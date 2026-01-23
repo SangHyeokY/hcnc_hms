@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title th:text="${metaTitle} ?: 'IT 개발자 프리랜서 인력관리'">IT 개발자 프리랜서 인력관리</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <link href="https://unpkg.com/tabulator-tables@4.0.5/dist/css/tabulator.min.css" rel="stylesheet">
+    <link rel="icon" th:href="@{/favicon.png}" href="/favicon.png" type="image/png">
+    <link rel="stylesheet" th:href="@{/css/import.css}">
+
+    <script type="text/javascript" src="https://unpkg.com/tabulator-tables@4.0.5/dist/js/tabulator.min.js"></script>
+    <script type="module" th:src="@{/js/layout/pageCommon.js}" src="/js/layout/pageCommon.js"></script>
+    <script type="module" th:src="@{/js/layout/menu.js}" src="/js/layout/menu.js"></script>
+    
+</head>
+<body data-context-path="/">
+<div id="app-wrapper" class="wrapper gr">
+    <div class="container-wrap">
+        <!-- 페이지의 1dept을 불러오는 영역 -->
+        <th:block th:insert="~{fragments/header :: headerFragment}"></th:block>
+        <div class="container">
+            <div class="contents-wrap" id="">
+                <th:block th:replace="~{fragments/page-common :: pageCommonFragment}"></th:block>
+                
+                <section class="search-area">
+                    <form action="">
+                        <div class="fl-ac fl-sb">
+                            <div class="search-info">
+                                <!-- 각 페이지에서 검색 조건을 커스터마이징 -->
+                                <th:block layout:fragment="searchCondition">
+                                    <div class="search-select">
+                                        <select name="" id="">
+                                            <option value="">구분</option>
+                                        </select>
+                                    </div>
+                                    <div class="search-input">
+                                        <p class="fl-ac">
+                                            <label class="" for=""></label>
+                                            <input type="text" placeholder="검색어를 입력하세요"/>
+                                        </p>
+                                    </div>
+                                </th:block>
+                            </div>
+                            <div class="search-btn-area">
+                                <button class="btn-search">검색</button>
+                            </div>
+                        </div>
+                    </form>
+                </section>
+
+                <section class="white-full">
+                    <div class="content-title fl-sb fl-ac" th:fragment="contentTitleFragment" xmlns:th="http://www.thymeleaf.org">
+                        <h4 class="page-sub-title"><!--페이지 상세 타이틀--></h4>
+                        <div class="btn-area">
+                            <button type="button" class="btn-new">신규</button>
+                            <button type="button" class="btn-edit">수정</button>
+                            <button type="button" class="btn-delete">삭제</button>
+                            <th:block layout:fragment="additionalButtons">
+                                <!-- 페이지별로 여기에 추가 버튼 정의 -->
+                            </th:block>
+                        </div>
+                    </div>
+                    <div class="content-body">
+                        <th:block layout:fragment="content">
+                        <!-- 페이지별 컨텐츠 -->
+                        </th:block>
+                    </div>
+                </section>
+            
+            </div>
+        </div>
+      </div>
+    </div>
+</div>
+<script>
+    (function () {
+        var ctx = document.body.dataset.contextPath;
+        if (ctx.endsWith("/")) ctx = ctx.slice(0, -1);
+        window.__CONTEXT_PATH__ = ctx;
+    })();
+</script>
+<script type="module" th:src="@{/js/layout/layout.js}" src="/js/layout/layout.js"></script>
+</body>
+</html>

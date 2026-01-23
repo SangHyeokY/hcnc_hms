@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ko" 
+      xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+
+<!-- 추가 버튼 정의 -->
+<th:block layout:fragment="additionalButtons">
+    <button type="button" class="btn-excel">엑셀 다운로드</button>
+    <button type="button" class="btn-print">출력</button>
+    <button type="button" class="btn-approve">승인</button>
+</th:block>
+
+<!-- 검색 조건 커스터마이징 (필요한 경우) -->
+<th:block layout:fragment="searchCondition">
+    <div class="search-select">
+        <select name="searchType" id="searchType">
+            <option value="">전체</option>
+            <option value="name">이름</option>
+            <option value="code">코드</option>
+            <option value="status">상태</option>
+        </select>
+    </div>
+    <div class="search-input">
+        <p class="fl-ac">
+            <label for="searchKeyword"></label>
+            <input type="text" id="searchKeyword" name="searchKeyword" placeholder="검색어를 입력하세요"/>
+        </p>
+    </div>
+</th:block>
+
+<!-- 실제 컨텐츠 영역 -->
+<th:block layout:fragment="content">
+    <div class="content">
+        <div class="form-wrap">
+            <h5>상세 정보</h5>
+            <div>sample1 내용</div>
+            <!-- 폼 내용 -->
+        </div>
+        
+    </div>
+    <script src="/js/api/sample.js"></script>
+</th:block>
+
+
+
+
+</html>

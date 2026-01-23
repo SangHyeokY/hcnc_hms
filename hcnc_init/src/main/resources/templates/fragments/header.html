@@ -1,0 +1,52 @@
+<header
+  class="header"
+  th:fragment="headerFragment"
+  xmlns:th="http://www.thymeleaf.org"
+>
+  <div class="lnb">
+    <div class="header-top">
+      <h1 id="logo" class="logo">
+        <!-- <a th:href="@{/P110}" href="/P110"> -->
+        <a th:href="|javascript:void(0);|">
+          <img
+            th:src="@{/images/common/header-logo.png}"
+            src="../images/common/header-logo.png"
+          />
+        </a>
+      </h1>
+      <div class="logo-sub flex" style="justify-content: center; display: flex">
+        <div class="sub-box">IT 개발자 프리랜서 인력관리</div>
+      </div>
+      <aside class="app-sidebar left-menu">
+        <nav class="app-nav nav">
+          <div class="lnb-menu">
+            <!--메뉴변수 menu.js-->
+          </div>
+        </nav>
+      </aside>
+    </div>
+    <div class="header-btn-wrap">
+      <div class="mem-area">
+        <button
+          th:onclick="|location.href='@{/login}'|"
+          type="button"
+          class="logout-btn"
+        >
+          <span class="ico-lock"></span>Logout
+        </button>
+      </div>
+
+      <div class="profile-area fl-fs fl-ac">
+        <div class="profile fl-fs fl-ac">
+          <div class="profile-img">
+            <img src="/images/common/img-profile.png" alt="프로필사진" />
+          </div>
+          <div class="h3">(주)에이치씨엔씨</div>
+        </div>
+        <div class="alarm">
+          <button class="bell-btn"><span class="ico-bell"></span></button>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>

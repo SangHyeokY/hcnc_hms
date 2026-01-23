@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hcncinit.MainMapper">
+    <select id="pData" resultType="map">
+        SELECT P_IDX, PAGE_NM, M_ID, SCORE, CHK_OPT, MEMO
+          FROM tb_p_data
+         WHERE PAGE_NM = #{code}
+    </select>
+    <select id="eData" resultType="map">
+        SELECT E_IDX, PAGE_NM, M_ID, SCORE, CHK_OPT, MEMO
+          FROM tb_e_data
+         WHERE PAGE_NM = #{code}
+    </select>
+    <select id="sData" resultType="map">
+        SELECT S_IDX, PAGE_NM, M_ID, SCORE, CHK_OPT, MEMO
+          FROM tb_s_data
+         WHERE PAGE_NM = #{code}
+    </select>
+    <select id="gData" resultType="map">
+        SELECT G_IDX, PAGE_NM, M_ID, SCORE, CHK_OPT, MEMO
+          FROM tb_g_data
+         WHERE PAGE_NM = #{code}
+    </select>
+    <update id="pUpdate">
+      UPDATE tb_p_data
+         SET SCORE=#{score}, CHK_OPT=#{check}
+       WHERE PAGE_NM = #{code};
+    </update>
+    <update id="eUpdate">
+      UPDATE tb_e_data
+         SET SCORE=#{score}, CHK_OPT=#{check}
+       WHERE PAGE_NM = #{code};
+    </update>
+    <update id="sUpdate">
+      UPDATE tb_s_data
+         SET SCORE=#{score}, CHK_OPT=#{check}
+       WHERE PAGE_NM = #{code};
+    </update>
+    <update id="gUpdate">
+      UPDATE tb_g_data
+         SET SCORE=#{score}, CHK_OPT=#{check}
+       WHERE PAGE_NM = #{code};
+    </update>
+</mapper>

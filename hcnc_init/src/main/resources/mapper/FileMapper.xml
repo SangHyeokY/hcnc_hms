@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hcncinit.FileMapper">
+    <!-- P타입 예시 -->
+    <select id="pfData" resultType="map" parameterType="map">
+        SELECT PAGE_NM, FILE_NM, ORI_FILE_NM, FILE_PATH, CHK_IDX
+        FROM tb_p_att
+        WHERE PAGE_NM = #{code}
+        <if test="check != null and check != ''">
+            AND CHK_IDX = #{check}
+        </if>
+    </select>
+
+    <insert id="pfInsert" parameterType="map">
+        INSERT INTO tb_p_att
+        (PAGE_NM, FILE_NM, ORI_FILE_NM, FILE_PATH, CHK_IDX)
+        VALUES(#{code}, #{name}, #{oriName}, #{path}, #{check})
+    </insert>
+
+    <update id="pfUpdate" parameterType="map">
+        UPDATE tb_p_att
+        SET FILE_NM = #{name}, 
+            ORI_FILE_NM = #{oriName},
+            FILE_PATH = #{path}
+        WHERE PAGE_NM = #{code} 
+        AND CHK_IDX = #{check}
+    </update>
+
+    <!-- E타입 -->
+    <select id="efData" resultType="map" parameterType="map">
+        SELECT PAGE_NM, FILE_NM, ORI_FILE_NM, FILE_PATH, CHK_IDX
+        FROM tb_e_att
+        WHERE PAGE_NM = #{code}
+        <if test="check != null and check != ''">
+            AND CHK_IDX = #{check}
+        </if>
+    </select>
+
+    <insert id="efInsert" parameterType="map">
+        INSERT INTO tb_e_att
+        (PAGE_NM, FILE_NM, ORI_FILE_NM, FILE_PATH, CHK_IDX)
+        VALUES(#{code}, #{name}, #{oriName}, #{path}, #{check})
+    </insert>
+
+    <update id="efUpdate" parameterType="map">
+        UPDATE tb_e_att
+        SET FILE_NM = #{name}, 
+            ORI_FILE_NM = #{oriName},
+            FILE_PATH = #{path}
+        WHERE PAGE_NM = #{code} 
+        AND CHK_IDX = #{check}
+    </update>
+
+    <!-- S타입 -->
+    <select id="sfData" resultType="map" parameterType="map">
+        SELECT PAGE_NM, FILE_NM, ORI_FILE_NM, FILE_PATH, CHK_IDX
+        FROM tb_s_att
+        WHERE PAGE_NM = #{code}
+        <if test="check != null and check != ''">
+            AND CHK_IDX = #{check}
+        </if>
+    </select>
+
+    <insert id="sfInsert" parameterType="map">
+        INSERT INTO tb_s_att
+        (PAGE_NM, FILE_NM, ORI_FILE_NM, FILE_PATH, CHK_IDX)
+        VALUES(#{code}, #{name}, #{oriName}, #{path}, #{check})
+    </insert>
+
+    <update id="sfUpdate" parameterType="map">
+        UPDATE tb_s_att
+        SET FILE_NM = #{name}, 
+            ORI_FILE_NM = #{oriName},
+            FILE_PATH = #{path}
+        WHERE PAGE_NM = #{code} 
+        AND CHK_IDX = #{check}
+    </update>
+
+    <!-- G타입 -->
+    <select id="gfData" resultType="map" parameterType="map">
+        SELECT PAGE_NM, FILE_NM, ORI_FILE_NM, FILE_PATH, CHK_IDX
+        FROM tb_g_att
+        WHERE PAGE_NM = #{code}
+        <if test="check != null and check != ''">
+            AND CHK_IDX = #{check}
+        </if>
+    </select>
+
+    <insert id="gfInsert" parameterType="map">
+        INSERT INTO tb_g_att
+        (PAGE_NM, FILE_NM, ORI_FILE_NM, FILE_PATH, CHK_IDX)
+        VALUES(#{code}, #{name}, #{oriName}, #{path}, #{check})
+    </insert>
+
+    <update id="gfUpdate" parameterType="map">
+        UPDATE tb_g_att
+        SET FILE_NM = #{name}, 
+            ORI_FILE_NM = #{oriName},
+            FILE_PATH = #{path}
+        WHERE PAGE_NM = #{code} 
+        AND CHK_IDX = #{check}
+    </update>
+</mapper>
