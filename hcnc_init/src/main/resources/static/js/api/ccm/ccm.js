@@ -53,13 +53,15 @@ $(document).ready(function () {
             return;
         }
 
+        if (!confirm("현재 정렬순서를 저장 하시겠습니까?")) {
+            return;
+        }
+
         rows.forEach(function (rowData, index) {
             rowData.sort_no = index + 1;
         });
         applyDetailSort(rows);
-
-        confirm("현재 정렬순서를 저장 하시겠습니까?");
-        alert("정렬순서를 저장하었습니다.");
+        alert("정렬순서를 저장했습니다.");
     });
 
     $(".btn-main-save").on("click", function () {
@@ -330,6 +332,7 @@ function deleteMainRows() {
                 pending -= 1;
                 if (pending === 0) {
                     loadMainTableData();
+                    alert("삭제되었습니다.");
                 }
             },
             error: function () {
@@ -365,6 +368,7 @@ function deleteDetailRows() {
                 pending -= 1;
                 if (pending === 0) {
                     loadDetailTableData(grpCd);
+                    alert("삭제되었습니다.");
                 }
             },
             error: function () {
@@ -405,6 +409,7 @@ function upsertMainBtn() {
             if (response.success) {
                 closeMainWriteModal();
                 loadMainTableData();
+                alert("저장되었습니다.");
             } else {
                 alert("저장에 실패했습니다.");
             }
@@ -463,6 +468,7 @@ function upsertDetailBtn() {
             if (response.success) {
                 closeDetailWriteModal();
                 loadDetailTableData(grpCd);
+                alert("저장되었습니다.");
             } else {
                 alert("저장에 실패했습니다.");
             }
