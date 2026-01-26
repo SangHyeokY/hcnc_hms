@@ -10,6 +10,7 @@ const Layout = {
   // 초기화
   init() {
     const contentsWrap = document.querySelector(".contents-wrap");
+    const article = document.querySelector("article");
 
     // 초기 페이지의 경우 PageCommon 정보로 이동
     if (window.PageCommon && window.PageCommon.currentPage) {
@@ -30,6 +31,17 @@ const Layout = {
       console.warn("PageCommon 정보가 없습니다.");
       const fallbackItem = menuData[0].children[0];
       this.loadMenu(fallbackItem, contentsWrap, article);
+    }
+  },
+
+  loadMenu(menuItem, contentsWrap, article) {
+    if (!menuItem) {
+      return;
+    }
+
+    const pageSubTitle = document.querySelector(".page-sub-title");
+    if (pageSubTitle && menuItem.title) {
+      pageSubTitle.textContent = menuItem.title;
     }
   },
 

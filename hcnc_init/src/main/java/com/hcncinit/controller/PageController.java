@@ -37,4 +37,18 @@ public class PageController {
         return mv;
     }
 
+    @GetMapping("/tagList")
+    public ModelAndView tagList(){
+        ModelAndView mv = new ModelAndView();
+        mv.setViewName("views/tagList");
+        return mv;
+    }
+
+    @GetMapping("/ccm")
+    public ModelAndView commonCode(){
+        ModelAndView mv = new ModelAndView();
+        mv.setViewName("views/sys/ccm");
+        return mv;
+    }
+
 }
