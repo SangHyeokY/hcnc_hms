@@ -41,6 +41,27 @@ $(document).ready(function () {
         deleteDetailRows();
     });
 
+    $(".btn-detail-sort-save").on("click", function () {
+        if (!detailTable || typeof detailTable.getData !== "function") {
+            alert("상세 테이블이 초기화되지 않았습니다.");
+            return;
+        }
+
+        var rows = detailTable.getData();
+        if (!rows.length) {
+            alert("저장할 정렬 데이터가 없습니다.");
+            return;
+        }
+
+        rows.forEach(function (rowData, index) {
+            rowData.sort_no = index + 1;
+        });
+        applyDetailSort(rows);
+
+        confirm("현재 정렬순서를 저장 하시겠습니까?");
+        alert("정렬순서를 저장하었습니다.");
+    });
+
     $(".btn-main-save").on("click", function () {
         upsertMainBtn();
     });
@@ -99,6 +120,7 @@ function buildTables() {
             resizable: true,
             cellClick: function (e, cell) {
                 toggleRowSelection(cell.getRow());
+                e.stopPropagation();
             }
         },
         columns: [
@@ -152,6 +174,7 @@ function buildTables() {
             resizable: true,
             cellClick: function (e, cell) {
                 toggleRowSelection(cell.getRow());
+                e.stopPropagation();
             }
         },
         columns: [
@@ -197,7 +220,6 @@ function buildTables() {
             rows.forEach(function (rowData, index) {
                 rowData.sort_no = index + 1;
             });
-            applyDetailSort(rows);
         }
     });
 }

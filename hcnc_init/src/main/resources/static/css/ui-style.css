@@ -340,13 +340,13 @@ input[type="checkbox"]:before {
 input[type="checkbox"]:checked:before {
     /* 체크박스를 체크했을때 */
     color: #fff; 
-    border-color: #ED242C;
-    background: #ED242C;
+    border-color: #c0832e;
+    background: #ff5e07;
 }
 input[type="checkbox"]:checked:after {
     content: "";
     position: absolute;
-    left: 5px;
+    left: 6px;
     top: 2px;
     width: 5px;
     height: 9px;
