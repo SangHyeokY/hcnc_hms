@@ -15,6 +15,18 @@ export const menuData = [
         type: "A",
         visible: true,
       },
+      {
+        title: "tagList",
+        path: "/tagList",
+        type: "A",
+        visible: true,
+      },
+      {
+        title: "공통코드 관리",
+        path: "/ccm",
+        type: "A",
+        visible: true,
+      },
     ],
   },
   {
