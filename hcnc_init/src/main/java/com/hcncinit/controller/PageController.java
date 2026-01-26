@@ -47,7 +47,7 @@ public class PageController {
     @GetMapping("/ccm")
     public ModelAndView commonCode(){
         ModelAndView mv = new ModelAndView();
-        mv.setViewName("views/sys/ccm");
+        mv.setViewName("views/ccm/ccm");
         return mv;
     }
 
