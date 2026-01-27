@@ -1,9 +1,7 @@
 package com.hcncinit.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -11,43 +9,50 @@ import org.springframework.web.servlet.ModelAndView;
 @RequestMapping("")
 public class PageController {
 
-    @GetMapping({"","/"})
+    @GetMapping({"", "/"})
     public String index() {
         return "redirect:/login";
     }
 
     @GetMapping("/login")
-    public ModelAndView login(){
+    public ModelAndView login() {
         ModelAndView mv = new ModelAndView();
-        mv.setViewName("views/login");
+        mv.setViewName("views/login/login");
         return mv;
     }
 
     @GetMapping("/sample")
-    public ModelAndView sample(){
+    public ModelAndView sample() {
         ModelAndView mv = new ModelAndView();
         mv.setViewName("views/sample");
         return mv;
     }
 
     @GetMapping("/sample2")
-    public ModelAndView sample2(){
+    public ModelAndView sample2() {
         ModelAndView mv = new ModelAndView();
         mv.setViewName("views/sample2");
         return mv;
     }
 
     @GetMapping("/tagList")
-    public ModelAndView tagList(){
+    public ModelAndView tagList() {
         ModelAndView mv = new ModelAndView();
         mv.setViewName("views/tagList");
         return mv;
     }
 
-    @GetMapping("/ccm")
-    public ModelAndView commonCode(){
+    @GetMapping("/cm040")
+    public ModelAndView commonCode() {
         ModelAndView mv = new ModelAndView();
-        mv.setViewName("views/ccm/ccm");
+        mv.setViewName("views/cm020/cm040");
+        return mv;
+    }
+
+    @GetMapping("/cm010")
+    public ModelAndView userManage() {
+        ModelAndView mv = new ModelAndView();
+        mv.setViewName("views/cm010/cm010");
         return mv;
     }
 

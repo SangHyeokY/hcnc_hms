@@ -1,8 +1,6 @@
 <!DOCTYPE html>
-<html lang="ko"
-      xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout/layout}">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layout/layout}">
 
 <th:block layout:fragment="searchCondition">
     <div class="search-select">
@@ -15,7 +13,7 @@
     <div class="search-input">
         <p class="fl-ac">
             <label for="searchKeyword"></label>
-            <input type="text" id="searchKeyword" name="searchKeyword" placeholder="코드그룹/코드명 검색"/>
+            <input type="text" id="searchKeyword" name="searchKeyword" placeholder="코드그룹/코드명 검색" />
         </p>
     </div>
 </th:block>
@@ -72,13 +70,15 @@
                                             <p class="cell-tit">코드그룹</p>
                                             <div class="cell-info">
                                                 <input type="hidden" id="write_main_parent_grp_cd">
-                                                <input type="text" class="text" id="write_main_grp_cd" placeholder="코드그룹">
+                                                <input type="text" class="text" id="write_main_grp_cd"
+                                                    placeholder="코드그룹">
                                             </div>
                                         </div>
                                         <div class="table-cell">
                                             <p class="cell-tit">코드그룹명</p>
                                             <div class="cell-info">
-                                                <input type="text" class="text" id="write_main_grp_nm" placeholder="코드그룹명">
+                                                <input type="text" class="text" id="write_main_grp_nm"
+                                                    placeholder="코드그룹명">
                                             </div>
                                         </div>
                                     </li>
@@ -92,6 +92,16 @@
                                                 </select>
                                             </div>
                                         </div>
+                                    </li>
+                                    <li class="table-col fl-ac">
+                                        <div class="table-cell">
+                                            <p class="cell-tit">코드</p>
+                                            <div class="cell-info">
+                                                <input type="text" class="text" id="write_main_cd"
+                                                    placeholder="코드">
+                                            </div>
+                                        </div>
+                                        <div class="table-cell"></div>
                                     </li>
                                 </ul>
                             </div>
@@ -135,13 +145,15 @@
                                         <div class="table-cell">
                                             <p class="cell-tit">코드명</p>
                                             <div class="cell-info">
-                                                <input type="text" class="text" id="write_detail_cd_nm" placeholder="코드명">
+                                                <input type="text" class="text" id="write_detail_cd_nm"
+                                                    placeholder="코드명">
                                             </div>
                                         </div>
                                         <div class="table-cell">
                                             <p class="cell-tit">정렬순서</p>
                                             <div class="cell-info">
-                                                <input type="number" class="text" id="write_detail_sort_no" placeholder="정렬순서">
+                                                <input type="number" class="text" id="write_detail_sort_no"
+                                                    placeholder="정렬순서">
                                             </div>
                                         </div>
                                     </li>
@@ -149,13 +161,15 @@
                                         <div class="table-cell">
                                             <p class="cell-tit">부가정보1</p>
                                             <div class="cell-info">
-                                                <input type="text" class="text" id="write_detail_adinfo_01" placeholder="부가정보1">
+                                                <input type="text" class="text" id="write_detail_adinfo_01"
+                                                    placeholder="부가정보1">
                                             </div>
                                         </div>
                                         <div class="table-cell">
                                             <p class="cell-tit">부가정보2</p>
                                             <div class="cell-info">
-                                                <input type="text" class="text" id="write_detail_adinfo_02" placeholder="부가정보2">
+                                                <input type="text" class="text" id="write_detail_adinfo_02"
+                                                    placeholder="부가정보2">
                                             </div>
                                         </div>
                                     </li>
@@ -163,13 +177,15 @@
                                         <div class="table-cell">
                                             <p class="cell-tit">부가정보3</p>
                                             <div class="cell-info">
-                                                <input type="text" class="text" id="write_detail_adinfo_03" placeholder="부가정보3">
+                                                <input type="text" class="text" id="write_detail_adinfo_03"
+                                                    placeholder="부가정보3">
                                             </div>
                                         </div>
                                         <div class="table-cell">
                                             <p class="cell-tit">부가정보4</p>
                                             <div class="cell-info">
-                                                <input type="text" class="text" id="write_detail_adinfo_04" placeholder="부가정보4">
+                                                <input type="text" class="text" id="write_detail_adinfo_04"
+                                                    placeholder="부가정보4">
                                             </div>
                                         </div>
                                     </li>
@@ -177,7 +193,8 @@
                                         <div class="table-cell">
                                             <p class="cell-tit">부가정보5</p>
                                             <div class="cell-info">
-                                                <input type="text" class="text" id="write_detail_adinfo_05" placeholder="부가정보5">
+                                                <input type="text" class="text" id="write_detail_adinfo_05"
+                                                    placeholder="부가정보5">
                                             </div>
                                         </div>
                                         <div class="table-cell">
@@ -205,6 +222,7 @@
         </div>
     </div>
 
-    <script src="/js/api/ccm/ccm.js"></script>
+    <script src="/js/api/cm020/cm040.js"></script>
 </th:block>
+
 </html>

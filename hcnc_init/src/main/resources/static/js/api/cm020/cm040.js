@@ -1,5 +1,5 @@
 /*****
- * 공통코드관리 - ccm.js (hcnc_hms)
+ * 공통코드관리 - cm040.js (hcnc_hms)
  *  - tb_cd_mst 기준
  *  - 코드그룹/상세코드 관리
  */
@@ -144,6 +144,7 @@ function buildTables() {
                 download: false
             },
             { title: "코드그룹", field: "grp_cd", hozAlign: "center", widthGrow: 1 },
+            { title: "코드", field: "cd", hozAlign: "center", widthGrow: 1 },
             { title: "코드그룹명", field: "grp_nm", widthGrow: 1 },
             { title: "사용여부", field: "use_yn", hozAlign: "center", width: 100, widthGrow: 0 }
         ],
@@ -157,7 +158,7 @@ function buildTables() {
         rowSelectionChanged: function (data) {
             syncTableCheckboxes(mainTable);
             if (data.length !== 0) {
-                loadDetailTableData(data[0].grp_cd);
+                loadDetailTableData(data[0].cd);
             } else if (detailTable && typeof detailTable.clearData === "function") {
                 detailTable.clearData();
             }
@@ -198,7 +199,7 @@ function buildTables() {
                 download: false
             },
             { title: "코드", field: "cd", hozAlign: "center" },
-            { title: "코드명", field: "cd_nm" , width: 150},
+            { title: "코드명", field: "cd_nm", width: 150 },
             { title: "정렬순서", field: "sort_no", hozAlign: "center" },
             { title: "부가정보1", field: "adinfo_01" },
             { title: "부가정보2", field: "adinfo_02" },
@@ -235,7 +236,7 @@ function loadMainTableData() {
     var useYn = $("#searchUseYn").val();
 
     $.ajax({
-        url: "/ccm/main/list",
+        url: "/cm040/main/list",
         type: "GET",
         data: {
             searchKeyword: keyword,
@@ -264,7 +265,7 @@ function loadDetailTableData(grpCd) {
     }
 
     $.ajax({
-        url: "/ccm/detail/list",
+        url: "/cm040/detail/list",
         type: "GET",
         data: { grp_cd: grpCd },
         success: function (response) {
@@ -284,7 +285,7 @@ function applyDetailSort(rows) {
     var pending = rows.length;
     rows.forEach(function (rowData) {
         $.ajax({
-            url: "/ccm/detail/sort",
+            url: "/cm040/detail/sort",
             type: "POST",
             data: {
                 grp_cd: rowData.grp_cd,
@@ -313,18 +314,19 @@ function deleteMainRows() {
     }
 
     var pending = selectedRows.length;
+    var allSucceeded = true;
     selectedRows.forEach(function (row) {
         var rowData = row.getData();
-        var parentGrpCd = rowData.parent_grp_cd || rowData.grp_cd;
         $.ajax({
-            url: "/ccm/main/delete",
+            url: "/cm040/main/delete",
             type: "POST",
             data: {
                 grp_cd: rowData.grp_cd,
-                parent_grp_cd: parentGrpCd
+                cd: rowData.cd
             },
             success: function (response) {
                 if (!response.success) {
+                    allSucceeded = false;
                     alert(response.message || "삭제할 수 없습니다.");
                 }
             },
@@ -332,10 +334,13 @@ function deleteMainRows() {
                 pending -= 1;
                 if (pending === 0) {
                     loadMainTableData();
-                    alert("삭제되었습니다.");
+                    if (allSucceeded) {
+                        alert("삭제되었습니다.");
+                    }
                 }
             },
             error: function () {
+                allSucceeded = false;
                 alert("코드그룹 삭제 중 오류가 발생했습니다.");
             }
         });
@@ -358,7 +363,7 @@ function deleteDetailRows() {
 
     selectedRows.forEach(function (row) {
         $.ajax({
-            url: "/ccm/detail/delete",
+            url: "/cm040/detail/delete",
             type: "POST",
             data: {
                 grp_cd: row.getData().grp_cd,
@@ -382,11 +387,17 @@ function upsertMainBtn() {
     var grpCd = $.trim($("#write_main_grp_cd").val());
     var grpNm = $.trim($("#write_main_grp_nm").val());
     var useYn = $("#write_main_use_yn").val();
-    var parentGrpCd = $.trim($("#write_main_parent_grp_cd").val()) || grpCd;
+    var code = $.trim($("#write_main_cd").val());
 
     if (!grpCd) {
         alert("코드그룹을 입력해주세요.");
         $("#write_main_grp_cd").focus();
+        return;
+    }
+
+    if (!code) {
+        alert("코드를 입력해주세요.");
+        $("#write_main_cd").focus();
         return;
     }
 
@@ -397,12 +408,12 @@ function upsertMainBtn() {
     }
 
     $.ajax({
-        url: "/ccm/main/save",
+        url: "/cm040/main/save",
         type: "POST",
         data: {
             grp_cd: grpCd,
-            parent_grp_cd: parentGrpCd,
-            grp_nm: grpNm,
+            cd: code,
+            cd_nm: grpNm,
             use_yn: useYn
         },
         success: function (response) {
@@ -431,7 +442,7 @@ function upsertDetailBtn() {
         return;
     }
 
-    if (!cd) {
+    if (detailMode !== "insert" && !cd) {
         alert("코드를 입력해주세요.");
         $("#write_detail_cd").focus();
         return;
@@ -450,7 +461,7 @@ function upsertDetailBtn() {
     }
 
     $.ajax({
-        url: "/ccm/detail/save",
+        url: "/cm040/detail/save",
         type: "POST",
         data: {
             grp_cd: grpCd,
@@ -462,7 +473,8 @@ function upsertDetailBtn() {
             adinfo_03: $.trim($("#write_detail_adinfo_03").val()),
             adinfo_04: $.trim($("#write_detail_adinfo_04").val()),
             adinfo_05: $.trim($("#write_detail_adinfo_05").val()),
-            use_yn: $("#write_detail_use_yn").val()
+            use_yn: $("#write_detail_use_yn").val(),
+            mode: detailMode
         },
         success: function (response) {
             if (response.success) {
@@ -488,6 +500,7 @@ function openMainWriteModal(type) {
         $("#write_main_grp_nm").val("");
         $("#write_main_use_yn").val("Y");
         $("#write_main_parent_grp_cd").val("");
+        $("#write_main_cd").val("").prop("disabled", false);
     } else {
         var selectedRows = mainTable.getSelectedRows();
         if (selectedRows.length === 0) {
@@ -504,6 +517,7 @@ function openMainWriteModal(type) {
         $("#write_main_grp_nm").val(rowData.grp_nm);
         $("#write_main_use_yn").val(rowData.use_yn);
         $("#write_main_parent_grp_cd").val(rowData.parent_grp_cd || rowData.grp_cd);
+        $("#write_main_cd").val(rowData.cd).prop("disabled", true);
     }
 
     $("#write-main-area").show();
@@ -535,8 +549,8 @@ function openDetailWriteModal(type) {
         }
 
         var mainData = selectedMain[0].getData();
-        $("#write_detail_grp_cd").val(mainData.grp_cd);
-        $("#write_detail_cd").val("").prop("disabled", false);
+        $("#write_detail_grp_cd").val(mainData.cd);
+        $("#write_detail_cd").val("").prop("disabled", true).attr("placeholder", "자동");
         $("#write_detail_cd_nm").val("");
 
         var maxSort = detailTable.getData()
@@ -561,7 +575,7 @@ function openDetailWriteModal(type) {
 
         var rowData = selectedDetail[0].getData();
         $("#write_detail_grp_cd").val(rowData.grp_cd);
-        $("#write_detail_cd").val(rowData.cd).prop("disabled", true);
+        $("#write_detail_cd").val(rowData.cd).prop("disabled", true).attr("placeholder", "");
         $("#write_detail_cd_nm").val(rowData.cd_nm);
         $("#write_detail_sort_no").val(rowData.sort_no);
         $("#write_detail_adinfo_01").val(rowData.adinfo_01 || "");

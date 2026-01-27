@@ -23,7 +23,13 @@ export const menuData = [
       },
       {
         title: "공통코드 관리",
-        path: "/ccm",
+        path: "/cm040",
+        type: "A",
+        visible: true,
+      },
+      {
+        title: "사용자 관리",
+        path: "/cm010",
         type: "A",
         visible: true,
       },
