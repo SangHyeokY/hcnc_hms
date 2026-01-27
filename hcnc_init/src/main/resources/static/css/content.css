@@ -156,3 +156,141 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .total-rank-area .soc-area dd  p span.bold{color: rgba(57, 181, 77, 1); }
 .total-rank-area .gov-area dd  p span.bold{color: rgba(238, 116, 64, 1); }
 .gray-area{margin-top:30px; padding:20px; border-radius: 8px; background:rgba(243, 244, 247, 1); border:1px solid rgba(213, 218, 223, 1)}
+
+
+
+/* 인력관리 > 기본 인적사항 (임시/검색x), 따로 분류할건지는 논의 */
+.form-wrap h5 {
+    padding-bottom: 15px;
+}
+
+.form-row {
+    padding-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.tagify {
+    height: 36px;
+    min-height: 36px;
+    padding: 0;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    border-radius: 4px;
+    border: 1px solid #D9D9D9;
+    color: #61646d;
+    font-family: 'Inter';
+    font-size: 14px;
+}
+
+.tagify__input {
+    margin: 0;
+    padding: 0 10px;
+    min-height: 36px;
+    line-height: 36px;
+    height: 36px;
+    box-sizing: border-box;
+}
+
+.form-row select {
+    height: 36px;
+}
+
+.temp-btn {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding-top: 15px;
+}
+
+/* 테이블 */
+.temp-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: center;
+}
+
+.hrm-detail-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.hrm-detail-table < tr < td {
+    text-align: left;
+}
+
+.temp-table th,
+.temp-table td,
+.hrm-detail-table th,
+.hrm-detail-table td {
+    border: 1px solid #ccc;
+    height: 40px;
+    padding: 4px 6px;
+}
+
+.temp-table th, .hrm-detail-table th {
+    background: #f5f5f5;
+    font-weight: 600;
+}
+
+/* 태그 영역 */
+.tag-box {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 4px;
+    min-height: 36px;
+}
+
+/* 태그 스타일 */
+.tagify-tag {
+    display: inline-flex;
+    align-items: center;
+    background: #e0e0e0;
+    border-radius: 14px;
+    padding: 4px 10px;
+    font-size: 13px;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.tagify-tag:hover {
+    background: #eeeeee;
+}
+
+.tagify-tag .remove {
+    margin-left: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    color: #666;
+    transition: color 0.2s ease;
+}
+
+.tagify-tag .remove:hover {
+    color: #d00;
+}
+
+.search-row {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.search-select,
+.search-input {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.search-select p,
+.search-input p {
+    margin: 0;
+    white-space: nowrap;
+}
+
+.tap-btn {
+    border: 1px solid #ccc;
+}

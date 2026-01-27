@@ -37,4 +37,19 @@ public class PageController {
         return mv;
     }
 
+    // 인력관리 > 기본 인적사항 (임시/검색x), 따로 분류할건지는 논의
+    @GetMapping("/hr010")
+    public ModelAndView hr010(){
+        ModelAndView mv = new ModelAndView();
+        mv.setViewName("views/hr010");
+        return mv;
+    }
+
+    // 인력관리 > 기본 인적사항 (상세) (임시/검색x), 따로 분류할건지는 논의
+    @GetMapping("/hr010/detail")
+    public ModelAndView hr011(){
+        ModelAndView mv = new ModelAndView();
+        mv.setViewName("views/hr011");
+        return mv;
+    }
 }
