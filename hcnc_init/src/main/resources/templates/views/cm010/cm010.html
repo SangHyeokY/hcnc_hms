@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+
+<th:block layout:fragment="searchCondition">
+    <div class="search-select">
+        <select name="searchType" id="searchType">
+            <option value="">전체</option>
+            <option value="user_id">ID</option>
+            <option value="user_nm">이름</option>
+            <option value="email">이메일</option>
+            <option value="tel">연락처</option>
+            <option value="dept_cd">부서</option>
+            <option value="role_cd">역할</option>
+        </select>
+    </div>
+    <div class="search-select">
+        <select name="searchUseYn" id="searchUseYn">
+            <option value="">사용여부 전체</option>
+            <option value="Y">사용</option>
+            <option value="N">미사용</option>
+        </select>
+    </div>
+    <div class="search-input">
+        <p class="fl-ac">
+            <label for="searchKeyword"></label>
+            <input type="text" id="searchKeyword" name="searchKeyword" placeholder="검색어를 입력하세요"/>
+        </p>
+    </div>
+</th:block>
+
+<th:block layout:fragment="content">
+    <div class="content list-area">
+        <div class="table-wrap">
+            <div id="TABLE_USER"></div>
+        </div>
+    </div>
+
+    <div class="modal-wrap content" id="view-user-area" style="display: none">
+        <div class="modal-container">
+            <div class="header">
+                <h4>사용자 관리 <span>상세</span></h4>
+                <span class="modal-close" onclick="closeUserViewModal()"></span>
+            </div>
+            <div class="modal-content">
+                <article>
+                    <div class="div-table">
+                        <ul>
+                            <li class="table-col fl-ac">
+                                <div class="table-cell">
+                                    <p class="cell-tit">아이디</p>
+                                    <div class="cell-info"><p class="text" id="view_user_id"></p></div>
+                                </div>
+                                <div class="table-cell">
+                                    <p class="cell-tit">이름</p>
+                                    <div class="cell-info"><p class="text" id="view_user_nm"></p></div>
+                                </div>
+                            </li>
+                            <li class="table-col fl-ac">
+                                <div class="table-cell">
+                                    <p class="cell-tit">이메일</p>
+                                    <div class="cell-info"><p class="text" id="view_email"></p></div>
+                                </div>
+                                <div class="table-cell">
+                                    <p class="cell-tit">연락처</p>
+                                    <div class="cell-info"><p class="text" id="view_tel"></p></div>
+                                </div>
+                            </li>
+                            <li class="table-col fl-ac">
+                                <div class="table-cell">
+                                    <p class="cell-tit">부서</p>
+                                    <div class="cell-info"><p class="text" id="view_dept_cd"></p></div>
+                                </div>
+                                <div class="table-cell">
+                                    <p class="cell-tit">직무</p>
+                                    <div class="cell-info"><p class="text" id="view_job_cd"></p></div>
+                                </div>
+                            </li>
+                            <li class="table-col fl-ac">
+                                <div class="table-cell">
+                                    <p class="cell-tit">역할</p>
+                                    <div class="cell-info"><p class="text" id="view_role_cd"></p></div>
+                                </div>
+                                <div class="table-cell">
+                                    <p class="cell-tit">잠금여부</p>
+                                    <div class="cell-info"><p class="text" id="view_lock_yn"></p></div>
+                                </div>
+                            </li>
+                            <li class="table-col">
+                                <div class="table-cell">
+                                    <p class="cell-tit">비고</p>
+                                    <div class="cell-info"><p class="text" id="view_remark"></p></div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </article>
+            </div>
+            <div class="modal-btn">
+                <ul>
+                    <li>
+                        <button class="btn btn-close" onclick="closeUserViewModal()">
+                            확인
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-wrap content" id="write-user-area" style="display: none">
+        <div class="modal-container">
+            <div class="header">
+                <h4>사용자 관리 <span class="edit-mode">등록</span></h4>
+                <span class="modal-close" onclick="closeUserWriteModal()"></span>
+            </div>
+            <div class="modal-content">
+                <article>
+                    <div class="div-table">
+                        <ul>
+                            <li class="table-col fl-ac">
+                                <div class="table-cell">
+                                    <p class="cell-tit">아이디</p>
+                                    <div class="cell-info"><input type="text" class="text" id="write_user_id" placeholder="아이디"></div>
+                                </div>
+                                <div class="table-cell">
+                                    <p class="cell-tit">이름</p>
+                                    <div class="cell-info"><input type="text" class="text" id="write_user_nm" placeholder="이름"></div>
+                                </div>
+                            </li>
+                            <li class="table-col fl-ac">
+                                <div class="table-cell">
+                                    <p class="cell-tit">비밀번호 해시</p>
+                                    <div class="cell-info"><input type="password" class="text" id="write_pwd_hash" placeholder="비밀번호 해시"></div>
+                                </div>
+                                <div class="table-cell">
+                                    <p class="cell-tit">이메일</p>
+                                    <div class="cell-info"><input type="text" class="text" id="write_email" placeholder="이메일"></div>
+                                </div>
+                            </li>
+                            <li class="table-col fl-ac">
+                                <div class="table-cell">
+                                    <p class="cell-tit">연락처</p>
+                                    <div class="cell-info"><input type="text" class="text" id="write_tel" placeholder="연락처"></div>
+                                </div>
+                                <div class="table-cell">
+                                    <p class="cell-tit">역할코드</p>
+                                    <div class="cell-info"><input type="text" class="text" id="write_role_cd" placeholder="역할코드"></div>
+                                </div>
+                            </li>
+                            <li class="table-col fl-ac">
+                                <div class="table-cell">
+                                    <p class="cell-tit">부서코드</p>
+                                    <div class="cell-info"><input type="text" class="text" id="write_dept_cd" placeholder="부서코드"></div>
+                                </div>
+                                <div class="table-cell">
+                                    <p class="cell-tit">직무코드</p>
+                                    <div class="cell-info"><input type="text" class="text" id="write_job_cd" placeholder="직무코드"></div>
+                                </div>
+                            </li>
+                            <li class="table-col fl-ac">
+                                <div class="table-cell">
+                                    <p class="cell-tit">잠금여부</p>
+                                    <div class="cell-info">
+                                        <select id="write_lock_yn">
+                                            <option value="N">N</option>
+                                            <option value="Y">Y</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="table-cell">
+                                    <p class="cell-tit">사용여부</p>
+                                    <div class="cell-info">
+                                        <select id="write_use_yn">
+                                            <option value="Y">Y</option>
+                                            <option value="N">N</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="table-col">
+                                <div class="table-cell">
+                                    <p class="cell-tit">비고</p>
+                                    <div class="cell-info"><input type="text" class="text" id="write_remark" placeholder="비고"></div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </article>
+            </div>
+            <div class="modal-btn">
+                <ul>
+                    <li>
+                        <button class="btn btn-close" onclick="closeUserWriteModal()">
+                            닫기
+                        </button>
+                    </li>
+                    <li><button class="btn btn-save btn-user-save">저장</button></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/api/cm010/cm010.js"></script>
+</th:block>
+</html>
