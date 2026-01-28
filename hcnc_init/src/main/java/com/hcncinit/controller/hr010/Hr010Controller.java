@@ -5,6 +5,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
@@ -30,25 +31,57 @@ public class Hr010Controller {
         return mv;
     }
 
-    // 인력관리 > 기본 인적사항 (상세) (임시/검색x), 따로 분류할건지는 논의
-    @RequestMapping("/detail")
-    public ModelAndView select_hr011 (@RequestParam("dev_id") String devId) {
+    @PostMapping("/upsert")
+    public ModelAndView saveHr010(@RequestParam Map<String, Object> param) {
         ModelAndView mv = new ModelAndView("jsonView");
-        // 확인용 1
-        System.out.println("select_hr010 팝업 호출됨, param = " + devId);
+        System.out.println("저장 요청 param = " + param);
+        String devType = (String) param.get("dev_type");
+        // 신규일 때만 채번
+        if (param.get("dev_id") == null || "".equals(param.get("dev_id"))) {
+            String devId = hr010Service.generateDevId(devType);
+            param.put("dev_id", devId);
+        }
+        hr010Service.insert_hr011(param);
+        mv.addObject("result", "success");
+        return mv;
+    }
+
+    @PostMapping("/delete")
+    public ModelAndView deleteHr010(@RequestParam Map<String, Object> param) {
+        ModelAndView mv = new ModelAndView("jsonView");
+        System.out.println("삭제 요청 param = " + param);
+
+        hr010Service.insert_hr011(param);
+        mv.addObject("result", "success");
+        return mv;
+    }
+
+
+
+
+
+
+
+    // 폐기
+    @RequestMapping("/detailPage")
+    public ModelAndView hr011Page(@RequestParam("dev_id") String devId) {
+        ModelAndView mv = new ModelAndView("views/hr010/hr011_old"); // hr011_old.html 경로를 새로 잡아줘야 인식함
+        System.out.println("안쓰이는 코드가 사용되었습니다. 확인부탁드립니다. Hr010Controller.java /detailPage");
         Map<String, Object> resList = hr010Service.select_hr011(devId);
-        // 확인용 2
-        System.out.println("조회 결과 = " + resList);
         mv.addObject("res", resList);
         return mv;
     }
 
     // 폐기
-    @RequestMapping("/detailPage")
-    public ModelAndView hr011Page(@RequestParam("dev_id") String devId) {
-        ModelAndView mv = new ModelAndView("views/hr010/hr011"); // hr011.html 경로를 새로 잡아줘야 인식함
-        System.out.println("안쓰이는 코드가 사용되었습니다. 확인부탁드립니다. Hr010Controller.java /detailPage");
+    // 인력관리 > 기본 인적사항 (상세) (임시/검색x), 따로 분류할건지는 논의
+    @RequestMapping("/detail")
+    public ModelAndView select_hr011 (@RequestParam("dev_id") String devId) {
+        ModelAndView mv = new ModelAndView("jsonView");
+        // 확인용 1
+        System.out.println("select_hr011 팝업 호출됨, param = " + devId);
         Map<String, Object> resList = hr010Service.select_hr011(devId);
+        // 확인용 2
+        System.out.println("조회 결과 = " + resList);
         mv.addObject("res", resList);
         return mv;
     }
