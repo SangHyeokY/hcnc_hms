@@ -20,6 +20,8 @@ $(document).ready(function () {
     });
 
     $(".btn-new").on("click", function () {
+        selectCommonCodesForUser();
+
         openUserWriteModal("insert");
     });
 
@@ -106,14 +108,21 @@ function buildUserTable() {
                 headerSort: false,
                 download: false
             },
-            { title: "아이디", field: "user_id", hozAlign: "center", widthGrow: 1 },
+            { title: "ID", field: "user_id", hozAlign: "center", widthGrow: 1 },
             { title: "이름", field: "user_nm", widthGrow: 1 },
-            { title: "이메일", field: "email", widthGrow: 1 },
+            { title: "e-mail", field: "email", widthGrow: 2 },
             { title: "연락처", field: "tel", hozAlign: "center" },
-            { title: "역할", field: "role_cd", hozAlign: "center" },
-            { title: "부서", field: "dept_cd", hozAlign: "center" },
-            { title: "직무", field: "job_cd", hozAlign: "center" },
-            { title: "사용여부", field: "use_yn", hozAlign: "center", width: 90 }
+            { title: "권한", field: "role_nm", hozAlign: "center", widthGrow: 1  },
+            { title: "직무", field: "job_nm", hozAlign: "center", widthGrow: 1  },
+            { title: "부서", field: "dept_nm", hozAlign: "center", widthGrow: 1  },
+            { title: "사용여부", field: "use_yn", hozAlign: "center", widthGrow: 1  },
+            {
+                title: "활성화 여부", field: "lock_yn", hozAlign: "center",
+                formatter: function (cell) {
+                    return cell.getValue() === "N" ? "Y" : "N";
+                }, widthGrow: 1 
+            },
+            { title: "비고", field: "remark", hozAlign: "center", widthGrow: 2  },
         ],
         data: [],
         rowSelected: function (row) {
@@ -136,6 +145,8 @@ function loadUserTableData() {
         return;
     }
 
+    selectCommonCodesForUser();
+
     $.ajax({
         url: "/cm010/list",
         type: "GET",
@@ -143,6 +154,7 @@ function loadUserTableData() {
             searchType: $("#searchType").val(),
             searchUseYn: $("#searchUseYn").val(),
             searchKeyword: $("#searchKeyword").val()
+
         },
         success: function (response) {
             userTable.setData(response.list || []);
@@ -151,6 +163,11 @@ function loadUserTableData() {
             alert("사용자 데이터를 불러오는 중 오류가 발생했습니다.");
         }
     });
+
+
+
+
+
 }
 
 function upsertUserBtn() {
@@ -172,13 +189,13 @@ function upsertUserBtn() {
     }
 
     if (!roleCd) {
-        alert("역할코드를 입력해주세요.");
+        alert("역할을 선택해주세요.");
         $("#write_role_cd").focus();
         return;
     }
 
     if (currentMode === "insert" && !pwdHash) {
-        alert("비밀번호 해시를 입력해주세요.");
+        alert("비밀번호를 입력해주세요.");
         $("#write_pwd_hash").focus();
         return;
     }
@@ -213,6 +230,61 @@ function upsertUserBtn() {
         }
     });
 }
+
+
+function selectCommonCodesForUser(done) {
+    $.ajax({
+        url: "/cm010/cdList",
+        type: "GET",
+        success: function (response) {
+            var list = response.list || [];
+
+            var roleList = list.filter(function (item) {
+                return item.grp_cd === "role_cd";
+            });
+
+            var jobList = list.filter(function (item) {
+                return item.grp_cd === "job_cd";
+            });
+
+            var deptList = list.filter(function (item) {
+                return item.grp_cd === "dept_cd";
+            });
+
+            fillSelect("#write_role_cd", roleList);
+            fillSelect("#write_job_cd", jobList);
+            fillSelect("#write_dept_cd", deptList);
+
+            if (typeof done === "function") {
+                done();
+            }
+        },
+        error: function () {
+            fillSelect("#write_role_cd", []);
+            fillSelect("#write_job_cd", []);
+            fillSelect("#write_dept_cd", []);
+            alert("공통코드 조회 중 오류가 발생했습니다.");
+        }
+    });
+}
+
+function fillSelect(selector, list) {
+    var $sel = $(selector);
+    $sel.empty();
+    $sel.append("<option value=''>선택</option>");
+
+    list.forEach(function (item) {
+        $sel.append("<option value='" + item.cd + "'>" + item.cd_nm + "</option>");
+    });
+}
+
+
+
+
+
+
+
+
 
 function deleteUserRows() {
     var selectedRows = userTable.getSelectedRows();
@@ -255,11 +327,9 @@ function openUserWriteModal(type) {
         $("#write_pwd_hash").val("");
         $("#write_email").val("");
         $("#write_tel").val("");
-        $("#write_role_cd").val("");
-        $("#write_dept_cd").val("");
-        $("#write_job_cd").val("");
-        $("#write_lock_yn").val("N");
+
         $("#write_use_yn").val("Y");
+        $("#write_lock_yn").val("N");
         $("#write_remark").val("");
     } else {
         var selectedRows = userTable.getSelectedRows();
@@ -271,19 +341,23 @@ function openUserWriteModal(type) {
             alert("수정은 한 명만 선택해주세요.");
             return;
         }
+        selectCommonCodesForUser(
+            function () {
+                var rowData = selectedRows[0].getData();
+                $("#write_user_id").val(rowData.user_id).prop("disabled", true);
+                $("#write_user_nm").val(rowData.user_nm);
+                $("#write_pwd_hash").val("");
+                $("#write_email").val(rowData.email || "");
+                $("#write_tel").val(rowData.tel || "");
+                $("#write_role_cd").val(rowData.role_cd || "");
+                $("#write_job_cd").val(rowData.job_cd || "");
+                $("#write_dept_cd").val(rowData.dept_cd || "");
+                $("#write_use_yn").val(rowData.use_yn);
+                $("#write_lock_yn").val(rowData.lock_yn);
+                $("#write_remark").val(rowData.remark || "");
+            }
+        );
 
-        var rowData = selectedRows[0].getData();
-        $("#write_user_id").val(rowData.user_id).prop("disabled", true);
-        $("#write_user_nm").val(rowData.user_nm);
-        $("#write_pwd_hash").val("");
-        $("#write_email").val(rowData.email || "");
-        $("#write_tel").val(rowData.tel || "");
-        $("#write_role_cd").val(rowData.role_cd || "");
-        $("#write_dept_cd").val(rowData.dept_cd || "");
-        $("#write_job_cd").val(rowData.job_cd || "");
-        $("#write_lock_yn").val(rowData.lock_yn || "N");
-        $("#write_use_yn").val(rowData.use_yn || "Y");
-        $("#write_remark").val(rowData.remark || "");
     }
 
     document.getElementById("write-user-area").style.display = "block";
@@ -298,10 +372,11 @@ function openUserViewModal(rowData) {
     $("#view_user_nm").text(rowData.user_nm || "");
     $("#view_email").text(rowData.email || "");
     $("#view_tel").text(rowData.tel || "");
-    $("#view_dept_cd").text(rowData.dept_cd || "");
-    $("#view_job_cd").text(rowData.job_cd || "");
     $("#view_role_cd").text(rowData.role_cd || "");
-    $("#view_lock_yn").text(rowData.lock_yn || "");
+    $("#view_job_cd").text(rowData.job_cd || "");
+    $("#view_dept_cd").text(rowData.dept_cd || "");
+    $("#view_use_yn").text(rowData.use_yn || "Y");
+    $("#view_lock_yn").text(rowData.lock_yn === "Y" ? "N" : "Y" || "");
     $("#view_remark").text(rowData.remark || "");
 
     document.getElementById("view-user-area").style.display = "block";
