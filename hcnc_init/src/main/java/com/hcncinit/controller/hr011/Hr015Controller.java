@@ -62,10 +62,8 @@ public class Hr015Controller {
         applyLoginUser(map, session);
         applyDefaults(map);
         hr015Service.ensureUser(map);
-        List<Map<String, Object>> rows = parseRows(map.get("rows"));
-        map.put("rows", rows);
         int res = hr015Service.saveB(map);
-        mv.addObject("success", rows.isEmpty() || res > 0);
+        mv.addObject("success", res > 0);
         return mv;
     }
 

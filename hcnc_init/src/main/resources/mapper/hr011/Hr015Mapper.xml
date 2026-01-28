@@ -33,31 +33,16 @@
 
     <select id="selectListB" resultType="hashmap" parameterType="map">
         SELECT
-              cd.cd AS eval_id
-            , cd.cd_nm AS cd_nm
-            , CASE WHEN IFNULL(eval.lvl, 0) = 1 THEN 'Y' ELSE 'N' END AS lv1
-            , CASE WHEN IFNULL(eval.lvl, 0) = 2 THEN 'Y' ELSE 'N' END AS lv2
-            , CASE WHEN IFNULL(eval.lvl, 0) = 3 THEN 'Y' ELSE 'N' END AS lv3
-            , CASE WHEN IFNULL(eval.lvl, 0) = 4 THEN 'Y' ELSE 'N' END AS lv4
-            , CASE WHEN IFNULL(eval.lvl, 0) = 5 THEN 'Y' ELSE 'N' END AS lv5
-            , eval.cmt AS cmt
-        FROM tb_cd_mst cd
-        LEFT JOIN tb_dev_eval_info eval
-          ON cd.cd = eval.eval_id
-         AND eval.dev_id = #{dev_id}
-         AND eval.del_yn = 'N'
-        WHERE cd.grp_cd =
-            <choose>
-                <when test="eval_grp_b != null and eval_grp_b != ''">
-                    #{eval_grp_b}
-                </when>
-                <otherwise>
-                    'eval_id_b'
-                </otherwise>
-            </choose>
-          AND cd.del_yn = 'N'
-          AND cd.use_yn = 'Y'
-        ORDER BY cd.sort_no
+              leave_yn
+            , claim_yn
+            , sec_yn
+            , re_in_yn
+            , memo
+        FROM tb_dev_rsk_info
+        WHERE dev_id = #{dev_id}
+          AND del_yn = 'N'
+        ORDER BY rsk_dt DESC, rsk_id DESC
+        LIMIT 1
     </select>
 
     <insert id="saveA" parameterType="map">
@@ -99,41 +84,35 @@
     </insert>
 
     <insert id="saveB" parameterType="map">
-        <if test="rows != null and rows.size() > 0">
-            INSERT INTO tb_dev_eval_info (
-                dev_id,
-                eval_id,
-                lvl,
-                cmt,
-                use_yn,
-                del_yn,
-                crt_ts,
-                crt_by,
-                upd_ts,
-                upd_by
-            ) VALUES
-            <foreach collection="rows" item="row" separator=",">
-                (
-                    #{dev_id},
-                    #{row.eval_id},
-                    #{row.lvl},
-                    #{row.cmt},
-                    'Y',
-                    'N',
-                    NOW(),
-                    #{userId},
-                    NOW(),
-                    #{userId}
-                )
-            </foreach>
-            ON DUPLICATE KEY UPDATE
-                lvl = VALUES(lvl),
-                cmt = VALUES(cmt),
-                use_yn = 'Y',
-                del_yn = 'N',
-                upd_ts = NOW(),
-                upd_by = #{userId}
-        </if>
+        INSERT INTO tb_dev_rsk_info (
+            dev_id,
+            rsk_dt,
+            leave_yn,
+            claim_yn,
+            sec_yn,
+            re_in_yn,
+            memo,
+            use_yn,
+            del_yn,
+            crt_ts,
+            crt_by,
+            upd_ts,
+            upd_by
+        ) VALUES (
+            #{dev_id},
+            CURDATE(),
+            #{leave_yn},
+            #{claim_yn},
+            #{sec_yn},
+            #{re_in_yn},
+            #{memo},
+            'Y',
+            'N',
+            NOW(),
+            #{userId},
+            NOW(),
+            #{userId}
+        )
     </insert>
 
 </mapper>

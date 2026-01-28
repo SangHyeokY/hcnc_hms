@@ -77,6 +77,27 @@
     align-content: center;
 }
 
+/*===============================================================================
+  HR015 - risk memo
+================================================================================*/
+.risk-memo-wrap {
+  margin-top: 12px;
+}
+.risk-memo-wrap label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+.risk-memo-wrap textarea {
+  width: 100%;
+  resize: vertical;
+  min-height: 120px;
+  border: 1px solid #dcdcdc;
+  border-radius: 6px;
+  padding: 8px 10px;
+}
+
 /*=================================================================================
  * Toast style
 =================================================================================*/
