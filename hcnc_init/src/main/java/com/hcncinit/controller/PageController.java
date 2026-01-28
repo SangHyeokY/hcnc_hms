@@ -62,4 +62,11 @@ public class PageController {
         mv.setViewName("views/hr010/hr010");
         return mv;
     }
+
+    @GetMapping("/hr015")
+    public ModelAndView useDetail() {
+        ModelAndView mv = new ModelAndView();
+        mv.setViewName("views/hr011/hr015");
+        return mv;
+    }
 }
