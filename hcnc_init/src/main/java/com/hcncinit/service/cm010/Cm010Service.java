@@ -18,6 +18,10 @@ public class Cm010Service {
         return this.sqlSession.selectList("com.hcncinit.Cm010Mapper.selectUserList", map);
     }
 
+    public List<Map<String, Object>> commonCodesForUser() {
+        return this.sqlSession.selectList("com.hcncinit.Cm010Mapper.selectCommonCodesForUser");
+    }
+
     public int upsert(Map<String, Object> map) {
         return this.sqlSession.insert("com.hcncinit.Cm010Mapper.upsertUser", map);
     }

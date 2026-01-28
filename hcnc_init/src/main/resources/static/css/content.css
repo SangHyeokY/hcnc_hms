@@ -70,6 +70,13 @@
 .tabulator .tabulator-header {color:#333 !important; font-size: 15px !important; font-weight: 600 !important;}
 .tabulator .tabulator-header .tabulator-col.tabulator-col-group .tabulator-col-group-cols {border-top: 2px solid #ebedf1 !important;}
 
+/*===============================================================================
+  HR015 - score tables alignment
+================================================================================*/
+#TABLE_HR015_A .tabulator-col.tabulator-sortable {
+    align-content: center;
+}
+
 /*=================================================================================
  * Toast style
 =================================================================================*/

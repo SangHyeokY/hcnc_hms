@@ -28,6 +28,16 @@ public class Cm010Controller {
         return mv;
     }
 
+    @RequestMapping("/cdList")
+    public ModelAndView cdList(Map<String, Object> map) {
+        ModelAndView mv = new ModelAndView("jsonView");
+        List<Map<String, Object>> cdList = cm010Service.commonCodesForUser();
+        mv.addObject("success", cdList != null);
+        mv.addObject("list", cdList);
+        return mv;
+    }
+
+
     @RequestMapping("/save")
     public ModelAndView save(@RequestParam Map<String, Object> map, HttpSession session) {
         ModelAndView mv = new ModelAndView("jsonView");
