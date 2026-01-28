@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hcncinit.Hr015Mapper">
+
+    <select id="selectListA" resultType="hashmap" parameterType="map">
+        SELECT
+              cd.cd AS eval_id
+            , cd.cd_nm AS cd_nm
+            , CASE WHEN IFNULL(eval.lvl, 0) = 1 THEN 'Y' ELSE 'N' END AS lv1
+            , CASE WHEN IFNULL(eval.lvl, 0) = 2 THEN 'Y' ELSE 'N' END AS lv2
+            , CASE WHEN IFNULL(eval.lvl, 0) = 3 THEN 'Y' ELSE 'N' END AS lv3
+            , CASE WHEN IFNULL(eval.lvl, 0) = 4 THEN 'Y' ELSE 'N' END AS lv4
+            , CASE WHEN IFNULL(eval.lvl, 0) = 5 THEN 'Y' ELSE 'N' END AS lv5
+            , eval.cmt AS cmt
+        FROM tb_cd_mst cd
+        LEFT JOIN tb_dev_eval_info eval
+          ON cd.cd = eval.eval_id
+         AND eval.dev_id = #{dev_id}
+         AND eval.del_yn = 'N'
+        WHERE cd.grp_cd =
+            <choose>
+                <when test="eval_grp != null and eval_grp != ''">
+                    #{eval_grp}
+                </when>
+                <otherwise>
+                    'eval_id'
+                </otherwise>
+            </choose>
+          AND cd.del_yn = 'N'
+          AND cd.use_yn = 'Y'
+        ORDER BY cd.sort_no
+    </select>
+
+    <select id="selectListB" resultType="hashmap" parameterType="map">
+        SELECT
+              cd.cd AS eval_id
+            , cd.cd_nm AS cd_nm
+            , CASE WHEN IFNULL(eval.lvl, 0) = 1 THEN 'Y' ELSE 'N' END AS lv1
+            , CASE WHEN IFNULL(eval.lvl, 0) = 2 THEN 'Y' ELSE 'N' END AS lv2
+            , CASE WHEN IFNULL(eval.lvl, 0) = 3 THEN 'Y' ELSE 'N' END AS lv3
+            , CASE WHEN IFNULL(eval.lvl, 0) = 4 THEN 'Y' ELSE 'N' END AS lv4
+            , CASE WHEN IFNULL(eval.lvl, 0) = 5 THEN 'Y' ELSE 'N' END AS lv5
+            , eval.cmt AS cmt
+        FROM tb_cd_mst cd
+        LEFT JOIN tb_dev_eval_info eval
+          ON cd.cd = eval.eval_id
+         AND eval.dev_id = #{dev_id}
+         AND eval.del_yn = 'N'
+        WHERE cd.grp_cd =
+            <choose>
+                <when test="eval_grp_b != null and eval_grp_b != ''">
+                    #{eval_grp_b}
+                </when>
+                <otherwise>
+                    'eval_id_b'
+                </otherwise>
+            </choose>
+          AND cd.del_yn = 'N'
+          AND cd.use_yn = 'Y'
+        ORDER BY cd.sort_no
+    </select>
+
+    <insert id="saveA" parameterType="map">
+        <if test="rows != null and rows.size() > 0">
+            INSERT INTO tb_dev_eval_info (
+                dev_id,
+                eval_id,
+                lvl,
+                cmt,
+                use_yn,
+                del_yn,
+                crt_ts,
+                crt_by,
+                upd_ts,
+                upd_by
+            ) VALUES
+            <foreach collection="rows" item="row" separator=",">
+                (
+                    #{dev_id},
+                    #{row.eval_id},
+                    #{row.lvl},
+                    #{row.cmt},
+                    'Y',
+                    'N',
+                    NOW(),
+                    #{userId},
+                    NOW(),
+                    #{userId}
+                )
+            </foreach>
+            ON DUPLICATE KEY UPDATE
+                lvl = VALUES(lvl),
+                cmt = VALUES(cmt),
+                use_yn = 'Y',
+                del_yn = 'N',
+                upd_ts = NOW(),
+                upd_by = #{userId}
+        </if>
+    </insert>
+
+    <insert id="saveB" parameterType="map">
+        <if test="rows != null and rows.size() > 0">
+            INSERT INTO tb_dev_eval_info (
+                dev_id,
+                eval_id,
+                lvl,
+                cmt,
+                use_yn,
+                del_yn,
+                crt_ts,
+                crt_by,
+                upd_ts,
+                upd_by
+            ) VALUES
+            <foreach collection="rows" item="row" separator=",">
+                (
+                    #{dev_id},
+                    #{row.eval_id},
+                    #{row.lvl},
+                    #{row.cmt},
+                    'Y',
+                    'N',
+                    NOW(),
+                    #{userId},
+                    NOW(),
+                    #{userId}
+                )
+            </foreach>
+            ON DUPLICATE KEY UPDATE
+                lvl = VALUES(lvl),
+                cmt = VALUES(cmt),
+                use_yn = 'Y',
+                del_yn = 'N',
+                upd_ts = NOW(),
+                upd_by = #{userId}
+        </if>
+    </insert>
+
+</mapper>
