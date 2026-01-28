@@ -21,4 +21,12 @@ public class Hr010Service {
     public Map<String, Object> select_hr011(String devId) {
         return this.sqlSession.selectOne("com.hcncinit.Hr010Mapper.select_hr011", devId);
     }
+
+    public int insert_hr011(Map<String, Object> map) {
+        return this.sqlSession.insert("com.hcncinit.Hr010Mapper.insert_hr011", map);
+    }
+
+    public String generateDevId(String devType) {
+        return this.sqlSession.selectOne("com.hcncinit.Hr010Mapper.selectDevId", devType);
+    }
 }

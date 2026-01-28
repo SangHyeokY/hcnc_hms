@@ -226,3 +226,5 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .modal-btn ul li:last-child {margin-right: 0;}
 .modal-btn .btn {padding: 8px 20px; border-radius: 4px; background-color: #fff; border: 1px solid #0554f8; color: #0554f8; font-size: 14px; font-weight: 500;}
 .modal-btn .btn.btn-save {background: #0554f8; color: #fff;}
+
+.modal-container-detail {display: flex; flex-direction: column; max-height: 90vh; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); min-width: 80vw; max-width: calc(100% - 32px); background: #fff; border-radius: 6px; padding: 20px; box-sizing: border-box;}
