@@ -4,18 +4,39 @@
 
     <select id="selectUserList" resultType="hashmap" parameterType="map">
         SELECT
-               user_id
-             , user_nm
-             , email
-             , tel
-             , role_cd
-             , dept_cd
-             , job_cd
-             , lock_yn
-             , remark
-             , use_yn
-        FROM tb_user_info
-        WHERE del_yn = 'N'
+               u.user_id
+             , u.user_nm
+             , u.email
+             , u.tel
+             , u.role_cd
+             , u.dept_cd
+             , u.job_cd
+             , u.lock_yn
+             , u.remark
+             , u.use_yn
+             , r.cd_nm AS role_nm
+             , j.cd_nm AS job_nm
+             , d.cd_nm AS dept_nm
+        FROM tb_user_info u
+        LEFT JOIN tb_cd_mst r
+               ON r.grp_cd = 'role_cd'
+              AND r.cd = u.role_cd
+              AND r.del_yn = 'N'
+              AND r.use_yn = 'Y'
+              AND r.sort_no &gt; 0
+        LEFT JOIN tb_cd_mst j
+               ON j.grp_cd = 'job_cd'
+              AND j.cd = u.job_cd
+              AND j.del_yn = 'N'
+              AND j.use_yn = 'Y'
+              AND j.sort_no &gt; 0
+        LEFT JOIN tb_cd_mst d
+               ON d.grp_cd = 'dept_cd'
+              AND d.cd = u.dept_cd
+              AND d.del_yn = 'N'
+              AND d.use_yn = 'Y'
+              AND d.sort_no &gt; 0
+        WHERE u.del_yn = 'N'
         <if test="searchUseYn != null and searchUseYn != ''">
             AND use_yn = #{searchUseYn}
         </if>
@@ -25,16 +46,17 @@
         <if test="searchType == null or searchType == ''">
             <if test="searchKeyword != null and searchKeyword != ''">
                 AND (
-                        user_id LIKE CONCAT('%', #{searchKeyword}, '%')
-                     OR user_nm LIKE CONCAT('%', #{searchKeyword}, '%')
-                     OR email LIKE CONCAT('%', #{searchKeyword}, '%')
-                     OR tel LIKE CONCAT('%', #{searchKeyword}, '%')
-                     OR dept_cd LIKE CONCAT('%', #{searchKeyword}, '%')
-                     OR role_cd LIKE CONCAT('%', #{searchKeyword}, '%')
+                        u.user_id LIKE CONCAT('%', #{searchKeyword}, '%')
+                     OR u.user_nm LIKE CONCAT('%', #{searchKeyword}, '%')
+                     OR u.email LIKE CONCAT('%', #{searchKeyword}, '%')
+                     OR u.tel LIKE CONCAT('%', #{searchKeyword}, '%')
+                     OR r.cd_nm LIKE CONCAT('%', #{searchKeyword}, '%')
+                     OR j.cd_nm LIKE CONCAT('%', #{searchKeyword}, '%')
+                     OR d.cd_nm LIKE CONCAT('%', #{searchKeyword}, '%')
                 )
             </if>
         </if>
-        ORDER BY user_id ASC
+        ORDER BY u.user_id ASC
     </select>
 
     <select id="selectLoginUser" resultType="hashmap" parameterType="string">
@@ -49,6 +71,22 @@
           AND use_yn = 'Y'
           AND lock_yn = 'N'
     </select>
+
+    <select id="selectCommonCodesForUser" resultType="hashmap">
+        SELECT
+               grp_cd
+            ,cd
+            ,cd_nm
+            ,sort_no
+        FROM tb_cd_mst
+        WHERE del_yn = 'N'
+          AND use_yn = 'Y'
+          AND grp_cd IN ('role_cd', 'job_cd', 'dept_cd')
+          AND sort_no &gt; 0
+        ORDER BY grp_cd ASC, sort_no ASC, cd ASC
+    </select>
+
+
 
     <insert id="upsertUser" parameterType="map">
         INSERT INTO tb_user_info (
