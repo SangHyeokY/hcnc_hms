@@ -33,6 +33,12 @@ export const menuData = [
         type: "A",
         visible: true,
       },
+      {
+          title: "기본 인적사항",
+          path: "/hr010",
+          type: "A",
+          visible: true,
+        },
     ],
   },
   {

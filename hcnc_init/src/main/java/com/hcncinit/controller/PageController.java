@@ -56,4 +56,10 @@ public class PageController {
         return mv;
     }
 
+    @GetMapping("/hr010")
+    public ModelAndView commonCode2() {
+        ModelAndView mv = new ModelAndView();
+        mv.setViewName("views/hr010/hr010");
+        return mv;
+    }
 }
