@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hcncinit.Hr010Mapper">
+    <!-- 인력관리 > 기본 인적사항 (임시/검색x), score 아직 미구현 상태 -->
+    <select id="select_hr010" parameterType="map" resultType="map">
+        SELECT dev_id
+            , dev_nm -- 성명
+            , DATE_FORMAT(brdt, '%Y-%m-%d') AS brdt -- 생년월일
+            , tel -- 연락처
+            , email -- 이메일
+            , region -- 거주지역
+            , main_lang -- 주 개발언어
+            , exp_yr -- 경력연차
+            , edu_last -- 최종학력
+            , cert_txt -- 보유 자격증
+            , work_md -- 근무형태
+            , DATE_FORMAT(avail_dt, '%Y-%m-%d') AS avail_dt -- 투입가능시점
+            , ctrt_typ -- 계약형태
+            , hope_rate_amt -- 단가
+        FROM tb_dev_info
+        WHERE del_yn='N'
+        AND use_yn='Y'
+        <if test="dev_nm != null and dev_nm != ''">
+            AND dev_nm LIKE CONCAT('%', #{dev_nm}, '%')
+        </if>
+    </select>
+
+    <!-- 인적사항 신규 등록 -->
+    <insert id="insert_hr011" parameterType="map">
+        INSERT INTO tb_dev_info (
+            dev_id,
+            brdt,
+            avail_dt,
+            dev_nm,
+            tel,
+            email,
+            region,
+            main_lang,
+            exp_yr,
+            edu_last,
+            cert_txt,
+            work_md,
+            hope_rate_amt,
+            ctrt_typ,
+            crt_ts,
+            use_yn,
+            del_yn,
+            crt_by
+        ) VALUES (
+            #{dev_id},
+            #{brdt},
+            #{avail_dt},
+            #{dev_nm},
+            #{tel},
+            #{email},
+            #{region},
+            #{main_lang},
+            #{exp_yr},
+            #{edu_last},
+            #{cert_txt},
+            #{work_md},
+            #{hope_rate_amt},
+            #{ctrt_typ},
+            NOW(),
+            'Y',
+            'N',
+            #{dev_id}
+        ) ON DUPLICATE KEY UPDATE
+            dev_id = #{dev_id},
+            brdt = #{brdt},
+            avail_dt = #{avail_dt},
+            dev_nm = #{dev_nm},
+            tel = #{tel},
+            email = #{email},
+            region = #{region},
+            main_lang = #{main_lang},
+            exp_yr = #{exp_yr},
+            edu_last = #{edu_last},
+            cert_txt = #{cert_txt},
+            work_md = #{work_md},
+            hope_rate_amt = #{hope_rate_amt},
+            ctrt_typ = #{ctrt_typ},
+            crt_ts = NOW(),
+            use_yn = 'Y',
+            del_yn = 'N',
+            crt_by = #{dev_id}
+    </insert>
+
+    <!-- dev_id 생성 시, 뒤에 숫자 붙이기 -->
+    <select id="selectDevId" parameterType="string" resultType="string">
+        SELECT
+            CONCAT(
+                #{dev_type},
+                LPAD(
+                    IFNULL(
+                        MAX(CAST(SUBSTRING(dev_id, 7) AS UNSIGNED)),
+                        0
+                    ) + 1,
+                    3,
+                    '0'
+            )
+        )
+        FROM tb_dev_info
+        WHERE dev_id LIKE CONCAT(#{dev_type}, '%')
+    </select>
+
+
+    <!-- 폐기 -->
+    <!-- 인력관리 > 기본 인적사항 (상세) (임시/검색x), 임시로 가장 첫번째 데이터 불러오기 -->
+    <select id="select_hr011" resultType="hashmap" parameterType="string">
+        SELECT dev_nm -- 성명
+        , brdt -- 생년월일
+        , tel -- 연락처
+        , email -- 이메일
+        , region -- 거주지역
+        , main_lang -- 주 개발언어
+        , exp_yr -- 경력연차
+        , edu_last -- 최종학력
+        , cert_txt -- 보유 자격증
+        , work_md -- 희망단가
+        , avail_dt -- 투입가능시점
+        , ctrt_typ -- 계약형태
+        , hope_rate_amt -- 단가
+        FROM tb_dev_info
+        WHERE del_yn='N'
+        AND use_yn='Y'
+        AND dev_id = #{devId};
+    </select>
+
+</mapper>

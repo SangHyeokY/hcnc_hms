@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hcncinit.Cm040Mapper">
+
+    <select id="selectMainList" resultType="hashmap" parameterType="map">
+        SELECT
+               grp_cd AS grp_cd
+             , grp_cd AS parent_grp_cd
+             , cd AS cd
+             , cd_nm AS grp_nm
+             , cd_nm AS cd_nm
+             , sort_no
+             , use_yn
+        FROM tb_cd_mst
+        WHERE del_yn = 'N'
+          AND sort_no = 0
+        <if test="searchUseYn != null and searchUseYn != ''">
+            AND use_yn = #{searchUseYn}
+        </if>
+        <if test="searchKeyword != null and searchKeyword != ''">
+            AND (grp_cd LIKE CONCAT('%', #{searchKeyword}, '%')
+             OR  cd_nm LIKE CONCAT('%', #{searchKeyword}, '%'))
+        </if>
+        ORDER BY grp_cd ASC
+    </select>
+
+    <select id="selectDetailList" resultType="hashmap" parameterType="map">
+        SELECT
+               grp_cd
+             , cd
+             , cd_nm
+             , sort_no
+             , adinfo_01
+             , adinfo_02
+             , adinfo_03
+             , adinfo_04
+             , adinfo_05
+             , use_yn
+        FROM tb_cd_mst
+        WHERE del_yn = 'N'
+          AND grp_cd = #{parent_grp_cd}
+          AND sort_no &gt; 0
+        ORDER BY sort_no ASC, cd ASC
+    </select>
+
+    <select id="detailCount" resultType="int" parameterType="map">
+        SELECT COUNT(*)
+          FROM tb_cd_mst
+         WHERE del_yn = 'N'
+           AND grp_cd =
+               <choose>
+                   <when test="detail_grp_cd != null and detail_grp_cd != ''">
+                       #{detail_grp_cd}
+                   </when>
+                   <otherwise>
+                       #{grp_cd}
+                   </otherwise>
+               </choose>
+           AND sort_no &gt; 0
+    </select>
+
+    <select id="selectNextDetailCd" resultType="string" parameterType="map">
+        SELECT LPAD(IFNULL(MAX(CAST(cd AS UNSIGNED)), 0) + 1, 2, '0')
+          FROM tb_cd_mst
+         WHERE del_yn = 'N'
+           AND grp_cd = #{parent_grp_cd}
+           AND cd REGEXP '^[0-9]+$'
+           AND sort_no &gt; 0
+    </select>
+
+    <select id="selectNextDetailSortNo" resultType="int" parameterType="map">
+        SELECT IFNULL(MAX(sort_no), 0) + 1
+          FROM tb_cd_mst
+         WHERE del_yn = 'N'
+           AND grp_cd = #{parent_grp_cd}
+           AND sort_no &gt; 0
+    </select>
+
+    <insert id="upsertMain" parameterType="map">
+        INSERT INTO tb_cd_mst (
+            grp_cd,
+            cd,
+            cd_nm,
+            sort_no,
+            use_yn,
+            del_yn,
+            crt_ts,
+            crt_by,
+            upd_ts,
+            upd_by
+        ) VALUES (
+            #{grp_cd},
+            #{cd},
+            #{cd_nm},
+            0,
+            #{use_yn},
+            'N',
+            NOW(),
+            #{userId},
+            NOW(),
+            #{userId}
+        )
+        ON DUPLICATE KEY UPDATE
+            cd_nm = #{cd_nm},
+            use_yn = #{use_yn},
+            del_yn = 'N',
+            upd_ts = NOW(),
+            upd_by = #{userId}
+    </insert>
+
+    <insert id="upsertDetail" parameterType="map">
+        INSERT INTO tb_cd_mst (
+            grp_cd,
+            cd,
+            cd_nm,
+            sort_no,
+            adinfo_01,
+            adinfo_02,
+            adinfo_03,
+            adinfo_04,
+            adinfo_05,
+            use_yn,
+            del_yn,
+            crt_ts,
+            crt_by,
+            upd_ts,
+            upd_by
+        ) VALUES (
+            #{parent_grp_cd},
+            #{cd},
+            #{cd_nm},
+            #{sort_no},
+            #{adinfo_01},
+            #{adinfo_02},
+            #{adinfo_03},
+            #{adinfo_04},
+            #{adinfo_05},
+            #{use_yn},
+            'N',
+            NOW(),
+            #{userId},
+            NOW(),
+            #{userId}
+        )
+        ON DUPLICATE KEY UPDATE
+            cd_nm = #{cd_nm},
+            sort_no = #{sort_no},
+            adinfo_01 = #{adinfo_01},
+            adinfo_02 = #{adinfo_02},
+            adinfo_03 = #{adinfo_03},
+            adinfo_04 = #{adinfo_04},
+            adinfo_05 = #{adinfo_05},
+            use_yn = #{use_yn},
+            del_yn = 'N',
+            upd_ts = NOW(),
+            upd_by = #{userId}
+    </insert>
+
+    <update id="deleteMain" parameterType="map">
+        UPDATE tb_cd_mst
+           SET del_yn = 'Y',
+               del_ts = NOW(),
+               del_by = #{userId},
+               upd_ts = NOW(),
+               upd_by = #{userId}
+         WHERE grp_cd = #{grp_cd}
+           AND cd = #{cd}
+    </update>
+
+    <update id="deleteDetail" parameterType="map">
+        UPDATE tb_cd_mst
+           SET del_yn = 'Y',
+               del_ts = NOW(),
+               del_by = #{userId},
+               upd_ts = NOW(),
+               upd_by = #{userId}
+         WHERE grp_cd = #{parent_grp_cd}
+           AND cd = #{cd}
+    </update>
+
+    <update id="updateDetailSort" parameterType="map">
+        UPDATE tb_cd_mst
+           SET sort_no = #{sort_no},
+               upd_ts = NOW(),
+               upd_by = #{userId}
+         WHERE grp_cd = #{parent_grp_cd}
+           AND cd = #{cd}
+    </update>
+
+</mapper>

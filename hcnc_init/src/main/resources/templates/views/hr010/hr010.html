@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+
+<!-- 추가 버튼 정의 -->
+<th:block layout:fragment="additionalButtons">
+    <button type="button" class="btn-excel">엑셀 다운로드</button>
+<!-- <button type="button" class="btn-print">출력</button> -->
+<!-- <button type="button" class="btn-approve">승인</button> -->
+</th:block>
+
+<th:block layout:fragment="searchCondition">
+    <div class="search-input">
+        <p class="fl-ac">
+            <label for="insertNM" class="pd-r15">성명</label>
+            <input type="text" id="insertNM" name="insertNM" placeholder="성명(을)를 입력하세요" />
+        </p>
+    </div>
+    <div class="search-input">
+        <p class="fl-ac">
+            <label for="searchKeyword" class="pd-r15">태그</label>
+            <input type="text" id="searchKeyword" name="searchKeyword" placeholder="검색어를 입력하세요"/>
+        </p>
+    </div>
+</th:block>
+
+<!-- 실제 컨텐츠 영역 -->
+<th:block layout:fragment="content">
+    <div class="content list-area">
+        <div class="table-wrap">
+            <div id="TABLE_USER"></div>
+        </div>
+        <input type="hidden" id="dev_id" name="dev_id" th:value="${dev_id}">
+    </div>
+
+    <!-- 모달 -->
+    <div class="modal-wrap" id="view-user-area" style="display:none">
+        <div class="modal-container-detail">
+            <div class="header">
+                <h4>인력 관리 <span class="modal-title">상세</span></h4>
+                <span class="modal-close" onclick="closeUserViewModal()"></span>
+            </div>
+
+            <div class="modal-content" style="display: flex;">
+                <section>
+                    <h5 class="mg-b15">○ 인적사항</h5>
+                    <table class="hrm-detail-table">
+                        <colgroup>
+                            <col style="width: 20%;">
+                            <col style="width: 40%;">
+                            <col style="width: 10%;">
+                            <col style="width: 30%;">
+                        </colgroup>
+
+                        <!-- 1 -->
+                        <tr>
+                            <th scope="row">성명</th>
+                            <td>
+                                <input type="text" id="dev_nm" class="input-text" disabled style="width:100%;">
+                            </td>
+                            <td colspan="2">
+                                <select id="dev_type" style="width:100%;">
+                                    <option value="">프리랜서/직원</option>
+                                    <option value="HCNC_F">프리랜서</option>
+                                    <option value="HCNC_S">직원</option>
+                                </select>
+                            </td>
+                        </tr>
+
+                        <!-- 2 -->
+                        <tr>
+                            <th scope="row">생년월일</th>
+                            <td>
+                                <input type="date" id="brdt" style="width:100%;">
+                            </td>
+                            <td colspan="2" rowspan="4" style="text-align:center;">
+                                <img src="../images/common/profile.png" alt="profile">
+                                <br>
+                                <button type="button">파일 업로드</button>
+                            </td>
+                        </tr>
+
+                        <!-- 3 -->
+                        <tr>
+                            <th scope="row">연락처</th>
+                            <td>
+                                <input type="text" id="tel" disabled style="width:100%;">
+                            </td>
+                        </tr>
+
+                        <!-- 4 -->
+                        <tr>
+                            <th scope="row">이메일</th>
+                            <td>
+                                <input type="email" id="email" disabled style="width:100%;">
+                            </td>
+                        </tr>
+
+                        <!-- 5 -->
+                        <tr>
+                            <th scope="row">거주지역</th>
+                            <td>
+                                <input type="text" id="region" disabled style="width:100%;">
+                            </td>
+                        </tr>
+
+                        <!-- 6 -->
+                        <tr>
+                            <th scope="row">주 개발언어</th>
+                            <td>
+                                <input type="text" id="main_lang" disabled style="width:100%;">
+                            </td>
+                            <th rowspan="3">등급</th>
+                            <td rowspan="3" style="text-align:center;">
+                                <input type="text" id="grade" disabled style="text-align:center; width:100%;">
+                            </td>
+                        </tr>
+
+                        <!-- 7 -->
+                        <tr>
+                            <th scope="row">경력연차</th>
+                            <td>
+                                <input type="text" id="exp_yr" disabled style="width:100%;">
+                            </td>
+                        </tr>
+
+                        <!-- 8 -->
+                        <tr>
+                            <th scope="row">최종학력</th>
+                            <td>
+                                <input type="text" id="edu_last" disabled style="width:100%;">
+                            </td>
+                        </tr>
+
+                        <!-- 9 -->
+                        <tr>
+                            <th scope="row">보유 자격증</th>
+                            <td colspan="3">
+                                <input type="text" id="cert_txt" disabled style="width:100%;">
+                            </td>
+                        </tr>
+
+                        <!-- 10 -->
+                        <tr>
+                            <th scope="row">근무가능형태</th>
+                            <td colspan="3">
+                                <select id="work_md" style="width:100%;">
+                                    <option value="">상주/재택/혼합</option>
+                                    <option value="01">상주</option>
+                                    <option value="02">재택</option>
+                                    <option value="03">혼합</option>
+                                </select>
+                            </td>
+                        </tr>
+
+                        <!-- 11 -->
+                        <tr>
+                            <th scope="row">단가</th>
+<!--                            <td>-->
+<!--                                <select id="hope_rate_typ" style="width:100%">-->
+<!--                                    <option value="">일/월</option>-->
+<!--                                    <option value="01">일</option>-->
+<!--                                    <option value="02">월</option>-->
+<!--                                </select>-->
+<!--                            </td>-->
+                            <td colspan="3">
+                                <input type="text" id="hope_rate_amt" disabled style="width:100%">
+                            </td>
+                        </tr>
+
+                        <!-- 12 -->
+                        <tr>
+                            <th scope="row">투입가능시점</th>
+                            <td colspan="3">
+                                <input type="date" id="avail_dt" style="width:100%">
+                            </td>
+                        </tr>
+
+                        <!-- 13 -->
+                        <tr>
+                            <th scope="row">계약형태</th>
+                            <td colspan="3">
+                                <select id="ctrt_typ" style="width:100%;">
+                                    <option value="">개인/법인</option>
+                                    <option value="01">개인</option>
+                                    <option value="02">법인</option>
+                                </select>
+                            </td>
+                        </tr>
+                    </table>
+                </section>
+                <section style="flex: 0 0 50%;">
+                    <!-- 우측 -->
+                    <div class="wp100">
+                        <div class="tap-area">
+                            <span class="tap-btn">소속및 계약정보</span>
+                            <span class="tap-btn">보유역량 및 숙련도</span>
+                            <span class="tap-btn">프로젝트</span>
+                            <span class="tap-btn">평가 및 리스크</span>
+                        </div>
+                        <table class="temp-table">
+                            <tr>
+                                <th>Backend</th>
+                                <td>-</td></tr>
+                            <tr>
+                                <th>Frontend</th>
+                                <td>-</td></tr>
+                            <tr>
+                                <th>Mobile</th>
+                                <td>-</td>
+                            </tr>
+                            <tr>
+                                <th>DB</th>
+                                <td>-</td>
+                            </tr>
+                            <tr>
+                                <th>Infra</th>
+                                <td>-</td>
+                            </tr>
+                            <tr>
+                                <th>DevOps</th>
+                                <td>-</td>
+                            </tr>
+                            <tr>
+                                <th>ERP/MES</th>
+                                <td>-</td>
+                            </tr>
+                            <tr>
+                                <th>기타</th>
+                                <td>-</td>
+                            </tr>
+                        </table>
+                    </div>
+                </section>
+            </div>
+            <div class="modal-btn">
+                <ul>
+                    <li>
+                        <button class="btn btn-close" onclick="closeUserViewModal()">
+                            닫기
+                        </button>
+                    </li>
+                    <li><button class="btn btn-save btn-user-save">저장</button></li>
+                </ul>
+            </div>
+    </div>
+
+    <script src="/js/api/hr010/hr010.js"></script>
+</th:block>
+</html>

@@ -1,47 +1,57 @@
 export const menuData = [
   {
-    title: "Title",
+    title: "시스템",
     visible: true,
     children: [
       {
         title: "sample1",
         path: "/sample",
         type: "A",
-        visible: true,
+        visible: false,
       },
       {
         title: "sample2",
         path: "/sample2",
         type: "A",
+        visible: false,
+      },
+      {
+        title: "tagList",
+        path: "/tagList",
+        type: "A",
+        visible: false,
+      },
+      {
+        title: "공통코드 관리",
+        path: "/cm040",
+        type: "A",
         visible: true,
       },
+      {
+        title: "사용자 관리",
+        path: "/cm010",
+        type: "A",
+        visible: true,
+      },
+
     ],
   },
+
   {
-    title: "DEP_1",
+    title: "인력관리",
     visible: true,
     children: [
       {
-        title: "DEP_2",
+        title: "기본 인적사항",
+        path: "/hr010",
+        type: "A",
         visible: true,
-        children: [
-          {
-            title: "DEP_3",
-            path: "/#",
-            name: "E110",
-            type: "A",
-            visible: true,
-            filePageCode: "EF110",
-          },
-          {
-            title: "DEP_3_1",
-            path: "/#",
-            name: "EF110",
-            type: "F",
-            visible: true,
-            parentPage: "E110",
-          },
-        ],
+      },
+      {
+        title: "인적사항 (상세) > 평가 및 리스크 탭",
+        path: "/hr015",
+        type: "A",
+        visible: true,
       },
     ],
   },
@@ -51,6 +61,6 @@ export const menuData = [
     name: "sample",
     type: "ETC",
     renderPath: "/views/sample.html",
-    visible: true,
+    visible: false,
   },
 ];

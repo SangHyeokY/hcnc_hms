@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hcncinit.Cm010Mapper">
+
+    <select id="selectUserList" resultType="hashmap" parameterType="map">
+        SELECT
+               u.user_id
+             , u.user_nm
+             , u.email
+             , u.tel
+             , u.role_cd
+             , u.dept_cd
+             , u.job_cd
+             , u.lock_yn
+             , u.remark
+             , u.use_yn
+             , r.cd_nm AS role_nm
+             , j.cd_nm AS job_nm
+             , d.cd_nm AS dept_nm
+        FROM tb_user_info u
+        LEFT JOIN tb_cd_mst r
+               ON r.grp_cd = 'role_cd'
+              AND r.cd = u.role_cd
+              AND r.del_yn = 'N'
+              AND r.use_yn = 'Y'
+              AND r.sort_no &gt; 0
+        LEFT JOIN tb_cd_mst j
+               ON j.grp_cd = 'job_cd'
+              AND j.cd = u.job_cd
+              AND j.del_yn = 'N'
+              AND j.use_yn = 'Y'
+              AND j.sort_no &gt; 0
+        LEFT JOIN tb_cd_mst d
+               ON d.grp_cd = 'dept_cd'
+              AND d.cd = u.dept_cd
+              AND d.del_yn = 'N'
+              AND d.use_yn = 'Y'
+              AND d.sort_no &gt; 0
+        WHERE u.del_yn = 'N'
+        <if test="searchUseYn != null and searchUseYn != ''">
+            AND u.use_yn = #{searchUseYn}
+        </if>
+        <if test="searchType != null and searchType != '' and searchKeyword != null and searchKeyword != ''">
+            AND ${searchType} LIKE CONCAT('%', #{searchKeyword}, '%')
+        </if>
+        <if test="searchType == null or searchType == ''">
+            <if test="searchKeyword != null and searchKeyword != ''">
+                AND (
+                        u.user_id LIKE CONCAT('%', #{searchKeyword}, '%')
+                     OR u.user_nm LIKE CONCAT('%', #{searchKeyword}, '%')
+                     OR u.email LIKE CONCAT('%', #{searchKeyword}, '%')
+                     OR u.tel LIKE CONCAT('%', #{searchKeyword}, '%')
+                     OR r.cd_nm LIKE CONCAT('%', #{searchKeyword}, '%')
+                     OR j.cd_nm LIKE CONCAT('%', #{searchKeyword}, '%')
+                     OR d.cd_nm LIKE CONCAT('%', #{searchKeyword}, '%')
+                )
+            </if>
+        </if>
+        ORDER BY u.user_id ASC
+    </select>
+
+    <select id="selectLoginUser" resultType="hashmap" parameterType="string">
+        SELECT
+               user_id
+             , user_nm
+             , pwd_hash
+             , lock_yn
+        FROM tb_user_info
+        WHERE user_id = #{userId}
+          AND del_yn = 'N'
+          AND use_yn = 'Y'
+          AND lock_yn = 'N'
+    </select>
+
+    <select id="selectCommonCodesForUser" resultType="hashmap">
+        SELECT
+               grp_cd
+            ,cd
+            ,cd_nm
+            ,sort_no
+        FROM tb_cd_mst
+        WHERE del_yn = 'N'
+          AND use_yn = 'Y'
+          AND grp_cd IN ('role_cd', 'job_cd', 'dept_cd')
+          AND sort_no &gt; 0
+        ORDER BY grp_cd ASC, sort_no ASC, cd ASC
+    </select>
+
+
+
+    <insert id="upsertUser" parameterType="map">
+        INSERT INTO tb_user_info (
+            user_id,
+            user_nm,
+            pwd_hash,
+            email,
+            tel,
+            role_cd,
+            dept_cd,
+            job_cd,
+            lock_yn,
+            remark,
+            use_yn,
+            del_yn,
+            crt_ts,
+            crt_by,
+            upd_ts,
+            upd_by
+        ) VALUES (
+            #{user_id},
+            #{user_nm},
+            #{pwd_hash},
+            #{email},
+            #{tel},
+            #{role_cd},
+            #{dept_cd},
+            #{job_cd},
+            #{lock_yn},
+            #{remark},
+            #{use_yn},
+            'N',
+            NOW(),
+            #{userId},
+            NOW(),
+            #{userId}
+        )
+        ON DUPLICATE KEY UPDATE
+            user_nm = #{user_nm},
+            email = #{email},
+            tel = #{tel},
+            role_cd = #{role_cd},
+            dept_cd = #{dept_cd},
+            job_cd = #{job_cd},
+            lock_yn = #{lock_yn},
+            remark = #{remark},
+            use_yn = #{use_yn},
+            del_yn = 'N',
+            upd_ts = NOW(),
+            upd_by = #{userId}
+    </insert>
+
+    <update id="deleteUser" parameterType="map">
+        UPDATE tb_user_info
+           SET del_yn = 'Y',
+               del_ts = NOW(),
+               del_by = #{userId},
+               upd_ts = NOW(),
+               upd_by = #{userId}
+         WHERE user_id = #{user_id}
+    </update>
+
+    <update id="updateLastLogin" parameterType="map">
+        UPDATE tb_user_info
+           SET last_login_ts = NOW(),
+               upd_ts = NOW()
+         WHERE user_id = #{user_id}
+    </update>
+
+</mapper>

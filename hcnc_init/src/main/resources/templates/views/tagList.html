@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ko" 
+      xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+
+<!-- 추가 버튼 정의 -->
+<th:block layout:fragment="additionalButtons">
+    <button type="button" class="btn-excel">엑셀 다운로드</button>
+    <button type="button" class="btn-print">출력</button>
+    <button type="button" class="btn-approve">승인</button>
+</th:block>
+
+<!-- 검색 조건 커스터마이징 (필요한 경우) -->
+<th:block layout:fragment="searchCondition">
+    <div class="search-select">
+        <select name="searchType" id="searchType">
+            <option value="">전체</option>
+            <option value="name">이름</option>
+            <option value="code">코드</option>
+            <option value="status">상태</option>
+        </select>
+    </div>
+    <div class="search-input">
+        <p class="fl-ac">
+            <label for="searchKeyword"></label>
+            <input type="text" id="searchKeyword" name="searchKeyword" placeholder="검색어를 입력하세요"/>
+        </p>
+    </div>
+</th:block>
+
+<!-- 실제 컨텐츠 영역 -->
+<th:block layout:fragment="content">
+    <div class="content">
+        <div class="form-wrap">
+            <h5>연습</h5>
+            <div>연습</div>
+            <div class="tag-input">
+                <label for="tagInput">태그</label>
+                <div class="tag-input-box">
+                    <ul class="tag-list" id="tagList"></ul>
+                    <input type="text" id="tagInput" placeholder="태그 입력 후 Enter 또는 ,"/>
+                </div>
+                <input type="hidden" name="tags" id="tagsHidden"/>
+            </div>
+
+            <div class="table-wrap">
+                <div id="TABLE_MAIN"></div>
+            </div>
+
+            <div class="person-modal" id="personDetailModal" aria-hidden="true">
+                <div class="modal-backdrop"></div>
+                <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="personDetailTitle">
+                    <div class="modal-header">
+                        <h5 id="personDetailTitle">인적사항 상세정보</h5>
+                        <button type="button" class="modal-close" aria-label="닫기">닫기</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="person-detail-grid">
+                            <table class="person-detail-table">
+                                <tbody>
+                                    <tr>
+                                        <th>성명</th>
+                                        <td id="personName"></td>
+                                        <th>생년월일</th>
+                                        <td id="personBirthDate"></td>
+                                    </tr>
+                                    <tr>
+                                        <th>연락처</th>
+                                        <td id="personPhone"></td>
+                                        <th>이메일</th>
+                                        <td id="personEmail"></td>
+                                    </tr>
+                                    <tr>
+                                        <th>거주지역</th>
+                                        <td id="personArea"></td>
+                                        <th>주 개발언어</th>
+                                        <td id="personLanguages"></td>
+                                    </tr>
+                                    <tr>
+                                        <th>경력연차</th>
+                                        <td id="personExperience"></td>
+                                        <th>최종학력</th>
+                                        <td id="personEducation"></td>
+                                    </tr>
+                                    <tr>
+                                        <th>보유 자격증</th>
+                                        <td id="personCerts"></td>
+                                        <th>근무가능형태</th>
+                                        <td id="personWorkType"></td>
+                                    </tr>
+                                    <tr>
+                                        <th>희망단가</th>
+                                        <td id="personHopePay"></td>
+                                        <th>투입가능시점</th>
+                                        <td id="personAvailableDate"></td>
+                                    </tr>
+                                    <tr>
+                                        <th>계약형태</th>
+                                        <td id="personContractType"></td>
+                                        <th></th>
+                                        <td></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+
+
+            <!-- 폼 내용 -->
+        </div>
+        
+    </div>
+    <script src="/js/api/tagList.js"></script>
+</th:block>
+
+
+
+
+</html>
