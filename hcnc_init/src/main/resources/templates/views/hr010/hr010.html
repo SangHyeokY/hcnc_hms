@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+
+<!-- 추가 버튼 정의 -->
+<th:block layout:fragment="additionalButtons">
+    <button type="button" class="btn-excel">엑셀 다운로드</button>
+<!-- <button type="button" class="btn-print">출력</button> -->
+<!-- <button type="button" class="btn-approve">승인</button> -->
+</th:block>
+
+<th:block layout:fragment="searchCondition">
+    <div class="search-input">
+        <p class="fl-ac">
+            <label for="insertNM" class="pd-r15">성명</label>
+            <input type="text" id="insertNM" name="insertNM" placeholder="성명(을)를 입력하세요" />
+        </p>
+    </div>
+    <div class="search-input">
+        <p class="fl-ac">
+            <label for="searchKeyword" class="pd-r15">태그</label>
+            <input type="text" id="searchKeyword" name="searchKeyword" placeholder="검색어를 입력하세요"/>
+        </p>
+    </div>
+</th:block>
+
+<!-- 실제 컨텐츠 영역 -->
+<th:block layout:fragment="content">
+    <div class="content list-area">
+        <div class="table-wrap">
+            <div id="TABLE_USER"></div>
+        </div>
+        <input type="hidden" id="dev_id" name="dev_id" th:value="${dev_id}">
+    </div>
+
+    <!-- 상세 모달 -->
+    <div class="modal-wrap content" id="view-user-area" style="display: none">
+        <div class="modal-container">
+            <div class="header">
+                <h4>인력 관리 <span>상세</span></h4>
+                <span class="modal-close" onclick="closeUserViewModal()"></span>
+            </div>
+            <div class="modal-content">
+                <article>
+                   <div class="col" style="width:40%;">
+                       <div class="div-table">
+                           <ul>
+                               <!-- 1줄 -->
+                               <li class="table-col fl-ac">
+                                   <div class="table-cell">
+                                       <p class="cell-tit">성명</p>
+                                       <div class="cell-info">
+                                           <p class="text" id="dev_nm_td"></p>
+                                       </div>
+                                   </div>
+
+                                   <div class="table-cell" style="flex:2; text-align:center;">
+                                       <img src="../images/common/profile.png" alt="profile">
+                                       <button type="button">파일 업로드</button>
+                                   </div>
+                               </li>
+
+                               <!-- 2줄 -->
+                               <li class="table-col fl-ac">
+                                   <div class="table-cell">
+                                       <p class="cell-tit">생년월일</p>
+                                       <div class="cell-info">
+                                           <input type="date" id="brdt_td" style="width:100%">
+                                       </div>
+                                   </div>
+                               </li>
+
+                               <!-- 3줄 -->
+                               <li class="table-col fl-ac">
+                                   <div class="table-cell">
+                                       <p class="cell-tit">연락처</p>
+                                       <div class="cell-info">
+                                           <p class="text" id="tel_td"></p>
+                                       </div>
+                                   </div>
+
+                                   <div class="table-cell">
+                                       <p class="cell-tit">이메일</p>
+                                       <div class="cell-info">
+                                           <p class="text" id="email_td"></p>
+                                       </div>
+                                   </div>
+                               </li>
+
+                               <!-- 4줄 -->
+                               <li class="table-col fl-ac">
+                                   <div class="table-cell">
+                                       <p class="cell-tit">거주지역</p>
+                                       <div class="cell-info">
+                                           <p class="text" id="region_td"></p>
+                                       </div>
+                                   </div>
+                               </li>
+
+                               <!-- 5줄 -->
+                               <li class="table-col fl-ac">
+                                   <div class="table-cell">
+                                       <p class="cell-tit">주 개발언어</p>
+                                       <div class="cell-info">
+                                           <p class="text" id="main_lang_td"></p>
+                                       </div>
+                                   </div>
+
+                                   <div class="table-cell">
+                                       <p class="cell-tit">등급</p>
+                                       <div class="cell-info" style="text-align:center;">
+                                           <p class="text">S (90점)</p>
+                                       </div>
+                                   </div>
+                               </li>
+
+                               <!-- 6줄 -->
+                               <li class="table-col fl-ac">
+                                   <div class="table-cell">
+                                       <p class="cell-tit">경력연차</p>
+                                       <div class="cell-info">
+                                           <p class="text" id="exp_yr_td"></p>
+                                       </div>
+                                   </div>
+
+                                   <div class="table-cell">
+                                       <p class="cell-tit">최종학력</p>
+                                       <div class="cell-info">
+                                           <p class="text" id="edu_last_td"></p>
+                                       </div>
+                                   </div>
+                               </li>
+
+                               <!-- 7줄 -->
+                               <li class="table-col">
+                                   <div class="table-cell">
+                                       <p class="cell-tit">보유 자격증</p>
+                                       <div class="cell-info">
+                                           <p class="text" id="cert_txt_td"></p>
+                                       </div>
+                                   </div>
+                               </li>
+
+                               <!-- 8줄 -->
+                               <li class="table-col">
+                                   <div class="table-cell">
+                                       <p class="cell-tit">근무가능형태</p>
+                                       <div class="cell-info">
+                                           <select id="work_md" style="width:100%">
+                                               <option value="">상주/재택/혼합</option>
+                                               <option value="01">상주</option>
+                                               <option value="02">재택</option>
+                                               <option value="03">혼합</option>
+                                           </select>
+                                       </div>
+                                   </div>
+                               </li>
+
+                               <!-- 9줄 -->
+                               <li class="table-col fl-ac">
+                                   <div class="table-cell">
+                                       <p class="cell-tit">희망단가</p>
+                                       <div class="cell-info">
+                                           <select style="width:100%">
+                                               <option value="">일/월</option>
+                                               <option value="01">일</option>
+                                               <option value="02">월</option>
+                                           </select>
+                                       </div>
+                                   </div>
+
+                                   <div class="table-cell">
+                                       <p class="cell-tit">금액</p>
+                                       <div class="cell-info" style="text-align:right;">
+                                           <p class="text" id="hope_rate_amt_td"></p>
+                                       </div>
+                                   </div>
+                               </li>
+
+                               <!-- 10줄 -->
+                               <li class="table-col">
+                                   <div class="table-cell">
+                                       <p class="cell-tit">투입가능시점</p>
+                                       <div class="cell-info">
+                                           <input type="date" id="avail_dt_td" style="width:100%">
+                                       </div>
+                                   </div>
+                               </li>
+
+                               <!-- 11줄 -->
+                               <li class="table-col">
+                                   <div class="table-cell">
+                                       <p class="cell-tit">계약형태</p>
+                                       <div class="cell-info">
+                                           <select id="ctrt_typ" style="width:100%">
+                                               <option value="">개인/법인</option>
+                                               <option value="01">개인</option>
+                                               <option value="02">법인</option>
+                                           </select>
+                                       </div>
+                                   </div>
+                               </li>
+                           </ul>
+                       </div>
+
+                            <!-- 우측 -->
+                            <div class="col" style="width:60%;">
+                                <div class="tap-area">
+                                    <span class="tap-btn">소속및 계약정보</span>
+                                    <span class="tap-btn">보유역량 및 숙련도</span>
+                                    <span class="tap-btn">프로젝트</span>
+                                    <span class="tap-btn">평가 및 리스크</span>
+                                </div>
+
+                                <table class="temp-table">
+                                    <tr><th>Backend</th><td>-</td></tr>
+                                    <tr><th>Frontend</th><td>-</td></tr>
+                                    <tr><th>Mobile</th><td>-</td></tr>
+                                    <tr><th>DB</th><td>-</td></tr>
+                                    <tr><th>Infra</th><td>-</td></tr>
+                                    <tr><th>DevOps</th><td>-</td></tr>
+                                    <tr><th>ERP/MES</th><td>-</td></tr>
+                                    <tr><th>기타</th><td>-</td></tr>
+                                </table>
+                            </div>
+                   </div>
+                </article>
+            </div>
+
+            <!-- 하단 버튼 -->
+            <div class="modal-btn">
+                <ul>
+                    <li>
+                        <button class="btn btn-close" onclick="closeUserViewModal()">확인</button>
+                    </li>
+                </ul>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Tagify -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.css">
+    <script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify"></script>
+
+    <script>
+        var hrTable;
+
+        $(document).ready(function () {
+            buildHrTable();
+            loadHrTableData();
+
+            $(".btn-search").on("click", function (e) {
+                e.preventDefault();
+                loadHrTableData();
+            });
+
+            $("#insertNM").on("keyup", function (e) {
+                if (e.key === "Enter") {
+                    loadHrTableData();
+                }
+            });
+        });
+
+        function buildHrTable() {
+
+            if (!window.Tabulator || !document.getElementById("TABLE_USER")) {
+                return;
+            }
+
+            function syncRowCheckbox(row, checked) {
+                var rowElement = row.getElement();
+                if (!rowElement) return;
+
+                var checkbox = rowElement.querySelector(".row-check");
+                if (checkbox) checkbox.checked = checked;
+            }
+
+            function syncTableCheckboxes() {
+                hrTable.getRows().forEach(function (row) {
+                    syncRowCheckbox(row, row.isSelected());
+                });
+            }
+
+            function toggleRowSelection(row) {
+                row.isSelected() ? row.deselect() : row.select();
+            }
+
+            hrTable = new Tabulator("#TABLE_USER", {
+                height: "500px",
+                layout: "fitColumns",
+                placeholder: "데이터가 존재하지 않습니다.",
+                selectable: true,
+                selectableRangeMode: "click",
+                headerHozAlign: "center",
+
+                columnDefaults: {
+                    resizable: true,
+                    cellClick: function (e, cell) {
+                        toggleRowSelection(cell.getRow());
+                        e.stopPropagation();
+                    }
+                },
+
+                columns: [
+                    {
+                        title: "",
+                        field: "check",
+                        width: 50,
+                        hozAlign: "center",
+                        headerSort: false,
+                        download: false,
+                        formatter: function (cell) {
+                            var checked = cell.getRow().isSelected() ? " checked" : "";
+                            return "<input type='checkbox' class='row-check'" + checked + " />";
+                        },
+                        cellClick: function (e, cell) {
+                            toggleRowSelection(cell.getRow());
+                            e.preventDefault();
+                            e.stopPropagation();
+                        }
+                    },
+                    { title: "성명", field: "dev_nm", hozAlign: "center" },
+                    { title: "생년월일", field: "brdt" },
+                    { title: "연락처", field: "tel" },
+                    { title: "이메일", field: "email" },
+                    { title: "거주지역", field: "region" },
+                    { title: "주 개발언어", field: "main_lang" },
+                    { title: "경력연차", field: "exp_yr", hozAlign: "center" },
+                    { title: "최종학력", field: "edu_last" },
+                    { title: "보유자격증", field: "cert_txt" },
+                    { title: "희망단가", field: "hope_rate_amt", hozAlign: "right" },
+                    { title: "투입가능시점", field: "avail_dt" },
+                    { title: "계약형태", field: "ctrt_typ" }
+                ],
+
+                rowSelected: function (row) {
+                    syncRowCheckbox(row, true);
+                },
+
+                rowDeselected: function (row) {
+                    syncRowCheckbox(row, false);
+                },
+
+                rowSelectionChanged: function () {
+                    syncTableCheckboxes();
+                },
+
+                // 더블클릭 시 상세 이동 (체크박스랑 충돌 없음)
+                rowDblClick: function (e, row) {
+                    var devId = row.getData().dev_id;
+                    if (!devId) {
+                        alert("개발자 ID가 없습니다.");
+                        return;
+                    }
+
+                    // location.href = "/hr010/detailPage?dev_id=" + devId;
+                    openHr010DetailModal(devId);
+                }
+            });
+        }
+
+        function loadHrTableData() {
+            if (!hrTable) return;
+
+            $.ajax({
+                url: "/hr010/list",
+                type: "GET",
+                data: {
+                    dev_nm: $("#insertNM").val(),
+                    tags: $("#tagInput").val()
+                },
+                success: function (res) {
+                    hrTable.setData(res.res || []);
+                },
+                error: function () {
+                    alert("데이터 조회 중 오류가 발생했습니다.");
+                }
+            });
+        }
+
+        function openHr010DetailModal(devId) {
+
+            // dev_id hidden에 저장
+            $("#detail_dev_id").val(devId);
+
+            // 기존 값 초기화
+            $("#detailModal input, #detailModal textarea").val("");
+            $("#detailModal td").text("");
+
+            // 모달 표시
+            $("#detailModal").fadeIn(150);
+
+            // 상세 데이터 로딩
+            loadHr010Detail(devId);
+        }
+
+        function closeUserViewModal() {
+            $("#detailModal").fadeOut(150);
+        }
+
+        function loadHr010Detail(devId) {
+            $.ajax({
+                url: "/hr010/detail",
+                type: "GET",
+                data: { dev_id: devId },
+                success: function (response) {
+                    const data = response.res;
+
+                    $("#dev_nm_td").text(data.dev_nm || "");
+                    $("#brdt_td").val(data.brdt || "");
+                    $("#tel_td").text(data.tel || "");
+                    $("#email_td").text(data.email || "");
+                    $("#region_td").text(data.region || "");
+                    $("#main_lang_td").text(data.main_lang || "");
+                    $("#exp_yr_td").text(data.exp_yr || "");
+                    $("#edu_last_td").text(data.edu_last || "");
+                    $("#cert_txt_td").text(data.cert_txt || "");
+                    $("#hope_rate_amt_td").text(data.hope_rate_amt || "");
+                    $("#avail_dt_td").val(data.avail_dt || "");
+
+                    $("#work_md").val(data.work_md || "");
+                    $("#ctrt_typ").val(data.ctrt_typ || "");
+                },
+                error: function () {
+                    alert("상세 정보 조회 실패");
+                }
+            });
+        }
+
+        // Tagify 사용하려다 만거
+
+<!--        $(function() {-->
+
+<!--            const input = document.querySelector('#tagInput');-->
+<!--            const select = document.querySelector('#categorySelect');-->
+
+<!--            if (!input) {-->
+<!--                console.error("tagInput을 찾지 못했습니다.");-->
+<!--                return;-->
+<!--            }-->
+
+<!--            // tagInput에만 Tagify 적용-->
+<!--            const tagify = new Tagify(input, {-->
+<!--                maxTags: 1, // 한 번에 하나씩 입력 (확장 가능)-->
+<!--                dropdown: { enabled: 0 },-->
+<!--                delimiters: ",|/|\n"     // 검색 키 : "enter", ",", "/"-->
+<!--            });-->
+
+<!--            // 태그 입력 → 선택된 td로 이동-->
+<!--            tagify.on('add', function(e) {-->
+<!--                const category = select.value;-->
+<!--                const tag = e.detail.data.value.trim();-->
+
+<!--                if (!category) {-->
+<!--                    alert("구분을 먼저 선택하세요.");-->
+<!--                    tagify.removeAllTags();-->
+<!--                    return;-->
+<!--                }-->
+
+<!--                const $box = $(`td[data-key="${category}"] .tag-box`);-->
+
+<!--                if ($box.length === 0) {-->
+<!--                    alert("해당 구분 행을 찾을 수 없습니다.");-->
+<!--                    tagify.removeAllTags();-->
+<!--                    return;-->
+<!--                }-->
+
+<!--                // 같은 구분 안 중복값 입력 방지-->
+<!--                let exists = false;-->
+<!--                $box.find(".tagify-tag").each(function() {-->
+<!--                    if ($(this).data("tag") === tag) {-->
+<!--                        exists = true;-->
+<!--                        return false;-->
+<!--                    }-->
+<!--                });-->
+
+<!--                if (exists) {-->
+<!--                    alert("이미 등록된 태그입니다.");-->
+<!--                    tagify.removeAllTags();-->
+<!--                    return;-->
+<!--                }-->
+
+<!--                // td 안에 태그 추가-->
+<!--                const tagHtml = `-->
+<!--                    <span class="tagify-tag" data-tag="${tag}">-->
+<!--                        <span class="text">${tag}</span>-->
+<!--                        <span class="remove">×</span>-->
+<!--                    </span>-->
+<!--                `;-->
+
+<!--                $box.append(tagHtml);-->
+
+<!--                // 입력창 초기화-->
+<!--                tagify.removeAllTags();-->
+<!--            });-->
+
+<!--            // td 안 태그 삭제-->
+<!--            $(document).on("click", ".tagify-tag .remove", function() {-->
+<!--                $(this).closest(".tagify-tag").remove();-->
+<!--            });-->
+
+    </script>
+</th:block>
+</html>
