@@ -38,7 +38,7 @@
               AND d.sort_no &gt; 0
         WHERE u.del_yn = 'N'
         <if test="searchUseYn != null and searchUseYn != ''">
-            AND use_yn = #{searchUseYn}
+            AND u.use_yn = #{searchUseYn}
         </if>
         <if test="searchType != null and searchType != '' and searchKeyword != null and searchKeyword != ''">
             AND ${searchType} LIKE CONCAT('%', #{searchKeyword}, '%')

@@ -1,25 +1,25 @@
 export const menuData = [
   {
-    title: "Title",
+    title: "시스템",
     visible: true,
     children: [
       {
         title: "sample1",
         path: "/sample",
         type: "A",
-        visible: true,
+        visible: false,
       },
       {
         title: "sample2",
         path: "/sample2",
         type: "A",
-        visible: true,
+        visible: false,
       },
       {
         title: "tagList",
         path: "/tagList",
         type: "A",
-        visible: true,
+        visible: false,
       },
       {
         title: "공통코드 관리",
@@ -33,39 +33,19 @@ export const menuData = [
         type: "A",
         visible: true,
       },
-      {
-          title: "기본 인적사항",
-          path: "/hr010",
-          type: "A",
-          visible: true,
-        },
+
     ],
   },
+
   {
-    title: "DEP_1",
+    title: "인력관리",
     visible: true,
     children: [
       {
-        title: "DEP_2",
+        title: "기본 인적사항",
+        path: "/hr010",
+        type: "A",
         visible: true,
-        children: [
-          {
-            title: "DEP_3",
-            path: "/#",
-            name: "E110",
-            type: "A",
-            visible: true,
-            filePageCode: "EF110",
-          },
-          {
-            title: "DEP_3_1",
-            path: "/#",
-            name: "EF110",
-            type: "F",
-            visible: true,
-            parentPage: "E110",
-          },
-        ],
       },
     ],
   },
@@ -75,6 +55,6 @@ export const menuData = [
     name: "sample",
     type: "ETC",
     renderPath: "/views/sample.html",
-    visible: true,
+    visible: false,
   },
 ];
