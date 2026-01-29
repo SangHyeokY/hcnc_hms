@@ -145,6 +145,7 @@ function buildTables() {
     buildRiskList();
 }
 
+// 탭1 평가 데이터 조회
 function loadTableA() {
     if (!tableA || typeof tableA.setData !== "function") {
         return;
@@ -162,6 +163,7 @@ function loadTableA() {
     });
 }
 
+// 탭2 리스크 데이터 조회
 function loadTableB() {
     $.ajax({
         url: "/hr015/b/list",
@@ -183,6 +185,7 @@ function loadTableB() {
     });
 }
 
+// 탭1 평가 저장
 function saveTableA() {
     if (!tableA) {
         return;
@@ -206,6 +209,7 @@ function saveTableA() {
     });
 }
 
+// 탭2 리스크 저장
 function saveTableB() {
     riskState.re_in_yn = $("#HR015_REIN_CHECK").is(":checked") ? "Y" : "N";
 
@@ -233,6 +237,7 @@ function saveTableB() {
     });
 }
 
+// 리스크 항목 리스트 렌더링
 function buildRiskList() {
     var $list = $("#HR015_RISK_LIST");
     if ($list.length === 0) {
@@ -263,6 +268,7 @@ function buildRiskList() {
     });
 }
 
+// 리스크 항목 선택 처리
 function setRiskActive(key) {
     riskActiveKey = key;
     $("#HR015_RISK_LIST .risk-item").removeClass("active");
@@ -275,6 +281,7 @@ function setRiskActive(key) {
     }
 }
 
+// 탭1 저장용 payload 구성
 function buildSaveRows(rows) {
     if (!Array.isArray(rows)) {
         return [];

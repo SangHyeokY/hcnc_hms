@@ -24,6 +24,7 @@ public class Hr015Controller {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @RequestMapping("/a/list")
+    // 탭1 평가 목록 조회
     public ModelAndView listA(@RequestParam(required = false) Map<String, Object> map) {
         applyDefaults(map);
         ModelAndView mv = new ModelAndView("jsonView");
@@ -34,6 +35,7 @@ public class Hr015Controller {
     }
 
     @RequestMapping("/b/list")
+    // 탭2 리스크 조회
     public ModelAndView listB(@RequestParam(required = false) Map<String, Object> map) {
         applyDefaults(map);
         ModelAndView mv = new ModelAndView("jsonView");
@@ -44,6 +46,7 @@ public class Hr015Controller {
     }
 
     @RequestMapping("/a/save")
+    // 탭1 평가 저장
     public ModelAndView saveA(@RequestParam Map<String, Object> map, HttpSession session) {
         ModelAndView mv = new ModelAndView("jsonView");
         applyLoginUser(map, session);
@@ -56,6 +59,7 @@ public class Hr015Controller {
     }
 
     @RequestMapping("/b/save")
+    // 탭2 리스크 저장
     public ModelAndView saveB(@RequestParam Map<String, Object> map, HttpSession session) {
         ModelAndView mv = new ModelAndView("jsonView");
         applyLoginUser(map, session);

@@ -2,6 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.hcncinit.Hr015Mapper">
 
+    <!-- 탭1 평가 목록 조회 -->
     <select id="selectListA" resultType="hashmap" parameterType="map">
         SELECT
               cd.cd AS eval_id
@@ -31,6 +32,7 @@
         ORDER BY cd.sort_no
     </select>
 
+    <!-- 탭2 리스크 조회 -->
     <select id="selectListB" resultType="hashmap" parameterType="map">
         SELECT
               leave_txt
@@ -45,6 +47,7 @@
         LIMIT 1
     </select>
 
+    <!-- 탭1 평가 저장 -->
     <insert id="saveA" parameterType="map">
         <if test="rows != null and rows.size() > 0">
             INSERT INTO tb_dev_eval_info (
@@ -83,6 +86,7 @@
         </if>
     </insert>
 
+    <!-- 탭2 리스크 최신건 업데이트 -->
     <update id="updateLatestRiskByDev" parameterType="map">
         UPDATE tb_dev_rsk_info
            SET leave_txt = #{leave_txt},
@@ -104,6 +108,7 @@
          )
     </update>
 
+    <!-- 탭2 리스크 신규 저장 -->
     <insert id="insertRisk" parameterType="map">
         INSERT INTO tb_dev_rsk_info (
             dev_id,

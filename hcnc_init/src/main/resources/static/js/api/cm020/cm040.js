@@ -227,6 +227,7 @@ function buildTables() {
     });
 }
 
+// 코드그룹 목록 조회
 function loadMainTableData() {
     if (!mainTable || typeof mainTable.setData !== "function") {
         return;
@@ -254,6 +255,7 @@ function loadMainTableData() {
     });
 }
 
+// 상세코드 목록 조회
 function loadDetailTableData(grpCd) {
     if (!detailTable || typeof detailTable.setData !== "function") {
         return;
@@ -277,6 +279,7 @@ function loadDetailTableData(grpCd) {
     });
 }
 
+// 상세코드 정렬 저장
 function applyDetailSort(rows) {
     if (!rows.length) {
         return;
@@ -302,6 +305,7 @@ function applyDetailSort(rows) {
     });
 }
 
+// 코드그룹 삭제 처리
 function deleteMainRows() {
     var selectedRows = mainTable.getSelectedRows();
     if (selectedRows.length === 0) {
@@ -347,6 +351,7 @@ function deleteMainRows() {
     });
 }
 
+// 상세코드 삭제 처리
 function deleteDetailRows() {
     var selectedRows = detailTable.getSelectedRows();
     if (selectedRows.length === 0) {
@@ -383,6 +388,7 @@ function deleteDetailRows() {
     });
 }
 
+// 코드그룹 신규/수정 저장
 function upsertMainBtn() {
     var grpCd = $.trim($("#write_main_grp_cd").val());
     var grpNm = $.trim($("#write_main_grp_nm").val());
@@ -431,6 +437,7 @@ function upsertMainBtn() {
     });
 }
 
+// 상세코드 신규/수정 저장
 function upsertDetailBtn() {
     var grpCd = $.trim($("#write_detail_grp_cd").val());
     var cd = $.trim($("#write_detail_cd").val());
@@ -491,6 +498,7 @@ function upsertDetailBtn() {
     });
 }
 
+// 코드그룹 등록/수정 모달 오픈
 function openMainWriteModal(type) {
     mainMode = type;
     $("#main-type").text(type === "insert" ? "등록" : "수정");
@@ -523,10 +531,12 @@ function openMainWriteModal(type) {
     $("#write-main-area").show();
 }
 
+// 코드그룹 등록/수정 모달 닫기
 function closeMainWriteModal() {
     $("#write-main-area").hide();
 }
 
+// 상세코드 등록/수정 모달 오픈
 function openDetailWriteModal(type) {
     detailMode = type;
     $("#detail-type").text(type === "insert" ? "등록" : "수정");
@@ -589,6 +599,7 @@ function openDetailWriteModal(type) {
     $("#write-detail-area").show();
 }
 
+// 상세코드 등록/수정 모달 닫기
 function closeDetailWriteModal() {
     $("#write-detail-area").hide();
 }
