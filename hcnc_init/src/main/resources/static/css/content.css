@@ -343,7 +343,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .modal-human-area .table-area tr:nth-child(1) th{border-top:1px solid #F0F1F3;}
 .modal-human-area .table-area tr:nth-child(1) td{border-top:1px solid #F0F1F3;}
 .modal-human-area .table-area tr th{background:#F1F4F9; border-bottom:1px solid #F0F1F3;}
-.modal-human-area .table-area tr td{padding:10px;border-bottom:2px solid #F0F1F3;}
+.modal-human-area .table-area tr td{padding:4px;border-bottom:2px solid #F0F1F3;}
 
 .tab-area {
     display: flex;
