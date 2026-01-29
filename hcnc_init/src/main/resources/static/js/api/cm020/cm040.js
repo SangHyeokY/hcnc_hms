@@ -146,7 +146,7 @@ function buildTables() {
             { title: "코드그룹", field: "grp_cd", hozAlign: "center", widthGrow: 1 },
             { title: "코드", field: "cd", hozAlign: "center", widthGrow: 1 },
             { title: "코드그룹명", field: "grp_nm", widthGrow: 1 },
-            { title: "사용여부", field: "use_yn", hozAlign: "center", width: 100, widthGrow: 0 }
+            { title: "사용여부", field: "use_yn", hozAlign: "center", width: 90, widthGrow: 0 }
         ],
         data: [],
         rowSelected: function (row) {
@@ -198,15 +198,15 @@ function buildTables() {
                 headerSort: false,
                 download: false
             },
-            { title: "코드", field: "cd", hozAlign: "center" },
+            { title: "코드", field: "cd", hozAlign: "center", width: 90 },
             { title: "코드명", field: "cd_nm", width: 150 },
-            { title: "정렬순서", field: "sort_no", hozAlign: "center" },
-            { title: "부가정보1", field: "adinfo_01" , formatter: amountFormatter},
-            { title: "부가정보2", field: "adinfo_02" , formatter: amountFormatter},
-            { title: "부가정보3", field: "adinfo_03" , formatter: amountFormatter},
-            { title: "부가정보4", field: "adinfo_04" , formatter: amountFormatter},
-            { title: "부가정보5", field: "adinfo_05" , formatter: amountFormatter},
-            { title: "사용여부", field: "use_yn", hozAlign: "center" }
+            { title: "정렬순서", field: "sort_no", hozAlign: "center", width: 90 },
+            { title: "부가정보1", field: "adinfo_01", formatter: amountFormatter },
+            { title: "부가정보2", field: "adinfo_02", formatter: amountFormatter },
+            { title: "부가정보3", field: "adinfo_03", formatter: amountFormatter },
+            { title: "부가정보4", field: "adinfo_04", formatter: amountFormatter },
+            { title: "부가정보5", field: "adinfo_05", formatter: amountFormatter },
+            { title: "사용여부", field: "use_yn", hozAlign: "center", width: 90 }
         ],
         data: [],
         rowSelected: function (row) {
