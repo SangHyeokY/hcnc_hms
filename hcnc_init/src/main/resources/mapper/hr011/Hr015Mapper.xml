@@ -33,9 +33,9 @@
 
     <select id="selectListB" resultType="hashmap" parameterType="map">
         SELECT
-              leave_yn
-            , claim_yn
-            , sec_yn
+              leave_txt
+            , claim_txt
+            , sec_txt
             , re_in_yn
             , memo
         FROM tb_dev_rsk_info
@@ -87,9 +87,9 @@
         INSERT INTO tb_dev_rsk_info (
             dev_id,
             rsk_dt,
-            leave_yn,
-            claim_yn,
-            sec_yn,
+            leave_txt,
+            claim_txt,
+            sec_txt,
             re_in_yn,
             memo,
             use_yn,
@@ -101,9 +101,9 @@
         ) VALUES (
             #{dev_id},
             CURDATE(),
-            #{leave_yn},
-            #{claim_yn},
-            #{sec_yn},
+            #{leave_txt},
+            #{claim_txt},
+            #{sec_txt},
             #{re_in_yn},
             #{memo},
             'Y',

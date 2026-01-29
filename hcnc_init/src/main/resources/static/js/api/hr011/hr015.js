@@ -129,6 +129,18 @@ function buildTables() {
         data: []
     });
 
+    function riskValueFormatter(cell) {
+        if (!cell || typeof cell.getRow !== "function") {
+            return "";
+        }
+        var rowData = cell.getRow().getData();
+        if (rowData.rsk_key === "re_in_yn") {
+            var checked = cell.getValue() === "Y" ? " checked" : "";
+            return "<input type='checkbox'" + checked + " />";
+        }
+        return cell.getValue() || "";
+    }
+
     tableB = new Tabulator("#TABLE_HR015_B", {
         layout: "fitColumns",
         headerSort: true,
@@ -138,13 +150,26 @@ function buildTables() {
             { title: "구 분", field: "label", hozAlign: "center", widthGrow: 2 },
             {
                 title: "내 용",
-                field: "yn",
+                field: "value",
                 hozAlign: "center",
-                widthGrow: 1,
-                formatter: scoreCheckboxFormatter,
+                widthGrow: 4,
+                formatter: riskValueFormatter,
+                editor: "input",
+                editable: function (cell) {
+                    var rowData = cell.getRow().getData();
+                    return rowData.rsk_key !== "re_in_yn";
+                },
                 cellClick: function (e, cell) {
+                    if (!cell || typeof cell.getRow !== "function") {
+                        return;
+                    }
+                    var rowData = cell.getRow().getData();
+                    if (rowData.rsk_key !== "re_in_yn") {
+                        cell.edit();
+                        return;
+                    }
                     var value = cell.getValue() === "Y" ? "N" : "Y";
-                    cell.getRow().update({ yn: value });
+                    cell.getRow().update({ value: value });
                 },
                 headerSort: false
             }
@@ -240,18 +265,18 @@ function saveTableB() {
 
 function buildRiskRows(risk) {
     return [
-        { rsk_key: "leave_yn", label: "이탈이력", yn: risk.leave_yn || "N" },
-        { rsk_key: "claim_yn", label: "클레임", yn: risk.claim_yn || "N" },
-        { rsk_key: "sec_yn", label: "보안이슈", yn: risk.sec_yn || "N" },
-        { rsk_key: "re_in_yn", label: "재투입 가능 여부", yn: risk.re_in_yn || "N" }
+        { rsk_key: "leave_txt", label: "이탈이력", value: risk.leave_txt || "" },
+        { rsk_key: "claim_txt", label: "클레임", value: risk.claim_txt || "" },
+        { rsk_key: "sec_txt", label: "보안이슈", value: risk.sec_txt || "" },
+        { rsk_key: "re_in_yn", label: "재투입 가능 여부", value: risk.re_in_yn || "N" }
     ];
 }
 
 function buildRiskPayload(rows) {
     var payload = {
-        leave_yn: "N",
-        claim_yn: "N",
-        sec_yn: "N",
+        leave_txt: "",
+        claim_txt: "",
+        sec_txt: "",
         re_in_yn: "N"
     };
 
@@ -260,8 +285,8 @@ function buildRiskPayload(rows) {
     }
 
     rows.forEach(function (row) {
-        if (row.rsk_key && row.yn) {
-            payload[row.rsk_key] = row.yn;
+        if (row.rsk_key) {
+            payload[row.rsk_key] = row.value;
         }
     });
 
