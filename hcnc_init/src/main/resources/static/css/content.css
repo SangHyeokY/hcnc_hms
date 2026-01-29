@@ -324,7 +324,18 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
     background: #0554f8;
     color: #ffffff;
 }
-
-.hrm-detail-table tr td input, .hrm-detail-table tr td select {
+#TABLE_HR010_B tr td input, #TABLE_HR010_B tr td select {
     width: 100%;
+}
+
+.skill-tag {
+    display: inline-block;
+    padding: 3px 8px;
+    margin: 2px;
+    font-size: 12px;
+    border-radius: 12px;
+    background: #eef3ff;
+    color: #2f5bea;
+    border: 1px solid #cdd9ff;
+    white-space: nowrap;
 }

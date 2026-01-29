@@ -30,7 +30,7 @@
 <th:block layout:fragment="content">
     <div class="content list-area">
         <div class="table-wrap">
-            <div id="TABLE_USER"></div>
+            <div id="TABLE_HR010_A"></div>
         </div>
         <input type="hidden" id="dev_id" name="dev_id" th:value="${dev_id}">
     </div>
@@ -48,12 +48,12 @@
             </div>
 
             <div class="modal-content" style="display: flex;">
-                <section>
+                <section class="white-full">
                     <div style="display: flex;">
                         <h5 class="mg-b15 mg-r5">○ 인적사항</h5>
                         <label class="show_devId"></label>
                     </div>
-                    <table class="hrm-detail-table">
+                    <table id="TABLE_HR010_B">
                         <colgroup>
                             <col style="width: 20%;">
                             <col style="width: 40%;">
@@ -198,7 +198,7 @@
                         </tr>
                     </table>
                 </section>
-                <section>
+                <section class="white-full">
                     <!-- 우측 -->
                     <div class="tap-area mg-b15">
                         <span class="tap-btn fs13 active" data-tab="tab1">소속 및 계약정보</span>
@@ -208,10 +208,10 @@
                     </div>
 
                     <div class="tab-content">
-                        <div class="tab-panel" id="tab1" th:replace="~{tab1 :: tab1Content}"></div>
-                        <div class="tab-panel" id="tab2" th:replace="~{tab2 :: tab2Content}" style="display:none;"></div>
-                        <div class="tab-panel" id="tab3" th:replace="~{tab3 :: tab3Content}" style="display:none;"></div>
-                        <div class="tab-panel" id="tab4" th:replace="~{tab4 :: tab4Content}" style="display:none;"></div>
+                        <div layout:replace="~{views/hr010/hr011 :: tab1Content}"></div>
+                        <div layout:replace="~{views/hr010/hr012 :: tab2Content}"></div>
+                        <div layout:replace="~{views/hr010/hr013 :: tab3Content}"></div>
+                        <div layout:replace="~{views/hr010/hr014 :: tab4Content}"></div>
                     </div>
                 </section>
             </div>
@@ -225,8 +225,13 @@
                     <li><button class="btn btn-save btn-user-save">저장</button></li>
                 </ul>
             </div>
+        </div>
     </div>
 
+    <script src="/js/api/hr010/hr011.js"></script>
+    <script src="/js/api/hr010/hr012.js"></script>
+    <script src="/js/api/hr010/hr013.js"></script>
+    <script src="/js/api/hr010/hr014.js"></script>
     <script src="/js/api/hr010/hr010.js"></script>
 </th:block>
 </html>

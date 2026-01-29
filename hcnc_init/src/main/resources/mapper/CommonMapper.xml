@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hcncinit.CommonMapper">
+
+    <select id="get_cm" resultType="hashmap" parameterType="map">
+        SELECT 	cd
+             ,	cd_nm
+        FROM	tb_cd_mst
+        WHERE	del_yn = 'N'
+            AND use_yn = 'Y'
+            AND grp_cd = #{grp_cd}
+            <if test="tag != null and tag != ''">
+            AND MATCH(adinfo_01, adinfo_02, adinfo_03, adinfo_04, adinfo_05)
+                AGAINST (#{tag} IN BOOLEAN MODE)
+            </if>
+        ORDER BY sort_no
+    </select>
+
+</mapper>

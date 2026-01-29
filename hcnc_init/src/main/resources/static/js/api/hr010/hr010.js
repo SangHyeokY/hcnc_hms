@@ -3,11 +3,37 @@
  */
 var userTable;
 var currentMode = "insert";
+window.currentDevId = null;
+
+const tabInitState = {
+    tab1: false,
+    tab2: false,
+    tab3: false,
+    tab4: false
+};
 
 // 문서 첫 생성 시 실행
 $(document).ready(function () {
     buildUserTable();
     loadUserTableData();
+
+    $(".tab-panel").hide();
+
+    $(".tap-btn").on("click", function () {
+
+        const tabId = $(this).data("tab");
+
+        $(".tap-btn").removeClass("active");
+        $(this).addClass("active");
+
+        $(".tab-panel").hide();
+        $("#" + tabId).show();
+
+        requestAnimationFrame(() => {
+            initTab(tabId);
+        });
+    });
+
 
     $(".btn-search").on("click", function (event) {
         event.preventDefault();
@@ -44,7 +70,7 @@ function buildUserTable() {
         return;
     }
 
-    if (!document.getElementById("TABLE_USER")) {
+    if (!document.getElementById("TABLE_HR010_A")) {
         return;
     }
 
@@ -76,7 +102,7 @@ function buildUserTable() {
         }
     }
 
-    userTable = new Tabulator("#TABLE_USER", {
+    userTable = new Tabulator("#TABLE_HR010_A", {
         layout: "fitColumns",
         headerSort: true,
         placeholder: "데이터 없음",
@@ -252,6 +278,19 @@ function openUserModal(mode, data) {
     }
     setModalMode(mode);
     $("#view-user-area").show();
+
+    requestAnimationFrame(() => {
+
+        // tab 버튼 active 세팅
+        $(".tap-btn").removeClass("active");
+        $(".tap-btn[data-tab='tab1']").addClass("active");
+
+        // tab panel 제어
+        $(".tab-panel").hide();
+        $("#tab1").show();
+
+        initTab("tab1");
+    });
 }
 
 // 팝업 열리면 데이터 채워넣기 (구)
@@ -276,6 +315,8 @@ function openUserModal(mode, data) {
 
 // 팝업에 데이터 채워넣기
 function fillUserForm(d) {
+    window.currentDevId = d.dev_id;
+    $("#dev_id").val(d.dev_id || "");
     $("#dev_nm").val(d.dev_nm || "");
     $("#brdt").val(d.brdt || "");
     $("#tel").val(d.tel || "");
@@ -292,7 +333,11 @@ function fillUserForm(d) {
     $("#work_md").val(d.work_md || "");
     $("#ctrt_typ").val(d.ctrt_typ || "");
 
-    $(".show_devId").text(d.dev_id ? "[" + d.dev_id + "]" : "");
+    $(".show_devId").text(
+            window.currentDevId
+                ? "[" + window.currentDevId + "]"
+                : ""
+        );
 
     // dev_id 값 가져와서 sub-title에 붙이기
     if (d.dev_id) {
@@ -312,6 +357,8 @@ function fillUserForm(d) {
 
 // 팝업 닫히면 값 초기화하기
 function clearUserForm() {
+    window.currentDevId = null;
+    $("#dev_id").val("");
     $("#dev_nm").val("");
     $("#brdt").val("");
     $("#tel").val("");
@@ -353,17 +400,43 @@ function closeUserViewModal() {
     document.getElementById("view-user-area").style.display = "none";
 }
 
-// 탭 화면 전환
-$(document).ready(function() {
-    $(".tap-btn").on("click", function() {
-        var tabId = $(this).data("tab");
 
-        // 탭 active 클래스 변경
-        $(".tap-btn").removeClass("active");
-        $(this).addClass("active");
+function initTab(tabId) {
 
-        // 탭 컨텐츠 전환
-        $(".tab-panel").hide();
-        $("#" + tabId).show();
-    });
-});
+    if (!window.currentDevId && tabId !== "tab1") {ay
+            console.warn("dev_id 정보 없음");
+            return;
+        }
+
+    // 이미 초기화된 탭이면 redraw만
+    if (tabInitState[tabId]) {
+
+        const tableMap = {
+            tab1: window.hr011Table,
+            tab2: window.hr012Table,
+            tab3: window.hr013Table,
+            tab4: window.hr014Table
+        };
+
+        tableMap[tabId]?.redraw(true);
+        return;
+    }
+
+    // 최초 초기화
+    switch (tabId) {
+        case "tab1":
+            window.initTab1?.();
+            break;
+        case "tab2":
+            window.initTab2?.();
+            break;
+        case "tab3":
+            window.initTab3?.();
+            break;
+        case "tab4":
+            window.initTab4?.();
+            break;
+    }
+
+    tabInitState[tabId] = true;
+}
