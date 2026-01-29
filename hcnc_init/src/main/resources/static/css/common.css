@@ -63,6 +63,7 @@ a.disable {background-color:#bababa !important; pointer-events: none;/*이벤트
 .fl-sb {display:flex; justify-content: space-between;}
 .fl-fc{display: flex; flex-flow: column; align-items: center; justify-content: center;}
 .fl-ac{display:flex; align-items:center;}
+.fd-col{display:flex; flex-direction: column;}
 .mg-0a {margin:0 auto;}
 
 /* grid */

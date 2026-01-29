@@ -343,7 +343,7 @@ input[type="checkbox"]:before {
 input[type="checkbox"]:checked:before {
     /* 체크박스를 체크했을때 */
     color: #fff; 
-    border-color: #c0832e;
+    border-color: #3A3F49;
     background: #3A3F49;
 }
 input[type="checkbox"]:checked:after {

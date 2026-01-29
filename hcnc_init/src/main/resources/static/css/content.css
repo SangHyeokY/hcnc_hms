@@ -28,7 +28,7 @@
 /*=================================================================================
  * Grid Table style
 =================================================================================*/
-.tabulator {border-top: none !important; border-right: 0; border-left: 0; border-bottom: 0; height: 100%;}
+.tabulator {border-top: none !important; border-right: 0; border-left: 0; border-bottom: 0; height: 100%; border-radius: 8px 8px 0 0;}
 .tabulator-header {padding: 0 !important; margin: 0 !important; border-bottom: 0 !important; font-size: 1em !important;}
 .tabulator-header .tabulator-col {
   background-color: #F8F9FD !important;
@@ -308,7 +308,12 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .modal-wrap .header h4 span {font-size: 13px;}
 .modal-wrap .header .modal-close {background: #d7dde8; border-radius: 50%; width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; font-size: 16px; color: #2f3a4a;}
 .modal-wrap .header .modal-close:before {content: "×"; line-height: 1;}
-.modal-content {max-height: 74%; overflow: auto;}
+.modal-content .title-area{padding-bottom:8px;}
+.modal-content {width:100%; max-height: 74%; overflow: auto; padding:14px;}
+.modal-content h5{position:relative; padding-left:10px; font-size:16px;}
+.modal-content h5:before{content:""; position:absolute; top:50%; left:0; transform:translateY(-50%); display:block; background:#4880FF; width:4px; height:16px; bordedr-radius:6px;}
+.modal-content .title-area .type span{padding:4px; border:1px solid #4880FF; border-radius:4px;}
+.modal-content top-article{padding-bottom:10px;}
 .modal-content ul {list-style: none; margin: 0; padding: 0;}
 .modal-content li.table-col {width: 100%; padding: 10px 0; gap: 10px;}
 .modal-content li.table-col .table-cell {width: 100%;}
@@ -323,8 +328,23 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .modal-btn .btn.btn-save {background: #4880FF; color: #fff;}
 
 
-
 .modal-container-detail {display: flex; flex-direction: column; max-height: 90vh; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); min-width: 80vw; max-width: calc(100% - 32px); background: #fff; border-radius: 6px; padding: 20px; box-sizing: border-box;}
+.modal-container-detail .close-btn{background:none; border:none; }
+.modal-container-detail .close-btn img{width:16px; }
+
+.modal-human-area {width:100%;}
+.modal-human-area .pic-area{width: 15%; margin-right:1%;}
+.modal-human-area .pic-area .profile-area{position:relative; width:100%; padding-top:120%; border:1px solid #ddd; border-radius:12px; overflow:hidden;}
+.modal-human-area .pic-area .profile-area img{position:absolute; top:50%; left:50%; transform:translate(-50%); width:100%; height:100%;}
+.modal-human-area .upload{width:100%; height:100%; padding-top:10%; position:relative;}
+.modal-human-area .upload .file{width:100%; height:100%; position: absolute; top:0; left:0; opacity:0; z-index:1;}
+.modal-human-area .upload .showingbtn{width:100%; height:40px; border-radius:4px; border:1px dotted #ccc; color:#333}
+.modal-human-area .table-area{width: 84%}
+.modal-human-area .table-area tr:nth-child(1) th{border-top:1px solid #F0F1F3;}
+.modal-human-area .table-area tr:nth-child(1) td{border-top:1px solid #F0F1F3;}
+.modal-human-area .table-area tr th{background:#F1F4F9; border-bottom:1px solid #F0F1F3;}
+.modal-human-area .table-area tr td{padding:10px;border-bottom:2px solid #F0F1F3;}
+
 .tab-area {
     display: flex;
     width: 100%;
@@ -333,24 +353,32 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
     box-sizing: border-box;
 }
 .tab-btn, .tab-sub-btn {
-    flex: 1;
     text-align: center;
     padding: 5px 10px;
     font-weight: 500;
     color: #555;
-    border-radius: 6px;
-    background-color: #f8f8f8;
     cursor: pointer;
 }
 
 .tab-btn.active, .tab-sub-btn.active {
-    background: #4880FF;
-    color: #ffffff;
+    background: #fff;
+    color: #111;
+    font-weight:700;
+    border-bottom:4px solid #333;
 }
 
-#TABLE_HR010_B tr td input, #TABLE_HR010_B tr td select {
+#TABLE_HR010_B tr td input,
+#TABLE_HR010_B tr td select {
     width: 100%;
 }
+
+#TABLE_HR010_B tr td input:read-only ,
+#TABLE_HR010_B tr td select:disabled {
+    background:#fff;
+    border:none;
+    color:#333;
+}
+
 .skill-tag {
     display: inline-block;
     padding: 3px 8px;
