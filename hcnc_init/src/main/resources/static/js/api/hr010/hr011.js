@@ -43,8 +43,9 @@ function loadHr011TableData() {
         type: "GET",
         data: { dev_id: devId },
         success: function(res) {
-            // res가 배열인지 확인, 아니면 배열로 변환
-            const dataArray = res ? (Array.isArray(res) ? res : [res]) : [];
+            // 데이터를 배열로 변환
+            const data = res && res.res ? res.res: [];
+            const dataArray = Array.isArray(data) ? data : [data];
 
             // 데이터 없으면 setData 호출하지 않고, placeholder가 표시되도록 처리 가능
             window.hr011Table.setData(dataArray);

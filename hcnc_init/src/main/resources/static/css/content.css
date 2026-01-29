@@ -343,7 +343,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
     cursor: pointer;
 }
 
-.tap-btn.active {
+.tab-btn.active, .tab-sub-btn.active {
     background: #4880FF;
     color: #ffffff;
 }

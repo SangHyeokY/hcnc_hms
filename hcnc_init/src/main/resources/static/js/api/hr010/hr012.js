@@ -4,13 +4,33 @@ window.initTab2 = function() {
     $(".tab-sub-btn").removeClass("active");
     $(".tab-sub-btn[data-tab='tab2-1']").addClass("active");
 
-    // 테이블 보여주기/숨기기
+    // 테이블 초기화 (한 번만 수행)
+    if (!window.hr012TableA) buildHr012TableA();
+    if (!window.hr012TableB) buildHr012TableB();
+
+    // 초기 데이터 로드
+    loadHr012TableDataA();
+    loadHr012TableDataB();
+
+    // A/B 테이블 보여주기/숨기기
     $("#TABLE_HR012_A").show();
     $("#TABLE_HR012_B").hide();
 
-    // A 테이블 초기화 + 데이터 로드
-    if (!window.hr012TableA) buildHr012TableA();
-    loadHr012TableDataA();
+    // 탭 클릭 이벤트
+    $(".tab-sub-btn").off("click").on("click", function() {
+        const tabId = $(this).data("tab");
+
+        $(".tab-sub-btn").removeClass("active");
+        $(this).addClass("active");
+
+        if (tabId === "tab2-1") {
+            $("#TABLE_HR012_A").show();
+            $("#TABLE_HR012_B").hide();
+        } else if (tabId === "tab2-2") {
+            $("#TABLE_HR012_B").show();
+            $("#TABLE_HR012_A").hide();
+        }
+    });
 };
 
 function buildHr012TableA() {
@@ -66,31 +86,28 @@ function loadHr012TableDataA() {
     });
 }
 
+// =============================================================================================================================
+
 function buildHr012TableB() {
     if (window.hr012TableB) return;
 
-    const categories = ["Java", "Spring", "React"];
+    const categories = ["Java", "Spring", "Node", "React"]; // 나중에 DB에서 연결해서 사용하기
     const initData = categories.map(skl => ({
-            skl_nm: skl,
-            c1: "",
-            c2: "",
-            c3: "",
-            c4: "",
-            c5: "",
-            c6: ""
-        }));
+        skl_id: skl,
+        lv0: "", lv1: "", lv2: "", lv3: "", lv4: "", lv5: ""
+    }));
 
     window.hr012TableB = new Tabulator("#TABLE_HR012_B", {
-        layout: "fitColumns",   // 컬럼 너비 자동
+        layout: "fitColumns",
         placeholder: "데이터 없음",
         columns: [
-            { title: "스킬명", field: "skl_nm", hozAlign: "left", widthGrow: 2 },
-            { title: "Y/N1", field: "c1", hozAlign: "center", formatter: "tickCross", tickElement: "Y", crossElement: "N" },
-            { title: "Y/N2", field: "c2", hozAlign: "center", formatter: "tickCross", tickElement: "Y", crossElement: "N" },
-            { title: "Y/N3", field: "c3", hozAlign: "center", formatter: "tickCross", tickElement: "Y", crossElement: "N" },
-            { title: "Y/N4", field: "c4", hozAlign: "center", formatter: "tickCross", tickElement: "Y", crossElement: "N" },
-            { title: "Y/N5", field: "c5", hozAlign: "center", formatter: "tickCross", tickElement: "Y", crossElement: "N" },
-            { title: "Y/N6", field: "c6", hozAlign: "center", formatter: "tickCross", tickElement: "Y", crossElement: "N" }
+            { title: "기술", field: "skl_id", hozAlign: "left", widthGrow: 2 },
+            { title: "1", field: "lv0", hozAlign: "center", formatter: "tickCross", tickElement: "Y", crossElement: "N" },
+            { title: "2", field: "lv1", hozAlign: "center", formatter: "tickCross", tickElement: "Y", crossElement: "N" },
+            { title: "3", field: "lv2", hozAlign: "center", formatter: "tickCross", tickElement: "Y", crossElement: "N" },
+            { title: "4", field: "lv3", hozAlign: "center", formatter: "tickCross", tickElement: "Y", crossElement: "N" },
+            { title: "5", field: "lv4", hozAlign: "center", formatter: "tickCross", tickElement: "Y", crossElement: "N" },
+            { title: "6", field: "lv5", hozAlign: "center", formatter: "tickCross", tickElement: "Y", crossElement: "N" }
         ],
         data: initData
     });
@@ -98,7 +115,14 @@ function buildHr012TableB() {
 
 function loadHr012TableDataB() {
     const devId = window.currentDevId;
-    if (!window.hr012TableA) return;
+    if (!window.hr012TableB) return;
+
+    // 초기 카테고리
+    const categories = ["Java", "Spring", "Node", "React"];
+    const currentData = categories.map(skl => ({
+        skl_id: skl,
+        lv0: "", lv1: "", lv2: "", lv3: "", lv4: "", lv5: ""
+    }));
 
     $.ajax({
         url: "/hr010/tab2_2",
@@ -106,37 +130,18 @@ function loadHr012TableDataB() {
         data: { dev_id: devId },
         success: function(response) {
             const dataArray = Array.isArray(response) ? response : response.res;
+            if (!Array.isArray(dataArray)) return console.error("Tab2B 데이터 형식이 배열이 아닙니다.", response);
 
-            if (!Array.isArray(dataArray)) {
-                console.error("Tab2B 데이터 형식이 배열이 아닙니다.", response);
-                return;
-            }
-
-            // 기존 초기 데이터 가져오기
-            let currentData = window.hr012TableB.getData();
-
-            // 서버 데이터로 업데이트
             dataArray.forEach(item => {
-                // 기존 스킬명이 있으면 업데이트
-                const existing = currentData.find(d => d.skl_nm === item.skl_nm);
+                // item.cd_nm → 초기 currentData의 skl_id와 매칭
+                const existing = currentData.find(d => d.skl_id === item.cd_nm);
                 if (existing) {
-                    existing.c1 = item.c1 || "";
-                    existing.c2 = item.c2 || "";
-                    existing.c3 = item.c3 || "";
-                    existing.c4 = item.c4 || "";
-                    existing.c5 = item.c5 || "";
-                    existing.c6 = item.c6 || "";
-                } else {
-                    // 없으면 새로 추가
-                    currentData.push({
-                        skl_nm: item.skl_nm,
-                        c1: item.c1 || "",
-                        c2: item.c2 || "",
-                        c3: item.c3 || "",
-                        c4: item.c4 || "",
-                        c5: item.c5 || "",
-                        c6: item.c6 || ""
-                    });
+                    existing.lv0 = item.lv0 || "";
+                    existing.lv1 = item.lv1 || "";
+                    existing.lv2 = item.lv2 || "";
+                    existing.lv3 = item.lv3 || "";
+                    existing.lv4 = item.lv4 || "";
+                    existing.lv5 = item.lv5 || "";
                 }
             });
 
@@ -148,23 +153,5 @@ function loadHr012TableDataB() {
     });
 }
 
-$(document).ready(function() {
-    $(".tab-sub-btn").on("click", function() {
-        const tabId = $(this).data("tab");
-
-        $(".tab-sub-btn").removeClass("active");
-        $(this).addClass("active");
-
-        if (tabId === "tab2-1") {
-            $("#TABLE_HR012_A").show();
-            $("#TABLE_HR012_B").hide();
-            // if (!window.hr012TableA) initTab2A();
-        } else if (tabId === "tab2-2") {
-            $("#TABLE_HR012_B").show();
-            $("#TABLE_HR012_A").hide();
-            // if (!window.hr012TableB) initTab2B();
-        }
-    });
-});
 
 
