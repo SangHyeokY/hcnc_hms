@@ -122,8 +122,8 @@
     <select id="select_tab1" resultType="hashmap" parameterType="string">
         SELECT org_nm
             , biz_typ
-            , st_dt
-            , ed_dt
+            , DATE_FORMAT(st_dt, '%Y-%m-%d') AS st_dt
+            , DATE_FORMAT(ed_dt, '%Y-%m-%d') AS ed_dt
             , amt
             , remark
         FROM tb_ctrt_info
@@ -182,8 +182,10 @@
         ORDER BY skl.skl_id;
     </select>
 
+
+
+
     <!-- 폐기 // hr011_old -->
-    <!-- 인력관리 > 기본 인적사항 (상세) (임시/검색x), 임시로 가장 첫번째 데이터 불러오기 -->
     <select id="select_hr011" resultType="hashmap" parameterType="string">
         SELECT dev_nm -- 성명
         , brdt -- 생년월일

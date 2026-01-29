@@ -139,7 +139,7 @@ function buildUserTable() {
             { title: "경력연차", field: "exp_yr", hozAlign: "center" },
             { title: "최종학력", field: "edu_last" },
             { title: "보유자격증", field: "cert_txt" },
-            { title: "희망단가", field: "hope_rate_amt", hozAlign: "right" },
+            { title: "희망단가", field: "hope_rate_amt", hozAlign: "right", formatter:"money", formatterParams:{symbol:"₩", precision:0} },
             { title: "투입가능시점", field: "avail_dt" },
             { title: "계약형태",
                   field: "ctrt_typ",
