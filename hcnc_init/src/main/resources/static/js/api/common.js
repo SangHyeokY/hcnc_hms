@@ -1,4 +1,4 @@
-function setComCode(strId, strGrpCd, strTag, id = 'cd', name = 'cd_nm') {
+function setComCode(strId, strGrpCd, strTag, id = 'cd', name = 'cd_nm', done) {
 
     $.ajax({
         url: "/common/getCm",
@@ -9,6 +9,9 @@ function setComCode(strId, strGrpCd, strTag, id = 'cd', name = 'cd_nm') {
         },
         success: function (data) {
             bindComCode(strId, data.res, id, name);
+            if (typeof done === "function") {
+                done(data.res || []);
+            }
         },
         error: function () {
             alert("콤보박스 데이터를 불러오는 중 오류가 발생했습니다.");

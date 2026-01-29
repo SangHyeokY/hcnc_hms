@@ -18,7 +18,8 @@
             , prj.cust_nm
             , prj.prj_nm
             , rate.rate_amt
-            , prj.job_cd AS role_nm
+            , prj.job_cd
+            , role.cd_nm AS role_nm
             , prj.stack_txt
             , prj.alloc_pct
             , prj.remark
@@ -28,6 +29,11 @@
          AND prj.dev_id = rate.dev_id
          AND rate.del_yn = 'N'
          AND rate.use_yn = 'Y'
+        LEFT JOIN tb_cd_mst role
+          ON role.grp_cd = 'job_cd'
+         AND role.cd = prj.job_cd
+         AND role.use_yn = 'Y'
+         AND role.del_yn = 'N'
         WHERE prj.del_yn = 'N'
           AND prj.use_yn = 'Y'
           AND prj.dev_id = #{dev_id}

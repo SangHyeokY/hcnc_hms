@@ -78,13 +78,13 @@
                                 <div class="table-cell">
                                     <p class="cell-tit">계약단가</p>
                                     <div class="cell-info">
-                                        <input type="text" class="text" id="write_hr014_rate_amt" placeholder="">
+                                        <input type="text" class="text" id="write_hr014_rate_amt" placeholder="금액 입력">
                                     </div>
                                 </div>
                                 <div class="table-cell">
                                     <p class="cell-tit">역할</p>
                                     <div class="cell-info">
-                                        <input type="text" class="text" id="write_hr014_role_nm" placeholder="">
+                                        <select id="write_hr014_job_cd"></select>
                                     </div>
                                 </div>
                             </li>
@@ -92,13 +92,22 @@
                                 <div class="table-cell">
                                     <p class="cell-tit">기술스택</p>
                                     <div class="cell-info">
-                                        <input type="text" class="text" id="write_hr014_stack_txt" placeholder="">
+                                        <div class="tag-input">
+                                            <div class="tag-input-box">
+                                                <ul class="tag-list" id="hr014SkillTagList" ></ul>
+                                            </div>
+                                            <div class="tag-select-row">
+                                                <select id="write_hr014_skl_cd"></select>
+                                                <button type="button" class="btn btn-add-skill">추가</button>
+                                            </div>
+                                            <input type="hidden" id="write_hr014_stack_txt">
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="table-cell">
                                     <p class="cell-tit">투입률</p>
                                     <div class="cell-info">
-                                        <input type="text" class="text" id="write_hr014_alloc_pct" placeholder="%">
+                                        <input type="text" class="text" id="write_hr014_alloc_pct" placeholder="숫자%">
                                     </div>
                                 </div>
                             </li>
@@ -124,6 +133,7 @@
         </div>
     </div>
 
+    <script src="/js/api/common.js"></script>
     <script src="/js/api/hr011/hr014.js"></script>
 </th:block>
 

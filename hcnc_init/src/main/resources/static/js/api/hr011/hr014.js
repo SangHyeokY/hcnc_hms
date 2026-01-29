@@ -1,4 +1,7 @@
 var tableHr014;
+var skillOptions = [];
+var skillMap = {};
+var skillTags = [];
 
 $(document).ready(function () {
     buildHr014Table();
@@ -31,6 +34,25 @@ $(document).ready(function () {
     $("#write_hr014_alloc_pct").on("input", function () {
         $(this).val(formatPercentInput($(this).val()));
     });
+
+    $(".btn-add-skill").on("click", function () {
+        addSkillTagByCode($("#write_hr014_skl_cd").val());
+    });
+
+    $("#hr014SkillTagList").on("click", ".tag-remove", function () {
+        var code = $(this).closest(".tag-item").data("code");
+        removeSkillTag(code);
+    });
+
+    setComCode("write_hr014_job_cd", "job_cd", "");
+    setComCode("write_hr014_skl_cd", "skl_id", "", "cd", "cd_nm", function (res) {
+        skillOptions = res || [];
+        buildSkillMap();
+        setSkillTagsFromValue($("#write_hr014_stack_txt").val());
+        if (tableHr014) {
+            tableHr014.redraw(true);
+        }
+    });
 });
 
 function buildHr014Table() {
@@ -60,7 +82,7 @@ function buildHr014Table() {
             { title: "프로젝트명", field: "prj_nm", widthGrow: 2 },
             { title: "계약단가", field: "rate_amt", width: 130, hozAlign: "right", formatter: amountFormatter },
             { title: "역할", field: "role_nm", width: 80, hozAlign: "center" },
-            { title: "기술스택", field: "stack_txt", widthGrow: 3 },
+            { title: "기술스택", field: "stack_txt", widthGrow: 3, formatter: skillDisplayFormatter },
             { title: "투입률", field: "alloc_pct", width: 90, hozAlign: "right", formatter: perentageFormatter },
             { title: "비고", field: "remark", widthGrow: 4 }
         ],
@@ -133,10 +155,10 @@ function fillHr014Form(data) {
     $("#write_hr014_cust_nm").val(data.cust_nm || "");
     $("#write_hr014_prj_nm").val(data.prj_nm || "");
     $("#write_hr014_rate_amt").val(formatNumberInput(data.rate_amt));
-    $("#write_hr014_role_nm").val(data.role_nm || "");
-    $("#write_hr014_stack_txt").val(data.stack_txt || "");
+    $("#write_hr014_job_cd").val(data.job_cd || "");
     $("#write_hr014_alloc_pct").val(formatPercentInput(data.alloc_pct));
     $("#write_hr014_remark").val(data.remark || "");
+    setSkillTagsFromValue(data.stack_txt || "");
     console.log("input value : " + $("#write_hr014_st_dt").val());
 }
 
@@ -149,10 +171,10 @@ function clearHr014Form() {
     $("#write_hr014_cust_nm").val("");
     $("#write_hr014_prj_nm").val("");
     $("#write_hr014_rate_amt").val("");
-    $("#write_hr014_role_nm").val("");
-    $("#write_hr014_stack_txt").val("");
+    $("#write_hr014_job_cd").val("");
     $("#write_hr014_alloc_pct").val("");
     $("#write_hr014_remark").val("");
+    setSkillTagsFromValue("");
 }
 
 // 저장 버튼
@@ -168,6 +190,98 @@ function deleteHr014Row() {
         return;
     }
     alert("삭제 API는 아직 구현되지 않았습니다.");
+}
+
+// 기술스택 태그 맵 구성
+function buildSkillMap() {
+    skillMap = {};
+    skillOptions.forEach(function (item) {
+        if (item && item.cd != null) {
+            skillMap[item.cd] = item.cd_nm || item.cd;
+        }
+    });
+}
+
+// 태그 추가 (코드)
+function addSkillTagByCode(code) {
+    if (!code) return;
+    if (skillTags.some(function (t) { return t.code === code; })) return;
+    var label = skillMap[code] || code;
+    skillTags.push({ code: code, label: label });
+    renderSkillTags();
+}
+
+// 태그 추가 (라벨)
+function addSkillTagByLabel(raw) {
+    var label = $.trim(raw || "");
+    if (!label) return;
+    var code = null;
+    skillOptions.some(function (item) {
+        if (item && item.cd_nm === label) {
+            code = item.cd;
+            return true;
+        }
+        return false;
+    });
+    if (!code) {
+        return;
+    }
+    addSkillTagByCode(code);
+}
+
+// 태그 삭제
+function removeSkillTag(code) {
+    if (!code) return;
+    skillTags = skillTags.filter(function (t) { return t.code !== code; });
+    renderSkillTags();
+}
+
+// 태그 렌더링
+function renderSkillTags() {
+    var $list = $("#hr014SkillTagList");
+    $list.empty();
+    skillTags.forEach(function (tag) {
+        var $item = $("<li class=\"tag-item\"></li>");
+        $item.attr("data-code", tag.code);
+        $item.append(document.createTextNode(tag.label));
+        var $remove = $("<button type=\"button\" class=\"tag-remove\" aria-label=\"태그 삭제\">x</button>");
+        $item.append($remove);
+        $list.append($item);
+    });
+    var codes = skillTags.map(function (t) { return t.code; }).join(",");
+    $("#write_hr014_stack_txt").val(codes);
+}
+
+// 기존 값으로 태그 세팅
+function setSkillTagsFromValue(value) {
+    skillTags = [];
+    var raw = String(value || "").trim();
+    if (!raw) {
+        renderSkillTags();
+        return;
+    }
+    raw.split(",").forEach(function (code) {
+        var trimmed = $.trim(code);
+        if (trimmed) {
+            addSkillTagByCode(trimmed);
+        }
+    });
+}
+
+// 테이블 표시용 기술스택 변환
+function skillDisplayFormatter(cell) {
+    var value = cell.getValue();
+    if (value == null || value === "") {
+        return "";
+    }
+    var raw = String(value);
+    var parts = raw.split(",");
+    var labels = parts.map(function (code) {
+        var trimmed = $.trim(code);
+        if (!trimmed) return "";
+        return skillMap[trimmed] || trimmed;
+    }).filter(function (item) { return item !== ""; });
+    return labels.join(", ");
 }
 
 // 투입률
