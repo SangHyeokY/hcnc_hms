@@ -71,13 +71,26 @@ public class Hr010Controller {
         return mv;
     }
 
-    // tab2
+    // tab2 - 보유역량
     @RequestMapping("/tab2")
     public ModelAndView select_tab2 (@RequestParam("dev_id") String devId) {
         ModelAndView mv = new ModelAndView("jsonView");
         // 확인용 1
         System.out.println("select_tab2 호출됨, param = " + devId);
-        List<Map<String, Object>> reslist = hr010Service.select_tab2(devId);
+        List<Map<String, Object>> reslist = hr010Service.select_tab2_1(devId);
+        // 확인용 2
+        System.out.println("tab2 조회 결과 = " + reslist);
+        mv.addObject("res", reslist);
+        return mv;
+    }
+
+    // tab2 - 숙련도
+    @RequestMapping("/tab2_2")
+    public ModelAndView select_tab2_2 (@RequestParam("dev_id") String devId) {
+        ModelAndView mv = new ModelAndView("jsonView");
+        // 확인용 1
+        System.out.println("select_tab2 호출됨, param = " + devId);
+        List<Map<String, Object>> reslist = hr010Service.select_tab2_2(devId);
         // 확인용 2
         System.out.println("tab2 조회 결과 = " + reslist);
         mv.addObject("res", reslist);

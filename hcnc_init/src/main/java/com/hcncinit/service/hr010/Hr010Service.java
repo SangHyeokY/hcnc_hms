@@ -38,8 +38,11 @@ public class Hr010Service {
     }
 
     // tab2
-    public List<Map<String, Object>> select_tab2(String devId) {
-        return this.sqlSession.selectList("com.hcncinit.Hr010Mapper.select_tab2", devId);
+    public List<Map<String, Object>> select_tab2_1(String devId) {
+        return this.sqlSession.selectList("com.hcncinit.Hr010Mapper.select_tab2_1", devId);
+    }
+    public List<Map<String, Object>> select_tab2_2(String devId) {
+        return this.sqlSession.selectList("com.hcncinit.Hr010Mapper.select_tab2_2", devId);
     }
 
 

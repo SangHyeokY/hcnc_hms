@@ -1,11 +1,7 @@
 // hr014.js
-window.initTab4 = function () {
-
-    if (!window.hr014Table) {
-        //buildHr014Table();
-        //loadHr014TableData();
-    }
-    window.hr014Table?.redraw(true);
+window.initTab4 = function() {
+    if (!window.hr014Table) buildHr014Table();
+    loadHr014TableData();
 };
 
 function buildHr014Table() {

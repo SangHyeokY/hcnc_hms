@@ -325,14 +325,14 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 
 
 .modal-container-detail {display: flex; flex-direction: column; max-height: 90vh; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); min-width: 80vw; max-width: calc(100% - 32px); background: #fff; border-radius: 6px; padding: 20px; box-sizing: border-box;}
-.tap-area {
+.tab-area {
     display: flex;
     width: 100%;
     gap: 8px;
     border-bottom: 2px solid #ccc;
     box-sizing: border-box;
 }
-.tap-btn {
+.tab-btn, .tab-sub-btn {
     flex: 1;
     text-align: center;
     padding: 5px 10px;
@@ -347,10 +347,10 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
     background: #4880FF;
     color: #ffffff;
 }
+
 #TABLE_HR010_B tr td input, #TABLE_HR010_B tr td select {
     width: 100%;
 }
-
 .skill-tag {
     display: inline-block;
     padding: 3px 8px;
@@ -361,4 +361,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
     color: #2f5bea;
     border: 1px solid #cdd9ff;
     white-space: nowrap;
+}
+.tab-content {
+    position: relative;
 }

@@ -118,6 +118,7 @@
         WHERE dev_id = #{dev_id}
     </update>
 
+    <!-- 소속 및 계약정보 -->
     <select id="select_tab1" resultType="hashmap" parameterType="string">
         SELECT org_nm
             , biz_typ
@@ -131,7 +132,8 @@
         AND dev_id = #{devId};
     </select>
 
-    <select id="select_tab2" resultType="hashmap" parameterType="string">
+    <!-- 보유역량 및 숙련도 - 보유역량 -->
+    <select id="select_tab2_1" resultType="hashmap" parameterType="string">
         WITH grp AS (
             SELECT cd,
                 cd_nm,
@@ -161,6 +163,24 @@
         GROUP BY g.cd, g.cd_nm, g.sort_no;
     </select>
 
+    <!-- 보유역량 및 숙련도 - 숙련도 -->
+    <select id="select_tab2_2" resultType="hashmap" parameterType="string">
+        SELECT skl.skl_id
+            , cd.cd_nm
+            , CASE WHEN skl.lvl = 0 THEN 'Y' ELSE 'N' END lv0
+            , CASE WHEN skl.lvl = 1 THEN 'Y' ELSE 'N' END lv1
+            , CASE WHEN skl.lvl = 2 THEN 'Y' ELSE 'N' END lv2
+            , CASE WHEN skl.lvl = 3 THEN 'Y' ELSE 'N' END lv3
+            , CASE WHEN skl.lvl = 4 THEN 'Y' ELSE 'N' END lv4
+            , CASE WHEN skl.lvl = 5 THEN 'Y' ELSE 'N' END lv5
+        FROM tb_dev_skl_info skl
+        LEFT JOIN tb_cd_mst cd ON skl.skl_id = cd.cd
+        AND cd.grp_cd = 'skl_id'
+        WHERE cd.del_yn = 'N'
+        AND cd.use_yn = 'Y'
+        AND skl.dev_id = #{devId}
+        ORDER BY skl.skl_id;
+    </select>
 
     <!-- 폐기 // hr011_old -->
     <!-- 인력관리 > 기본 인적사항 (상세) (임시/검색x), 임시로 가장 첫번째 데이터 불러오기 -->
