@@ -31,6 +31,7 @@ public class Hr010Controller {
         return mv;
     }
 
+    // 인력관리 신규 등록/수정
     @PostMapping("/upsert")
     public ModelAndView saveHr010(@RequestParam Map<String, Object> param) {
         ModelAndView mv = new ModelAndView("jsonView");
@@ -41,17 +42,18 @@ public class Hr010Controller {
             String devId = hr010Service.generateDevId(devType);
             param.put("dev_id", devId);
         }
-        hr010Service.insert_hr011(param);
+        hr010Service.insert_hr010(param);
         mv.addObject("result", "success");
         return mv;
     }
 
+    // 인력관리 삭제
     @PostMapping("/delete")
     public ModelAndView deleteHr010(@RequestParam Map<String, Object> param) {
         ModelAndView mv = new ModelAndView("jsonView");
         System.out.println("삭제 요청 param = " + param);
 
-        hr010Service.insert_hr011(param);
+        hr010Service.delete_hr010(param);
         mv.addObject("result", "success");
         return mv;
     }
@@ -59,10 +61,7 @@ public class Hr010Controller {
 
 
 
-
-
-
-    // 폐기
+    // 폐기 hr011
     @RequestMapping("/detailPage")
     public ModelAndView hr011Page(@RequestParam("dev_id") String devId) {
         ModelAndView mv = new ModelAndView("views/hr010/hr011_old"); // hr011_old.html 경로를 새로 잡아줘야 인식함
@@ -72,13 +71,13 @@ public class Hr010Controller {
         return mv;
     }
 
-    // 폐기
+    // 폐기 hr011
     // 인력관리 > 기본 인적사항 (상세) (임시/검색x), 따로 분류할건지는 논의
     @RequestMapping("/detail")
     public ModelAndView select_hr011 (@RequestParam("dev_id") String devId) {
         ModelAndView mv = new ModelAndView("jsonView");
         // 확인용 1
-        System.out.println("select_hr011 팝업 호출됨, param = " + devId);
+        System.out.println("안쓰이는 코드가 사용되었습니다. Hr010Controller.java /detail");
         Map<String, Object> resList = hr010Service.select_hr011(devId);
         // 확인용 2
         System.out.println("조회 결과 = " + resList);
