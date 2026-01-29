@@ -48,7 +48,13 @@ export const menuData = [
         visible: true,
       },
       {
-        title: "인적사항 (상세) > 평가 및 리스크 탭",
+        title: "인적사항 (상세기능) - 평가 및 리스크 탭",
+        path: "/hr015",
+        type: "A",
+        visible: false,
+      },
+      {
+        title: "인적사항 (상세기능) - 평가 및 리스크 탭",
         path: "/hr015",
         type: "A",
         visible: true,
