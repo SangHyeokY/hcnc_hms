@@ -29,10 +29,4 @@ public class Hr015Service {
         return this.sqlSession.insert("com.hcncinit.Hr015Mapper.saveB", map);
     }
 
-    public void ensureUser(Map<String, Object> map) {
-        Object userId = map.get("userId");
-        if (userId == null || String.valueOf(userId).trim().isEmpty()) {
-            map.put("userId", "admin");
-        }
-    }
 }

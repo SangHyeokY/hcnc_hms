@@ -129,15 +129,50 @@ function buildTables() {
         data: []
     });
 
+    function riskValueFormatter(cell) {
+        if (!cell || typeof cell.getRow !== "function") {
+            return "";
+        }
+        var rowData = cell.getRow().getData();
+        if (rowData.rsk_key === "re_in_yn") {
+            var checked = cell.getValue() === "Y" ? " checked" : "";
+            return "<input type='checkbox'" + checked + " />";
+        }
+        return cell.getValue() || "";
+    }
+
     tableB = new Tabulator("#TABLE_HR015_B", {
         layout: "fitColumns",
         headerSort: true,
         placeholder: "데이터 없음",
         headerHozAlign: "center",
         columns: [
-            { title: "항목코드", field: "item_cd", hozAlign: "center", widthGrow: 1 },
-            { title: "항목명", field: "item_nm", widthGrow: 2 },
-            { title: "사용여부", field: "use_yn", hozAlign: "center", widthGrow: 1 }
+            { title: "구 분", field: "label", hozAlign: "center", widthGrow: 2 },
+            {
+                title: "내 용",
+                field: "value",
+                hozAlign: "center",
+                widthGrow: 4,
+                formatter: riskValueFormatter,
+                editor: "input",
+                editable: function (cell) {
+                    var rowData = cell.getRow().getData();
+                    return rowData.rsk_key !== "re_in_yn";
+                },
+                cellClick: function (e, cell) {
+                    if (!cell || typeof cell.getRow !== "function") {
+                        return;
+                    }
+                    var rowData = cell.getRow().getData();
+                    if (rowData.rsk_key !== "re_in_yn") {
+                        cell.edit();
+                        return;
+                    }
+                    var value = cell.getValue() === "Y" ? "N" : "Y";
+                    cell.getRow().update({ value: value });
+                },
+                headerSort: false
+            }
         ],
         data: []
     });
@@ -169,7 +204,9 @@ function loadTableB() {
         url: "/hr015/b/list",
         type: "GET",
         success: function (response) {
-            tableB.setData(response.list || []);
+            var risk = (response.list && response.list[0]) ? response.list[0] : {};
+            tableB.setData(buildRiskRows(risk));
+            $("#HR015_RISK_MEMO").val(risk.memo || "");
         },
         error: function () {
             alert("탭2 데이터를 불러오는 중 오류가 발생했습니다.");
@@ -205,10 +242,13 @@ function saveTableB() {
         return;
     }
 
+    var risk = buildRiskPayload(tableB.getData());
+    risk.memo = $.trim($("#HR015_RISK_MEMO").val());
+
     $.ajax({
         url: "/hr015/b/save",
         type: "POST",
-        data: { rows: JSON.stringify(buildSaveRows(tableB.getData())) },
+        data: risk,
         success: function (response) {
             if (response.success) {
                 loadTableB();
@@ -221,6 +261,36 @@ function saveTableB() {
             alert("저장 중 오류가 발생했습니다.");
         }
     });
+}
+
+function buildRiskRows(risk) {
+    return [
+        { rsk_key: "leave_txt", label: "이탈이력", value: risk.leave_txt || "" },
+        { rsk_key: "claim_txt", label: "클레임", value: risk.claim_txt || "" },
+        { rsk_key: "sec_txt", label: "보안이슈", value: risk.sec_txt || "" },
+        { rsk_key: "re_in_yn", label: "재투입 가능 여부", value: risk.re_in_yn || "N" }
+    ];
+}
+
+function buildRiskPayload(rows) {
+    var payload = {
+        leave_txt: "",
+        claim_txt: "",
+        sec_txt: "",
+        re_in_yn: "N"
+    };
+
+    if (!Array.isArray(rows)) {
+        return payload;
+    }
+
+    rows.forEach(function (row) {
+        if (row.rsk_key) {
+            payload[row.rsk_key] = row.value;
+        }
+    });
+
+    return payload;
 }
 
 function buildSaveRows(rows) {
