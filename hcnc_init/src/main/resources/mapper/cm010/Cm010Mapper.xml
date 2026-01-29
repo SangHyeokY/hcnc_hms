@@ -2,6 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.hcncinit.Cm010Mapper">
 
+    <!-- 사용자 목록 조회 -->
     <select id="selectUserList" resultType="hashmap" parameterType="map">
         SELECT
                u.user_id
@@ -59,6 +60,7 @@
         ORDER BY u.user_id ASC
     </select>
 
+    <!-- 로그인 사용자 조회 -->
     <select id="selectLoginUser" resultType="hashmap" parameterType="string">
         SELECT
                user_id
@@ -72,6 +74,7 @@
           AND lock_yn = 'N'
     </select>
 
+    <!-- 공통코드(권한/직무/부서) 조회 -->
     <select id="selectCommonCodesForUser" resultType="hashmap">
         SELECT
                grp_cd
@@ -88,6 +91,7 @@
 
 
 
+    <!-- 사용자 신규/수정 저장 -->
     <insert id="upsertUser" parameterType="map">
         INSERT INTO tb_user_info (
             user_id,
@@ -139,6 +143,7 @@
             upd_by = #{userId}
     </insert>
 
+    <!-- 사용자 삭제 처리 -->
     <update id="deleteUser" parameterType="map">
         UPDATE tb_user_info
            SET del_yn = 'Y',
@@ -149,6 +154,7 @@
          WHERE user_id = #{user_id}
     </update>
 
+    <!-- 마지막 로그인 일시 갱신 -->
     <update id="updateLastLogin" parameterType="map">
         UPDATE tb_user_info
            SET last_login_ts = NOW(),

@@ -80,22 +80,66 @@
 /*===============================================================================
   HR015 - risk memo
 ================================================================================*/
-.risk-memo-wrap {
-  margin-top: 12px;
+.risk-box {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
 }
-.risk-memo-wrap label {
-  display: block;
-  font-size: 12px;
-  font-weight: 700;
-  margin-bottom: 6px;
-}
-.risk-memo-wrap textarea {
-  width: 100%;
-  resize: vertical;
-  min-height: 120px;
+.risk-list {
   border: 1px solid #dcdcdc;
   border-radius: 6px;
-  padding: 8px 10px;
+  overflow: hidden;
+  background: #fff;
+}
+.risk-list .risk-item.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.risk-list .risk-item.row .label {
+  flex: 1 1 auto;
+}
+.risk-list .risk-item.row input[type="checkbox"] {
+  flex: 0 0 auto;
+}
+.risk-list .risk-item {
+  padding: 10px 12px;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+  font-size: 14px;
+}
+.risk-list .risk-item:last-child {
+  border-bottom: none;
+}
+.risk-list .risk-item.active {
+  background: #eaf2ff;
+  font-weight: 700;
+}
+.risk-detail textarea {
+  width: 100%;
+  min-height: 220px;
+  border: 1px solid #dcdcdc;
+  border-radius: 6px;
+  padding: 10px 12px;
+  resize: vertical;
+}
+.risk-extra {
+  margin: 10px 14px 12px;
+  display: flex;
+}
+.risk-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+}
+.risk-check span {
+  order: 0;
+}
+.risk-check input[type="checkbox"] {
+  order: 1;
 }
 
 /*=================================================================================
@@ -255,6 +299,8 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .modal-btn .btn {padding: 8px 20px; border-radius: 4px; background-color: #fff; border: 1px solid #0554f8; color: #0554f8; font-size: 14px; font-weight: 500;}
 .modal-btn .btn.btn-save {background: #0554f8; color: #fff;}
 
+
+
 .modal-container-detail {display: flex; flex-direction: column; max-height: 90vh; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); min-width: 80vw; max-width: calc(100% - 32px); background: #fff; border-radius: 6px; padding: 20px; box-sizing: border-box;}
 .tap-area {
     display: flex;
@@ -277,4 +323,19 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .tap-btn.active {
     background: #0554f8;
     color: #ffffff;
+}
+#TABLE_HR010_B tr td input, #TABLE_HR010_B tr td select {
+    width: 100%;
+}
+
+.skill-tag {
+    display: inline-block;
+    padding: 3px 8px;
+    margin: 2px;
+    font-size: 12px;
+    border-radius: 12px;
+    background: #eef3ff;
+    color: #2f5bea;
+    border: 1px solid #cdd9ff;
+    white-space: nowrap;
 }

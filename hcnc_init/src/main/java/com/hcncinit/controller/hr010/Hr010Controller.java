@@ -58,13 +58,38 @@ public class Hr010Controller {
         return mv;
     }
 
+    // tab1
+    @RequestMapping("/tab1")
+    public ModelAndView select_tab1 (@RequestParam("dev_id") String devId) {
+        ModelAndView mv = new ModelAndView("jsonView");
+        // 확인용 1
+        System.out.println("select_tab1 호출됨, param = " + devId);
+        Map<String, Object> resList = hr010Service.select_tab1(devId);
+        // 확인용 2
+        System.out.println("tab1 조회 결과 = " + resList);
+        mv.addObject("res", resList);
+        return mv;
+    }
+
+    // tab2
+    @RequestMapping("/tab2")
+    public ModelAndView select_tab2 (@RequestParam("dev_id") String devId) {
+        ModelAndView mv = new ModelAndView("jsonView");
+        // 확인용 1
+        System.out.println("select_tab2 호출됨, param = " + devId);
+        List<Map<String, Object>> reslist = hr010Service.select_tab2(devId);
+        // 확인용 2
+        System.out.println("tab2 조회 결과 = " + reslist);
+        mv.addObject("res", reslist);
+        return mv;
+    }
 
 
 
     // 폐기 hr011
     @RequestMapping("/detailPage")
     public ModelAndView hr011Page(@RequestParam("dev_id") String devId) {
-        ModelAndView mv = new ModelAndView("views/hr010/hr011_old"); // hr011_old.html 경로를 새로 잡아줘야 인식함
+        ModelAndView mv = new ModelAndView("views/hr010/hr011_old"); // hr010_old.html 경로를 새로 잡아줘야 인식함
         System.out.println("안쓰이는 코드가 사용되었습니다. 확인부탁드립니다. Hr010Controller.java /detailPage");
         Map<String, Object> resList = hr010Service.select_hr011(devId);
         mv.addObject("res", resList);

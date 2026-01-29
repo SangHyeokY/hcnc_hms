@@ -146,7 +146,7 @@ function buildTables() {
             { title: "코드그룹", field: "grp_cd", hozAlign: "center", widthGrow: 1 },
             { title: "코드", field: "cd", hozAlign: "center", widthGrow: 1 },
             { title: "코드그룹명", field: "grp_nm", widthGrow: 1 },
-            { title: "사용여부", field: "use_yn", hozAlign: "center", width: 100, widthGrow: 0 }
+            { title: "사용여부", field: "use_yn", hozAlign: "center", width: 90, widthGrow: 0 }
         ],
         data: [],
         rowSelected: function (row) {
@@ -198,15 +198,15 @@ function buildTables() {
                 headerSort: false,
                 download: false
             },
-            { title: "코드", field: "cd", hozAlign: "center" },
+            { title: "코드", field: "cd", hozAlign: "center", width: 90 },
             { title: "코드명", field: "cd_nm", width: 150 },
-            { title: "정렬순서", field: "sort_no", hozAlign: "center" },
-            { title: "부가정보1", field: "adinfo_01" },
-            { title: "부가정보2", field: "adinfo_02" },
-            { title: "부가정보3", field: "adinfo_03" },
-            { title: "부가정보4", field: "adinfo_04" },
-            { title: "부가정보5", field: "adinfo_05" },
-            { title: "사용여부", field: "use_yn", hozAlign: "center" }
+            { title: "정렬순서", field: "sort_no", hozAlign: "center", width: 90 },
+            { title: "부가정보1", field: "adinfo_01", formatter: amountFormatter },
+            { title: "부가정보2", field: "adinfo_02", formatter: amountFormatter },
+            { title: "부가정보3", field: "adinfo_03", formatter: amountFormatter },
+            { title: "부가정보4", field: "adinfo_04", formatter: amountFormatter },
+            { title: "부가정보5", field: "adinfo_05", formatter: amountFormatter },
+            { title: "사용여부", field: "use_yn", hozAlign: "center", width: 90 }
         ],
         data: [],
         rowSelected: function (row) {
@@ -227,6 +227,23 @@ function buildTables() {
     });
 }
 
+// 계약단가(,)
+function amountFormatter(cell) {
+    if (!cell.getValue() === null || cell.getValue() === undefined) {
+        return "";
+    }
+    comma = function (str) {
+        str = String(str);
+        return str.replace(/(\d)(?=(?:\d{3})+(?!\d))/g, '$1,');
+    }
+
+    return comma(cell.getValue());
+}
+
+
+
+
+// 코드그룹 목록 조회
 function loadMainTableData() {
     if (!mainTable || typeof mainTable.setData !== "function") {
         return;
@@ -254,6 +271,7 @@ function loadMainTableData() {
     });
 }
 
+// 상세코드 목록 조회
 function loadDetailTableData(grpCd) {
     if (!detailTable || typeof detailTable.setData !== "function") {
         return;
@@ -277,6 +295,7 @@ function loadDetailTableData(grpCd) {
     });
 }
 
+// 상세코드 정렬 저장
 function applyDetailSort(rows) {
     if (!rows.length) {
         return;
@@ -302,6 +321,7 @@ function applyDetailSort(rows) {
     });
 }
 
+// 코드그룹 삭제 처리
 function deleteMainRows() {
     var selectedRows = mainTable.getSelectedRows();
     if (selectedRows.length === 0) {
@@ -347,6 +367,7 @@ function deleteMainRows() {
     });
 }
 
+// 상세코드 삭제 처리
 function deleteDetailRows() {
     var selectedRows = detailTable.getSelectedRows();
     if (selectedRows.length === 0) {
@@ -383,6 +404,7 @@ function deleteDetailRows() {
     });
 }
 
+// 코드그룹 신규/수정 저장
 function upsertMainBtn() {
     var grpCd = $.trim($("#write_main_grp_cd").val());
     var grpNm = $.trim($("#write_main_grp_nm").val());
@@ -431,6 +453,7 @@ function upsertMainBtn() {
     });
 }
 
+// 상세코드 신규/수정 저장
 function upsertDetailBtn() {
     var grpCd = $.trim($("#write_detail_grp_cd").val());
     var cd = $.trim($("#write_detail_cd").val());
@@ -491,6 +514,7 @@ function upsertDetailBtn() {
     });
 }
 
+// 코드그룹 등록/수정 모달 오픈
 function openMainWriteModal(type) {
     mainMode = type;
     $("#main-type").text(type === "insert" ? "등록" : "수정");
@@ -523,10 +547,12 @@ function openMainWriteModal(type) {
     $("#write-main-area").show();
 }
 
+// 코드그룹 등록/수정 모달 닫기
 function closeMainWriteModal() {
     $("#write-main-area").hide();
 }
 
+// 상세코드 등록/수정 모달 오픈
 function openDetailWriteModal(type) {
     detailMode = type;
     $("#detail-type").text(type === "insert" ? "등록" : "수정");
@@ -589,6 +615,7 @@ function openDetailWriteModal(type) {
     $("#write-detail-area").show();
 }
 
+// 상세코드 등록/수정 모달 닫기
 function closeDetailWriteModal() {
     $("#write-detail-area").hide();
 }

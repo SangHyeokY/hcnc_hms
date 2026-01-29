@@ -21,6 +21,7 @@ public class Cm040Controller {
     private Cm040Service cm040Service;
 
     @RequestMapping("/main/list")
+    // 코드그룹 목록 조회
     public ModelAndView mainList(@RequestParam(required = false) Map<String, Object> map) {
         applyQueryDefaults(map);
         ModelAndView mv = new ModelAndView("jsonView");
@@ -32,6 +33,7 @@ public class Cm040Controller {
     }
 
     @RequestMapping("/detail/list")
+    // 상세코드 목록 조회
     public ModelAndView detailList(@RequestParam(required = false) Map<String, Object> map) {
         applyQueryDefaults(map);
         ModelAndView mv = new ModelAndView("jsonView");
@@ -42,6 +44,7 @@ public class Cm040Controller {
     }
 
     @RequestMapping("/main/save")
+    // 코드그룹 신규/수정 저장
     public ModelAndView mainSave(@RequestParam Map<String, Object> map, HttpSession session) {
         ModelAndView mv = new ModelAndView("jsonView");
         applyLoginUser(map, session);
@@ -55,6 +58,7 @@ public class Cm040Controller {
     }
 
     @RequestMapping("/detail/save")
+    // 상세코드 신규/수정 저장
     public ModelAndView detailSave(@RequestParam Map<String, Object> map, HttpSession session) {
         ModelAndView mv = new ModelAndView("jsonView");
         applyLoginUser(map, session);
@@ -66,6 +70,7 @@ public class Cm040Controller {
     }
 
     @RequestMapping("/main/delete")
+    // 코드그룹 삭제 처리
     public ModelAndView mainDelete(@RequestParam Map<String, Object> map, HttpSession session) {
         ModelAndView mv = new ModelAndView("jsonView");
         applyLoginUser(map, session);
@@ -85,6 +90,7 @@ public class Cm040Controller {
     }
 
     @RequestMapping("/detail/delete")
+    // 상세코드 삭제 처리
     public ModelAndView detailDelete(@RequestParam Map<String, Object> map, HttpSession session) {
         ModelAndView mv = new ModelAndView("jsonView");
         applyLoginUser(map, session);
@@ -95,6 +101,7 @@ public class Cm040Controller {
     }
 
     @RequestMapping("/detail/sort")
+    // 상세코드 정렬 저장
     public ModelAndView detailSort(@RequestParam Map<String, Object> map, HttpSession session) {
         ModelAndView mv = new ModelAndView("jsonView");
         applyLoginUser(map, session);
