@@ -25,9 +25,11 @@ window.initTab2 = function() {
 
         if (tabId === "tab2-1") {
             $("#TABLE_HR012_A").show();
+            window.hr012TableA.redraw();
             $("#TABLE_HR012_B").hide();
         } else if (tabId === "tab2-2") {
             $("#TABLE_HR012_B").show();
+            window.hr012TableB.redraw();
             $("#TABLE_HR012_A").hide();
         }
     });
@@ -36,8 +38,8 @@ window.initTab2 = function() {
 function buildHr012TableA() {
     if (window.hr012TableA) return;
 
-    const categories = ["Backend", "DB", "DevOps", "ERP/MES", "Frontend", "Infra", "Mobile", "기타"];
-    const initData = categories.map(cat => ({ cd_nm: cat, skl_id_kst: "" }));
+    // const categories = ["Backend", "DB", "DevOps", "ERP/MES", "Frontend", "Infra", "Mobile", "기타"];
+    // const initData = categories.map(cat => ({ cd_nm: cat, skl_id_kst: "" }));
 
     window.hr012TableA = new Tabulator("#TABLE_HR012_A", {
         layout: "fitColumns",
@@ -46,7 +48,7 @@ function buildHr012TableA() {
             { title: "구분", field: "cd_nm", hozAlign: "left" },
             { title: "상세", field: "skl_id_kst", hozAlign: "left" }
         ],
-        data: initData
+        data: []
     });
 }
 
@@ -66,19 +68,25 @@ function loadHr012TableDataA() {
                 return;
             }
 
-            const dataMap = {};
-            dataArray.forEach(item => {
-                // 서버에서 오는 skl_id_lst 문자열 그대로 사용
-                dataMap[item.cd_nm] = item.skl_id_lst || "";
-            });
+//            const dataMap = {};
+//            dataArray.forEach(item => {
+//                // 서버에서 오는 skl_id_lst 문자열 그대로 사용
+//                dataMap[item.cd_nm] = item.skl_id_lst || "";
+//            });
+//
+//            // 기존 테이블 데이터 가져와서 상세 값만 채움
+//            const updatedData = window.hr012TableA.getData().map(row => ({
+//                cd_nm: row.cd_nm,
+//                skl_id_kst: dataMap[row.cd_nm] || ""
+//            }));
+//
+//            window.hr012TableA.setData(updatedData);
+               const tableData = dataArray.map(item => ({
+                      cd_nm: item.cd_nm,
+                      skl_id_kst: item.skl_id_lst || ""
+                  }));
 
-            // 기존 테이블 데이터 가져와서 상세 값만 채움
-            const updatedData = window.hr012TableA.getData().map(row => ({
-                cd_nm: row.cd_nm,
-                skl_id_kst: dataMap[row.cd_nm] || ""
-            }));
-
-            window.hr012TableA.setData(updatedData);
+                  window.hr012TableA.setData(tableData);
         },
         error: function() {
             alert("Tab2A 데이터 로드 실패");
@@ -88,41 +96,33 @@ function loadHr012TableDataA() {
 
 // =============================================================================================================================
 
+function scoreCheckboxFormatter(cell, formatterParams, onRendered) {
+    const value = cell.getValue();
+    const checked = value ? "checked" : "";
+    return `<input type="checkbox" disabled ${checked} />`;
+}
+
 function buildHr012TableB() {
     if (window.hr012TableB) return;
-
-    const categories = ["Java", "Spring", "Node", "React"]; // 나중에 DB에서 연결해서 사용하기
-    const initData = categories.map(skl => ({
-        skl_id: skl,
-        lv0: "", lv1: "", lv2: "", lv3: "", lv4: "", lv5: ""
-    }));
 
     window.hr012TableB = new Tabulator("#TABLE_HR012_B", {
         layout: "fitColumns",
         placeholder: "데이터 없음",
         columns: [
-            { title: "기술", field: "skl_id", hozAlign: "left", widthGrow: 2 },
-            { title: "1", field: "lv0", hozAlign: "center", formatter: "tickCross", tickElement: "Y", crossElement: "N" },
-            { title: "2", field: "lv1", hozAlign: "center", formatter: "tickCross", tickElement: "Y", crossElement: "N" },
-            { title: "3", field: "lv2", hozAlign: "center", formatter: "tickCross", tickElement: "Y", crossElement: "N" },
-            { title: "4", field: "lv3", hozAlign: "center", formatter: "tickCross", tickElement: "Y", crossElement: "N" },
-            { title: "5", field: "lv4", hozAlign: "center", formatter: "tickCross", tickElement: "Y", crossElement: "N" },
-            { title: "6", field: "lv5", hozAlign: "center", formatter: "tickCross", tickElement: "Y", crossElement: "N" }
+            { title: "기술", field: "cd_nm", hozAlign: "left", widthGrow: 2 },
+            { title: "1", field: "lv1", hozAlign: "center", formatter: scoreCheckboxFormatter },
+            { title: "2", field: "lv2", hozAlign: "center", formatter: scoreCheckboxFormatter },
+            { title: "3", field: "lv3", hozAlign: "center", formatter: scoreCheckboxFormatter },
+            { title: "4", field: "lv4", hozAlign: "center", formatter: scoreCheckboxFormatter },
+            { title: "5", field: "lv5", hozAlign: "center", formatter: scoreCheckboxFormatter }
         ],
-        data: initData
+        data: []
     });
 }
 
 function loadHr012TableDataB() {
     const devId = window.currentDevId;
     if (!window.hr012TableB) return;
-
-    // 초기 카테고리
-    const categories = ["Java", "Spring", "Node", "React"];
-    const currentData = categories.map(skl => ({
-        skl_id: skl,
-        lv0: "", lv1: "", lv2: "", lv3: "", lv4: "", lv5: ""
-    }));
 
     $.ajax({
         url: "/hr010/tab2_2",
@@ -132,20 +132,16 @@ function loadHr012TableDataB() {
             const dataArray = Array.isArray(response) ? response : response.res;
             if (!Array.isArray(dataArray)) return console.error("Tab2B 데이터 형식이 배열이 아닙니다.", response);
 
-            dataArray.forEach(item => {
-                // item.cd_nm → 초기 currentData의 skl_id와 매칭
-                const existing = currentData.find(d => d.skl_id === item.cd_nm);
-                if (existing) {
-                    existing.lv0 = item.lv0 || "";
-                    existing.lv1 = item.lv1 || "";
-                    existing.lv2 = item.lv2 || "";
-                    existing.lv3 = item.lv3 || "";
-                    existing.lv4 = item.lv4 || "";
-                    existing.lv5 = item.lv5 || "";
-                }
-            });
+            const tableData = dataArray.map(item => ({
+                cd_nm: item.cd_nm,
+                lv1: item.lv1 === "Y",
+                lv2: item.lv2 === "Y",
+                lv3: item.lv3 === "Y",
+                lv4: item.lv4 === "Y",
+                lv5: item.lv5 === "Y"
+            }));
 
-            window.hr012TableB.setData(currentData);
+            window.hr012TableB.setData(tableData);
         },
         error: function() {
             alert("Tab2B 데이터 로드 실패");

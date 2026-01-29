@@ -9,9 +9,9 @@ function buildHr011Table() {
 
     window.hr011Table = new Tabulator("#TABLE_HR011_A", {
         layout: "fitColumns",
-        headerSort: true,
+        // headerSort: true,
         placeholder: "데이터 없음", // 데이터 없으면 표시
-        selectable: true,
+        // selectable: true,
         columns: [
             { title: "소속사", field: "org_nm", hozAlign: "center" },
             {
@@ -49,6 +49,7 @@ function loadHr011TableData() {
 
             // 데이터 없으면 setData 호출하지 않고, placeholder가 표시되도록 처리 가능
             window.hr011Table.setData(dataArray);
+            window.hr011Table.redraw();
         },
         error: function() { alert("Tab1 데이터 로드 실패"); }
     });
