@@ -79,7 +79,7 @@ public class Hr010Controller {
         System.out.println("select_tab2 호출됨, param = " + devId);
         List<Map<String, Object>> reslist = hr010Service.select_tab2_1(devId);
         // 확인용 2
-        System.out.println("tab2 조회 결과 = " + reslist);
+        System.out.println("tab2_1 조회 결과 = " + reslist);
         mv.addObject("res", reslist);
         return mv;
     }
@@ -92,7 +92,7 @@ public class Hr010Controller {
         System.out.println("select_tab2 호출됨, param = " + devId);
         List<Map<String, Object>> reslist = hr010Service.select_tab2_2(devId);
         // 확인용 2
-        System.out.println("tab2 조회 결과 = " + reslist);
+        System.out.println("tab2_2 조회 결과 = " + reslist);
         mv.addObject("res", reslist);
         return mv;
     }
