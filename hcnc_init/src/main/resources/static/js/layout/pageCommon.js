@@ -27,7 +27,7 @@ const PageCommon = {
   init() {
     this.chkPagePath(currentPath);
     this.updatePageCommon();
-    this.updatePageTitle();
+    //this.updatePageTitle();
   },
 
   // 현재페이지 경로체크
@@ -52,8 +52,15 @@ const PageCommon = {
   // pageinfo 셋팅 (타이틀, 네비게이션, 서브타이틀)
   updatePageCommon() {
     const pageTitle = document.querySelector(".page-title");
+//    if (pageTitle) {
+//      const title = this.currentPage.depth1?.title;
+//      pageTitle.textContent = title;
+//    }
     if (pageTitle) {
-      const title = this.currentPage.depth1?.title;
+      // depth3 > depth2 > depth1 순으로 메인 타이틀 표시
+      const title =
+        this.currentPage.depth2?.title ||
+        this.currentPage.depth1?.title;
       pageTitle.textContent = title;
     }
 

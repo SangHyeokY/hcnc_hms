@@ -19,9 +19,16 @@
 </th:block>
 
 <th:block layout:fragment="content">
+    <script>
+        <!--  테이블이 2개 이상 들어가는 경우 whitefull이 두개 이상들어가면 사용필요-->
+        $(document).ready(function() {
+            $(document).ready(function() {
+                $('.contents-wrap > .white-full').addClass('no-white');
+            });
+        });
+    </script>
     <div class="content common-code-page">
         <div class="form-wrap">
-
             <div class="common-code-wrap">
                 <section class="white-full common-code-section">
                     <div class="content-title fl-sb fl-ac">

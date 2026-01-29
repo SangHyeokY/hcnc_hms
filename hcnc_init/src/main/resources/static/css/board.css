@@ -68,7 +68,7 @@ table a.btn {padding:3px 10px;}
 
 /* Tabulate */
 .tabulator-row.tabulator-selectable:hover .tabulator-cell {background-color: #fff8f8 !important; color: #ed2455;}
-.tabulator-row.tabulator-selected div.tabulator-cell {color: #ff8000 !important; font-weight: 500 !important; background-color: #fff9da !important}
+.tabulator-row.tabulator-selected div.tabulator-cell {color: #ff8000 !important; font-weight: 500 !important; background-color: #F4F7FF !important}
 .tabulator .tabulator-header {width: auto;}
 .tabulator-row .tabulator-cell.tabulator-editing > * {font-size: 15px !important;}
 
