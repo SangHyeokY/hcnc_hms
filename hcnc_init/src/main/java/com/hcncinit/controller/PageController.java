@@ -69,4 +69,11 @@ public class PageController {
         mv.setViewName("views/hr011/hr015");
         return mv;
     }
+
+    @GetMapping("/hr014")
+    public ModelAndView devRateHistory() {
+        ModelAndView mv = new ModelAndView();
+        mv.setViewName("views/hr011/hr014");
+        return mv;
+    }
 }

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hcncinit.Hr014Mapper">
+
+    <!-- 개발자 프로젝트/단가 이력 조회 -->
+    <select id="selectList" resultType="hashmap" parameterType="map">
+        SELECT
+              prj.dev_prj_id
+            , prj.dev_id
+            , prj.inprj_yn
+            , prj.st_dt
+            , prj.ed_dt
+            , CONCAT(
+                IFNULL(DATE_FORMAT(prj.st_dt, '%Y.%m'), ''),
+                ' ~ ',
+                IFNULL(DATE_FORMAT(prj.ed_dt, '%Y.%m'), '')
+              ) AS st_ed_dt
+            , prj.cust_nm
+            , prj.prj_nm
+            , rate.rate_amt
+            , prj.job_cd AS role_nm
+            , prj.stack_txt
+            , prj.alloc_pct
+            , prj.remark
+        FROM tb_dev_prj_info prj
+        LEFT JOIN tb_dev_rate_info rate
+          ON prj.dev_prj_id = rate.dev_prj_id
+         AND prj.dev_id = rate.dev_id
+         AND rate.del_yn = 'N'
+         AND rate.use_yn = 'Y'
+        WHERE prj.del_yn = 'N'
+          AND prj.use_yn = 'Y'
+          AND prj.dev_id = #{dev_id}
+        ORDER BY prj.st_dt DESC, prj.dev_prj_id DESC
+    </select>
+
+</mapper>

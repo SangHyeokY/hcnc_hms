@@ -140,6 +140,7 @@ function buildUserTable() {
     });
 }
 
+// 사용자 목록 조회
 function loadUserTableData() {
     if (!userTable || typeof userTable.setData !== "function") {
         return;
@@ -170,6 +171,7 @@ function loadUserTableData() {
 
 }
 
+// 사용자 신규/수정 저장
 function upsertUserBtn() {
     var userId = $.trim($("#write_user_id").val());
     var userNm = $.trim($("#write_user_nm").val());
@@ -231,7 +233,7 @@ function upsertUserBtn() {
     });
 }
 
-
+// 공통코드(권한/직무/부서) 콤보 조회
 function selectCommonCodesForUser(done) {
     $.ajax({
         url: "/cm010/cdList",
@@ -268,6 +270,7 @@ function selectCommonCodesForUser(done) {
     });
 }
 
+// 공통 콤보 옵션 렌더링
 function fillSelect(selector, list) {
     var $sel = $(selector);
     $sel.empty();
@@ -280,12 +283,7 @@ function fillSelect(selector, list) {
 
 
 
-
-
-
-
-
-
+// 사용자 삭제 처리
 function deleteUserRows() {
     var selectedRows = userTable.getSelectedRows();
     if (selectedRows.length === 0) {
@@ -317,6 +315,7 @@ function deleteUserRows() {
     });
 }
 
+// 사용자 등록/수정 모달 오픈
 function openUserWriteModal(type) {
     currentMode = type;
     $(".edit-mode").text(type === "insert" ? "등록" : "수정");
@@ -363,10 +362,12 @@ function openUserWriteModal(type) {
     document.getElementById("write-user-area").style.display = "block";
 }
 
+// 사용자 등록/수정 모달 닫기
 function closeUserWriteModal() {
     document.getElementById("write-user-area").style.display = "none";
 }
 
+// 사용자 상세 보기 모달 오픈
 function openUserViewModal(rowData) {
     $("#view_user_id").text(rowData.user_id || "");
     $("#view_user_nm").text(rowData.user_nm || "");
@@ -382,6 +383,7 @@ function openUserViewModal(rowData) {
     document.getElementById("view-user-area").style.display = "block";
 }
 
+// 사용자 상세 보기 모달 닫기
 function closeUserViewModal() {
     document.getElementById("view-user-area").style.display = "none";
 }

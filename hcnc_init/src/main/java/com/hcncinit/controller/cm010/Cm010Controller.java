@@ -20,6 +20,7 @@ public class Cm010Controller {
     private Cm010Service cm010Service;
 
     @RequestMapping("/list")
+    // 사용자 목록 조회
     public ModelAndView list(@RequestParam(required = false) Map<String, Object> map) {
         ModelAndView mv = new ModelAndView("jsonView");
         List<Map<String, Object>> list = cm010Service.list(map);
@@ -29,6 +30,7 @@ public class Cm010Controller {
     }
 
     @RequestMapping("/cdList")
+    // 공통코드(권한/직무/부서) 조회
     public ModelAndView cdList(Map<String, Object> map) {
         ModelAndView mv = new ModelAndView("jsonView");
         List<Map<String, Object>> cdList = cm010Service.commonCodesForUser();
@@ -39,6 +41,7 @@ public class Cm010Controller {
 
 
     @RequestMapping("/save")
+    // 사용자 신규/수정 저장
     public ModelAndView save(@RequestParam Map<String, Object> map, HttpSession session) {
         ModelAndView mv = new ModelAndView("jsonView");
         applyLoginUser(map, session);
@@ -49,6 +52,7 @@ public class Cm010Controller {
     }
 
     @RequestMapping("/delete")
+    // 사용자 삭제 처리
     public ModelAndView delete(@RequestParam Map<String, Object> map, HttpSession session) {
         ModelAndView mv = new ModelAndView("jsonView");
         applyLoginUser(map, session);

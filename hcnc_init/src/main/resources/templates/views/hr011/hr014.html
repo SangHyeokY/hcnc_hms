@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layout/layout}">
+
+<th:block layout:fragment="content">
+    <th:block layout:fragment="additionalButtons">
+        <style>
+            .contents-wrap .btn-new,
+            .contents-wrap .btn-edit,
+            .contents-wrap .btn-delete {
+                display: none;
+            }
+        </style>
+    </th:block>
+
+    <div class="content list-area">
+        <section class="white-full">
+            <div class="content-title fl-sb fl-ac">
+                <h4 class="page-sub-title">단가/프로젝트 이력</h4>
+            </div>
+            <div class="content-body">
+                <div id="TABLE_HR014"></div>
+            </div>
+        </section>
+    </div>
+
+    <script src="/js/api/hr011/hr014.js"></script>
+</th:block>
+
+</html>
