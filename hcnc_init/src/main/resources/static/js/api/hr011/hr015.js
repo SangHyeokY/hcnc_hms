@@ -1,5 +1,18 @@
 var tableA;
-var tableB;
+var riskState = {
+    leave_txt: "",
+    claim_txt: "",
+    sec_txt: "",
+    re_in_yn: "N",
+    memo: ""
+};
+var riskKeys = [
+    { key: "leave_txt", label: "이탈이력" },
+    { key: "claim_txt", label: "클레임" },
+    { key: "sec_txt", label: "보안이슈" },
+    { key: "memo_txt", label: "관리메모" }
+];
+var riskActiveKey = "leave_txt";
 
 $(document).ready(function () {
     buildTables();
@@ -129,53 +142,7 @@ function buildTables() {
         data: []
     });
 
-    function riskValueFormatter(cell) {
-        if (!cell || typeof cell.getRow !== "function") {
-            return "";
-        }
-        var rowData = cell.getRow().getData();
-        if (rowData.rsk_key === "re_in_yn") {
-            var checked = cell.getValue() === "Y" ? " checked" : "";
-            return "<input type='checkbox'" + checked + " />";
-        }
-        return cell.getValue() || "";
-    }
-
-    tableB = new Tabulator("#TABLE_HR015_B", {
-        layout: "fitColumns",
-        headerSort: true,
-        placeholder: "데이터 없음",
-        headerHozAlign: "center",
-        columns: [
-            { title: "구 분", field: "label", hozAlign: "center", widthGrow: 2 },
-            {
-                title: "내 용",
-                field: "value",
-                hozAlign: "center",
-                widthGrow: 4,
-                formatter: riskValueFormatter,
-                editor: "input",
-                editable: function (cell) {
-                    var rowData = cell.getRow().getData();
-                    return rowData.rsk_key !== "re_in_yn";
-                },
-                cellClick: function (e, cell) {
-                    if (!cell || typeof cell.getRow !== "function") {
-                        return;
-                    }
-                    var rowData = cell.getRow().getData();
-                    if (rowData.rsk_key !== "re_in_yn") {
-                        cell.edit();
-                        return;
-                    }
-                    var value = cell.getValue() === "Y" ? "N" : "Y";
-                    cell.getRow().update({ value: value });
-                },
-                headerSort: false
-            }
-        ],
-        data: []
-    });
+    buildRiskList();
 }
 
 function loadTableA() {
@@ -196,17 +163,19 @@ function loadTableA() {
 }
 
 function loadTableB() {
-    if (!tableB || typeof tableB.setData !== "function") {
-        return;
-    }
-
     $.ajax({
         url: "/hr015/b/list",
         type: "GET",
         success: function (response) {
             var risk = (response.list && response.list[0]) ? response.list[0] : {};
-            tableB.setData(buildRiskRows(risk));
-            $("#HR015_RISK_MEMO").val(risk.memo || "");
+            riskState.leave_txt = risk.leave_txt || "";
+            riskState.claim_txt = risk.claim_txt || "";
+            riskState.sec_txt = risk.sec_txt || "";
+            riskState.re_in_yn = risk.re_in_yn || "N";
+            riskState.memo = risk.memo || "";
+
+            $("#HR015_REIN_CHECK").prop("checked", riskState.re_in_yn === "Y");
+            setRiskActive(riskActiveKey);
         },
         error: function () {
             alert("탭2 데이터를 불러오는 중 오류가 발생했습니다.");
@@ -238,17 +207,18 @@ function saveTableA() {
 }
 
 function saveTableB() {
-    if (!tableB) {
-        return;
-    }
-
-    var risk = buildRiskPayload(tableB.getData());
-    risk.memo = $.trim($("#HR015_RISK_MEMO").val());
+    riskState.re_in_yn = $("#HR015_REIN_CHECK").is(":checked") ? "Y" : "N";
 
     $.ajax({
         url: "/hr015/b/save",
         type: "POST",
-        data: risk,
+        data: {
+            leave_txt: riskState.leave_txt,
+            claim_txt: riskState.claim_txt,
+            sec_txt: riskState.sec_txt,
+            re_in_yn: riskState.re_in_yn,
+            memo: riskState.memo
+        },
         success: function (response) {
             if (response.success) {
                 loadTableB();
@@ -263,34 +233,46 @@ function saveTableB() {
     });
 }
 
-function buildRiskRows(risk) {
-    return [
-        { rsk_key: "leave_txt", label: "이탈이력", value: risk.leave_txt || "" },
-        { rsk_key: "claim_txt", label: "클레임", value: risk.claim_txt || "" },
-        { rsk_key: "sec_txt", label: "보안이슈", value: risk.sec_txt || "" },
-        { rsk_key: "re_in_yn", label: "재투입 가능 여부", value: risk.re_in_yn || "N" }
-    ];
-}
-
-function buildRiskPayload(rows) {
-    var payload = {
-        leave_txt: "",
-        claim_txt: "",
-        sec_txt: "",
-        re_in_yn: "N"
-    };
-
-    if (!Array.isArray(rows)) {
-        return payload;
+function buildRiskList() {
+    var $list = $("#HR015_RISK_LIST");
+    if ($list.length === 0) {
+        return;
     }
+    $list.empty();
+    riskKeys.forEach(function (item) {
+        var $btn = $("<div class='risk-item'></div>");
+        $btn.text(item.label);
+        $btn.attr("data-key", item.key);
+        $btn.on("click", function () {
+            setRiskActive(item.key);
+        });
+        $list.append($btn);
+    });
 
-    rows.forEach(function (row) {
-        if (row.rsk_key) {
-            payload[row.rsk_key] = row.value;
+    $("#HR015_RISK_TEXT").on("input", function () {
+        var value = $(this).val();
+        if (riskActiveKey === "memo_txt") {
+            riskState.memo = value;
+        } else {
+            riskState[riskActiveKey] = value;
         }
     });
 
-    return payload;
+    $("#HR015_REIN_CHECK").on("change", function () {
+        riskState.re_in_yn = $(this).is(":checked") ? "Y" : "N";
+    });
+}
+
+function setRiskActive(key) {
+    riskActiveKey = key;
+    $("#HR015_RISK_LIST .risk-item").removeClass("active");
+    $("#HR015_RISK_LIST .risk-item[data-key='" + key + "']").addClass("active");
+
+    if (key === "memo_txt") {
+        $("#HR015_RISK_TEXT").val(riskState.memo || "");
+    } else {
+        $("#HR015_RISK_TEXT").val(riskState[key] || "");
+    }
 }
 
 function buildSaveRows(rows) {
