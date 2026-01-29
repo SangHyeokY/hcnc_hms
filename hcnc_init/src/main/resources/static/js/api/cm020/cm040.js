@@ -201,11 +201,11 @@ function buildTables() {
             { title: "코드", field: "cd", hozAlign: "center" },
             { title: "코드명", field: "cd_nm", width: 150 },
             { title: "정렬순서", field: "sort_no", hozAlign: "center" },
-            { title: "부가정보1", field: "adinfo_01" },
-            { title: "부가정보2", field: "adinfo_02" },
-            { title: "부가정보3", field: "adinfo_03" },
-            { title: "부가정보4", field: "adinfo_04" },
-            { title: "부가정보5", field: "adinfo_05" },
+            { title: "부가정보1", field: "adinfo_01" , formatter: amountFormatter},
+            { title: "부가정보2", field: "adinfo_02" , formatter: amountFormatter},
+            { title: "부가정보3", field: "adinfo_03" , formatter: amountFormatter},
+            { title: "부가정보4", field: "adinfo_04" , formatter: amountFormatter},
+            { title: "부가정보5", field: "adinfo_05" , formatter: amountFormatter},
             { title: "사용여부", field: "use_yn", hozAlign: "center" }
         ],
         data: [],
@@ -226,6 +226,22 @@ function buildTables() {
         }
     });
 }
+
+// 계약단가(,)
+function amountFormatter(cell) {
+    if (!cell.getValue() === null || cell.getValue() === undefined) {
+        return "";
+    }
+    comma = function (str) {
+        str = String(str);
+        return str.replace(/(\d)(?=(?:\d{3})+(?!\d))/g, '$1,');
+    }
+
+    return comma(cell.getValue());
+}
+
+
+
 
 // 코드그룹 목록 조회
 function loadMainTableData() {
