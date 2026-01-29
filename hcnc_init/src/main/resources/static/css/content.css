@@ -71,6 +71,18 @@
 .tabulator .tabulator-header .tabulator-col.tabulator-col-group .tabulator-col-group-cols {border-top: 2px solid #ebedf1 !important;}
 
 /*===============================================================================
+  HR014 
+================================================================================*/
+button.btn.btn-add-skill {
+  background-color: #ffffff;
+      color: #1d67f8;
+      border-radius: 5px;
+      border: 1px solid #1d67f8;
+      padding: 10px 8px;
+      font-size: 14px;
+      font-weight: 500;
+}
+/*===============================================================================
   HR015 - score tables alignment
 ================================================================================*/
 #TABLE_HR015_A .tabulator-col.tabulator-sortable {
@@ -236,7 +248,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 /*===============================================================================
   Tag input
 ================================================================================*/
-.tag-input {margin-top: 16px;}
+
 .tag-input label {display: block; margin-bottom: 6px; font-weight: 600; color: #2f3542;}
 .tag-input-box {display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 33px 10px; border: 1px solid #dfe4ea; border-radius: 4px; background: #f8fafc; max-width: 100%;}
 .tag-input-box:focus-within {border-color: #8bb7ff; box-shadow: 0 0 0 3px rgba(139, 183, 255, 0.25);}
@@ -245,6 +257,11 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .tag-item {display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 999px; background: #e6f0ff; color: #2c5282; font-size: 13px; font-weight: 600;}
 .tag-select-row {display: flex; align-items: center; gap: 8px; margin-top: 6px;}
 .tag-select-row select {min-width: 140px;}
+.tag-help {font-size: 12px; color: #6b7280; margin-bottom: 6px;}
+.tag-input-box .tag-help {margin-bottom: 0; white-space: nowrap;}
+.date-range {display: flex; align-items: center; gap: 8px;}
+.full-row .table-cell:last-child {display: none;}
+.full-width {flex: 1 1 100%;}
 .tag-remove {border: none; background: #2c5282; color: #fff; width: 18px; height: 18px; border-radius: 50%; font-size: 11px; line-height: 18px; cursor: pointer;}
 .tag-remove:hover {background: #1a365d;}
 

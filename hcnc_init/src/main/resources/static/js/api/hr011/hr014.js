@@ -44,7 +44,14 @@ $(document).ready(function () {
         removeSkillTag(code);
     });
 
-    setComCode("write_hr014_job_cd", "job_cd", "");
+    setComCode("write_hr014_job_cd", "job_cd", "", "cd", "cd_nm", function () {
+        if ($("#write_hr014_job_cd option[value='']").length === 0) {
+            $("#write_hr014_job_cd").prepend("<option value=''>선택</option>");
+        }
+        if (!$("#write_hr014_job_cd").val()) {
+            $("#write_hr014_job_cd option:first").prop("selected", true);
+        }
+    });
     setComCode("write_hr014_skl_cd", "skl_id", "", "cd", "cd_nm", function (res) {
         skillOptions = res || [];
         buildSkillMap();
@@ -179,7 +186,74 @@ function clearHr014Form() {
 
 // 저장 버튼
 function saveHr014Row() {
-    alert("저장 API는 아직 구현되지 않았습니다.");
+    var payload = {
+        dev_prj_id: $("#write_hr014_dev_prj_id").val(),
+        inprj_yn: $("#write_hr014_inprj_yn").val(),
+        st_dt: $("#write_hr014_st_dt").val(),
+        ed_dt: $("#write_hr014_ed_dt").val(),
+        cust_nm: $("#write_hr014_cust_nm").val(),
+        prj_nm: $("#write_hr014_prj_nm").val(),
+        rate_amt: $("#write_hr014_rate_amt").val(),
+        job_cd: $("#write_hr014_job_cd").val(),
+        stack_txt: $("#write_hr014_stack_txt").val(),
+        alloc_pct: $("#write_hr014_alloc_pct").val(),
+        remark: $("#write_hr014_remark").val()
+    };
+
+    if (!payload.inprj_yn) {
+        alert("당사 여부를 선택해주세요.");
+        return;
+    }
+    if (!payload.st_dt) {
+        alert("시작일을 입력해주세요.");
+        return;
+    }
+    if (!payload.ed_dt) {
+        alert("종료일을 입력해주세요.");
+        return;
+    }
+    if (!payload.cust_nm) {
+        alert("고객사를 입력해주세요.");
+        return;
+    }
+    if (!payload.prj_nm) {
+        alert("프로젝트명을 입력해주세요.");
+        return;
+    }
+    if (!payload.rate_amt) {
+        alert("계약단가를 입력해주세요.");
+        return;
+    }
+    if (!payload.job_cd) {
+        alert("역할을 선택해주세요.");
+        return;
+    }
+    if (!payload.alloc_pct) {
+        alert("투입률을 입력해주세요.");
+        return;
+    }
+    if (!payload.stack_txt) {
+        alert("기술스택을 선택해주세요.");
+        return;
+    }
+
+    $.ajax({
+        url: "/hr014/save",
+        type: "POST",
+        data: payload,
+        success: function (response) {
+            if (response.success) {
+                closeHr014Modal();
+                loadHr014Table();
+                alert("저장되었습니다.");
+            } else {
+                alert("저장에 실패했습니다.");
+            }
+        },
+        error: function () {
+            alert("저장 중 오류가 발생했습니다.");
+        }
+    });
 }
 
 // 삭제 버튼
@@ -189,7 +263,25 @@ function deleteHr014Row() {
         alert("삭제할 행을 선택해주세요.");
         return;
     }
-    alert("삭제 API는 아직 구현되지 않았습니다.");
+    if (!confirm("삭제하시겠습니까?")) {
+        return;
+    }
+    $.ajax({
+        url: "/hr014/delete",
+        type: "POST",
+        data: { dev_prj_id: rowData.dev_prj_id },
+        success: function (response) {
+            if (response.success) {
+                loadHr014Table();
+                alert("삭제되었습니다.");
+            } else {
+                alert("삭제에 실패했습니다.");
+            }
+        },
+        error: function () {
+            alert("삭제 중 오류가 발생했습니다.");
+        }
+    });
 }
 
 // 기술스택 태그 맵 구성
@@ -239,6 +331,7 @@ function removeSkillTag(code) {
 // 태그 렌더링
 function renderSkillTags() {
     var $list = $("#hr014SkillTagList");
+    var $help = $("#hr014SkillTagList").closest(".tag-input-box").find(".tag-help");
     $list.empty();
     skillTags.forEach(function (tag) {
         var $item = $("<li class=\"tag-item\"></li>");
@@ -248,6 +341,9 @@ function renderSkillTags() {
         $item.append($remove);
         $list.append($item);
     });
+    if ($help.length) {
+        $help.toggle(skillTags.length === 0);
+    }
     var codes = skillTags.map(function (t) { return t.code; }).join(",");
     $("#write_hr014_stack_txt").val(codes);
 }
