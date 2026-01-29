@@ -59,7 +59,15 @@
         </section>
     </div>
 
-    <script src="/js/api/hr011/hr015.js"></script>
+    <script src="/js/api/hr011/hr015.js">
+
+        <!-- 테이블이 2개 이상 들어가는 경우 whitefull이 두개 이상들어가면 사용필요 -->
+        $(document).ready(function() {
+            $(document).ready(function() {
+                $('.contents-wrap > .white-full').addClass('no-white');
+            });
+        });
+    </script>
 </th:block>
 
 </html>

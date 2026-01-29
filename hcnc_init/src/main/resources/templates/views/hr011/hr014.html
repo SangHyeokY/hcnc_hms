@@ -38,7 +38,7 @@
                 <article>
                     <div class="div-table">
                         <ul>
-                            <li class="table-col fl-ac">
+                            <li class="table-col fl-ac full-row">
                                 <div class="table-cell">
                                     <p class="cell-tit">당사 여부</p>
                                     <div class="cell-info">
@@ -49,14 +49,18 @@
                                         </select>
                                     </div>
                                 </div>
+                                <div class="table-cell"></div>
+                            </li>
+                            <li class="table-col fl-ac full-row">
                                 <div class="table-cell">
                                     <p class="cell-tit">기간</p>
-                                    <div class="cell-info">
+                                    <div class="cell-info date-range">
                                         <input type="date" class="text" id="write_hr014_st_dt">
                                         <span class="date-split">~</span>
                                         <input type="date" class="text" id="write_hr014_ed_dt">
                                     </div>
                                 </div>
+                                <div class="table-cell"></div>
                             </li>
                             <li class="table-col fl-ac">
                                 <div class="table-cell">
@@ -76,32 +80,46 @@
                                 <div class="table-cell">
                                     <p class="cell-tit">계약단가</p>
                                     <div class="cell-info">
-                                        <input type="text" class="text" id="write_hr014_rate_amt" placeholder="">
+                                        <input type="text" class="text" id="write_hr014_rate_amt" placeholder="금액 입력">
                                     </div>
                                 </div>
                                 <div class="table-cell">
                                     <p class="cell-tit">역할</p>
                                     <div class="cell-info">
-                                        <input type="text" class="text" id="write_hr014_role_nm" placeholder="">
+                                        <select id="write_hr014_job_cd"></select>
                                     </div>
                                 </div>
                             </li>
-                            <li class="table-col fl-ac">
+                            <li class="table-col fl-ac full-row">
                                 <div class="table-cell">
+                                    <p class="cell-tit" >투입률</p>
+                                    <div class="cell-info">
+                                        <input type="text" class="text" id="write_hr014_alloc_pct" placeholder="숫자%">
+                                    </div>
+                                </div>
+                                <div class="table-cell"></div>
+                            </li>
+                            <li class="table-col fl-ac full-row" style="align-items: start;">
+                                <div class="table-cell full-width">
                                     <p class="cell-tit">기술스택</p>
                                     <div class="cell-info">
-                                        <input type="text" class="text" id="write_hr014_stack_txt" placeholder="">
+                                        <div class="tag-input">
+                                            <div class="tag-input-box">
+                                                <div class="tag-help">태그 선택 후 추가 버튼 클릭</div>
+                                                <ul class="tag-list" id="hr014SkillTagList" ></ul>
+                                            </div>
+                                            <div class="tag-select-row">
+                                                <select id="write_hr014_skl_cd"></select>
+                                                <button type="button" class="btn btn-add-skill">추가</button>
+                                            </div>
+                                            <input type="hidden" id="write_hr014_stack_txt">
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="table-cell">
-                                    <p class="cell-tit">투입률</p>
-                                    <div class="cell-info">
-                                        <input type="text" class="text" id="write_hr014_alloc_pct" placeholder="%">
-                                    </div>
-                                </div>
+                                <div class="table-cell"></div>
                             </li>
-                            <li class="table-col fl-ac">
-                                <div class="table-cell">
+                            <li class="table-col fl-ac full-row">
+                                <div class="table-cell full-width">
                                     <p class="cell-tit">비고</p>
                                     <div class="cell-info">
                                         <textarea class="text" id="write_hr014_remark" placeholder="비고"></textarea>
@@ -122,6 +140,7 @@
         </div>
     </div>
 
+    <script src="/js/api/common.js"></script>
     <script src="/js/api/hr011/hr014.js"></script>
 </th:block>
 
