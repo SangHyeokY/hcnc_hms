@@ -28,8 +28,8 @@
         </if>
     </select>
 
-    <!-- 인적사항 신규 등록 -->
-    <insert id="insert_hr011" parameterType="map">
+    <!-- 인적사항 신규 등록/수정 -->
+    <insert id="insert_hr010" parameterType="map">
         INSERT INTO tb_dev_info (
             dev_id,
             brdt,
@@ -107,8 +107,20 @@
         WHERE dev_id LIKE CONCAT(#{dev_type}, '%')
     </select>
 
+    <!-- 인적사항 삭제 -->
+    <update id="delete_hr010" parameterType="map">
+        UPDATE tb_dev_info
+        SET del_yn = 'Y',
+            del_ts = NOW(),
+            del_by = #{dev_id},
+            upd_ts = NOW(),
+            upd_by = #{dev_id}
+        WHERE dev_id = #{dev_id}
+    </update>
 
-    <!-- 폐기 -->
+
+
+    <!-- 폐기 // hr011_old -->
     <!-- 인력관리 > 기본 인적사항 (상세) (임시/검색x), 임시로 가장 첫번째 데이터 불러오기 -->
     <select id="select_hr011" resultType="hashmap" parameterType="string">
         SELECT dev_nm -- 성명

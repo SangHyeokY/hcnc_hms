@@ -40,12 +40,19 @@
         <div class="modal-container-detail">
             <div class="header">
                 <h4>인력 관리 <span class="modal-title">상세</span></h4>
-                <span class="modal-close" onclick="closeUserViewModal()"></span>
+<!--                <div class="btn-area">-->
+<!--                    <button type="button" class="btn-new">신규</button>-->
+<!--                    <button type="button" class="btn-edit">수정</button>-->
+<!--                    <button type="button" class="btn-delete">삭제</button>-->
+<!--                </div>-->
             </div>
 
             <div class="modal-content" style="display: flex;">
                 <section>
-                    <h5 class="mg-b15">○ 인적사항</h5>
+                    <div style="display: flex;">
+                        <h5 class="mg-b15 mg-r5">○ 인적사항</h5>
+                        <label class="show_devId"></label>
+                    </div>
                     <table class="hrm-detail-table">
                         <colgroup>
                             <col style="width: 20%;">
@@ -191,48 +198,30 @@
                         </tr>
                     </table>
                 </section>
-                <section style="flex: 0 0 50%;">
+                <section>
                     <!-- 우측 -->
-                    <div class="wp100">
-                        <div class="tap-area">
-                            <span class="tap-btn">소속및 계약정보</span>
-                            <span class="tap-btn">보유역량 및 숙련도</span>
-                            <span class="tap-btn">프로젝트</span>
-                            <span class="tap-btn">평가 및 리스크</span>
-                        </div>
-                        <table class="temp-table">
-                            <tr>
-                                <th>Backend</th>
-                                <td>-</td></tr>
-                            <tr>
-                                <th>Frontend</th>
-                                <td>-</td></tr>
-                            <tr>
-                                <th>Mobile</th>
-                                <td>-</td>
-                            </tr>
-                            <tr>
-                                <th>DB</th>
-                                <td>-</td>
-                            </tr>
-                            <tr>
-                                <th>Infra</th>
-                                <td>-</td>
-                            </tr>
-                            <tr>
-                                <th>DevOps</th>
-                                <td>-</td>
-                            </tr>
-                            <tr>
-                                <th>ERP/MES</th>
-                                <td>-</td>
-                            </tr>
-                            <tr>
-                                <th>기타</th>
-                                <td>-</td>
-                            </tr>
-                        </table>
+                    <div class="tap-area mg-b15">
+                        <span class="tap-btn fs13 active" data-tab="tab1">소속 및 계약정보</span>
+                        <span class="tap-btn fs13" data-tab="tab2">보유역량 및 숙련도</span>
+                        <span class="tap-btn fs13" data-tab="tab3">프로젝트</span>
+                        <span class="tap-btn fs13" data-tab="tab4">평가 및 리스크</span>
                     </div>
+
+                    <div class="tab-content">
+                        <div class="tab-panel" id="tab1">
+                            <div id="tab-table1">11</div>
+                        </div>
+                        <div class="tab-panel" id="tab2" style="display:none;">
+                            <div id="tab-table2">22</div>
+                        </div>
+                        <div class="tab-panel" id="tab3" style="display:none;">
+                            <div id="tab-table3">33</div>
+                        </div>
+                        <div class="tab-panel" id="tab4" style="display:none;">
+                            <div id="tab-table4">44</div>
+                        </div>
+                    </div>
+
                 </section>
             </div>
             <div class="modal-btn">

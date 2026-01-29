@@ -235,3 +235,25 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .modal-btn .btn.btn-save {background: #0554f8; color: #fff;}
 
 .modal-container-detail {display: flex; flex-direction: column; max-height: 90vh; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); min-width: 80vw; max-width: calc(100% - 32px); background: #fff; border-radius: 6px; padding: 20px; box-sizing: border-box;}
+.tap-area {
+    display: flex;
+    width: 100%;
+    gap: 8px;
+    border-bottom: 2px solid #ccc;
+    box-sizing: border-box;
+}
+.tap-btn {
+    flex: 1;
+    text-align: center;
+    padding: 5px 10px;
+    font-weight: 500;
+    color: #555;
+    border-radius: 6px;
+    background-color: #f8f8f8;
+    cursor: pointer;
+}
+
+.tap-btn.active {
+    background: #0554f8;
+    color: #ffffff;
+}
