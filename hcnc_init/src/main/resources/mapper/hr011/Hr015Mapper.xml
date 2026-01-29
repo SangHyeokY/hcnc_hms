@@ -18,14 +18,14 @@
          AND eval.dev_id = #{dev_id}
          AND eval.del_yn = 'N'
         WHERE cd.grp_cd =
-            <choose>
-                <when test="eval_grp != null and eval_grp != ''">
+        <choose>
+            <when test="eval_grp != null and eval_grp != ''">
                     #{eval_grp}
-                </when>
-                <otherwise>
+            </when>
+            <otherwise>
                     'eval_id'
-                </otherwise>
-            </choose>
+            </otherwise>
+        </choose>
           AND cd.del_yn = 'N'
           AND cd.use_yn = 'Y'
         ORDER BY cd.sort_no
@@ -83,7 +83,28 @@
         </if>
     </insert>
 
-    <insert id="saveB" parameterType="map">
+    <update id="updateLatestRiskByDev" parameterType="map">
+        UPDATE tb_dev_rsk_info
+           SET leave_txt = #{leave_txt},
+               claim_txt = #{claim_txt},
+               sec_txt = #{sec_txt},
+               re_in_yn = #{re_in_yn},
+               memo = #{memo},
+               use_yn = 'Y',
+               del_yn = 'N',
+               upd_ts = NOW(),
+               upd_by = #{userId}
+         WHERE rsk_id = (
+            SELECT rsk_id
+              FROM tb_dev_rsk_info
+             WHERE dev_id = #{dev_id}
+               AND del_yn = 'N'
+             ORDER BY rsk_dt DESC, rsk_id DESC
+             LIMIT 1
+         )
+    </update>
+
+    <insert id="insertRisk" parameterType="map">
         INSERT INTO tb_dev_rsk_info (
             dev_id,
             rsk_dt,

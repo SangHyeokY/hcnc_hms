@@ -26,7 +26,11 @@ public class Hr015Service {
     }
 
     public int saveB(Map<String, Object> map) {
-        return this.sqlSession.insert("com.hcncinit.Hr015Mapper.saveB", map);
+        int updated = this.sqlSession.update("com.hcncinit.Hr015Mapper.updateLatestRiskByDev", map);
+        if (updated > 0) {
+            return updated;
+        }
+        return this.sqlSession.insert("com.hcncinit.Hr015Mapper.insertRisk", map);
     }
 
 }
