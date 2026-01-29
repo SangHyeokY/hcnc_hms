@@ -2,19 +2,20 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/layout}">
 
-<th:block layout:fragment="tab1Content">
-    <div class="tab-panel" id="tab2">
-
-        <div class="content list-area">
-            <section class="white-full">
-                <div class="content-body">
-                    <div id="TABLE_HR012_A">
-
-                    </div>
-                </div>
-            </section>
+<th:block th:fragment="tab2Content">
+    <div class="content list-area">
+        <div class="tab-area mg-b15">
+            <span class="tab-sub-btn fs13 active" data-tab="tab2-1">보유역량</span>
+            <span class="tab-sub-btn fs13" data-tab="tab2-2">숙련도</span>
         </div>
-
+        <section class="white-full">
+            <div class="content-body">
+                <!-- Tabulator 테이블 div -->
+                <div id="TABLE_HR012_A"></div>
+                <!-- Tabulator 테이블 div -->
+                <div id="TABLE_HR012_B" style="display:none;"></div>
+            </div>
+        </section>
     </div>
 </th:block>
 

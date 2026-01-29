@@ -1,48 +1,55 @@
 // hr011.js
-window.initTab1 = function () {
-
-    if (!window.hr011Table) {
-        buildHr011Table();
-        loadHr011TableData();
-    }
-    window.hr011Table?.redraw(true);
+window.initTab1 = function() {
+    if (!window.hr011Table) buildHr011Table();
+    loadHr011TableData();
 };
 
 function buildHr011Table() {
-    if (!window.Tabulator) return;
     if (!document.getElementById("TABLE_HR011_A")) return;
 
     window.hr011Table = new Tabulator("#TABLE_HR011_A", {
         layout: "fitColumns",
         headerSort: true,
-        placeholder: "데이터 없음",
+        placeholder: "데이터 없음", // 데이터 없으면 표시
         selectable: true,
         columns: [
             { title: "소속사", field: "org_nm", hozAlign: "center" },
-            { title: "사업자유형", field: "biz_typ" },
+            {
+                title: "사업자유형",
+                field: "biz_typ",
+                formatter: function(cell) {
+                    const val = cell.getValue();
+                    if(val === "01") return "개인";
+                    if(val === "02") return "개인사업자";
+                    if(val === "03") return "법인";
+                    return val || "";
+                }
+            },
             { title: "계약시작일", field: "st_dt" },
             { title: "계약종료일", field: "ed_dt" },
-            { title: "계약금액", field: "amt" },
+            { title: "계약금액", field: "amt", hozAlign: "right", formatter:"money", formatterParams:{symbol:"₩", precision:0} },
             { title: "비고", field: "remark" }
         ],
-        data: []
+        data: [] // 초기에는 빈 배열
     });
 }
 
 function loadHr011TableData() {
+    const devId = window.currentDevId;
     if (!window.hr011Table) return;
-     const devId = window.currentDevId;
-    if (!devId) {
-        window.hr011Table.clearData();
-        return;
-    }
+
     $.ajax({
         url: "/hr010/tab1",
         type: "GET",
         data: { dev_id: devId },
         success: function(res) {
-            window.hr011Table.setData(res || []);
+            // res가 배열인지 확인, 아니면 배열로 변환
+            const dataArray = res ? (Array.isArray(res) ? res : [res]) : [];
+
+            // 데이터 없으면 setData 호출하지 않고, placeholder가 표시되도록 처리 가능
+            window.hr011Table.setData(dataArray);
         },
         error: function() { alert("Tab1 데이터 로드 실패"); }
     });
 }
+

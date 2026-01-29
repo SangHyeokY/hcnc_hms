@@ -2,6 +2,7 @@
  * 사용자 관리 - hr010.js (hcnc_hms)
  */
 var userTable;
+// var tab1Table, tab2Table, tab3Table, tab4Table;
 var currentMode = "insert";
 window.currentDevId = null;
 
@@ -19,21 +20,17 @@ $(document).ready(function () {
 
     $(".tab-panel").hide();
 
-    $(".tap-btn").on("click", function () {
-
+    // 탭 클릭 이벤트
+    $(".tab-btn").on("click", function () {
         const tabId = $(this).data("tab");
 
-        $(".tap-btn").removeClass("active");
+        $(".tab-btn").removeClass("active");
         $(this).addClass("active");
 
         $(".tab-panel").hide();
         $("#" + tabId).show();
-
-        requestAnimationFrame(() => {
-            initTab(tabId);
-        });
+        initTab(tabId);
     });
-
 
     $(".btn-search").on("click", function (event) {
         event.preventDefault();
@@ -259,38 +256,29 @@ function deleteUserRows() {
 }
 
 // 모달(팝업) 열리는 이벤트 처리
-function openUserModal(mode, data) {
+openUserModal = function(mode, data) {
     currentMode = mode;
+    if(mode === "insert") clearUserForm();
+    else fillUserForm(data || userTable.getSelectedRows()[0].getData());
 
-    if (mode === "insert") {
-        clearUserForm();
-    }
-    else if (mode === "update" || mode === "view") {
-        if (!data) {
-            var rows = userTable.getSelectedRows();
-            if (rows.length !== 1) {
-                alert("한 명만 선택해주세요.");
-                return;
-            }
-            data = rows[0].getData();
-        }
-        fillUserForm(data);
-    }
     setModalMode(mode);
     $("#view-user-area").show();
 
-    requestAnimationFrame(() => {
+    // 항상 tab1 활성화
+    $(".tab-btn").removeClass("active");
+    $(".tab-btn[data-tab='tab1']").addClass("active");
+    $(".tab-panel").hide();
+    $("#tab1").show();
 
-        // tab 버튼 active 세팅
-        $(".tap-btn").removeClass("active");
-        $(".tap-btn[data-tab='tab1']").addClass("active");
+    initAllTabs(); // 모든 tab 초기화
+};
 
-        // tab panel 제어
-        $(".tab-panel").hide();
-        $("#tab1").show();
-
-        initTab("tab1");
-    });
+// 모든 tab 초기화
+function initAllTabs() {
+    initTab1();
+    initTab2();
+    initTab3();
+    initTab4();
 }
 
 // 팝업 열리면 데이터 채워넣기 (구)
@@ -400,43 +388,11 @@ function closeUserViewModal() {
     document.getElementById("view-user-area").style.display = "none";
 }
 
-
 function initTab(tabId) {
-
-    if (!window.currentDevId && tabId !== "tab1") {ay
-            console.warn("dev_id 정보 없음");
-            return;
-        }
-
-    // 이미 초기화된 탭이면 redraw만
-    if (tabInitState[tabId]) {
-
-        const tableMap = {
-            tab1: window.hr011Table,
-            tab2: window.hr012Table,
-            tab3: window.hr013Table,
-            tab4: window.hr014Table
-        };
-
-        tableMap[tabId]?.redraw(true);
-        return;
+    switch(tabId) {
+        case "tab1": initTab1(); break;
+        case "tab2": initTab2(); break;
+        case "tab3": initTab3(); break;
+        case "tab4": initTab4(); break;
     }
-
-    // 최초 초기화
-    switch (tabId) {
-        case "tab1":
-            window.initTab1?.();
-            break;
-        case "tab2":
-            window.initTab2?.();
-            break;
-        case "tab3":
-            window.initTab3?.();
-            break;
-        case "tab4":
-            window.initTab4?.();
-            break;
-    }
-
-    tabInitState[tabId] = true;
 }

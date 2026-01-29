@@ -200,18 +200,26 @@
                 </section>
                 <section class="white-full">
                     <!-- 우측 -->
-                    <div class="tap-area mg-b15">
-                        <span class="tap-btn fs13 active" data-tab="tab1">소속 및 계약정보</span>
-                        <span class="tap-btn fs13" data-tab="tab2">보유역량 및 숙련도</span>
-                        <span class="tap-btn fs13" data-tab="tab3">프로젝트</span>
-                        <span class="tap-btn fs13" data-tab="tab4">평가 및 리스크</span>
+                    <div class="tab-area mg-b15">
+                        <span class="tab-btn fs13 active" data-tab="tab1">소속 및 계약정보</span>
+                        <span class="tab-btn fs13" data-tab="tab2">보유역량 및 숙련도</span>
+                        <span class="tab-btn fs13" data-tab="tab3">프로젝트</span>
+                        <span class="tab-btn fs13" data-tab="tab4">평가 및 리스크</span>
                     </div>
 
                     <div class="tab-content">
-                        <div layout:replace="~{views/hr010/hr011 :: tab1Content}"></div>
-                        <div layout:replace="~{views/hr010/hr012 :: tab2Content}"></div>
-                        <div layout:replace="~{views/hr010/hr013 :: tab3Content}"></div>
-                        <div layout:replace="~{views/hr010/hr014 :: tab4Content}"></div>
+                        <div id="tab1" class="tab-panel active">
+                            <div th:insert="~{views/hr010/hr011 :: tab1Content}"></div>
+                        </div>
+                        <div id="tab2" class="tab-panel">
+                            <div th:insert="~{views/hr010/hr012 :: tab2Content}"></div>
+                        </div>
+                        <div id="tab3" class="tab-panel">
+                            <div th:insert="~{views/hr010/hr013 :: tab3Content}"></div>
+                        </div>
+                        <div id="tab4" class="tab-panel">
+                            <div th:insert="~{views/hr010/hr014 :: tab4Content}"></div>
+                        </div>
                     </div>
                 </section>
             </div>

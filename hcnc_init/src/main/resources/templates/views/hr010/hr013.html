@@ -2,41 +2,15 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/layout}">
 
-<th:block layout:fragment="tab3Content">
-    <div class="tab-panel" id="tab3">
-
-        <div class="content list-area">
-            <section class="white-full">
-                <div class="content-title fl-sb fl-ac">
-                    <h4 class="page-sub-title">관리자평가 - 탭3</h4>
-                    <div class="btn-area">
-                        <button type="button" class="btn bg-primary btn-a-save">저장</button>
-                    </div>
-                </div>
-                <div class="content-body">
-                    <div id="TABLE_HR015_A"></div>
-                </div>
-            </section>
-
-            <section class="white-full">
-                <div class="content-title fl-sb fl-ac">
-                    <h4 class="page-sub-title">리스크 관리 - 탭2</h4>
-                    <div class="btn-area">
-                        <button type="button" class="btn bg-primary btn-b-save">저장</button>
-                    </div>
-                </div>
-                <div class="content-body">
-                    <div id="TABLE_HR015_B"></div>
-                    <div class="risk-memo-wrap">
-                        <label for="HR015_RISK_MEMO">관리 메모</label>
-                        <textarea id="HR015_RISK_MEMO" rows="6"></textarea>
-                    </div>
-                </div>
-            </section>
-        </div>
-
+<th:block th:fragment="tab3Content">
+    <div class="content list-area">
+        <section class="white-full">
+            <div class="content-body">
+                <!-- Tab3 내용 -->
+                <p>Tab3 내용</p>
+            </div>
+        </section>
     </div>
-    <!-- <script src="/js/api/hr011/hr015.js"></script> -->
 </th:block>
 
 </html>

@@ -1,11 +1,7 @@
 // hr013.js
-window.initTab3 = function () {
-
-    if (!window.hr013Table) {
-        //buildHr013Table();
-        //loadHr013TableData();
-    }
-    window.hr013Table?.redraw(true);
+window.initTab3 = function() {
+    if (!window.hr013Table) buildHr013Table();
+    loadHr013TableData();
 };
 
 function buildHr013Table() {
