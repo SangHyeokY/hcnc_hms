@@ -135,9 +135,19 @@ function buildTables() {
         placeholder: "데이터 없음",
         headerHozAlign: "center",
         columns: [
-            { title: "항목코드", field: "item_cd", hozAlign: "center", widthGrow: 1 },
-            { title: "항목명", field: "item_nm", widthGrow: 2 },
-            { title: "사용여부", field: "use_yn", hozAlign: "center", widthGrow: 1 }
+            { title: "구 분", field: "label", hozAlign: "center", widthGrow: 2 },
+            {
+                title: "내 용",
+                field: "yn",
+                hozAlign: "center",
+                widthGrow: 1,
+                formatter: scoreCheckboxFormatter,
+                cellClick: function (e, cell) {
+                    var value = cell.getValue() === "Y" ? "N" : "Y";
+                    cell.getRow().update({ yn: value });
+                },
+                headerSort: false
+            }
         ],
         data: []
     });
@@ -169,7 +179,9 @@ function loadTableB() {
         url: "/hr015/b/list",
         type: "GET",
         success: function (response) {
-            tableB.setData(response.list || []);
+            var risk = (response.list && response.list[0]) ? response.list[0] : {};
+            tableB.setData(buildRiskRows(risk));
+            $("#HR015_RISK_MEMO").val(risk.memo || "");
         },
         error: function () {
             alert("탭2 데이터를 불러오는 중 오류가 발생했습니다.");
@@ -205,10 +217,13 @@ function saveTableB() {
         return;
     }
 
+    var risk = buildRiskPayload(tableB.getData());
+    risk.memo = $.trim($("#HR015_RISK_MEMO").val());
+
     $.ajax({
         url: "/hr015/b/save",
         type: "POST",
-        data: { rows: JSON.stringify(buildSaveRows(tableB.getData())) },
+        data: risk,
         success: function (response) {
             if (response.success) {
                 loadTableB();
@@ -221,6 +236,36 @@ function saveTableB() {
             alert("저장 중 오류가 발생했습니다.");
         }
     });
+}
+
+function buildRiskRows(risk) {
+    return [
+        { rsk_key: "leave_yn", label: "이탈이력", yn: risk.leave_yn || "N" },
+        { rsk_key: "claim_yn", label: "클레임", yn: risk.claim_yn || "N" },
+        { rsk_key: "sec_yn", label: "보안이슈", yn: risk.sec_yn || "N" },
+        { rsk_key: "re_in_yn", label: "재투입 가능 여부", yn: risk.re_in_yn || "N" }
+    ];
+}
+
+function buildRiskPayload(rows) {
+    var payload = {
+        leave_yn: "N",
+        claim_yn: "N",
+        sec_yn: "N",
+        re_in_yn: "N"
+    };
+
+    if (!Array.isArray(rows)) {
+        return payload;
+    }
+
+    rows.forEach(function (row) {
+        if (row.rsk_key && row.yn) {
+            payload[row.rsk_key] = row.yn;
+        }
+    });
+
+    return payload;
 }
 
 function buildSaveRows(rows) {
