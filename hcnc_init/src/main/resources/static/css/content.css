@@ -369,11 +369,6 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
     border-bottom:4px solid #333;
 }
 
-#TABLE_HR010_B tr td input,
-#TABLE_HR010_B tr td select {
-    width: 100%;
-}
-
 #TABLE_HR010_B tr td input:read-only ,
 #TABLE_HR010_B tr td select:disabled {
     background:#fff;

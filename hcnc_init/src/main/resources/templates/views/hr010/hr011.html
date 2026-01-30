@@ -9,6 +9,90 @@
             <div id="TABLE_HR011_A"></div>
         </div>
     </div>
+
+    <!-- tab1 등록/수정 모달 -->
+    <div class="modal-wrap" id="upsert-user-hrm" style="display:none">
+        <div class="modal-container-detail" style="min-width: 40vw;">
+            <div class="header">
+                <h4>소속 및 계약정보 <span class="modal-title">등록</span></h4>
+                <div class="btn-area">
+                    <button class="close-btn" onclick="closeUpsertUserModal()"><img src="../icons/icon-close.png" alt=""/></button>
+                </div>
+            </div>
+
+            <div class="modal-content">
+                <div class="top-article">
+                    <div class="modal-human-area fl-sa">
+                        <div class="table-area">
+                            <table >
+                                <colgroup>
+                                    <col style="width: 20%;">
+                                    <col style="width: 30%;">
+                                    <col style="width: 20%;">
+                                    <col style="width: 30%;">
+                                </colgroup>
+                                <tbody>
+                                <tr>
+                                    <th>소속사</th>
+                                    <td>
+                                        <select id="" class="wp100">
+                                            <option>개인/에이전시</option>
+                                            <option>개인</option>
+                                            <option>에이전시</option>
+                                        </select>
+                                    </td>
+                                    <th>사업자유형</th>
+                                    <td>
+                                        <select id="" class="wp100">
+                                            <option>개인/개인사업자/법인</option>
+                                            <option>개인</option>
+                                            <option>개인사업자</option>
+                                            <option>법인</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>계약시작일</th>
+                                    <td><input type="date" class="wp100" disabled></td>
+                                    <th>계약종료일</th>
+                                    <td><input type="date" class="wp100" disabled></td>
+                                </tr>
+                                <tr>
+                                    <th>계약금액</th>
+                                    <td><input type="text" class="wp100" disabled></td>
+                                    <th>정산조건</th>
+                                    <td>
+                                        <select id="" class="wp100">
+                                            <option>월말/익월</option>
+                                            <option>월말</option>
+                                            <option>익월</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>비고</th>
+                                    <td colspan="3">
+                                        <textarea id="" rows="10"></textarea>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-btn fl-fe">
+                <ul>
+                    <li>
+                        <button class="btn btn-save btn-user-save">확인</button>
+                    </li>
+                    <li>
+                        <button class="btn btn-close" onclick="closeUpsertUserModal()">닫기</button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
 </th:block>
 
 </html>

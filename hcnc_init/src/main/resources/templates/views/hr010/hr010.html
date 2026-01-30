@@ -63,7 +63,8 @@
                     <div class="modal-human-area fl-sa" id="TABLE_HR010_B">
                         <div class="pic-area fd-col">
                             <div class="profile-area">
-                                <img src="../images/common/profile.png" alt="profile"/>
+                                <!-- 첨부파일 기능 사용하기 전, 임시 -->
+                                <!-- <img src="../images/att_profile/profile.png" alt="profile"/> -->
                             </div>
                             <div class="upload">
                                 <input type="file" class="file">
@@ -83,32 +84,32 @@
                                 <tbody>
                                     <tr>
                                         <th>성명</th>
-                                        <td><input type="text" id="dev_nm" disabled></td>
+                                        <td><input type="text" class="wp100" id="dev_nm" disabled></td>
                                         <th>생년월일</th>
-                                        <td><input type="date" id="brdt"></td>
+                                        <td><input type="date" class="wp100" id="brdt"></td>
                                         <th>연락처</th>
-                                        <td><input type="text" id="tel" disabled></td>
+                                        <td><input type="text" class="wp100" id="tel" disabled></td>
                                     </tr>
                                     <tr>
                                         <th>이메일</th>
-                                        <td><input type="email" id="email" disabled></td>
+                                        <td><input type="email" class="wp100" id="email" disabled></td>
                                         <th>거주지역</th>
-                                        <td><input type="text" id="region" disabled></td>
+                                        <td><input type="text" class="wp100" id="region" disabled></td>
                                         <th>주 개발언어</th>
-                                        <td><input type="text" id="main_lang" disabled ></td>
+                                        <td><input type="text" class="wp100" id="main_lang" disabled ></td>
                                     </tr>
                                     <tr>
                                         <th>경력연차</th>
-                                        <td><input type="text" id="exp_yr" disabled></td>
+                                        <td><input type="text" class="wp100" id="exp_yr" disabled></td>
                                         <th>최종학력</th>
-                                        <td><input type="text" id="edu_last" disabled></td>
+                                        <td><input type="text" class="wp100" id="edu_last" disabled></td>
                                         <th>보유 자격증</th>
-                                        <td><input type="text" id="cert_txt" disabled></td>
+                                        <td><input type="text" class="wp100" id="cert_txt" disabled></td>
                                     </tr>
                                     <tr>
                                         <th>소속 구분</th>
                                         <td>
-                                            <select id="dev_type">
+                                            <select id="dev_type" class="wp100">
                                                 <option value="">프리랜서/직원</option>
                                                 <option value="HCNC_F">프리랜서</option>
                                                 <option value="HCNC_S">직원</option>
@@ -116,12 +117,12 @@
                                         </td>
                                         <th>등급</th>
                                         <td>
-                                            <div class="fw600 ta-c" id="grade"></div>
-                                            <div class="fw600 ta-c" id="score"></div>
+                                            <span class="fw600" id="grade" style="padding-left:10px;"></span>
+                                            <span class="fw600" id="score" style="padding-right:10px;"></span>
                                         </td>
                                         <th>근무 가능형태</th>
                                         <td>
-                                            <select id="work_md">
+                                            <select id="work_md" class="wp100">
                                                 <option value="">상주/재택/혼합</option>
                                                 <option value="01">상주</option>
                                                 <option value="02">재택</option>
@@ -132,20 +133,13 @@
                                     <tr>
                                         <th>희망단가</th>
                                         <td>
-                                            <input type="text" id="hope_rate_amt" disabled>
-        <!--                            <td>-->
-        <!--                                <select id="hope_rate_typ" style="width:100%">-->
-        <!--                                    <option value="">일/월</option>-->
-        <!--                                    <option value="01">일</option>-->
-        <!--                                    <option value="02">월</option>-->
-        <!--                                </select>-->
-        <!--                            </td>-->
+                                            <input type="text" class="wp100" id="hope_rate_amt" disabled>
                                         </td>
                                         <th>투입 가능 시점</th>
-                                        <td><input type="date" id="avail_dt"></td>
+                                        <td><input type="date" class="wp100" id="avail_dt"></td>
                                         <th>계약 형태</th>
                                         <td>
-                                            <select id="ctrt_typ">
+                                            <select id="ctrt_typ" class="wp100">
                                                 <option value="">개인/법인</option>
                                                 <option value="01">개인</option>
                                                 <option value="02">법인</option>
@@ -193,11 +187,11 @@
                 </ul>
                 <ul>
                     <li>
-                        <button class="btn btn-close" onclick="closeUserViewModal()">
-                            닫기
-                        </button>
+                        <button class="btn btn-close" onclick="closeUserViewModal()">닫기</button>
                     </li>
-                    <li><button class="btn btn-save btn-user-save">저장</button></li>
+                    <li>
+                        <button class="btn btn-save btn-user-save">저장</button>
+                    </li>
                 </ul>
             </div>
         </div>
