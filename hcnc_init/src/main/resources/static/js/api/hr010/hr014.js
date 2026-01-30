@@ -18,7 +18,7 @@ var riskActiveKey = "leave_txt";
 window.initTab4 = function() {
     // 서브 탭 초기 상태 설정
     $(".tab-sub-btn").removeClass("active");
-    $(".tab-sub-btn[data-tab='tab4-1']").addClass("active");
+    $(".tab-sub-btn[data-tab='tab4-A']").addClass("active");
 
     // 테이블 초기화 (한 번만 수행)
     if (!window.hr014TableA) buildHr014TableA();
@@ -39,11 +39,11 @@ window.initTab4 = function() {
         $(".tab-sub-btn").removeClass("active");
         $(this).addClass("active");
 
-        if (tabId === "tab4-1") {
+        if (tabId === "tab4-A") {
             $("#TABLE_HR014_A").show();
             $("#TABLE_HR014_B").hide();
             window.hr014TableB
-        } else if (tabId === "tab4-2") {
+        } else if (tabId === "tab4-B") {
             $("#TABLE_HR014_A").hide();
             $("#TABLE_HR014_B").show();
             // window.hr014TableB.redraw();

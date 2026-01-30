@@ -2,7 +2,7 @@
 window.initTab2 = function() {
     // 서브 탭 초기 상태 설정
     $(".tab-sub-btn").removeClass("active");
-    $(".tab-sub-btn[data-tab='tab2-1']").addClass("active");
+    $(".tab-sub-btn[data-tab='tab2-A']").addClass("active");
 
     // 테이블 초기화 (한 번만 수행)
     if (!window.hr012TableA) buildHr012TableA();
@@ -23,11 +23,11 @@ window.initTab2 = function() {
         $(".tab-sub-btn").removeClass("active");
         $(this).addClass("active");
 
-        if (tabId === "tab2-1") {
+        if (tabId === "tab2-A") {
             $("#TABLE_HR012_A").show();
             window.hr012TableA.redraw();
             $("#TABLE_HR012_B").hide();
-        } else if (tabId === "tab2-2") {
+        } else if (tabId === "tab2-B") {
             $("#TABLE_HR012_B").show();
             window.hr012TableB.redraw();
             $("#TABLE_HR012_A").hide();

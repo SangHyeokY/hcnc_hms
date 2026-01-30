@@ -27,7 +27,7 @@ function buildHr011Table() {
             },
             { title: "계약시작일", field: "st_dt" },
             { title: "계약종료일", field: "ed_dt" },
-            { title: "계약금액", field: "amt", hozAlign: "right", formatter:"money", formatterParams:{symbol:"₩", precision:0} },
+            { title: "계약금액", field: "amt", hozAlign: "right", formatter: amountFormatter },
             { title: "비고", field: "remark" }
         ],
         data: [] // 초기에는 빈 배열
@@ -53,5 +53,14 @@ function loadHr011TableData() {
         },
         error: function() { alert("Tab1 데이터 로드 실패"); }
     });
+}
+
+// 계약단가(,),(테이블표)
+function amountFormatter(cell) {
+    if (cell.getValue() === null || cell.getValue() === undefined || cell.getValue() === "") {
+        return "";
+    }
+    return formatNumberInput(cell.getValue());
+
 }
 

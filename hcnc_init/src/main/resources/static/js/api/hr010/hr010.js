@@ -58,6 +58,25 @@ $(document).ready(function () {
     $(".btn-user-save").on("click", function () {
         upsertUserBtn();
     });
+
+    $(".btn-main-view").on("click", function () {
+
+        if (!userTable) return;
+
+        const rows = userTable.getSelectedRows();
+
+        if (rows.length === 0) {
+            alert("조회할 대상을 선택하세요.");
+            return;
+        }
+
+        if (rows.length > 1) {
+            alert("한 명만 선택해주세요.");
+            return;
+        }
+        const rowData = rows[0].getData();
+        openUserModal("view", rowData);
+    });
 });
 
 // 테이블 생성 정의
@@ -104,7 +123,7 @@ function buildUserTable() {
         headerSort: true,
         placeholder: "데이터 없음",
         headerHozAlign: "center",
-        selectable: true,
+        selectable: 1,
         columnDefaults: {
             resizable: true,
             cellClick: function (e, cell) {
@@ -139,7 +158,7 @@ function buildUserTable() {
             { title: "경력연차", field: "exp_yr", hozAlign: "center" },
             { title: "최종학력", field: "edu_last" },
             { title: "보유자격증", field: "cert_txt" },
-            { title: "희망단가", field: "hope_rate_amt", hozAlign: "right", formatter:"money", formatterParams:{symbol:"₩", precision:0} },
+            { title: "희망단가", field: "hope_rate_amt", hozAlign: "right", formatter: amountFormatter },
             { title: "투입가능시점", field: "avail_dt" },
             { title: "계약형태",
                   field: "ctrt_typ",
@@ -190,6 +209,10 @@ function loadUserTableData() {
 
 // 데이터 신규 등록/수정 이벤트
 function upsertUserBtn() {
+     // 유효성 검사
+     if (!validateUserForm()) {
+            return;
+        }
     var payload = {
         dev_id: $("#dev_id").val(),
         dev_nm: $("#dev_nm").val(),
@@ -201,7 +224,7 @@ function upsertUserBtn() {
         exp_yr: $("#exp_yr").val(),
         edu_last: $("#edu_last").val(),
         cert_txt: $("#cert_txt").val(),
-        hope_rate_amt: $("#hope_rate_amt").val(),
+        hope_rate_amt: $("#hope_rate_amt").val().replace(/,/g, ""),
         avail_dt: $("#avail_dt").val(),
         ctrt_typ: $("#ctrt_typ").val(),
         work_md: $("#work_md").val(),
@@ -315,7 +338,10 @@ function fillUserForm(d) {
     $("#edu_last").val(d.edu_last || "");
     $("#cert_txt").val(d.cert_txt || "");
     $("#avail_dt").val(d.avail_dt || "");
-    $("#hope_rate_amt").val(d.hope_rate_amt || "");
+
+    $("#hope_rate_amt").val(
+        formatAmount(d.hope_rate_amt)
+    );
 
     $("#dev_type").val(d.dev_type || "");
     $("#work_md").val(d.work_md || "");
@@ -431,3 +457,94 @@ function initTab(tabId) {
         case "tab4": initTab4(); break;
     }
 }
+
+// 계약단가(,),(테이블표)
+function amountFormatter(cell) {
+    if (cell.getValue() === null || cell.getValue() === undefined || cell.getValue() === "") {
+        return "";
+    }
+    return formatNumberInput(cell.getValue());
+}
+
+// 팝업에서도 마찬가지로 (,) 표시
+function formatAmount(value) {
+    if (value === null || value === undefined || value === "") return "";
+
+    return value
+        .toString()
+        .replace(/[^0-9]/g, "")
+        .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+// 데이터 유효성 검사
+function validateUserForm() {
+
+    // 값 가져오기
+    const dev_nm = $("#dev_nm").val().trim();
+    const brdt = $("#brdt").val().trim();
+    const tel = $("#tel").val().trim();
+    const email = $("#email").val().trim();
+    const hopeRate = $("#hope_rate_amt").val().replace(/,/g, "");
+
+    if (!dev_nm) {
+        alert("성명을 입력하세요.");
+        $("#dev_nm").focus();
+        return false;
+    }
+
+    if (!brdt) {
+        alert("생년월일을 입력하세요.");
+        $("#brdt").focus();
+        return false;
+    }
+
+    if (!tel) {
+        alert("연락처를 입력하세요.");
+        $("#tel").focus();
+        return false;
+    }
+
+    if (!email) {
+        alert("이메일을 입력하세요.");
+        $("#email").focus();
+        return false;
+    }
+
+    // 전화번호 (숫자만 입력)
+    if (!/^[0-9\-]+$/.test(tel)) {
+        alert("연락처 형식이 올바르지 않습니다.");
+        $("#tel").focus();
+        return false;
+    }
+
+    // 이메일
+    const emailRegex =
+        /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+
+    if (!emailRegex.test(email)) {
+        alert("이메일 형식이 올바르지 않습니다.");
+        $("#email").focus();
+        return false;
+    }
+
+    if (hopeRate && isNaN(hopeRate)) {
+        alert("희망단가는 숫자만 입력 가능합니다.");
+        $("#hope_rate_amt").focus();
+        return false;
+    }
+
+    return true;
+}
+
+// 전화번호 자동 변환
+$("#tel").on("input", function () {
+    let val = $(this).val().replace(/[^0-9]/g, "");
+
+    if (val.length < 4) {
+        $(this).val(val);
+    } else if (val.length < 8) {
+        $(this).val(val.replace(/(\d{3})(\d+)/, "$1-$2"));
+    } else {
+        $(this).val(val.replace(/(\d{3})(\d{4})(\d+)/, "$1-$2-$3"));
+    }
+});
