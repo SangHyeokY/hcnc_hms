@@ -38,6 +38,13 @@ function openHr011Modal(mode) {
     $("#upsert-user-hrm").show();
 }
 
+// 등록/수정 모달 닫히게 하기
+function closeUpsertUserModal() {
+    // clearHr011Form();
+    hr011ModalMode = "new";
+    $("#upsert-user-hrm").hide();
+}
+
 function getHr011SelectedRow() {
     if (!window.hr011Table) {
         return null;
@@ -47,13 +54,6 @@ function getHr011SelectedRow() {
         return null;
     }
     return rows[0].getData();
-}
-
-// 등록/수정 모달 닫히게 하기
-function closeUpsertUserModal() {
-    clearHr011Form();
-    hr011ModalMode = "new";
-    $("#upsert-user-hrm").hide();
 }
 
 function buildHr011Table() {
