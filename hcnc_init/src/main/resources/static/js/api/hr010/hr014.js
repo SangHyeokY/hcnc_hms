@@ -378,6 +378,8 @@ function buildSaveRows(rows) {
             lvl: lvl,
             cmt: row.cmt || ""
         };
+    }).filter(function (row) {
+        return row.eval_id && row.lvl != null && row.lvl !== "";
     });
 }
 

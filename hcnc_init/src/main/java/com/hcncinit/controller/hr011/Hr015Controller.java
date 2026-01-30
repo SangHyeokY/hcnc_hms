@@ -73,6 +73,13 @@ public class Hr015Controller {
         Object loginUserId = session.getAttribute("LOGIN_USER_ID");
         if (loginUserId != null) {
             map.put("userId", String.valueOf(loginUserId));
+            return;
+        }
+        Object devId = map != null ? map.get("dev_id") : null;
+        if (devId != null && !String.valueOf(devId).trim().isEmpty()) {
+            map.put("userId", String.valueOf(devId));
+        } else {
+            map.put("userId", "SYSTEM");
         }
     }
 
