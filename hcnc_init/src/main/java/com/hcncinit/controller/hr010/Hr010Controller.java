@@ -53,6 +53,7 @@ public class Hr010Controller {
             param.put("dev_id", devId);
         }
         hr010Service.insert_hr010(param);
+        mv.addObject("dev_id", param.get("dev_id"));
         mv.addObject("result", "success");
         return mv;
     }
@@ -167,7 +168,7 @@ public class Hr010Controller {
             return;
         }
         if (!map.containsKey("dev_id") || String.valueOf(map.get("dev_id")).trim().isEmpty()) {
-            map.put("dev_id", "TEMP_DEV");
+            map.put("dev_id", "");
         }
     }
 

@@ -19,27 +19,37 @@ window.initTab3 = function() {
             addSkillTagByCode($("#write_hr013_skl_cd").val());
         });
 
-        $("#hr013SkillTagList").on("click", ".tag-remove", function () {
-            var code = $(this).closest(".tag-item").data("code");
-            removeSkillTag(code);
+    $("#hr013SkillTagList").on("click", ".tag-remove", function () {
+        var code = $(this).closest(".tag-item").data("code");
+        removeSkillTag(code);
+    });
+
+    $(".btn-hr013-save").off("click").on("click", function () {
+        saveHr013Row();
+    });
+
+        $(".btn-tab3-new").off("click").on("click", function () {
+            openHr013Modal("new");
+        });
+        $(".btn-tab3-edit").off("click").on("click", function () {
+            openHr013Modal("edit");
+        });
+        $(".btn-tab3-delete").off("click").on("click", function () {
+            deleteHr013Row();
         });
 
-//        setComCode("write_hr013_job_cd", "job_cd", "", "cd", "cd_nm", function () {
-//            if ($("#write_hr013_job_cd option[value='']").length === 0) {
-//                $("#write_hr013_job_cd").prepend("<option value=''>선택</option>");
-//            }
-//            if (!$("#write_hr013_job_cd").val()) {
-//                $("#write_hr013_job_cd option:first").prop("selected", true);
-//            }
-//        });
-//        setComCode("write_hr013_skl_cd", "skl_id", "", "cd", "cd_nm", function (res) {
-//            skillOptions = res || [];
-//            buildSkillMap();
-//            setSkillTagsFromValue($("#write_hr013_stack_txt").val());
-//            if (tableHr013) {
-//                tableHr013.redraw(true);
-//            }
-//        });
+       setComCode("write_hr013_job_cd", "job_cd", "", "cd", "cd_nm", function () {
+           initSelectDefault("write_hr013_job_cd", "선택");
+       });
+       setComCode("write_hr013_skl_cd", "skl_id", "", "cd", "cd_nm", function (res) {
+           skillOptions = res || [];
+           buildSkillMap();
+           setSkillTagsFromValue($("#write_hr013_stack_txt").val());
+           initSelectDefault("write_hr013_skl_cd", "기술스택 선택");
+           if (window.hr013Table) {
+               window.hr013Table.redraw(true);
+           }
+       });
 };
 
 function buildHr013Table() {
@@ -48,8 +58,22 @@ function buildHr013Table() {
     window.hr013Table = new Tabulator("#TABLE_HR013_A", {
         layout: "fitColumns",
         placeholder: "데이터 없음",
+        selectable: 1,
+        columnDefaults: {
+            cellClick: function (e, cell) {
+                cell.getRow().toggleSelect();
+            }
+        },
         columns: [
-            { title: "당사 여부", field: "inprj_yn", hozAlign: "center", formatter: ynCheckboxFormatter },
+            {
+                title: "당사 여부",
+                field: "inprj_yn",
+                hozAlign: "center",
+                formatter: ynCheckboxFormatter,
+                cellClick: function (e, cell) {
+                    cell.getRow().toggleSelect();
+                }
+            },
             { title: "기간", field: "st_ed_dt", hozAlign: "center" },
             { title: "고객사", field: "cust_nm"},
             { title: "프로젝트명", field: "prj_nm"},
@@ -63,8 +87,32 @@ function buildHr013Table() {
     });
 }
 
+// 프로젝트 이력 모달 열기
+function openHr013Modal(mode) {
+    var title = mode === "edit" ? "수정" : "등록";
+    $("#hr013-type").text(title);
+
+    if (mode === "edit") {
+        var rowData = getHr013SelectedRow();
+        if (!rowData) {
+            alert("수정할 행을 선택해주세요.");
+            return;
+        }
+        fillHr013Form(rowData);
+    } else {
+        clearHr013Form();
+    }
+
+    $("#write-hr013-area").show();
+}
+
+// 프로젝트 이력 모달 닫기
+function closeHr013Modal() {
+    $("#write-hr013-area").hide();
+}
+
 function loadHr013TableData() {
-    const dev_id = window.currentDevId;
+    const dev_id = window.currentDevId || $("#dev_id").val();
     if (!window.hr013Table) return;
 
     $.ajax({
@@ -128,6 +176,7 @@ function clearHr013Form() {
 // 저장 버튼
 function saveHr013Row() {
     var payload = {
+        dev_id: window.currentDevId || $("#dev_id").val(),
         dev_prj_id: $("#write_hr013_dev_prj_id").val(),
         inprj_yn: $("#write_hr013_inprj_yn").val(),
         st_dt: $("#write_hr013_st_dt").val(),
@@ -185,7 +234,7 @@ function saveHr013Row() {
         success: function (response) {
             if (response.success) {
                 closeHr013Modal();
-                loadHr013Table();
+                loadHr013TableData();
                 alert("저장되었습니다.");
             } else {
                 alert("저장에 실패했습니다.");
@@ -208,12 +257,12 @@ function deleteHr013Row() {
         return;
     }
     $.ajax({
-        url: "/hr013/tab3_delete",
+        url: "/hr010/tab3_delete",
         type: "POST",
-        data: { dev_prj_id: rowData.dev_prj_id },
+        data: { dev_prj_id: rowData.dev_prj_id, dev_id: window.currentDevId || $("#dev_id").val() },
         success: function (response) {
             if (response.success) {
-                loadHr013Table();
+                loadHr013TableData();
                 alert("삭제되었습니다.");
             } else {
                 alert("삭제에 실패했습니다.");
@@ -228,6 +277,18 @@ function deleteHr013Row() {
 function ynCheckboxFormatter(cell) {
     var checked = cell.getValue() === "Y" ? " checked" : "";
     return "<input type='checkbox'" + checked + " disabled />";
+}
+
+// 콤보 기본 옵션/선택 처리
+function initSelectDefault(selectId, placeholderText) {
+    var $sel = $("#" + selectId);
+    if ($sel.find("option[value='']").length === 0) {
+        $sel.prepend("<option value=''>" + placeholderText + "</option>");
+    }
+    $sel.val("");
+    if (!$sel.val()) {
+        $sel.find("option:first").prop("selected", true);
+    }
 }
 
 // 기술스택 태그 맵 구성
