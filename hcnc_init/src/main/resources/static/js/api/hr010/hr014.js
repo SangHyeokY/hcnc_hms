@@ -17,39 +17,54 @@ var riskActiveKey = "leave_txt";
 
 window.initTab4 = function() {
     // 서브 탭 초기 상태 설정
-    $(".tab-sub-btn").removeClass("active");
-    $(".tab-sub-btn[data-tab='tab4-A']").addClass("active");
+    var $tab4 = $("#tab4");
+    var $subBtns = $tab4.find(".tab-sub-btn");
+    $subBtns.removeClass("active");
+    $subBtns.filter("[data-tab='tab4-A']").addClass("active");
 
     // 테이블 초기화 (한 번만 수행)
     if (!window.hr014TableA) buildHr014TableA();
     // if (!window.hr014TableB) buildHr014TableB();
 
-    // 초기 데이터 로드
-    loadHr014TableDataA();
-    loadHr014TableDataB();
+    // 초기 데이터 로드 (한 번만)
+    if (!window.hr014TabInitialized) {
+        loadHr014TableDataA();
+        loadHr014TableDataB();
+    }
 
     // A/B 테이블 보여주기/숨기기
-    $("#TABLE_HR014_A").show();
-    $("#TABLE_HR014_B").hide();
+    $tab4.find("#TABLE_HR014_A").show();
+    $tab4.find("#TABLE_HR014_B").hide();
+    if (window.hr014TableA) {
+        window.hr014TableA.redraw(true);
+    }
 
     // 탭 클릭 이벤트
-    $(".tab-sub-btn").off("click").on("click", function() {
+    $subBtns.off("click").on("click", function() {
         const tabId = $(this).data("tab");
 
-        $(".tab-sub-btn").removeClass("active");
+        $subBtns.removeClass("active");
         $(this).addClass("active");
 
         if (tabId === "tab4-A") {
-            $("#TABLE_HR014_A").show();
-            $("#TABLE_HR014_B").hide();
-            window.hr014TableB
+            $tab4.find("#TABLE_HR014_A").show();
+            $tab4.find("#TABLE_HR014_B").hide();
+            if (window.hr014TableA) {
+                window.hr014TableA.redraw(true);
+            }
         } else if (tabId === "tab4-B") {
-            $("#TABLE_HR014_A").hide();
-            $("#TABLE_HR014_B").show();
+            $tab4.find("#TABLE_HR014_A").hide();
+            $tab4.find("#TABLE_HR014_B").show();
             // window.hr014TableB.redraw();
         }
     });
      buildRiskList();
+
+    $(".btn-tab4-save").off("click").on("click", function () {
+        saveTab4Active();
+    });
+
+    window.hr014TabInitialized = true;
 };
 
 function buildHr014TableA() {
@@ -136,7 +151,7 @@ function buildHr014TableA() {
 }
 
 function loadHr014TableDataA() {
-    const devId = window.currentDevId;
+    const devId = window.currentDevId || $("#dev_id").val();
     if (!window.hr014TableA) return;
 
     $.ajax({
@@ -161,10 +176,14 @@ function loadHr014TableDataA() {
 function scoreCheckboxFormatter(cell, formatterParams, onRendered) {
     const value = cell.getValue();
     const checked = value === "Y" ? "checked" : "";
-    return `<input type="checkbox" disabled ${checked} />`;
+    const disabled = window.hr010ReadOnly ? "disabled" : "";
+    return `<input type="checkbox" ${checked} ${disabled} />`;
 }
 
 function setScore(row, level) {
+        if (window.hr010ReadOnly) {
+            return;
+        }
         var data = row.getData();
         data.lv1 = "N";
         data.lv2 = "N";
@@ -194,7 +213,7 @@ function setScore(row, level) {
 //}
 
 function loadHr014TableDataB() {
-    const devId = window.currentDevId;
+    const devId = window.currentDevId || $("#dev_id").val();
     // if (!window.hr014TableB) return;
 
     $.ajax({
@@ -221,18 +240,26 @@ function loadHr014TableDataB() {
 // ================================================================================= //
 
 // 탭1 평가 저장
-function saveTableA() {
-    if (!tableA) {
+function saveTableA(showAlert) {
+    if (showAlert === undefined) {
+        showAlert = true;
+    }
+    if (!window.hr014TableA) {
         return;
     }
     $.ajax({
         url: "/hr015/a/save",
         type: "POST",
-        data: { rows: JSON.stringify(buildSaveRows(tableA.getData())) },
+        data: {
+            dev_id: window.currentDevId || $("#dev_id").val(),
+            rows: JSON.stringify(buildSaveRows(window.hr014TableA.getData()))
+        },
         success: function (response) {
             if (response.success) {
-                loadTableA();
-                alert("저장되었습니다.");
+                loadHr014TableDataA();
+                if (showAlert) {
+                    alert("저장되었습니다.");
+                }
             } else {
                 alert("저장에 실패했습니다.");
             }
@@ -244,13 +271,17 @@ function saveTableA() {
 }
 
 // 탭2 리스크 저장
-function saveTableB() {
+function saveTableB(showAlert) {
+    if (showAlert === undefined) {
+        showAlert = true;
+    }
     riskState.re_in_yn = $("#HR015_REIN_CHECK").is(":checked") ? "Y" : "N";
 
     $.ajax({
         url: "/hr015/b/save",
         type: "POST",
         data: {
+            dev_id: window.currentDevId || $("#dev_id").val(),
             leave_txt: riskState.leave_txt,
             claim_txt: riskState.claim_txt,
             sec_txt: riskState.sec_txt,
@@ -259,8 +290,10 @@ function saveTableB() {
         },
         success: function (response) {
             if (response.success) {
-                loadTableB();
-                alert("저장되었습니다.");
+                loadHr014TableDataB();
+                if (showAlert) {
+                    alert("저장되었습니다.");
+                }
             } else {
                 alert("저장에 실패했습니다.");
             }
@@ -289,6 +322,9 @@ function buildRiskList() {
     });
 
     $("#HR015_RISK_TEXT").on("input", function () {
+        if (window.hr010ReadOnly) {
+            return;
+        }
         var value = $(this).val();
         if (riskActiveKey === "memo_txt") {
             riskState.memo = value;
@@ -298,6 +334,9 @@ function buildRiskList() {
     });
 
     $("#HR015_REIN_CHECK").on("change", function () {
+        if (window.hr010ReadOnly) {
+            return;
+        }
         riskState.re_in_yn = $(this).is(":checked") ? "Y" : "N";
     });
 }
@@ -341,6 +380,31 @@ function buildSaveRows(rows) {
         };
     });
 }
+
+// 탭4 저장 (활성 서브탭 기준)
+function saveTab4Active() {
+    var activeTab = $(".tab-sub-btn.active").data("tab");
+    if (activeTab === "tab4-B") {
+        saveTableB(true);
+    } else {
+        saveTableA(true);
+    }
+}
+
+// 탭4 전체 저장 (평가 + 리스크)
+function saveTab4All() {
+    saveTableA(false);
+    saveTableB(false);
+}
+
+window.saveTab4All = saveTab4All;
+
+function applyTab4Readonly(isReadOnly) {
+    $("#HR015_RISK_TEXT").prop("disabled", isReadOnly);
+    $("#HR015_REIN_CHECK").prop("disabled", isReadOnly);
+}
+
+window.applyTab4Readonly = applyTab4Readonly;
 
 
 

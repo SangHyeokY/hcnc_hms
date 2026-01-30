@@ -30,6 +30,8 @@ $(document).ready(function () {
         $(".tab-panel").hide();
         $("#" + tabId).show();
         initTab(tabId);
+        updateTabActions(tabId);
+        refreshTabLayout(tabId);
     });
 
     $(".btn-search").on("click", function (event) {
@@ -237,7 +239,14 @@ function upsertUserBtn() {
         url: "/hr010/upsert",
         type: "POST",
         data: payload,
-        success: function () {
+        success: function (response) {
+            if (response && response.dev_id) {
+                window.currentDevId = response.dev_id;
+                $("#dev_id").val(response.dev_id);
+            }
+            if (typeof window.saveTab4All === "function") {
+                window.saveTab4All();
+            }
             alert("저장되었습니다.");
             closeUserViewModal();
             loadUserTableData();
@@ -293,7 +302,11 @@ openUserModal = function(mode, data) {
     $(".tab-panel").hide();
     $("#tab1").show();
 
+    window.hr014TabInitialized = false;
+
     initAllTabs(); // 모든 tab 초기화
+    updateTabActions("tab1");
+    refreshTabLayout("tab1");
 };
 
 // 모든 tab 초기화
@@ -442,6 +455,12 @@ function setModalMode(mode) {
         $inputs.prop("disabled", false);
         $(".btn-save").show();
     }
+
+    window.hr010ReadOnly = mode === "view";
+    updateTabActions($(".tab-btn.active").data("tab"));
+    if (typeof window.applyTab4Readonly === "function") {
+        window.applyTab4Readonly(window.hr010ReadOnly);
+    }
 }
 
 // 모달 닫히면 영역 사라지게 하기
@@ -456,6 +475,30 @@ function initTab(tabId) {
         case "tab3": initTab3(); break;
         case "tab4": initTab4(); break;
     }
+}
+
+// 탭별 버튼 표시
+function updateTabActions(tabId) {
+    if (window.hr010ReadOnly) {
+        $(".tab-actions").removeClass("active");
+        $(".tab-action-bar").hide();
+        return;
+    }
+    $(".tab-action-bar").show();
+    $(".tab-actions").removeClass("active");
+    $(".tab-actions[data-tab='" + tabId + "']").addClass("active");
+}
+
+// 탭 표시 후 레이아웃 재계산
+function refreshTabLayout(tabId) {
+    setTimeout(function () {
+        if (tabId === "tab3" && window.hr013Table) {
+            window.hr013Table.redraw(true);
+        }
+        if (tabId === "tab4" && window.hr014TableA) {
+            window.hr014TableA.redraw(true);
+        }
+    }, 0);
 }
 
 // 계약단가(,),(테이블표)

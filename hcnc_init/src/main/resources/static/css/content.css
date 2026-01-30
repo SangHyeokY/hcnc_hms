@@ -87,9 +87,10 @@ button.btn.btn-add-skill {
 
 
 /*===============================================================================
-  HR015 - score tables alignment
+  HR015,HR014 - score tables alignment
 ================================================================================*/
-#TABLE_HR015_A .tabulator-col.tabulator-sortable {
+#TABLE_HR015_A .tabulator-col.tabulator-sortable,
+.tabulator-col.tabulator-sortable {
     align-content: center;
 }
 
@@ -266,6 +267,14 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .date-range {display: flex; align-items: center; gap: 8px;}
 .full-row .table-cell:last-child {display: none;}
 .full-width {flex: 1 1 100%;}
+.tab-action-bar {display: flex; justify-content: flex-end; margin-bottom: 10px;}
+.tab-actions {display: none; gap: 8px;}
+.tab-actions.active {display: inline-flex;}
+.tab-action-bar .btn {padding: 6px 10px; font-size: 14px; font-weight: 500; line-height: 1.0; background-color: #ffffff; border: 1px solid #4880ff; border-radius: 3px;}
+.tabulator-cell input[type="checkbox"] {cursor: pointer;}
+.tabulator-cell input[type="checkbox"]:disabled {cursor: not-allowed;}
+.risk-check input[type="checkbox"] {cursor: pointer;}
+.risk-check input[type="checkbox"]:disabled {cursor: not-allowed;}
 .tag-remove {border: none; background: #2c5282; color: #fff; width: 18px; height: 18px; border-radius: 50%; font-size: 11px; line-height: 18px; cursor: pointer;}
 .tag-remove:hover {background: #1a365d;}
 

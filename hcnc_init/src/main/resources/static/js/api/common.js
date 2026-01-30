@@ -1,4 +1,4 @@
-function setComCode(strId, strGrpCd, strTag, id = 'cd', name = 'cd_nm') {
+function setComCode(strId, strGrpCd, strTag, id = 'cd', name = 'cd_nm', done, bTotal = false) {
 
     $.ajax({
         url: "/common/getCm",
