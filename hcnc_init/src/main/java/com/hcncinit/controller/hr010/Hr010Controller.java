@@ -124,13 +124,13 @@ public class Hr010Controller {
     // tab3 - 프로젝트
     @RequestMapping("/tab3")
     public ModelAndView list(@RequestParam(required = false) Map<String, Object> map) {
-        System.out.println("tab3 : "+map); // map => dev_id
+        // System.out.println("tab3 : "+map); // map => dev_id
         applyDefaults(map);
         ModelAndView mv = new ModelAndView("jsonView");
         List<Map<String, Object>> list = hr013Service.list(map);
         mv.addObject("success", true);
         mv.addObject("list", list);
-        System.out.println("tab3 담음 : "+list);
+        // System.out.println("tab3 담음 : "+list);
         return mv;
     }
 
