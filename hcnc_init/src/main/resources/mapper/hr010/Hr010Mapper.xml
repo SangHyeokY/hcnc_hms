@@ -169,6 +169,14 @@
         -- 재계약의사
         rein AS
         (
+        --    SELECT   '[재계약의사]' title
+        --       ,   CASE WHEN avl.re_in_yn = 'Y' THEN 'S' ELSE 'C' END rank
+        --        ,   CASE WHEN avl.re_in_yn = 'Y' THEN 100 ELSE 0 END val
+        --          ,   CASE WHEN avl.re_in_yn = 'Y' THEN 100 ELSE 0 END weight
+        --    FROM   tb_dev_avl_info avl
+        --       CROSS JOIN param p
+        --       WHERE   avl.del_yn = 'N' AND avl.use_yn = 'Y'
+        --          AND avl.dev_id = p.dev_id
         SELECT   '[재계약의사]' title
         ,   CASE WHEN rsk.re_in_yn = 'Y' THEN 'S' ELSE 'C' END rank
         ,   CASE WHEN rsk.re_in_yn = 'Y' THEN 100 ELSE 0 END val
@@ -191,9 +199,10 @@
         WHERE   del_yn = 'N' AND use_yn = 'Y'
         AND MATCH(adinfo_01, adinfo_02, adinfo_03, adinfo_04, adinfo_05)
         AGAINST ('[단가경쟁력]' IN BOOLEAN MODE)
-        AND cd_nm = (   SELECT fn_get_cm('job_cd', job_cd) job_nm
-        FROM   tb_dev_prj_info
-        WHERE   dev_id = p.dev_id )
+        AND cd_nm = ( SELECT    fn_get_cm('job_cd', job_cd) job_nm
+        FROM      tb_dev_prj_info
+        WHERE   dev_id = 'HCNC_F002'
+        ORDER BY dev_prj_id desc LIMIT 1 )
         ORDER BY sort_no
         ) R1
         JOIN JSON_TABLE(JSON_KEYS(R1.obj),'$[*]' COLUMNS ( rank VARCHAR(100) PATH '$' )) R2
@@ -281,6 +290,6 @@
         WHERE   rk.title = '[최종스코어]'
         AND rk.weight &lt;= res.score
         ) T
-        LIMIT 1
+        LIMIT 1;
     </select>
 </mapper>

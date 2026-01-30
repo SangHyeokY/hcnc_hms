@@ -50,7 +50,9 @@ $(document).ready(function () {
     });
 
     $(".btn-main-edit").on("click", function () {
-        openUserModal("update");
+        const rowData = btnEditView("수정할 ");
+        if (!rowData) return;
+        openUserModal("update", rowData);
     });
 
     $(".btn-main-del").on("click", function () {
@@ -62,24 +64,25 @@ $(document).ready(function () {
     });
 
     $(".btn-main-view").on("click", function () {
-
-        if (!userTable) return;
-
-        const rows = userTable.getSelectedRows();
-
-        if (rows.length === 0) {
-            alert("조회할 대상을 선택하세요.");
-            return;
-        }
-
-        if (rows.length > 1) {
-            alert("한 명만 선택해주세요.");
-            return;
-        }
-        const rowData = rows[0].getData();
+        const rowData = btnEditView("조회할 ");
+        if (!rowData) return;
         openUserModal("view", rowData);
     });
 });
+
+function btnEditView(alertPrefix = "") {
+    if (!userTable) return null;
+    const rows = userTable.getSelectedRows();
+    if (rows.length === 0) {
+        alert(alertPrefix + "대상을 선택하세요.");
+        return null;
+    }
+    if (rows.length > 1) {
+        alert(alertPrefix + "한 명만 선택해주세요.");
+        return null;
+    }
+    return rows[0].getData();
+}
 
 // 테이블 생성 정의
 function buildUserTable() {
@@ -296,6 +299,8 @@ openUserModal = function(mode, data) {
     setModalMode(mode);
     $("#view-user-area").show();
 
+    initAllTabs(); // 모든 tab 초기화
+
     // 항상 tab1 활성화
     $(".tab-btn").removeClass("active");
     $(".tab-btn[data-tab='tab1']").addClass("active");
@@ -303,10 +308,14 @@ openUserModal = function(mode, data) {
     $("#tab1").show();
 
     window.hr014TabInitialized = false;
-
-    initAllTabs(); // 모든 tab 초기화
     updateTabActions("tab1");
     refreshTabLayout("tab1");
+
+    if (mode !== "insert" && data?.dev_id) {
+        requestAnimationFrame(() => {
+            loadUserScore(data.dev_id);
+        });
+    }
 };
 
 // 모든 tab 초기화
@@ -380,41 +389,6 @@ function fillUserForm(d) {
         // console.log("dev_id 값이 존재하지 않습니다.")
         $("#dev_type").val("");
     }
-
-    function setGrade(rank, score) {
-        const $grade = $("#grade");
-        const $score = $("#score");
-        if ($grade.length > 0 && $score.length > 0) {
-            $grade.text(rank);
-            $score.text(score);
-        } else {
-            // DOM이 아직 없으면 조금 뒤에 재시도
-            setTimeout(() => setGrade(rank, score), 50);
-        }
-    }
-
-    $.ajax({
-        url: "/hr010/getScore",
-        type: "GET",
-        data: { dev_id: d.dev_id },
-        success: function(res) {
-            // console.log("AJAX response:", res);
-
-            let data = res.res || {};
-            let rank = data.rank || "";
-            let score = data.score || "0";
-
-            $("#grade").text(rank);
-            $("#score").text(`(${score}점)`);
-
-            setGrade(rank, `(${score}점)`);
-
-            // console.log("Grade:", rank, "Score:", score);
-        },
-        error: function() {
-            alert("점수 계산 에러");
-        }
-    });
 }
 
 // 팝업 닫히면 값 초기화하기
@@ -591,3 +565,21 @@ $("#tel").on("input", function () {
         $(this).val(val.replace(/(\d{3})(\d{4})(\d+)/, "$1-$2-$3"));
     }
 });
+
+// 점수 계산
+function loadUserScore(devId) {
+    // 최초값
+    $("#grade").text("계산중...");
+    $("#score").text("");
+
+    $.ajax({
+            url: "/hr010/getScore",
+            type: "GET",
+            data: { dev_id: devId },
+            success: function(res) {
+                const data = res.res || {};
+                $("#grade").text(data.rank || "-");
+                $("#score").text(`(${data.score || 0}점)`);
+            }
+        });
+}

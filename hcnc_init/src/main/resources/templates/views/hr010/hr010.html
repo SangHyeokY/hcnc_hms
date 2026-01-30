@@ -63,7 +63,7 @@
                     <div class="modal-human-area fl-sa" id="TABLE_HR010_B">
                         <div class="pic-area fd-col">
                             <div class="profile-area">
-                                <img src="/images/common/img-profile.png" alt="profile"/>
+                                <!--<img src="/images/common/img-profile.png" alt="profile"/>-->
                             </div>
                             <div class="upload">
                                 <input type="file" class="file">
@@ -71,7 +71,7 @@
                             </div>
                         </div>
                         <div class="table-area">
-                            <table >
+                            <table>
                                 <colgroup>
                                     <col style="width: 13%;">
                                     <col style="width: 20%;">
@@ -116,7 +116,7 @@
                                         </td>
                                         <th>등급</th>
                                         <td>
-                                            <span class="fw600" id="grade" style="padding-left:10px;"></span>
+                                            <span class="fw600" id="grade" style="padding-left:10px;">계산중...</span>
                                             <span class="fw600" id="score" style="padding-right:10px;"></span>
                                         </td>
                                         <th>근무 가능형태</th>
@@ -162,14 +162,26 @@
                         <span class="tab-btn fs13" data-tab="tab4">평가 및 리스크</span>
                     </div>
                     <div class="tab-action-bar">
-                        <div class="tab-actions" data-tab="tab1"></div>
-                        <div class="tab-actions" data-tab="tab2"></div>
+                        <div class="tab-actions" data-tab="tab1">
+                            <button type="button" class="btn btn-tab1-new">등록</button>
+                            <button type="button" class="btn btn-tab1-edit">수정</button>
+                            <button type="button" class="btn btn-tab1-delete">삭제</button>
+                        </div>
+                        <div class="tab-actions" data-tab="tab2" style="margin-bottom: -20px;">
+                            <button type="button" class="btn btn-tab2-new">등록</button>
+                            <button type="button" class="btn btn-tab2-edit">수정</button>
+                            <button type="button" class="btn btn-tab2-delete">삭제</button>
+                        </div>
                         <div class="tab-actions" data-tab="tab3">
                             <button type="button" class="btn btn-tab3-new">등록</button>
                             <button type="button" class="btn btn-tab3-edit">수정</button>
                             <button type="button" class="btn btn-tab3-delete">삭제</button>
                         </div>
-                        <div class="tab-actions" data-tab="tab4"></div>
+                        <div class="tab-actions" data-tab="tab4" style="margin-bottom: -20px;">
+                            <button type="button" class="btn btn-tab4-new">등록</button>
+                            <button type="button" class="btn btn-tab4-edit">수정</button>
+                            <button type="button" class="btn btn-tab4-delete">삭제</button>
+                        </div>
                     </div>
 
                     <div class="tab-content">
@@ -188,7 +200,7 @@
                     </div>
                 </div>
             </div>
-            <div class="modal-btn fl-ac fl-sb">
+            <div class="modal-btn fl-fe">
                 <ul>
                     <li>
                         <button class="btn btn-close" onclick="closeUserViewModal()">닫기</button>
