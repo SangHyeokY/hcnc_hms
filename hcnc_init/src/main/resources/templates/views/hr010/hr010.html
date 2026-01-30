@@ -63,8 +63,7 @@
                     <div class="modal-human-area fl-sa" id="TABLE_HR010_B">
                         <div class="pic-area fd-col">
                             <div class="profile-area">
-                                <!-- 첨부파일 기능 사용하기 전, 임시 -->
-                                <!-- <img src="../images/att_profile/profile.png" alt="profile"/> -->
+                                <img src="/images/common/img-profile.png" alt="profile"/>
                             </div>
                             <div class="upload">
                                 <input type="file" class="file">
@@ -162,6 +161,16 @@
                         <span class="tab-btn fs13" data-tab="tab3">프로젝트</span>
                         <span class="tab-btn fs13" data-tab="tab4">평가 및 리스크</span>
                     </div>
+                    <div class="tab-action-bar">
+                        <div class="tab-actions" data-tab="tab1"></div>
+                        <div class="tab-actions" data-tab="tab2"></div>
+                        <div class="tab-actions" data-tab="tab3">
+                            <button type="button" class="btn btn-tab3-new">등록</button>
+                            <button type="button" class="btn btn-tab3-edit">수정</button>
+                            <button type="button" class="btn btn-tab3-delete">삭제</button>
+                        </div>
+                        <div class="tab-actions" data-tab="tab4"></div>
+                    </div>
 
                     <div class="tab-content">
                         <div id="tab1" class="tab-panel active">
@@ -181,11 +190,6 @@
             </div>
             <div class="modal-btn fl-ac fl-sb">
                 <ul>
-                    <li><button type="button" class="popup-btn-new">등록</button></li>
-                    <li><button type="button" class="popup-btn-edit">수정</button></li>
-                    <li><button type="button" class="popup-btn-delete">삭제</button></li>
-                </ul>
-                <ul>
                     <li>
                         <button class="btn btn-close" onclick="closeUserViewModal()">닫기</button>
                     </li>
@@ -202,5 +206,6 @@
     <script src="/js/api/hr010/hr013.js"></script>
     <script src="/js/api/hr010/hr014.js"></script>
     <script src="/js/api/hr010/hr010.js"></script>
+    <script src="/js/api/common.js"></script>
 </th:block>
 </html>
