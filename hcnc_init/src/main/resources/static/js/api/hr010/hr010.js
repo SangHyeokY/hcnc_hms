@@ -342,15 +342,15 @@ function fillUserForm(d) {
         $("#dev_type").val("");
     }
 
-    function setGrade(rank) {
+    function setGrade(rank, score) {
         const $grade = $("#grade");
-        const $level = $("#level");
-        if ($grade.length > 0) {
-            $grade.val(rank);
-            $level.val(rank);
+        const $score = $("#score");
+        if ($grade.length > 0 && $score.length > 0) {
+            $grade.text(rank);
+            $score.text(score);
         } else {
             // DOM이 아직 없으면 조금 뒤에 재시도
-            setTimeout(() => setGrade(rank), 50);
+            setTimeout(() => setGrade(rank, score), 50);
         }
     }
 
@@ -359,35 +359,23 @@ function fillUserForm(d) {
         type: "GET",
         data: { dev_id: d.dev_id },
         success: function(res) {
-            let rank;
-            let level;
+            console.log("AJAX response:", res);
 
-            // res가 문자열이면 JSON으로 변환
-            if (typeof res === "string") {
-                try {
-                    res = JSON.parse(res);
-                } catch(e) {
-                    console.error("JSON parse error:", e);
-                }
-            }
+            let data = res.res || {};
+            let rank = data.rank || "";
+            let score = data.score || "0";
 
-            // 구조 확인
-            if (res.res) {
-                rank = res.res.rank;
-                level = res.res.level;
-            } else {
-                rank = res.rank;
-                level = res.level;
-            }
+            $("#grade").text(rank);
+            $("#score").text(`(${score}점)`);
 
-            $("#grade").text(rank || "");
-            $("#level").text(level || "");
+            setGrade(rank, `(${score}점)`);
+
+            console.log("Grade:", rank, "Score:", score);
         },
         error: function() {
             alert("점수 계산 에러");
         }
     });
-
 }
 
 // 팝업 닫히면 값 초기화하기
