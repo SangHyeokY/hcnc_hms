@@ -322,10 +322,10 @@ function fillUserForm(d) {
     $("#ctrt_typ").val(d.ctrt_typ || "");
 
     $(".show_devId").text(
-            window.currentDevId
-                ? "[" + window.currentDevId + "]"
-                : ""
-        );
+        window.currentDevId
+            ? "[" + window.currentDevId + "]"
+            : ""
+    );
 
     // dev_id 값 가져와서 sub-title에 붙이기
     if (d.dev_id) {
@@ -341,6 +341,41 @@ function fillUserForm(d) {
         console.log("dev_id 값이 존재하지 않습니다.")
         $("#dev_type").val("");
     }
+
+    function setGrade(rank, score) {
+        const $grade = $("#grade");
+        const $score = $("#score");
+        if ($grade.length > 0 && $score.length > 0) {
+            $grade.text(rank);
+            $score.text(score);
+        } else {
+            // DOM이 아직 없으면 조금 뒤에 재시도
+            setTimeout(() => setGrade(rank, score), 50);
+        }
+    }
+
+    $.ajax({
+        url: "/hr010/getScore",
+        type: "GET",
+        data: { dev_id: d.dev_id },
+        success: function(res) {
+            console.log("AJAX response:", res);
+
+            let data = res.res || {};
+            let rank = data.rank || "";
+            let score = data.score || "0";
+
+            $("#grade").text(rank);
+            $("#score").text(`(${score}점)`);
+
+            setGrade(rank, `(${score}점)`);
+
+            console.log("Grade:", rank, "Score:", score);
+        },
+        error: function() {
+            alert("점수 계산 에러");
+        }
+    });
 }
 
 // 팝업 닫히면 값 초기화하기

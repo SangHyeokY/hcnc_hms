@@ -45,17 +45,13 @@ $(document).ready(function () {
     });
 
     setComCode("write_hr014_job_cd", "job_cd", "", "cd", "cd_nm", function () {
-        if ($("#write_hr014_job_cd option[value='']").length === 0) {
-            $("#write_hr014_job_cd").prepend("<option value=''>선택</option>");
-        }
-        if (!$("#write_hr014_job_cd").val()) {
-            $("#write_hr014_job_cd option:first").prop("selected", true);
-        }
+        initSelectDefault("write_hr014_job_cd", "역할 선택");
     });
     setComCode("write_hr014_skl_cd", "skl_id", "", "cd", "cd_nm", function (res) {
         skillOptions = res || [];
         buildSkillMap();
         setSkillTagsFromValue($("#write_hr014_stack_txt").val());
+        initSelectDefault("write_hr014_skl_cd", "기술스택 선택");
         if (tableHr014) {
             tableHr014.redraw(true);
         }
@@ -95,6 +91,18 @@ function buildHr014Table() {
         ],
         data: []
     });
+}
+
+// 콤보 기본 옵션/선택 처리
+function initSelectDefault(selectId, placeholderText) {
+    var $sel = $("#" + selectId);
+    if ($sel.find("option[value='']").length === 0) {
+        $sel.prepend("<option value=''>" + placeholderText + "</option>");
+    }
+    $sel.val("");
+    if (!$sel.val()) {
+        $sel.find("option:first").prop("selected", true);
+    }
 }
 
 // 단가/프로젝트 이력 조회
