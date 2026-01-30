@@ -50,11 +50,11 @@ footer {width:100%; height:30px; line-height: 30px; padding:0 20px; display: fle
 .profile h4{font-size:15px; font-weight:500; color:#B1B1B1;}
 .profile-area {justify-content: center; gap:4px;}
 .profile-area .profile{width:100%; background:#EDEFF5; padding:6.5px; border-radius: 8px; font-size:12px;}
-.profile-area .profile-img{position:relative; display:block; width: 32px; height: 32px; margin-right:4px; border-radius:50%; overflow:hidden; background: #333; background-size:cover;}
+.profile-area .profile-img{position:relative; display:block; width: 32px; height: 32px; margin-right:4px; border-radius:50%; overflow:hidden; background-size:cover;}
 .profile-area .profile-img img {position:absolute; width:100%; top:0%; left:0%;}
 .profile-area .alarm{}
 .profile-area .alarm .bell-btn{padding:12px; background:#EDEFF5; border:none; border-radius: 8px;}
-.profile-area .alarm .bell-btn .ico-bell{display:inline-block; width:20px; height:20px; background:url('../icons/ico-bell.png')center center no-repeat; background-size:contain;}
+.profile-area .alarm .bell-btn .ico-bell{display:inline-block; width:20px; height:20px; background:url('../icons/lnb-ico-alarm.png')center center no-repeat; background-size:contain;}
 
 .left-menu {width:100%; padding: 20px 0;}
 .left-menu .nav {height:100%;overflow:auto;}
@@ -89,10 +89,10 @@ footer {width:100%; height:30px; line-height: 30px; padding:0 20px; display: fle
 .left-menu .nav .lnb-menu .dep1 > li > .dep2 > li:after{content: ""; display: inline-block; background: #3A3F49; position: absolute; left: 0; width: 1px; height: 100%; top: 0px;}
 .left-menu .nav .lnb-menu .dep1 > li > .dep2 > li:last-child:after{height:16px;}
 
-.mem-area{border-bottom: 1px solid rgba(31, 37, 44, 1); margin-bottom:10px;}
+.mem-area{border-bottom: 1px solid #C5CCD5; margin-bottom:10px;}
 .mem-area .logout-btn{width:100%; text-align: left; border:none; background:none; padding:10px; color:#6B727B;}
 .mem-area .logout-btn:hover{color:#fff;}
-.mem-area .logout-btn .ico-lock{display:inline-block; width:20px; height:20px; margin-right:4px; background:url('../icons/ico-lock.png')center center no-repeat; background-size:contain;}
+.mem-area .logout-btn .ico-lock{display:inline-block; width:20px; height:20px; margin-right:4px; background:url('../icons/lnb-ico-logout.png')center center no-repeat; background-size:contain;}
 
 /*=================================================================================
  * Container style

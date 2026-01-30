@@ -45,7 +45,9 @@ public class Hr010Service {
         return this.sqlSession.selectList("com.hcncinit.Hr010Mapper.select_tab2_2", devId);
     }
 
-
+    public Map<String, Object> dev_score(String devId) {
+        return this.sqlSession.selectOne("com.hcncinit.Hr010Mapper.dev_score", devId);
+    }
 
     // 폐기 hr011
     // 인력관리 > 기본 인적사항 (상세) (임시/검색x), 따로 분류할건지는 논의
