@@ -4,12 +4,34 @@
 
 <th:block th:fragment="tab4Content">
     <div class="content list-area">
-        <section class="white-full">
-            <div class="content-body">
-                <!-- Tab4 내용 -->
-                <p>Tab4 내용</p>
-            </div>
-        </section>
+        <div class="tab-area mg-b15">
+            <span class="tab-sub-btn fs13 active" data-tab="tab4-1">관리자 평가</span>
+            <span class="tab-sub-btn fs13" data-tab="tab4-2">리스크 관리</span>
+        </div>
+        <div class="content-body">
+            <!-- Tabulator 테이블 div -->
+            <div id="TABLE_HR014_A"></div>
+
+
+            <section class="white-full" id="TABLE_HR014_B" style="display:none;">
+                <div class="content-body">
+                    <div class="risk-box">
+                        <div class="risk-list" id="HR015_RISK_LIST"></div>
+                        <div class="risk-detail">
+                            <textarea id="HR015_RISK_TEXT" rows="10"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="risk-extra">
+                        <label class="risk-check">
+                            <span>재투입 가능여부</span>
+                            <input type="checkbox" id="HR015_REIN_CHECK">
+                        </label>
+                    </div>
+                </div>
+            </section>
+
+        </div>
     </div>
 </th:block>
 

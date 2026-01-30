@@ -32,26 +32,7 @@ public class Hr010Service {
         return this.sqlSession.update("com.hcncinit.Hr010Mapper.delete_hr010", map);
     }
 
-    // tab1
-    public Map<String, Object> select_tab1(String devId) {
-        return this.sqlSession.selectOne("com.hcncinit.Hr010Mapper.select_tab1", devId);
-    }
-
-    // tab2
-    public List<Map<String, Object>> select_tab2_1(String devId) {
-        return this.sqlSession.selectList("com.hcncinit.Hr010Mapper.select_tab2_1", devId);
-    }
-    public List<Map<String, Object>> select_tab2_2(String devId) {
-        return this.sqlSession.selectList("com.hcncinit.Hr010Mapper.select_tab2_2", devId);
-    }
-
     public Map<String, Object> dev_score(String devId) {
         return this.sqlSession.selectOne("com.hcncinit.Hr010Mapper.dev_score", devId);
-    }
-
-    // 폐기 hr011
-    // 인력관리 > 기본 인적사항 (상세) (임시/검색x), 따로 분류할건지는 논의
-    public Map<String, Object> select_hr011(String devId) {
-        return this.sqlSession.selectOne("com.hcncinit.Hr010Mapper.select_hr011", devId);
     }
 }

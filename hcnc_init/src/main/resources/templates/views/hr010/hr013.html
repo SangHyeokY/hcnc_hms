@@ -11,6 +11,119 @@
             </div>
         </section>
     </div>
+
+    <!-- 프로젝트 이력 모달 -->
+    <div class="modal-wrap" id="write-hr013-area" style="display: none">
+        <div class="modal-container">
+            <div class="header">
+                <h4>프로젝트 이력 <span id="hr013-type">등록</span></h4>
+                <span class="modal-close" onclick="closeHr013Modal()"></span>
+            </div>
+            <div class="modal-content">
+                <article>
+                    <div class="div-table">
+                        <ul>
+                            <li class="table-col fl-ac full-row">
+                                <div class="table-cell">
+                                    <p class="cell-tit">당사 여부</p>
+                                    <div class="cell-info">
+                                        <input type="hidden" id="write_hr013_dev_prj_id">
+                                        <select id="write_hr013_inprj_yn">
+                                            <option value="Y">Y</option>
+                                            <option value="N">N</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="table-cell"></div>
+                            </li>
+                            <li class="table-col fl-ac full-row">
+                                <div class="table-cell">
+                                    <p class="cell-tit">기간</p>
+                                    <div class="cell-info date-range">
+                                        <input type="date" class="text" id="write_hr013_st_dt">
+                                        <span class="date-split">~</span>
+                                        <input type="date" class="text" id="write_hr013_ed_dt">
+                                    </div>
+                                </div>
+                                <div class="table-cell"></div>
+                            </li>
+                            <li class="table-col fl-ac">
+                                <div class="table-cell">
+                                    <p class="cell-tit">고객사</p>
+                                    <div class="cell-info">
+                                        <input type="text" class="text" id="write_hr013_cust_nm" placeholder="">
+                                    </div>
+                                </div>
+                                <div class="table-cell">
+                                    <p class="cell-tit">프로젝트명</p>
+                                    <div class="cell-info">
+                                        <input type="text" class="text" id="write_hr013_prj_nm" placeholder="">
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="table-col fl-ac">
+                                <div class="table-cell">
+                                    <p class="cell-tit">계약단가</p>
+                                    <div class="cell-info">
+                                        <input type="text" class="text" id="write_hr013_rate_amt" placeholder="금액 입력">
+                                    </div>
+                                </div>
+                                <div class="table-cell">
+                                    <p class="cell-tit">역할</p>
+                                    <div class="cell-info">
+                                        <select id="write_hr013_job_cd"></select>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="table-col fl-ac full-row">
+                                <div class="table-cell">
+                                    <p class="cell-tit" >투입률</p>
+                                    <div class="cell-info">
+                                        <input type="text" class="text" id="write_hr013_alloc_pct" placeholder="숫자%">
+                                    </div>
+                                </div>
+                                <div class="table-cell"></div>
+                            </li>
+                            <li class="table-col fl-ac full-row" style="align-items: start;">
+                                <div class="table-cell full-width">
+                                    <p class="cell-tit">기술스택</p>
+                                    <div class="cell-info">
+                                        <div class="tag-input">
+                                            <div class="tag-input-box">
+                                                <div class="tag-help">태그 선택 후 추가 버튼 클릭</div>
+                                                <ul class="tag-list" id="hr013SkillTagList" ></ul>
+                                            </div>
+                                            <div class="tag-select-row">
+                                                <select id="write_hr013_skl_cd"></select>
+                                                <button type="button" class="btn btn-add-skill">추가</button>
+                                            </div>
+                                            <input type="hidden" id="write_hr013_stack_txt">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="table-cell"></div>
+                            </li>
+                            <li class="table-col fl-ac full-row">
+                                <div class="table-cell full-width">
+                                    <p class="cell-tit">비고</p>
+                                    <div class="cell-info">
+                                        <textarea class="text" id="write_hr013_remark" placeholder="비고"></textarea>
+                                    </div>
+                                </div>
+                                <div class="table-cell"></div>
+                            </li>
+                        </ul>
+                    </div>
+                </article>
+            </div>
+            <div class="modal-btn">
+                <ul>
+                    <li><button class="btn btn-close" onclick="closeHr013Modal()">닫기</button></li>
+                    <li><button class="btn btn-save btn-hr013-save">저장</button></li>
+                </ul>
+            </div>
+        </div>
+    </div>
 </th:block>
 
 </html>

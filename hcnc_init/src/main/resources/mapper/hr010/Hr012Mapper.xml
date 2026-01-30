@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hcncinit.Hr012Mapper">
+    <!-- 보유역량 및 숙련도 - 보유역량 -->
+    <select id="select_tab2_1" resultType="hashmap" parameterType="string">
+        WITH grp AS (
+            SELECT cd,
+                cd_nm,
+                sort_no
+            FROM tb_cd_mst
+            WHERE del_yn = 'N'
+            AND use_yn = 'Y'
+            AND grp_cd = 'skl_grp'
+            ),
+        skl AS (
+            SELECT SUBSTR(skl.skl_id, 1, 2) AS skl_grp,
+                skl.skl_id,
+                cd.cd_nm,
+                cd.adinfo_01
+            FROM tb_dev_skl_info skl
+            LEFT JOIN tb_cd_mst cd ON skl.skl_id = cd.cd
+            AND cd.grp_cd = 'skl_id'
+            WHERE cd.del_yn = 'N'
+            AND cd.use_yn = 'Y'
+            AND skl.dev_id = #{devId}
+        )
+        SELECT g.cd,
+            g.cd_nm,
+            GROUP_CONCAT(s.skl_id ORDER BY s.skl_id) AS skl_id_lst
+        FROM grp g
+        LEFT JOIN skl s ON g.cd = s.skl_grp
+        GROUP BY g.cd, g.cd_nm, g.sort_no
+    </select>
+
+    <!-- 보유역량 및 숙련도 - 숙련도 -->
+    <select id="select_tab2_2" resultType="hashmap" parameterType="string">
+        SELECT skl.skl_id
+            , cd.cd_nm
+            , CASE WHEN skl.lvl = 0 THEN 'Y' ELSE 'N' END lv0
+            , CASE WHEN skl.lvl = 1 THEN 'Y' ELSE 'N' END lv1
+            , CASE WHEN skl.lvl = 2 THEN 'Y' ELSE 'N' END lv2
+            , CASE WHEN skl.lvl = 3 THEN 'Y' ELSE 'N' END lv3
+            , CASE WHEN skl.lvl = 4 THEN 'Y' ELSE 'N' END lv4
+            , CASE WHEN skl.lvl = 5 THEN 'Y' ELSE 'N' END lv5
+        FROM tb_dev_skl_info skl
+        LEFT JOIN tb_cd_mst cd ON skl.skl_id = cd.cd
+        AND cd.grp_cd = 'skl_id'
+        WHERE cd.del_yn = 'N'
+        AND cd.use_yn = 'Y'
+        AND skl.dev_id = #{devId}
+        ORDER BY skl.skl_id
+    </select>
+</mapper>

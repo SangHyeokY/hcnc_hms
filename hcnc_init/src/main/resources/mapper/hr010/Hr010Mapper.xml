@@ -118,70 +118,6 @@
         WHERE dev_id = #{dev_id}
     </update>
 
-    <!-- 소속 및 계약정보 -->
-    <select id="select_tab1" resultType="hashmap" parameterType="string">
-        SELECT org_nm
-            , biz_typ
-            , DATE_FORMAT(st_dt, '%Y-%m-%d') AS st_dt
-            , DATE_FORMAT(ed_dt, '%Y-%m-%d') AS ed_dt
-            , amt
-            , remark
-        FROM tb_ctrt_info
-        WHERE del_yn='N'
-        AND use_yn='Y'
-        AND dev_id = #{devId}
-    </select>
-
-    <!-- 보유역량 및 숙련도 - 보유역량 -->
-    <select id="select_tab2_1" resultType="hashmap" parameterType="string">
-        WITH grp AS (
-            SELECT cd,
-                cd_nm,
-                sort_no
-            FROM tb_cd_mst
-            WHERE del_yn = 'N'
-            AND use_yn = 'Y'
-            AND grp_cd = 'skl_grp'
-            ),
-        skl AS (
-            SELECT SUBSTR(skl.skl_id, 1, 2) AS skl_grp,
-                skl.skl_id,
-                cd.cd_nm,
-                cd.adinfo_01
-            FROM tb_dev_skl_info skl
-            LEFT JOIN tb_cd_mst cd ON skl.skl_id = cd.cd
-            AND cd.grp_cd = 'skl_id'
-            WHERE cd.del_yn = 'N'
-            AND cd.use_yn = 'Y'
-            AND skl.dev_id = #{devId}
-        )
-        SELECT g.cd,
-            g.cd_nm,
-            GROUP_CONCAT(s.skl_id ORDER BY s.skl_id) AS skl_id_lst
-        FROM grp g
-        LEFT JOIN skl s ON g.cd = s.skl_grp
-        GROUP BY g.cd, g.cd_nm, g.sort_no
-    </select>
-
-    <!-- 보유역량 및 숙련도 - 숙련도 -->
-    <select id="select_tab2_2" resultType="hashmap" parameterType="string">
-        SELECT skl.skl_id
-            , cd.cd_nm
-            , CASE WHEN skl.lvl = 0 THEN 'Y' ELSE 'N' END lv0
-            , CASE WHEN skl.lvl = 1 THEN 'Y' ELSE 'N' END lv1
-            , CASE WHEN skl.lvl = 2 THEN 'Y' ELSE 'N' END lv2
-            , CASE WHEN skl.lvl = 3 THEN 'Y' ELSE 'N' END lv3
-            , CASE WHEN skl.lvl = 4 THEN 'Y' ELSE 'N' END lv4
-            , CASE WHEN skl.lvl = 5 THEN 'Y' ELSE 'N' END lv5
-        FROM tb_dev_skl_info skl
-        LEFT JOIN tb_cd_mst cd ON skl.skl_id = cd.cd
-        AND cd.grp_cd = 'skl_id'
-        WHERE cd.del_yn = 'N'
-        AND cd.use_yn = 'Y'
-        AND skl.dev_id = #{devId}
-        ORDER BY skl.skl_id
-    </select>
-
     <!-- 인적사항 => 등급 계산 -->
     <select id="dev_score" resultType="hashmap" parameterType="string">
         WITH param AS
@@ -347,27 +283,4 @@
         ) T
         LIMIT 1
     </select>
-
-
-    <!-- 폐기 // hr011_old -->
-    <select id="select_hr011" resultType="hashmap" parameterType="string">
-        SELECT dev_nm -- 성명
-        , brdt -- 생년월일
-        , tel -- 연락처
-        , email -- 이메일
-        , region -- 거주지역
-        , main_lang -- 주 개발언어
-        , exp_yr -- 경력연차
-        , edu_last -- 최종학력
-        , cert_txt -- 보유 자격증
-        , work_md -- 희망단가
-        , avail_dt -- 투입가능시점
-        , ctrt_typ -- 계약형태
-        , hope_rate_amt -- 단가
-        FROM tb_dev_info
-        WHERE del_yn='N'
-        AND use_yn='Y'
-        AND dev_id = #{devId}
-    </select>
-
 </mapper>

@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hcncinit.Hr013Mapper">
+
+    <!-- 개발자 프로젝트/단가 이력 조회 -->
+    <select id="selectList" resultType="hashmap" parameterType="map">
+        SELECT
+        prj.dev_prj_id
+        , prj.dev_id
+        , prj.inprj_yn
+        , prj.st_dt
+        , prj.ed_dt
+        , CONCAT(
+        IFNULL(DATE_FORMAT(prj.st_dt, '%Y.%m'), ''),
+        ' ~ ',
+        IFNULL(DATE_FORMAT(prj.ed_dt, '%Y.%m'), '')
+        ) AS st_ed_dt
+        , prj.cust_nm
+        , prj.prj_nm
+        , rate.rate_amt
+        , prj.job_cd
+        , role.cd_nm AS role_nm
+        , prj.stack_txt
+        , prj.alloc_pct
+        , prj.remark
+        FROM tb_dev_prj_info prj
+        LEFT JOIN tb_dev_rate_info rate
+        ON prj.dev_prj_id = rate.dev_prj_id
+        AND prj.dev_id = rate.dev_id
+        AND rate.rate_id = (
+        SELECT r2.rate_id
+        FROM tb_dev_rate_info r2
+        WHERE r2.dev_prj_id = prj.dev_prj_id
+        AND r2.dev_id = prj.dev_id
+        AND r2.del_yn = 'N'
+        AND r2.use_yn = 'Y'
+        ORDER BY r2.rate_id DESC
+        LIMIT 1
+        )
+        LEFT JOIN tb_cd_mst role
+        ON role.grp_cd = 'job_cd'
+        AND role.cd = prj.job_cd
+        AND role.use_yn = 'Y'
+        AND role.del_yn = 'N'
+        WHERE prj.del_yn = 'N'
+        AND prj.use_yn = 'Y'
+        AND prj.dev_id = #{dev_id}
+        ORDER BY prj.st_dt DESC, prj.dev_prj_id DESC
+    </select>
+
+    <!-- 프로젝트 등록 -->
+    <insert id="insertProject" parameterType="map" useGeneratedKeys="true" keyProperty="dev_prj_id">
+        INSERT INTO tb_dev_prj_info (
+        dev_id,
+        st_dt,
+        ed_dt,
+        cust_nm,
+        prj_nm,
+        job_cd,
+        stack_txt,
+        alloc_pct,
+        remark,
+        inprj_yn,
+        use_yn,
+        del_yn,
+        crt_ts,
+        crt_by,
+        upd_ts,
+        upd_by
+        ) VALUES (
+        #{dev_id},
+        #{st_dt},
+        #{ed_dt},
+        #{cust_nm},
+        #{prj_nm},
+        #{job_cd},
+        #{stack_txt},
+        #{alloc_pct},
+        #{remark},
+        #{inprj_yn},
+        'Y',
+        'N',
+        NOW(),
+        #{userId},
+        NOW(),
+        #{userId}
+        )
+    </insert>
+
+    <!-- 프로젝트 수정 -->
+    <update id="updateProject" parameterType="map">
+        UPDATE tb_dev_prj_info
+        SET st_dt = #{st_dt},
+        ed_dt = #{ed_dt},
+        cust_nm = #{cust_nm},
+        prj_nm = #{prj_nm},
+        job_cd = #{job_cd},
+        stack_txt = #{stack_txt},
+        alloc_pct = #{alloc_pct},
+        remark = #{remark},
+        inprj_yn = #{inprj_yn},
+        upd_ts = NOW(),
+        upd_by = #{userId}
+        WHERE dev_prj_id = #{dev_prj_id}
+    </update>
+
+    <!-- 프로젝트 삭제(소프트) -->
+    <update id="deleteProject" parameterType="map">
+        UPDATE tb_dev_prj_info
+        SET del_yn = 'Y',
+        del_ts = NOW(),
+        del_by = #{userId}
+        WHERE dev_prj_id = #{dev_prj_id}
+    </update>
+
+    <!-- 단가 이력 삭제(소프트) -->
+    <update id="deleteRateByProject" parameterType="map">
+        UPDATE tb_dev_rate_info
+        SET del_yn = 'Y',
+        del_ts = NOW(),
+        del_by = #{userId}
+        WHERE dev_prj_id = #{dev_prj_id}
+        AND dev_id = #{dev_id}
+    </update>
+
+    <!-- 최신 단가 조회 -->
+    <select id="selectLatestRate" resultType="java.math.BigDecimal" parameterType="map">
+        SELECT rate_amt
+        FROM tb_dev_rate_info
+        WHERE dev_prj_id = #{dev_prj_id}
+        AND dev_id = #{dev_id}
+        AND del_yn = 'N'
+        AND use_yn = 'Y'
+        ORDER BY rate_id DESC
+        LIMIT 1
+    </select>
+
+    <!-- 단가 이력 저장 -->
+    <insert id="insertRate" parameterType="map">
+        INSERT INTO tb_dev_rate_info (
+        dev_prj_id,
+        dev_id,
+        rate_amt,
+        remark,
+        use_yn,
+        del_yn,
+        crt_ts,
+        crt_by,
+        upd_ts,
+        upd_by
+        ) VALUES (
+        #{dev_prj_id},
+        #{dev_id},
+        #{rate_amt},
+        #{remark},
+        'Y',
+        'N',
+        NOW(),
+        #{userId},
+        NOW(),
+        #{userId}
+        )
+    </insert>
+
+</mapper>

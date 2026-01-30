@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hcncinit.Hr011Mapper">
+    <!-- 소속 및 계약정보 -->
+    <select id="select_tab1" resultType="hashmap" parameterType="string">
+        SELECT org_nm
+            , biz_typ
+            , DATE_FORMAT(st_dt, '%Y-%m-%d') AS st_dt
+            , DATE_FORMAT(ed_dt, '%Y-%m-%d') AS ed_dt
+            , amt
+            , remark
+        FROM tb_ctrt_info
+        WHERE del_yn='N'
+        AND use_yn='Y'
+        AND dev_id = #{devId}
+    </select>
+</mapper>

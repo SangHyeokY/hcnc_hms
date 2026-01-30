@@ -43,15 +43,15 @@ $(document).ready(function () {
         }
     });
 
-    $(".btn-new").on("click", function () {
+    $(".btn-main-add").on("click", function () {
         openUserModal("insert");
     });
 
-    $(".btn-edit").on("click", function () {
+    $(".btn-main-edit").on("click", function () {
         openUserModal("update");
     });
 
-    $(".btn-delete").on("click", function () {
+    $(".btn-main-del").on("click", function () {
         deleteUserRows();
     });
 
@@ -334,11 +334,11 @@ function fillUserForm(d) {
         } else if (d.dev_id.startsWith("HCNC_S")) {
             $("#dev_type").val("HCNC_S");
         } else {
-            console.log("dev_id 값이 잘못 되었습니다.")
+            // console.log("dev_id 값이 잘못 되었습니다.")
             $("#dev_type").val("");
         }
     } else {
-        console.log("dev_id 값이 존재하지 않습니다.")
+        // console.log("dev_id 값이 존재하지 않습니다.")
         $("#dev_type").val("");
     }
 
@@ -359,7 +359,7 @@ function fillUserForm(d) {
         type: "GET",
         data: { dev_id: d.dev_id },
         success: function(res) {
-            console.log("AJAX response:", res);
+            // console.log("AJAX response:", res);
 
             let data = res.res || {};
             let rank = data.rank || "";
@@ -370,7 +370,7 @@ function fillUserForm(d) {
 
             setGrade(rank, `(${score}점)`);
 
-            console.log("Grade:", rank, "Score:", score);
+            // console.log("Grade:", rank, "Score:", score);
         },
         error: function() {
             alert("점수 계산 에러");

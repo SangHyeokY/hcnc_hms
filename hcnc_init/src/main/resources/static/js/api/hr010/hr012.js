@@ -45,7 +45,7 @@ function buildHr012TableA() {
         layout: "fitColumns",
         placeholder: "데이터 없음",
         columns: [
-            { title: "구분", field: "cd_nm", hozAlign: "left" },
+            { title: "구분", field: "cd_nm", hozAlign: "left", width: 400},
             { title: "상세", field: "skl_id_kst", hozAlign: "left" }
         ],
         data: []
