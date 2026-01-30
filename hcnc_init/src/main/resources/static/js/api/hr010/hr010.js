@@ -322,10 +322,10 @@ function fillUserForm(d) {
     $("#ctrt_typ").val(d.ctrt_typ || "");
 
     $(".show_devId").text(
-            window.currentDevId
-                ? "[" + window.currentDevId + "]"
-                : ""
-        );
+        window.currentDevId
+            ? "[" + window.currentDevId + "]"
+            : ""
+    );
 
     // dev_id 값 가져와서 sub-title에 붙이기
     if (d.dev_id) {
@@ -341,6 +341,53 @@ function fillUserForm(d) {
         console.log("dev_id 값이 존재하지 않습니다.")
         $("#dev_type").val("");
     }
+
+    function setGrade(rank) {
+        const $grade = $("#grade");
+        const $level = $("#level");
+        if ($grade.length > 0) {
+            $grade.val(rank);
+            $level.val(rank);
+        } else {
+            // DOM이 아직 없으면 조금 뒤에 재시도
+            setTimeout(() => setGrade(rank), 50);
+        }
+    }
+
+    $.ajax({
+        url: "/hr010/getScore",
+        type: "GET",
+        data: { dev_id: d.dev_id },
+        success: function(res) {
+            let rank;
+            let level;
+
+            // res가 문자열이면 JSON으로 변환
+            if (typeof res === "string") {
+                try {
+                    res = JSON.parse(res);
+                } catch(e) {
+                    console.error("JSON parse error:", e);
+                }
+            }
+
+            // 구조 확인
+            if (res.res) {
+                rank = res.res.rank;
+                level = res.res.level;
+            } else {
+                rank = res.rank;
+                level = res.level;
+            }
+
+            $("#grade").text(rank || "");
+            $("#level").text(level || "");
+        },
+        error: function() {
+            alert("점수 계산 에러");
+        }
+    });
+
 }
 
 // 팝업 닫히면 값 초기화하기

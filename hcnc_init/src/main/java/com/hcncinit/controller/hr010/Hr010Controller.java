@@ -58,6 +58,15 @@ public class Hr010Controller {
         return mv;
     }
 
+    // 점수 계산
+    @RequestMapping("/getScore")
+    public ModelAndView getScore (@RequestParam("dev_id") String devId) {
+        ModelAndView mv = new ModelAndView("jsonView");
+        Map<String, Object> resList = hr010Service.dev_score(devId);
+        mv.addObject("res", resList);
+        return mv;
+    }
+
     // tab1
     @RequestMapping("/tab1")
     public ModelAndView select_tab1 (@RequestParam("dev_id") String devId) {
@@ -96,6 +105,9 @@ public class Hr010Controller {
         mv.addObject("res", reslist);
         return mv;
     }
+
+
+
 
 
 
