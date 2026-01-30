@@ -1,4 +1,4 @@
-function setComCode(strId, strGrpCd, strTag, id = 'cd', name = 'cd_nm', done) {
+function setComCode(strId, strGrpCd, strTag, id = 'cd', name = 'cd_nm') {
 
     $.ajax({
         url: "/common/getCm",
@@ -8,7 +8,7 @@ function setComCode(strId, strGrpCd, strTag, id = 'cd', name = 'cd_nm', done) {
             tag: strTag
         },
         success: function (data) {
-            bindComCode(strId, data.res, id, name);
+            bindComCode(strId, data.res, bTotal, id, name);
             if (typeof done === "function") {
                 done(data.res || []);
             }
@@ -19,11 +19,18 @@ function setComCode(strId, strGrpCd, strTag, id = 'cd', name = 'cd_nm', done) {
     });
 }
 
-function bindComCode(strId, jsonData, id, name) {
+function bindComCode(strId, jsonData, bTotal, id, name) {
     const select = $("#" + strId)[0];
 
     // 기존 옵션 제거
     select.innerHTML = "";
+
+    if (bTotal) {
+        const option = document.createElement("option");
+        option.value = "";
+        option.textContent = "전체";
+        select.appendChild(option);
+    }
 
     jsonData.forEach((item) => {
         const option = document.createElement("option");
