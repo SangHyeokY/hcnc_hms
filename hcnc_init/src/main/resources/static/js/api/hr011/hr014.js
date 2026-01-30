@@ -190,6 +190,8 @@ function clearHr014Form() {
     $("#write_hr014_alloc_pct").val("");
     $("#write_hr014_remark").val("");
     setSkillTagsFromValue("");
+    initSelectDefault("write_hr014_job_cd", "역할 선택");
+    initSelectDefault("write_hr014_skl_cd", "기술스택 선택");
 }
 
 // 저장 버튼

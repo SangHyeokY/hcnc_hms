@@ -63,7 +63,7 @@ public class Hr014Controller {
             return;
         }
         if (!map.containsKey("dev_id") || String.valueOf(map.get("dev_id")).trim().isEmpty()) {
-            map.put("dev_id", "TEMP_DEV");
+            map.put("dev_id", "");
         }
     }
 

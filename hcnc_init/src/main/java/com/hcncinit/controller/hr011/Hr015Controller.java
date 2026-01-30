@@ -81,7 +81,7 @@ public class Hr015Controller {
             return;
         }
         if (!map.containsKey("dev_id") || String.valueOf(map.get("dev_id")).trim().isEmpty()) {
-            map.put("dev_id", "TEMP_DEV");
+            map.put("dev_id", "");
         }
         if (!map.containsKey("eval_grp") || String.valueOf(map.get("eval_grp")).trim().isEmpty()) {
             map.put("eval_grp", "eval_id");
