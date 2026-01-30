@@ -144,7 +144,17 @@ function buildHr014TableA() {
                     }
                 ]
             },
-            { title: "코멘트", field: "cmt", widthGrow: 3, hozAlign: "center", editor: "input", headerVertical: "middle" }
+            {
+                title: "코멘트",
+                field: "cmt",
+                widthGrow: 3,
+                hozAlign: "center",
+                editor: "input",
+                editable: function () {
+                    return !window.hr010ReadOnly;
+                },
+                headerVertical: "middle"
+            }
         ],
         data: []
     });
@@ -177,7 +187,7 @@ function scoreCheckboxFormatter(cell, formatterParams, onRendered) {
     const value = cell.getValue();
     const checked = value === "Y" ? "checked" : "";
     const disabled = window.hr010ReadOnly ? "disabled" : "";
-    return `<input type="checkbox" ${checked} ${disabled} />`;
+    return `<input type="radio" ${checked} ${disabled} />`;
 }
 
 function setScore(row, level) {
@@ -404,6 +414,7 @@ window.saveTab4All = saveTab4All;
 function applyTab4Readonly(isReadOnly) {
     $("#HR015_RISK_TEXT").prop("disabled", isReadOnly);
     $("#HR015_REIN_CHECK").prop("disabled", isReadOnly);
+    $("#TABLE_HR014_A").toggleClass("is-readonly", !!isReadOnly);
 }
 
 window.applyTab4Readonly = applyTab4Readonly;

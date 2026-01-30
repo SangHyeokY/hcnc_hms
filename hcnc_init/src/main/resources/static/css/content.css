@@ -93,6 +93,19 @@ button.btn.btn-add-skill {
 .tabulator-col.tabulator-sortable {
     align-content: center;
 }
+#TABLE_HR014_A input[type="radio"],
+#TABLE_HR015_A input[type="radio"] {
+  pointer-events: none;
+  cursor: default;
+}
+#TABLE_HR014_A.is-readonly .tabulator-row,
+#TABLE_HR014_A.is-readonly .tabulator-row .tabulator-cell {
+  cursor: default;
+}
+#TABLE_HR013_A.is-readonly .tabulator-row,
+#TABLE_HR013_A.is-readonly .tabulator-row .tabulator-cell {
+  cursor: default;
+}
 
 /*===============================================================================
   HR015 - risk memo
