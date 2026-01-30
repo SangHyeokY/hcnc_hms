@@ -16,4 +16,213 @@
         ORDER BY sort_no
     </select>
 
+    <select id="get_dev_info_excel" resultType="hashmap" parameterType="map">
+        SELECT 	dev.dev_nm -- 성명
+             , 	dev.brdt -- 생년월일
+             , 	dev.tel -- 연락처
+             , 	dev.email -- 이메일
+             , 	dev.region -- 거주지역
+             , 	fn_get_cm_lst('skl_id', dev.main_lang) main_lang -- 주 개발언어
+             , 	dev.exp_yr -- 경력연차
+             , 	dev.edu_last -- 최종학력
+             , 	dev.cert_txt -- 보유 자격증
+             , 	fn_get_cm('work_md', dev.work_md) work_md
+             , 	dev.hope_rate_amt  -- 희망단가
+             , 	dev.avail_dt -- 투입가능시점
+             , 	fn_get_cm('ctrt_typ', dev.ctrt_typ) ctrt_typ -- 계약형태
+             ,	ctrt.org_nm	-- 소속사
+             , 	fn_get_cm('biz_typ', ctrt.biz_typ) biz_typ	-- 사업자 유형
+             ,	ctrt.st_dt	-- 계약 시작일
+             ,	ctrt.ed_dt	-- 계약 종료일
+             ,	ctrt.amt	-- 계약금액
+             ,	ctrt.remark	-- 비고
+        FROM 	tb_dev_info dev
+                    LEFT JOIN tb_ctrt_info ctrt
+                              ON	dev.dev_id = ctrt.dev_id
+                              AND   ctrt.del_yn = 'N'
+                              AND   ctrt.use_yn = 'Y'
+        WHERE 	dev.del_yn = 'N'
+          AND   dev.use_yn = 'Y'
+          AND   dev.dev_id = #{dev_id}
+    </select>
+
+    <select id="get_skl_info_excel_01" resultType="hashmap" parameterType="map">
+        WITH grp AS
+        (
+             SELECT 	cd
+                  , 	cd_nm
+                  , 	sort_no
+             FROM 	tb_cd_mst
+             WHERE 	del_yn = 'N'
+               AND use_yn = 'Y'
+               AND grp_cd = 'skl_grp'
+             ORDER BY sort_no
+        ),
+        skl AS
+        (
+             SELECT 	SUBSTR(skl.skl_id, 1, 2) skl_grp
+                  ,     skl.skl_id
+             FROM 	tb_dev_skl_info skl
+             WHERE 	skl.del_yn = 'N'
+               AND skl.use_yn = 'Y'
+               AND skl.dev_id = #{dev_id}
+             ORDER BY skl.skl_id
+        )
+        SELECT 	g.cd
+             , 	g.cd_nm
+             , 	fn_get_cm_lst('skl_id', GROUP_CONCAT(skl_id)) skl_id_lst
+        FROM 	grp AS g
+                    LEFT JOIN skl AS s
+                              ON    g.cd = s.skl_grp
+        GROUP BY g.cd
+        ORDER BY g.sort_no
+    </select>
+
+    <select id="get_skl_info_excel_02" resultType="hashmap" parameterType="map">
+        SELECT 	skl.skl_id
+             , 	cd.cd_nm
+             , 	CASE WHEN skl.lvl = 1 THEN '✓' ELSE '' END lv1
+             , 	CASE WHEN skl.lvl = 2 THEN '✓' ELSE '' END lv2
+             , 	CASE WHEN skl.lvl = 3 THEN '✓' ELSE '' END lv3
+             , 	CASE WHEN skl.lvl = 4 THEN '✓' ELSE '' END lv4
+             , 	CASE WHEN skl.lvl = 5 THEN '✓' ELSE '' END lv5
+        FROM 	tb_dev_skl_info skl
+                    LEFT JOIN tb_cd_mst cd
+                              ON 	skl.skl_id = cd.cd
+                                  AND cd.grp_cd = 'skl_id'
+        WHERE	cd.del_yn = 'N'
+          AND cd.use_yn = 'Y'
+          AND skl.dev_id = #{dev_id}
+        ORDER BY skl.skl_id
+    </select>
+
+    <select id="get_prj_info_excel" resultType="hashmap" parameterType="map">
+        SELECT 	prj.inprj_yn -- 당사 여부
+             , 	prj.st_dt
+             , 	prj.ed_dt
+             , 	CONCAT(TO_CHAR(prj.st_dt, 'YYYY-MM'), ' ~ ', TO_CHAR(prj.ed_dt, 'YYYY-MM')) AS st_ed_dt -- 기간
+             , 	prj.cust_nm -- 고객사
+             , 	prj.prj_nm -- 프로젝트명
+             , 	rate.rate_amt -- 계약단가
+             , 	fn_get_cm('job_cd', prj.job_cd) job_cd -- 역할
+             , 	fn_get_cm_lst('skl_id', prj.stack_txt) stack_txt -- 기술스택
+             , 	prj.alloc_pct -- 투입률
+             , 	prj.remark -- 비고
+        FROM 	tb_dev_prj_info prj
+                    LEFT JOIN tb_dev_rate_info rate
+                              ON 	prj.dev_prj_id = rate.dev_prj_id
+                                  AND prj.dev_id = rate.dev_id
+                                  AND rate.del_yn='N'
+                                  AND rate.use_yn='Y'
+        WHERE 	prj.del_yn = 'N'
+            AND prj.use_yn = 'Y'
+            AND prj.dev_id = #{dev_id}
+    </select>
+
+    <select id="get_in_prj_info_excel" resultType="hashmap" parameterType="map">
+        SELECT 	prj.inprj_yn -- 당사 여부
+             , 	prj.st_dt
+             , 	prj.ed_dt
+             , 	CONCAT(TO_CHAR(prj.st_dt, 'YYYY-MM'), ' ~ ', TO_CHAR(prj.ed_dt, 'YYYY-MM')) AS st_ed_dt -- 기간
+             , 	prj.cust_nm -- 고객사
+             , 	prj.prj_nm -- 프로젝트명
+             , 	rate.rate_amt -- 계약단가
+             , 	fn_get_cm('job_cd', prj.job_cd) job_cd -- 역할
+             , 	prj.stack_txt -- 기술스택
+             , 	ROUND(prj.alloc_pct / 100, 2) alloc_pct -- 투입률
+             , 	prj.remark -- 비고
+        FROM 	tb_dev_prj_info prj
+                    LEFT JOIN tb_dev_rate_info rate
+                              ON 	prj.dev_prj_id = rate.dev_prj_id
+                                  AND prj.dev_id = rate.dev_id
+                                  AND rate.del_yn='N'
+                                  AND rate.use_yn='Y'
+        WHERE 	prj.del_yn = 'N'
+          AND prj.use_yn = 'Y'
+          AND prj.dev_id = #{dev_id}
+          AND prj.inprj_yn = 'Y'
+    </select>
+
+    <select id="get_in_evel_info_excel_01" resultType="hashmap" parameterType="map">
+        SELECT 	cd.cd
+             , 	cd.cd_nm -- 항목
+             , 	CASE WHEN IFNULL(eval.lvl, 0) = 0 THEN '✓' ELSE '' END AS lv0
+             , 	CASE WHEN IFNULL(eval.lvl, 1) = 0 THEN '✓' ELSE '' END AS lv1
+             , 	CASE WHEN IFNULL(eval.lvl, 2) = 0 THEN '✓' ELSE '' END AS lv2
+             , 	CASE WHEN IFNULL(eval.lvl, 3) = 0 THEN '✓' ELSE '' END AS lv3
+             , 	CASE WHEN IFNULL(eval.lvl, 4) = 0 THEN '✓' ELSE '' END AS lv4
+             , 	CASE WHEN IFNULL(eval.lvl, 5) = 0 THEN '✓' ELSE '' END AS lv5
+             , 	eval.cmt -- 코멘트
+        FROM 	tb_cd_mst cd
+                    LEFT JOIN tb_dev_eval_info eval
+                              ON 	cd.cd = eval.eval_id
+                                  AND eval.dev_id = #{dev_id}
+        WHERE 	grp_cd = 'eval_id'
+            AND cd.del_yn = 'N'
+            AND cd.use_yn = 'Y'
+        ORDER BY sort_no
+    </select>
+
+    <select id="get_in_evel_info_excel_02" resultType="hashmap" parameterType="map">
+        WITH tmp AS
+        (
+             SELECT	rsk.rsk_id
+                  , 	rsk.dev_id
+                  , 	rsk.rsk_dt
+                  , 	JSON_OBJECT(
+                     '이탈이력', rsk.leave_txt,
+                     '클레임', rsk.claim_txt,
+                     '보안이슈', rsk.sec_txt,
+                     '재투입 가능 여부', rsk.re_in_yn,
+                     '관리메모', rsk.memo
+                       ) AS yn_obj
+             FROM 	tb_dev_rsk_info rsk
+             WHERE 	rsk.del_yn = 'N'
+               AND rsk.use_yn = 'Y'
+               AND rsk.dev_id = 'HCNC_F001'
+        )
+        SELECT 	tmp.dev_id
+             , 	k.yn_key
+             , 	CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(tmp.yn_obj, CONCAT('$.', k.yn_key))) = 'Y' THEN '✓'
+                    ELSE '' END AS value -- 값
+        FROM 	tmp tmp
+            JOIN JSON_TABLE(
+                JSON_KEYS(tmp.yn_obj),
+                    '$[*]' COLUMNS (
+                        yn_key VARCHAR(100) PATH '$'
+                    )
+                ) k
+    </select>
+
+    <select id="get_rate_info_excel" resultType="hashmap" parameterType="map">
+        SELECT 	TO_CHAR(prj.st_dt, 'YYYY') dt
+             , 	prj.prj_nm -- 프로젝트명
+             , 	rate.rate_amt -- 계약단가
+             , 	prj.remark -- 비고
+        FROM	tb_dev_info dev
+                    LEFT JOIN  	tb_dev_prj_info prj
+                                 ON	dev.dev_id = prj.dev_id
+                    LEFT JOIN tb_dev_rate_info rate
+                              ON 	prj.dev_prj_id = rate.dev_prj_id
+                                  AND prj.dev_id = rate.dev_id
+                                  AND rate.del_yn = 'N'
+                                  AND rate.use_yn = 'Y'
+        WHERE 	prj.del_yn = 'N'
+          AND prj.use_yn = 'Y'
+          AND prj.dev_id = #{dev_id}
+          AND prj.inprj_yn = 'Y'
+    </select>
+
+    <select id="get_avl_info_excel" resultType="hashmap" parameterType="map">
+        SELECT 	dev.dev_nm
+             ,	fn_get_cm('st_cd', avl.st_cd) work_md
+             ,	avl.end_plan_dt
+             ,	CASE WHEN avl.re_in_yn = 'Y' THEN '✓'
+                    ELSE '' END re_in_yn
+        FROM	tb_dev_info dev
+                    LEFT JOIN tb_dev_avl_info avl
+                              ON	dev.dev_id = avl.dev_id
+        ORDER BY dev.dev_id
+    </select>
+
 </mapper>
