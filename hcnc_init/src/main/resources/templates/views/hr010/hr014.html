@@ -3,33 +3,38 @@
       layout:decorate="~{layout/layout}">
 
 <th:block th:fragment="tab4Content">
-    <div class="content list-area">
-        <div class="tab-area mg-b15">
-            <span class="tab-sub-btn fs13 active" data-tab="tab4-A">관리자 평가</span>
-            <span class="tab-sub-btn fs13" data-tab="tab4-B">리스크 관리</span>
-        </div>
-        <div class="content-body">
-            <!-- Tabulator 테이블 div -->
-            <div id="TABLE_HR014_A"></div>
-
-            <section class="white-full" id="TABLE_HR014_B" style="display:none;">
-                <div class="content-body">
-                    <div class="risk-box">
-                        <div class="risk-list" id="HR015_RISK_LIST"></div>
-                        <div class="risk-detail">
-                            <textarea id="HR015_RISK_TEXT" rows="10"></textarea>
+    <div class="content list-area hr014-page">
+        <div class="hr014-shell">
+            <div class="hr014-tab-wrap">
+                <div class="hr014-side-tabs" id="HR014_SIDE_TABS">
+                    <button type="button" class="hr014-tab-btn active" data-tab="hr014-A">관리자 평가</button>
+                    <button type="button" class="hr014-tab-btn" data-tab="hr014-B">리스크 관리</button>
+                </div>
+                <div class="hr014-tab-panels">
+                    <div class="hr014-tab-panel active" id="HR014_TAB_A">
+                        <div class="content-body">
+                            <div id="TABLE_HR014_A"></div>
                         </div>
                     </div>
+                    <div class="hr014-tab-panel" id="HR014_TAB_B">
+                        <div class="content-body">
+                            <div class="risk-box risk-box-top">
+                                <div class="risk-list risk-list-top" id="HR015_RISK_LIST"></div>
+                                <div class="risk-detail">
+                                    <textarea id="HR015_RISK_TEXT" rows="10" placeholder="Enter message."></textarea>
+                                </div>
+                            </div>
 
-                    <div class="risk-extra">
-                        <label class="risk-check">
-                            <span>재투입 가능여부</span>
-                            <input type="checkbox" id="HR015_REIN_CHECK">
-                        </label>
+                            <div class="risk-extra">
+                                <label class="risk-check">
+                                    <span>재투입 가능여부</span>
+                                    <input type="checkbox" id="HR015_REIN_CHECK">
+                                </label>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </section>
-
+            </div>
         </div>
     </div>
 </th:block>
