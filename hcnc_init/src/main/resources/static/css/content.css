@@ -413,3 +413,11 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .tab-content {
     position: relative;
 }
+
+.mw0 {
+    min-width: 0px !important;
+}
+
+.select2-search__field {
+    display: none;
+}

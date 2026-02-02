@@ -20,6 +20,19 @@ $(document).ready(function () {
 
     $(".tab-panel").hide();
 
+    $("#fileProfile").on("change", function (e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        // 이미지 파일만 허용
+        if (!file.type.startsWith("image/")) {
+            alert("이미지 파일만 선택 가능합니다.");
+            return;
+        }
+
+        $("#dev_img")[0].src = URL.createObjectURL(file);
+    });
+
     // 탭 클릭 이벤트
     $(".tab-btn").on("click", function () {
         const tabId = $(this).data("tab");
@@ -52,6 +65,7 @@ $(document).ready(function () {
     $(".btn-main-edit").on("click", function () {
         const rowData = btnEditView("수정할 ");
         if (!rowData) return;
+        loadUserTableImgData(rowData);
         openUserModal("update", rowData);
     });
 
@@ -66,6 +80,7 @@ $(document).ready(function () {
     $(".btn-main-view").on("click", function () {
         const rowData = btnEditView("조회할 ");
         if (!rowData) return;
+        loadUserTableImgData(rowData);
         openUserModal("view", rowData);
     });
 });
@@ -186,7 +201,9 @@ function buildUserTable() {
             syncTableCheckboxes(userTable);
         },
         rowDblClick: function (e, row) {
-            openUserModal("view", row.getData());
+            var rowData = row.getData();
+            loadUserTableImgData(rowData);
+            openUserModal("view", rowData);
         }
     });
 }
@@ -199,21 +216,50 @@ function loadUserTableData() {
     $.ajax({
         url: "/hr010/list",
         type: "GET",
+        // xhrFields: { responseType: "arraybuffer" }, // ★ 핵심
         data: {
             dev_nm: $("#insertNM").val(),
             searchKeyword: $("#searchKeyword").val()
         },
-      success: function (response) {
-          userTable.setData(response.res || []);
-      },
-        error: function () {
+        success: function (response) {
+            userTable.setData(response.res || []);
+        },
+        error: function (e) {
+            alert("사용자 데이터를 불러오는 중 오류가 발생했습니다.");
+        }
+    });
+}
+
+// db로부터 리스트 불러오기
+function loadUserTableImgData(data) {
+    if (!userTable || typeof userTable.setData !== "function") {
+        return;
+    }
+    $.ajax({
+        url: "/hr010/list/img",
+        type: "GET",
+        xhrFields: { responseType: "arraybuffer" }, // ★ 핵심
+        data: data,
+        success: function (response) {
+            const blob = new Blob([response], { type: "image/jpeg" });
+            const imgUrl = URL.createObjectURL(blob);
+
+            if (response.byteLength > 0)
+                $("#dev_img").show();
+            else
+                $("#dev_img").hide();
+
+            $("#dev_img")[0].src = imgUrl;
+        },
+        error: function (e) {
             alert("사용자 데이터를 불러오는 중 오류가 발생했습니다.");
         }
     });
 }
 
 // 데이터 신규 등록/수정 이벤트
-function upsertUserBtn() {
+function upsertUserBtn()
+{
      // 유효성 검사
      if (!validateUserForm()) {
             return;
@@ -238,10 +284,26 @@ function upsertUserBtn() {
         crt_by: ""
     };
 
+    const file = $("#fileProfile")[0].files[0]; // 또는 payload.dev_img
+    const fd = new FormData();
+
+    // 1) 텍스트 필드들 추가
+    Object.keys(payload).forEach(k => {
+        if (k === "dev_img") return;          // ✅ File은 제외
+        if (payload[k] == null) return;
+        fd.append(k, payload[k]);
+    });
+
+    // 2) 파일 추가 (컨트롤러 @RequestPart 이름과 동일해야 함)
+    if (file) fd.append("dev_img", file);
+
     $.ajax({
         url: "/hr010/upsert",
         type: "POST",
-        data: payload,
+        data: fd,
+        processData: false,
+        contentType: false,
+        dataType: "json",
         success: function (response) {
             if (response && response.dev_id) {
                 window.currentDevId = response.dev_id;
