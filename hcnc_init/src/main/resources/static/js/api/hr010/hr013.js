@@ -379,6 +379,10 @@ function setSkillTagsFromValue(value) {
 
 // 테이블 표시용 기술스택 변환
 function skillDisplayFormatter(cell) {
+    var row = cell.getRow().getData();
+    if (row && row.stack_txt_nm != null && row.stack_txt_nm !== "") {
+        return row.stack_txt_nm;
+    }
     var value = cell.getValue();
     if (value == null || value === "") {
         return "";
