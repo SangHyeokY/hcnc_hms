@@ -18,6 +18,7 @@ $(document).ready(function () {
     buildTables();
     loadTableA();
     loadTableB();
+    initHr015Tabs();
 
     $(".btn-a-load").on("click", function () {
         loadTableA();
@@ -143,6 +144,30 @@ function buildTables() {
     });
 
     buildRiskList();
+}
+
+// 탭2 평가 데이터 조회
+function initHr015Tabs() {
+    var $shell = $(".hr015-shell");
+    var $tabs = $("#HR015_SIDE_TABS .hr015-tab-btn");
+    var $panels = $(".hr015-tab-panel");
+
+    $tabs.off("click").on("click", function () {
+        var target = $(this).data("tab");
+        $tabs.removeClass("active");
+        $(this).addClass("active");
+        $panels.removeClass("active");
+        if (target === "hr015-B") {
+            $("#HR015_TAB_B").addClass("active");
+            $shell.addClass("is-risk");
+        } else {
+            $("#HR015_TAB_A").addClass("active");
+            $shell.removeClass("is-risk");
+            if (tableA && typeof tableA.redraw === "function") {
+                tableA.redraw(true);
+            }
+        }
+    });
 }
 
 // 탭1 평가 데이터 조회

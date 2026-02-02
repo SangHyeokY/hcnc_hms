@@ -171,6 +171,220 @@ button.btn.btn-add-skill {
 .risk-check input[type="checkbox"] {
   order: 1;
 }
+/*===============================================================================
+  HR015 - tab layout
+================================================================================*/
+.hr015-page .white-full {
+  border: none;
+}
+.hr015-tab-wrap {
+  display: flex;
+  gap: 16px;
+  align-items: stretch;
+}
+.hr015-side-tabs {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 140px;
+  border: none;
+}
+.hr015-tab-btn {
+  border: none;
+  background: #f4f6f9;
+  color: #5f6b7a;
+  padding: 10px 12px;
+  border-radius: 8px;
+  text-align: left;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+}
+.hr015-tab-btn.active {
+  background: #111827;
+  color: #fff;
+}
+.hr015-tab-panels {
+  flex: 1 1 auto;
+}
+.hr015-tab-panel {
+  display: none;
+}
+.hr015-tab-panel.active {
+  display: block;
+}
+.hr015-shell.is-risk .hr015-tab-wrap {
+  flex-direction: column;
+}
+.hr015-shell.is-risk .hr015-side-tabs {
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  background: #eef2ff;
+  padding: 6px;
+  border-radius: 10px;
+}
+.hr015-shell.is-risk .hr015-tab-btn {
+  background: transparent;
+  color: #4c5a6a;
+  border-radius: 6px;
+  padding: 8px 12px;
+}
+.hr015-shell.is-risk .hr015-tab-btn.active {
+  background: #2f5bea;
+  color: #fff;
+}
+.hr015-shell.is-risk .risk-detail textarea {
+  background: #f8fafc;
+  border-color: #dbe3f6;
+}
+/*===============================================================================
+  HR014 - tab layout
+================================================================================*/
+.hr014-page .white-full {
+  border: none;
+}
+.hr014-shell {
+  background: none;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+}
+.hr014-page {
+  overflow: visible;
+}
+.hr014-page .content-body {
+  overflow: visible;
+}
+.hr014-page .tab-action-bar {
+  position: relative;
+  z-index: 2;
+}
+.hr014-tab-wrap {
+  display: flex;
+  gap: 16px;
+  align-items: stretch;
+  padding-top: 30px;
+}
+.hr014-side-tabs {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 90px;
+  border: none;
+  padding-top: 6px;
+}
+.hr014-tab-btn {
+  border: none;
+  background: transparent;
+  color: #7b8794;
+  padding: 4px 2px;
+  border-radius: 0;
+  text-align: left;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+  position: relative;
+}
+.hr014-tab-btn.active {
+  color: #111827;
+  font-weight: 700;
+}
+.hr014-page #TABLE_HR014_A .tabulator-row:nth-child(2n) .tabulator-cell {
+  background-color: #FFFFFF !important;
+}
+.hr014-page #TABLE_HR014_A .tabulator-row .tabulator-cell {
+  font-size: 14px;
+}
+.hr014-page #TABLE_HR014_A .tabulator-row .tabulator-cell:first-child {
+  font-size: 16px;
+  font-weight: 700;
+  background-color: #E2F3FF !important;
+}
+.hr014-page #TABLE_HR014_A .hr014-comment-input {
+  height: 32px;
+  padding: 6px 10px;
+  background-color: #ffffff;
+  border: 1px solid #d6dbe3;
+  border-radius: 4px;
+  font-size: 12px;
+}
+.hr014-page #TABLE_HR014_A .hr014-comment-input::placeholder {
+  color: #9aa3af;
+}
+.hr014-tab-panels {
+  flex: 1 1 auto;
+}
+.hr014-tab-panel {
+  display: none;
+}
+.hr014-tab-panel.active {
+  display: block;
+}
+.risk-box-top {
+  display: block;
+}
+.risk-list-top {
+  display: flex;
+  gap: 8px;
+  padding: 6px 8px;
+  background: #f1f3f6;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+  margin-bottom: 10px;
+}
+.risk-list-top .risk-item {
+  border: 1px solid transparent;
+  padding: 6px 12px;
+  border-radius: 6px;
+  background: #fff;
+  font-weight: 600;
+  font-size: 16px;
+  color: #6b7280;
+}
+.risk-list-top .risk-item.active {
+  background: #2f5bea;
+  border-color: #2f5bea;
+  color: #fff;
+}
+.risk-box-top .risk-detail textarea {
+  background: #f8fafc;
+  border-color: #dbe3f6;
+  min-height: 220px;
+}
+.hr014-page .tab-btn,
+.hr014-page .tab-sub-btn {
+  font-size: 16px;
+}
+.modal-wrap .tab-btn,
+.modal-wrap .tab-sub-btn {
+  font-size: 16px;
+}
+
+.hr014-page .tab-action-bar {
+  justify-content: flex-end;
+  gap: 8px;
+}
+.hr014-page .tab-action-bar .btn {
+  height: 32px;
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #111827;
+  font-size: 14px;
+  font-weight: 600;
+}
+.hr014-page .tab-action-bar .btn.bg-primary {
+  border-color: #3b6df4;
+  background: #3b6df4;
+  color: #fff;
+}
+
+.hr014-page .tab-action-bar {
+  margin-top: 6px;
+  padding-top: 2px;
+}
 
 /*=================================================================================
  * Toast style
@@ -348,8 +562,18 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .modal-btn ul {display: flex; justify-content: flex-end;}
 .modal-btn ul li {margin-right: 10px;}
 .modal-btn ul li:last-child {margin-right: 0;}
-.modal-btn .btn {padding: 8px 20px; border-radius: 4px; background-color: #fff; border: 1px solid #4880FF; color: #4880FF; font-size: 14px; font-weight: 500;}
-.modal-btn .btn.btn-save {background: #4880FF; color: #fff;}
+.modal-btn .btn {padding: 8px 20px; border-radius: 8px; background-color: #fff; border: 1px solid #4880FF; color: #4880FF; font-size: 14px; font-weight: 500;}
+.modal-btn .btn.btn-save {background: #5A8DFF; border-color: #5A8DFF; color: #fff;}
+.modal-wrap #view-user-area .modal-btn ul {
+  flex-direction: row-reverse;
+}
+.modal-wrap #view-user-area .modal-btn ul li {
+  margin-right: 0;
+  margin-left: 10px;
+}
+.modal-wrap #view-user-area .modal-btn ul li:last-child {
+  margin-left: 0;
+}
 
 
 .modal-container-detail {display: flex; flex-direction: column; max-height: 90vh; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); min-width: 80vw; max-width: calc(100% - 32px); background: #fff; border-radius: 6px; padding: 20px; box-sizing: border-box;}

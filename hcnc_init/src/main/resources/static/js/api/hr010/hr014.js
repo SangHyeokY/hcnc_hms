@@ -39,25 +39,7 @@ window.initTab4 = function() {
         window.hr014TableA.redraw(true);
     }
 
-    // 탭 클릭 이벤트
-    $subBtns.off("click").on("click", function() {
-        const tabId = $(this).data("tab");
-
-        $subBtns.removeClass("active");
-        $(this).addClass("active");
-
-        if (tabId === "tab4-A") {
-            $tab4.find("#TABLE_HR014_A").show();
-            $tab4.find("#TABLE_HR014_B").hide();
-            if (window.hr014TableA) {
-                window.hr014TableA.redraw(true);
-            }
-        } else if (tabId === "tab4-B") {
-            $tab4.find("#TABLE_HR014_A").hide();
-            $tab4.find("#TABLE_HR014_B").show();
-            // window.hr014TableB.redraw();
-        }
-    });
+    initHr014Tabs();
      buildRiskList();
 
     $(".btn-tab4-save").off("click").on("click", function () {
@@ -66,6 +48,32 @@ window.initTab4 = function() {
 
     window.hr014TabInitialized = true;
 };
+
+function initHr014Tabs() {
+    var $shell = $(".hr014-shell");
+    var $tabs = $("#HR014_SIDE_TABS .hr014-tab-btn");
+    var $panels = $(".hr014-tab-panel");
+
+    if ($tabs.length === 0) {
+        return;
+    }
+
+    $tabs.off("click").on("click", function () {
+        var target = $(this).data("tab");
+        $tabs.removeClass("active");
+        $(this).addClass("active");
+        $panels.removeClass("active");
+
+        if (target === "hr014-B") {
+            $("#HR014_TAB_B").addClass("active");
+        } else {
+            $("#HR014_TAB_A").addClass("active");
+            if (window.hr014TableA) {
+                window.hr014TableA.redraw(true);
+            }
+        }
+    });
+}
 
 function buildHr014TableA() {
     if (window.hr014TableA) return;
@@ -149,11 +157,9 @@ function buildHr014TableA() {
                 field: "cmt",
                 widthGrow: 3,
                 hozAlign: "center",
-                editor: "input",
-                editable: function () {
-                    return !window.hr010ReadOnly;
-                },
-                headerVertical: "middle"
+                formatter: commentInputFormatter,
+                headerVertical: "middle",
+                headerSort: false
             }
         ],
         data: []
@@ -188,6 +194,30 @@ function scoreCheckboxFormatter(cell, formatterParams, onRendered) {
     const checked = value === "Y" ? "checked" : "";
     const disabled = window.hr010ReadOnly ? "disabled" : "";
     return `<input type="radio" ${checked} ${disabled} />`;
+}
+
+function commentInputFormatter(cell, formatterParams, onRendered) {
+    var value = cell.getValue();
+    var safeValue = escapeHtml(value == null ? "" : String(value));
+    var disabled = window.hr010ReadOnly ? "disabled" : "";
+    onRendered(function () {
+        var input = cell.getElement().querySelector(".hr014-comment-input");
+        if (!input) return;
+        input.oninput = function () {
+            if (window.hr010ReadOnly) return;
+            cell.setValue(this.value, true);
+        };
+    });
+    return `<input type="text" class="hr014-comment-input" placeholder="Enter message." value="${safeValue}" ${disabled} />`;
+}
+
+function escapeHtml(value) {
+    return value
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
 }
 
 function setScore(row, level) {
