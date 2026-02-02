@@ -30,6 +30,7 @@ $(document).ready(function () {
             return;
         }
 
+        $("#dev_img").show();
         $("#dev_img")[0].src = URL.createObjectURL(file);
     });
 
@@ -456,6 +457,8 @@ function fillUserForm(d) {
 // 팝업 닫히면 값 초기화하기
 function clearUserForm() {
     window.currentDevId = null;
+    $("#dev_img").hide();
+    $("#dev_img")[0].src = "";
     $("#dev_id").val("");
     $("#dev_nm").val("");
     $("#brdt").val("");
