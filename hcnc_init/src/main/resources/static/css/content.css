@@ -491,6 +491,19 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .tag-select-row select {min-width: 140px;}
 .tag-help {font-size: 12px; color: #6b7280; margin-bottom: 6px;}
 .tag-input-box .tag-help {margin-bottom: 0; white-space: nowrap;}
+.tag-input-box #main_lang_input {
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  padding: 6px 8px;
+  background: #ffffff;
+}
+.tag-input-box.is-readonly {
+  pointer-events: none;
+  background: transparent;
+}
+.tag-input-box.is-readonly .tag-remove {
+  display: none;
+}
 .date-range {display: flex; align-items: center; gap: 8px;}
 .full-row .table-cell:last-child {display: none;}
 .full-width {flex: 1 1 100%;}
