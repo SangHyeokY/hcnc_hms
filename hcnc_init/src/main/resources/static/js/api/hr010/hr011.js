@@ -45,6 +45,18 @@ function closeUpsertUserModal() {
     $("#upsert-user-hrm").hide();
 }
 
+// 등록/수정 모달에 데이터 넣기
+function fillHr011Form(data) {
+    $("#org_nm").val(data.org_nm); // 소속사
+    $("#biz_typ").val(data.biz_typ); // 사업자유형
+    $("#st_dt").val(data.st_dt); // 계약시작일
+    $("#ed_dt").val(data.ed_dt); // 계약종료일
+    $("#amt").val(data.amt); // 계약금액
+    $("#remark").val(data.remark); // 비고
+}
+
+// ====================================================================================== //
+
 function getHr011SelectedRow() {
     if (!window.hr011Table) {
         return null;

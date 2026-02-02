@@ -1,4 +1,5 @@
 package com.hcncinit.service.hr010;
+import java.io.InputStream;
 import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,6 +16,12 @@ public class Hr010Service {
     // 인력관리 > 기본 인적사항 (임시/검색x), 따로 분류할건지는 논의
     public List<Map<String, Object>> select_hr010(Map<String, Object> map) {
         return this.sqlSession.selectList("com.hcncinit.Hr010Mapper.select_hr010", map);
+    }
+
+    // 인력관리 > 기본 인적사항 이미지
+    public byte[] select_hr010_img(Map<String, Object> map) {
+        byte[] res = this.sqlSession.selectOne("com.hcncinit.Hr010Mapper.select_hr010_img", map);
+        return res;
     }
 
     // 인력관리 신규 등록/수정

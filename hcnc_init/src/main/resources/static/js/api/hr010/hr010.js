@@ -20,6 +20,20 @@ $(document).ready(function () {
 
     $(".tab-panel").hide();
 
+    $("#fileProfile").on("change", function (e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        // 이미지 파일만 허용
+        if (!file.type.startsWith("image/")) {
+            alert("이미지 파일만 선택 가능합니다.");
+            return;
+        }
+
+        $("#dev_img").show();
+        $("#dev_img")[0].src = URL.createObjectURL(file);
+    });
+
     // 탭 클릭 이벤트
     $(".tab-btn").on("click", function () {
         const tabId = $(this).data("tab");
@@ -52,6 +66,7 @@ $(document).ready(function () {
     $(".btn-main-edit").on("click", function () {
         const rowData = btnEditView("수정할 ");
         if (!rowData) return;
+        loadUserTableImgData(rowData);
         openUserModal("update", rowData);
     });
 
@@ -66,6 +81,7 @@ $(document).ready(function () {
     $(".btn-main-view").on("click", function () {
         const rowData = btnEditView("조회할 ");
         if (!rowData) return;
+        loadUserTableImgData(rowData);
         openUserModal("view", rowData);
     });
 });
@@ -186,7 +202,9 @@ function buildUserTable() {
             syncTableCheckboxes(userTable);
         },
         rowDblClick: function (e, row) {
-            openUserModal("view", row.getData());
+            var rowData = row.getData();
+            loadUserTableImgData(rowData);
+            openUserModal("view", rowData);
         }
     });
 }
@@ -199,21 +217,50 @@ function loadUserTableData() {
     $.ajax({
         url: "/hr010/list",
         type: "GET",
+        // xhrFields: { responseType: "arraybuffer" }, // ★ 핵심
         data: {
             dev_nm: $("#insertNM").val(),
             searchKeyword: $("#searchKeyword").val()
         },
-      success: function (response) {
-          userTable.setData(response.res || []);
-      },
-        error: function () {
+        success: function (response) {
+            userTable.setData(response.res || []);
+        },
+        error: function (e) {
+            alert("사용자 데이터를 불러오는 중 오류가 발생했습니다.");
+        }
+    });
+}
+
+// db로부터 리스트 불러오기
+function loadUserTableImgData(data) {
+    if (!userTable || typeof userTable.setData !== "function") {
+        return;
+    }
+    $.ajax({
+        url: "/hr010/list/img",
+        type: "GET",
+        xhrFields: { responseType: "arraybuffer" }, // ★ 핵심
+        data: data,
+        success: function (response) {
+            const blob = new Blob([response], { type: "image/jpeg" });
+            const imgUrl = URL.createObjectURL(blob);
+
+            if (response.byteLength > 0)
+                $("#dev_img").show();
+            else
+                $("#dev_img").hide();
+
+            $("#dev_img")[0].src = imgUrl;
+        },
+        error: function (e) {
             alert("사용자 데이터를 불러오는 중 오류가 발생했습니다.");
         }
     });
 }
 
 // 데이터 신규 등록/수정 이벤트
-function upsertUserBtn() {
+function upsertUserBtn()
+{
      // 유효성 검사
      if (!validateUserForm()) {
             return;
@@ -238,10 +285,26 @@ function upsertUserBtn() {
         crt_by: ""
     };
 
+    const file = $("#fileProfile")[0].files[0]; // 또는 payload.dev_img
+    const fd = new FormData();
+
+    // 1) 텍스트 필드들 추가
+    Object.keys(payload).forEach(k => {
+        if (k === "dev_img") return;          // ✅ File은 제외
+        if (payload[k] == null) return;
+        fd.append(k, payload[k]);
+    });
+
+    // 2) 파일 추가 (컨트롤러 @RequestPart 이름과 동일해야 함)
+    if (file) fd.append("dev_img", file);
+
     $.ajax({
         url: "/hr010/upsert",
         type: "POST",
-        data: payload,
+        data: fd,
+        processData: false,
+        contentType: false,
+        dataType: "json",
         success: function (response) {
             if (response && response.dev_id) {
                 window.currentDevId = response.dev_id;
@@ -326,26 +389,6 @@ function initAllTabs() {
     initTab4();
 }
 
-// 팝업 열리면 데이터 채워넣기 (구)
-//function openUserViewModal(d) {
-//    $("#dev_nm").val(d.dev_nm || "");       // 성명
-//    $("#brdt").val(d.brdt || "");           // 생년월일
-//    $("#tel").val(d.tel || "");             // 연락처
-//    $("#email").val(d.email || "");         // 이메일
-//    $("#region").val(d.region || "");       // 거주지역
-//    $("#main_lang").val(d.main_lang || ""); // 주 개발언어
-//    $("#exp_yr").val(d.exp_yr || "");       // 경력연차
-//    $("#edu_last").val(d.edu_last || "");   // 최종학력
-//    $("#cert_txt").val(d.cert_txt || "");   // 보유 자격증
-//    $("#avail_dt").val(d.avail_dt || "");   // 투입가능시점
-//    $("#work_md").val(d.work_md || "");    // 근무형태
-//    $("#ctrt_typ").val(d.ctrt_typ || "");   // 계약형태
-//    $("#hope_rate_amt").val(d.hope_rate_amt || "");   // 희망단가
-//
-//    setModalMode("view");
-//    $("#view-user-area").show();
-//}
-
 // 팝업에 데이터 채워넣기
 function fillUserForm(d) {
     window.currentDevId = d.dev_id;
@@ -369,7 +412,7 @@ function fillUserForm(d) {
     $("#work_md").val(d.work_md || "");
     $("#ctrt_typ").val(d.ctrt_typ || "");
 
-    $(".show_devId").text(
+    $("#show_devId").text(
         window.currentDevId
             ? "[" + window.currentDevId + "]"
             : ""
@@ -379,21 +422,29 @@ function fillUserForm(d) {
     if (d.dev_id) {
         if (d.dev_id.startsWith("HCNC_F")) {
             $("#dev_type").val("HCNC_F");
+            $("#dev_type2").text("프리랜서");
+            $("#devTypeWrap").show();
         } else if (d.dev_id.startsWith("HCNC_S")) {
             $("#dev_type").val("HCNC_S");
+            $("#dev_type2").text("사원");
+            $("#devTypeWrap").show();
         } else {
             // console.log("dev_id 값이 잘못 되었습니다.")
             $("#dev_type").val("");
+            $("#dev_type2").text("");
         }
     } else {
         // console.log("dev_id 값이 존재하지 않습니다.")
         $("#dev_type").val("");
+        $("#dev_type2").text("");
     }
 }
 
 // 팝업 닫히면 값 초기화하기
 function clearUserForm() {
     window.currentDevId = null;
+    $("#dev_img").hide();
+    $("#dev_img")[0].src = "";
     $("#dev_id").val("");
     $("#dev_nm").val("");
     $("#brdt").val("");
@@ -406,6 +457,16 @@ function clearUserForm() {
     $("#cert_txt").val("");
     $("#avail_dt").val("");
     $("#hope_rate_amt").val("");
+
+    $("#grade").text("");
+    $("#score").text("");
+    $("#dev_type").val("");
+    $("#work_md").val("");
+    $("#ctrt_typ").val("");
+
+    $("#show_devId").text("");
+    $("#dev_type2").text("");
+    $("#devTypeWrap").hide();
 
     $("#view-user-area").hide();
 }
@@ -443,6 +504,7 @@ function setModalMode(mode) {
 // 모달 닫히면 영역 사라지게 하기
 function closeUserViewModal() {
     document.getElementById("view-user-area").style.display = "none";
+    clearUserForm()
 }
 
 function initTab(tabId) {
