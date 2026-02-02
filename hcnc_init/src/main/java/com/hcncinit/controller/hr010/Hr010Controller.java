@@ -30,7 +30,7 @@ public class Hr010Controller {
 
     // 인력관리 > 기본 인적사항 (임시/검색x), 따로 분류할건지는 논의
     @RequestMapping("/list")
-    public ModelAndView select_hr010 (@RequestParam(required = false) Map<String,Object> map) {
+    public ModelAndView selectHr010 (@RequestParam(required = false) Map<String,Object> map) {
         ModelAndView mv = new ModelAndView("jsonView");
         // 확인용 1
         // System.out.println("select_hr010 호출됨, param = " + map);
@@ -43,7 +43,7 @@ public class Hr010Controller {
 
     // 인력관리 신규 등록/수정
     @PostMapping("/upsert")
-    public ModelAndView saveHr010(@RequestParam Map<String, Object> param) {
+    public ModelAndView upsertHr010(@RequestParam Map<String, Object> param) {
         ModelAndView mv = new ModelAndView("jsonView");
         // System.out.println("저장 요청 param = " + param);
         String devType = (String) param.get("dev_type");
@@ -81,7 +81,7 @@ public class Hr010Controller {
 
     // tab1
     @RequestMapping("/tab1")
-    public ModelAndView select_tab1 (@RequestParam("dev_id") String devId) {
+    public ModelAndView selectTab1 (@RequestParam("dev_id") String devId) {
         ModelAndView mv = new ModelAndView("jsonView");
         // 확인용 1
         // System.out.println("select_tab1 호출됨, param = " + devId);
@@ -89,6 +89,18 @@ public class Hr010Controller {
         // 확인용 2
         // System.out.println("tab1 조회 결과 = " + resList);
         mv.addObject("res", resList);
+        return mv;
+    }
+
+    // tab1 수정/등록
+    @PostMapping("/tab1_upsert")
+    public ModelAndView saveTab1(@RequestParam Map<String, Object> param) {
+        System.out.println("sdfsdfsadffsdfsdf: "+param);
+        System.out.println("ed_dt = " + param.get("ed_dt"));
+        ModelAndView mv = new ModelAndView("jsonView");
+        hr011Service.upsert_tab1(param);
+        mv.addObject("dev_id", param.get("dev_id"));
+        mv.addObject("result", "success");
         return mv;
     }
 

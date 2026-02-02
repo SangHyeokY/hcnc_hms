@@ -2,7 +2,6 @@
  * 사용자 관리 - hr010.js (hcnc_hms)
  */
 var userTable;
-// var tab1Table, tab2Table, tab3Table, tab4Table;
 var currentMode = "insert";
 window.currentDevId = null;
 

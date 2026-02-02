@@ -5,8 +5,53 @@
 <th:block th:fragment="tab1Content">
     <div class="content list-area">
         <div class="content-body">
-            <!-- Tabulator 테이블 div -->
-            <div id="TABLE_HR011_A"></div>
+            <section class="white-full">
+                <!-- Tabulator 테이블 div -->
+                <!--<div id="TABLE_HR011_A"></div>-->
+                <div class="modal-human-area fl-sa">
+                    <div class="table-area" id="TABLE_HR011_A" style="width: 100%;">
+                        <table >
+                            <colgroup>
+                                <col style="width: 15%;">
+                                <col style="width: 35%;">
+                                <col style="width: 15%;">
+                                <col style="width: 35%;">
+                            </colgroup>
+                            <tbody>
+                            <tr>
+                                <th>소속사</th>
+                                <td colspan="3"><input type="text" id="org_nm" class="wp100" disabled></td>
+                            </tr>
+                            <tr>
+                                <th>계약 시작일</th>
+                                <td><input type="date" id="st_dt" class="wp100" disabled></td>
+                                <th>계약 종료일</th>
+                                <td><input type="date" id="ed_dt" class="wp100" disabled></td>
+                            </tr>
+                            <tr>
+                                <th>사업자 유형</th>
+                                <td>
+                                    <select id="biz_typ" class="wp100">
+                                        <option value="">개인/개인사업자/법인</option>
+                                        <option value="01">개인</option>
+                                        <option value="02">개인사업자</option>
+                                        <option value="03">법인</option>
+                                    </select>
+                                </td>
+                                <th>계약 금액</th>
+                                <td><input type="text" id="amt" class="wp100" disabled></td>
+                            </tr>
+                            <tr>
+                                <th>비고</th>
+                                <td colspan="3">
+                                    <textarea id="remark" rows="7"></textarea>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
         </div>
     </div>
 
@@ -23,7 +68,7 @@
             <div class="modal-content">
                 <div class="top-article">
                     <div class="modal-human-area fl-sa">
-                        <div class="table-area">
+                        <div class="table-area" style="width: 100%;">
                             <table >
                                 <colgroup>
                                     <col style="width: 20%;">
@@ -34,45 +79,32 @@
                                 <tbody>
                                 <tr>
                                     <th>소속사</th>
-                                    <td>
-                                        <select id="org_nm" class="wp100">
-                                            <option>개인/에이전시</option>
-                                            <option>개인</option>
-                                            <option>에이전시</option>
-                                        </select>
-                                    </td>
-                                    <th>사업자유형</th>
-                                    <td>
-                                        <select id="biz_typ" class="wp100">
-                                            <option>개인/개인사업자/법인</option>
-                                            <option>개인</option>
-                                            <option>개인사업자</option>
-                                            <option>법인</option>
-                                        </select>
-                                    </td>
+                                    <td colspan="3"><input type="text" id="org_nm_input" class="wp100" disabled></td>
+
                                 </tr>
                                 <tr>
-                                    <th>계약시작일</th>
-                                    <td><input type="date" id="st_dt" class="wp100" disabled></td>
-                                    <th>계약종료일</th>
-                                    <td><input type="date" id="ed_dt" class="wp100" disabled></td>
+                                    <th>계약 시작일</th>
+                                    <td><input type="date" id="st_dt_input" class="wp100" disabled></td>
+                                    <th>계약 종료일</th>
+                                    <td><input type="date" id="ed_dt_input" class="wp100" disabled></td>
                                 </tr>
                                 <tr>
-                                    <th>계약금액</th>
-                                    <td><input type="text" id="amt" class="wp100" disabled></td>
-                                    <th>정산조건</th>
+                                    <th>사업자 유형</th>
                                     <td>
-                                        <select id="" class="wp100">
-                                            <option>월말/익월</option>
-                                            <option>월말</option>
-                                            <option>익월</option>
+                                        <select id="biz_typ_input" class="wp100">
+                                            <option value="">개인/개인사업자/법인</option>
+                                            <option value="01">개인</option>
+                                            <option value="02">개인사업자</option>
+                                            <option value="03">법인</option>
                                         </select>
                                     </td>
+                                    <th>계약 금액</th>
+                                    <td><input type="text" id="amt_input" class="wp100" disabled></td>
                                 </tr>
                                 <tr>
                                     <th>비고</th>
                                     <td colspan="3">
-                                        <textarea id="remark" rows="10"></textarea>
+                                        <textarea id="remark_input" rows="7"></textarea>
                                     </td>
                                 </tr>
                                 </tbody>

@@ -17,4 +17,36 @@
         AND use_yn='Y'
         AND dev_id = #{devId}
     </select>
+
+    <insert id="upsert_tab1" parameterType="map">
+        INSERT INTO tb_ctrt_info (
+            org_nm,
+            biz_typ,
+            st_dt,
+            ed_dt,
+            amt,
+            remark,
+            dev_id,
+            upd_ts,
+            upd_by
+        ) VALUES (
+            #{orgNm},
+            #{bizTyp},
+            #{stDt},
+            #{edDt},
+            #{amt},
+            #{remark},
+            #{devId},
+            now(),
+            #{devId}
+        ) ON DUPLICATE KEY UPDATE
+            org_nm = #{orgNm},
+            biz_typ = #{bizTyp},
+            st_dt = #{stDt},
+            ed_dt = #{edDt},
+            amt = #{amt},
+            remark = #{remark},
+            upd_ts = now(),
+            upd_by = #{devId}
+    </insert>
 </mapper>
