@@ -279,7 +279,6 @@ function upsertUserBtn()
         avail_dt: $("#avail_dt").val(),
         ctrt_typ: $("#ctrt_typ").val(),
         work_md: $("#work_md").val(),
-        cert_txt: $("#cert_txt").val(),
         dev_type: $("#dev_type").val(),
         crt_by: ""
     };
@@ -289,7 +288,7 @@ function upsertUserBtn()
 
     // 1) 텍스트 필드들 추가
     Object.keys(payload).forEach(k => {
-        if (k === "dev_img") return;          // ✅ File은 제외
+        if (k === "dev_img") return;
         if (payload[k] == null) return;
         fd.append(k, payload[k]);
     });
@@ -370,6 +369,7 @@ openUserModal = function(mode, data) {
     $("#tab1").show();
 
     window.hr014TabInitialized = false;
+
     updateTabActions("tab1");
     refreshTabLayout("tab1");
 
@@ -544,7 +544,7 @@ function amountFormatter(cell) {
     if (cell.getValue() === null || cell.getValue() === undefined || cell.getValue() === "") {
         return "";
     }
-    return formatNumberInput(cell.getValue());
+    return formatNumber(cell.getValue());
 }
 
 // 팝업에서도 마찬가지로 (,) 표시
@@ -565,7 +565,6 @@ function validateUserForm() {
     const brdt = $("#brdt").val().trim();
     const tel = $("#tel").val().trim();
     const email = $("#email").val().trim();
-    const hopeRate = $("#hope_rate_amt").val().replace(/,/g, "");
 
     if (!dev_nm) {
         alert("성명을 입력하세요.");
@@ -607,13 +606,6 @@ function validateUserForm() {
         $("#email").focus();
         return false;
     }
-
-    if (hopeRate && isNaN(hopeRate)) {
-        alert("희망단가는 숫자만 입력 가능합니다.");
-        $("#hope_rate_amt").focus();
-        return false;
-    }
-
     return true;
 }
 
@@ -629,6 +621,23 @@ $("#tel").on("input", function () {
         $(this).val(val.replace(/(\d{3})(\d{4})(\d+)/, "$1-$2-$3"));
     }
 });
+
+// 희망단가는 숫자만 입력 가능
+$("#hope_rate_amt").on("input", function () {
+    let input_number = this.value.replace(/[^0-9]/g, "");
+    this.value = formatNumber(input_number);
+});
+
+// 숫자에 콤마
+function formatNumber(num) {
+    if (!num) return "";
+    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+// 문자열 가공
+//function unformatNumber(str) {
+//    return str ? str.replace(/,/g, "") : "";
+//}
 
 // 점수 계산
 function loadUserScore(devId) {

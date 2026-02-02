@@ -35,16 +35,24 @@ public class Hr010Controller {
 
     // 인력관리 > 기본 인적사항 (임시/검색x), 따로 분류할건지는 논의
     @RequestMapping("/list")
-    public ModelAndView select_hr010 (@RequestParam(required = false) Map<String,Object> map) {
+    public ModelAndView select_hr010 (@RequestParam(required = false) Map<String,Object> map, HttpSession session) {
         ModelAndView mv = new ModelAndView("jsonView");
+
+        // 세션 만료되면 로그인 페이지로 되돌아감
+        System.out.println("session 확인 : "+session);
+        Object loginUserId = session.getAttribute("LOGIN_USER_ID");
+        if (loginUserId == null) {
+            // 로그인 페이지로 리다이렉트
+            return new ModelAndView("redirect:/login");
+        }
+
         // 확인용 1
         // System.out.println("select_hr010 호출됨, param = " + map);
         List<Map<String, Object>> resList = hr010Service.select_hr010(map);
         // 확인용 2
         // System.out.println("조회 결과 = " + resList);
         mv.addObject("res", resList);
-
-        System.out.println("조회 결과 = " + mv);
+        // System.out.println("조회 결과 = " + mv);
         return mv;
     }
 
@@ -52,10 +60,10 @@ public class Hr010Controller {
     @RequestMapping("/list/img")
     public ResponseEntity<byte[]> select_hr010_img (@RequestParam(required = false) Map<String,Object> map) {
         // 확인용 1
-        System.out.println("select_hr010_img 호출됨, param = " + map);
+        // System.out.println("select_hr010_img 호출됨, param = " + map);
         byte[] bytes = hr010Service.select_hr010_img(map);
         // 확인용 2
-        System.out.println("조회 결과 = " + bytes);
+        // System.out.println("조회 결과 = " + bytes);
         return ResponseEntity.ok(bytes);
     }
 
@@ -94,14 +102,12 @@ public class Hr010Controller {
 
             byte[] bytes = profileImg.getBytes();
 
-            // ✅ Mapper/Service에서 그대로 쓰도록 param에 넣기 (키명은 DB/쿼리에 맞게)
+            // Mapper/Service에서 그대로 쓰도록 param에 넣기 (키명은 DB/쿼리에 맞게)
             param.put("dev_img", bytes);
 //            param.put("photo_mime", contentType);
 //            param.put("photo_name", profileImg.getOriginalFilename());
         }
-
-
-        System.out.println("param = " + param);
+        // System.out.println("param = " + param);
         hr010Service.insert_hr010(param);
         mv.addObject("dev_id", param.get("dev_id"));
         mv.addObject("result", "success");
@@ -139,6 +145,25 @@ public class Hr010Controller {
         // 확인용 2
         // System.out.println("tab1 조회 결과 = " + resList);
         mv.addObject("res", resList);
+        return mv;
+    }
+
+    // tab1 등록/수정
+    @PostMapping("/tab1_upsert")
+    public ModelAndView saveTab1(@RequestBody Map<String, Object> param) {
+        ModelAndView mv = new ModelAndView("jsonView");
+        hr011Service.upsert_tab1(param);
+        mv.addObject("result", "success");
+        return mv;
+    }
+
+    // tab1 삭제
+    @PostMapping("/tab1_delete")
+    public ModelAndView deleteTab1(@RequestBody Map<String, Object> param) {
+        ModelAndView mv = new ModelAndView("jsonView");
+        System.out.println("dfsdfsdfsdfsdfdsf   : "+param);
+        hr011Service.delete_tab1(param);
+        mv.addObject("result", "success");
         return mv;
     }
 

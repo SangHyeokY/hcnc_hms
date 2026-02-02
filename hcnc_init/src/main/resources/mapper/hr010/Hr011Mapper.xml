@@ -6,7 +6,9 @@
 <mapper namespace="com.hcncinit.Hr011Mapper">
     <!-- 소속 및 계약정보 -->
     <select id="select_tab1" resultType="hashmap" parameterType="string">
-        SELECT org_nm
+        SELECT ctrt_id
+            , dev_id
+            , org_nm
             , biz_typ
             , DATE_FORMAT(st_dt, '%Y-%m-%d') AS st_dt
             , DATE_FORMAT(ed_dt, '%Y-%m-%d') AS ed_dt
@@ -16,10 +18,14 @@
         WHERE del_yn='N'
         AND use_yn='Y'
         AND dev_id = #{devId}
+        ORDER BY st_dt DESC
+        LIMIT 1
     </select>
 
+    <!-- 소속 및 계약정보 등록/수정 -->
     <insert id="upsert_tab1" parameterType="map">
         INSERT INTO tb_ctrt_info (
+            ctrt_id,
             org_nm,
             biz_typ,
             st_dt,
@@ -27,9 +33,15 @@
             amt,
             remark,
             dev_id,
+            crt_by,
+            crt_ts,
+            upd_by,
             upd_ts,
-            upd_by
-        ) VALUES (
+            use_yn,
+            del_yn
+        )
+        VALUES (
+            #{ctrtId,jdbcType=INTEGER},
             #{orgNm},
             #{bizTyp},
             #{stDt},
@@ -37,16 +49,37 @@
             #{amt},
             #{remark},
             #{devId},
-            now(),
-            #{devId}
+            #{devId},
+            NOW(),
+            #{devId},
+            NOW(),
+            'Y',
+            'N'
         ) ON DUPLICATE KEY UPDATE
-            org_nm = #{orgNm},
+            org_nm  = #{orgNm},
             biz_typ = #{bizTyp},
-            st_dt = #{stDt},
-            ed_dt = #{edDt},
-            amt = #{amt},
-            remark = #{remark},
-            upd_ts = now(),
-            upd_by = #{devId}
+            st_dt   = #{stDt},
+            ed_dt   = #{edDt},
+            amt     = #{amt},
+            remark  = #{remark},
+            use_yn  = 'Y',
+            del_yn  = 'N',
+            upd_ts  = NOW(),
+            upd_by  = #{devId};
     </insert>
+
+    <!-- 소속 및 계약정보 삭제 -->
+    <update id="delete_tab1" parameterType="map">
+        UPDATE tb_ctrt_info
+        SET
+        dev_id = #{devId},
+        use_yn = 'N',
+        del_yn = 'Y',
+        del_ts = NOW(),
+        del_by = #{devId},
+        crt_by = #{devId},
+        upd_ts = NOW(),
+        upd_by = #{devId}
+        WHERE ctrt_id = #{ctrtId}
+    </update>
 </mapper>
