@@ -76,7 +76,7 @@ $(document).ready(function () {
         deleteUserRows();
     });
 
-    $(".btn-user-save").on("click", function () {
+    $("#btn-user-save").on("click", function () {
         upsertUserBtn();
     });
 

@@ -39,12 +39,11 @@ public class Hr010Controller {
         ModelAndView mv = new ModelAndView("jsonView");
 
         // 세션 만료되면 로그인 페이지로 되돌아감
-        System.out.println("session 확인 : "+session);
-        Object loginUserId = session.getAttribute("LOGIN_USER_ID");
-        if (loginUserId == null) {
-            // 로그인 페이지로 리다이렉트
-            return new ModelAndView("redirect:/login");
-        }
+//        System.out.println("session 확인 : "+session);
+//        Object loginUserId = session.getAttribute("LOGIN_USER_ID");
+//        if (loginUserId == null) {
+//            return new ModelAndView("redirect:/login");
+//        }
 
         // 확인용 1
         // System.out.println("select_hr010 호출됨, param = " + map);
@@ -230,6 +229,8 @@ public class Hr010Controller {
         mv.addObject("success", res > 0);
         return mv;
     }
+
+    // =============================================================================== //
 
     private void applyLoginUser(Map<String, Object> map, HttpSession session) {
         Object loginUserId = session.getAttribute("LOGIN_USER_ID");
