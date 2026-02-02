@@ -326,26 +326,6 @@ function initAllTabs() {
     initTab4();
 }
 
-// 팝업 열리면 데이터 채워넣기 (구)
-//function openUserViewModal(d) {
-//    $("#dev_nm").val(d.dev_nm || "");       // 성명
-//    $("#brdt").val(d.brdt || "");           // 생년월일
-//    $("#tel").val(d.tel || "");             // 연락처
-//    $("#email").val(d.email || "");         // 이메일
-//    $("#region").val(d.region || "");       // 거주지역
-//    $("#main_lang").val(d.main_lang || ""); // 주 개발언어
-//    $("#exp_yr").val(d.exp_yr || "");       // 경력연차
-//    $("#edu_last").val(d.edu_last || "");   // 최종학력
-//    $("#cert_txt").val(d.cert_txt || "");   // 보유 자격증
-//    $("#avail_dt").val(d.avail_dt || "");   // 투입가능시점
-//    $("#work_md").val(d.work_md || "");    // 근무형태
-//    $("#ctrt_typ").val(d.ctrt_typ || "");   // 계약형태
-//    $("#hope_rate_amt").val(d.hope_rate_amt || "");   // 희망단가
-//
-//    setModalMode("view");
-//    $("#view-user-area").show();
-//}
-
 // 팝업에 데이터 채워넣기
 function fillUserForm(d) {
     window.currentDevId = d.dev_id;
@@ -369,7 +349,7 @@ function fillUserForm(d) {
     $("#work_md").val(d.work_md || "");
     $("#ctrt_typ").val(d.ctrt_typ || "");
 
-    $(".show_devId").text(
+    $("#show_devId").text(
         window.currentDevId
             ? "[" + window.currentDevId + "]"
             : ""
@@ -379,15 +359,21 @@ function fillUserForm(d) {
     if (d.dev_id) {
         if (d.dev_id.startsWith("HCNC_F")) {
             $("#dev_type").val("HCNC_F");
+            $("#dev_type2").text("프리랜서");
+            $("#devTypeWrap").show();
         } else if (d.dev_id.startsWith("HCNC_S")) {
             $("#dev_type").val("HCNC_S");
+            $("#dev_type2").text("사원");
+            $("#devTypeWrap").show();
         } else {
             // console.log("dev_id 값이 잘못 되었습니다.")
             $("#dev_type").val("");
+            $("#dev_type2").text("");
         }
     } else {
         // console.log("dev_id 값이 존재하지 않습니다.")
         $("#dev_type").val("");
+        $("#dev_type2").text("");
     }
 }
 
@@ -406,6 +392,16 @@ function clearUserForm() {
     $("#cert_txt").val("");
     $("#avail_dt").val("");
     $("#hope_rate_amt").val("");
+
+    $("#grade").text("");
+    $("#score").text("");
+    $("#dev_type").val("");
+    $("#work_md").val("");
+    $("#ctrt_typ").val("");
+
+    $("#show_devId").text("");
+    $("#dev_type2").text("");
+    $("#devTypeWrap").hide();
 
     $("#view-user-area").hide();
 }
@@ -440,6 +436,7 @@ function setModalMode(mode) {
 // 모달 닫히면 영역 사라지게 하기
 function closeUserViewModal() {
     document.getElementById("view-user-area").style.display = "none";
+    clearUserForm()
 }
 
 function initTab(tabId) {
