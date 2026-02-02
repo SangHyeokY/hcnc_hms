@@ -428,6 +428,9 @@ function setModalMode(mode) {
 
     window.hr010ReadOnly = mode === "view";
     updateTabActions($(".tab-btn.active").data("tab"));
+    if (typeof window.applyTab3Readonly === "function") {
+        window.applyTab3Readonly(window.hr010ReadOnly);
+    }
     if (typeof window.applyTab4Readonly === "function") {
         window.applyTab4Readonly(window.hr010ReadOnly);
     }

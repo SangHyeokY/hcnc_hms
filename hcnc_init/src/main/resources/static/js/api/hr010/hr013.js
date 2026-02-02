@@ -87,6 +87,12 @@ function buildHr013Table() {
     });
 }
 
+function applyTab3Readonly(isReadOnly) {
+    $("#TABLE_HR013_A").toggleClass("is-readonly", !!isReadOnly);
+}
+
+window.applyTab3Readonly = applyTab3Readonly;
+
 // 프로젝트 이력 모달 열기
 function openHr013Modal(mode) {
     var title = mode === "edit" ? "수정" : "등록";
