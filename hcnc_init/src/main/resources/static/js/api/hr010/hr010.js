@@ -4,6 +4,9 @@
 var userTable;
 var currentMode = "insert";
 window.currentDevId = null;
+// 주 개발언어 태그 입력 공통 모듈
+var mainLangTagInput = null;
+var pendingMainLangValue = "";
 
 const tabInitState = {
     tab1: false,
@@ -169,19 +172,19 @@ function buildUserTable() {
                 download: false
             },
             { title: "dev_id", field: "dev_id", visible: false },
-            { title: "성명", field: "dev_nm", hozAlign: "center", headerSort: true },
+            { title: "성명", field: "dev_nm", hozAlign: "center", headerSort: true , width:130},
             { title: "생년월일", field: "brdt", headerSort: true },
-            { title: "연락처", field: "tel" },
-            { title: "이메일", field: "email" },
-            { title: "거주지역", field: "region" },
-            { title: "주 개발언어", field: "main_lang" },
-            { title: "경력연차", field: "exp_yr", hozAlign: "center" },
-            { title: "최종학력", field: "edu_last" },
+            { title: "연락처", field: "tel", width:150},
+            { title: "이메일", field: "email", width:200},
+            { title: "거주지역", field: "region", width:90 },
+            { title: "주 개발언어", field: "main_lang_nm", width: 300 },
+            { title: "경력연차", field: "exp_yr", hozAlign: "center" , width:90},
+            { title: "최종학력", field: "edu_last", width: 180 },
             { title: "보유자격증", field: "cert_txt" },
             { title: "희망단가", field: "hope_rate_amt", hozAlign: "right", formatter: amountFormatter },
             { title: "투입가능시점", field: "avail_dt" },
             { title: "계약형태",
-                  field: "ctrt_typ",
+                  field: "ctrt_typ", width:90,
                   formatter: function(cell, formatterParams, onRendered){
                       var val = cell.getValue();
                       if(val === "01") return "개인";
@@ -373,6 +376,8 @@ openUserModal = function(mode, data) {
     updateTabActions("tab1");
     refreshTabLayout("tab1");
 
+    initMainLangTags();
+
     if (mode !== "insert" && data?.dev_id) {
         requestAnimationFrame(() => {
             loadUserScore(data.dev_id);
@@ -398,6 +403,10 @@ function fillUserForm(d) {
     $("#email").val(d.email || "");
     $("#region").val(d.region || "");
     $("#main_lang").val(d.main_lang || "");
+    pendingMainLangValue = d.main_lang || "";   // main_lang 채워넣기 전용
+    if (mainLangTagInput) {
+        mainLangTagInput.setFromValue(pendingMainLangValue);
+    }
     $("#exp_yr").val(d.exp_yr || "");
     $("#edu_last").val(d.edu_last || "");
     $("#cert_txt").val(d.cert_txt || "");
@@ -451,6 +460,10 @@ function clearUserForm() {
     $("#email").val("");
     $("#region").val("");
     $("#main_lang").val("");
+    pendingMainLangValue = "";
+    if (mainLangTagInput) {
+        mainLangTagInput.clear();
+    }
     $("#exp_yr").val("");
     $("#edu_last").val("");
     $("#cert_txt").val("");
@@ -480,14 +493,23 @@ function setModalMode(mode) {
         $title.text("상세");
         $inputs.prop("disabled", true);
         $(".btn-save").hide();
+        $("#main_lang_input").hide();
+        $("#mainLangTagList").closest(".tag-input-box").find(".tag-help").hide();
+        $("#mainLangTagList").closest(".tag-input-box").addClass("is-readonly");
     } else if (mode === "insert") {
         $title.text("등록");
         $inputs.prop("disabled", false);
         $(".btn-save").show();
+        $("#main_lang_input").show();
+        $("#mainLangTagList").closest(".tag-input-box").find(".tag-help").show();
+        $("#mainLangTagList").closest(".tag-input-box").removeClass("is-readonly");
     } else {
         $title.text("수정");
         $inputs.prop("disabled", false);
         $(".btn-save").show();
+        $("#main_lang_input").show();
+        $("#mainLangTagList").closest(".tag-input-box").find(".tag-help").show();
+        $("#mainLangTagList").closest(".tag-input-box").removeClass("is-readonly");
     }
 
     window.hr010ReadOnly = mode === "view";
@@ -607,6 +629,27 @@ function validateUserForm() {
         return false;
     }
     return true;
+}
+
+// 주 개발언어 태그 공통화 초기화
+function initMainLangTags() {
+    if (mainLangTagInput) {
+        return;
+    }
+    mainLangTagInput = createTagInput({
+        inputSelector: "#main_lang_input",
+        listSelector: "#mainLangTagList",
+        hiddenSelector: "#main_lang",
+        datalistSelector: "#main_lang_datalist",
+        getValue: function (item) { return item.cd; },
+        getLabel: function (item) { return item.cd_nm; },
+        matchMode: "prefix"
+    });
+
+    setComCode("main_lang_select", "skl_id", "", "cd", "cd_nm", function (res) {
+        mainLangTagInput.setOptions(res || []);
+        mainLangTagInput.setFromValue(pendingMainLangValue || $("#main_lang").val());
+    });
 }
 
 // 전화번호 자동 변환

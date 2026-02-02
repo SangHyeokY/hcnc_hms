@@ -22,8 +22,9 @@
         , prj.prj_nm
         , rate.rate_amt
         , prj.job_cd
-        , role.cd_nm AS role_nm
+        , fn_get_cm('job_cd', prj.job_cd) AS role_nm
         , prj.stack_txt
+        , fn_get_cm_lst('skl_id', prj.stack_txt) AS stack_txt_nm
         , prj.alloc_pct
         , prj.remark
         FROM tb_dev_prj_info prj
@@ -40,11 +41,6 @@
         ORDER BY r2.rate_id DESC
         LIMIT 1
         )
-        LEFT JOIN tb_cd_mst role
-        ON role.grp_cd = 'job_cd'
-        AND role.cd = prj.job_cd
-        AND role.use_yn = 'Y'
-        AND role.del_yn = 'N'
         WHERE prj.del_yn = 'N'
         AND prj.use_yn = 'Y'
         AND prj.dev_id = #{dev_id}

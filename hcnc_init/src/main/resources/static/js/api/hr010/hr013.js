@@ -1,7 +1,6 @@
 // hr013.js
-var skillOptions = [];
-var skillMap = {};
-var skillTags = [];
+var stackTagInput = null;
+var pendingStackValue = "";
 
 window.initTab3 = function() {
     if (!window.hr013Table) buildHr013Table();
@@ -14,15 +13,6 @@ window.initTab3 = function() {
         $("#write_hr013_alloc_pct").on("input", function () {
             $(this).val(formatPercentInput($(this).val()));
         });
-
-        $(".btn-add-skill").on("click", function () {
-            addSkillTagByCode($("#write_hr013_skl_cd").val());
-        });
-
-    $("#hr013SkillTagList").on("click", ".tag-remove", function () {
-        var code = $(this).closest(".tag-item").data("code");
-        removeSkillTag(code);
-    });
 
     $(".btn-hr013-save").off("click").on("click", function () {
         saveHr013Row();
@@ -42,10 +32,19 @@ window.initTab3 = function() {
            initSelectDefault("write_hr013_job_cd", "선택");
        });
        setComCode("write_hr013_skl_cd", "skl_id", "", "cd", "cd_nm", function (res) {
-           skillOptions = res || [];
-           buildSkillMap();
-           setSkillTagsFromValue($("#write_hr013_stack_txt").val());
-           initSelectDefault("write_hr013_skl_cd", "기술스택 선택");
+           if (!stackTagInput) {
+               stackTagInput = createTagInput({
+                   inputSelector: "#write_hr013_stack_input",
+                   listSelector: "#hr013SkillTagList",
+                   hiddenSelector: "#write_hr013_stack_txt",
+                   datalistSelector: "#write_hr013_stack_datalist",
+                   getValue: function (item) { return item.cd; },
+                   getLabel: function (item) { return item.cd_nm; },
+                   matchMode: "prefix"
+               });
+           }
+           stackTagInput.setOptions(res || []);
+           stackTagInput.setFromValue(pendingStackValue || $("#write_hr013_stack_txt").val());
            if (window.hr013Table) {
                window.hr013Table.redraw(true);
            }
@@ -160,7 +159,10 @@ function fillHr013Form(data) {
     $("#write_hr013_job_cd").val(data.job_cd || "");
     $("#write_hr013_alloc_pct").val(formatPercentInput(data.alloc_pct));
     $("#write_hr013_remark").val(data.remark || "");
-    setSkillTagsFromValue(data.stack_txt || "");
+    pendingStackValue = data.stack_txt || "";
+    if (stackTagInput) {
+        stackTagInput.setFromValue(pendingStackValue);
+    }
     console.log("input value : " + $("#write_hr013_st_dt").val());
 }
 
@@ -176,7 +178,10 @@ function clearHr013Form() {
     $("#write_hr013_job_cd").val("");
     $("#write_hr013_alloc_pct").val("");
     $("#write_hr013_remark").val("");
-    setSkillTagsFromValue("");
+    pendingStackValue = "";
+    if (stackTagInput) {
+        stackTagInput.clear();
+    }
 }
 
 // 저장 버튼
@@ -297,100 +302,14 @@ function initSelectDefault(selectId, placeholderText) {
     }
 }
 
-// 기술스택 태그 맵 구성
-function buildSkillMap() {
-    skillMap = {};
-    skillOptions.forEach(function (item) {
-        if (item && item.cd != null) {
-            skillMap[item.cd] = item.cd_nm || item.cd;
-        }
-    });
-}
-
-// 태그 추가 (코드)
-function addSkillTagByCode(code) {
-    if (!code) return;
-    if (skillTags.some(function (t) { return t.code === code; })) return;
-    var label = skillMap[code] || code;
-    skillTags.push({ code: code, label: label });
-    renderSkillTags();
-}
-
-// 태그 추가 (라벨)
-function addSkillTagByLabel(raw) {
-    var label = $.trim(raw || "");
-    if (!label) return;
-    var code = null;
-    skillOptions.some(function (item) {
-        if (item && item.cd_nm === label) {
-            code = item.cd;
-            return true;
-        }
-        return false;
-    });
-    if (!code) {
-        return;
-    }
-    addSkillTagByCode(code);
-}
-
-// 태그 삭제
-function removeSkillTag(code) {
-    if (!code) return;
-    skillTags = skillTags.filter(function (t) { return t.code !== code; });
-    renderSkillTags();
-}
-
-// 태그 렌더링
-function renderSkillTags() {
-    var $list = $("#hr013SkillTagList");
-    var $help = $("#hr013SkillTagList").closest(".tag-input-box").find(".tag-help");
-    $list.empty();
-    skillTags.forEach(function (tag) {
-        var $item = $("<li class=\"tag-item\"></li>");
-        $item.attr("data-code", tag.code);
-        $item.append(document.createTextNode(tag.label));
-        var $remove = $("<button type=\"button\" class=\"tag-remove\" aria-label=\"태그 삭제\">x</button>");
-        $item.append($remove);
-        $list.append($item);
-    });
-    if ($help.length) {
-        $help.toggle(skillTags.length === 0);
-    }
-    var codes = skillTags.map(function (t) { return t.code; }).join(",");
-    $("#write_hr013_stack_txt").val(codes);
-}
-
-// 기존 값으로 태그 세팅
-function setSkillTagsFromValue(value) {
-    skillTags = [];
-    var raw = String(value || "").trim();
-    if (!raw) {
-        renderSkillTags();
-        return;
-    }
-    raw.split(",").forEach(function (code) {
-        var trimmed = $.trim(code);
-        if (trimmed) {
-            addSkillTagByCode(trimmed);
-        }
-    });
-}
-
 // 테이블 표시용 기술스택 변환
 function skillDisplayFormatter(cell) {
-    var value = cell.getValue();
-    if (value == null || value === "") {
-        return "";
+    var row = cell.getRow().getData();
+    if (row && row.stack_txt_nm != null && row.stack_txt_nm !== "") {
+        return row.stack_txt_nm;
     }
-    var raw = String(value);
-    var parts = raw.split(",");
-    var labels = parts.map(function (code) {
-        var trimmed = $.trim(code);
-        if (!trimmed) return "";
-        return skillMap[trimmed] || trimmed;
-    }).filter(function (item) { return item !== ""; });
-    return labels.join(", ");
+    var value = cell.getValue();
+    return value == null ? "" : value;
 }
 
 // 투입률

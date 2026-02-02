@@ -13,7 +13,8 @@
         , tel -- 연락처
         , email -- 이메일
         , region -- 거주지역
-        , main_lang -- 주 개발언어
+        , main_lang -- 주 개발언어 코드
+        , fn_get_cm_lst('skl_id', main_lang) AS main_lang_nm -- 주 개발언어 라벨
         , exp_yr -- 경력연차
         , edu_last -- 최종학력
         , cert_txt -- 보유 자격증
@@ -306,4 +307,8 @@
         ) T
         LIMIT 1;
     </select>
+
+
+
+
 </mapper>

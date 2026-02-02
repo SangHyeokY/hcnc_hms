@@ -482,7 +482,10 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 ================================================================================*/
 
 .tag-input label {display: block; margin-bottom: 6px; font-weight: 600; color: #2f3542;}
-.tag-input-box {display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 33px 10px; border: 1px solid #dfe4ea; border-radius: 4px; background: #f8fafc; max-width: 100%;}
+.tag-input-box {position: relative; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 33px 10px; border: 1px solid #dfe4ea; border-radius: 4px; background: #f8fafc; max-width: 100%;}
+.tag-input-box::after {
+  display: none;
+}
 .tag-input-box:focus-within {border-color: #8bb7ff; box-shadow: 0 0 0 3px rgba(139, 183, 255, 0.25);}
 .tag-input-box input {border: none; outline: none; background: transparent; min-width: 140px; padding: 4px 6px; font-size: 14px; color: #2f3542;}
 .tag-list {display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none;}
@@ -491,6 +494,31 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .tag-select-row select {min-width: 140px;}
 .tag-help {font-size: 12px; color: #6b7280; margin-bottom: 6px;}
 .tag-input-box .tag-help {margin-bottom: 0; white-space: nowrap;}
+.tag-input-box .tag-input-field {
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  padding: 6px 8px;
+  background: #ffffff;
+  padding-right: 28px;
+  appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='14' viewBox='0 0 10 14'><path d='M1.5 1.5l6 5.5-6 5.5' stroke='%23555B66' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 16px 12px;
+}
+.tag-input-box .tag-input-field::-webkit-calendar-picker-indicator {
+  opacity: 0;
+}
+.tag-input-box.is-readonly::after {
+  display: none;
+}
+.tag-input-box.is-readonly {
+  pointer-events: none;
+  background: transparent;
+}
+.tag-input-box.is-readonly .tag-remove {
+  display: none;
+}
 .date-range {display: flex; align-items: center; gap: 8px;}
 .full-row .table-cell:last-child {display: none;}
 .full-width {flex: 1 1 100%;}
