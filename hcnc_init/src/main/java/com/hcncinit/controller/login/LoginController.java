@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
@@ -20,6 +21,7 @@ public class LoginController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    // 로그인
     @PostMapping("/login")
     public ModelAndView login(@RequestParam Map<String, Object> map, HttpSession session) {
         ModelAndView mv = new ModelAndView("jsonView");
@@ -54,11 +56,10 @@ public class LoginController {
         return mv;
     }
 
-    @PostMapping("/logout")
-    public ModelAndView logout(HttpSession session) {
+    // 로그아웃
+    @GetMapping("/logout")
+    public String logout(HttpSession session) {
         session.invalidate();
-        ModelAndView mv = new ModelAndView("jsonView");
-        mv.addObject("success", true);
-        return mv;
+        return "redirect:/login";
     }
 }
