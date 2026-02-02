@@ -5,11 +5,8 @@ var userTable;
 // var tab1Table, tab2Table, tab3Table, tab4Table;
 var currentMode = "insert";
 window.currentDevId = null;
-// 주 개발언어 태그 상태 (옵션/매핑/선택된 태그)
-var mainLangOptions = [];   // main_lang_select 데이터
-var mainLangMap = {};
-var mainLangTags = [];
-var mainLangInitialized = false;
+// 주 개발언어 태그 입력 공통 모듈
+var mainLangTagInput = null;
 var pendingMainLangValue = "";
 
 const tabInitState = {
@@ -178,12 +175,12 @@ function buildUserTable() {
             { title: "dev_id", field: "dev_id", visible: false },
             { title: "성명", field: "dev_nm", hozAlign: "center", headerSort: true , width:130},
             { title: "생년월일", field: "brdt", headerSort: true },
-            { title: "연락처", field: "tel" },
+            { title: "연락처", field: "tel", width:150},
             { title: "이메일", field: "email", width:200},
             { title: "거주지역", field: "region", width:90 },
             { title: "주 개발언어", field: "main_lang_nm", width: 300 },
             { title: "경력연차", field: "exp_yr", hozAlign: "center" , width:90},
-            { title: "최종학력", field: "edu_last" },
+            { title: "최종학력", field: "edu_last", width: 180 },
             { title: "보유자격증", field: "cert_txt" },
             { title: "희망단가", field: "hope_rate_amt", hozAlign: "right", formatter: amountFormatter },
             { title: "투입가능시점", field: "avail_dt" },
@@ -408,8 +405,8 @@ function fillUserForm(d) {
     $("#region").val(d.region || "");
     $("#main_lang").val(d.main_lang || "");
     pendingMainLangValue = d.main_lang || "";   // main_lang 채워넣기 전용
-    if (mainLangInitialized) {
-        setMainLangTagsFromValue(pendingMainLangValue);
+    if (mainLangTagInput) {
+        mainLangTagInput.setFromValue(pendingMainLangValue);
     }
     $("#exp_yr").val(d.exp_yr || "");
     $("#edu_last").val(d.edu_last || "");
@@ -465,8 +462,9 @@ function clearUserForm() {
     $("#region").val("");
     $("#main_lang").val("");
     pendingMainLangValue = "";
-    mainLangTags = [];
-    renderMainLangTags();
+    if (mainLangTagInput) {
+        mainLangTagInput.clear();
+    }
     $("#exp_yr").val("");
     $("#edu_last").val("");
     $("#cert_txt").val("");
@@ -642,134 +640,24 @@ function validateUserForm() {
     return true;
 }
 
-// 주 개발언어 태그: 옵션 로드 + 이벤트 바인딩
+// 주 개발언어 태그 공통화 초기화
 function initMainLangTags() {
-    if (mainLangInitialized) { // 중복초기화 방지
+    if (mainLangTagInput) {
         return;
     }
-    // 공통 콤보
+    mainLangTagInput = createTagInput({
+        inputSelector: "#main_lang_input",
+        listSelector: "#mainLangTagList",
+        hiddenSelector: "#main_lang",
+        datalistSelector: "#main_lang_datalist",
+        getValue: function (item) { return item.cd; },
+        getLabel: function (item) { return item.cd_nm; },
+        matchMode: "prefix"
+    });
+
     setComCode("main_lang_select", "skl_id", "", "cd", "cd_nm", function (res) {
-        mainLangOptions = res || [];    // main_lang_select 데이터
-        buildMainLangMap(); // mainLangMap 생성
-        renderMainLangDatalist();   // datalist 생성
-        mainLangInitialized = true;
-        setMainLangTagsFromValue(pendingMainLangValue || $("#main_lang").val());
-    });
-
-    $("#mainLangTagList").on("click", ".tag-remove", function () {
-        var code = $(this).closest(".tag-item").data("code");
-        removeMainLangTag(code);
-    });
-
-    $("#main_lang_input").on("keydown", function (e) {
-        if (e.key === "Enter") {
-            e.preventDefault();
-            addMainLangTagByLabel($(this).val());
-            $(this).val("").focus();
-        }
-    });
-}
-
-// 코드 -> 라벨 매핑
-function buildMainLangMap() {
-    mainLangMap = {};   
-    mainLangOptions.forEach(function (item) {
-        if (item && item.cd != null) {
-            mainLangMap[item.cd] = item.cd_nm || item.cd;
-        }
-    });
-}
-
-// datalist 생성 (option value에 이름 넣기)
-function renderMainLangDatalist() {
-    var $list = $("#main_lang_datalist");
-    $list.empty();
-    mainLangOptions.forEach(function (item) {
-        if (!item || item.cd_nm == null) return;
-        var opt = document.createElement("option");
-        opt.value = item.cd_nm;
-        $list.append(opt);
-    });
-}
-
-// 코드로 태그 추가 (코드 저장, 라벨 표시)
-function addMainLangTagByCode(code) {
-    if (!code) return;
-    if (mainLangTags.some(function (t) { return t.code === code; })) return;
-    var label = mainLangMap[code] || code;
-    mainLangTags.push({ code: code, label: label });
-    renderMainLangTags();
-}
-
-function addMainLangTagByLabel(raw) {
-    var label = $.trim(raw || "");
-    if (!label) return;
-    var code = null;
-    var lowered = label.toLowerCase();
-    mainLangOptions.some(function (item) {
-        if (!item || !item.cd_nm) return false;
-        var name = String(item.cd_nm);
-        if (name.toLowerCase() === lowered) {
-            code = item.cd;
-            return true;
-        }
-        return false;
-    });
-    if (!code) {
-        mainLangOptions.some(function (item) {
-            if (!item || !item.cd_nm) return false;
-            var name = String(item.cd_nm);
-            if (name.toLowerCase().startsWith(lowered)) {
-                code = item.cd;
-                return true;
-            }
-            return false;
-        });
-    }
-    if (!code) return;
-    addMainLangTagByCode(code);
-}
-
-// 코드로 태그 삭제
-function removeMainLangTag(code) {
-    if (!code) return;
-    mainLangTags = mainLangTags.filter(function (t) { return t.code !== code; });
-    renderMainLangTags();
-}
-
-// 태그 목록 렌더링 + hidden 값 동기화
-function renderMainLangTags() {
-    var $list = $("#mainLangTagList");
-    var $help = $list.closest(".tag-input-box").find(".tag-help");
-    $list.empty();
-    mainLangTags.forEach(function (tag) {
-        var $item = $("<li class=\"tag-item\"></li>");
-        $item.attr("data-code", tag.code);
-        $item.append(document.createTextNode(tag.label));
-        var $remove = $("<button type=\"button\" class=\"tag-remove\" aria-label=\"태그 삭제\">x</button>");
-        $item.append($remove);
-        $list.append($item);
-    });
-    if ($help.length) {
-        $help.toggle(mainLangTags.length === 0);
-    }
-    var codes = mainLangTags.map(function (t) { return t.code; }).join(",");
-    $("#main_lang").val(codes);
-}
-
-// 저장된 CSV에서 태그 재구성
-function setMainLangTagsFromValue(value) {
-    mainLangTags = [];
-    var raw = String(value || "").trim();
-    if (!raw) {
-        renderMainLangTags();
-        return;
-    }
-    raw.split(",").forEach(function (code) {
-        var trimmed = $.trim(code);
-        if (trimmed) {
-            addMainLangTagByCode(trimmed);
-        }
+        mainLangTagInput.setOptions(res || []);
+        mainLangTagInput.setFromValue(pendingMainLangValue || $("#main_lang").val());
     });
 }
 

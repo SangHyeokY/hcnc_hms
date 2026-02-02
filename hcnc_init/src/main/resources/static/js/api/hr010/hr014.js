@@ -205,7 +205,7 @@ function commentInputFormatter(cell, formatterParams, onRendered) {
         if (!input) return;
         input.oninput = function () {
             if (window.hr010ReadOnly) return;
-            cell.setValue(this.value, true);
+            cell.getRow().getData().cmt = this.value;
         };
     });
     return `<input type="text" class="hr014-comment-input" placeholder="Enter message." value="${safeValue}" ${disabled} />`;
