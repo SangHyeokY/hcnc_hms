@@ -53,4 +53,13 @@
         AND skl.dev_id = #{devId}
         ORDER BY skl.skl_id
     </select>
+
+    <!-- 보유역량 및 숙련도 - 숙련도 저장 -->
+    <update id="save_tab2_2" parameterType="map">
+        UPDATE tb_dev_skl_info
+        SET lvl = #{lvl}
+        WHERE dev_id = #{devId}
+        AND skl_id = #{sklId}
+    </update>
+
 </mapper>

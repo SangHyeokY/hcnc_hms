@@ -16,6 +16,9 @@ window.initTab2 = function() {
     $("#TABLE_HR012_A").show();
     $("#TABLE_HR012_B").hide();
 
+     // 등록 버튼
+     $(".btn-tab2-new").off("click").on("click", saveHr012TableB);
+
     // 탭 클릭 이벤트
     $(".tab-sub-btn").off("click").on("click", function() {
         const tabId = $(this).data("tab");
@@ -61,6 +64,8 @@ function loadHr012TableDataA() {
         type: "GET",
         data: { dev_id: devId },
         success: function(response) {
+            console.log("데이터 받아왔니? tab1")
+            console.log(response);
             const dataArray = Array.isArray(response) ? response : response.res;
 
             if (!Array.isArray(dataArray)) {
@@ -96,10 +101,9 @@ function loadHr012TableDataA() {
 
 // =============================================================================================================================
 
-function scoreCheckboxFormatter(cell, formatterParams, onRendered) {
-    const value = cell.getValue();
-    const checked = value ? "checked" : "";
-    return `<input type="checkbox" disabled ${checked} />`;
+function radioFormatter(cell) {
+    const checked = cell.getValue() ? "checked" : "";
+    return `<input type="radio" class="circle-radio" ${checked}>`;
 }
 
 function buildHr012TableB() {
@@ -109,16 +113,35 @@ function buildHr012TableB() {
         layout: "fitColumns",
         placeholder: "데이터 없음",
         columns: [
+            { title: "skl_id", field: "skl_id", visible:false },
             { title: "기술", field: "cd_nm", hozAlign: "left", widthGrow: 2 },
-            { title: "1", field: "lv1", hozAlign: "center", formatter: scoreCheckboxFormatter },
-            { title: "2", field: "lv2", hozAlign: "center", formatter: scoreCheckboxFormatter },
-            { title: "3", field: "lv3", hozAlign: "center", formatter: scoreCheckboxFormatter },
-            { title: "4", field: "lv4", hozAlign: "center", formatter: scoreCheckboxFormatter },
-            { title: "5", field: "lv5", hozAlign: "center", formatter: scoreCheckboxFormatter }
+            ...[1,2,3,4,5].map(i => ({
+                title: i.toString(),
+                field: "lv" + i,
+                hozAlign: "center",
+                formatter: radioFormatter,
+                cellClick: function(e, cell){
+                    const row = cell.getRow();
+                    const rowData = row.getData();
+                    const currentField = cell.getField();
+
+                    // 이미 선택되어 있으면 → 해제
+                    if(rowData[currentField]){
+                        row.update({ lv1:false, lv2:false, lv3:false, lv4:false, lv5:false });
+                        return;
+                    }
+
+                    // 클릭한 레벨만 true, 나머지는 false
+                    const updateObj = { lv1:false, lv2:false, lv3:false, lv4:false, lv5:false };
+                    updateObj[currentField] = true;
+                    row.update(updateObj);
+                }
+            }))
         ],
         data: []
     });
 }
+
 
 function loadHr012TableDataB() {
     const devId = window.currentDevId;
@@ -134,6 +157,7 @@ function loadHr012TableDataB() {
 
             const tableData = dataArray.map(item => ({
                 cd_nm: item.cd_nm,
+                skl_id: item.skl_id,
                 lv1: item.lv1 === "Y",
                 lv2: item.lv2 === "Y",
                 lv3: item.lv3 === "Y",
@@ -145,6 +169,42 @@ function loadHr012TableDataB() {
         },
         error: function() {
             alert("Tab2B 데이터 로드 실패");
+        }
+    });
+}
+
+function saveHr012TableB(){
+    if (!window.hr012TableB) return;
+
+    const devId = window.currentDevId;
+    const tableData = window.hr012TableB.getData(); // 데이터 임시 저장
+    const saveList = tableData.map(row => {
+        let lvl = 0;
+        if (row.lv5) lvl = 5;
+        else if (row.lv4) lvl = 4;
+        else if (row.lv3) lvl = 3;
+        else if (row.lv2) lvl = 2;
+        else if (row.lv1) lvl = 1;
+        else lvl = 0;
+
+        return {
+            devId: devId,
+            sklId: row.skl_id,
+            lvl: lvl
+        };
+    });
+
+    $.ajax({
+        url: "/hr010/tab2_2_save",
+        type: "POST",
+        contentType: "application/json; charset=utf-8",
+        data: JSON.stringify(saveList),
+        success: function(response) {
+            alert("숙련도 저장 완료!");
+            loadHr012TableDataB();
+        },
+        error: function() {
+            alert("숙련도 저장 실패");
         }
     });
 }

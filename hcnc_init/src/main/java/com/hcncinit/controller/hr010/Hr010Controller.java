@@ -1,12 +1,14 @@
 package com.hcncinit.controller.hr010;
 
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.hcncinit.service.hr010.*;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -192,6 +194,20 @@ public class Hr010Controller {
         // System.out.println("tab2_2 조회 결과 = " + reslist);
         mv.addObject("res", reslist);
         return mv;
+    }
+
+    // tab2-2 - 숙련도 저장
+    @PostMapping("/tab2_2_save")
+    @ResponseBody
+    public ResponseEntity<?> save_tab2_2(@RequestBody List<Map<String, Object>> saveList) {
+        try {
+            System.out.println("save_tab2 호출됨, saveList = " + saveList);
+            hr012Service.save_tab2_2(saveList);
+            return ResponseEntity.ok("ok");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("error");
+        }
     }
 
     // =============================================================================== //
