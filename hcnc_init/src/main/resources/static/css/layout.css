@@ -85,13 +85,14 @@ footer {width:100%; height:30px; line-height: 30px; padding:0 20px; display: fle
 .left-menu .nav .lnb-menu .dep2 > li > a.on {font-weight: 600; color:#F0F1F3;}
 .left-menu .nav .lnb-menu .dep2 li.on > a {background: url('../images/common/Ico-arrow-up-sub.png') 91% center no-repeat; background-size: 10px; color: #202224; font-weight: 700;}
 .left-menu .nav .lnb-menu .dep1 > li > .dep2 > li:before{content: ""; display: inline-block; background: #3A3F49; position: absolute; left: 0; width: 9px; height: 1px; top: 15px;}
-.left-menu .nav .lnb-menu .dep1 > li > .dep2 > li:first-child:before{top:22px;}
+.left-menu .nav .lnb-menu .dep1 > li > .dep2 > li:first-child:before{top:22px ;}
 .left-menu .nav .lnb-menu .dep1 > li > .dep2 > li:after{content: ""; display: inline-block; background: #3A3F49; position: absolute; left: 0; width: 1px; height: 100%; top: 0px;}
 .left-menu .nav .lnb-menu .dep1 > li > .dep2 > li:last-child:after{height:16px;}
+.left-menu .nav .lnb-menu .dep1 > li:nth-child(2) > .dep2 > li:after{height:22px;}
 
 .mem-area{border-bottom: 1px solid #C5CCD5; margin-bottom:10px;}
 .mem-area .logout-btn{width:100%; text-align: left; border:none; background:none; padding:10px; color:#6B727B;}
-.mem-area .logout-btn:hover{color:#fff;}
+.mem-area .logout-btn:hover{color:#4880FF; font-weight:bold;}
 .mem-area .logout-btn .ico-lock{display:inline-block; width:20px; height:20px; margin-right:4px; background:url('../icons/lnb-ico-logout.png')center center no-repeat; background-size:contain;}
 
 /*=================================================================================
@@ -100,7 +101,7 @@ footer {width:100%; height:30px; line-height: 30px; padding:0 20px; display: fle
  /* Title */
  .container-wrap h3 {font-size: 26px; font-size:700; color:#000; }
  .content-title{padding-bottom:20px; }
- .content-body{height:100%;}
+ .content-body{ width: 100%; height:100%;}
  .container-wrap h4 {font-size:24px; font-size:700; color:#000; }
  .title-wrap {display:flex; justify-content: space-between; align-items: center;}
  .title {font-size:22px;}
