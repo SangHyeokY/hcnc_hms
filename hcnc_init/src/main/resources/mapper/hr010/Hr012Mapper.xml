@@ -7,25 +7,28 @@
     <!-- 보유역량 및 숙련도 - 보유역량 -->
     <select id="select_tab2_1" resultType="hashmap" parameterType="string">
         WITH grp AS (
-            SELECT cd,
-                cd_nm,
-                sort_no
-            FROM tb_cd_mst
-            WHERE del_yn = 'N'
-            AND use_yn = 'Y'
-            AND grp_cd = 'skl_grp'
-            ),
+            SELECT 	cd
+                 ,	cd_nm
+                 ,	sort_no
+            FROM 	tb_cd_mst
+            WHERE 	del_yn = 'N'
+              AND use_yn = 'Y'
+              AND grp_cd = 'skl_grp'
+        ),
         skl AS (
-            SELECT SUBSTR(skl.skl_id, 1, 2) AS skl_grp,
-                skl.skl_id,
-                cd.cd_nm,
-                cd.adinfo_01
-            FROM tb_dev_skl_info skl
-            LEFT JOIN tb_cd_mst cd ON skl.skl_id = cd.cd
-            AND cd.grp_cd = 'skl_id'
-            WHERE cd.del_yn = 'N'
-            AND cd.use_yn = 'Y'
-            AND skl.dev_id = #{devId}
+            SELECT 	SUBSTR(skl.skl_id, 1, 2) AS skl_grp
+                  ,	skl.skl_id
+                  ,	cd.cd_nm
+                  ,	cd.adinfo_01
+            FROM 	tb_dev_skl_info skl
+                LEFT JOIN tb_cd_mst cd
+                    ON 	skl.skl_id = cd.cd
+                    AND cd.grp_cd = 'skl_id'
+                    AND cd.del_yn = 'N'
+                    AND cd.use_yn = 'Y'
+            WHERE 	skl.del_yn = 'N'
+                AND skl.use_yn = 'Y'
+                AND skl.dev_id = 'HCNC_F001'
         )
         SELECT 	g.cd
              ,	g.cd_nm
@@ -42,15 +45,24 @@
 
     <!-- 보유역량 및 숙련도 - 보유역량 신규/수정 저장 -->
     <insert id="upsert_tab2_1" parameterType="map">
+        <if test='type == "d"'>
+        UPDATE  tb_dev_skl_info
+            SET del_yn = 'Y'
+            ,   del_ts = current_timestamp()
+            ,   del_by = #{userId}
+        WHERE   dev_id = #{dev_id}
+            AND skl_id = #{skl_id}
+        </if>
+        <if test='type == "c"'>
         INSERT INTO tb_dev_skl_info
         (
-          dev_id
-        , skl_id
-        , lvl
-        , use_yn
-        , del_yn
-        , crt_ts
-        , crt_by
+              dev_id
+            , skl_id
+            , lvl
+            , use_yn
+            , del_yn
+            , crt_ts
+            , crt_by
         )
         VALUES
         (
@@ -62,35 +74,42 @@
             , current_timestamp()
             , #{userId}
         ) ON DUPLICATE KEY UPDATE
-              upd_ts	= current_timestamp()
+              del_yn    = 'N'
+            , del_ts    = null
+            , del_by    = null
+            , upd_ts	= current_timestamp()
             , upd_by	= ''
+        </if>
     </insert>
 
     <!-- 보유역량 및 숙련도 - 숙련도 -->
     <select id="select_tab2_2" resultType="hashmap" parameterType="string">
-        SELECT skl.skl_id
-            , cd.cd_nm
-            , CASE WHEN skl.lvl = 0 THEN 'Y' ELSE 'N' END lv0
-            , CASE WHEN skl.lvl = 1 THEN 'Y' ELSE 'N' END lv1
-            , CASE WHEN skl.lvl = 2 THEN 'Y' ELSE 'N' END lv2
-            , CASE WHEN skl.lvl = 3 THEN 'Y' ELSE 'N' END lv3
-            , CASE WHEN skl.lvl = 4 THEN 'Y' ELSE 'N' END lv4
-            , CASE WHEN skl.lvl = 5 THEN 'Y' ELSE 'N' END lv5
-        FROM tb_dev_skl_info skl
-        LEFT JOIN tb_cd_mst cd ON skl.skl_id = cd.cd
-        AND cd.grp_cd = 'skl_id'
-        WHERE cd.del_yn = 'N'
-        AND cd.use_yn = 'Y'
-        AND skl.dev_id = #{devId}
+        SELECT  skl.skl_id
+            ,   cd.cd_nm
+            ,   CASE WHEN skl.lvl = 0 THEN 'Y' ELSE 'N' END lv0
+            ,   CASE WHEN skl.lvl = 1 THEN 'Y' ELSE 'N' END lv1
+            ,   CASE WHEN skl.lvl = 2 THEN 'Y' ELSE 'N' END lv2
+            ,   CASE WHEN skl.lvl = 3 THEN 'Y' ELSE 'N' END lv3
+            ,   CASE WHEN skl.lvl = 4 THEN 'Y' ELSE 'N' END lv4
+            ,   CASE WHEN skl.lvl = 5 THEN 'Y' ELSE 'N' END lv5
+        FROM    tb_dev_skl_info skl
+            LEFT JOIN tb_cd_mst cd
+                ON  skl.skl_id = cd.cd
+                AND cd.grp_cd = 'skl_id'
+                AND cd.del_yn = 'N'
+                AND cd.use_yn = 'Y'
+        WHERE   skl.del_yn = 'N'
+            AND skl.use_yn = 'Y'
+            AND skl.dev_id = #{devId}
         ORDER BY skl.skl_id
     </select>
 
     <!-- 보유역량 및 숙련도 - 숙련도 저장 -->
     <update id="save_tab2_2" parameterType="map">
-        UPDATE tb_dev_skl_info
-        SET lvl = #{lvl}
-        WHERE dev_id = #{devId}
-        AND skl_id = #{sklId}
+        UPDATE  tb_dev_skl_info
+            SET lvl = #{lvl}
+        WHERE   dev_id = #{devId}
+            AND skl_id = #{sklId}
     </update>
 
 </mapper>
