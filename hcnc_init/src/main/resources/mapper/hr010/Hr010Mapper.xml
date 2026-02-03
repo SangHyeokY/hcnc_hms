@@ -23,9 +23,13 @@
             , ctrt_typ -- 계약형태
             , hope_rate_amt -- 단가
             , DATE_FORMAT(crt_ts, '%Y-%m-%d') AS crt_ts -- 등록일자
+            , search_txt
         FROM tb_dev_info
         WHERE del_yn='N'
         AND use_yn='Y'
+        <if test="searchKeyword != null and searchKeyword != ''">
+            AND MATCH(search_txt) AGAINST (#{searchKeyword} IN BOOLEAN MODE)
+        </if>
         <if test="dev_nm != null and dev_nm != ''">
             AND dev_nm LIKE CONCAT('%', #{dev_nm}, '%')
         </if>

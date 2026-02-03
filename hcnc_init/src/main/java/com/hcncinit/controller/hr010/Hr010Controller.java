@@ -1,7 +1,5 @@
 package com.hcncinit.controller.hr010;
 
-import java.util.Base64;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -37,7 +35,7 @@ public class Hr010Controller {
 
     // 인력관리 > 기본 인적사항 (임시/검색x), 따로 분류할건지는 논의
     @RequestMapping("/list")
-    public ModelAndView select_hr010 (@RequestParam(required = false) Map<String,Object> map, HttpSession session) {
+    public ModelAndView select_hr010 (@RequestParam(required = false) Map<String,Object> map) {
         ModelAndView mv = new ModelAndView("jsonView");
 
         // 세션 만료되면 로그인 페이지로 되돌아감
@@ -46,7 +44,6 @@ public class Hr010Controller {
 //        if (loginUserId == null) {
 //            return new ModelAndView("redirect:/login");
 //        }
-
         // 확인용 1
         // System.out.println("select_hr010 호출됨, param = " + map);
         List<Map<String, Object>> resList = hr010Service.select_hr010(map);

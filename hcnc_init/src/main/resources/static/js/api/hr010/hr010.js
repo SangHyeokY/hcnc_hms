@@ -48,6 +48,7 @@ $(document).ready(function () {
         loadUserTableData();
     });
 
+    // 검색 기능 - 사용 안함
     $("#searchKeyword").on("keyup", function (event) {
         if (event.key === "Enter") {
             loadUserTableData();
@@ -92,7 +93,7 @@ $(document).ready(function () {
             return;
         }
 
-        // Tab2
+        // Tab2 ~ Tab4
 
     // ---------- Tab 마다 추가하기 ------------ //
 
@@ -108,9 +109,10 @@ $(document).ready(function () {
             } else if (activeTab === "tab2") {
                 saveHr012TableData?.();
                 saveHr012TableB?.();
-            } else if (activeTab === "tab3") {
-                saveHr013TableData?.();
             }
+// else if (activeTab === "tab3") {
+//                saveHr013TableData?.();
+//            }
         });
     });
 });
@@ -232,13 +234,28 @@ function loadUserTableData() {
     if (!userTable || typeof userTable.setData !== "function") {
         return;
     }
+
+    // 키워드 검색
+    let keyword = $("#searchKeyword").val().trim();
+    if (keyword) {
+        // 공백이나 콤마를 기준으로 단어 나눔
+        keyword = keyword
+            .split(/[\s,]+/)
+            .filter(w => w)
+            .map(w => "+" + w)
+            .join(" ");
+    } else {
+        keyword = null;
+    }
+    console.log("키워드 : " + keyword);
+
     $.ajax({
         url: "/hr010/list",
         type: "GET",
         // xhrFields: { responseType: "arraybuffer" }, // ★ 핵심
         data: {
             dev_nm: $("#insertNM").val(),
-            searchKeyword: $("#searchKeyword").val()
+            searchKeyword: keyword
         },
         success: function (response) {
             userTable.setData(response.res || []);
@@ -561,6 +578,12 @@ function setModalMode(mode) { // 간략화
     // Tab 연동
     window.hr010ReadOnly = isView;
     broadcastTabReadonly(isView);
+
+    if (isView) {
+        $(".showingbtn").hide();  // 조회일때 숨김
+    } else if (isUpdate || isInsert) {
+        $(".showingbtn").show();  // 수정/등록일때 보이기
+    }
 }
 
 // Tab의 readonly 제어
