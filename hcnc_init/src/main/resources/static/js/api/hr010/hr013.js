@@ -9,6 +9,10 @@ var hr013JobOptions = [];
 window.initTab3 = function() {
     if (!window.hr013Table) buildHr013Table();
     loadHr013TableData();
+    $(document).off("tab:readonly.hr013").on("tab:readonly.hr013", function (_, isReadOnly) {
+        applyTab3Readonly(!!isReadOnly);
+    });
+    applyTab3Readonly(!!window.hr010ReadOnly);
 
     $("#write_hr013_rate_amt").on("input", function () {
             $(this).val(formatNumberInput($(this).val()));
@@ -51,6 +55,8 @@ window.initTab3 = function() {
            }).get();
            initSelectDefault("write_hr013_job_cd", "선택");
            if (window.hr013Table) {
+               normalizeJobCodes();
+               normalizeJobRows();
                window.hr013Table.redraw(true);
            }
        });
@@ -70,6 +76,7 @@ window.initTab3 = function() {
            stackTagInput.setOptions(res || []);
            stackTagInput.setFromValue(pendingStackValue || $("#write_hr013_stack_txt").val());
            if (window.hr013Table) {
+               syncStackLabelsFromCodes();
                window.hr013Table.redraw(true);
            }
        });
@@ -82,7 +89,6 @@ function buildHr013Table() {
         layout: "fitColumns",
         placeholder: "데이터 없음",
         selectable: false,
-        variableHeight: true,
         columns: [
             {
                 field: "_checked",
@@ -91,6 +97,9 @@ function buildHr013Table() {
                 headerSort: false,
                 width: 50,
                 cellClick: function (e, cell) {
+                    if (window.hr010ReadOnly) {
+                        return;
+                    }
                     var resolved = resolveCell(e, cell);
                     if (!resolved) {
                         return;
@@ -142,6 +151,13 @@ function buildHr013Table() {
                 editable: function (cell) {
                     return isHr013Editable() && cell.getRow().getData().inprj_yn !== "Y";
                 },
+                cellEdited: function (cell) {
+                    var row = cell.getRow();
+                    var data = row ? row.getData() : null;
+                    if (data && data.inprj_yn !== "Y") {
+                        row.update({ _prev_cust_nm: cell.getValue() || "" });
+                    }
+                },
                 cellClick: startEditOnClick
             },
             { title: "프로젝트명", field: "prj_nm", editor: "input", editable: isHr013Editable, cellClick: startEditOnClick },
@@ -153,9 +169,17 @@ function buildHr013Table() {
                 formatter: jobCodeFormatter,
                 editor: "select",
                 editorParams: function () {
-                    return { values: getJobCodeMap() };
+                    return {
+                        values: getJobCodeMap()
+                    };
                 },
                 editable: isHr013Editable,
+                cellEdited: function (cell) {
+                    var value = normalizeJobValue(cell.getValue()) || "";
+                    if (cell.getValue() !== value) {
+                        cell.setValue(value, true);
+                    }
+                },
                 cellClick: startEditOnClick
             },
             { title: "기술스택", field: "stack_txt", formatter: skillDisplayFormatter, editor: stackTagEditor, editable: isHr013Editable, cellClick: startEditOnClick },
@@ -212,12 +236,16 @@ function loadHr013TableData() {
             const dataArray = Array.isArray(res.list) ? res.list : [];
             var normalized = dataArray.map(function (row) {
                 row._checked = false;
-                if (row.job_cd && typeof row.job_cd === "object") {
-                    row.job_cd = row.job_cd.cd || row.job_cd.value || "";
+                if (row.inprj_yn !== "Y") {
+                    row._prev_cust_nm = row.cust_nm || "";
                 }
+                row.role_nm = normalizeJobValue(row.role_nm) || "";
+                row.job_cd = normalizeJobValue(row.job_cd) || "";
                 return row;
             });
             window.hr013Table.setData(normalized);
+            normalizeJobCodes();
+            syncStackLabelsFromCodes();
             window.hr013Table.redraw();
         },
         error: function() { alert("Tab3 데이터 로드 실패"); }
@@ -502,6 +530,7 @@ function addHr013Row() {
         st_dt: "",
         ed_dt: "",
         cust_nm: "",
+        _prev_cust_nm: "",
         prj_nm: "",
         rate_amt: "",
         job_cd: "",
@@ -515,13 +544,16 @@ function toggleInprjValue(cell) {
     var row = cell.getRow();
     var data = row.getData();
     var next = data.inprj_yn === "Y" ? "N" : "Y";
-    var nextCust = data.cust_nm || "";
     if (next === "Y") {
-        nextCust = "HCNC";
-    } else if (nextCust === "HCNC") {
-        nextCust = "";
+        var keep = data._prev_cust_nm || "";
+        if (data.cust_nm && data.cust_nm !== "HCNC") {
+            keep = data.cust_nm;
+        }
+        row.update({ inprj_yn: "Y", cust_nm: "HCNC", _prev_cust_nm: keep });
+        return;
     }
-    row.update({ inprj_yn: next, cust_nm: nextCust });
+    var restored = data._prev_cust_nm || "";
+    row.update({ inprj_yn: "N", cust_nm: restored });
 }
 
 function isHr013Editable() {
@@ -549,18 +581,40 @@ function getJobCodeMap() {
 
 function jobCodeFormatter(cell) {
     var row = cell.getRow().getData();
-    if (row && row.role_nm) {
-        return row.role_nm;
+    var map = getJobCodeMap();
+    var val = normalizeJobValue(cell.getValue()) || "";
+    if (val && map[val]) {
+        return map[val];
     }
-    var val = cell.getValue();
-    if (val && typeof val === "object") {
-        val = val.cd || val.value || "";
+    var roleVal = row ? normalizeJobValue(row.role_nm) : "";
+    if (roleVal) {
+        return roleVal;
     }
-    if (!val) {
+    return map[val] || val || "";
+}
+
+function normalizeJobValue(value) {
+    if (value == null) {
         return "";
     }
-    var map = getJobCodeMap();
-    return map[val] || val;
+    if (typeof value === "object") {
+        var current = value;
+        var guard = 0;
+        while (current && typeof current === "object" && guard < 4) {
+            var candidate = current.cd || current.value || current.label || current.cd_nm || current.name || current.nm || current.id;
+            if (candidate && typeof candidate !== "object") {
+                return String(candidate);
+            }
+            if (candidate && typeof candidate === "object") {
+                current = candidate;
+                guard += 1;
+                continue;
+            }
+            break;
+        }
+        return "";
+    }
+    return String(value);
 }
 
 function dateDisplayFormatter(cell) {
@@ -583,7 +637,8 @@ function formatDateDisplay(value) {
 
 function rowSelectFormatter(cell) {
     var checked = cell.getValue() ? " checked" : "";
-    return "<input type='checkbox' class='row-check'" + checked + " />";
+    var disabled = window.hr010ReadOnly ? " disabled" : "";
+    return "<input type='checkbox' class='row-check'" + checked + disabled + " />";
 }
 
 function syncRowCheckbox(row, checked) {
@@ -649,6 +704,23 @@ function stackTagEditor(cell, onRendered, success, cancel) {
     var wrap = document.createElement("div");
     wrap.className = "tag-input";
     wrap.style.width = "100%";
+    var rowObj = cell && typeof cell.getRow === "function" ? cell.getRow() : null;
+    var rowEl = rowObj ? rowObj.getElement() : null;
+    var tagInput = null;
+    var closed = false;
+    var suppressBlurUntil = 0;
+    var docListenerBound = false;
+
+    function setEditingState(isEditing) {
+        if (!rowEl) {
+            return;
+        }
+        if (isEditing) {
+            rowEl.classList.add("stack-editing");
+        } else {
+            rowEl.classList.remove("stack-editing");
+        }
+    }
 
     var box = document.createElement("div");
     box.className = "tag-input-box";
@@ -686,7 +758,11 @@ function stackTagEditor(cell, onRendered, success, cancel) {
     wrap.appendChild(row);
 
     onRendered(function () {
-        var tagInput = createTagInput({
+        setEditingState(true);
+        if (rowObj && typeof rowObj.normalizeHeight === "function") {
+            rowObj.normalizeHeight();
+        }
+        tagInput = createTagInput({
             inputSelector: "#" + uid + "_input",
             listSelector: "#" + uid + "_list",
             hiddenSelector: "#" + uid + "_hidden",
@@ -712,48 +788,61 @@ function stackTagEditor(cell, onRendered, success, cancel) {
                 e.stopPropagation();
                 commitByInput(input.value);
             }
+            if (e.key === "Escape") {
+                setEditingState(false);
+                if (rowObj && typeof rowObj.normalizeHeight === "function") {
+                    rowObj.normalizeHeight();
+                }
+                cancel();
+            }
         });
-
-        var row = cell.getRow();
-        if (row && typeof row.normalizeHeight === "function") {
-            row.normalizeHeight();
-        }
-        if (typeof MutationObserver !== "undefined") {
-            var observer = new MutationObserver(function () {
-                if (row && typeof row.normalizeHeight === "function") {
-                    row.normalizeHeight();
-                }
-            });
-            observer.observe(list, { childList: true, subtree: true });
-        }
-
-        input.focus();
-    });
-
-    wrap.addEventListener("click", function (e) {
-        if (e.target && e.target.classList && e.target.classList.contains("tag-remove")) {
-            if (cell && typeof cell.getRow === "function") {
-                var row = cell.getRow();
-                if (row && typeof row.normalizeHeight === "function") {
-                    row.normalizeHeight();
-                }
+        input.addEventListener("focus", function () {
+            setEditingState(true);
+            if (rowObj && typeof rowObj.normalizeHeight === "function") {
+                rowObj.normalizeHeight();
             }
-        }
-    });
-
-    wrap.addEventListener("keydown", function (e) {
-        if (e.key === "Escape") {
-            cancel();
-        }
-    });
-
-    wrap.addEventListener("focusout", function () {
-        setTimeout(function () {
-            if (!wrap.contains(document.activeElement)) {
-                var value = document.getElementById(uid + "_hidden").value;
+        });
+        input.addEventListener("blur", function () {
+            setTimeout(function () {
+                if (Date.now() < suppressBlurUntil) {
+                    input.focus();
+                }
+            }, 0);
+        });
+        wrap.addEventListener("mousedown", function () {
+            suppressBlurUntil = Date.now() + 150;
+        });
+        if (!docListenerBound) {
+            docListenerBound = true;
+            document.addEventListener("mousedown", function (e) {
+                if (closed) {
+                    return;
+                }
+                if (wrap.contains(e.target)) {
+                    return;
+                }
+                closed = true;
+                commitByInput(input.value);
+                var hiddenEl = document.getElementById(uid + "_hidden");
+                var value = hiddenEl ? hiddenEl.value : "";
+                if (!value) {
+                    value = normalizeTagValue(cell.getValue());
+                }
+                var row = cell && typeof cell.getRow === "function" ? cell.getRow() : null;
+                if (row) {
+                    row.update({
+                        stack_txt: value,
+                        stack_txt_nm: getSkillLabelList(value)
+                    });
+                }
+                setEditingState(false);
                 success(value);
-            }
-        }, 0);
+                if (rowObj && typeof rowObj.normalizeHeight === "function") {
+                    rowObj.normalizeHeight();
+                }
+            }, true);
+        }
+        input.focus();
     });
 
     return wrap;
@@ -778,19 +867,111 @@ function skillDisplayFormatter(cell) {
         return row.stack_txt_nm;
     }
     var value = cell.getValue();
+    return getSkillLabelList(value);
+}
+
+function getSkillLabelList(value) {
     if (value == null || value === "") {
         return "";
     }
-    var codes = String(value).split(",");
+    var codes = String(value).split(",").map(function (code) {
+        return $.trim(code);
+    }).filter(function (code) {
+        return code !== "";
+    });
     if (hr013SkillOptions && hr013SkillOptions.length) {
         return codes.map(function (code) {
             var match = hr013SkillOptions.find(function (item) {
                 return String(item.cd) === String(code);
             });
-            return match ? match.cd_nm : code;
+            if (match) {
+                return match.cd_nm;
+            }
+            var labelMatch = hr013SkillOptions.find(function (item) {
+                return String(item.cd_nm) === String(code);
+            });
+            return labelMatch ? labelMatch.cd_nm : code;
         }).join(", ");
     }
     return value;
+}
+
+function syncStackLabelsFromCodes() {
+    if (!window.hr013Table) {
+        return;
+    }
+    window.hr013Table.getRows().forEach(function (row) {
+        var data = row.getData();
+        var codes = normalizeTagValue(data.stack_txt || "");
+        var nextLabel = getSkillLabelList(codes);
+        if (codes && data.stack_txt_nm !== nextLabel) {
+            row.update({ stack_txt: codes, stack_txt_nm: nextLabel });
+        }
+    });
+}
+
+function normalizeJobRows() {
+    if (!window.hr013Table) {
+        return;
+    }
+    var map = getJobCodeMap();
+    var labelToCode = {};
+    Object.keys(map).forEach(function (code) {
+        labelToCode[map[code]] = code;
+    });
+    window.hr013Table.getRows().forEach(function (row) {
+        var data = row.getData();
+        var code = normalizeJobValue(data.job_cd) || "";
+        var label = normalizeJobValue(data.role_nm) || "";
+        if (code && map[code]) {
+            if (!label) {
+                row.update({ role_nm: map[code] });
+            }
+            return;
+        }
+        if (label && labelToCode[label]) {
+            row.update({ job_cd: labelToCode[label], role_nm: label });
+        }
+    });
+}
+
+function normalizeTagValue(value) {
+    if (value == null) {
+        return "";
+    }
+    if (typeof value === "object") {
+        return "";
+    }
+    return String(value).split(",").map(function (code) {
+        return $.trim(code);
+    }).filter(function (code) {
+        return code !== "";
+    }).join(",");
+}
+
+function normalizeJobCodes() {
+    if (!window.hr013Table) {
+        return;
+    }
+    var map = getJobCodeMap();
+    var labelToCode = {};
+    Object.keys(map).forEach(function (code) {
+        labelToCode[map[code]] = code;
+    });
+    window.hr013Table.getRows().forEach(function (row) {
+        var data = row.getData();
+        var current = normalizeJobValue(data.job_cd) || "";
+        if (current && map[current]) {
+            if (!data.role_nm) {
+                row.update({ role_nm: map[current] });
+            }
+            return;
+        }
+        var label = normalizeJobValue(data.role_nm) || current;
+        if (label && labelToCode[label]) {
+            row.update({ job_cd: labelToCode[label], role_nm: label });
+        }
+    });
 }
 
 // 투입률
