@@ -610,6 +610,12 @@ function updateTabActions(tabId) {
 // 탭 표시 후 레이아웃 재계산
 function refreshTabLayout(tabId) {
     setTimeout(function () {
+        if (tabId === "tab2" && window.hr012TableA) {
+            window.hr012TableA.redraw(true);
+        }
+        if (tabId === "tab2" && window.hr012TableB) {
+            window.hr012TableB.redraw(true);
+        }
         if (tabId === "tab3" && window.hr013Table) {
             window.hr013Table.redraw(true);
         }

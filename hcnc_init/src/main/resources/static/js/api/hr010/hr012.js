@@ -1,3 +1,5 @@
+let tableData_old = [];
+
 // hr012.js
 window.initTab2 = function() {
     // 서브 탭 초기 상태 설정
@@ -47,7 +49,8 @@ function buildHr012TableA() {
         columns: [
             { title: "코드", field: "cd", visible: false },
             { title: "구분", field: "cd_nm", hozAlign: "left", width: 400},
-            { title: "상세", field: "skl_id_lst", hozAlign: "left", editor: tagEditor, formatter: tagFormatter },
+            { title: "상세", field: "skl_id_lst", hozAlign: "left", editor: tagEditor, formatter: tagFormatter,
+                editable: () => currentMode !== "view" },
             { title: "key", field: "key", visible: false }
         ],
         data: []
@@ -76,6 +79,7 @@ function loadHr012TableDataA() {
                 cd_nm: item.cd_nm,
                 skl_id_lst: (item.skl_id_lst !== undefined) ? JSON.parse(item.skl_id_lst) : []}
             ));
+            tableData_old = structuredClone(tableData);
 
             window.hr012TableA.setData(tableData);
         },
@@ -162,35 +166,6 @@ function loadHr012TableDataB() {
     });
 }
 
-function saveHr012TableA(codes){
-    if (!window.hr012TableB) return;
-
-    const devId = window.currentDevId;
-    var userId = $.trim($("#write_user_id").val());
-
-    var saveList = codes.map(data => {
-        return {
-            dev_id: devId,
-            skl_id: data,
-            userId: userId
-        }
-    });
-
-    $.ajax({
-        url: "/hr010/tab2_1_save",
-        type: "POST",
-        contentType: "application/json; charset=utf-8",
-        data: JSON.stringify(saveList),
-        success: function(response) {
-            // alert("보유역량 저장 완료!");
-            loadHr012TableDataB();
-        },
-        error: function() {
-            alert("보유역량 저장 실패");
-        }
-    });
-}
-
 function saveHr012TableB(){
     if (!window.hr012TableB) return;
 
@@ -228,24 +203,69 @@ function saveHr012TableB(){
 }
 
 
+// 유효성 검사
+function validateHr012Form() {
 
+    return true;
+}
 
-$(document).ready(function () {
+function saveHr012TableData() {
+    if (!validateHr012Form()) return;
 
-    $("#btn-user-save").on("click", function () {
-        console.log("hr012 >> save");
+    const devId = window.currentDevId;
+    const userId = $.trim($("#write_user_id").val());
 
-        var codes = [];
-        hr012TableA.getData().forEach(row => {
-            if (row.skl_id_lst !== undefined)
-                Object.values(row.skl_id_lst).forEach(item => {
-                    if (item.code !== undefined)
-                        codes.push(item.code);
-                });
-        });
-
-        console.log("hr012 >> save >> " + codes);
-        saveHr012TableA(codes);
+    // 수정하기 전 데이터
+    let codes = [];
+    tableData_old.forEach(row => {
+        if (row.skl_id_lst !== undefined)
+            Object.values(row.skl_id_lst).forEach(item => {
+                if (item.code !== undefined)
+                    codes.push(item.code);
+            });
     });
+    const param_old = codes.map(data => {
+        return {
+            type: "d",
+            dev_id: devId,
+            skl_id: data,
+            userId: userId
+        }
+    });
+    // 수정한 후 데이터
+    codes = [];
+    hr012TableA.getData().forEach(row => {
+        if (row.skl_id_lst !== undefined)
+            Object.values(row.skl_id_lst).forEach(item => {
+                if (item.code !== undefined)
+                    codes.push(item.code);
+            });
+    });
+    let param = codes.map(data => {
+        return {
+            type: "c",
+            dev_id: devId,
+            skl_id: data,
+            userId: userId
+        }
+    });
+    // 삭제 된 데이터
+    const delparam = param_old.filter(a => !param.some(b => b.skl_id === a.skl_id));
 
-});
+    // 수정 + 삭제 데이터 병합
+    param = [
+        ...param,
+        ...delparam.filter(x => !param.some(y => y.skl_id === x.skl_id)),
+    ];
+
+    $.ajax({
+        url: "/hr010/tab2_1_save",
+        type: "POST",
+        contentType: "application/json",
+        data: JSON.stringify(param),
+        success: () => {
+            loadHr012TableDataA();
+        },
+        error: () => alert("저장 실패")
+    });
+}

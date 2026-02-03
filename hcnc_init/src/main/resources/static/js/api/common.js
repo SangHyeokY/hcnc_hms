@@ -422,7 +422,7 @@ function tagFormatter(cell, formatterParams, onRendered) {
             .replace(/'/g, "&#39;");
 
         return `
-      <div class="tag-input-box readonly">
+      <div class="tag-input-box">
         <ul class="tag-list">
           ${tags.map(t => `<li class="tag-item" data-code="${esc(t.code)}"><span class="tag-text">${esc(t.label)}</span></li>`).join("")}
         </ul>

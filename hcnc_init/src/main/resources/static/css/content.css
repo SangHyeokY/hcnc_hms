@@ -58,35 +58,6 @@
 .tabulator-tableHolder {background: #fff !important;}
 .tabulator .row-check {pointer-events: none;}
 
-#TABLE_HR013_A .row-check {
-  pointer-events: auto;
-  cursor: pointer;
-}
-#TABLE_HR013_A .tabulator-row {
-  height: auto !important;
-  min-height: 44px;
-}
-#TABLE_HR013_A .tabulator-row .tabulator-cell {
-  white-space: normal;
-  line-height: 1.3;
-  padding-top: 6px;
-  padding-bottom: 6px;
-  height: auto !important;
-  overflow: visible;
-}
-#TABLE_HR013_A .tabulator-cell.tabulator-editing {
-  overflow: visible;
-}
-#TABLE_HR013_A .tabulator-tableHolder {
-  min-height: 220px;
-}
-#TABLE_HR013_A .tag-input,
-#TABLE_HR013_A .tag-input-box,
-#TABLE_HR013_A .tag-list {
-  width: 100%;
-  flex-wrap: wrap;
-}
-
 .tabulator-row .tabulator-cell .tabulator-data-tree-control {width: 16px !important; height: 16px !important; background-color: #ED242C !important; border: none !important;}
 .tabulator-row .tabulator-cell .tabulator-data-tree-control .tabulator-data-tree-control-expand {background: #fff !important;}
 .tabulator-row .tabulator-cell .tabulator-data-tree-control .tabulator-data-tree-control-collapse:after,.tabulator-row .tabulator-cell .tabulator-data-tree-control .tabulator-data-tree-control-expand:after {background: #fff !important; color: #fff !important;}
@@ -270,7 +241,7 @@ button.btn.btn-add-skill {
 /*===============================================================================
   HR014 - tab layout
 ================================================================================*/
-.tab4-content .white-full {
+.hr014-page .white-full {
   border: none;
 }
 .hr014-shell {
@@ -279,13 +250,13 @@ button.btn.btn-add-skill {
   box-shadow: none;
   padding: 0;
 }
-.tab4-content {
+.hr014-page {
   overflow: visible;
 }
-.tab4-content .content-body {
+.hr014-page .content-body {
   overflow: visible;
 }
-.tab4-content .tab-action-bar {
+.hr014-page .tab-action-bar {
   position: relative;
   z-index: 2;
 }
@@ -315,20 +286,20 @@ button.btn.btn-add-skill {
   color: #111827;
   font-weight: 700;
 }
-.tab4-content #TABLE_HR014_A .tabulator-row:nth-child(2n) .tabulator-cell {
+.hr014-page #TABLE_HR014_A .tabulator-row:nth-child(2n) .tabulator-cell {
   background-color: #FFFFFF !important;
 }
-.tab4-content #TABLE_HR014_A .tabulator-row .tabulator-cell {
+.hr014-page #TABLE_HR014_A .tabulator-row .tabulator-cell {
   font-size: 14px;
 }
-.tab4-content #TABLE_HR014_A .tabulator-row .tabulator-cell input[type="radio"]:before{top:6px;}
-.tab4-content #TABLE_HR014_A .tabulator-row .tabulator-cell input[type="radio"]:after{top:11px;}
-.tab4-content #TABLE_HR014_A .tabulator-row .tabulator-cell:first-child {
+.hr014-page #TABLE_HR014_A .tabulator-row .tabulator-cell input[type="radio"]:before{top:6px;}
+.hr014-page #TABLE_HR014_A .tabulator-row .tabulator-cell input[type="radio"]:after{top:11px;}
+.hr014-page #TABLE_HR014_A .tabulator-row .tabulator-cell:first-child {
   font-size: 14px;
   font-weight: 700;
   background-color: #E2F3FF !important;
 }
-.tab4-content #TABLE_HR014_A .hr014-comment-input {
+.hr014-page #TABLE_HR014_A .hr014-comment-input {
   width:100%;
   height: 32px;
   padding: 6px 10px;
@@ -337,7 +308,7 @@ button.btn.btn-add-skill {
   border-radius: 4px;
   font-size: 12px;
 }
-.tab4-content #TABLE_HR014_A .hr014-comment-input::placeholder {
+.hr014-page #TABLE_HR014_A .hr014-comment-input::placeholder {
   color: #9aa3af;
 }
 .hr014-tab-panels {
@@ -375,8 +346,8 @@ button.btn.btn-add-skill {
   background: #f8fafc;
   border-color: #dbe3f6;
 }
-.tab4-content .tab-btn,
-.tab4-content .tab-sub-btn {
+.hr014-page .tab-btn,
+.hr014-page .tab-sub-btn {
   font-size: 16px;
 }
 .modal-wrap .tab-btn,
@@ -384,11 +355,11 @@ button.btn.btn-add-skill {
   font-size: 16px;
 }
 
-.tab4-content .tab-action-bar {
+.hr014-page .tab-action-bar {
   justify-content: flex-end;
   gap: 8px;
 }
-.tab4-content .tab-action-bar .btn {
+.hr014-page .tab-action-bar .btn {
   height: 32px;
   padding: 6px 14px;
   border-radius: 6px;
@@ -398,13 +369,13 @@ button.btn.btn-add-skill {
   font-size: 14px;
   font-weight: 600;
 }
-.tab4-content .tab-action-bar .btn.bg-primary {
+.hr014-page .tab-action-bar .btn.bg-primary {
   border-color: #3b6df4;
   background: #3b6df4;
   color: #fff;
 }
 
-.tab4-content .tab-action-bar {
+.hr014-page .tab-action-bar {
   margin-top: 6px;
   padding-top: 2px;
 }
@@ -634,9 +605,9 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .tab2-content{gap:16px;}
 
 
-/* .tab-area .tab-content .content-body{height: 320px; overflow-y: auto;}
+.tab-area .tab-content .content-body{height: 320px; overflow-y: auto;}
 
-.tab-content {  position: relative;  height: 260px;   overflow-y: auto;} */
+.tab-content {  position: relative;  height: 260px;   overflow-y: auto;}
 
 .mw0 {  min-width: 0px !important;}
 
@@ -644,24 +615,6 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
     display: none;
 }
 
-/* 인적사항 - 등급/작성일자 css */
 .none_editable_text {
-    color : #333333;
-}
-
-/* 탭 영역  */
-.tab1-content,
-.tab2-content,
-.tab3-content,
-.tab4-content {
-    flex-direction: column;
-    min-width: 200px;
-}
-
-.tab1-content .content-body,
-.tab2-content .content-body,
-.tab3-content .content-body,
-.tab4-content .content-body {
-    flex: 1;
-    overflow: auto;
+    color : #61646D;
 }
