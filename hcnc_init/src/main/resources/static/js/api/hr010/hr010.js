@@ -1,19 +1,13 @@
-/*****
- * 사용자 관리 - hr010.js (hcnc_hms)
- */
+// 사용자 관리 - hr010.js (hcnc_hms)
 var userTable;
 var currentMode = "insert";
 window.currentDevId = null;
+
 // 주 개발언어 태그 입력 공통 모듈
 var mainLangTagInput = null;
 var pendingMainLangValue = "";
 
-const tabInitState = {
-    tab1: false,
-    tab2: false,
-    tab3: false,
-    tab4: false
-};
+// ============================================================================== //
 
 // 문서 첫 생성 시 실행
 $(document).ready(function () {
@@ -45,7 +39,6 @@ $(document).ready(function () {
 
         $(".tab-panel").hide();
         $("#" + tabId).show();
-        initTab(tabId);
         updateTabActions(tabId);
         refreshTabLayout(tabId);
     });
@@ -76,31 +69,33 @@ $(document).ready(function () {
         deleteUserRows();
     });
 
-    $("#btn-user-save").on("click", function () {
-        upsertUserBtn();
-    });
-
     $(".btn-main-view").on("click", function () {
         const rowData = btnEditView("조회할 ");
         if (!rowData) return;
         loadUserTableImgData(rowData);
         openUserModal("view", rowData);
     });
+
+    // 인적사항 및 tab 정보 저장 (통합 저장)
+    $(document).on("click", "#btn-user-save", function () {
+        const activeTab = $(".tab-btn.active").data("tab");
+        console.log("현재 탭 :", activeTab);
+
+        // 인적사항 정보 저장
+        upsertUserBtn();
+
+        // 탭별로 저장
+        if (activeTab === "tab1") {
+            saveHr011TableData();
+        } else if (activeTab === "tab2") {
+            saveHr012TableData?.();
+        } else if (activeTab === "tab3") {
+            saveHr013TableData?.();
+        }
+    });
 });
 
-function btnEditView(alertPrefix = "") {
-    if (!userTable) return null;
-    const rows = userTable.getSelectedRows();
-    if (rows.length === 0) {
-        alert(alertPrefix + "대상을 선택하세요.");
-        return null;
-    }
-    if (rows.length > 1) {
-        alert(alertPrefix + "한 명만 선택해주세요.");
-        return null;
-    }
-    return rows[0].getData();
-}
+// ============================================================================== //
 
 // 테이블 생성 정의
 function buildUserTable() {
@@ -211,7 +206,7 @@ function buildUserTable() {
     });
 }
 
-// db로부터 리스트 불러오기
+// db로부터 리스트 불러와서 테이블에 넣기
 function loadUserTableData() {
     if (!userTable || typeof userTable.setData !== "function") {
         return;
@@ -259,6 +254,8 @@ function loadUserTableImgData(data) {
         }
     });
 }
+
+// ============================================================================== //
 
 // 데이터 신규 등록/수정 이벤트
 function upsertUserBtn()
@@ -354,6 +351,8 @@ function deleteUserRows() {
     });
 }
 
+// ============================================================================== //
+
 // 모달(팝업) 열리는 이벤트 처리
 openUserModal = function(mode, data) {
     currentMode = mode;
@@ -388,9 +387,11 @@ openUserModal = function(mode, data) {
 // 모든 tab 초기화
 function initAllTabs() {
     initTab1();
-    initTab2();
-    initTab3();
-    initTab4();
+    if (currentMode !== "insert") {
+        initTab2();
+        initTab3();
+        initTab4();
+    }
 }
 
 // 팝업에 데이터 채워넣기
@@ -485,26 +486,44 @@ function clearUserForm() {
 
 // 팝업의 역할에 따라 sub-title 변경 되기
 function setModalMode(mode) { // 간략화
+    console.log("Mode 구분 :", mode);
+
+    const isView   = mode === "view";
+    const isInsert = mode === "insert";
+    const isUpdate = mode === "update";
+
     var $modal = $("#view-user-area");
-    var $inputs = $modal.find("input, select");
     var $title = $modal.find(".modal-title");
 
-    const $tagBox = $("#mainLangTagList").closest(".tag-input-box");
-    const isView = mode === "view";
-    const isInsert = mode === "insert";
+    // title 표시
+    if (isView) $title.text("상세");
+    else if (isInsert) $title.text("등록");
+    else if (isUpdate) $title.text("수정");
 
-    // title
-    $title.text(isView ? "상세" : isInsert ? "등록" : "수정");
+    if (isView) {
+        // 조회 => 수정불가
+        $modal.find("input, textarea")
+              .prop("readonly", true)
+              .prop("disabled", true);
 
-    // input readonly
-    $inputs.prop("disabled", isView);
+        $modal.find("select").prop("disabled", true);
+    } else {
+        // 등록/수정할 때 수정 가능하도록 변경
+        $modal.find("input, textarea")
+              .prop("readonly", false)
+              .prop("disabled", false)
+              .removeAttr("readonly")
+              .removeAttr("disabled");
+        $modal.find("select")
+              .prop("disabled", false)
+              .removeAttr("disabled");
+    }
 
-    // 버튼 / 영역
-    $(".btn-save").toggle(!isView);
+    $("#btn-user-save").toggle(isInsert || isUpdate);
     $(".tab-article").toggle(!isInsert);
     $("#main_lang_input").toggle(!isView);
 
-    // tag readonly
+    const $tagBox = $("#mainLangTagList").closest(".tag-input-box");
     $tagBox.toggleClass("is-readonly", isView);
     $tagBox.find(".tag-help").toggle(!isView);
 
@@ -512,9 +531,18 @@ function setModalMode(mode) { // 간략화
 
     updateTabActions($(".tab-btn.active").data("tab"));
 
-    window.applyTab3Readonly?.(isView);
-    window.applyTab4Readonly?.(isView);
+    // Tab 연동
+    window.hr010ReadOnly = isView;
+    broadcastTabReadonly(isView);
 }
+
+// Tab의 readonly 제어
+function broadcastTabReadonly(isReadOnly) {
+    $(document).trigger("tab:readonly", [isReadOnly]);
+}
+
+// ============================================================================== //
+
 //function setModalMode(mode) {
 //    var $modal = $("#view-user-area");
 //    var $inputs = $modal.find("input, select");
@@ -536,7 +564,7 @@ function setModalMode(mode) { // 간략화
 //        $("#mainLangTagList").closest(".tag-input-box").find(".tag-help").show();
 //        $("#mainLangTagList").closest(".tag-input-box").removeClass("is-readonly");
 //    } else {
-//        $title.text("수정");
+//        $title.text("수정"); // edit
 //        $inputs.prop("disabled", false);
 //        $(".btn-save").show();
 //        $(".tab-article").show();
@@ -555,19 +583,12 @@ function setModalMode(mode) { // 간략화
 //    }
 //}
 
+// ============================================================================== //
+
 // 모달 닫히면 영역 사라지게 하기
 function closeUserViewModal() {
     document.getElementById("view-user-area").style.display = "none";
     clearUserForm()
-}
-
-function initTab(tabId) {
-    switch(tabId) {
-        case "tab1": initTab1(); break;
-        case "tab2": initTab2(); break;
-        case "tab3": initTab3(); break;
-        case "tab4": initTab4(); break;
-    }
 }
 
 // 탭별 버튼 표시
@@ -594,23 +615,7 @@ function refreshTabLayout(tabId) {
     }, 0);
 }
 
-// 계약단가(,),(테이블표)
-function amountFormatter(cell) {
-    if (cell.getValue() === null || cell.getValue() === undefined || cell.getValue() === "") {
-        return "";
-    }
-    return formatNumber(cell.getValue());
-}
-
-// 팝업에서도 마찬가지로 (,) 표시
-function formatAmount(value) {
-    if (value === null || value === undefined || value === "") return "";
-
-    return value
-        .toString()
-        .replace(/[^0-9]/g, "")
-        .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-}
+// ============================================================================== //
 
 // 데이터 유효성 검사
 function validateUserForm() {
@@ -620,25 +625,46 @@ function validateUserForm() {
     const brdt = $("#brdt").val().trim();
     const tel = $("#tel").val().trim();
     const email = $("#email").val().trim();
+    const hopeRaw = $("#hope_rate_amt").val().replace(/,/g, "");
+    const expYr = $("#exp_yr").val().trim();
 
+    // 최대 입력 가능 숫자
+    const MAX_AMT = 999999999;
+
+    // 개발자 이름
     if (!dev_nm) {
         alert("성명을 입력하세요.");
         $("#dev_nm").focus();
         return false;
     }
 
+    // 생년월일
     if (!brdt) {
         alert("생년월일을 입력하세요.");
         $("#brdt").focus();
         return false;
     }
 
+    // 전화번호
     if (!tel) {
         alert("연락처를 입력하세요.");
         $("#tel").focus();
         return false;
     }
 
+    // 경력연차
+    if (!expYr) {
+        alert("경력연차를 입력하세요.");
+        $("#exp_yr").focus();
+        return false;
+    }
+    if (!/^\d+(\.\d+)?$/.test(expYr)) {
+        alert("경력연차는 숫자(소수점 포함)만 입력 가능합니다.");
+        $("#exp_yr").focus();
+        return false;
+    }
+
+    // 이메일
     if (!email) {
         alert("이메일을 입력하세요.");
         $("#email").focus();
@@ -661,8 +687,23 @@ function validateUserForm() {
         $("#email").focus();
         return false;
     }
+
+    // 희망단가
+    if (!hopeRaw) {
+        alert("희망단가를 입력해주세요.");
+        $("#hope_rate_amt").focus();
+        return false;
+    }
+    if (Number(hopeRaw) > MAX_AMT) {
+        alert("희망단가는 최대 999,999,999원까지 입력 가능합니다.");
+        $("#hope_rate_amt").focus();
+        return false;
+    }
+
     return true;
 }
+
+// ============================================================================== //
 
 // 주 개발언어 태그 공통화 초기화
 function initMainLangTags() {
@@ -698,6 +739,21 @@ $("#tel").on("input", function () {
     }
 });
 
+// 경력연차 자동 변환
+$("#exp_yr").on("input", function () {
+    let val = this.value;
+
+    // 숫자와 소수점만 허용
+    val = val.replace(/[^0-9.]/g, "");
+
+    // 소수점은 하나만 허용
+    const parts = val.split(".");
+    if (parts.length > 2) {
+        val = parts[0] + "." + parts.slice(1).join("");
+    }
+    this.value = val;
+});
+
 // 희망단가는 숫자만 입력 가능
 $("#hope_rate_amt").on("input", function () {
     let input_number = this.value.replace(/[^0-9]/g, "");
@@ -722,13 +778,46 @@ function loadUserScore(devId) {
     $("#score").text("");
 
     $.ajax({
-            url: "/hr010/getScore",
-            type: "GET",
-            data: { dev_id: devId },
-            success: function(res) {
-                const data = res.res || {};
-                $("#grade").text(data.rank || "-");
-                $("#score").text(`(${data.score || 0}점)`);
-            }
-        });
+        url: "/hr010/getScore",
+        type: "GET",
+        data: { dev_id: devId },
+        success: function(res) {
+            const data = res.res || {};
+            $("#grade").text(data.rank || "-");
+            $("#score").text(`(${data.score || 0}점)`);
+        }
+    });
+}
+
+// alert 문자 가공
+function btnEditView(alertPrefix = "") {
+    if (!userTable) return null;
+    const rows = userTable.getSelectedRows();
+    if (rows.length === 0) {
+        alert(alertPrefix + "대상을 선택하세요.");
+        return null;
+    }
+    if (rows.length > 1) {
+        alert(alertPrefix + "한 명만 선택해주세요.");
+        return null;
+    }
+    return rows[0].getData();
+}
+
+// 계약단가(,),(테이블표)
+function amountFormatter(cell) {
+    if (cell.getValue() === null || cell.getValue() === undefined || cell.getValue() === "") {
+        return "";
+    }
+    return formatNumber(cell.getValue());
+}
+
+// 팝업에서도 마찬가지로 (,) 표시
+function formatAmount(value) {
+    if (value === null || value === undefined || value === "") return "";
+
+    return value
+        .toString()
+        .replace(/[^0-9]/g, "")
+        .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }

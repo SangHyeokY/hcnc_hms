@@ -19,13 +19,13 @@
                         <tbody>
                         <tr>
                             <th>소속사</th>
-                            <td colspan="3"><input type="text" id="org_nm" class="wp100" disabled></td>
+                            <td colspan="3"><input type="text" id="org_nm" class="wp100" ></td>
                         </tr>
                         <tr>
                             <th>계약 시작일</th>
-                            <td><input type="date" id="st_dt" class="wp100" disabled></td>
+                            <td><input type="date" id="st_dt" class="wp100" ></td>
                             <th>계약 종료일</th>
-                            <td><input type="date" id="ed_dt" class="wp100" disabled></td>
+                            <td><input type="date" id="ed_dt" class="wp100" ></td>
                         </tr>
                         <tr>
                             <th>사업자 유형</th>
@@ -38,7 +38,7 @@
                                 </select>
                             </td>
                             <th>계약 금액</th>
-                            <td><input type="text" id="amt" class="wp100" disabled></td>
+                            <td><input type="text" id="amt" class="wp100" ></td>
                         </tr>
                         <tr>
                             <th>비고</th>
@@ -54,78 +54,79 @@
         </div>
     </div>
 
+
     <!-- tab1 등록/수정 모달 -->
-    <div class="modal-wrap" id="upsert-user-hrm" style="display:none">
-        <div class="modal-container-detail" style="min-width: 50vw;">
-            <div class="header">
-                <h4>소속 및 계약정보 <span id="hr011-type">등록</span></h4>
-                <div class="btn-area">
-                    <button class="close-btn" onclick="closeUpsertUserModal()"><img src="../icons/icon-close.png" alt=""/></button>
-                </div>
-            </div>
+<!--    <div class="modal-wrap" id="upsert-user-hrm" style="display:none">-->
+<!--        <div class="modal-container-detail" style="min-width: 50vw;">-->
+<!--            <div class="header">-->
+<!--                <h4>소속 및 계약정보 <span id="hr011-type">등록</span></h4>-->
+<!--                <div class="btn-area">-->
+<!--                    <button class="close-btn" onclick="closeUpsertUserModal()"><img src="../icons/icon-close.png" alt=""/></button>-->
+<!--                </div>-->
+<!--            </div>-->
 
-            <div class="modal-content">
-                <div class="top-article">
-                    <div class="modal-human-area fl-sa">
-                        <input type="hidden" id="ctrt_id_input">
-                        <input type="hidden" id="dev_id_input">
-                        <div class="table-area" style="width: 100%;">
-                            <table >
-                                <colgroup>
-                                    <col style="width: 20%;">
-                                    <col style="width: 30%;">
-                                    <col style="width: 20%;">
-                                    <col style="width: 30%;">
-                                </colgroup>
-                                <tbody>
-                                <tr>
-                                    <th>소속사</th>
-                                    <td colspan="3"><input type="text" id="org_nm_input" class="wp100"></td>
+<!--            <div class="modal-content">-->
+<!--                <div class="top-article">-->
+<!--                    <div class="modal-human-area fl-sa">-->
+<!--                        <input type="hidden" id="ctrt_id_input">-->
+<!--                        <input type="hidden" id="dev_id_input">-->
+<!--                        <div class="table-area" style="width: 100%;">-->
+<!--                            <table >-->
+<!--                                <colgroup>-->
+<!--                                    <col style="width: 20%;">-->
+<!--                                    <col style="width: 30%;">-->
+<!--                                    <col style="width: 20%;">-->
+<!--                                    <col style="width: 30%;">-->
+<!--                                </colgroup>-->
+<!--                                <tbody>-->
+<!--                                <tr>-->
+<!--                                    <th>소속사</th>-->
+<!--                                    <td colspan="3"><input type="text" id="org_nm_input" class="wp100"></td>-->
 
-                                </tr>
-                                <tr>
-                                    <th>계약 시작일</th>
-                                    <td><input type="date" id="st_dt_input" class="wp100"></td>
-                                    <th>계약 종료일</th>
-                                    <td><input type="date" id="ed_dt_input" class="wp100"></td>
-                                </tr>
-                                <tr>
-                                    <th>사업자 유형</th>
-                                    <td>
-                                        <select id="biz_typ_input" class="wp100">
-                                            <option value="">개인/개인사업자/법인</option>
-                                            <option value="01">개인</option>
-                                            <option value="02">개인사업자</option>
-                                            <option value="03">법인</option>
-                                        </select>
-                                    </td>
-                                    <th>계약 금액</th>
-                                    <td><input type="text" id="amt_input" class="wp100"></td>
-                                </tr>
-                                <tr>
-                                    <th>비고</th>
-                                    <td colspan="3">
-                                        <textarea id="remark_input" rows="7"></textarea>
-                                    </td>
-                                </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-btn fl-fe">
-                <ul>
-                    <li>
-                        <button class="btn btn-close" onclick="closeUpsertUserModal()">닫기</button>
-                    </li>
-                    <li>
-                        <button class="btn btn-save" id="btn-tab1-save">저장</button>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </div>
+<!--                                </tr>-->
+<!--                                <tr>-->
+<!--                                    <th>계약 시작일</th>-->
+<!--                                    <td><input type="date" id="st_dt_input" class="wp100"></td>-->
+<!--                                    <th>계약 종료일</th>-->
+<!--                                    <td><input type="date" id="ed_dt_input" class="wp100"></td>-->
+<!--                                </tr>-->
+<!--                                <tr>-->
+<!--                                    <th>사업자 유형</th>-->
+<!--                                    <td>-->
+<!--                                        <select id="biz_typ_input" class="wp100">-->
+<!--                                            <option value="">개인/개인사업자/법인</option>-->
+<!--                                            <option value="01">개인</option>-->
+<!--                                            <option value="02">개인사업자</option>-->
+<!--                                            <option value="03">법인</option>-->
+<!--                                        </select>-->
+<!--                                    </td>-->
+<!--                                    <th>계약 금액</th>-->
+<!--                                    <td><input type="text" id="amt_input" class="wp100"></td>-->
+<!--                                </tr>-->
+<!--                                <tr>-->
+<!--                                    <th>비고</th>-->
+<!--                                    <td colspan="3">-->
+<!--                                        <textarea id="remark_input" rows="7"></textarea>-->
+<!--                                    </td>-->
+<!--                                </tr>-->
+<!--                                </tbody>-->
+<!--                            </table>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--            <div class="modal-btn fl-fe">-->
+<!--                <ul>-->
+<!--                    <li>-->
+<!--                        <button class="btn btn-close" onclick="closeUpsertUserModal()">닫기</button>-->
+<!--                    </li>-->
+<!--                    <li>-->
+<!--                        <button class="btn btn-save" id="btn-tab1-save">저장</button>-->
+<!--                    </li>-->
+<!--                </ul>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
 </th:block>
 
 </html>
