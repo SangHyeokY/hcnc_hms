@@ -267,7 +267,7 @@ function saveHr013Row() {
             if (response.success) {
                 closeHr013Modal();
                 loadHr013TableData();
-                alert("저장되었습니다.");
+                // alert("저장되었습니다.");
             } else {
                 alert("저장에 실패했습니다.");
             }
