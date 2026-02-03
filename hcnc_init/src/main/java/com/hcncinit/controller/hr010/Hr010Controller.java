@@ -196,7 +196,7 @@ public class Hr010Controller {
         return mv;
     }
 
-    // tab2-2 - 숙련도 저장
+    // tab2-1 - 숙련도 저장
     @PostMapping("/tab2_1_save")
     @ResponseBody
     public ResponseEntity<?> upsert_tab2_1(@RequestBody List<Map<String, Object>> saveList) {

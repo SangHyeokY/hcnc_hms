@@ -18,9 +18,6 @@ window.initTab2 = function() {
     $("#TABLE_HR012_A").show();
     $("#TABLE_HR012_B").hide();
 
-    // 등록 버튼
-    $(".btn-tab2-new").off("click").on("click", saveHr012TableB);
-
     // 탭 클릭 이벤트
     $(".tab-sub-btn").off("click").on("click", function() {
         const tabId = $(this).data("tab");
@@ -265,6 +262,7 @@ function saveHr012TableData() {
         data: JSON.stringify(param),
         success: () => {
             loadHr012TableDataA();
+            saveHr012TableB();
         },
         error: () => alert("저장 실패")
     });
