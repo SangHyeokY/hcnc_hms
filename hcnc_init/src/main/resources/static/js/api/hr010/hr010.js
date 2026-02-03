@@ -500,6 +500,7 @@ function setModalMode(mode) {
         $title.text("등록");
         $inputs.prop("disabled", false);
         $(".btn-save").show();
+        $(".tab-article").hide();
         $("#main_lang_input").show();
         $("#mainLangTagList").closest(".tag-input-box").find(".tag-help").show();
         $("#mainLangTagList").closest(".tag-input-box").removeClass("is-readonly");
@@ -507,6 +508,7 @@ function setModalMode(mode) {
         $title.text("수정");
         $inputs.prop("disabled", false);
         $(".btn-save").show();
+        $(".tab-article").show();
         $("#main_lang_input").show();
         $("#mainLangTagList").closest(".tag-input-box").find(".tag-help").show();
         $("#mainLangTagList").closest(".tag-input-box").removeClass("is-readonly");
