@@ -41,9 +41,6 @@ window.initTab2 = function() {
 function buildHr012TableA() {
     if (window.hr012TableA) return;
 
-    // const categories = ["Backend", "DB", "DevOps", "ERP/MES", "Frontend", "Infra", "Mobile", "기타"];
-    // const initData = categories.map(cat => ({ cd_nm: cat, skl_id_kst: "" }));
-
     window.hr012TableA = new Tabulator("#TABLE_HR012_A", {
         layout: "fitColumns",
         placeholder: "데이터 없음",
@@ -66,16 +63,19 @@ function loadHr012TableDataA() {
         type: "GET",
         data: { dev_id: devId },
         success: function(response) {
-            console.log("데이터 받아왔니? tab1")
-            console.log(response);
+            // console.log(response);
             const dataArray = Array.isArray(response) ? response : response.res;
 
             if (!Array.isArray(dataArray)) {
                 console.error("Tab2A 데이터 형식이 배열이 아닙니다.", response);
                 return;
             }
+               const tableData = dataArray.map(item => ({
+                      cd_nm: item.cd_nm,
+                      skl_id_kst: item.skl_id_lst || ""
+                  }));
 
-            window.hr012TableA.setData(dataArray);
+                  window.hr012TableA.setData(tableData);
         },
         error: function() {
             alert("Tab2A 데이터 로드 실패");
@@ -87,7 +87,8 @@ function loadHr012TableDataA() {
 
 function radioFormatter(cell) {
     const checked = cell.getValue() ? "checked" : "";
-    return `<input type="radio" class="circle-radio" ${checked}>`;
+    const disabled = currentMode === "view" ? "disabled" : "";
+    return `<input type="radio" class="circle-radio" ${checked} ${disabled}>`;
 }
 
 function buildHr012TableB() {
@@ -105,6 +106,8 @@ function buildHr012TableB() {
                 hozAlign: "center",
                 formatter: radioFormatter,
                 cellClick: function(e, cell){
+                    if (currentMode === "view") return;
+
                     const row = cell.getRow();
                     const rowData = row.getData();
                     const currentField = cell.getField();
@@ -192,12 +195,3 @@ function saveHr012TableB(){
         }
     });
 }
-
-var teamSkillTag = createTagInput({
-    inputSelector: "#team_skill_input",
-    listSelector: "#teamSkillTagList",
-    hiddenSelector: "#team_skill_codes",
-    datalistSelector: "#team_skill_datalist",
-    getValue: function (item) { return item.cd; },
-    getLabel: function (item) { return item.cd_nm; }
-});

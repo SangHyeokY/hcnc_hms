@@ -292,6 +292,8 @@ button.btn.btn-add-skill {
 .hr014-page #TABLE_HR014_A .tabulator-row .tabulator-cell {
   font-size: 14px;
 }
+.hr014-page #TABLE_HR014_A .tabulator-row .tabulator-cell input[type="radio"]:before{top:6px;}
+.hr014-page #TABLE_HR014_A .tabulator-row .tabulator-cell input[type="radio"]:after{top:11px;}
 .hr014-page #TABLE_HR014_A .tabulator-row .tabulator-cell:first-child {
   font-size: 14px;
   font-weight: 700;
