@@ -45,8 +45,10 @@ function buildHr012TableA() {
         layout: "fitColumns",
         placeholder: "데이터 없음",
         columns: [
+            { title: "코드", field: "cd", visible: false },
             { title: "구분", field: "cd_nm", hozAlign: "left", width: 400},
-            { title: "상세", field: "skl_id_kst", hozAlign: "left" }
+            { title: "상세", field: "skl_id_lst", hozAlign: "left", editor: tagEditor, formatter: tagFormatter },
+            { title: "key", field: "key", visible: false }
         ],
         data: []
     });
@@ -193,6 +195,3 @@ function saveHr012TableB(){
         }
     });
 }
-
-
-
