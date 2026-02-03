@@ -589,6 +589,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
   margin-left: 0;
 }
 
+
 .modal-container-detail {display: flex; flex-direction: column; max-height: 90vh; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); min-width: 80vw; max-width: calc(100% - 32px); background: #fff; border-radius: 6px; padding: 20px; box-sizing: border-box;}
 .modal-container-detail .close-btn{background:none; border:none; }
 .modal-container-detail .close-btn img{width:16px; }
@@ -647,6 +648,30 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .none_editable_text {
     color : #61646D;
 }
+
+
+#TABLE_HR012_A {
+    border-radius: 0px !important;
+}
+
+#TABLE_HR012_A > .tabulator-header {
+    display: none;
+}
+
+#TABLE_HR012_A .tabulator-table > .tabulator-row > .tabulator-cell:nth-child(2) {
+    background-color: #F1F4F9 !important;
+    border: solid 1px #DEE2E7 !important;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+#TABLE_HR012_A .tabulator-table > .tabulator-row > .tabulator-cell {
+    min-height: 48px;
+    align-content: center;
+}
+
+
+.tab2-content > .content-body{ width: 0px; flex:1;}
 
 /* 탭 영역  */
 .tab1-content,
