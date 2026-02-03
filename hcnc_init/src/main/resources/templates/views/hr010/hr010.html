@@ -103,9 +103,10 @@
                                         <td>
                                             <div class="tag-input">
                                                 <div class="tag-input-box">
-                                                <div class="tag-help">기술 입력 후 Enter</div>
-                                                <ul class="tag-list" id="mainLangTagList"></ul>
-                                                <input type="text" class="wp100" id="main_lang_input" list="main_lang_datalist" placeholder="기술 입력/선택">
+                                                    <input type="text" class="wp100" id="main_lang_input" list="main_lang_datalist" placeholder="기술 입력/선택" />
+                                                    <ul class="tag-list" id="mainLangTagList"></ul>
+                                                    <div class="tag-help">기술 입력 후 Enter</div>
+                                                </div>
                                             </div>
                                             <div class="tag-select-row"></div>
                                                 <datalist id="main_lang_datalist"></datalist>
@@ -133,8 +134,8 @@
                                         </td>
                                         <th>등급</th>
                                         <td>
-                                            <span class="fw600" id="grade" style="padding-left:10px;">계산중...</span>
-                                            <span class="fw600" id="score" style="padding-right:10px;"></span>
+                                            <div class="fl-ct wp100"><span class="fw600" id="grade" style="padding-left:10px;">계산중...</span>
+                                                <span class="fw600" id="score" style="padding-right:10px;"></span></div>
                                         </td>
                                         <th>근무 가능형태</th>
                                         <td>
@@ -178,19 +179,20 @@
                         <span class="tab-btn fs13" data-tab="tab3">프로젝트</span>
                         <span class="tab-btn fs13" data-tab="tab4">평가 및 리스크</span>
                     </div>
+
                     <div class="tab-action-bar">
                         <div class="tab-actions" data-tab="tab1">
-                            <button type="button" class="btn btn-tab1-new">등록</button>
+                            <button type="button" class="btn btn-tab1-new btn-save">등록</button>
                             <button type="button" class="btn btn-tab1-edit">수정</button>
                             <button type="button" class="btn btn-tab1-delete">삭제</button>
                         </div>
                         <div class="tab-actions" data-tab="tab2" style="margin-bottom: -20px;">
-                            <button type="button" class="btn btn-tab2-new">등록</button>
+                            <button type="button" class="btn btn-tab2-new btn-save">등록</button>
                             <button type="button" class="btn btn-tab2-edit">수정</button>
                             <button type="button" class="btn btn-tab2-delete">삭제</button>
                         </div>
                         <div class="tab-actions" data-tab="tab3">
-                            <button type="button" class="btn btn-tab3-new">등록</button>
+                            <button type="button" class="btn btn-tab3-new btn-save">등록</button>
                             <button type="button" class="btn btn-tab3-edit">수정</button>
                             <button type="button" class="btn btn-tab3-delete">삭제</button>
                         </div>
@@ -211,13 +213,12 @@
                             <div th:insert="~{views/hr010/hr014 :: tab4Content}"></div>
                         </div>
                     </div>
+
+
                 </div>
             </div>
             <div class="modal-btn fl-fe">
                 <ul>
-                    <li>
-                        <button class="btn btn-close" onclick="closeUserViewModal()">닫기</button>
-                    </li>
                     <li>
                         <button class="btn btn-save btn-user-save">저장</button>
                     </li>
