@@ -175,10 +175,10 @@ public class Hr010Controller {
     public ModelAndView select_tab2 (@RequestParam("dev_id") String devId) {
         ModelAndView mv = new ModelAndView("jsonView");
         // 확인용 1
-        // System.out.println("select_tab2 호출됨, param = " + devId);
+        System.out.println("select_tab2 호출됨, 탭2-1 = " + devId);
         List<Map<String, Object>> reslist = hr012Service.select_tab2_1(devId);
         // 확인용 2
-        // System.out.println("tab2_1 조회 결과 = " + reslist);
+        System.out.println("tab2_1 조회 결과 = " + reslist);
         mv.addObject("res", reslist);
         return mv;
     }
@@ -188,10 +188,10 @@ public class Hr010Controller {
     public ModelAndView select_tab2_2 (@RequestParam("dev_id") String devId) {
         ModelAndView mv = new ModelAndView("jsonView");
         // 확인용 1
-        // System.out.println("select_tab2 호출됨, param = " + devId);
+        System.out.println("select_tab2 호출됨, 탭2-2 = " + devId);
         List<Map<String, Object>> reslist = hr012Service.select_tab2_2(devId);
         // 확인용 2
-        // System.out.println("tab2_2 조회 결과 = " + reslist);
+        System.out.println("tab2_2 조회 결과 = " + reslist);
         mv.addObject("res", reslist);
         return mv;
     }
@@ -201,7 +201,7 @@ public class Hr010Controller {
     @ResponseBody
     public ResponseEntity<?> upsert_tab2_1(@RequestBody List<Map<String, Object>> saveList) {
         try {
-            System.out.println("save_tab2 호출됨, saveList = " + saveList);
+            System.out.println("save_tab2 호출됨, 탭2-1 = " + saveList);
             hr012Service.upsert_tab2_1(saveList);
             return ResponseEntity.ok("ok");
         } catch (Exception e) {
@@ -215,7 +215,7 @@ public class Hr010Controller {
     @ResponseBody
     public ResponseEntity<?> save_tab2_2(@RequestBody List<Map<String, Object>> saveList) {
         try {
-            System.out.println("save_tab2 호출됨, saveList = " + saveList);
+            System.out.println("save_tab2 호출됨, 탭2-2 = " + saveList);
             hr012Service.save_tab2_2(saveList);
             return ResponseEntity.ok("ok");
         } catch (Exception e) {
