@@ -40,7 +40,8 @@ window.initTab4 = function() {
     }
 
     initHr014Tabs();
-     buildRiskList();
+    buildRiskList();
+    setRiskActive(riskActiveKey);   // 리스크 항목 선택
 
     $(".btn-tab4-save").off("click").on("click", function () {
         saveTab4Active();
