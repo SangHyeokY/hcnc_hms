@@ -40,7 +40,8 @@ window.initTab4 = function() {
     }
 
     initHr014Tabs();
-     buildRiskList();
+    buildRiskList();
+    setRiskActive(riskActiveKey);   // 리스크 항목 선택
 
     $(".btn-tab4-save").off("click").on("click", function () {
         saveTab4Active();
@@ -196,10 +197,13 @@ function scoreCheckboxFormatter(cell, formatterParams, onRendered) {
     return `<input type="radio" ${checked} ${disabled} />`;
 }
 
+
 function commentInputFormatter(cell, formatterParams, onRendered) {
     var value = cell.getValue();
     var safeValue = escapeHtml(value == null ? "" : String(value));
     var disabled = window.hr010ReadOnly ? "disabled" : "";
+    var placeholder = window.hr010ReadOnly ? "" : "Enter message.";
+
     onRendered(function () {
         var input = cell.getElement().querySelector(".hr014-comment-input");
         if (!input) return;
@@ -208,7 +212,7 @@ function commentInputFormatter(cell, formatterParams, onRendered) {
             cell.getRow().getData().cmt = this.value;
         };
     });
-    return `<input type="text" class="hr014-comment-input" placeholder="Enter message." value="${safeValue}" ${disabled} />`;
+    return `<input type="text" class="hr014-comment-input" placeholder="${placeholder}" value="${safeValue}" ${disabled} style="border: none"/>`;
 }
 
 function escapeHtml(value) {
@@ -347,6 +351,8 @@ function saveTableB(showAlert) {
 // 리스크 항목 리스트 렌더링
 function buildRiskList() {
     var $list = $("#HR015_RISK_LIST");
+    var placeholder = window.hr010ReadOnly ? "" : "Enter message.";
+
     if ($list.length === 0) {
         return;
     }
@@ -372,6 +378,8 @@ function buildRiskList() {
             riskState[riskActiveKey] = value;
         }
     });
+
+    $("#HR015_RISK_TEXT").prop("placeholder", placeholder);
 
     $("#HR015_REIN_CHECK").on("change", function () {
         if (window.hr010ReadOnly) {
