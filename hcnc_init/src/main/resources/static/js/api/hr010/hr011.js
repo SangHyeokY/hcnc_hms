@@ -101,7 +101,7 @@ function loadHr011TableData(devId) {
 }
 
 function saveHr011TableData() {
-    if (!validateHr011Form()) return;
+    // if (!validateHr011Form()) return; // hr010.js로 이관
 
     const param = {
         ctrtId: hr011Mode === "update" ? window.hr011Data?.ctrt_id : null,
@@ -169,12 +169,6 @@ function validateHr011Form() {
         return false;
     }
 
-    if (!bizTyp || bizTyp == null) {
-        alert("사업자 유형을 선택해주세요.");
-        $("#biz_typ").focus();
-        return false;
-    }
-
     if (!stDt) {
         alert("계약 시작일을 입력해주세요.");
         $("#st_dt").focus();
@@ -190,6 +184,12 @@ function validateHr011Form() {
     if (new Date(stDt) > new Date(edDt)) {
         alert("계약 종료일은 시작일 이후여야 합니다.");
         $("#ed_dt").focus();
+        return false;
+    }
+
+    if (!bizTyp || bizTyp == null) {
+        alert("사업자 유형을 선택해주세요.");
+        $("#biz_typ").focus();
         return false;
     }
 

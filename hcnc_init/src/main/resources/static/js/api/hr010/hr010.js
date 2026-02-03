@@ -81,18 +81,37 @@ $(document).ready(function () {
         const activeTab = $(".tab-btn.active").data("tab");
         console.log("현재 탭 :", activeTab);
 
-        // 인적사항 정보 저장
-        upsertUserBtn();
-
-        // 탭별로 저장
-        if (activeTab === "tab1") {
-            saveHr011TableData();
-        } else if (activeTab === "tab2") {
-            // Table A, B 구분 필요
-            saveHr012TableData?.();
-        } else if (activeTab === "tab3") {
-            saveHr013TableData?.();
+    // ---------- Tab 마다 추가하기 ------------ //
+        if (!validateUserForm()) {
+            console.log("인적사항 유효성 검사 실패");
+            return;
         }
+
+        if (!validateHr011Form()) {
+            console.log("Tab1 유효성 검사 실패");
+            return;
+        }
+
+        // Tab2
+
+    // ---------- Tab 마다 추가하기 ------------ //
+
+        // 인적사항 정보 저장
+        upsertUserBtn(function(success) {
+            if (!success) {
+                console.log("인적사항 저장 실패");
+                return;
+            }
+            // Tab별로 저장
+            if (activeTab === "tab1") {
+                saveHr011TableData();
+            } else if (activeTab === "tab2") {
+                saveHr012TableData?.();
+                saveHr012TableB?.();
+            } else if (activeTab === "tab3") {
+                saveHr013TableData?.();
+            }
+        });
     });
 });
 
@@ -260,13 +279,14 @@ function loadUserTableImgData(data) {
 // ============================================================================== //
 
 // 데이터 신규 등록/수정 이벤트
-function upsertUserBtn()
+function upsertUserBtn(callback)
 {
-     // 유효성 검사
      if (!validateUserForm()) {
-            return;
-        }
-    var payload = {
+         if (callback) callback(false);
+         return;
+     }
+
+     var payload = {
         dev_id: $("#dev_id").val(),
         dev_nm: $("#dev_nm").val(),
         brdt: $("#brdt").val(),
@@ -314,11 +334,14 @@ function upsertUserBtn()
                 window.saveTab4All();
             }
             alert("저장되었습니다.");
+            if (callback) callback(true);
+
             closeUserViewModal();
             loadUserTableData();
         },
         error: function () {
             alert("저장 중 오류가 발생했습니다.");
+            if (callback) callback(false);
         }
     });
 }
@@ -662,15 +685,10 @@ function validateUserForm() {
         return false;
     }
 
-    // 경력연차
-    if (!expYr) {
-        alert("경력연차를 입력하세요.");
-        $("#exp_yr").focus();
-        return false;
-    }
-    if (!/^\d+(\.\d+)?$/.test(expYr)) {
-        alert("경력연차는 숫자(소수점 포함)만 입력 가능합니다.");
-        $("#exp_yr").focus();
+    // 전화번호 (숫자만 입력)
+    if (!/^[0-9\-]+$/.test(tel)) {
+        alert("연락처 형식이 올바르지 않습니다.");
+        $("#tel").focus();
         return false;
     }
 
@@ -681,20 +699,24 @@ function validateUserForm() {
         return false;
     }
 
-    // 전화번호 (숫자만 입력)
-    if (!/^[0-9\-]+$/.test(tel)) {
-        alert("연락처 형식이 올바르지 않습니다.");
-        $("#tel").focus();
-        return false;
-    }
-
-    // 이메일
     const emailRegex =
         /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
 
     if (!emailRegex.test(email)) {
         alert("이메일 형식이 올바르지 않습니다.");
         $("#email").focus();
+        return false;
+    }
+
+    // 경력연차
+    if (!expYr) {
+        alert("경력연차를 입력하세요.");
+        $("#exp_yr").focus();
+        return false;
+    }
+    if (!/^\d+(\.\d+)?$/.test(expYr)) {
+        alert("경력연차는 숫자(소수점 포함)만 입력 가능합니다.");
+        $("#exp_yr").focus();
         return false;
     }
 
