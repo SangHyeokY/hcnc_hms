@@ -28,7 +28,7 @@
                     AND cd.use_yn = 'Y'
             WHERE 	skl.del_yn = 'N'
                 AND skl.use_yn = 'Y'
-                AND skl.dev_id = 'HCNC_F001'
+                AND skl.dev_id = #{dev_id}
         )
         SELECT 	g.cd
              ,	g.cd_nm
