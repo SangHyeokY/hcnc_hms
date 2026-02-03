@@ -1,6 +1,7 @@
 // hr013.js
 var stackTagInput = null;
 var pendingStackValue = "";
+var lastNonInprjCustNm = "";
 
 window.initTab3 = function() {
     if (!window.hr013Table) buildHr013Table();
@@ -26,6 +27,16 @@ window.initTab3 = function() {
         });
         $(".btn-tab3-delete").off("click").on("click", function () {
             deleteHr013Row();
+        });
+
+        $("#write_hr013_inprj_yn").off("change").on("change", function () {
+            applyInprjCustomerName($(this).val(), $("#write_hr013_cust_nm").val());
+        });
+
+        $("#write_hr013_cust_nm").off("input").on("input", function () {
+            if ($("#write_hr013_inprj_yn").val() !== "Y") {
+                lastNonInprjCustNm = $(this).val();
+            }
         });
 
        setComCode("write_hr013_job_cd", "job_cd", "", "cd", "cd_nm", function () {
@@ -99,6 +110,7 @@ function openHr013Modal(mode) {
 
     if (mode === "edit") {
         var rowData = getHr013SelectedRow();
+
         if (!rowData) {
             alert("수정할 행을 선택해주세요.");
             return;
@@ -153,7 +165,8 @@ function fillHr013Form(data) {
     $("#write_hr013_inprj_yn").val(data.inprj_yn || "N");
     $("#write_hr013_st_dt").val(toDateInput(data.st_dt));
     $("#write_hr013_ed_dt").val(toDateInput(data.ed_dt));
-    $("#write_hr013_cust_nm").val(data.cust_nm || "");
+    lastNonInprjCustNm = data.inprj_yn === "Y" ? "" : (data.cust_nm || "");
+    applyInprjCustomerName(data.inprj_yn, data.cust_nm);
     $("#write_hr013_prj_nm").val(data.prj_nm || "");
     $("#write_hr013_rate_amt").val(formatNumberInput(data.rate_amt));
     $("#write_hr013_job_cd").val(data.job_cd || "");
@@ -163,7 +176,9 @@ function fillHr013Form(data) {
     if (stackTagInput) {
         stackTagInput.setFromValue(pendingStackValue);
     }
-    console.log("input value : " + $("#write_hr013_st_dt").val());
+
+
+    // console.log("input value : " + $("#write_hr013_st_dt").val());
 }
 
 // 폼 초기화
@@ -172,7 +187,8 @@ function clearHr013Form() {
     $("#write_hr013_inprj_yn").val("N");
     $("#write_hr013_st_dt").val("");
     $("#write_hr013_ed_dt").val("");
-    $("#write_hr013_cust_nm").val("");
+    lastNonInprjCustNm = "";
+    applyInprjCustomerName("N", "");
     $("#write_hr013_prj_nm").val("");
     $("#write_hr013_rate_amt").val("");
     $("#write_hr013_job_cd").val("");
@@ -200,6 +216,11 @@ function saveHr013Row() {
         alloc_pct: $("#write_hr013_alloc_pct").val(),
         remark: $("#write_hr013_remark").val()
     };
+
+    if (payload.inprj_yn === "Y") {
+        payload.cust_nm = "HCNC";
+        $("#write_hr013_cust_nm").val(payload.cust_nm);
+    }
 
     if (!payload.inprj_yn) {
         alert("당사 여부를 선택해주세요.");
@@ -255,6 +276,19 @@ function saveHr013Row() {
             alert("저장 중 오류가 발생했습니다.");
         }
     });
+}
+
+// 당사 여부에 따라 고객사 자동 입력
+function applyInprjCustomerName(inprjYn, custNm) {
+    if (inprjYn === "Y") {
+        if (custNm && custNm !== "HCNC") {
+            lastNonInprjCustNm = custNm;
+        }
+        $("#write_hr013_cust_nm").val("HCNC").prop("disabled", true);
+        return;
+    }
+    var nextValue = lastNonInprjCustNm || (custNm && custNm !== "HCNC" ? custNm : "") || "";
+    $("#write_hr013_cust_nm").val(nextValue).prop("disabled", false);
 }
 
 // 삭제 버튼
