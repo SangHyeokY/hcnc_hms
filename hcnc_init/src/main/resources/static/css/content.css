@@ -496,7 +496,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .tag-list {display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; text-align: left;}
 .tag-input-box.is-readonly .tag-list{width:100%; justify-content: flex-start;}
 
-.tag-item {display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 999px; background: #e6f0ff; color: #2c5282; font-size: 13px; font-weight: 600;}
+.tag-item {display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 999px; background: #e6f0ff; color: #2c5282; font-size: 13px; font-weight: 600; height: 32px;}
 .tag-input-box.is-readonly .tag-item{background:none; color:#333; }
 .tag-select-row {display: flex; align-items: center; gap: 8px; margin-top: 6px;}
 .tag-select-row select {min-width: 140px;}
@@ -601,7 +601,8 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .modal-btn ul li {margin-right: 10px;}
 .modal-btn ul li:last-child {margin-right: 0;}
 .modal-btn .btn {padding: 8px 20px; border-radius: 8px; background-color: #fff; border: 1px solid #4880FF; color: #4880FF; font-size: 14px; font-weight: 500;}
-.modal-btn .btn.btn-save {background: #5A8DFF; border-color: #5A8DFF; color: #fff; position: absolute; bottom: 25px;}
+.modal-btn .btn.btn-save {background: #5A8DFF; border-color: #5A8DFF; color: #fff;}
+.modal-btn #btn-user-save {background: #5A8DFF; border-color: #5A8DFF; color: #fff; position: absolute; bottom: 25px;}
 .modal-wrap #view-user-area .modal-btn ul {
   flex-direction: row-reverse;
 }
@@ -682,20 +683,29 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
     display: none;
 }
 
+#TABLE_HR012_A .tabulator-table > .tabulator-row:nth-child(1) {
+    border-top: 2px solid #F0F1F3;
+}
+
+#TABLE_HR012_A .tabulator-table > .tabulator-row {
+    border-bottom: 2px solid #F0F1F3;
+}
+
 #TABLE_HR012_A .tabulator-table > .tabulator-row > .tabulator-cell:nth-child(2) {
     background-color: #F1F4F9 !important;
-    border: solid 1px #DEE2E7 !important;
-    font-size: 16px;
+    font-size: 14px;
     font-weight: bold;
 }
 
 #TABLE_HR012_A .tabulator-table > .tabulator-row > .tabulator-cell {
-    min-height: 48px;
+    min-height: 44px;
     align-content: center;
+    border: 0;
+    /*border: solid 1px #DEE2E7 !important;*/
 }
 
 
-.tab2-content > .content-body{ width: 0px; flex:1;}
+/*.tab2-content > .content-body{ width: 0px; flex:1;}*/
 
 /* 탭 영역  */
 .tab1-content,

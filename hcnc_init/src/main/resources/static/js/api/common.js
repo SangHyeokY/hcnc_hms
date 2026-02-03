@@ -313,13 +313,14 @@ function tagEditor(cell, onRendered, success, cancel) {
     ul.className = "tag-list";
     ul.id = key + "-" + cdvalue + "-tags";
 
+    const datalist = document.createElement("datalist");
+    datalist.id = key + "-" + cdvalue + "-datalist";
+
     const input = document.createElement("input");
     input.type = "text";
     input.placeholder = "태그 입력 후 Enter";
     input.id = key + "-" + cdvalue + "-input";
-
-    const datalist = document.createElement("datalist");
-    datalist.id = key + "-" + cdvalue + "-datalist";
+    input.setAttribute("list", datalist.id);
 
     const hid = document.createElement("input");
     hid.type = "hidden";
@@ -359,7 +360,6 @@ function tagEditor(cell, onRendered, success, cancel) {
         });
 
         setComCode(null, "skl_id", cell.getData().cd_nm, "cd", "cd_nm", function (res) {
-            console.log(cell);
             teamSkillTag.setOptions(res || []);
         });
     }
@@ -376,11 +376,6 @@ function tagEditor(cell, onRendered, success, cancel) {
         if (container.contains(e.relatedTarget)) {
             return;
         }
-
-        console.log(div);
-        console.log(datalist);
-        console.log(input);
-        console.log(ul);
 
         tags = [];
         $(ul.children).each(function () {
