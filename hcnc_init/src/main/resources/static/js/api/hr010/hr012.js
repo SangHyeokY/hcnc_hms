@@ -16,8 +16,8 @@ window.initTab2 = function() {
     $("#TABLE_HR012_A").show();
     $("#TABLE_HR012_B").hide();
 
-     // 등록 버튼
-     $(".btn-tab2-new").off("click").on("click", saveHr012TableB);
+    // 등록 버튼
+    $(".btn-tab2-new").off("click").on("click", saveHr012TableB);
 
     // 탭 클릭 이벤트
     $(".tab-sub-btn").off("click").on("click", function() {
@@ -70,12 +70,14 @@ function loadHr012TableDataA() {
                 console.error("Tab2A 데이터 형식이 배열이 아닙니다.", response);
                 return;
             }
-               const tableData = dataArray.map(item => ({
-                      cd_nm: item.cd_nm,
-                      skl_id_kst: item.skl_id_lst || ""
-                  }));
 
-                  window.hr012TableA.setData(tableData);
+            const tableData = dataArray.map(item => ({
+                cd: item.cd,
+                cd_nm: item.cd_nm,
+                skl_id_lst: (item.skl_id_lst !== undefined) ? JSON.parse(item.skl_id_lst) : []}
+            ));
+
+            window.hr012TableA.setData(tableData);
         },
         error: function() {
             alert("Tab2A 데이터 로드 실패");
@@ -160,6 +162,35 @@ function loadHr012TableDataB() {
     });
 }
 
+function saveHr012TableA(codes){
+    if (!window.hr012TableB) return;
+
+    const devId = window.currentDevId;
+    var userId = $.trim($("#write_user_id").val());
+
+    var saveList = codes.map(data => {
+        return {
+            dev_id: devId,
+            skl_id: data,
+            userId: userId
+        }
+    });
+
+    $.ajax({
+        url: "/hr010/tab2_1_save",
+        type: "POST",
+        contentType: "application/json; charset=utf-8",
+        data: JSON.stringify(saveList),
+        success: function(response) {
+            // alert("보유역량 저장 완료!");
+            loadHr012TableDataB();
+        },
+        error: function() {
+            alert("보유역량 저장 실패");
+        }
+    });
+}
+
 function saveHr012TableB(){
     if (!window.hr012TableB) return;
 
@@ -195,3 +226,26 @@ function saveHr012TableB(){
         }
     });
 }
+
+
+
+
+$(document).ready(function () {
+
+    $("#btn-user-save").on("click", function () {
+        console.log("hr012 >> save");
+
+        var codes = [];
+        hr012TableA.getData().forEach(row => {
+            if (row.skl_id_lst !== undefined)
+                Object.values(row.skl_id_lst).forEach(item => {
+                    if (item.code !== undefined)
+                        codes.push(item.code);
+                });
+        });
+
+        console.log("hr012 >> save >> " + codes);
+        saveHr012TableA(codes);
+    });
+
+});

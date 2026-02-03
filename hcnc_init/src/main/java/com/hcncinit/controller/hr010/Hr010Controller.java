@@ -197,6 +197,20 @@ public class Hr010Controller {
     }
 
     // tab2-2 - 숙련도 저장
+    @PostMapping("/tab2_1_save")
+    @ResponseBody
+    public ResponseEntity<?> upsert_tab2_1(@RequestBody List<Map<String, Object>> saveList) {
+        try {
+            System.out.println("save_tab2 호출됨, saveList = " + saveList);
+            hr012Service.upsert_tab2_1(saveList);
+            return ResponseEntity.ok("ok");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("error");
+        }
+    }
+
+    // tab2-2 - 숙련도 저장
     @PostMapping("/tab2_2_save")
     @ResponseBody
     public ResponseEntity<?> save_tab2_2(@RequestBody List<Map<String, Object>> saveList) {

@@ -17,6 +17,11 @@ public class Hr012Service {
     public List<Map<String, Object>> select_tab2_1(String devId) {
         return this.sqlSession.selectList("com.hcncinit.Hr012Mapper.select_tab2_1", devId);
     }
+    public void upsert_tab2_1(List<Map<String, Object>> saveList) {
+        for (Map<String, Object> row : saveList) {
+            sqlSession.update("com.hcncinit.Hr012Mapper.upsert_tab2_1", row);
+        }
+    }
 
     // tab2_2
     public List<Map<String, Object>> select_tab2_2(String devId) {

@@ -674,3 +674,8 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
     cursor: pointer;
     accent-color: #4CAF50; /* 체크 색상 */
 }
+
+
+.none_editable_text {
+    color : #61646D;
+}
