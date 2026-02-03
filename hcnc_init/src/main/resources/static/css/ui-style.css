@@ -288,7 +288,7 @@ input, select, textarea {
     border:1px solid #DEE2E7;
     padding:0 10px; 
     border-radius:4px; 
-    color:#61646d;
+    color:#333333;
     background:#fff;
 }
 input[type="text"]:read-only ,
