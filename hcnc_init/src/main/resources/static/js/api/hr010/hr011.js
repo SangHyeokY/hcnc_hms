@@ -94,7 +94,7 @@ function loadHr011TableData(devId) {
         success: (res) => {
             const data = res?.res ?? null;
             window.hr011Data = data;
-            console.log(data);
+            // console.log(data);
 
             clearHr011Form();
             setHr011ViewReadonly();
