@@ -182,7 +182,7 @@ function saveHr012TableA(codes){
         contentType: "application/json; charset=utf-8",
         data: JSON.stringify(saveList),
         success: function(response) {
-            alert("보유역량 저장 완료!");
+            // alert("보유역량 저장 완료!");
             loadHr012TableDataB();
         },
         error: function() {

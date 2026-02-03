@@ -614,3 +614,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .select2-search__field {
     display: none;
 }
+
+.none_editable_text {
+    color : #61646D;
+}

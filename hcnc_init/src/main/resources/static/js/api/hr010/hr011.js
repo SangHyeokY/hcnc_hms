@@ -21,7 +21,7 @@ function setHr011Mode(mode) {
     hr011Mode = mode;
     const isView = mode === "view";
     const isEditable = mode === "insert" || mode === "update";
-    $("#tab1-mode-text").text(
+    $("#modal-title").text(
         isView ? "상세" : mode === "insert" ? "등록" : "수정"
     );
     const $fields = $(HR011_FIELDS);
