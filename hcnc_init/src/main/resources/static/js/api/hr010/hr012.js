@@ -187,7 +187,7 @@ function saveHr012TableB(){
         contentType: "application/json; charset=utf-8",
         data: JSON.stringify(saveList),
         success: function(response) {
-            alert("숙련도 저장 완료!");
+            // alert("숙련도 저장 완료!");
             loadHr012TableDataB();
         },
         error: function() {
