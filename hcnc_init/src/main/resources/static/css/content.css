@@ -57,6 +57,7 @@
 .tabulator-placeholder {background: #fff !important;}
 .tabulator-tableHolder {background: #fff !important;}
 .tabulator .row-check {pointer-events: none;}
+
 #TABLE_HR013_A .row-check {
   pointer-events: auto;
   cursor: pointer;
@@ -269,7 +270,7 @@ button.btn.btn-add-skill {
 /*===============================================================================
   HR014 - tab layout
 ================================================================================*/
-.hr014-page .white-full {
+.tab4-content .white-full {
   border: none;
 }
 .hr014-shell {
@@ -278,13 +279,13 @@ button.btn.btn-add-skill {
   box-shadow: none;
   padding: 0;
 }
-.hr014-page {
+.tab4-content {
   overflow: visible;
 }
-.hr014-page .content-body {
+.tab4-content .content-body {
   overflow: visible;
 }
-.hr014-page .tab-action-bar {
+.tab4-content .tab-action-bar {
   position: relative;
   z-index: 2;
 }
@@ -314,20 +315,20 @@ button.btn.btn-add-skill {
   color: #111827;
   font-weight: 700;
 }
-.hr014-page #TABLE_HR014_A .tabulator-row:nth-child(2n) .tabulator-cell {
+.tab4-content #TABLE_HR014_A .tabulator-row:nth-child(2n) .tabulator-cell {
   background-color: #FFFFFF !important;
 }
-.hr014-page #TABLE_HR014_A .tabulator-row .tabulator-cell {
+.tab4-content #TABLE_HR014_A .tabulator-row .tabulator-cell {
   font-size: 14px;
 }
-.hr014-page #TABLE_HR014_A .tabulator-row .tabulator-cell input[type="radio"]:before{top:6px;}
-.hr014-page #TABLE_HR014_A .tabulator-row .tabulator-cell input[type="radio"]:after{top:11px;}
-.hr014-page #TABLE_HR014_A .tabulator-row .tabulator-cell:first-child {
+.tab4-content #TABLE_HR014_A .tabulator-row .tabulator-cell input[type="radio"]:before{top:6px;}
+.tab4-content #TABLE_HR014_A .tabulator-row .tabulator-cell input[type="radio"]:after{top:11px;}
+.tab4-content #TABLE_HR014_A .tabulator-row .tabulator-cell:first-child {
   font-size: 14px;
   font-weight: 700;
   background-color: #E2F3FF !important;
 }
-.hr014-page #TABLE_HR014_A .hr014-comment-input {
+.tab4-content #TABLE_HR014_A .hr014-comment-input {
   width:100%;
   height: 32px;
   padding: 6px 10px;
@@ -336,7 +337,7 @@ button.btn.btn-add-skill {
   border-radius: 4px;
   font-size: 12px;
 }
-.hr014-page #TABLE_HR014_A .hr014-comment-input::placeholder {
+.tab4-content #TABLE_HR014_A .hr014-comment-input::placeholder {
   color: #9aa3af;
 }
 .hr014-tab-panels {
@@ -374,8 +375,8 @@ button.btn.btn-add-skill {
   background: #f8fafc;
   border-color: #dbe3f6;
 }
-.hr014-page .tab-btn,
-.hr014-page .tab-sub-btn {
+.tab4-content .tab-btn,
+.tab4-content .tab-sub-btn {
   font-size: 16px;
 }
 .modal-wrap .tab-btn,
@@ -383,11 +384,11 @@ button.btn.btn-add-skill {
   font-size: 16px;
 }
 
-.hr014-page .tab-action-bar {
+.tab4-content .tab-action-bar {
   justify-content: flex-end;
   gap: 8px;
 }
-.hr014-page .tab-action-bar .btn {
+.tab4-content .tab-action-bar .btn {
   height: 32px;
   padding: 6px 14px;
   border-radius: 6px;
@@ -397,13 +398,13 @@ button.btn.btn-add-skill {
   font-size: 14px;
   font-weight: 600;
 }
-.hr014-page .tab-action-bar .btn.bg-primary {
+.tab4-content .tab-action-bar .btn.bg-primary {
   border-color: #3b6df4;
   background: #3b6df4;
   color: #fff;
 }
 
-.hr014-page .tab-action-bar {
+.tab4-content .tab-action-bar {
   margin-top: 6px;
   padding-top: 2px;
 }
@@ -467,9 +468,11 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 }
 .tag-input-box:focus-within {border-color: #8bb7ff; box-shadow: 0 0 0 3px rgba(139, 183, 255, 0.25);}
 .tag-input-box input {border: none; outline: none; background: transparent; min-width: 140px; padding: 4px 6px; font-size: 14px; color: #2f3542;}
-.tag-list {display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none;}
-.tag-input-box.is-readonly .tag-list{width:100%; justify-content:center;}
-.tag-item {display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 999px; background: #e6f0ff; color: #2c5282; font-size: 13px; font-weight: 600; height: 30px;}
+
+.tag-list {display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; text-align: left;}
+.tag-input-box.is-readonly .tag-list{width:100%; justify-content: flex-start;}
+
+.tag-item {display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 999px; background: #e6f0ff; color: #2c5282; font-size: 13px; font-weight: 600;}
 .tag-input-box.is-readonly .tag-item{background:none; color:#333; }
 .tag-select-row {display: flex; align-items: center; gap: 8px; margin-top: 6px;}
 .tag-select-row select {min-width: 140px;}
@@ -629,32 +632,11 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
     border-bottom:4px solid #333;
 }
 
-#TABLE_HR011_A tr td input:read-only,
-#TABLE_HR011_A tr td select:disable,
-#TABLE_HR010_B tr td input:read-only ,
-#TABLE_HR010_B tr td select:disabled {
-    background:#fff;
-    border:none;
-    color:#333;
-}
-
 .tab2-content{gap:16px;}
 
 
 .tab-area .tab-content .content-body{height: 320px; overflow-y: auto;}
 
-
-.skill-tag {
-    display: inline-block;
-    padding: 3px 8px;
-    margin: 2px;
-    font-size: 12px;
-    border-radius: 12px;
-    background: #eef3ff;
-    color: #2f5bea;
-    border: 1px solid #cdd9ff;
-    white-space: nowrap;
-}
 .tab-content {  position: relative;  height: 260px;   overflow-y: auto;}
 
 .mw0 {  min-width: 0px !important;}
@@ -662,16 +644,6 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .select2-search__field {
     display: none;
 }
-
-.circle-checkbox {
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    border: 2px solid #999;
-    cursor: pointer;
-    accent-color: #4CAF50; /* 체크 색상 */
-}
-
 
 .none_editable_text {
     color : #61646D;
@@ -700,3 +672,21 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 
 
 .tab2-content > .content-body{ width: 0px; flex:1;}
+
+/* 탭 영역  */
+.tab1-content,
+.tab2-content,
+.tab3-content,
+.tab4-content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.tab1-content .content-body,
+.tab2-content .content-body,
+.tab3-content .content-body,
+.tab4-content .content-body {
+    flex: 1;
+    overflow: auto;
+}
