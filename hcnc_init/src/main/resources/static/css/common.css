@@ -56,6 +56,7 @@ a.disable {background-color:#bababa !important; pointer-events: none;/*이벤트
 .cb {clear:both !important; font-size:0px !important;}
 
 /* Flex */
+.flex{display:flex;}
 .fl-fs {display:flex; justify-content: flex-start !important;}
 .fl-fe {display:flex; justify-content: flex-end;}
 .fl-sa {display:flex; justify-content: space-around;}
