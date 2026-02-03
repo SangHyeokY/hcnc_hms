@@ -299,6 +299,7 @@ button.btn.btn-add-skill {
   min-width: 90px;
   border: none;
 }
+.hr012-tab-btn,
 .hr014-tab-btn {
   border: none;
   background: transparent;
@@ -311,6 +312,7 @@ button.btn.btn-add-skill {
   font-weight: 500;
   position: relative;
 }
+.hr012-tab-btn.active,
 .hr014-tab-btn.active {
   color: #111827;
   font-weight: 700;
@@ -375,6 +377,8 @@ button.btn.btn-add-skill {
   background: #f8fafc;
   border-color: #dbe3f6;
 }
+.tab2-content .tab-btn,
+.tab2-content .tab-sub-btn,
 .tab4-content .tab-btn,
 .tab4-content .tab-sub-btn {
   font-size: 16px;
@@ -384,10 +388,12 @@ button.btn.btn-add-skill {
   font-size: 16px;
 }
 
+.tab2-content .tab-action-bar,
 .tab4-content .tab-action-bar {
   justify-content: flex-end;
   gap: 8px;
 }
+.tab2-content .tab-action-bar .btn,
 .tab4-content .tab-action-bar .btn {
   height: 32px;
   padding: 6px 14px;
@@ -398,12 +404,14 @@ button.btn.btn-add-skill {
   font-size: 14px;
   font-weight: 600;
 }
+.tab2-content .tab-action-bar .btn.bg-primary,
 .tab4-content .tab-action-bar .btn.bg-primary {
   border-color: #3b6df4;
   background: #3b6df4;
   color: #fff;
 }
 
+.tab2-content .tab-action-bar,
 .tab4-content .tab-action-bar {
   margin-top: 6px;
   padding-top: 2px;

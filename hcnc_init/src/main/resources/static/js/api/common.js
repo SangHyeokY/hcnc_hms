@@ -318,7 +318,7 @@ function tagEditor(cell, onRendered, success, cancel) {
 
     const input = document.createElement("input");
     input.type = "text";
-    input.placeholder = "태그 입력 후 Enter";
+    input.placeholder = "기술 입력/선택 후 Enter";
     input.id = key + "-" + cdvalue + "-input";
     input.setAttribute("list", datalist.id);
 
