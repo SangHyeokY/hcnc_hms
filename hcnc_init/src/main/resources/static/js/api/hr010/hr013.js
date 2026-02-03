@@ -708,8 +708,38 @@ function stackTagEditor(cell, onRendered, success, cancel) {
     var rowEl = rowObj ? rowObj.getElement() : null;
     var tagInput = null;
     var closed = false;
-    var suppressBlurUntil = 0;
     var docListenerBound = false;
+    var docMouseDownHandler = null;
+
+    function closeEditor() {
+        if (closed) {
+            return;
+        }
+        closed = true;
+        if (tagInput && input && input.value) {
+            tagInput.addByLabel(input.value);
+            input.value = "";
+        }
+        var hiddenEl = document.getElementById(uid + "_hidden");
+        var value = hiddenEl ? hiddenEl.value : "";
+        var row = cell && typeof cell.getRow === "function" ? cell.getRow() : null;
+        if (row) {
+            row.update({
+                stack_txt: value,
+                stack_txt_nm: getSkillLabelList(value)
+            });
+        }
+        setEditingState(false);
+        success(value);
+        if (rowObj && typeof rowObj.normalizeHeight === "function") {
+            rowObj.normalizeHeight();
+        }
+        if (docListenerBound && docMouseDownHandler) {
+            document.removeEventListener("mousedown", docMouseDownHandler, true);
+            docListenerBound = false;
+            docMouseDownHandler = null;
+        }
+    }
 
     function setEditingState(isEditing) {
         if (!rowEl) {
@@ -787,6 +817,8 @@ function stackTagEditor(cell, onRendered, success, cancel) {
                 e.preventDefault();
                 e.stopPropagation();
                 commitByInput(input.value);
+                // After adding the last tag, close and save the editor.
+                closeEditor();
             }
             if (e.key === "Escape") {
                 setEditingState(false);
@@ -796,52 +828,6 @@ function stackTagEditor(cell, onRendered, success, cancel) {
                 cancel();
             }
         });
-        input.addEventListener("focus", function () {
-            setEditingState(true);
-            if (rowObj && typeof rowObj.normalizeHeight === "function") {
-                rowObj.normalizeHeight();
-            }
-        });
-        input.addEventListener("blur", function () {
-            setTimeout(function () {
-                if (Date.now() < suppressBlurUntil) {
-                    input.focus();
-                }
-            }, 0);
-        });
-        wrap.addEventListener("mousedown", function () {
-            suppressBlurUntil = Date.now() + 150;
-        });
-        if (!docListenerBound) {
-            docListenerBound = true;
-            document.addEventListener("mousedown", function (e) {
-                if (closed) {
-                    return;
-                }
-                if (wrap.contains(e.target)) {
-                    return;
-                }
-                closed = true;
-                commitByInput(input.value);
-                var hiddenEl = document.getElementById(uid + "_hidden");
-                var value = hiddenEl ? hiddenEl.value : "";
-                if (!value) {
-                    value = normalizeTagValue(cell.getValue());
-                }
-                var row = cell && typeof cell.getRow === "function" ? cell.getRow() : null;
-                if (row) {
-                    row.update({
-                        stack_txt: value,
-                        stack_txt_nm: getSkillLabelList(value)
-                    });
-                }
-                setEditingState(false);
-                success(value);
-                if (rowObj && typeof rowObj.normalizeHeight === "function") {
-                    rowObj.normalizeHeight();
-                }
-            }, true);
-        }
         input.focus();
     });
 
