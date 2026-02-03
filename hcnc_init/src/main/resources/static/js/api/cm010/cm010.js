@@ -19,17 +19,17 @@ $(document).ready(function () {
         }
     });
 
-    $(".btn-new").on("click", function () {
+    $(".btn-main-add").on("click", function () {
         selectCommonCodesForUser();
 
         openUserWriteModal("insert");
     });
 
-    $(".btn-edit").on("click", function () {
+    $(".btn-main-edit").on("click", function () {
         openUserWriteModal("update");
     });
 
-    $(".btn-delete").on("click", function () {
+    $(".btn-main-del").on("click", function () {
         deleteUserRows();
     });
 
@@ -373,9 +373,9 @@ function openUserViewModal(rowData) {
     $("#view_user_nm").text(rowData.user_nm || "");
     $("#view_email").text(rowData.email || "");
     $("#view_tel").text(rowData.tel || "");
-    $("#view_role_cd").text(rowData.role_cd || "");
-    $("#view_job_cd").text(rowData.job_cd || "");
-    $("#view_dept_cd").text(rowData.dept_cd || "");
+    $("#view_role_cd").text(rowData.role_nm || "");
+    $("#view_job_cd").text(rowData.job_nm || "");
+    $("#view_dept_cd").text(rowData.dept_nm || "");
     $("#view_use_yn").text(rowData.use_yn || "Y");
     $("#view_lock_yn").text(rowData.lock_yn === "Y" ? "N" : "Y" || "");
     $("#view_remark").text(rowData.remark || "");

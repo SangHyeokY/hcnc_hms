@@ -40,10 +40,7 @@ function openHr011Modal(mode) {
           clearHr011ModalForm();
           setHr011ModalEditable(true);
           if (window.currentDevId) {
-                 $("#dev_id_input").val(window.currentDevId);
-             } else {
-                 alert("세션이 만료되었습니다.");
-                 return;
+             $("#dev_id_input").val(window.currentDevId);
           }
     }
     $("#upsert-user-hrm").show();
