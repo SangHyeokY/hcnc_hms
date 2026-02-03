@@ -88,6 +88,7 @@ $(document).ready(function () {
         if (activeTab === "tab1") {
             saveHr011TableData();
         } else if (activeTab === "tab2") {
+            // Table A, B 구분 필요
             saveHr012TableData?.();
         } else if (activeTab === "tab3") {
             saveHr013TableData?.();

@@ -439,8 +439,10 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 }
 .tag-input-box:focus-within {border-color: #8bb7ff; box-shadow: 0 0 0 3px rgba(139, 183, 255, 0.25);}
 .tag-input-box input {border: none; outline: none; background: transparent; min-width: 140px; padding: 4px 6px; font-size: 14px; color: #2f3542;}
-.tag-list {display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none;}
-.tag-input-box.is-readonly .tag-list{width:100%; justify-content:center;}
+
+.tag-list {display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; text-align: left;}
+.tag-input-box.is-readonly .tag-list{width:100%; justify-content: flex-start;}
+
 .tag-item {display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 999px; background: #e6f0ff; color: #2c5282; font-size: 13px; font-weight: 600;}
 .tag-input-box.is-readonly .tag-item{background:none; color:#333; }
 .tag-select-row {display: flex; align-items: center; gap: 8px; margin-top: 6px;}
@@ -558,7 +560,6 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
   margin-left: 0;
 }
 
-
 .modal-container-detail {display: flex; flex-direction: column; max-height: 90vh; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); min-width: 80vw; max-width: calc(100% - 32px); background: #fff; border-radius: 6px; padding: 20px; box-sizing: border-box;}
 .modal-container-detail .close-btn{background:none; border:none; }
 .modal-container-detail .close-btn img{width:16px; }
@@ -601,48 +602,15 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
     border-bottom:4px solid #333;
 }
 
-#TABLE_HR011_A tr td input:read-only,
-#TABLE_HR011_A tr td select:disable,
-#TABLE_HR010_B tr td input:read-only ,
-#TABLE_HR010_B tr td select:disabled {
-    background:#fff;
-    border:none;
-    color:#333;
-}
-
 .tab2-content{gap:16px;}
 
 
 .tab-area .tab-content .content-body{height: 320px; overflow-y: auto;}
 
-
-.skill-tag {
-    display: inline-block;
-    padding: 3px 8px;
-    margin: 2px;
-    font-size: 12px;
-    border-radius: 12px;
-    background: #eef3ff;
-    color: #2f5bea;
-    border: 1px solid #cdd9ff;
-    white-space: nowrap;
-}
 .tab-content {  position: relative;  height: 260px;   overflow-y: auto;}
 
 .mw0 {  min-width: 0px !important;}
 
 .select2-search__field {
     display: none;
-}
-
-
-
-
-.circle-checkbox {
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    border: 2px solid #999;
-    cursor: pointer;
-    accent-color: #4CAF50; /* 체크 색상 */
 }
