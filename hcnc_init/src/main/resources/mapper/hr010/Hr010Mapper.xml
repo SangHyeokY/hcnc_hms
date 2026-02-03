@@ -8,20 +8,21 @@
     <!-- 인력관리 > 기본 인적사항 (임시/검색x) -->
     <select id="select_hr010" parameterType="map" resultType="map">
         SELECT dev_id
-        , dev_nm -- 성명
-        , DATE_FORMAT(brdt, '%Y-%m-%d') AS brdt -- 생년월일
-        , tel -- 연락처
-        , email -- 이메일
-        , region -- 거주지역
-        , main_lang -- 주 개발언어 코드
-        , fn_get_cm_lst('skl_id', main_lang) AS main_lang_nm -- 주 개발언어 라벨
-        , exp_yr -- 경력연차
-        , edu_last -- 최종학력
-        , cert_txt -- 보유 자격증
-        , work_md -- 근무형태
-        , DATE_FORMAT(avail_dt, '%Y-%m-%d') AS avail_dt -- 투입가능시점
-        , ctrt_typ -- 계약형태
-        , hope_rate_amt -- 단가
+            , dev_nm -- 성명
+            , DATE_FORMAT(brdt, '%Y-%m-%d') AS brdt -- 생년월일
+            , tel -- 연락처
+            , email -- 이메일
+            , region -- 거주지역
+            , main_lang -- 주 개발언어 코드
+            , fn_get_cm_lst('skl_id', main_lang) AS main_lang_nm -- 주 개발언어 라벨
+            , exp_yr -- 경력연차
+            , edu_last -- 최종학력
+            , cert_txt -- 보유 자격증
+            , work_md -- 근무형태
+            , DATE_FORMAT(avail_dt, '%Y-%m-%d') AS avail_dt -- 투입가능시점
+            , ctrt_typ -- 계약형태
+            , hope_rate_amt -- 단가
+            , DATE_FORMAT(crt_ts, '%Y-%m-%d') AS crt_ts -- 등록일자
         FROM tb_dev_info
         WHERE del_yn='N'
         AND use_yn='Y'

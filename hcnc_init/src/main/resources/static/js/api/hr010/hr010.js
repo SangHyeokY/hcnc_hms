@@ -168,6 +168,7 @@ function buildUserTable() {
                 download: false
             },
             { title: "dev_id", field: "dev_id", visible: false },
+            { title: "crt_ts", field: "crt_ts", visible: false},
             { title: "성명", field: "dev_nm", hozAlign: "center", headerSort: true , widthgrow:1},
             { title: "생년월일", field: "brdt", headerSort: true, widthgrow: 1},
             { title: "연락처", field: "tel", widthgrow: 3},
@@ -413,6 +414,7 @@ function fillUserForm(d) {
     $("#edu_last").val(d.edu_last || "");
     $("#cert_txt").val(d.cert_txt || "");
     $("#avail_dt").val(d.avail_dt || "");
+    $("#crt_ts").text(d.crt_ts || "");
 
     $("#hope_rate_amt").val(
         formatAmount(d.hope_rate_amt)
@@ -471,6 +473,7 @@ function clearUserForm() {
     $("#cert_txt").val("");
     $("#avail_dt").val("");
     $("#hope_rate_amt").val("");
+    $("#crt_ts").text("");
 
     $("#grade").text("");
     $("#score").text("");
@@ -494,7 +497,7 @@ function setModalMode(mode) { // 간략화
     const isUpdate = mode === "update";
 
     var $modal = $("#view-user-area");
-    var $title = $modal.find(".modal-title");
+    var $title = $modal.find("#modal-title");
 
     // title 표시
     if (isView) $title.text("상세");
