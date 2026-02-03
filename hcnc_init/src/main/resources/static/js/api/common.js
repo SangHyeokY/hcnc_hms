@@ -444,6 +444,7 @@ function createTagInput(config) {
     var getValue = config.getValue;
     var getLabel = config.getLabel;
     var matchMode = config.matchMode || "prefix";
+    var onTagChange = config.onTagChange;
     var options = [];
     var map = {};
     var tags = config.tags || [];
@@ -497,6 +498,9 @@ function createTagInput(config) {
             $help.toggle(tags.length === 0);
         }
         syncHidden();
+        if (typeof onTagChange === "function") {
+            onTagChange();
+        }
     }
 
     // 코드로 태그 추가

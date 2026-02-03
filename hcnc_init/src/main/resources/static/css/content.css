@@ -409,6 +409,30 @@ button.btn.btn-add-skill {
   padding-top: 2px;
 }
 
+/* 기술스택 편집 시 다른 셀 텍스트 상단 정렬 */
+.tabulator-row.stack-editing .tabulator-cell {
+    vertical-align: top !important;
+    padding-top: 9px;
+}
+
+/* 날짜 편집 시 너비 확보 */
+.tabulator-cell[tabulator-field="st_dt"].tabulator-editing input[type="date"],
+.tabulator-cell[tabulator-field="ed_dt"].tabulator-editing input[type="date"] {
+    min-width: 140px;
+}
+
+/* 기술스택 편집 시 다른 셀 텍스트 상단 정렬 */
+.tabulator-row.stack-editing .tabulator-cell {
+    vertical-align: top !important; /* important to override existing styles */
+    padding-top: 9px;
+}
+
+/* 날짜 편집 시 너비 확보 */
+.tabulator-cell[tabulator-field="st_dt"].tabulator-editing input[type="date"],
+.tabulator-cell[tabulator-field="ed_dt"].tabulator-editing input[type="date"] {
+    min-width: 140px;
+}
+
 /*=================================================================================
  * Toast style
 =================================================================================*/
