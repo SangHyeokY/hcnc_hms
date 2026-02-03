@@ -484,45 +484,76 @@ function clearUserForm() {
 }
 
 // 팝업의 역할에 따라 sub-title 변경 되기
-function setModalMode(mode) {
+function setModalMode(mode) { // 간략화
     var $modal = $("#view-user-area");
     var $inputs = $modal.find("input, select");
     var $title = $modal.find(".modal-title");
 
-    if (mode === "view") {
-        $title.text("상세");
-        $inputs.prop("disabled", true);
-        $(".btn-save").hide();
-        $("#main_lang_input").hide();
-        $("#mainLangTagList").closest(".tag-input-box").find(".tag-help").hide();
-        $("#mainLangTagList").closest(".tag-input-box").addClass("is-readonly");
-    } else if (mode === "insert") {
-        $title.text("등록");
-        $inputs.prop("disabled", false);
-        $(".btn-save").show();
-        $(".tab-article").hide();
-        $("#main_lang_input").show();
-        $("#mainLangTagList").closest(".tag-input-box").find(".tag-help").show();
-        $("#mainLangTagList").closest(".tag-input-box").removeClass("is-readonly");
-    } else {
-        $title.text("수정");
-        $inputs.prop("disabled", false);
-        $(".btn-save").show();
-        $(".tab-article").show();
-        $("#main_lang_input").show();
-        $("#mainLangTagList").closest(".tag-input-box").find(".tag-help").show();
-        $("#mainLangTagList").closest(".tag-input-box").removeClass("is-readonly");
-    }
+    const $tagBox = $("#mainLangTagList").closest(".tag-input-box");
+    const isView = mode === "view";
+    const isInsert = mode === "insert";
 
-    window.hr010ReadOnly = mode === "view";
+    // title
+    $title.text(isView ? "상세" : isInsert ? "등록" : "수정");
+
+    // input readonly
+    $inputs.prop("disabled", isView);
+
+    // 버튼 / 영역
+    $(".btn-save").toggle(!isView);
+    $(".tab-article").toggle(!isInsert);
+    $("#main_lang_input").toggle(!isView);
+
+    // tag readonly
+    $tagBox.toggleClass("is-readonly", isView);
+    $tagBox.find(".tag-help").toggle(!isView);
+
+    window.hr010ReadOnly = isView;
+
     updateTabActions($(".tab-btn.active").data("tab"));
-    if (typeof window.applyTab3Readonly === "function") {
-        window.applyTab3Readonly(window.hr010ReadOnly);
-    }
-    if (typeof window.applyTab4Readonly === "function") {
-        window.applyTab4Readonly(window.hr010ReadOnly);
-    }
+
+    window.applyTab3Readonly?.(isView);
+    window.applyTab4Readonly?.(isView);
 }
+//function setModalMode(mode) {
+//    var $modal = $("#view-user-area");
+//    var $inputs = $modal.find("input, select");
+//    var $title = $modal.find(".modal-title");
+//
+//    if (mode === "view") {
+//        $title.text("상세");
+//        $inputs.prop("disabled", true);
+//        $(".btn-save").hide();
+//        $("#main_lang_input").hide();
+//        $("#mainLangTagList").closest(".tag-input-box").find(".tag-help").hide();
+//        $("#mainLangTagList").closest(".tag-input-box").addClass("is-readonly");
+//    } else if (mode === "insert") {
+//        $title.text("등록");
+//        $inputs.prop("disabled", false);
+//        $(".btn-save").show();
+//        $(".tab-article").hide();
+//        $("#main_lang_input").show();
+//        $("#mainLangTagList").closest(".tag-input-box").find(".tag-help").show();
+//        $("#mainLangTagList").closest(".tag-input-box").removeClass("is-readonly");
+//    } else {
+//        $title.text("수정");
+//        $inputs.prop("disabled", false);
+//        $(".btn-save").show();
+//        $(".tab-article").show();
+//        $("#main_lang_input").show();
+//        $("#mainLangTagList").closest(".tag-input-box").find(".tag-help").show();
+//        $("#mainLangTagList").closest(".tag-input-box").removeClass("is-readonly");
+//    }
+//
+//    window.hr010ReadOnly = mode === "view";
+//    updateTabActions($(".tab-btn.active").data("tab"));
+//    if (typeof window.applyTab3Readonly === "function") {
+//        window.applyTab3Readonly(window.hr010ReadOnly);
+//    }
+//    if (typeof window.applyTab4Readonly === "function") {
+//        window.applyTab4Readonly(window.hr010ReadOnly);
+//    }
+//}
 
 // 모달 닫히면 영역 사라지게 하기
 function closeUserViewModal() {
