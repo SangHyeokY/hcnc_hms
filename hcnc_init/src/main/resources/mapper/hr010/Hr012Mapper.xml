@@ -74,7 +74,8 @@
             , current_timestamp()
             , #{userId}
         ) ON DUPLICATE KEY UPDATE
-              del_yn    = 'N'
+              lvl       = CASE WHEN del_yn = 'Y' THEN 0 ELSE lvl END
+            , del_yn    = 'N'
             , del_ts    = null
             , del_by    = null
             , upd_ts	= current_timestamp()

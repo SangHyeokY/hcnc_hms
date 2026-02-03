@@ -360,7 +360,6 @@ function tagEditor(cell, onRendered, success, cancel) {
         });
 
         setComCode(null, "skl_id", cell.getData().cd_nm, "cd", "cd_nm", function (res) {
-            console.log(cell);
             teamSkillTag.setOptions(res || []);
         });
     }
@@ -377,11 +376,6 @@ function tagEditor(cell, onRendered, success, cancel) {
         if (container.contains(e.relatedTarget)) {
             return;
         }
-
-        console.log(div);
-        console.log(datalist);
-        console.log(input);
-        console.log(ul);
 
         tags = [];
         $(ul.children).each(function () {
