@@ -45,7 +45,7 @@ function buildHr012TableA() {
         placeholder: "데이터 없음",
         columns: [
             { title: "코드", field: "cd", visible: false },
-            { title: "구분", field: "cd_nm", hozAlign: "left", width: 400},
+            { title: "구분", field: "cd_nm", hozAlign: "left", width: 180},
             { title: "상세", field: "skl_id_lst", hozAlign: "left", editor: tagEditor, formatter: tagFormatter,
                 editable: () => currentMode !== "view" },
             { title: "key", field: "key", visible: false }
