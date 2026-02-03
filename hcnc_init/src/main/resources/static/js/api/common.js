@@ -1,3 +1,6 @@
+/* =========================
+ * 공통 코드 조회 (콜백 방식)
+ * ========================= */
 function getComCode(strGrpCd, strTag, func) {
     $.ajax({
         url: "/common/getCm",
@@ -18,6 +21,9 @@ function getComCode(strGrpCd, strTag, func) {
     return null;
 }
 
+/* =========================
+ * 공통 코드 조회 + select 바인딩
+ * ========================= */
 function setComCode(strId, strGrpCd, strTag, id = "cd", name = "cd_nm", done, bTotal = false) {
 
     $.ajax({
@@ -39,6 +45,9 @@ function setComCode(strId, strGrpCd, strTag, id = "cd", name = "cd_nm", done, bT
     });
 }
 
+/* =========================
+ * select option 바인딩
+ * ========================= */
 function bindComCode(strId, jsonData, bTotal, id, name) {
     const select = $("#" + strId)[0];
 
@@ -62,6 +71,9 @@ function bindComCode(strId, jsonData, bTotal, id, name) {
     }
 }
 
+/* =========================
+ * Tabulator Select2 Multi Editor
+ * ========================= */
 function select2MultiEditor(cfg){
     cfg = Object.assign({
         data: [],
@@ -282,74 +294,9 @@ function selectHighlightedOrFirst() {
     }
 }
 
-
-// function tagEditor(cell, onRendered, success, cancel) {
-//     // id 동적 생성용 (타뷸레이터 id)
-//     let key = cell.getTable().element.id;
-//     let cdvalue = cell.getRow().getCell("cd")._cell.value;
-//     let keyvalue = cell.getRow().getCell("key")._cell.value;
-//
-//     const container = document.createElement("div");
-//     container.className = "tag-input-box";
-//
-//     const ul = document.createElement("ul");
-//     ul.className = "tag-list";
-//     ul.id = key + "-" + cdvalue + "-tags";
-//
-//     const input = document.createElement("input");
-//     input.type = "text";
-//     input.placeholder = "태그 입력 후 Enter";
-//     input.id = key + "-" + cdvalue + "-input";
-//
-//     container.appendChild(ul);
-//     container.appendChild(input);
-//
-//     // 기존 값 로드
-//     let tags = [...(cell.getValue() || [])];
-//
-//     function render() {
-//         ul.innerHTML = "";
-//         tags.forEach(tag => {
-//             const li = document.createElement("li");
-//             li.className = "tag-item";
-//             li.innerHTML = `
-//         ${tag}
-//         <button type="button" class="tag-remove">x</button>
-//       `;
-//             li.querySelector(".tag-remove").onclick = () => {
-//                 tags = tags.filter(t => t !== tag);
-//                 render();
-//             };
-//             ul.appendChild(li);
-//         });
-//     }
-//
-//     input.addEventListener("keydown", e => {
-//         if (e.key === "Enter" || e.key === ",") {
-//             e.preventDefault();
-//             const val = input.value.trim();
-//             if (val && !tags.includes(val)) {
-//                 tags.push(val);
-//                 render();
-//             }
-//             input.value = "";
-//         }
-//     });
-//
-//     onRendered(() => {
-//         render();
-//         input.focus();
-//     });
-//
-//     // 포커스 아웃 → 값 확정
-//     container.addEventListener("blur", () => {
-//         success(tags);
-//     }, true);
-//
-//     return container;
-// }
-
-
+/* =========================
+ * 태그 에디터 (Tabulator)
+ * ========================= */
 function tagEditor(cell, onRendered, success, cancel) {
     // id 동적 생성용 (타뷸레이터 id)
     let key = cell.getTable().element.id;
@@ -398,10 +345,6 @@ function tagEditor(cell, onRendered, success, cancel) {
         ${tag.label}
         <button type="button" class="tag-remove">x</button>
       `;
-            // li.querySelector(".tag-remove").onclick = () => {
-            //     tags = tags.filter(t => t !== tag);
-            //     render();
-            // };
             ul.appendChild(li);
         });
 
@@ -415,22 +358,11 @@ function tagEditor(cell, onRendered, success, cancel) {
             getLabel: function (item) { return item.cd_nm; }
         });
 
-        setComCode("tmp_select", "skl_id", "", "cd", "cd_nm", function (res) {
+        setComCode(null, "skl_id", cell.getData().cd_nm, "cd", "cd_nm", function (res) {
+            console.log(cell);
             teamSkillTag.setOptions(res || []);
         });
     }
-
-    // input.addEventListener("keydown", e => {
-    //     if (e.key === "Enter" || e.key === ",") {
-    //         e.preventDefault();
-    //         const val = input.value.trim();
-    //         if (val && !tags.includes(val)) {
-    //             tags.push(val);
-    //             render();
-    //         }
-    //         input.value = "";
-    //     }
-    // });
 
     onRendered(() => {
         render();
@@ -438,7 +370,13 @@ function tagEditor(cell, onRendered, success, cancel) {
     });
 
     // 포커스 아웃 → 값 확정
-    container.addEventListener("blur", () => {
+    container.addEventListener("focusout", (e) => {
+
+        // 다음 포커스 대상이 container 내부라면 무시
+        if (container.contains(e.relatedTarget)) {
+            return;
+        }
+
         console.log(div);
         console.log(datalist);
         console.log(input);
@@ -626,7 +564,8 @@ function createTagInput(config) {
         });
     }
 
-    $list.on("click", ".tag-remove", function () {
+    $list.on("mousedown", ".tag-remove", function (e) {
+        e.preventDefault(); // 포커스 이동 차단
         var code = $(this).closest(".tag-item").data("code");
         removeByCode(code);
     });

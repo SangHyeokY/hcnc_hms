@@ -27,13 +27,44 @@
             AND cd.use_yn = 'Y'
             AND skl.dev_id = #{devId}
         )
-        SELECT g.cd,
-            g.cd_nm,
-            GROUP_CONCAT(s.skl_id ORDER BY s.skl_id) AS skl_id_lst
-        FROM grp g
-        LEFT JOIN skl s ON g.cd = s.skl_grp
+        SELECT 	g.cd
+             ,	g.cd_nm
+             ,	s.skl_id
+             ,	CASE WHEN IFNULL(s.skl_id, '') = ''
+                     THEN NULL
+                     ELSE CONCAT('[', GROUP_CONCAT(JSON_OBJECT("code", s.skl_id, "label", fn_get_cm("skl_id", s.skl_id))), ']') END skl_id_lst
+        FROM 	grp g
+                    LEFT JOIN skl s
+                              ON g.cd = s.skl_grp
         GROUP BY g.cd, g.cd_nm, g.sort_no
+        ;
     </select>
+
+    <!-- 보유역량 및 숙련도 - 보유역량 신규/수정 저장 -->
+    <insert id="upsert_tab2_1" parameterType="map">
+        INSERT INTO tb_dev_skl_info
+        (
+          dev_id
+        , skl_id
+        , lvl
+        , use_yn
+        , del_yn
+        , crt_ts
+        , crt_by
+        )
+        VALUES
+        (
+              #{dev_id}
+            , #{skl_id}
+            , 0
+            , 'Y'
+            , 'N'
+            , current_timestamp()
+            , #{userId}
+        ) ON DUPLICATE KEY UPDATE
+              upd_ts	= current_timestamp()
+            , upd_by	= ''
+    </insert>
 
     <!-- 보유역량 및 숙련도 - 숙련도 -->
     <select id="select_tab2_2" resultType="hashmap" parameterType="string">
