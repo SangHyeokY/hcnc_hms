@@ -469,7 +469,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .tag-input-box input {border: none; outline: none; background: transparent; min-width: 140px; padding: 4px 6px; font-size: 14px; color: #2f3542;}
 .tag-list {display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none;}
 .tag-input-box.is-readonly .tag-list{width:100%; justify-content:center;}
-.tag-item {display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 999px; background: #e6f0ff; color: #2c5282; font-size: 13px; font-weight: 600;}
+.tag-item {display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 999px; background: #e6f0ff; color: #2c5282; font-size: 13px; font-weight: 600; height: 30px;}
 .tag-input-box.is-readonly .tag-item{background:none; color:#333; }
 .tag-select-row {display: flex; align-items: center; gap: 8px; margin-top: 6px;}
 .tag-select-row select {min-width: 140px;}
@@ -663,9 +663,6 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
     display: none;
 }
 
-
-
-
 .circle-checkbox {
     width: 18px;
     height: 18px;
@@ -679,3 +676,27 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .none_editable_text {
     color : #61646D;
 }
+
+
+#TABLE_HR012_A {
+    border-radius: 0px !important;
+}
+
+#TABLE_HR012_A > .tabulator-header {
+    display: none;
+}
+
+#TABLE_HR012_A .tabulator-table > .tabulator-row > .tabulator-cell:nth-child(2) {
+    background-color: #F1F4F9 !important;
+    border: solid 1px #DEE2E7 !important;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+#TABLE_HR012_A .tabulator-table > .tabulator-row > .tabulator-cell {
+    min-height: 48px;
+    align-content: center;
+}
+
+
+.tab2-content > .content-body{ width: 0px; flex:1;}
