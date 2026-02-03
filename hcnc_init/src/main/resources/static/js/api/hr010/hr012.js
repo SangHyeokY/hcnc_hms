@@ -48,8 +48,10 @@ function buildHr012TableA() {
         layout: "fitColumns",
         placeholder: "데이터 없음",
         columns: [
+            { title: "코드", field: "cd", visible: false },
             { title: "구분", field: "cd_nm", hozAlign: "left", width: 400},
-            { title: "상세", field: "skl_id_kst", hozAlign: "left" }
+            { title: "상세", field: "skl_id_lst", hozAlign: "left", editor: tagEditor, formatter: tagFormatter },
+            { title: "key", field: "key", visible: false }
         ],
         data: []
     });
@@ -73,25 +75,7 @@ function loadHr012TableDataA() {
                 return;
             }
 
-//            const dataMap = {};
-//            dataArray.forEach(item => {
-//                // 서버에서 오는 skl_id_lst 문자열 그대로 사용
-//                dataMap[item.cd_nm] = item.skl_id_lst || "";
-//            });
-//
-//            // 기존 테이블 데이터 가져와서 상세 값만 채움
-//            const updatedData = window.hr012TableA.getData().map(row => ({
-//                cd_nm: row.cd_nm,
-//                skl_id_kst: dataMap[row.cd_nm] || ""
-//            }));
-//
-//            window.hr012TableA.setData(updatedData);
-               const tableData = dataArray.map(item => ({
-                      cd_nm: item.cd_nm,
-                      skl_id_kst: item.skl_id_lst || ""
-                  }));
-
-                  window.hr012TableA.setData(tableData);
+            window.hr012TableA.setData(dataArray);
         },
         error: function() {
             alert("Tab2A 데이터 로드 실패");
@@ -209,5 +193,11 @@ function saveHr012TableB(){
     });
 }
 
-
-
+var teamSkillTag = createTagInput({
+    inputSelector: "#team_skill_input",
+    listSelector: "#teamSkillTagList",
+    hiddenSelector: "#team_skill_codes",
+    datalistSelector: "#team_skill_datalist",
+    getValue: function (item) { return item.cd; },
+    getLabel: function (item) { return item.cd_nm; }
+});
