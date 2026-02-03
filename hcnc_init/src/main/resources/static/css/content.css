@@ -656,7 +656,6 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
     display: flex;
     flex-direction: column;
     height: 100%;
-    border: 1px solid red;
 }
 
 .tab1-content .content-body,
@@ -665,5 +664,4 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .tab4-content .content-body {
     flex: 1;
     overflow: auto;
-    border: 1px solid blue;
 }
