@@ -591,7 +591,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 }
 
 
-.modal-container-detail {display: flex; flex-direction: column; max-height: 90vh; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); min-width: 80vw; max-width: calc(100% - 32px); background: #fff; border-radius: 6px; padding: 20px; box-sizing: border-box;}
+.modal-container-detail {display: flex; flex-direction: column; max-height: 90vh; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90vw; background: #fff; border-radius: 6px; padding: 20px; box-sizing: border-box;}
 .modal-container-detail .close-btn{background:none; border:none; }
 .modal-container-detail .close-btn img{width:16px; }
 
@@ -699,4 +699,23 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .tab4-content .content-body {
     flex: 1;
     overflow: auto;
+}
+
+.hr012-tab-btn.active {
+    color: #111827;
+    font-weight: 700;
+}
+
+
+.hr012-tab-btn {
+    border: none;
+    background: transparent;
+    color: #7b8794;
+    padding: 4px 2px;
+    border-radius: 0;
+    text-align: left;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 500;
+    position: relative;
 }
