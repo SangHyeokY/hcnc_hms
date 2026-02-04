@@ -33,6 +33,7 @@
         <if test="dev_nm != null and dev_nm != ''">
             AND dev_nm LIKE CONCAT('%', #{dev_nm}, '%')
         </if>
+        ORDER BY upd_ts DESC
     </select>
 
     <!-- 인력관리 > 기본 인적사항 (임시/검색x) -->
