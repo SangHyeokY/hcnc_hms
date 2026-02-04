@@ -563,6 +563,7 @@ function setModalMode(mode) { // 간략화
               .removeAttr("disabled");
     }
 
+    $("#btn-excel").toggle(isView);
     $("#btn-user-save").toggle(isInsert || isUpdate);
     $(".tab-article").toggle(!isInsert);
     $("#main_lang_input").toggle(!isView);

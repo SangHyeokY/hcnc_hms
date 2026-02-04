@@ -28,7 +28,7 @@
 /*=================================================================================
  * Grid Table style
 =================================================================================*/
-.tabulator {border-top: none !important; border-right: 0; border-left: 0; border-bottom: 0; height: 100%; border-radius: 8px 8px 0 0;}
+.tabulator {border-top: none !important; border-right: 0; border-left: 0; border-bottom: 0; height: 100%; border-radius: 8px 8px 0 0; max-width: 100%; overflow: hidden;}
 .tabulator-header {padding: 0 !important; margin: 0 !important; border-bottom: 0 !important; font-size: 1em !important;}
 .tabulator-header .tabulator-col {
   background-color: #F8F9FD !important;
@@ -37,6 +37,8 @@
   border-bottom: 1px solid #E8EAEE !important;
   /* max-height: 70px;*/
 }
+/* 테이블 자체 */
+.tabulator-table {width: 100% !important;}
 .tabulator .tabulator-header .tabulator-col:first-child {padding-left: 0 !important;}
 .tabulator .tabulator-header .tabulator-col:last-child {border-right: 0 !important;}
 .tabulator .tabulator-header .tabulator-col .tabulator-col-content {text-align: center; padding: 7px 10px !important;}
@@ -55,7 +57,7 @@
 .tabulator-row:nth-child(2n) .tabulator-cell {background-color: #FBFCFE !important;}
 .tabulator-row.tabulator-selectable:hover .tabulator-cell {background-color: #f3fcff !important; color: #0092c7;}
 .tabulator-placeholder {background: #fff !important;}
-.tabulator-tableHolder {background: #fff !important;}
+.tabulator-tableHolder {background: #fff !important; overflow-x: hidden !important;}
 .tabulator .row-check {pointer-events: none;}
 
 #TABLE_HR013_A .row-check {
@@ -121,7 +123,7 @@
 .tabulator .tabulator-header .tabulator-col.tabulator-col-group .tabulator-col-group-cols {border-top: 2px solid #ebedf1 !important;}
 
 /*===============================================================================
-  HR014 
+  HR014
 ================================================================================*/
 button.btn.btn-add-skill {
   background-color: #ffffff;
@@ -197,7 +199,7 @@ button.btn.btn-add-skill {
 }
 .risk-detail textarea {
   width: 100%;
-  min-height: 160px;
+  min-height: 150px;
   border: 1px solid #dcdcdc;
   border-radius: 6px;
   padding: 10px 12px;
@@ -298,12 +300,12 @@ button.btn.btn-add-skill {
   box-shadow: none;
   padding: 0;
 }
-.tab4-content {
+/* .tab4-content {
   overflow: visible;
 }
 .tab4-content .content-body {
   overflow: visible;
-}
+} */
 .tab4-content .tab-action-bar {
   position: relative;
   z-index: 2;
@@ -311,12 +313,19 @@ button.btn.btn-add-skill {
 .hr014-tab-wrap {
   display: flex;
   gap: 16px;
+  height: 100%;
 }
 .hr014-side-tabs {
   display: flex;
   flex-direction: column;
-  min-width: 90px;
+  min-width: 100px;
   border: none;
+  position: sticky;
+  top: 0;
+  align-self: flex-start;
+  height: fit-content;
+  background: #fff;
+  z-index: 3;
 }
 .hr012-tab-btn,
 .hr014-tab-btn {
@@ -330,6 +339,7 @@ button.btn.btn-add-skill {
   font-size: 16px;
   font-weight: 500;
   position: relative;
+  margin-bottom: 15px;
 }
 .hr012-tab-btn.active,
 .hr014-tab-btn.active {
@@ -436,12 +446,6 @@ button.btn.btn-add-skill {
   padding-top: 2px;
 }
 
-/* 기술스택 편집 시 다른 셀 텍스트 상단 정렬 */
-.tabulator-row.stack-editing .tabulator-cell {
-    vertical-align: top !important;
-    padding-top: 9px;
-}
-
 /* 날짜 편집 시 너비 확보 */
 .tabulator-cell[tabulator-field="st_dt"].tabulator-editing input[type="date"],
 .tabulator-cell[tabulator-field="ed_dt"].tabulator-editing input[type="date"] {
@@ -452,12 +456,6 @@ button.btn.btn-add-skill {
 .tabulator-row.stack-editing .tabulator-cell {
     vertical-align: top !important; /* important to override existing styles */
     padding-top: 9px;
-}
-
-/* 날짜 편집 시 너비 확보 */
-.tabulator-cell[tabulator-field="st_dt"].tabulator-editing input[type="date"],
-.tabulator-cell[tabulator-field="ed_dt"].tabulator-editing input[type="date"] {
-    min-width: 140px;
 }
 
 /*=================================================================================
@@ -605,7 +603,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
   Modal
 ================================================================================*/
 .modal-wrap {position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6); z-index: 999;}
-.modal-container {display: flex; flex-direction: column; max-height: 86vh; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); min-width: 560px; max-width: calc(100% - 32px); background: #fff; border-radius: 6px; padding: 20px; box-sizing: border-box;}
+.modal-container {display: flex; flex-direction: column; max-height: 90vh; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); min-width: 560px; max-width: calc(100% - 32px); background: #fff; border-radius: 6px; padding: 20px; box-sizing: border-box;}
 .modal-wrap .header {display: flex; align-items: center; justify-content: space-between; padding-bottom: 16px; border-bottom: 1px solid #eee;}
 .modal-wrap .header h4 {font-size: 18px; color: #000; font-weight: 700;}
 .modal-wrap .header h4 span {font-size: 13px;}
@@ -629,7 +627,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .modal-btn ul li:last-child {margin-right: 0;}
 .modal-btn .btn {padding: 8px 20px; border-radius: 8px; background-color: #fff; border: 1px solid #4880FF; color: #4880FF; font-size: 14px; font-weight: 500;}
 .modal-btn .btn.btn-save {background: #5A8DFF; border-color: #5A8DFF; color: #fff;}
-.modal-btn #btn-user-save {background: #5A8DFF; border-color: #5A8DFF; color: #fff; position: absolute; bottom: 25px;}
+.modal-btn #btn-user-save {background: #5A8DFF; border-color: #5A8DFF; color: #fff;} /*  position: absolute; bottom: 25px; */
 .modal-wrap #view-user-area .modal-btn ul {
   flex-direction: row-reverse;
 }
@@ -641,16 +639,15 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
   margin-left: 0;
 }
 
-
 .modal-container-detail {display: flex; flex-direction: column; max-height: 90vh; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90vw; background: #fff; border-radius: 6px; padding: 20px; box-sizing: border-box;}
 .modal-container-detail .close-btn{background:none; border:none; }
 .modal-container-detail .close-btn img{width:16px; }
 
 .modal-human-area {width:100%;}
 .modal-human-area .pic-area{width: 15%; margin-right:1%;}
-.modal-human-area .pic-area .profile-area{position:relative; width:100%; padding-top:123.4%; border:1px solid #ddd; background:url("../images/common/bg-userimg.png")center center no-repeat #ECECEE; border-radius:9px; overflow:hidden;}
+.modal-human-area .pic-area .profile-area{position:relative; width:100%; padding-top: 115%; border:1px solid #ddd; background:url("../images/common/bg-userimg.png")center center no-repeat #ECECEE; border-radius:9px; overflow:hidden;}
 .modal-human-area .pic-area .profile-area img{position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:100%; height:100%;}
-.modal-human-area .upload{width:100%; height:100%; padding-top:10%; position:relative;}
+.modal-human-area .upload{width:100%; height:100%; padding-top: 15px; position:relative;}
 .modal-human-area .upload .file{width:100%; height:100%; position: absolute; top:0; left:0; opacity:0; z-index:1;}
 .modal-human-area .upload .showingbtn{width:100%; height:40px; border-radius:4px; border:1px dotted #ccc; color:#333}
 .modal-human-area .table-area{width: 84%;}
@@ -684,14 +681,12 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
     border-bottom:4px solid #333;
 }
 
-.tab2-content{gap:16px;}
+/* .tab2-content{gap:16px;}*/
+/* .tab-area .tab-content .content-body{overflow-y: auto;} */
 
+.tab-content {position: relative; height: 240px; width: 100%; max-width: 100%; min-width: 0; overflow-x: hidden; overflow-y: auto;}
 
-.tab-area .tab-content .content-body{height: 320px; overflow-y: auto;}
-
-.tab-content {  position: relative;  height: 260px;   overflow-y: auto;}
-
-.mw0 {  min-width: 0px !important;}
+.mw0 { min-width: 0px !important;}
 
 .select2-search__field {
     display: none;
@@ -700,7 +695,6 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .none_editable_text {
     color : #61646D;
 }
-
 
 #TABLE_HR012_A {
     border-radius: 0px !important;
@@ -731,32 +725,20 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
     /*border: solid 1px #DEE2E7 !important;*/
 }
 
-
-/*.tab2-content > .content-body{ width: 0px; flex:1;}*/
-
 /* 탭 영역  */
-.tab1-content,
-.tab2-content,
-.tab3-content,
-.tab4-content {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-}
-
 .tab1-content .content-body,
 .tab2-content .content-body,
 .tab3-content .content-body,
 .tab4-content .content-body {
     flex: 1;
     overflow: auto;
+    min-height: 0;
 }
 
 .hr012-tab-btn.active {
     color: #111827;
     font-weight: 700;
 }
-
 
 .hr012-tab-btn {
     border: none;

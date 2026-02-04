@@ -25,7 +25,14 @@ public class Hr015Service {
 
     public int saveA(Map<String, Object> map) {
         // 탭1 평가 저장
-        return this.sqlSession.insert("com.hcncinit.Hr015Mapper.saveA", map);
+        Object rowsObj = map.get("rows");
+        if (rowsObj instanceof List<?> rowsList && !rowsList.isEmpty()) {
+            // rows가 존재하면 insert 실행
+            return this.sqlSession.insert("com.hcncinit.Hr015Mapper.saveA", map);
+        } else {
+            // rows가 없으면 아무 작업을 안하고 0 반환
+            return 0;
+        }
     }
 
     public int saveB(Map<String, Object> map) {
