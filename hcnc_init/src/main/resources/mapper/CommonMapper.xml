@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.hcncinit.CommonMapper">
-
+    <!-- 공통코드 값 반환 -->
     <select id="get_cm" resultType="hashmap" parameterType="map">
         SELECT 	cd
              ,	cd_nm
@@ -16,6 +16,7 @@
         ORDER BY sort_no
     </select>
 
+    <!-- 엑셀 다운로드 ▶ 인력 Master -->
     <select id="get_dev_info_excel" resultType="hashmap" parameterType="map">
         SELECT 	dev.dev_nm -- 성명
              , 	dev.brdt -- 생년월일
@@ -44,8 +45,10 @@
         WHERE 	dev.del_yn = 'N'
           AND   dev.use_yn = 'Y'
           AND   dev.dev_id = #{dev_id}
+        ORDER BY ctrt.ctrt_id DESC LIMIT 1
     </select>
 
+    <!-- 엑셀 다운로드 ▶ Skill Matrix ▶ 3. 보유역량 -->
     <select id="get_skl_info_excel_01" resultType="hashmap" parameterType="map">
         WITH grp AS
         (
@@ -78,6 +81,7 @@
         ORDER BY g.sort_no
     </select>
 
+    <!-- 엑셀 다운로드 ▶ Skill Matrix ▶ 숙련도 -->
     <select id="get_skl_info_excel_02" resultType="hashmap" parameterType="map">
         SELECT 	skl.skl_id
              , 	cd.cd_nm
@@ -96,6 +100,7 @@
         ORDER BY skl.skl_id
     </select>
 
+    <!-- 엑셀 다운로드 ▶ 프로젝트 이력 -->
     <select id="get_prj_info_excel" resultType="hashmap" parameterType="map">
         SELECT 	prj.inprj_yn -- 당사 여부
              , 	prj.st_dt
@@ -119,6 +124,7 @@
             AND prj.dev_id = #{dev_id}
     </select>
 
+    <!-- 엑셀 다운로드 ▶ 당사 투입이력 -->
     <select id="get_in_prj_info_excel" resultType="hashmap" parameterType="map">
         SELECT 	prj.inprj_yn -- 당사 여부
              , 	prj.st_dt
@@ -143,15 +149,16 @@
           AND prj.inprj_yn = 'Y'
     </select>
 
+    <!-- 엑셀 다운로드 ▶ 평가&등급 ▶ 6. PM / 관리자 평가 -->
     <select id="get_in_evel_info_excel_01" resultType="hashmap" parameterType="map">
         SELECT 	cd.cd
              , 	cd.cd_nm -- 항목
              , 	CASE WHEN IFNULL(eval.lvl, 0) = 0 THEN '✓' ELSE '' END AS lv0
-             , 	CASE WHEN IFNULL(eval.lvl, 1) = 0 THEN '✓' ELSE '' END AS lv1
-             , 	CASE WHEN IFNULL(eval.lvl, 2) = 0 THEN '✓' ELSE '' END AS lv2
-             , 	CASE WHEN IFNULL(eval.lvl, 3) = 0 THEN '✓' ELSE '' END AS lv3
-             , 	CASE WHEN IFNULL(eval.lvl, 4) = 0 THEN '✓' ELSE '' END AS lv4
-             , 	CASE WHEN IFNULL(eval.lvl, 5) = 0 THEN '✓' ELSE '' END AS lv5
+             , 	CASE WHEN IFNULL(eval.lvl, 0) = 1 THEN '✓' ELSE '' END AS lv1
+             , 	CASE WHEN IFNULL(eval.lvl, 0) = 2 THEN '✓' ELSE '' END AS lv2
+             , 	CASE WHEN IFNULL(eval.lvl, 0) = 3 THEN '✓' ELSE '' END AS lv3
+             , 	CASE WHEN IFNULL(eval.lvl, 0) = 4 THEN '✓' ELSE '' END AS lv4
+             , 	CASE WHEN IFNULL(eval.lvl, 0) = 5 THEN '✓' ELSE '' END AS lv5
              , 	eval.cmt -- 코멘트
         FROM 	tb_cd_mst cd
                     LEFT JOIN tb_dev_eval_info eval
@@ -163,6 +170,7 @@
         ORDER BY sort_no
     </select>
 
+    <!-- 엑셀 다운로드 ▶ 평가&등급 ▶ 7. 리스크 및 관리이력 -->
     <select id="get_in_evel_info_excel_02" resultType="hashmap" parameterType="map">
         WITH tmp AS
         (
@@ -183,8 +191,7 @@
         )
         SELECT 	tmp.dev_id
              , 	k.yn_key
-             , 	CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(tmp.yn_obj, CONCAT('$.', k.yn_key))) = 'Y' THEN '✓'
-                    ELSE '' END AS value -- 값
+             , 	JSON_UNQUOTE(JSON_EXTRACT(tmp.yn_obj, CONCAT('$.', k.yn_key))) AS value -- 값
         FROM 	tmp tmp
             JOIN JSON_TABLE(
                 JSON_KEYS(tmp.yn_obj),
@@ -194,6 +201,7 @@
                 ) k
     </select>
 
+    <!-- 엑셀 다운로드 ▶ 단가&가용성 ▶ 단가 히스토리 -->
     <select id="get_rate_info_excel" resultType="hashmap" parameterType="map">
         SELECT 	TO_CHAR(prj.st_dt, 'YYYY') dt
              , 	prj.prj_nm -- 프로젝트명
@@ -213,6 +221,7 @@
           AND prj.inprj_yn = 'Y'
     </select>
 
+    <!-- 엑셀 다운로드 ▶ 단가&가용성 ▶ 가용성 현황 -->
     <select id="get_avl_info_excel" resultType="hashmap" parameterType="map">
         SELECT 	dev.dev_nm
              ,	fn_get_cm('st_cd', avl.st_cd) work_md
@@ -224,5 +233,86 @@
                               ON	dev.dev_id = avl.dev_id
         ORDER BY dev.dev_id
     </select>
+
+    <insert id="add_log_data" parameterType="map">
+        <if test="call_id == null or call_id == ''">
+        INSERT INTO hcnc_hms.tb_qry_call_hist
+        (
+              req_id
+            , user_id
+            , sess_id
+            , ip_addr
+            , ua_txt
+            , app_nm
+            , scrn_cd
+            , fn_cd
+            , op_typ
+            , req_params
+            , ok_yn
+            , err_cd
+            , err_msg
+            , st_ts
+            , ed_ts
+            , dur_ms
+            , row_cnt
+            , use_yn
+            , del_yn
+            , crt_ts
+            , crt_by
+        )
+        VALUES
+        (
+              #{req_id}
+            , #{user_id}
+            , #{sess_id}
+            , #{ip_addr}
+            , #{ua_txt}
+            , #{app_nm}
+            , #{scrn_cd}
+            , #{fn_cd}
+            , #{op_typ}
+            , #{req_params}
+            , #{ok_yn}
+            , #{err_cd}
+            , #{err_msg}
+            , #{st_ts}
+            , #{ed_ts}
+            , #{dur_ms}
+            , #{row_cnt}
+            , 'Y'
+            , 'N'
+            , #{crt_ts}
+            , #{crt_by}
+        </if>
+        <if test="call_id != null and call_id != ''">
+            UPDATE  hcnc_hms.tb_qry_call_hist
+                SET req_id      = NULL
+                  , user_id     = NULL
+                  , sess_id     = NULL
+                  , ip_addr     = NULL
+                  , ua_txt      = NULL
+                  , app_nm      = NULL
+                  , scrn_cd     = NULL
+                  , fn_cd       = ''
+                  , op_typ      = ''
+                  , req_params  = NULL
+                  , ok_yn       = 'Y'
+                  , err_cd      = NULL
+                  , err_msg     = NULL
+                  , st_ts       = current_timestamp()
+                  , ed_ts       = NULL
+                  , dur_ms      = NULL
+                  , row_cnt     = NULL
+                  , use_yn      = 'Y'
+                  , del_yn      = 'N'
+                  , crt_ts      = current_timestamp()
+                  , crt_by      = ''
+                  , upd_ts      = current_timestamp()
+                  , upd_by      = NULL
+                  , del_ts      = NULL
+                  , del_by      = NULL
+            WHERE   call_id     = 0
+        </if>
+    </insert>
 
 </mapper>
