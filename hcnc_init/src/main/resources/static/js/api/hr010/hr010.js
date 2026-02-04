@@ -110,9 +110,9 @@ $(document).ready(function () {
                 saveHr012TableData?.();
                 saveHr012TableB?.();
             }
-// else if (activeTab === "tab3") {
-//                saveHr013TableData?.();
-//            }
+            else if (activeTab === "tab3") {
+                saveHr013TableData?.();
+            }
         });
     });
 });
@@ -195,7 +195,7 @@ function buildUserTable() {
             { title: "연락처", field: "tel", widthgrow: 3},
             { title: "이메일", field: "email", widthgrow:3},
             { title: "거주지역", field: "region", widthgrow:1 },
-            { title: "주 개발언어", field: "main_lang_nm", widthgrow: 3},
+            { title: "주 개발언어", field: "main_lang_nm", widthgrow: 4},
             { title: "경력연차", field: "exp_yr", hozAlign: "center" , widthgrow:1},
             { title: "최종학력", field: "edu_last", widthgrow:1},
             { title: "보유자격증", field: "cert_txt" , widthgrow:1},

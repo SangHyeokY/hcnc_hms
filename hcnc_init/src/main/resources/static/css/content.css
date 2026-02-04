@@ -54,7 +54,7 @@
 /* .tabulator-row .tabulator-cell {background-color: #fff !important; padding: 2px 10px !important; max-height: 34px; line-height: 30px;} */
 .tabulator-row .tabulator-cell {font-size: 15px; font-weight: 400; background-color: #fff !important; padding: 2px 10px !important; line-height: 30px;}
 .tabulator-row .tabulator-cell:last-child {border-right: 0 !important;}
-/*.tabulator-row:nth-child(2n) .tabulator-cell {background-color: #FBFCFE !important;}*/
+.tabulator-row:nth-child(2n) .tabulator-cell {background-color: #FBFCFE !important;}
 .tabulator-row.tabulator-selectable:hover .tabulator-cell {background-color: #f3fcff !important; color: #0092c7;}
 .tabulator-placeholder {background: #fff !important;}
 .tabulator-tableHolder {background: #fff !important; overflow-x: hidden !important;}
@@ -63,6 +63,25 @@
 #TABLE_HR013_A .row-check {
   pointer-events: auto;
   cursor: pointer;
+}
+#TABLE_HR013_A .tabulator-row {
+  min-height: 44px;
+}
+#TABLE_HR013_A .tabulator-row .tabulator-cell {
+  min-height: 44px;
+}
+#TABLE_HR013_A .tabulator-cell[data-field="job_cd"].tabulator-editing {
+  height: 44px;
+  overflow: hidden;
+  padding-top: 2px;
+  padding-bottom: 2px;
+  cursor: pointer;
+}
+#TABLE_HR013_A .tabulator-cell[data-field="job_cd"] select {
+  height: 30px;
+  line-height: 30px;
+  margin: 0;
+
 }
 #TABLE_HR013_A.is-readonly .row-check,
 #TABLE_HR013_A.is-readonly .tabulator-cell input[type="checkbox"] {
