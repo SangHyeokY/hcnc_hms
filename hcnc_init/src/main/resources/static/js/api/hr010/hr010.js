@@ -110,9 +110,9 @@ $(document).ready(function () {
                 saveHr012TableData?.();
                 saveHr012TableB?.();
             }
-// else if (activeTab === "tab3") {
-//                saveHr013TableData?.();
-//            }
+            else if (activeTab === "tab3") {
+                saveHr013TableData?.();
+            }
         });
     });
 });

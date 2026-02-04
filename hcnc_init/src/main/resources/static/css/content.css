@@ -62,6 +62,25 @@
   pointer-events: auto;
   cursor: pointer;
 }
+#TABLE_HR013_A .tabulator-row {
+  min-height: 44px;
+}
+#TABLE_HR013_A .tabulator-row .tabulator-cell {
+  min-height: 44px;
+}
+#TABLE_HR013_A .tabulator-cell[data-field="job_cd"].tabulator-editing {
+  height: 44px;
+  overflow: hidden;
+  padding-top: 2px;
+  padding-bottom: 2px;
+  cursor: pointer;
+}
+#TABLE_HR013_A .tabulator-cell[data-field="job_cd"] select {
+  height: 30px;
+  line-height: 30px;
+  margin: 0;
+ 
+}
 #TABLE_HR013_A.is-readonly .row-check,
 #TABLE_HR013_A.is-readonly .tabulator-cell input[type="checkbox"] {
   pointer-events: none;

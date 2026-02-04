@@ -6,7 +6,8 @@ var hr013DeletedIds = [];
 var hr013SkillOptions = [];
 var hr013JobOptions = [];
 
-window.initTab3 = function() {
+// 프로젝트 탭 초기화 (버튼/콤보/태그/테이블)
+window.initTab3 = function () {
     if (!window.hr013Table) buildHr013Table();
     loadHr013TableData();
     $(document).off("tab:readonly.hr013").on("tab:readonly.hr013", function (_, isReadOnly) {
@@ -15,77 +16,79 @@ window.initTab3 = function() {
     applyTab3Readonly(!!window.hr010ReadOnly);
 
     $("#write_hr013_rate_amt").on("input", function () {
-            $(this).val(formatNumberInput($(this).val()));
-        });
+        $(this).val(formatNumberInput($(this).val()));
+    });
 
-        $("#write_hr013_alloc_pct").on("input", function () {
-            $(this).val(formatPercentInput($(this).val()));
-        });
+    $("#write_hr013_alloc_pct").on("input", function () {
+        $(this).val(formatPercentInput($(this).val()));
+    });
 
     $(".btn-hr013-save").off("click").on("click", function () {
         saveHr013Row();
     });
 
-        $(".btn-tab3-new").off("click").on("click", function () {
-            openHr013Modal("new");
-        });
-        $(".btn-tab3-edit").off("click").on("click", function () {
-            openHr013Modal("edit");
-        });
-        $(".btn-tab3-remove").off("click").on("click", function () {
-            removeHr013SelectedRows();
-        });
-        $(".btn-tab3-add").off("click").on("click", function () {
-            addHr013Row();
-        });
+    $(".btn-tab3-new").off("click").on("click", function () {
+        openHr013Modal("new");
+    });
+    $(".btn-tab3-edit").off("click").on("click", function () {
+        openHr013Modal("edit");
+    });
+    $(".btn-tab3-remove").off("click").on("click", function () {
+        removeHr013SelectedRows();
+    });
+    $(".btn-tab3-add").off("click").on("click", function () {
+        addHr013Row();
+    });
 
-        $("#write_hr013_inprj_yn").off("change").on("change", function () {
-            applyInprjCustomerName($(this).val(), $("#write_hr013_cust_nm").val());
-        });
+    $("#write_hr013_inprj_yn").off("change").on("change", function () {
+        applyInprjCustomerName($(this).val(), $("#write_hr013_cust_nm").val());
+    });
 
-        $("#write_hr013_cust_nm").off("input").on("input", function () {
-            if ($("#write_hr013_inprj_yn").val() !== "Y") {
-                lastNonInprjCustNm = $(this).val();
-            }
-        });
+    $("#write_hr013_cust_nm").off("input").on("input", function () {
+        if ($("#write_hr013_inprj_yn").val() !== "Y") {
+            lastNonInprjCustNm = $(this).val();
+        }
+    });
 
-       setComCode("write_hr013_job_cd", "job_cd", "", "cd", "cd_nm", function () {
-           hr013JobOptions = $("#write_hr013_job_cd option").map(function () {
-               return { cd: this.value, cd_nm: $(this).text() };
-           }).get();
-           initSelectDefault("write_hr013_job_cd", "선택");
-           if (window.hr013Table) {
-               normalizeJobCodes();
-               normalizeJobRows();
-               window.hr013Table.redraw(true);
-           }
-
-           jobMap = getJobCodeMap();
-       });
-       setComCode("write_hr013_skl_cd", "skl_id", "", "cd", "cd_nm", function (res) {
-           hr013SkillOptions = res || [];
-           if (!stackTagInput) {
-               stackTagInput = createTagInput({
-                   inputSelector: "#write_hr013_stack_input",
-                   listSelector: "#hr013SkillTagList",
-                   hiddenSelector: "#write_hr013_stack_txt",
-                   datalistSelector: "#write_hr013_stack_datalist",
-                   getValue: function (item) { return item.cd; },
-                   getLabel: function (item) { return item.cd_nm; },
-                   matchMode: "prefix"
-               });
-           }
-           stackTagInput.setOptions(res || []);
-           stackTagInput.setFromValue(pendingStackValue || $("#write_hr013_stack_txt").val());
-           if (window.hr013Table) {
-               syncStackLabelsFromCodes();
-               window.hr013Table.redraw(true);
-           }
-       });
+    
+    setComCode("write_hr013_job_cd", "job_cd", "", "cd", "cd_nm", function () {
+        hr013JobOptions = $("#write_hr013_job_cd option").map(function () {
+            return { cd: this.value, cd_nm: $(this).text() };
+        }).get();
+        initSelectDefault("write_hr013_job_cd", "선택");
+        if (window.hr013Table) {
+            normalizeJobCodes();
+            normalizeJobRows();
+            window.hr013Table.redraw(true);
+        }
+        
+        jobMap = getJobCodeMap();
+    });
+    setComCode("write_hr013_skl_cd", "skl_id", "", "cd", "cd_nm", function (res) {
+        hr013SkillOptions = res || [];
+        if (!stackTagInput) {
+            stackTagInput = createTagInput({
+                inputSelector: "#write_hr013_stack_input",
+                listSelector: "#hr013SkillTagList",
+                hiddenSelector: "#write_hr013_stack_txt",
+                datalistSelector: "#write_hr013_stack_datalist",
+                getValue: function (item) { return item.cd; },
+                getLabel: function (item) { return item.cd_nm; },
+                matchMode: "prefix"
+            });
+        }
+        stackTagInput.setOptions(res || []);
+        stackTagInput.setFromValue(pendingStackValue || $("#write_hr013_stack_txt").val());
+        if (window.hr013Table) {
+            syncStackLabelsFromCodes();
+            window.hr013Table.redraw(true);
+        }
+    });
 };
 
 let jobMap = [];
 
+// 프로젝트 테이블 생성
 function buildHr013Table() {
     if (!document.getElementById("TABLE_HR013_A")) return;
 
@@ -190,6 +193,7 @@ function buildHr013Table() {
     });
 }
 
+// 상세모드에서는 테이블 조작 비활성화
 function applyTab3Readonly(isReadOnly) {
     $("#TABLE_HR013_A").toggleClass("is-readonly", !!isReadOnly);
     if (window.hr013Table) {
@@ -224,6 +228,7 @@ function closeHr013Modal() {
     $("#write-hr013-area").hide();
 }
 
+// 프로젝트 데이터 조회 후 테이블 반영
 function loadHr013TableData() {
     const dev_id = window.currentDevId || $("#dev_id").val();
     if (!window.hr013Table) return;
@@ -232,7 +237,7 @@ function loadHr013TableData() {
         url: "/hr010/tab3",
         type: "GET",
         data: { dev_id: dev_id },
-        success: function(res) {
+        success: function (res) {
             const dataArray = Array.isArray(res.list) ? res.list : [];
             var normalized = dataArray.map(function (row) {
                 row._checked = false;
@@ -248,7 +253,7 @@ function loadHr013TableData() {
             syncStackLabelsFromCodes();
             window.hr013Table.redraw();
         },
-        error: function() { alert("Tab3 데이터 로드 실패"); }
+        error: function () { alert("Tab3 데이터 로드 실패"); }
     });
 }
 
@@ -264,7 +269,7 @@ function getHr013SelectedRow() {
     return rows[0].getData();
 }
 
-// 폼 데이터 채우기
+// 모달 입력값 채우기
 function fillHr013Form(data) {
 
     console.log("st_dt : " + data.st_dt, "ed_dt : " + data.ed_dt);
@@ -288,7 +293,7 @@ function fillHr013Form(data) {
     // console.log("input value : " + $("#write_hr013_st_dt").val());
 }
 
-// 폼 초기화
+// 모달 입력값 초기화
 function clearHr013Form() {
     $("#write_hr013_dev_prj_id").val("");
     $("#write_hr013_inprj_yn").val("N");
@@ -308,13 +313,14 @@ function clearHr013Form() {
 }
 
 // 저장 버튼
+// 모달 저장 (구버전 유지)
 function saveHr013Row() {
     var payload = {
         dev_id: window.currentDevId || $("#dev_id").val(),
         dev_prj_id: $("#write_hr013_dev_prj_id").val(),
         inprj_yn: $("#write_hr013_inprj_yn").val(),
-        st_dt: $("#write_hr013_st_dt").val(),
-        ed_dt: $("#write_hr013_ed_dt").val(),
+        st_dt: normalizeDateForSave($("#write_hr013_st_dt").val()),
+        ed_dt: normalizeDateForSave($("#write_hr013_ed_dt").val()),
         cust_nm: $("#write_hr013_cust_nm").val(),
         prj_nm: $("#write_hr013_prj_nm").val(),
         rate_amt: $("#write_hr013_rate_amt").val(),
@@ -399,33 +405,6 @@ function applyInprjCustomerName(inprjYn, custNm) {
 }
 
 // 삭제 버튼
-function deleteHr013Row() {
-    var rowData = getHr013SelectedRow();
-    if (!rowData) {
-        alert("삭제할 행을 선택해주세요.");
-        return;
-    }
-    if (!confirm("삭제하시겠습니까?")) {
-        return;
-    }
-    $.ajax({
-        url: "/hr010/tab3_delete",
-        type: "POST",
-        data: { dev_prj_id: rowData.dev_prj_id, dev_id: window.currentDevId || $("#dev_id").val() },
-        success: function (response) {
-            if (response.success) {
-                loadHr013TableData();
-                alert("삭제되었습니다.");
-            } else {
-                alert("삭제에 실패했습니다.");
-            }
-        },
-        error: function () {
-            alert("삭제 중 오류가 발생했습니다.");
-        }
-    });
-}
-
 function inprjCheckboxFormatter(cell) {
     var checked = cell.getValue() === "Y" ? " checked" : "";
     var disabled = window.hr010ReadOnly ? " disabled" : "";
@@ -433,6 +412,7 @@ function inprjCheckboxFormatter(cell) {
 }
 
 // 선택 행 임시 삭제
+// 체크된 행을 임시 삭제(실제 삭제는 저장 시)
 function removeHr013SelectedRows() {
     if (!window.hr013Table) {
         return;
@@ -457,10 +437,12 @@ function removeHr013SelectedRows() {
 }
 
 // 프로젝트 탭 통합 저장용
+// 통합 저장 버튼에서 호출
 window.saveHr013TableData = function () {
     saveHr013InlineRows();
 };
 
+// 테이블 내용을 서버에 저장/삭제 반영
 function saveHr013InlineRows() {
     if (!window.hr013Table) {
         return;
@@ -485,8 +467,8 @@ function saveHr013InlineRows() {
                 dev_id: devId,
                 dev_prj_id: row.dev_prj_id,
                 inprj_yn: row.inprj_yn,
-                st_dt: row.st_dt,
-                ed_dt: row.ed_dt,
+                st_dt: normalizeDateForSave(row.st_dt),
+                ed_dt: normalizeDateForSave(row.ed_dt),
                 cust_nm: custNm,
                 prj_nm: row.prj_nm || "",
                 rate_amt: row.rate_amt || "",
@@ -518,6 +500,7 @@ function saveHr013InlineRows() {
     });
 }
 
+// 행 추가
 function addHr013Row() {
     if (!window.hr013Table) {
         return;
@@ -556,10 +539,12 @@ function toggleInprjValue(cell) {
     row.update({ inprj_yn: "N", cust_nm: restored });
 }
 
+// 상세 모드 여부
 function isHr013Editable() {
     return !window.hr010ReadOnly;
 }
 
+// 역할 코드 -> 라벨 맵 생성
 function getJobCodeMap() {
     var map = {};
     if (hr013JobOptions && hr013JobOptions.length) {
@@ -579,6 +564,7 @@ function getJobCodeMap() {
     return map;
 }
 
+// 역할 표시용 라벨 변환
 function jobCodeFormatter(cell) {
     var row = cell.getRow().getData();
     var map = getJobCodeMap();
@@ -593,13 +579,14 @@ function jobCodeFormatter(cell) {
     return map[val] || val || "";
 }
 
+// 역할 값이 객체로 와도 문자열로 정규화
 function normalizeJobValue(value) {
     if (value == null) {
         return "";
     }
     if (typeof value === "object") {
         var current = value;
-        var guard = 0;
+        var guard = 0; 
         while (current && typeof current === "object" && guard < 4) {
             var candidate = current.cd || current.value || current.label || current.cd_nm || current.name || current.nm || current.id;
             if (candidate && typeof candidate !== "object") {
@@ -617,10 +604,12 @@ function normalizeJobValue(value) {
     return String(value);
 }
 
+// 날짜 표시용 포맷터
 function dateDisplayFormatter(cell) {
     return formatDateDisplay(cell.getValue());
 }
 
+// YYYY-MM-DD 포맷 변환
 function formatDateDisplay(value) {
     if (!value) {
         return "";
@@ -635,12 +624,36 @@ function formatDateDisplay(value) {
     return String(value).replaceAll(".", "-");
 }
 
+// 저장용 날짜 포맷 정규화
+function normalizeDateForSave(value) {
+    if (!value) {
+        return "";
+    }
+    if (typeof value === "number" || /^\d+$/.test(String(value))) {
+        var d = new Date(Number(value));
+        if (isNaN(d.getTime())) {
+            return "";
+        }
+        return d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2);
+    }
+    var raw = String(value).trim();
+    if (!raw) {
+        return "";
+    }
+    if (raw.indexOf(" ") !== -1) {
+        raw = raw.split(" ")[0];
+    }
+    raw = raw.replaceAll(".", "-");
+    return raw;
+}
+
 function rowSelectFormatter(cell) {
     var checked = cell.getValue() ? " checked" : "";
     var disabled = window.hr010ReadOnly ? " disabled" : "";
     return "<input type='checkbox' class='row-check'" + checked + disabled + " />";
 }
 
+// 체크박스 UI 동기화
 function syncRowCheckbox(row, checked) {
     var el = row.getElement();
     if (!el) {
@@ -652,6 +665,7 @@ function syncRowCheckbox(row, checked) {
     }
 }
 
+// 셀 클릭 시 편집 시작
 function startEditOnClick(e, cell) {
     if (!isHr013Editable()) {
         return;
@@ -662,6 +676,7 @@ function startEditOnClick(e, cell) {
     }
 }
 
+// 이벤트/셀 객체 타입 분기
 function resolveCell(e, cell) {
     if (cell && typeof cell.getRow === "function") {
         return cell;
@@ -672,11 +687,12 @@ function resolveCell(e, cell) {
     return null;
 }
 
+// 날짜 입력 에디터
 function dateEditor(cell, onRendered, success, cancel) {
     var input = document.createElement("input");
     input.type = "date";
     input.style.width = "100%";
-    input.value = formatDateDisplay(cell.getValue());
+    input.value = normalizeDateForSave(cell.getValue());
 
     onRendered(function () {
         input.focus();
@@ -699,6 +715,7 @@ function dateEditor(cell, onRendered, success, cancel) {
     return input;
 }
 
+// 기술스택 태그 입력 에디터
 function stackTagEditor(cell, onRendered, success, cancel) {
     var uid = "hr013_tag_" + Date.now() + "_" + Math.floor(Math.random() * 100000);
     var wrap = document.createElement("div");
@@ -711,6 +728,7 @@ function stackTagEditor(cell, onRendered, success, cancel) {
     var docListenerBound = false;
     var docMouseDownHandler = null;
 
+    // 에디터 종료/저장
     function closeEditor() {
         if (closed) {
             return;
@@ -769,7 +787,7 @@ function stackTagEditor(cell, onRendered, success, cancel) {
     input.className = "text tag-input-field";
     input.id = uid + "_input";
     input.setAttribute("list", uid + "_datalist");
-    input.placeholder = "기술 입력/선택 후 Enter";
+    input.placeholder = "입력 후 Enter";
     box.appendChild(input);
 
     var row = document.createElement("div");
@@ -882,6 +900,7 @@ function getSkillLabelList(value) {
     return value;
 }
 
+// 코드 -> 라벨 동기화
 function syncStackLabelsFromCodes() {
     if (!window.hr013Table) {
         return;
@@ -896,6 +915,7 @@ function syncStackLabelsFromCodes() {
     });
 }
 
+// 역할 코드/라벨 정합성 보정
 function normalizeJobRows() {
     if (!window.hr013Table) {
         return;
@@ -928,6 +948,7 @@ function normalizeTagValue(value) {
     if (typeof value === "object") {
         return "";
     }
+    // 태그 CSV 정리(공백/빈값 제거)
     return String(value).split(",").map(function (code) {
         return $.trim(code);
     }).filter(function (code) {
@@ -935,6 +956,7 @@ function normalizeTagValue(value) {
     }).join(",");
 }
 
+// 역할 코드/라벨 정합성 보정(코드 우선)
 function normalizeJobCodes() {
     if (!window.hr013Table) {
         return;
@@ -981,7 +1003,7 @@ function amountFormatter(cell) {
 function toDateInput(v) {
     if (!v) return "";
     var d = new Date(Number(v));
-    if(isNaN(d.getTime())) return "";
+    if (isNaN(d.getTime())) return "";
     return d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2);
 
 }
