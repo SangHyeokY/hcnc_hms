@@ -505,7 +505,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .tag-input-box.is-readonly .tag-list{width:100%; justify-content: flex-start;}
 
 .tag-item {display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 999px; background: #e6f0ff; color: #2c5282; font-size: 13px; font-weight: 600; height: 32px;}
-.tag-input-box.is-readonly .tag-item{background:none; color:#333; }
+/*.tag-input-box.is-readonly .tag-item{background:none; color:#333; }*/
 .tag-select-row {display: flex; align-items: center; gap: 8px; margin-top: 6px;}
 .tag-select-row select {min-width: 140px;}
 .tag-help {background:#f8fafc; font-size: 12px; color: #6b7280; margin-bottom: 6px;}

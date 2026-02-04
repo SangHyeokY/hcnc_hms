@@ -461,7 +461,9 @@ function createTagInput(config) {
     function renderDatalist() {
         if (!$datalist) return;
         $datalist.empty();
-        options.forEach(function (item) {
+
+        // 기 등록된 항목에 대해서 list에 출력 안함.
+        options.filter(a => !tags.some(b => b.code === a.cd)).forEach(function (item) {
             var label = getLabel(item);
             if (label == null) return;
             var opt = document.createElement("option");
@@ -567,6 +569,7 @@ function createTagInput(config) {
         e.preventDefault(); // 포커스 이동 차단
         var code = $(this).closest(".tag-item").data("code");
         removeByCode(code);
+        renderDatalist();   // list 리로드
     });
 
     $input.on("keydown", function (e) {
@@ -574,6 +577,7 @@ function createTagInput(config) {
             e.preventDefault();
             addByLabel($(this).val());
             $(this).val("").focus();
+            renderDatalist();   // list 리로드
         }
     });
 

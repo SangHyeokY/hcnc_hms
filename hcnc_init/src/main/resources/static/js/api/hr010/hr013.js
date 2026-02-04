@@ -59,6 +59,8 @@ window.initTab3 = function() {
                normalizeJobRows();
                window.hr013Table.redraw(true);
            }
+
+           jobMap = getJobCodeMap();
        });
        setComCode("write_hr013_skl_cd", "skl_id", "", "cd", "cd_nm", function (res) {
            hr013SkillOptions = res || [];
@@ -81,6 +83,8 @@ window.initTab3 = function() {
            }
        });
 };
+
+let jobMap = [];
 
 function buildHr013Table() {
     if (!document.getElementById("TABLE_HR013_A")) return;
@@ -168,11 +172,7 @@ function buildHr013Table() {
                 hozAlign: "center",
                 formatter: jobCodeFormatter,
                 editor: "select",
-                editorParams: function () {
-                    return {
-                        values: getJobCodeMap()
-                    };
-                },
+                editorParams: (cell) => jobMap,
                 editable: isHr013Editable,
                 cellEdited: function (cell) {
                     var value = normalizeJobValue(cell.getValue()) || "";
