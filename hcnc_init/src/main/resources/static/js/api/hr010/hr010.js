@@ -48,7 +48,6 @@ $(document).ready(function () {
         loadUserTableData();
     });
 
-    // 검색 기능 - 사용 안함
     $("#searchKeyword").on("keyup", function (event) {
         if (event.key === "Enter") {
             loadUserTableData();
@@ -87,14 +86,27 @@ $(document).ready(function () {
             console.log("인적사항 유효성 검사 실패");
             return;
         }
-
-        if (!validateHr011Form()) {
-            console.log("Tab1 유효성 검사 실패");
-            return;
+    // ---------- Tab 마다 추가하기 ------------ //
+        if (activeTab === "tab1") {
+            if (!validateHr011Form()) {
+                console.log("Tab1 유효성 검사 실패");
+                return;
+            }
         }
-
-        // Tab2 ~ Tab4
-
+    // ---------- Tab 마다 추가하기 ------------ //
+//        if (activeTab === "tab2") {
+//            if (!validateHr011Form()) {
+//                console.log("Tab2 유효성 검사 실패");
+//                return;
+//            }
+//        }
+    // ---------- Tab 마다 추가하기 ------------ //
+//        if (activeTab === "tab3") {
+//            if (!validateHr011Form()) {
+//                console.log("Tab3 유효성 검사 실패");
+//                return;
+//            }
+//        }
     // ---------- Tab 마다 추가하기 ------------ //
 
         // 인적사항 정보 저장
@@ -105,13 +117,11 @@ $(document).ready(function () {
             }
             // Tab별로 저장
             if (activeTab === "tab1") {
+                console.log("Tab1 저장");
                 saveHr011TableData();
-            } else if (activeTab === "tab2") {
-                saveHr012TableData?.();
-                saveHr012TableB?.();
-            }
-            else if (activeTab === "tab3") {
-                saveHr013TableData?.();
+            } else if (activeTab === "tab4") {
+                console.log("Tab4 저장");
+                saveTab4All();
             }
         });
     });
@@ -195,13 +205,13 @@ function buildUserTable() {
             { title: "연락처", field: "tel", widthgrow: 3},
             { title: "이메일", field: "email", widthgrow:3},
             { title: "거주지역", field: "region", widthgrow:1 },
-            { title: "주 개발언어", field: "main_lang_nm", widthgrow: 4},
+            { title: "주 개발언어", field: "main_lang_nm", widthgrow: 3},
             { title: "경력연차", field: "exp_yr", hozAlign: "center" , widthgrow:1},
             { title: "최종학력", field: "edu_last", widthgrow:1},
-            { title: "보유자격증", field: "cert_txt" , widthgrow:1},
+            { title: "보유 자격증", field: "cert_txt" , widthgrow:1},
             { title: "희망단가", field: "hope_rate_amt", hozAlign: "right", formatter: amountFormatter, widthgrow:1 },
-            { title: "투입가능시점", field: "avail_dt", widthgrow:1 },
-            { title: "계약형태",
+            { title: "투입 가능 시점", field: "avail_dt", widthgrow:1 },
+            { title: "계약 형태",
                   field: "ctrt_typ", widthgrow:1,
                   formatter: function(cell, formatterParams, onRendered){
                       var val = cell.getValue();
@@ -353,7 +363,7 @@ function upsertUserBtn(callback)
             alert("저장되었습니다.");
             if (callback) callback(true);
 
-            closeUserViewModal();
+            // closeUserViewModal();
             loadUserTableData();
         },
         error: function () {
@@ -529,7 +539,7 @@ function clearUserForm() {
 }
 
 // 팝업의 역할에 따라 sub-title 변경 되기
-function setModalMode(mode) { // 간략화
+function setModalMode(mode) {
     console.log("Mode 구분 :", mode);
 
     const isView   = mode === "view";
@@ -544,6 +554,13 @@ function setModalMode(mode) { // 간략화
     else if (isInsert) $title.text("등록");
     else if (isUpdate) $title.text("수정");
 
+    // 등록 페이지의 경우
+    if (isInsert) {
+        const today = getToday();
+        $("#crt_ts").text(today);
+        $("#grade").text("없음");
+    }
+
     if (isView) {
         // 조회 => 수정불가
         $modal.find("input, textarea")
@@ -551,19 +568,24 @@ function setModalMode(mode) { // 간략화
               .prop("disabled", true);
 
         $modal.find("select").prop("disabled", true);
-    } else {
-        // 등록/수정할 때 수정 가능하도록 변경
+    }
+    else {
         $modal.find("input, textarea")
               .prop("readonly", false)
               .prop("disabled", false)
               .removeAttr("readonly")
               .removeAttr("disabled");
+
         $modal.find("select")
               .prop("disabled", false)
               .removeAttr("disabled");
     }
+    if (isInsert) {
+        $("#dev_type").prop("disabled", false);
+    } else {
+        $("#dev_type").prop("disabled", true);
+    }
 
-    $("#btn-excel").toggle(isView);
     $("#btn-user-save").toggle(isInsert || isUpdate);
     $(".tab-article").toggle(!isInsert);
     $("#main_lang_input").toggle(!isView);
@@ -678,12 +700,21 @@ function refreshTabLayout(tabId) {
 function validateUserForm() {
 
     // 값 가져오기
-    const dev_nm = $("#dev_nm").val().trim();
-    const brdt = $("#brdt").val().trim();
-    const tel = $("#tel").val().trim();
-    const email = $("#email").val().trim();
-    const hopeRaw = $("#hope_rate_amt").val().replace(/,/g, "");
-    const expYr = $("#exp_yr").val().trim();
+    const dev_nm = $("#dev_nm").val().trim();                    // 성명
+    const brdt = $("#brdt").val().trim();                        // 생년월일
+    // ==
+    const tel = $("#tel").val().trim();                          // 연락처
+    const email = $("#email").val().trim();                      // 이메일
+    // ==
+    const expYr = $("#exp_yr").val().trim();                     // 경력연차
+    const eduLast = $("#edu_last").val().trim();                 // 최종학력
+    // ==
+    const devType = $("#dev_type").val().trim();                 // 소속 구분 (dev_id에서 S: 직원, F: 프리랜서)
+    const workMd = $("#work_md").val().trim();                   // 근무 가능형태 (01: 상주, 02: 재택, 03: 혼합)
+    // ==
+    const hopeRaw = $("#hope_rate_amt").val().replace(/,/g, ""); // 희망단가 금액
+    const availDt = $("#avail_dt").val().trim();                 // 투입 가능일
+    const ctrtTyp = $("#ctrt_typ").val().trim();                 // 계약 형태 (01: 개인, 02: 법인)
 
     // 최대 입력 가능 숫자
     const MAX_AMT = 999999999;
@@ -744,6 +775,27 @@ function validateUserForm() {
         return false;
     }
 
+    // 최종학력
+    if (!eduLast) {
+        alert("최종학력을 입력하세요.");
+        $("#edu_last").focus();
+        return false;
+    }
+
+    // 소속 구분
+    if (!devType || devType == "") {
+        alert("소속을 선택해주세요.");
+        $("#dev_type").focus();
+        return false;
+    }
+
+    // 근무 가능 형태
+    if (!workMd || workMd == "") {
+        alert("근무 형태를 선택해주세요.");
+        $("#work_md").focus();
+        return false;
+    }
+
     // 희망단가
     if (!hopeRaw) {
         alert("희망단가를 입력해주세요.");
@@ -753,6 +805,20 @@ function validateUserForm() {
     if (Number(hopeRaw) > MAX_AMT) {
         alert("희망단가는 최대 999,999,999원까지 입력 가능합니다.");
         $("#hope_rate_amt").focus();
+        return false;
+    }
+
+    // 투입 가능일
+    if (!availDt) {
+        alert("투입 가능 시점을 입력하세요.");
+        $("#avail_dt").focus();
+        return false;
+    }
+
+    // 계약 형태
+    if (!ctrtTyp || ctrtTyp == "") {
+        alert("계약 형태를 선택해주세요.");
+        $("#ctrt_typ").focus();
         return false;
     }
 
@@ -822,11 +888,6 @@ function formatNumber(num) {
     return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
-// 문자열 가공
-//function unformatNumber(str) {
-//    return str ? str.replace(/,/g, "") : "";
-//}
-
 // 점수 계산
 function loadUserScore(devId) {
     // 최초값
@@ -839,7 +900,7 @@ function loadUserScore(devId) {
         data: { dev_id: devId },
         success: function(res) {
             const data = res.res || {};
-            $("#grade").text(data.rank || "-");
+            $("#grade").text(data.rank || "");
             $("#score").text(`(${data.score || 0}점)`);
         }
     });
@@ -877,3 +938,13 @@ function formatAmount(value) {
         .replace(/[^0-9]/g, "")
         .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
+
+// 현재 날짜
+function getToday() {
+  const d = new Date();
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+}
+
