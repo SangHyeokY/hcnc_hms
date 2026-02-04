@@ -7,6 +7,14 @@ window.currentDevId = null;
 var mainLangTagInput = null;
 var pendingMainLangValue = "";
 
+// 개인/법인 공통코드
+var ctrtTypMap = [];
+var ctrtTypOptions = [];
+
+// 근무형태 공통코드
+var workMdMap = [];
+var workMdOptions = [];
+
 // ============================================================================== //
 
 // 문서 첫 생성 시 실행
@@ -125,7 +133,114 @@ $(document).ready(function () {
             }
         });
     });
+
+    // 근무형태 셀렉트 공통콤보
+    setComCode("select_work_md", "WORK_MD", "", "cd", "cd_nm", function () {
+        workMdOptions = $("#select_work_md option").map(function () {
+            return { cd: this.value, cd_nm: $(this).text() };
+        }).get();
+        initSelectDefault("select_work_md", "상주/재택/혼합");
+        if (window.userTable) {
+            window.userTable.redraw(true);
+        }
+        workMdMap = getWorkMdMap();
+    });
+
+    // 개인/법인 셀렉트 공통콤보
+    setComCode("select_ctrt_typ", "CTRT_TYP", "", "cd", "cd_nm", function () {
+        ctrtTypOptions = $("#select_ctrt_typ option").map(function () {
+            return { cd: this.value, cd_nm: $(this).text() };
+        }).get();
+        initSelectDefault("select_ctrt_typ", "개인/법인");
+        if (window.userTable) {
+            window.userTable.redraw(true);
+        }
+        ctrtTypMap = getCtrtMap();
+    });
+
+//<option value="">상주/재택/혼합</option>
+//<option value="01">상주</option>
+//<option value="02">재택</option>
+//<option value="03">혼합</option>
+
 });
+
+// 역할 코드 -> 라벨 맵 생성
+function getWorkMdMap() {
+    var map = {};
+    if (workMdOptions && workMdOptions.length) {
+        workMdOptions.forEach(function (item) {
+            if (item.cd) {
+                map[item.cd] = item.cd_nm || item.cd;
+            }
+        });
+        return map;
+    }
+    $("#select_work_md option").each(function () {
+        var val = this.value;
+        if (val) {
+            map[val] = $(this).text();
+        }
+    });
+    return map;
+}
+
+// 역할 코드 -> 라벨 맵 생성
+function getCtrtMap() {
+    var map = {};
+    if (ctrtTypOptions && ctrtTypOptions.length) {
+        ctrtTypOptions.forEach(function (item) {
+            if (item.cd) {
+                map[item.cd] = item.cd_nm || item.cd;
+            }
+        });
+        return map;
+    }
+    $("#select_ctrt_typ option").each(function () {
+        var val = this.value;
+        if (val) {
+            map[val] = $(this).text();
+        }
+    });
+    return map;
+}
+
+// 콤보 기본 옵션/선택 처리
+function initSelectDefault(selectId, placeholderText) {
+    var $sel = $("#" + selectId);
+    if ($sel.find("option[value='']").length === 0) {
+        $sel.prepend("<option value=''>" + placeholderText + "</option>");
+    }
+    $sel.val("");
+    if (!$sel.val()) {
+        $sel.find("option:first").prop("selected", true);
+    }
+}
+
+// 역할 값이 객체로 와도 문자열로 정규화
+function normalizeJobValue(value) {
+    if (value == null) {
+        return "";
+    }
+    if (typeof value === "object") {
+        var current = value;
+        var guard = 0;
+        while (current && typeof current === "object" && guard < 4) {
+            var candidate = current.cd || current.value || current.label || current.cd_nm || current.name || current.nm || current.id;
+            if (candidate && typeof candidate !== "object") {
+                return String(candidate);
+            }
+            if (candidate && typeof candidate === "object") {
+                current = candidate;
+                guard += 1;
+                continue;
+            }
+            break;
+        }
+        return "";
+    }
+    return String(value);
+}
 
 // ============================================================================== //
 
@@ -199,27 +314,24 @@ function buildUserTable() {
                 download: false
             },
             { title: "dev_id", field: "dev_id", visible: false },
-            { title: "crt_ts", field: "crt_ts", visible: false},
-            { title: "성명", field: "dev_nm", hozAlign: "center", headerSort: true , widthgrow:1},
-            { title: "생년월일", field: "brdt", headerSort: true, widthgrow: 1},
-            { title: "연락처", field: "tel", widthgrow: 3},
-            { title: "이메일", field: "email", widthgrow:3},
-            { title: "거주지역", field: "region", widthgrow:1 },
-            { title: "주 개발언어", field: "main_lang_nm", widthgrow: 3},
-            { title: "경력연차", field: "exp_yr", hozAlign: "center" , widthgrow:1},
-            { title: "최종학력", field: "edu_last", widthgrow:1},
-            { title: "보유 자격증", field: "cert_txt" , widthgrow:1},
-            { title: "희망단가", field: "hope_rate_amt", hozAlign: "right", formatter: amountFormatter, widthgrow:1 },
-            { title: "투입 가능 시점", field: "avail_dt", widthgrow:1 },
-            { title: "계약 형태",
-                  field: "ctrt_typ", widthgrow:1,
-                  formatter: function(cell, formatterParams, onRendered){
-                      var val = cell.getValue();
-                      if(val === "01") return "개인";
-                      if(val === "02") return "법인";
-                      return "";
-                  }
-            }
+            { title: "성명", field: "dev_nm", hozAlign: "center", headerSort: true , widthGrow:1, minWidth: 80 },
+            { title: "생년월일", field: "brdt", headerSort: true, widthGrow: 2, minWidth: 120 },
+            { title: "연락처", field: "tel", widthGrow: 3, minWidth: 150 },
+            { title: "이메일", field: "email", widthGrow:4, minWidth: 180 },
+            { title: "거주지역", field: "region", widthGrow:1, minWidth: 80 },
+            { title: "주 개발언어", field: "main_lang_nm", widthGrow: 4, minWidth: 180 },
+            { title: "경력연차", field: "exp_yr", hozAlign: "center" , widthGrow:1, minWidth: 80 },
+            { title: "최종학력", field: "edu_last", widthGrow:4, minWidth: 180 },
+            { title: "보유 자격증", field: "cert_txt" , widthGrow:4, minWidth: 180 },
+            { title: "희망단가", field: "hope_rate_amt", hozAlign: "right", formatter: amountFormatter, widthGrow:2, minWidth: 120 },
+            { title: "투입 가능 시점", field: "avail_dt", widthGrow:2, minWidth: 120 },
+            {   title: "계약 형태",
+                field: "ctrt_typ",
+                formatter: function(cell) {
+                    var val = normalizeJobValue(cell.getValue()) || "";
+                    return ctrtTypMap[val] || val;
+                }, editor: false, editable: false, widthGrow: 1, minWidth: 80
+            },
         ],
         data: [],
         rowSelected: function (row) {
@@ -326,8 +438,8 @@ function upsertUserBtn(callback)
         cert_txt: $("#cert_txt").val(),
         hope_rate_amt: $("#hope_rate_amt").val().replace(/,/g, ""),
         avail_dt: $("#avail_dt").val(),
-        ctrt_typ: $("#ctrt_typ").val(),
-        work_md: $("#work_md").val(),
+        ctrt_typ: $("#select_ctrt_typ").val(),
+        work_md: $("#select_work_md").val(),
         dev_type: $("#dev_type").val(),
         crt_by: ""
     };
@@ -464,41 +576,53 @@ function fillUserForm(d) {
     $("#edu_last").val(d.edu_last || "");
     $("#cert_txt").val(d.cert_txt || "");
     $("#avail_dt").val(d.avail_dt || "");
-    $("#crt_ts").text(d.crt_ts || "");
+    $("#dev_id_input").text(d.dev_id || "");
 
     $("#hope_rate_amt").val(
         formatAmount(d.hope_rate_amt)
     );
 
     $("#dev_type").val(d.dev_type || "");
-    $("#work_md").val(d.work_md || "");
-    $("#ctrt_typ").val(d.ctrt_typ || "");
 
-    $("#show_devId").text(
-        window.currentDevId
-            ? "[" + window.currentDevId + "]"
-            : ""
-    );
+    // 셀렉트 work_md
+    if (d.work_md && workMdMap[d.work_md]) {
+        $("#select_work_md").val(d.work_md);
+    } else {
+        $("#select_work_md").val("");
+    }
+
+    // 셀렉트 ctrt_typ
+    if (d.ctrt_typ && ctrtTypMap[d.ctrt_typ]) {
+        $("#select_ctrt_typ").val(d.ctrt_typ);
+    } else {
+        $("#select_ctrt_typ").val("");
+    }
+
+//    $("#show_devId").text(
+//        window.currentDevId
+//            ? "[" + window.currentDevId + "]"
+//            : ""
+//    );
 
     // dev_id 값 가져와서 sub-title에 붙이기
     if (d.dev_id) {
         if (d.dev_id.startsWith("HCNC_F")) {
             $("#dev_type").val("HCNC_F");
-            $("#dev_type2").text("프리랜서");
-            $("#devTypeWrap").show();
+            // $("#dev_type2").text("프리랜서");
+            // $("#devTypeWrap").show();
         } else if (d.dev_id.startsWith("HCNC_S")) {
             $("#dev_type").val("HCNC_S");
-            $("#dev_type2").text("사원");
-            $("#devTypeWrap").show();
+            // $("#dev_type2").text("사원");
+            // $("#devTypeWrap").show();
         } else {
             // console.log("dev_id 값이 잘못 되었습니다.")
             $("#dev_type").val("");
-            $("#dev_type2").text("");
+            // $("#dev_type2").text("");
         }
     } else {
         // console.log("dev_id 값이 존재하지 않습니다.")
         $("#dev_type").val("");
-        $("#dev_type2").text("");
+        // $("#dev_type2").text("");
     }
 }
 
@@ -523,16 +647,17 @@ function clearUserForm() {
     $("#cert_txt").val("");
     $("#avail_dt").val("");
     $("#hope_rate_amt").val("");
-    $("#crt_ts").text("");
+    $("#dev_id_input").text("");
 
     $("#grade").text("");
     $("#score").text("");
     $("#dev_type").val("");
-    $("#work_md").val("");
-    $("#ctrt_typ").val("");
 
-    $("#show_devId").text("");
-    $("#dev_type2").text("");
+    $("#select_work_md").val("");
+    $("#select_ctrt_typ").val("");
+
+    // $("#show_devId").text("");
+    // $("#dev_type2").text("");
     $("#devTypeWrap").hide();
 
     $("#view-user-area").hide();
@@ -556,9 +681,9 @@ function setModalMode(mode) {
 
     // 등록 페이지의 경우
     if (isInsert) {
-        const today = getToday();
-        $("#crt_ts").text(today);
-        $("#grade").text("없음");
+        // const today = getToday();
+        $("#dev_id_input").text("-");
+        $("#grade").text("-");
     }
 
     if (isView) {
@@ -700,21 +825,21 @@ function refreshTabLayout(tabId) {
 function validateUserForm() {
 
     // 값 가져오기
-    const dev_nm = $("#dev_nm").val().trim();                    // 성명
-    const brdt = $("#brdt").val().trim();                        // 생년월일
+    const dev_nm = ($("#dev_nm").val() || "").trim();                    // 성명
+    const brdt = ($("#brdt").val() || "").trim();                        // 생년월일
     // ==
-    const tel = $("#tel").val().trim();                          // 연락처
-    const email = $("#email").val().trim();                      // 이메일
+    const tel = ($("#tel").val() || "").trim();                          // 연락처
+    const email = ($("#email").val() || "").trim();                      // 이메일
     // ==
-    const expYr = $("#exp_yr").val().trim();                     // 경력연차
-    const eduLast = $("#edu_last").val().trim();                 // 최종학력
+    const expYr = ($("#exp_yr").val() || "").trim();                     // 경력연차
+    const eduLast = ($("#edu_last").val() || "").trim();                 // 최종학력
     // ==
-    const devType = $("#dev_type").val().trim();                 // 소속 구분 (dev_id에서 S: 직원, F: 프리랜서)
-    const workMd = $("#work_md").val().trim();                   // 근무 가능형태 (01: 상주, 02: 재택, 03: 혼합)
+    const devType = ($("#dev_type").val() || "").trim();                 // 소속 구분 (dev_id에서 S: 직원, F: 프리랜서)
+    const workMd = ($("#select_work_md").val() || "").trim();                   // 근무 가능형태 (01: 상주, 02: 재택, 03: 혼합)
     // ==
-    const hopeRaw = $("#hope_rate_amt").val().replace(/,/g, ""); // 희망단가 금액
-    const availDt = $("#avail_dt").val().trim();                 // 투입 가능일
-    const ctrtTyp = $("#ctrt_typ").val().trim();                 // 계약 형태 (01: 개인, 02: 법인)
+    const hopeRaw = $("#hope_rate_amt").val().replace(/,/g, "");        // 희망단가 금액
+    const availDt = ($("#avail_dt").val() || "").trim();                 // 투입 가능일
+    const ctrtTyp = ($("#select_ctrt_typ").val() || "").trim();                 // 계약 형태 (01: 개인, 02: 법인)
 
     // 최대 입력 가능 숫자
     const MAX_AMT = 999999999;
@@ -791,8 +916,8 @@ function validateUserForm() {
 
     // 근무 가능 형태
     if (!workMd || workMd == "") {
-        alert("근무 형태를 선택해주세요.");
-        $("#work_md").focus();
+        alert("근무형태를 선택해주세요.");
+        $("#select_work_md").focus();
         return false;
     }
 
@@ -939,12 +1064,19 @@ function formatAmount(value) {
         .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
+// 공통 콤보
+//function jobCodeFormatter(cell) {
+//    var map = getCtrtMap()
+//    var val = normalizeJobValue(cell.getValue()) || "";
+//    return map[val] || val || "";
+//}
+
 // 현재 날짜
-function getToday() {
-  const d = new Date();
-  const yyyy = d.getFullYear();
-  const mm = String(d.getMonth() + 1).padStart(2, '0');
-  const dd = String(d.getDate()).padStart(2, '0');
-  return `${yyyy}-${mm}-${dd}`;
-}
+//function getToday() {
+//  const d = new Date();
+//  const yyyy = d.getFullYear();
+//  const mm = String(d.getMonth() + 1).padStart(2, '0');
+//  const dd = String(d.getDate()).padStart(2, '0');
+//  return `${yyyy}-${mm}-${dd}`;
+//}
 

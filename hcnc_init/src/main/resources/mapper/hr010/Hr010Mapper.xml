@@ -22,7 +22,6 @@
             , DATE_FORMAT(avail_dt, '%Y-%m-%d') AS avail_dt -- 투입가능시점
             , ctrt_typ -- 계약형태
             , hope_rate_amt -- 단가
-            , DATE_FORMAT(crt_ts, '%Y-%m-%d') AS crt_ts -- 등록일자
             , search_txt
         FROM tb_dev_info
         WHERE del_yn='N'
