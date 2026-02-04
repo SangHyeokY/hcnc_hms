@@ -565,14 +565,11 @@ function createTagInput(config) {
         });
     }
 
-    $input.on("mousedown", function() {
-        renderDatalist();
-    });
-
     $list.on("mousedown", ".tag-remove", function (e) {
         e.preventDefault(); // 포커스 이동 차단
         var code = $(this).closest(".tag-item").data("code");
         removeByCode(code);
+        renderDatalist();   // list 리로드
     });
 
     $input.on("keydown", function (e) {
@@ -580,6 +577,7 @@ function createTagInput(config) {
             e.preventDefault();
             addByLabel($(this).val());
             $(this).val("").focus();
+            renderDatalist();   // list 리로드
         }
     });
 
@@ -588,7 +586,7 @@ function createTagInput(config) {
         setOptions: function (list) {
             options = list || [];
             buildMap();
-            // renderDatalist(); // 데이터 로드 시점 변경 (랜더링 => 마우스 클릭 시)
+            renderDatalist();
         },
         setFromValue: setFromValue,
         clear: function () {
