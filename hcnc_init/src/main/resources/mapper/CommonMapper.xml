@@ -91,11 +91,13 @@
              , 	CASE WHEN skl.lvl = 4 THEN '✓' ELSE '' END lv4
              , 	CASE WHEN skl.lvl = 5 THEN '✓' ELSE '' END lv5
         FROM 	tb_dev_skl_info skl
-                    LEFT JOIN tb_cd_mst cd
-                              ON 	skl.skl_id = cd.cd
-                                  AND cd.grp_cd = 'skl_id'
-        WHERE	cd.del_yn = 'N'
-          AND cd.use_yn = 'Y'
+            LEFT JOIN tb_cd_mst cd
+                ON 	skl.skl_id = cd.cd
+                AND cd.grp_cd = 'skl_id'
+                AND cd.del_yn = 'N'
+                AND cd.use_yn = 'Y'
+        WHERE skl.del_yn = 'N'
+          AND skl.use_yn = 'Y'
           AND skl.dev_id = #{dev_id}
         ORDER BY skl.skl_id
     </select>
