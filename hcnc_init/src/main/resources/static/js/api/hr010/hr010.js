@@ -48,7 +48,6 @@ $(document).ready(function () {
         loadUserTableData();
     });
 
-    // 검색 기능 - 사용 안함
     $("#searchKeyword").on("keyup", function (event) {
         if (event.key === "Enter") {
             loadUserTableData();
@@ -358,6 +357,9 @@ function upsertUserBtn(callback)
                 window.currentDevId = response.dev_id;
                 $("#dev_id").val(response.dev_id);
             }
+            if (typeof window.saveTab4All === "function") {
+                window.saveTab4All();
+            }
             alert("저장되었습니다.");
             if (callback) callback(true);
 
@@ -537,7 +539,7 @@ function clearUserForm() {
 }
 
 // 팝업의 역할에 따라 sub-title 변경 되기
-function setModalMode(mode) { // 간략화
+function setModalMode(mode) {
     console.log("Mode 구분 :", mode);
 
     const isView   = mode === "view";
@@ -694,7 +696,7 @@ function refreshTabLayout(tabId) {
 
 // ============================================================================== //
 
-// 데이터 유효성 검사 [순서 정리하기]
+// 데이터 유효성 검사
 function validateUserForm() {
 
     // 값 가져오기

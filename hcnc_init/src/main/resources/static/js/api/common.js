@@ -297,11 +297,10 @@ function selectHighlightedOrFirst() {
 /* =========================
  * 태그 에디터 (Tabulator)
  * ========================= */
-function tagEditor(cell, onRendered, success, cancel) {
+function tagEditor(cell, onRendered, success, cancel, test) {
     // id 동적 생성용 (타뷸레이터 id)
     let key = cell.getTable().element.id;
-    let cdvalue = cell.getRow().getCell("cd")._cell.value;
-    let keyvalue = cell.getRow().getCell("key")._cell.value;
+    let cdvalue = cell.getRow().getCell("cd")._cell?.value;
 
     const container = document.createElement("div");
     container.className = "tag-input";
