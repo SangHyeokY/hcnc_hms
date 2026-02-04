@@ -98,6 +98,7 @@ function buildHr013Table() {
         selectable: false,
         columns: [
             {
+                title: "선택",
                 field: "_checked",
                 formatter: rowSelectFormatter,
                 hozAlign: "center",
@@ -117,6 +118,25 @@ function buildHr013Table() {
                     syncRowCheckbox(row, next);
                 }
             },
+            { title: "프로젝트명", field: "prj_nm", editor: "input", editable: isHr013Editable, cellClick: startEditOnClick, width: 250 },
+            {
+                title: "시작일",
+                field: "st_dt",
+                hozAlign: "center",
+                formatter: dateDisplayFormatter,
+                editor: dateEditor,
+                editable: isHr013Editable,
+                cellClick: startEditOnClick, width: 140
+            },
+            {
+                title: "종료일",
+                field: "ed_dt",
+                hozAlign: "center",
+                formatter: dateDisplayFormatter,
+                editor: dateEditor,
+                editable: isHr013Editable,
+                cellClick: startEditOnClick, width: 140
+            },
             {
                 title: "당사 여부",
                 field: "inprj_yn",
@@ -131,25 +151,7 @@ function buildHr013Table() {
                         return;
                     }
                     toggleInprjValue(resolved);
-                }
-            },
-            {
-                title: "시작일",
-                field: "st_dt",
-                hozAlign: "center",
-                formatter: dateDisplayFormatter,
-                editor: dateEditor,
-                editable: isHr013Editable,
-                cellClick: startEditOnClick
-            },
-            {
-                title: "종료일",
-                field: "ed_dt",
-                hozAlign: "center",
-                formatter: dateDisplayFormatter,
-                editor: dateEditor,
-                editable: isHr013Editable,
-                cellClick: startEditOnClick
+                }, width: 90
             },
             {
                 title: "고객사",
@@ -165,10 +167,9 @@ function buildHr013Table() {
                         row.update({ _prev_cust_nm: cell.getValue() || "" });
                     }
                 },
-                cellClick: startEditOnClick
+                cellClick: startEditOnClick, width: 110
             },
-            { title: "프로젝트명", field: "prj_nm", editor: "input", editable: isHr013Editable, cellClick: startEditOnClick },
-            { title: "계약단가", field: "rate_amt", hozAlign: "right", formatter: amountFormatter, editor: "input", editable: isHr013Editable, cellClick: startEditOnClick },
+            { title: "계약단가", field: "rate_amt", hozAlign: "right", formatter: amountFormatter, editor: "input", editable: isHr013Editable, cellClick: startEditOnClick , width: 110},
             {
                 title: "역할",
                 field: "job_cd",
@@ -183,11 +184,11 @@ function buildHr013Table() {
                         cell.setValue(value, true);
                     }
                 },
-                cellClick: startEditOnClick
+                cellClick: startEditOnClick, width: 90
             },
             { title: "기술스택", field: "stack_txt", formatter: skillDisplayFormatter, editor: stackTagEditor, editable: isHr013Editable, cellClick: startEditOnClick },
-            { title: "투입률", field: "alloc_pct", hozAlign: "right", formatter: percentageFormatter, minWidth: 90, editor: "input", editable: isHr013Editable, cellClick: startEditOnClick },
-            { title: "비고", field: "remark", editor: "input", editable: isHr013Editable, cellClick: startEditOnClick }
+            { title: "투입률", field: "alloc_pct", hozAlign: "right", formatter: percentageFormatter, width: 90, editor: "input", editable: isHr013Editable, cellClick: startEditOnClick },
+            { title: "비고", field: "remark", editor: "input", editable: isHr013Editable, cellClick: startEditOnClick , width: 200}
         ],
         data: []
     });
@@ -212,7 +213,7 @@ function openHr013Modal(mode) {
         var rowData = getHr013SelectedRow();
 
         if (!rowData) {
-            alert("수정할 행을 선택해주세요.");
+            alert("수정할 행을 체크해주세요.");
             return;
         }
         fillHr013Form(rowData);
