@@ -186,7 +186,9 @@ function buildHr013Table() {
                 },
                 cellClick: startEditOnClick, width: 90
             },
-            { title: "기술스택", field: "stack_txt", formatter: skillDisplayFormatter, editor: stackTagEditor, editable: isHr013Editable, cellClick: startEditOnClick },
+            { title: "기술스택", field: "skl_id_lst", hozAlign: "left", editor: tagEditor, formatter: tagFormatter,
+                editable: () => currentMode !== "view" },
+            // { title: "기술스택", field: "stack_txt", formatter: skillDisplayFormatter, editor: stackTagEditor, editable: isHr013Editable, cellClick: startEditOnClick },
             { title: "투입률", field: "alloc_pct", hozAlign: "right", formatter: percentageFormatter, width: 90, editor: "input", editable: isHr013Editable, cellClick: startEditOnClick },
             { title: "비고", field: "remark", editor: "input", editable: isHr013Editable, cellClick: startEditOnClick , width: 200}
         ],
@@ -247,6 +249,8 @@ function loadHr013TableData() {
                 }
                 row.role_nm = normalizeJobValue(row.role_nm) || "";
                 row.job_cd = normalizeJobValue(row.job_cd) || "";
+
+                row.skl_id_lst = (row.skl_id_lst !== undefined) ? JSON.parse(row.skl_id_lst) : [];
                 return row;
             });
             window.hr013Table.setData(normalized);
@@ -450,9 +454,12 @@ function saveHr013InlineRows() {
     }
     var devId = window.currentDevId || $("#dev_id").val();
     var rows = window.hr013Table.getData();
+
     var requests = [];
 
     rows.forEach(function (row) {
+        const code = $(row.skl_id_lst[0]).map(x => x.code);
+
         if (!row.inprj_yn || !row.st_dt || !row.ed_dt) {
             return;
         }
@@ -474,7 +481,7 @@ function saveHr013InlineRows() {
                 prj_nm: row.prj_nm || "",
                 rate_amt: row.rate_amt || "",
                 job_cd: row.job_cd || "",
-                stack_txt: row.stack_txt || "",
+                stack_txt: Object.values(row.skl_id_lst).map(item => item.code).toString() || "", //row.stack_txt || "",
                 alloc_pct: row.alloc_pct || "",
                 remark: row.remark || ""
             }
@@ -866,13 +873,27 @@ function initSelectDefault(selectId, placeholderText) {
 }
 
 // 테이블 표시용 기술스택 변환
+// function skillDisplayFormatter(cell) {
+//     var row = cell.getRow().getData();
+//     if (row && row.stack_txt_nm != null && row.stack_txt_nm !== "") {
+//         return row.stack_txt_nm;
+//     }
+//     var value = cell.getValue();
+//     return getSkillLabelList(value);
+// }
+
+// 테이블 표시용 기술스택 변환
 function skillDisplayFormatter(cell) {
     var row = cell.getRow().getData();
     if (row && row.stack_txt_nm != null && row.stack_txt_nm !== "") {
-        return row.stack_txt_nm;
+        return `
+            <div class="tag-input-box">
+                <ul class="tag-list">
+                    ${row.stack_txt_nm.split(",").map(t => `<li class="tag-item"><span class="tag-text">${t.trim()}</span></li>`).join("")}
+                </ul>
+            </div>`;
     }
-    var value = cell.getValue();
-    return getSkillLabelList(value);
+    return null;
 }
 
 function getSkillLabelList(value) {

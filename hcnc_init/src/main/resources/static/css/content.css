@@ -696,33 +696,14 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
     color : #61646D;
 }
 
-#TABLE_HR012_A {
-    border-radius: 0px !important;
-}
-
 #TABLE_HR012_A > .tabulator-header {
     display: none;
-}
-
-#TABLE_HR012_A .tabulator-table > .tabulator-row:nth-child(1) {
-    border-top: 2px solid #F0F1F3;
-}
-
-#TABLE_HR012_A .tabulator-table > .tabulator-row {
-    border-bottom: 2px solid #F0F1F3;
 }
 
 #TABLE_HR012_A .tabulator-table > .tabulator-row > .tabulator-cell:nth-child(2) {
     background-color: #F1F4F9 !important;
     font-size: 14px;
     font-weight: bold;
-}
-
-#TABLE_HR012_A .tabulator-table > .tabulator-row > .tabulator-cell {
-    min-height: 44px;
-    align-content: center;
-    border: 0;
-    /*border: solid 1px #DEE2E7 !important;*/
 }
 
 /* 탭 영역  */
