@@ -1,5 +1,6 @@
 package com.hcncinit.service.cm040;
 
+import com.hcncinit.logging.QryLog;
 import java.util.List;
 import java.util.Map;
 
@@ -13,21 +14,25 @@ public class Cm040Service {
     @Autowired
     private SqlSession sqlSession;
 
+    @QryLog(scrnCd = "CM040", fnCd = "CODE_GRP_LIST", opTyp = "SELECT")
     public List<Map<String, Object>> mainList(Map<String, Object> map) {
         // 코드그룹 목록 조회
         return this.sqlSession.selectList("com.hcncinit.Cm040Mapper.selectMainList", map);
     }
 
+    @QryLog(scrnCd = "CM040", fnCd = "CODE_DTL_LIST", opTyp = "SELECT")
     public List<Map<String, Object>> detailList(Map<String, Object> map) {
         // 상세코드 목록 조회
         return this.sqlSession.selectList("com.hcncinit.Cm040Mapper.selectDetailList", map);
     }
 
+    @QryLog(scrnCd = "CM040", fnCd = "CODE_GRP_SAVE", opTyp = "UPSERT")
     public int mainUpsert(Map<String, Object> map) {
         // 코드그룹 신규/수정 저장
         return this.sqlSession.insert("com.hcncinit.Cm040Mapper.upsertMain", map);
     }
 
+    @QryLog(scrnCd = "CM040", fnCd = "CODE_DTL_SAVE", opTyp = "UPSERT")
     public int detailUpsert(Map<String, Object> map) {
         // 상세코드 신규/수정 저장
         return this.sqlSession.insert("com.hcncinit.Cm040Mapper.upsertDetail", map);
@@ -65,21 +70,25 @@ public class Cm040Service {
         }
     }
 
+    @QryLog(scrnCd = "CM040", fnCd = "CODE_GRP_DELETE", opTyp = "DELETE")
     public int mainDelete(Map<String, Object> map) {
         // 코드그룹 삭제 처리
         return this.sqlSession.update("com.hcncinit.Cm040Mapper.deleteMain", map);
     }
 
+    @QryLog(scrnCd = "CM040", fnCd = "CODE_DTL_DELETE", opTyp = "DELETE")
     public int detailDelete(Map<String, Object> map) {
         // 상세코드 삭제 처리
         return this.sqlSession.update("com.hcncinit.Cm040Mapper.deleteDetail", map);
     }
 
+    @QryLog(scrnCd = "CM040", fnCd = "CODE_DTL_SORT", opTyp = "UPDATE")
     public int detailSort(Map<String, Object> map) {
         // 상세코드 정렬 저장
         return this.sqlSession.update("com.hcncinit.Cm040Mapper.updateDetailSort", map);
     }
 
+    @QryLog(scrnCd = "CM040", fnCd = "CODE_DTL_COUNT", opTyp = "SELECT")
     public int detailCount(Map<String, Object> map) {
         // 상세코드 개수 조회
         Object count = this.sqlSession.selectOne("com.hcncinit.Cm040Mapper.detailCount", map);

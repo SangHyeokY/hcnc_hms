@@ -1,5 +1,6 @@
 package com.hcncinit.service.hr010;
 
+import com.hcncinit.logging.QryLog;
 import org.apache.ibatis.session.SqlSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,9 +15,11 @@ public class Hr012Service {
     private SqlSession sqlSession;
 
     // tab2_1
+    @QryLog(scrnCd = "HR010", fnCd = "TAB2_1_SELECT", opTyp = "SELECT")
     public List<Map<String, Object>> select_tab2_1(String devId) {
         return this.sqlSession.selectList("com.hcncinit.Hr012Mapper.select_tab2_1", devId);
     }
+    @QryLog(scrnCd = "HR010", fnCd = "TAB2_1_SAVE", opTyp = "UPSERT")
     public void upsert_tab2_1(List<Map<String, Object>> saveList) {
         for (Map<String, Object> row : saveList) {
             sqlSession.update("com.hcncinit.Hr012Mapper.upsert_tab2_1", row);
@@ -24,9 +27,11 @@ public class Hr012Service {
     }
 
     // tab2_2
+    @QryLog(scrnCd = "HR010", fnCd = "TAB2_2_SELECT", opTyp = "SELECT")
     public List<Map<String, Object>> select_tab2_2(String devId) {
         return this.sqlSession.selectList("com.hcncinit.Hr012Mapper.select_tab2_2", devId);
     }
+    @QryLog(scrnCd = "HR010", fnCd = "TAB2_2_SAVE", opTyp = "UPSERT")
     public void save_tab2_2(List<Map<String, Object>> saveList) {
         for (Map<String, Object> row : saveList) {
             sqlSession.update("com.hcncinit.Hr012Mapper.save_tab2_2", row);

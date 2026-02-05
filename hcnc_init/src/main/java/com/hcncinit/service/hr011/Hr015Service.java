@@ -1,5 +1,6 @@
 package com.hcncinit.service.hr011;
 
+import com.hcncinit.logging.QryLog;
 import java.util.List;
 import java.util.Map;
 
@@ -13,16 +14,19 @@ public class Hr015Service {
     @Autowired
     private SqlSession sqlSession;
 
+    @QryLog(scrnCd = "HR010", fnCd = "TAB4_EVAL_LIST", opTyp = "SELECT")
     public List<Map<String, Object>> listA(Map<String, Object> map) {
         // 탭1 평가 목록 조회
         return this.sqlSession.selectList("com.hcncinit.Hr015Mapper.selectListA", map);
     }
 
+    @QryLog(scrnCd = "HR010", fnCd = "TAB4_RISK_LIST", opTyp = "SELECT")
     public List<Map<String, Object>> listB(Map<String, Object> map) {
         // 탭2 리스크 조회
         return this.sqlSession.selectList("com.hcncinit.Hr015Mapper.selectListB", map);
     }
 
+    @QryLog(scrnCd = "HR010", fnCd = "TAB4_EVAL_SAVE", opTyp = "UPSERT")
     public int saveA(Map<String, Object> map) {
         // 탭1 평가 저장
         Object rowsObj = map.get("rows");
@@ -35,6 +39,7 @@ public class Hr015Service {
         }
     }
 
+    @QryLog(scrnCd = "HR010", fnCd = "TAB4_RISK_SAVE", opTyp = "UPSERT")
     public int saveB(Map<String, Object> map) {
         // 탭2 리스크 저장
         int updated = this.sqlSession.update("com.hcncinit.Hr015Mapper.updateLatestRiskByDev", map);

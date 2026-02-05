@@ -1,5 +1,6 @@
 package com.hcncinit.service;
 
+import com.hcncinit.logging.QryLog;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -33,6 +34,7 @@ public class FileService {
     /**
      * 통합 파일 Upsert 메서드
      */
+    @QryLog(scrnCd = "FILE", fnCd = "FILE_UPSERT", opTyp = "UPLOAD")
     public int fileUpsert(Map<String, Object> map, String fileType) throws IOException {
         String code = (String) map.get("code");
         String check = (String) map.get("check");
