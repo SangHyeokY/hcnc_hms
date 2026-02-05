@@ -88,60 +88,30 @@ $(document).ready(function () {
         const activeTab = $(".tab-btn.active").data("tab");
         console.log("현재 탭 :", activeTab);
 
-    // ---------- Tab 마다 추가하기 ------------ //
         if (!validateUserForm()) {
             console.log("인적사항 유효성 검사 실패");
             return;
         }
-    // ---------- Tab 마다 추가하기 ------------ //
-        if (activeTab === "tab1") {
-            if (!validateHr011Form()) {
-                console.log("Tab1 유효성 검사 실패");
-                return;
-            }
-        }
-    // ---------- Tab 마다 추가하기 ------------ //
-        if (activeTab === "tab2") {
-            if (!validateHr012Form()) {
-                console.log("Tab2 유효성 검사 실패");
-                return;
-            }
-        }
-    // ---------- Tab 마다 추가하기 ------------ //
-        if (activeTab === "tab3") {
-            if (!window.hr013Table) {
-                console.log("Tab3 유효성 검사 실패");
-                return;
-            }
-        }
-    // ---------- Tab 마다 추가하기 ------------ //
-         if (activeTab === "tab4") {
-            if (!window.hr014TableA) {
-                console.log("Tab4 유효성 검사 실패");
-                return;
-            }
-        }
-    // ---------- Tab 마다 추가하기 ------------ //
 
-        // 인적사항 정보 저장
-        upsertUserBtn(function(success) {
-            if (!success) {
-                console.log("인적사항 저장 실패");
-                return;
+        if (currentMode === "insert" || currentMode === "view") {
+                console.log("Tab Mode 구분 : ", currentMode);
+            } else {
+                // update 모드에서만 탭별 검사
+                if (activeTab === "tab1" && !validateHr011Form()) return;
+                if (activeTab === "tab2" && !validateHr012Form()) return;
+                if (activeTab === "tab3" && !window.hr013Table) return;
+                if (activeTab === "tab4" && !window.hr014TableA) return;
             }
-            // Tab별로 저장
-            if (activeTab === "tab1") {
-                console.log("Tab1 저장");
-                saveHr011TableData();
-            } else if (activeTab === "tab2") {
-                console.log("Tab2 저장");
-                saveHr012TableData();
-            } else if (activeTab === "tab3") {
-                console.log("Tab3 저장");
-                saveHr013InlineRows();
-            }else if (activeTab === "tab4") {
-                console.log("Tab4 저장");
-                saveTab4All();
+
+            // 인적사항 + 탭 저장
+            upsertUserBtn(function (success) {
+                if (!success) return;
+
+                if (currentMode !== "insert") {
+                    if (activeTab === "tab1") saveHr011TableData();
+                    else if (activeTab === "tab2") saveHr012TableData();
+                    else if (activeTab === "tab3") saveHr013InlineRows();
+                    else if (activeTab === "tab4") saveTab4All();
             }
         });
     });
@@ -454,6 +424,7 @@ function upsertUserBtn(callback)
         crt_by: ""
     };
 
+    const activeTab = $(".tab-btn.active").data("tab");
     const file = $("#fileProfile")[0].files[0]; // 또는 payload.dev_img
     const fd = new FormData();
 
@@ -475,21 +446,62 @@ function upsertUserBtn(callback)
         contentType: false,
         dataType: "json",
         success: function (response) {
+
+            if (!response || response.success === false) {
+                const msg = response?.message || "저장에 실패했습니다.";
+                alert(msg);
+
+                if (callback) callback(false);
+                return;
+            }
+
+            // 정상적으로 되었을 경우
             if (response && response.dev_id) {
                 window.currentDevId = response.dev_id;
                 $("#dev_id").val(response.dev_id);
             }
-//            if (typeof window.saveTab4All === "function") {
-//                window.saveTab4All();
-//            }
-            alert("저장되었습니다.");
-            if (callback) callback(true);
 
-            // closeUserViewModal();
+            if (currentMode !== "insert"){
+                // 3) Tab별로 저장 메시지 알림
+                const msgMap = {
+                    tab1: "인적사항,\n소속 및 계약정보\n정보가 저장되었습니다.",
+                    tab2: "인적사항,\n보유역량 및 숙련도\n정보가 저장되었습니다.",
+                    tab3: "인적사항,\n프로젝트\n정보가 저장되었습니다.",
+                    tab4: "인적사항,\n평가 및 리스크\n정보가 저장되었습니다."
+                };
+                alert(msgMap[activeTab]);
+            }
+            else {
+                alert("인적사항\n정보가 저장되었습니다.");
+                closeUserViewModal();
+            }
+
+            if (callback) callback(true);
             loadUserTableData();
         },
-        error: function () {
-            alert("저장 중 오류가 발생했습니다.");
+        error: function (xhr, status, error) {
+            let msg = "저장 중 오류가 발생했습니다.";
+
+            if (xhr.responseJSON && xhr.responseJSON.message) {
+                msg = xhr.responseJSON.message;
+            }
+
+            else if (xhr.responseText) {
+                console.error("Server Error:", xhr.responseText);
+            }
+
+            if (xhr.status === 400) {
+                msg = "ERROR_CODE : 400";
+            } else if (xhr.status === 401) {
+                msg = "ERROR_CODE : 401";
+            } else if (xhr.status === 403) {
+                msg = "ERROR_CODE : 403";
+            } else if (xhr.status === 500) {
+                msg = "ERROR_CODE : 500\n서버 오류가 발생했습니다. 관리자에게 문의하세요.";
+            }
+
+            alert(msg);
+
             if (callback) callback(false);
         }
     });

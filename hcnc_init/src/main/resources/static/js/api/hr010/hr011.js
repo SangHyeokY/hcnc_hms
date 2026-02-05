@@ -169,7 +169,7 @@ function loadHr011TableData(devId) {
             if (data) {fillHr011Form(data);}
           },
         error: () => {
-            alert("데이터 조회 실패");
+            console.log("데이터 조회 실패");
             clearHr011Form();
             setHr011Mode("insert");
         }
