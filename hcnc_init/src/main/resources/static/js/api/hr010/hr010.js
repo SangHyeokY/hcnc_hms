@@ -544,11 +544,14 @@ function deleteUserRows() {
 // 모달(팝업) 열리는 이벤트 처리
 openUserModal = function(mode, data) {
     currentMode = mode;
+    const $modal = $("#view-user-area");
+
     if(mode === "insert") clearUserForm();
     else fillUserForm(data || userTable.getSelectedRows()[0].getData());
 
     setModalMode(mode);
-    $("#view-user-area").show();
+    $modal.removeClass("show");
+    $modal.show();
 
     initAllTabs(); // 모든 tab 초기화
 
@@ -570,6 +573,10 @@ openUserModal = function(mode, data) {
             loadUserScore(data.dev_id);
         });
     }
+
+    setTimeout(() => {
+        $modal.addClass("show");
+    }, 100);
 };
 
 // 모든 tab 초기화
@@ -682,9 +689,7 @@ function clearUserForm() {
 
     // $("#show_devId").text("");
     // $("#dev_type2").text("");
-    $("#devTypeWrap").hide();
-
-    $("#view-user-area").hide();
+    // $("#devTypeWrap").hide();
 }
 
 // ============================================================================== //
@@ -807,8 +812,14 @@ function broadcastTabReadonly(isReadOnly) {
 
 // 모달 닫히면 영역 사라지게 하기
 function closeUserViewModal() {
-    document.getElementById("view-user-area").style.display = "none";
-    clearUserForm()
+    // document.getElementById("view-user-area").style.display = "none";
+    const $modal = $("#view-user-area");
+    $modal.removeClass("show");
+
+    setTimeout(() => {
+        $modal.hide();
+        clearUserForm();
+    }, 250);
 }
 
 // 탭별 버튼 표시
@@ -838,7 +849,7 @@ function refreshTabLayout(tabId) {
         if (tabId === "tab4" && window.hr014TableA) {
             window.hr014TableA.redraw(true);
         }
-    }, 0);
+    }, 10);
 }
 
 // ============================================================================== //
@@ -965,7 +976,7 @@ function validateUserForm() {
     // 계약 형태
     if (!ctrtTyp || ctrtTyp == "") {
         alert("계약 형태를 선택해주세요.");
-        $("#ctrt_typ").focus();
+        $("#select_ctrt_typ").focus();
         return false;
     }
 
@@ -1087,12 +1098,16 @@ function formatAmount(value) {
 }
 
 // 엑셀 다운로드 처리
-document.getElementById("btn-excel").addEventListener("click", function () {
-    const devId = document.getElementById("dev_id").value;
-    const devNm = document.getElementById("dev_nm").value;
-    if (!devId) {
-        alert("오류 : 개발자ID가 없습니다.");
-        return;
-    }
-    location.href = `/common/getExcel?dev_id=${encodeURIComponent(devId)}` + `&dev_nm=${encodeURIComponent(devNm)}`;
-});
+const excelBtn = document.getElementById("btn-excel");
+if (excelBtn) {
+    excelBtn.addEventListener("click", function () {
+        const devId = document.getElementById("dev_id").value;
+        const devNm = document.getElementById("dev_nm").value;
+        if (!devId) {
+            alert("오류 : 개발자ID가 없습니다.");
+            return;
+        }
+        location.href =
+            `/common/getExcel?dev_id=${encodeURIComponent(devId)}&dev_nm=${encodeURIComponent(devNm)}`;
+    });
+}

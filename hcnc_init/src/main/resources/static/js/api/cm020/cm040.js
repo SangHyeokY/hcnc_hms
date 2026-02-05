@@ -544,12 +544,20 @@ function openMainWriteModal(type) {
         $("#write_main_cd").val(rowData.cd).prop("disabled", true);
     }
 
-    $("#write-main-area").show();
+    const $modal = $("#write-main-area");
+    $modal.show();
+    setTimeout(() => {
+        $("#write-main-area").addClass("show");
+    }, 100);
 }
 
 // 코드그룹 등록/수정 모달 닫기
 function closeMainWriteModal() {
-    $("#write-main-area").hide();
+    const modal = document.getElementById("write-main-area");
+    modal.classList.remove("show");
+    setTimeout(() => {
+        modal.style.display = "none";
+    }, 250);
 }
 
 // 상세코드 등록/수정 모달 오픈
@@ -611,11 +619,18 @@ function openDetailWriteModal(type) {
         $("#write_detail_adinfo_05").val(rowData.adinfo_05 || "");
         $("#write_detail_use_yn").val(rowData.use_yn);
     }
-
-    $("#write-detail-area").show();
+    const $modal = $("#write-detail-area");
+    $modal.show();
+    setTimeout(() => {
+        $("#write-detail-area").addClass("show");
+    }, 100);
 }
 
 // 상세코드 등록/수정 모달 닫기
 function closeDetailWriteModal() {
-    $("#write-detail-area").hide();
+    const modal = document.getElementById("write-detail-area");
+    modal.classList.remove("show");
+    setTimeout(() => {
+        modal.style.display = "none";
+    }, 250);
 }
