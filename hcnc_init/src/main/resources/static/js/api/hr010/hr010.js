@@ -15,6 +15,17 @@ var ctrtTypOptions = [];
 var workMdMap = [];
 var workMdOptions = [];
 
+// 탭 입력/수정 여부 판단 => 전역 플래그
+let initTabs = false;
+
+// 탭 입력/수정 여부 판단
+const changedTabs = {
+    tab1: false,
+    tab2: false,
+    tab3: false,
+    tab4: false
+};
+
 // ============================================================================== //
 
 // 문서 첫 생성 시 실행
@@ -83,6 +94,26 @@ $(document).ready(function () {
         openUserModal("view", rowData);
     });
 
+    $("#tab1").on("change input", "input, select, textarea", function () {
+        if (initTabs) return;
+        changedTabs.tab1 = true;
+    });
+
+    $("#tab2").on("change input", "input, select, textarea", function () {
+        if (initTabs) return;
+        changedTabs.tab2 = true;
+    });
+
+    $("#tab3").on("change input", "input, select, textarea", function () {
+        if (initTabs) return;
+        changedTabs.tab3 = true;
+    });
+
+    $("#tab4").on("change input", "input, select, textarea", function () {
+        if (initTabs) return;
+        changedTabs.tab4 = true;
+    });
+
     // 인적사항 및 tab 정보 저장 (통합 저장)
     $(document).on("click", "#btn-user-save", function () {
         const activeTab = $(".tab-btn.active").data("tab");
@@ -97,10 +128,10 @@ $(document).ready(function () {
                 console.log("Tab Mode 구분 : ", currentMode);
             } else {
                 // update 모드에서만 탭별 검사
-                if (activeTab === "tab1" && !validateHr011Form()) return;
-                if (activeTab === "tab2" && !validateHr012Form()) return;
-                if (activeTab === "tab3" && !window.hr013Table) return;
-                if (activeTab === "tab4" && !window.hr014TableA) return;
+                if (changedTabs.tab1 && !validateHr011Form()) return;
+                if (changedTabs.tab2 && !validateHr012Form()) return;
+                if (changedTabs.tab3 && !window.hr013Table) return;
+                if (changedTabs.tab4 && !window.hr014TableA) return;
             }
 
             // 인적사항 + 탭 저장
@@ -108,10 +139,19 @@ $(document).ready(function () {
                 if (!success) return;
 
                 if (currentMode !== "insert") {
-                    if (activeTab === "tab1") saveHr011TableData();
-                    else if (activeTab === "tab2") saveHr012TableData();
-                    else if (activeTab === "tab3") saveHr013InlineRows();
-                    else if (activeTab === "tab4") saveTab4All();
+                    // if (activeTab === "tab1") saveHr011TableData();
+                    // else if (activeTab === "tab2") saveHr012TableData();
+                    // else if (activeTab === "tab3") saveHr013InlineRows();
+                    // else if (activeTab === "tab4") saveTab4All();
+
+                    // 수정/변경된 값들을 한번에 저장
+                    if (changedTabs.tab1) saveHr011TableData();
+                    if (changedTabs.tab2) saveHr012TableData();
+                    if (changedTabs.tab3) saveHr013InlineRows();
+                    if (changedTabs.tab4) saveTab4All();
+
+                    // 저장이 끝나면 초기화
+                    Object.keys(changedTabs).forEach(k => changedTabs[k] = false);
             }
         });
     });
@@ -544,6 +584,7 @@ function deleteUserRows() {
 // 모달(팝업) 열리는 이벤트 처리
 openUserModal = function(mode, data) {
     currentMode = mode;
+    initTabs = true;
     const $modal = $("#view-user-area");
 
     if(mode === "insert") clearUserForm();
@@ -575,6 +616,7 @@ openUserModal = function(mode, data) {
     }
 
     setTimeout(() => {
+        initTabs = false;
         $modal.addClass("show");
     }, 100);
 };

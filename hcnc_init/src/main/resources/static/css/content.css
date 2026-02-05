@@ -629,8 +629,9 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .modal-btn ul li {margin-right: 10px;}
 .modal-btn ul li:last-child {margin-right: 0;}
 .modal-btn .btn {padding: 8px 20px; border-radius: 8px; background-color: #fff; border: 1px solid #4880FF; color: #4880FF; font-size: 14px; font-weight: 500;}
-.modal-btn .btn.btn-save {background: #5A8DFF; border-color: #5A8DFF; color: #fff;}
-.modal-btn #btn-user-save {background: #5A8DFF; border-color: #5A8DFF; color: #fff;} /*  position: absolute; bottom: 25px; */
+/* .modal-btn .btn.btn-save {background: #5A8DFF; border-color: #5A8DFF; color: #fff;} */
+.modal-btn #btn-user-save {background: #4880FF; border-color: #4880FF; color: #fff;}
+.modal-btn #btn-user-save:hover {background: #3B6EEA; border-color: #3B6EEA;}
 .modal-wrap #view-user-area .modal-btn ul {
   flex-direction: row-reverse;
 }

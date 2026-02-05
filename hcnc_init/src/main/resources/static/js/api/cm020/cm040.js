@@ -146,7 +146,7 @@ function buildTables() {
             { title: "코드그룹", field: "grp_cd", hozAlign: "center", widthGrow: 1 },
             { title: "코드", field: "cd", hozAlign: "center", widthGrow: 1 },
             { title: "코드그룹명", field: "grp_nm", widthGrow: 1 },
-            { title: "사용여부", field: "use_yn", hozAlign: "center", width: 90, widthGrow: 0 }
+            { title: "사용여부", field: "use_yn", hozAlign: "center", width: 90, widthGrow: 1 }
         ],
         data: [],
         rowSelected: function (row) {
