@@ -207,7 +207,7 @@ function validateHr012Form() {
 }
 
 function saveHr012TableData() {
-    if (!validateHr012Form()) return;
+    // if (!validateHr012Form()) return;
 
     const devId = window.currentDevId;
     const userId = $.trim($("#write_user_id").val());

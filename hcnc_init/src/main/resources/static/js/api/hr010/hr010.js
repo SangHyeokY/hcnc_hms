@@ -102,19 +102,26 @@ $(document).ready(function () {
             }
         }
     // ---------- Tab 마다 추가하기 ------------ //
-//        if (activeTab === "tab2") {
-//            if (!validateHr011Form()) {
-//                console.log("Tab2 유효성 검사 실패");
-//                return;
-//            }
-//        }
+        if (activeTab === "tab2") {
+            if (!validateHr012Form()) {
+                console.log("Tab2 유효성 검사 실패");
+                return;
+            }
+        }
     // ---------- Tab 마다 추가하기 ------------ //
-//        if (activeTab === "tab3") {
-//            if (!validateHr011Form()) {
-//                console.log("Tab3 유효성 검사 실패");
-//                return;
-//            }
-//        }
+        if (activeTab === "tab3") {
+            if (!window.hr013Table) {
+                console.log("Tab3 유효성 검사 실패");
+                return;
+            }
+        }
+    // ---------- Tab 마다 추가하기 ------------ //
+         if (activeTab === "tab4") {
+            if (!window.hr014TableA) {
+                console.log("Tab4 유효성 검사 실패");
+                return;
+            }
+        }
     // ---------- Tab 마다 추가하기 ------------ //
 
         // 인적사항 정보 저장
@@ -127,7 +134,13 @@ $(document).ready(function () {
             if (activeTab === "tab1") {
                 console.log("Tab1 저장");
                 saveHr011TableData();
-            } else if (activeTab === "tab4") {
+            } else if (activeTab === "tab2") {
+                console.log("Tab2 저장");
+                saveHr012TableData();
+            } else if (activeTab === "tab3") {
+                console.log("Tab3 저장");
+                saveHr013InlineRows();
+            }else if (activeTab === "tab4") {
                 console.log("Tab4 저장");
                 saveTab4All();
             }
@@ -463,9 +476,9 @@ function upsertUserBtn(callback)
                 window.currentDevId = response.dev_id;
                 $("#dev_id").val(response.dev_id);
             }
-            if (typeof window.saveTab4All === "function") {
-                window.saveTab4All();
-            }
+//            if (typeof window.saveTab4All === "function") {
+//                window.saveTab4All();
+//            }
             alert("저장되었습니다.");
             if (callback) callback(true);
 
@@ -710,24 +723,18 @@ function setModalMode(mode) {
     $("#btn-excel").toggle(isView);
     $(".tab-article").toggle(!isInsert);
     $("#main_lang_input").toggle(!isView);
+    $(".showingbtn").toggle(isUpdate || isInsert);
 
     const $tagBox = $("#mainLangTagList").closest(".tag-input-box");
     $tagBox.toggleClass("is-readonly", isView);
     $tagBox.find(".tag-help").toggle(!isView);
 
     window.hr010ReadOnly = isView;
-
     updateTabActions($(".tab-btn.active").data("tab"));
 
     // Tab 연동
     window.hr010ReadOnly = isView;
     broadcastTabReadonly(isView);
-
-    if (isView) {
-        $(".showingbtn").hide();  // 조회일때 숨김
-    } else if (isUpdate || isInsert) {
-        $(".showingbtn").show();  // 수정/등록일때 보이기
-    }
 }
 
 // Tab의 readonly 제어
