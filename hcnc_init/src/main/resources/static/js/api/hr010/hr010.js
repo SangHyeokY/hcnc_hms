@@ -33,7 +33,6 @@ $(document).ready(function () {
             alert("이미지 파일만 선택 가능합니다.");
             return;
         }
-
         $("#dev_img").show();
         $("#dev_img")[0].src = URL.createObjectURL(file);
     });
@@ -171,6 +170,8 @@ $(document).ready(function () {
         ctrtTypMap = getCtrtTypMap();
     });
 });
+
+// ============================================================================== //
 
 // 역할 코드 -> 라벨 맵 생성
 function getWorkMdMap() {
@@ -358,6 +359,8 @@ function buildUserTable() {
     });
 }
 
+// ============================================================================== //
+
 // db로부터 리스트 불러와서 테이블에 넣기
 function loadUserTableData() {
     if (!userTable || typeof userTable.setData !== "function") {
@@ -491,6 +494,8 @@ function upsertUserBtn(callback)
         }
     });
 }
+
+// ============================================================================== //
 
 // 데이터 삭제 이벤트
 function deleteUserRows() {
@@ -669,6 +674,8 @@ function clearUserForm() {
 
     $("#view-user-area").hide();
 }
+
+// ============================================================================== //
 
 // 팝업의 역할에 따라 sub-title 변경 되기
 function setModalMode(mode) {
@@ -1067,19 +1074,12 @@ function formatAmount(value) {
         .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
-// 공통 콤보
-//function jobCodeFormatter(cell) {
-//    var map = getCtrtTypMap()
-//    var val = normalizeJobValue(cell.getValue()) || "";
-//    return map[val] || val || "";
-//}
-
-// 현재 날짜
-//function getToday() {
-//  const d = new Date();
-//  const yyyy = d.getFullYear();
-//  const mm = String(d.getMonth() + 1).padStart(2, '0');
-//  const dd = String(d.getDate()).padStart(2, '0');
-//  return `${yyyy}-${mm}-${dd}`;
-//}
-
+// 엑셀 다운로드 처리
+document.getElementById("btn-excel").addEventListener("click", function () {
+    const devId = document.getElementById("dev_id").value;
+    if (!devId) {
+        alert("오류 : 개발자ID가 없습니다.");
+        return;
+    }
+    location.href = `/common/getExcel?dev_id=${encodeURIComponent(devId)}`;
+});

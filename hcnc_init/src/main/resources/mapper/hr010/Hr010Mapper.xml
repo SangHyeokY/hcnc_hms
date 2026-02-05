@@ -27,7 +27,10 @@
         WHERE del_yn='N'
         AND use_yn='Y'
         <if test="searchKeyword != null and searchKeyword != ''">
-            AND MATCH(search_txt) AGAINST (#{searchKeyword} IN BOOLEAN MODE)
+            AND (
+            MATCH(search_txt) AGAINST (CONCAT(#{searchKeyword}, '*') IN BOOLEAN MODE)
+            OR search_txt LIKE CONCAT('%', #{searchKeyword}, '%')
+            )
         </if>
         <if test="dev_nm != null and dev_nm != ''">
             AND dev_nm LIKE CONCAT('%', #{dev_nm}, '%')

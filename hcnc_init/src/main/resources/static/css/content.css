@@ -559,8 +559,10 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .tab-action-bar {display: flex; justify-content: flex-end; margin-bottom: 10px;}
 .tab-actions {display: none; gap: 8px;}
 .tab-actions.active {display: inline-flex;}
+/*
 .tab-action-bar .btn {padding: 8px 20px; font-size: 14px; font-weight: 500; line-height: 1.0; background-color: #ffffff; border: 1px solid #333; border-radius: 8px;}
 .tab-action-bar .btn.btn-save{background: #5A8DFF; border-color: #5A8DFF; color: #fff;}
+*/
 .tabulator-cell input[type="checkbox"] {cursor: pointer;}
 .tabulator-cell input[type="checkbox"]:disabled {cursor: not-allowed;}
 .risk-check input[type="checkbox"] {cursor: pointer;}

@@ -36,13 +36,14 @@ public class CommonController {
     }
 
     @GetMapping("/getExcel")
-    public void download(HttpServletResponse response) throws IOException {
+    public void download(@RequestParam("dev_id") String devId, HttpServletResponse response) throws IOException {
         response.reset(); // 중요
-        String fileName = "ExcelDownload.xlsx";
+        // String fileName = "ExcelDownload.xlsx";
+        String fileName = "[" + devId + "]_Profile_Download.xlsx";
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         response.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
         response.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0");
 
-        commonService.download(response);
+        commonService.download(response, devId);
     }
 }
