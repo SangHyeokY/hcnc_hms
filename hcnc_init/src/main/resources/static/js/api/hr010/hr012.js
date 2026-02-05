@@ -44,9 +44,8 @@ function buildHr012TableA() {
         layout: "fitColumns",
         placeholder: "데이터 없음",
         cellEdited: function (cell) {
-            console.log("cellEdited !!!!");
+            console.log("cellEdited A !!!!");
             console.log(cell.getValue());
-            changedTabs.tab2 = true;
         },
         columns: [
             { title: "코드", field: "cd", visible: false },
@@ -105,6 +104,11 @@ function buildHr012TableB() {
     window.hr012TableB = new Tabulator("#TABLE_HR012_B", {
         layout: "fitColumns",
         placeholder: "데이터 없음",
+        cellEdited: function (cell) {
+           console.log("cellEdited B !!!!");
+           console.log(cell.getValue());
+           changedTabs.tab2 = true;
+        },
         columns: [
             { title: "skl_id", field: "skl_id", visible:false },
             { title: "기술", field: "cd_nm", hozAlign: "left", widthGrow: 2 },
@@ -138,7 +142,6 @@ function buildHr012TableB() {
         data: []
     });
 }
-
 
 function loadHr012TableDataB() {
     const devId = window.currentDevId;

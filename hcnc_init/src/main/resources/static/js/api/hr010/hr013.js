@@ -97,7 +97,7 @@ function buildHr013Table() {
         placeholder: "데이터 없음",
         selectable: false,
         cellEdited: function () {
-                changedTabs.tab3 = true;
+           changedTabs.tab3 = true;
         },
         columns: [
             {
@@ -154,6 +154,7 @@ function buildHr013Table() {
                         return;
                     }
                     toggleInprjValue(resolved);
+                    changedTabs.tab3 = true;
                 }, width: 90
             },
             {

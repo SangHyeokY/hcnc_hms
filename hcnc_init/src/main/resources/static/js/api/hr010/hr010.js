@@ -501,19 +501,20 @@ function upsertUserBtn(callback)
                 $("#dev_id").val(response.dev_id);
             }
 
-            if (currentMode !== "insert"){
-                // 3) Tab별로 저장 메시지 알림
-                const msgMap = {
-                    tab1: "인적사항,\n소속 및 계약정보\n정보가 저장되었습니다.",
-                    tab2: "인적사항,\n보유역량 및 숙련도\n정보가 저장되었습니다.",
-                    tab3: "인적사항,\n프로젝트\n정보가 저장되었습니다.",
-                    tab4: "인적사항,\n평가 및 리스크\n정보가 저장되었습니다."
-                };
-                alert(msgMap[activeTab]);
+//                const msgMap = {
+//                    tab1: "인적사항,\n소속 및 계약정보\n정보가 저장되었습니다.",
+//                    tab2: "인적사항,\n보유역량 및 숙련도\n정보가 저장되었습니다.",
+//                    tab3: "인적사항,\n프로젝트\n정보가 저장되었습니다.",
+//                    tab4: "인적사항,\n평가 및 리스크\n정보가 저장되었습니다."
+//                };
+//                alert(msgMap[activeTab]);
+
+            if (currentMode == "insert"){
+                alert("인적사항 정보가 저장되었습니다.");
+                closeUserViewModal();
             }
             else {
-                alert("인적사항\n정보가 저장되었습니다.");
-                closeUserViewModal();
+                alert("인적사항 및 상세정보가 저장되었습니다.");
             }
 
             if (callback) callback(true);
