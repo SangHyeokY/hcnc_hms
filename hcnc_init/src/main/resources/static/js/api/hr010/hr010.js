@@ -1077,9 +1077,10 @@ function formatAmount(value) {
 // 엑셀 다운로드 처리
 document.getElementById("btn-excel").addEventListener("click", function () {
     const devId = document.getElementById("dev_id").value;
+    const devNm = document.getElementById("dev_nm").value;
     if (!devId) {
         alert("오류 : 개발자ID가 없습니다.");
         return;
     }
-    location.href = `/common/getExcel?dev_id=${encodeURIComponent(devId)}`;
+    location.href = `/common/getExcel?dev_id=${encodeURIComponent(devId)}` + `&dev_nm=${encodeURIComponent(devNm)}`;
 });
