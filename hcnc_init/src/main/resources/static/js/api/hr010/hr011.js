@@ -7,13 +7,86 @@ $(document).on("tab:readonly", function (_, isReadOnly) {
 let hr011Mode = "view";
 window.hr011Data = null;
 
-const HR011_FIELDS = "#org_nm, #biz_typ, #st_dt, #ed_dt, #amt, #remark"; // 데이터 담을 상수
+const HR011_FIELDS = "#org_nm, #select_biz_typ, #st_dt, #ed_dt, #amt, #remark"; // 데이터 담을 상수
+
+// 사업자 유형 공통코드
+var bizTypMap = [];
+var bizTypOptions = [];
 
 // ============================================================================== //
 
 window.initTab1 = function () {
-    loadHr011TableData(window.currentDevId);
+    // 개인/법인 셀렉트 공통콤보
+    setComCode("select_biz_typ", "BIZ_TYP", "", "cd", "cd_nm", function () {
+        bizTypOptions = $("#select_biz_typ option").map(function () {
+            return { cd: this.value, cd_nm: $(this).text() };
+        }).get();
+        initSelectDefault("select_biz_typ", "개인/개인사업자/법인");
+        bizTypMap = getBizTypMap();
+
+        // 지금 데이터 로드
+        loadHr011TableData(window.currentDevId);
+    });
 };
+
+// 역할 코드 -> 라벨 맵 생성
+function getBizTypMap() {
+    var map = {};
+    if (bizTypOptions && bizTypOptions.length) {
+        bizTypOptions.forEach(function (item) {
+            if (item.cd) {
+                map[item.cd] = item.cd_nm || item.cd;
+            }
+        });
+        return map;
+    }
+    $("#select_biz_typ option").each(function () {
+        var val = this.value;
+        if (val) {
+            map[val] = $(this).text();
+        }
+    });
+    return map;
+}
+
+// 콤보 기본 옵션/선택 처리
+function initSelectDefault(selectId, placeholderText) {
+    var $sel = $("#" + selectId);
+    if ($sel.find("option[value='']").length === 0) {
+        $sel.prepend("<option value=''>" + placeholderText + "</option>");
+    }
+    $sel.val("");
+    if (!$sel.val()) {
+        $sel.find("option:first").prop("selected", true);
+    }
+}
+
+// 역할 값이 객체로 와도 문자열로 정규화
+function normalizeJobValue(value) {
+    if (value == null) {
+        return "";
+    }
+    if (typeof value === "object") {
+        var current = value;
+        var guard = 0;
+        while (current && typeof current === "object" && guard < 4) {
+            var candidate = current.cd || current.value || current.label || current.cd_nm || current.name || current.nm || current.id;
+            if (candidate && typeof candidate !== "object") {
+                return String(candidate);
+            }
+            if (candidate && typeof candidate === "object") {
+                current = candidate;
+                guard += 1;
+                continue;
+            }
+            break;
+        }
+        return "";
+    }
+    return String(value);
+}
+
+// ============================================================================== //
 
 // 모드 제어 함수
 function setHr011Mode(mode) {
@@ -64,11 +137,14 @@ function openHr011(mode) {
 
 function fillHr011Form(data) {
     $("#org_nm").val(data.org_nm || "");
-    $("#biz_typ").val(data.biz_typ || "");
     $("#st_dt").val(data.st_dt || "");
     $("#ed_dt").val(data.ed_dt || "");
     $("#amt").val(formatNumber(data.amt));
     $("#remark").val(data.remark || "");
+
+    if ($("#select_biz_typ option").length > 0) {
+        $("#select_biz_typ").val(data.biz_typ || "");
+    }
 }
 
 function clearHr011Form() {
@@ -107,7 +183,7 @@ function saveHr011TableData() {
         ctrtId: hr011Mode === "update" ? window.hr011Data?.ctrt_id : null,
         devId: window.currentDevId,
         orgNm: $("#org_nm").val(),
-        bizTyp: $("#biz_typ").val(),
+        bizTyp: $("#select_biz_typ").val(),
         stDt: $("#st_dt").val(),
         edDt: $("#ed_dt").val(),
         amt: unformatNumber($("#amt").val()),
@@ -121,7 +197,7 @@ function saveHr011TableData() {
         data: JSON.stringify(param),
         success: () => {
             // alert("저장되었습니다.");
-            setHr011Mode("view");
+            // setHr011Mode("view");
             loadHr011TableData(window.currentDevId);
         },
         error: () => alert("저장 실패")
@@ -156,7 +232,7 @@ function deleteHr011() {
 // 유효성 검사
 function validateHr011Form() {
     const orgNm   = $("#org_nm").val().trim();
-    const bizTyp  = $("#biz_typ").val().trim();
+    const bizTyp  = $("#select_biz_typ").val().trim();
     const stDt    = $("#st_dt").val();
     const edDt    = $("#ed_dt").val();
     const amtRaw  = unformatNumber($("#amt").val());
@@ -189,7 +265,7 @@ function validateHr011Form() {
 
     if (!bizTyp || bizTyp == null) {
         alert("사업자 유형을 선택해주세요.");
-        $("#biz_typ").focus();
+        $("#select_biz_typ").focus();
         return false;
     }
 

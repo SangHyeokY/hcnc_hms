@@ -155,14 +155,8 @@ $(document).ready(function () {
         if (window.userTable) {
             window.userTable.redraw(true);
         }
-        ctrtTypMap = getCtrtMap();
+        ctrtTypMap = getCtrtTypMap();
     });
-
-//<option value="">상주/재택/혼합</option>
-//<option value="01">상주</option>
-//<option value="02">재택</option>
-//<option value="03">혼합</option>
-
 });
 
 // 역할 코드 -> 라벨 맵 생성
@@ -186,7 +180,7 @@ function getWorkMdMap() {
 }
 
 // 역할 코드 -> 라벨 맵 생성
-function getCtrtMap() {
+function getCtrtTypMap() {
     var map = {};
     if (ctrtTypOptions && ctrtTypOptions.length) {
         ctrtTypOptions.forEach(function (item) {
@@ -711,7 +705,9 @@ function setModalMode(mode) {
         $("#dev_type").prop("disabled", true);
     }
 
+    // Mode에 따른 버튼 숨김/표시
     $("#btn-user-save").toggle(isInsert || isUpdate);
+    $("#btn-excel").toggle(isView);
     $(".tab-article").toggle(!isInsert);
     $("#main_lang_input").toggle(!isView);
 
@@ -1066,7 +1062,7 @@ function formatAmount(value) {
 
 // 공통 콤보
 //function jobCodeFormatter(cell) {
-//    var map = getCtrtMap()
+//    var map = getCtrtTypMap()
 //    var val = normalizeJobValue(cell.getValue()) || "";
 //    return map[val] || val || "";
 //}
