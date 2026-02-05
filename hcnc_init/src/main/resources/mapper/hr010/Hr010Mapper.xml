@@ -192,14 +192,6 @@
         -- 재계약의사
         rein AS
         (
-        --    SELECT   '[재계약의사]' title
-        --       ,   CASE WHEN avl.re_in_yn = 'Y' THEN 'S' ELSE 'C' END rank
-        --        ,   CASE WHEN avl.re_in_yn = 'Y' THEN 100 ELSE 0 END val
-        --          ,   CASE WHEN avl.re_in_yn = 'Y' THEN 100 ELSE 0 END weight
-        --    FROM   tb_dev_avl_info avl
-        --       CROSS JOIN param p
-        --       WHERE   avl.del_yn = 'N' AND avl.use_yn = 'Y'
-        --          AND avl.dev_id = p.dev_id
         SELECT   '[재계약의사]' title
         ,   CASE WHEN rsk.re_in_yn = 'Y' THEN 'S' ELSE 'C' END rank
         ,   CASE WHEN rsk.re_in_yn = 'Y' THEN 100 ELSE 0 END val
@@ -275,7 +267,7 @@
         ) R4
         CROSS JOIN
         (
-        SELECT  COUNT(1) cnt, SUM(skl.lvl) total, ROUND(SUM(skl.lvl) / COUNT(1) * 5, 1) pct, fn_get_cm_lst('skl_id', GROUP_CONCAT(skl.skl_id)) skl_lst
+        SELECT  COUNT(1) cnt, SUM(skl.lvl) total, ROUND(SUM(skl.lvl) / (COUNT(1) * 5) * 100, 1) pct, fn_get_cm_lst('skl_id', GROUP_CONCAT(skl.skl_id)) skl_lst
         FROM    tb_dev_skl_info skl
         CROSS JOIN    param p
         WHERE   skl.del_yn = 'N' AND skl.use_yn = 'Y'
