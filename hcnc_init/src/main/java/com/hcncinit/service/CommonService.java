@@ -1,5 +1,6 @@
 package com.hcncinit.service;
 
+import com.hcncinit.logging.QryLog;
 import com.hcncinit.config.PoiRowInsertUtil;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletResponse;
@@ -31,6 +32,7 @@ public class CommonService {
 
     private static final String TEMPLATE_PATH = "templates/excel/ExcelDownload.xlsx";
 
+    @QryLog(scrnCd = "COMMON", fnCd = "EXCEL_DOWNLOAD", opTyp = "DOWNLOAD", logParams = false)
     public void download(HttpServletResponse response, String devId) throws IOException {
 
         Map<String, Object> map = Map.of("dev_id", devId);

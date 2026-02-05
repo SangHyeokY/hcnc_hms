@@ -285,6 +285,7 @@
             , 'N'
             , #{crt_ts}
             , #{crt_by}
+        )
         </if>
         <if test="call_id != null and call_id != ''">
             UPDATE  hcnc_hms.tb_qry_call_hist
