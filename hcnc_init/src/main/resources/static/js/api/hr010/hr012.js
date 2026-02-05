@@ -43,6 +43,11 @@ function buildHr012TableA() {
     window.hr012TableA = new Tabulator("#TABLE_HR012_A", {
         layout: "fitColumns",
         placeholder: "데이터 없음",
+        cellEdited: function (cell) {
+            console.log("cellEdited !!!!");
+            console.log(cell.getValue());
+            changedTabs.tab2 = true;
+        },
         columns: [
             { title: "코드", field: "cd", visible: false },
             { title: "구분", field: "cd_nm", hozAlign: "left", width: 180},
@@ -125,6 +130,8 @@ function buildHr012TableB() {
                     const updateObj = { lv1:false, lv2:false, lv3:false, lv4:false, lv5:false };
                     updateObj[currentField] = true;
                     row.update(updateObj);
+
+                    changedTabs.tab2 = true;
                 }
             }))
         ],

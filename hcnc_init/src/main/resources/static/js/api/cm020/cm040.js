@@ -146,7 +146,7 @@ function buildTables() {
             { title: "코드그룹", field: "grp_cd", hozAlign: "center", widthGrow: 1 },
             { title: "코드", field: "cd", hozAlign: "center", widthGrow: 1 },
             { title: "코드그룹명", field: "grp_nm", widthGrow: 1 },
-            { title: "사용여부", field: "use_yn", hozAlign: "center", width: 90, widthGrow: 0 }
+            { title: "사용여부", field: "use_yn", hozAlign: "center", width: 90, widthGrow: 1 }
         ],
         data: [],
         rowSelected: function (row) {
@@ -206,7 +206,7 @@ function buildTables() {
             { title: "부가정보3", field: "adinfo_03", formatter: amountFormatter },
             { title: "부가정보4", field: "adinfo_04", formatter: amountFormatter },
             { title: "부가정보5", field: "adinfo_05", formatter: amountFormatter },
-            { title: "사용여부", field: "use_yn", hozAlign: "center", width: 90 }
+            { title: "사용여부", field: "use_yn", hozAlign: "center" }
         ],
         data: [],
         rowSelected: function (row) {

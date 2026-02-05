@@ -33,7 +33,7 @@ $(document).ready(function () {
         deleteUserRows();
     });
 
-    $(".btn-user-save").on("click", function () {
+    $("#btn-user-save").on("click", function () {
         upsertUserBtn();
     });
 });
@@ -111,7 +111,7 @@ function buildUserTable() {
             { title: "ID", field: "user_id", hozAlign: "center", widthGrow: 1 },
             { title: "이름", field: "user_nm", widthGrow: 1 },
             { title: "e-mail", field: "email", widthGrow: 2 },
-            { title: "연락처", field: "tel", hozAlign: "center" },
+            { title: "연락처", field: "tel", hozAlign: "center", widthGrow: 2  },
             { title: "권한", field: "role_nm", hozAlign: "center", widthGrow: 1  },
             { title: "직무", field: "job_nm", hozAlign: "center", widthGrow: 1  },
             { title: "부서", field: "dept_nm", hozAlign: "center", widthGrow: 1  },
@@ -122,7 +122,7 @@ function buildUserTable() {
                     return cell.getValue() === "N" ? "Y" : "N";
                 }, widthGrow: 1 
             },
-            { title: "비고", field: "remark", hozAlign: "center", widthGrow: 2  },
+            { title: "비고", field: "remark", hozAlign: "center", widthGrow: 3  },
         ],
         data: [],
         rowSelected: function (row) {
@@ -320,14 +320,18 @@ function openUserWriteModal(type) {
     currentMode = type;
     $(".edit-mode").text(type === "insert" ? "등록" : "수정");
     const modal = document.getElementById("write-user-area");
-    modal.classList.remove("show");
-    modal.style.display = "block";
-    modal.offsetHeight;
-    setTimeout(() => {
+
+    function showModal() {
+        modal.classList.remove("show");
+        modal.style.display = "block";
+        modal.offsetHeight;
+        setTimeout(() => {
             modal.classList.add("show");
-    }, 100);
+        }, 100);
+    }
 
     if (type === "insert") {
+        showModal();
         $("#write_user_id").val("").prop("disabled", false);
         $("#write_user_nm").val("");
         $("#write_pwd_hash").val("");
@@ -347,6 +351,7 @@ function openUserWriteModal(type) {
             alert("수정은 한 명만 선택해주세요.");
             return;
         }
+        showModal();
         selectCommonCodesForUser(
             function () {
                 var rowData = selectedRows[0].getData();
@@ -405,3 +410,18 @@ function closeUserViewModal() {
         modal.style.display = "none";
     }, 250);
 }
+
+
+// 전화번호 자동 변환
+$("#write_tel").on("input", function () {
+    let val = $(this).val().replace(/[^0-9]/g, "");
+
+    if (val.length < 4) {
+        $(this).val(val);
+    } else if (val.length < 8) {
+        $(this).val(val.replace(/(\d{3})(\d+)/, "$1-$2"));
+    } else {
+        $(this).val(val.replace(/(\d{3})(\d{4})(\d+)/, "$1-$2-$3"));
+    }
+
+});

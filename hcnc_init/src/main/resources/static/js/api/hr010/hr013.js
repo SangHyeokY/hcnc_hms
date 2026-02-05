@@ -96,6 +96,9 @@ function buildHr013Table() {
         layout: "fitColumns",
         placeholder: "데이터 없음",
         selectable: false,
+        cellEdited: function () {
+                changedTabs.tab3 = true;
+        },
         columns: [
             {
                 title: "선택",
@@ -439,6 +442,8 @@ function removeHr013SelectedRows() {
         }
         row.delete();
     });
+
+    changedTabs.tab3 = true;
 }
 
 // 프로젝트 탭 통합 저장용
@@ -529,6 +534,8 @@ function addHr013Row() {
         alloc_pct: "",
         remark: ""
     }, true);
+
+    changedTabs.tab3 = true;
 }
 
 function toggleInprjValue(cell) {

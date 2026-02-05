@@ -157,10 +157,10 @@ function buildHr014TableA() {
                 title: "코멘트",
                 field: "cmt",
                 widthGrow: 3,
-                hozAlign: "center",
-                formatter: commentInputFormatter,
-                headerVertical: "middle",
-                headerSort: false
+//                hozAlign: "center",
+//                formatter: commentInputFormatter,
+//                headerVertical: "middle",
+//                headerSort: false
             }
         ],
         data: []
@@ -236,6 +236,8 @@ function setScore(row, level) {
         data.lv5 = "N";
         data["lv" + level] = "Y";
         row.update(data);
+
+        changedTabs.tab4 = true;
     }
 
 //function buildHr014TableB() {
