@@ -319,6 +319,13 @@ function deleteUserRows() {
 function openUserWriteModal(type) {
     currentMode = type;
     $(".edit-mode").text(type === "insert" ? "등록" : "수정");
+    const modal = document.getElementById("write-user-area");
+    modal.classList.remove("show");
+    modal.style.display = "block";
+    modal.offsetHeight;
+    setTimeout(() => {
+            modal.classList.add("show");
+    }, 100);
 
     if (type === "insert") {
         $("#write_user_id").val("").prop("disabled", false);
@@ -356,15 +363,16 @@ function openUserWriteModal(type) {
                 $("#write_remark").val(rowData.remark || "");
             }
         );
-
     }
-
-    document.getElementById("write-user-area").style.display = "block";
 }
 
 // 사용자 등록/수정 모달 닫기
 function closeUserWriteModal() {
-    document.getElementById("write-user-area").style.display = "none";
+    const modal = document.getElementById("write-user-area");
+    modal.classList.remove("show");
+    setTimeout(() => {
+        modal.style.display = "none";
+    }, 250);
 }
 
 // 사용자 상세 보기 모달 오픈
@@ -380,10 +388,20 @@ function openUserViewModal(rowData) {
     $("#view_lock_yn").text(rowData.lock_yn === "Y" ? "N" : "Y" || "");
     $("#view_remark").text(rowData.remark || "");
 
-    document.getElementById("view-user-area").style.display = "block";
+    const modal = document.getElementById("view-user-area");
+    modal.classList.remove("show");
+    modal.style.display = "block";
+    modal.offsetHeight;
+    setTimeout(() => {
+        modal.classList.add("show");
+    }, 100);
 }
 
 // 사용자 상세 보기 모달 닫기
 function closeUserViewModal() {
-    document.getElementById("view-user-area").style.display = "none";
+    const modal = document.getElementById("view-user-area");
+    modal.classList.remove("show");
+    setTimeout(() => {
+        modal.style.display = "none";
+    }, 250);
 }

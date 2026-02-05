@@ -77,6 +77,7 @@
  .btn-area button:disabled,
  .btn-area .btn:disabled{opacity:0.5; cursor:not-allowed;}
  .btn-area .btn.bg-bk{background:#000; color:#fff; border-color:#000;}
+
  .btn-area .btn.bg-primary,
  .btn-area button.btn-new,
  .btn-area button.btn-excel,
@@ -84,6 +85,14 @@
     background: #4880FF;
     color:#fff;
     border-color:#4880FF;
+ }
+
+ .btn-area .btn.bg-primary:hover,
+ .btn-area button.btn-new:hover,
+ .btn-area button.btn-excel:hover,
+ .btn-area button.btn-approve:hover {
+     background: #3B6EEA;
+     border-color: #3B6EEA;
  }
 
  .search-btn-area .btn-search{
@@ -102,7 +111,9 @@
     font-weight: 600;
     cursor: pointer;
  }
- .search-btn-area .btn-search:hover{background:url("../icons/ico-search.png") 16px center no-repeat #0b4fe0;}
+ .search-btn-area .btn-search:hover{
+    background:url("../icons/ico-search.png") 16px center no-repeat #3B6EEA;
+}
 
 
 /* No icon style */

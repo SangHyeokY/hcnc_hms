@@ -183,7 +183,7 @@ function loadHr014TableDataA() {
             // console.log(dataArray)
         },
         error: function() {
-            alert("tab4A 데이터 로드 실패");
+            console.log("tab4A 데이터 로드 실패");
         }
     });
 }
@@ -276,7 +276,7 @@ function loadHr014TableDataB() {
             setRiskActive(riskActiveKey);
         },
         error: function() {
-            alert("tab4B 데이터 로드 실패");
+            console.log("tab4B 데이터 로드 실패");
         }
     });
 }

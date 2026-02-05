@@ -258,7 +258,7 @@ function loadHr013TableData() {
             syncStackLabelsFromCodes();
             window.hr013Table.redraw();
         },
-        error: function () { alert("Tab3 데이터 로드 실패"); }
+        error: function () { console.log("Tab3 데이터 로드 실패"); }
     });
 }
 

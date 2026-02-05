@@ -7,6 +7,14 @@ window.currentDevId = null;
 var mainLangTagInput = null;
 var pendingMainLangValue = "";
 
+// 개인/법인 공통코드
+var ctrtTypMap = [];
+var ctrtTypOptions = [];
+
+// 근무형태 공통코드
+var workMdMap = [];
+var workMdOptions = [];
+
 // ============================================================================== //
 
 // 문서 첫 생성 시 실행
@@ -25,7 +33,6 @@ $(document).ready(function () {
             alert("이미지 파일만 선택 가능합니다.");
             return;
         }
-
         $("#dev_img").show();
         $("#dev_img")[0].src = URL.createObjectURL(file);
     });
@@ -81,51 +88,137 @@ $(document).ready(function () {
         const activeTab = $(".tab-btn.active").data("tab");
         console.log("현재 탭 :", activeTab);
 
-    // ---------- Tab 마다 추가하기 ------------ //
         if (!validateUserForm()) {
             console.log("인적사항 유효성 검사 실패");
             return;
         }
-    // ---------- Tab 마다 추가하기 ------------ //
-        if (activeTab === "tab1") {
-            if (!validateHr011Form()) {
-                console.log("Tab1 유효성 검사 실패");
-                return;
-            }
-        }
-    // ---------- Tab 마다 추가하기 ------------ //
-//        if (activeTab === "tab2") {
-//            if (!validateHr011Form()) {
-//                console.log("Tab2 유효성 검사 실패");
-//                return;
-//            }
-//        }
-    // ---------- Tab 마다 추가하기 ------------ //
-//        if (activeTab === "tab3") {
-//            if (!validateHr011Form()) {
-//                console.log("Tab3 유효성 검사 실패");
-//                return;
-//            }
-//        }
-    // ---------- Tab 마다 추가하기 ------------ //
 
-        // 인적사항 정보 저장
-        upsertUserBtn(function(success) {
-            if (!success) {
-                console.log("인적사항 저장 실패");
-                return;
+        if (currentMode === "insert" || currentMode === "view") {
+                console.log("Tab Mode 구분 : ", currentMode);
+            } else {
+                // update 모드에서만 탭별 검사
+                if (activeTab === "tab1" && !validateHr011Form()) return;
+                if (activeTab === "tab2" && !validateHr012Form()) return;
+                if (activeTab === "tab3" && !window.hr013Table) return;
+                if (activeTab === "tab4" && !window.hr014TableA) return;
             }
-            // Tab별로 저장
-            if (activeTab === "tab1") {
-                console.log("Tab1 저장");
-                saveHr011TableData();
-            } else if (activeTab === "tab4") {
-                console.log("Tab4 저장");
-                saveTab4All();
+
+            // 인적사항 + 탭 저장
+            upsertUserBtn(function (success) {
+                if (!success) return;
+
+                if (currentMode !== "insert") {
+                    if (activeTab === "tab1") saveHr011TableData();
+                    else if (activeTab === "tab2") saveHr012TableData();
+                    else if (activeTab === "tab3") saveHr013InlineRows();
+                    else if (activeTab === "tab4") saveTab4All();
             }
         });
     });
+
+    // 근무형태 셀렉트 공통콤보
+    setComCode("select_work_md", "WORK_MD", "", "cd", "cd_nm", function () {
+        workMdOptions = $("#select_work_md option").map(function () {
+            return { cd: this.value, cd_nm: $(this).text() };
+        }).get();
+        initSelectDefault("select_work_md", "상주/재택/혼합");
+        if (window.userTable) {
+            window.userTable.redraw(true);
+        }
+        workMdMap = getWorkMdMap();
+    });
+
+    // 개인/법인 셀렉트 공통콤보
+    setComCode("select_ctrt_typ", "CTRT_TYP", "", "cd", "cd_nm", function () {
+        ctrtTypOptions = $("#select_ctrt_typ option").map(function () {
+            return { cd: this.value, cd_nm: $(this).text() };
+        }).get();
+        initSelectDefault("select_ctrt_typ", "개인/법인");
+        if (window.userTable) {
+            window.userTable.redraw(true);
+        }
+        ctrtTypMap = getCtrtTypMap();
+    });
 });
+
+// ============================================================================== //
+
+// 역할 코드 -> 라벨 맵 생성
+function getWorkMdMap() {
+    var map = {};
+    if (workMdOptions && workMdOptions.length) {
+        workMdOptions.forEach(function (item) {
+            if (item.cd) {
+                map[item.cd] = item.cd_nm || item.cd;
+            }
+        });
+        return map;
+    }
+    $("#select_work_md option").each(function () {
+        var val = this.value;
+        if (val) {
+            map[val] = $(this).text();
+        }
+    });
+    return map;
+}
+
+// 역할 코드 -> 라벨 맵 생성
+function getCtrtTypMap() {
+    var map = {};
+    if (ctrtTypOptions && ctrtTypOptions.length) {
+        ctrtTypOptions.forEach(function (item) {
+            if (item.cd) {
+                map[item.cd] = item.cd_nm || item.cd;
+            }
+        });
+        return map;
+    }
+    $("#select_ctrt_typ option").each(function () {
+        var val = this.value;
+        if (val) {
+            map[val] = $(this).text();
+        }
+    });
+    return map;
+}
+
+// 콤보 기본 옵션/선택 처리
+function initSelectDefault(selectId, placeholderText) {
+    var $sel = $("#" + selectId);
+    if ($sel.find("option[value='']").length === 0) {
+        $sel.prepend("<option value=''>" + placeholderText + "</option>");
+    }
+    $sel.val("");
+    if (!$sel.val()) {
+        $sel.find("option:first").prop("selected", true);
+    }
+}
+
+// 역할 값이 객체로 와도 문자열로 정규화
+function normalizeJobValue(value) {
+    if (value == null) {
+        return "";
+    }
+    if (typeof value === "object") {
+        var current = value;
+        var guard = 0;
+        while (current && typeof current === "object" && guard < 4) {
+            var candidate = current.cd || current.value || current.label || current.cd_nm || current.name || current.nm || current.id;
+            if (candidate && typeof candidate !== "object") {
+                return String(candidate);
+            }
+            if (candidate && typeof candidate === "object") {
+                current = candidate;
+                guard += 1;
+                continue;
+            }
+            break;
+        }
+        return "";
+    }
+    return String(value);
+}
 
 // ============================================================================== //
 
@@ -199,27 +292,24 @@ function buildUserTable() {
                 download: false
             },
             { title: "dev_id", field: "dev_id", visible: false },
-            { title: "crt_ts", field: "crt_ts", visible: false},
-            { title: "성명", field: "dev_nm", hozAlign: "center", headerSort: true , widthgrow:1},
-            { title: "생년월일", field: "brdt", headerSort: true, widthgrow: 1},
-            { title: "연락처", field: "tel", widthgrow: 3},
-            { title: "이메일", field: "email", widthgrow:3},
-            { title: "거주지역", field: "region", widthgrow:1 },
-            { title: "주 개발언어", field: "main_lang_nm", widthgrow: 3},
-            { title: "경력연차", field: "exp_yr", hozAlign: "center" , widthgrow:1},
-            { title: "최종학력", field: "edu_last", widthgrow:1},
-            { title: "보유 자격증", field: "cert_txt" , widthgrow:1},
-            { title: "희망단가", field: "hope_rate_amt", hozAlign: "right", formatter: amountFormatter, widthgrow:1 },
-            { title: "투입 가능 시점", field: "avail_dt", widthgrow:1 },
-            { title: "계약 형태",
-                  field: "ctrt_typ", widthgrow:1,
-                  formatter: function(cell, formatterParams, onRendered){
-                      var val = cell.getValue();
-                      if(val === "01") return "개인";
-                      if(val === "02") return "법인";
-                      return "";
-                  }
-            }
+            { title: "성명", field: "dev_nm", hozAlign: "center", headerSort: true , widthGrow:1, minWidth: 80 },
+            { title: "생년월일", field: "brdt", headerSort: true, widthGrow: 2, minWidth: 120 },
+            { title: "연락처", field: "tel", widthGrow: 3, minWidth: 150 },
+            { title: "이메일", field: "email", widthGrow:4, minWidth: 180 },
+            { title: "거주지역", field: "region", widthGrow:1, minWidth: 80 },
+            { title: "주 개발언어", field: "main_lang_nm", widthGrow: 4, minWidth: 180 },
+            { title: "경력연차", field: "exp_yr", hozAlign: "center" , widthGrow:1, minWidth: 80 },
+            { title: "최종학력", field: "edu_last", widthGrow:4, minWidth: 180 },
+            { title: "보유 자격증", field: "cert_txt" , widthGrow:4, minWidth: 180 },
+            { title: "희망단가", field: "hope_rate_amt", hozAlign: "right", formatter: amountFormatter, widthGrow:2, minWidth: 120 },
+            { title: "투입 가능 시점", field: "avail_dt", widthGrow:2, minWidth: 120 },
+            {   title: "계약 형태",
+                field: "ctrt_typ",
+                formatter: function(cell) {
+                    var val = normalizeJobValue(cell.getValue()) || "";
+                    return ctrtTypMap[val] || val;
+                }, editor: false, editable: false, widthGrow: 1, minWidth: 80
+            },
         ],
         data: [],
         rowSelected: function (row) {
@@ -238,6 +328,8 @@ function buildUserTable() {
         }
     });
 }
+
+// ============================================================================== //
 
 // db로부터 리스트 불러와서 테이블에 넣기
 function loadUserTableData() {
@@ -326,12 +418,13 @@ function upsertUserBtn(callback)
         cert_txt: $("#cert_txt").val(),
         hope_rate_amt: $("#hope_rate_amt").val().replace(/,/g, ""),
         avail_dt: $("#avail_dt").val(),
-        ctrt_typ: $("#ctrt_typ").val(),
-        work_md: $("#work_md").val(),
+        ctrt_typ: $("#select_ctrt_typ").val(),
+        work_md: $("#select_work_md").val(),
         dev_type: $("#dev_type").val(),
         crt_by: ""
     };
 
+    const activeTab = $(".tab-btn.active").data("tab");
     const file = $("#fileProfile")[0].files[0]; // 또는 payload.dev_img
     const fd = new FormData();
 
@@ -353,25 +446,68 @@ function upsertUserBtn(callback)
         contentType: false,
         dataType: "json",
         success: function (response) {
+
+            if (!response || response.success === false) {
+                const msg = response?.message || "저장에 실패했습니다.";
+                alert(msg);
+
+                if (callback) callback(false);
+                return;
+            }
+
+            // 정상적으로 되었을 경우
             if (response && response.dev_id) {
                 window.currentDevId = response.dev_id;
                 $("#dev_id").val(response.dev_id);
             }
-            if (typeof window.saveTab4All === "function") {
-                window.saveTab4All();
-            }
-            alert("저장되었습니다.");
-            if (callback) callback(true);
 
-            // closeUserViewModal();
+            if (currentMode !== "insert"){
+                // 3) Tab별로 저장 메시지 알림
+                const msgMap = {
+                    tab1: "인적사항,\n소속 및 계약정보\n정보가 저장되었습니다.",
+                    tab2: "인적사항,\n보유역량 및 숙련도\n정보가 저장되었습니다.",
+                    tab3: "인적사항,\n프로젝트\n정보가 저장되었습니다.",
+                    tab4: "인적사항,\n평가 및 리스크\n정보가 저장되었습니다."
+                };
+                alert(msgMap[activeTab]);
+            }
+            else {
+                alert("인적사항\n정보가 저장되었습니다.");
+                closeUserViewModal();
+            }
+
+            if (callback) callback(true);
             loadUserTableData();
         },
-        error: function () {
-            alert("저장 중 오류가 발생했습니다.");
+        error: function (xhr, status, error) {
+            let msg = "저장 중 오류가 발생했습니다.";
+
+            if (xhr.responseJSON && xhr.responseJSON.message) {
+                msg = xhr.responseJSON.message;
+            }
+
+            else if (xhr.responseText) {
+                console.error("Server Error:", xhr.responseText);
+            }
+
+            if (xhr.status === 400) {
+                msg = "ERROR_CODE : 400";
+            } else if (xhr.status === 401) {
+                msg = "ERROR_CODE : 401";
+            } else if (xhr.status === 403) {
+                msg = "ERROR_CODE : 403";
+            } else if (xhr.status === 500) {
+                msg = "ERROR_CODE : 500\n서버 오류가 발생했습니다. 관리자에게 문의하세요.";
+            }
+
+            alert(msg);
+
             if (callback) callback(false);
         }
     });
 }
+
+// ============================================================================== //
 
 // 데이터 삭제 이벤트
 function deleteUserRows() {
@@ -408,11 +544,14 @@ function deleteUserRows() {
 // 모달(팝업) 열리는 이벤트 처리
 openUserModal = function(mode, data) {
     currentMode = mode;
+    const $modal = $("#view-user-area");
+
     if(mode === "insert") clearUserForm();
     else fillUserForm(data || userTable.getSelectedRows()[0].getData());
 
     setModalMode(mode);
-    $("#view-user-area").show();
+    $modal.removeClass("show");
+    $modal.show();
 
     initAllTabs(); // 모든 tab 초기화
 
@@ -434,6 +573,10 @@ openUserModal = function(mode, data) {
             loadUserScore(data.dev_id);
         });
     }
+
+    setTimeout(() => {
+        $modal.addClass("show");
+    }, 100);
 };
 
 // 모든 tab 초기화
@@ -464,41 +607,53 @@ function fillUserForm(d) {
     $("#edu_last").val(d.edu_last || "");
     $("#cert_txt").val(d.cert_txt || "");
     $("#avail_dt").val(d.avail_dt || "");
-    $("#crt_ts").text(d.crt_ts || "");
+    $("#dev_id_input").text(d.dev_id || "");
 
     $("#hope_rate_amt").val(
         formatAmount(d.hope_rate_amt)
     );
 
     $("#dev_type").val(d.dev_type || "");
-    $("#work_md").val(d.work_md || "");
-    $("#ctrt_typ").val(d.ctrt_typ || "");
 
-    $("#show_devId").text(
-        window.currentDevId
-            ? "[" + window.currentDevId + "]"
-            : ""
-    );
+    // 셀렉트 work_md
+    if (d.work_md && workMdMap[d.work_md]) {
+        $("#select_work_md").val(d.work_md);
+    } else {
+        $("#select_work_md").val("");
+    }
+
+    // 셀렉트 ctrt_typ
+    if (d.ctrt_typ && ctrtTypMap[d.ctrt_typ]) {
+        $("#select_ctrt_typ").val(d.ctrt_typ);
+    } else {
+        $("#select_ctrt_typ").val("");
+    }
+
+//    $("#show_devId").text(
+//        window.currentDevId
+//            ? "[" + window.currentDevId + "]"
+//            : ""
+//    );
 
     // dev_id 값 가져와서 sub-title에 붙이기
     if (d.dev_id) {
         if (d.dev_id.startsWith("HCNC_F")) {
             $("#dev_type").val("HCNC_F");
-            $("#dev_type2").text("프리랜서");
-            $("#devTypeWrap").show();
+            // $("#dev_type2").text("프리랜서");
+            // $("#devTypeWrap").show();
         } else if (d.dev_id.startsWith("HCNC_S")) {
             $("#dev_type").val("HCNC_S");
-            $("#dev_type2").text("사원");
-            $("#devTypeWrap").show();
+            // $("#dev_type2").text("사원");
+            // $("#devTypeWrap").show();
         } else {
             // console.log("dev_id 값이 잘못 되었습니다.")
             $("#dev_type").val("");
-            $("#dev_type2").text("");
+            // $("#dev_type2").text("");
         }
     } else {
         // console.log("dev_id 값이 존재하지 않습니다.")
         $("#dev_type").val("");
-        $("#dev_type2").text("");
+        // $("#dev_type2").text("");
     }
 }
 
@@ -523,20 +678,21 @@ function clearUserForm() {
     $("#cert_txt").val("");
     $("#avail_dt").val("");
     $("#hope_rate_amt").val("");
-    $("#crt_ts").text("");
+    $("#dev_id_input").text("");
 
     $("#grade").text("");
     $("#score").text("");
     $("#dev_type").val("");
-    $("#work_md").val("");
-    $("#ctrt_typ").val("");
 
-    $("#show_devId").text("");
-    $("#dev_type2").text("");
-    $("#devTypeWrap").hide();
+    $("#select_work_md").val("");
+    $("#select_ctrt_typ").val("");
 
-    $("#view-user-area").hide();
+    // $("#show_devId").text("");
+    // $("#dev_type2").text("");
+    // $("#devTypeWrap").hide();
 }
+
+// ============================================================================== //
 
 // 팝업의 역할에 따라 sub-title 변경 되기
 function setModalMode(mode) {
@@ -556,9 +712,9 @@ function setModalMode(mode) {
 
     // 등록 페이지의 경우
     if (isInsert) {
-        const today = getToday();
-        $("#crt_ts").text(today);
-        $("#grade").text("없음");
+        // const today = getToday();
+        $("#dev_id_input").text("-");
+        $("#grade").text("-");
     }
 
     if (isView) {
@@ -586,27 +742,23 @@ function setModalMode(mode) {
         $("#dev_type").prop("disabled", true);
     }
 
+    // Mode에 따른 버튼 숨김/표시
     $("#btn-user-save").toggle(isInsert || isUpdate);
+    $("#btn-excel").toggle(isView);
     $(".tab-article").toggle(!isInsert);
     $("#main_lang_input").toggle(!isView);
+    $(".showingbtn").toggle(isUpdate || isInsert);
 
     const $tagBox = $("#mainLangTagList").closest(".tag-input-box");
     $tagBox.toggleClass("is-readonly", isView);
     $tagBox.find(".tag-help").toggle(!isView);
 
     window.hr010ReadOnly = isView;
-
     updateTabActions($(".tab-btn.active").data("tab"));
 
     // Tab 연동
     window.hr010ReadOnly = isView;
     broadcastTabReadonly(isView);
-
-    if (isView) {
-        $(".showingbtn").hide();  // 조회일때 숨김
-    } else if (isUpdate || isInsert) {
-        $(".showingbtn").show();  // 수정/등록일때 보이기
-    }
 }
 
 // Tab의 readonly 제어
@@ -660,8 +812,14 @@ function broadcastTabReadonly(isReadOnly) {
 
 // 모달 닫히면 영역 사라지게 하기
 function closeUserViewModal() {
-    document.getElementById("view-user-area").style.display = "none";
-    clearUserForm()
+    // document.getElementById("view-user-area").style.display = "none";
+    const $modal = $("#view-user-area");
+    $modal.removeClass("show");
+
+    setTimeout(() => {
+        $modal.hide();
+        clearUserForm();
+    }, 250);
 }
 
 // 탭별 버튼 표시
@@ -691,7 +849,7 @@ function refreshTabLayout(tabId) {
         if (tabId === "tab4" && window.hr014TableA) {
             window.hr014TableA.redraw(true);
         }
-    }, 0);
+    }, 10);
 }
 
 // ============================================================================== //
@@ -700,21 +858,21 @@ function refreshTabLayout(tabId) {
 function validateUserForm() {
 
     // 값 가져오기
-    const dev_nm = $("#dev_nm").val().trim();                    // 성명
-    const brdt = $("#brdt").val().trim();                        // 생년월일
+    const dev_nm = ($("#dev_nm").val() || "").trim();                    // 성명
+    const brdt = ($("#brdt").val() || "").trim();                        // 생년월일
     // ==
-    const tel = $("#tel").val().trim();                          // 연락처
-    const email = $("#email").val().trim();                      // 이메일
+    const tel = ($("#tel").val() || "").trim();                          // 연락처
+    const email = ($("#email").val() || "").trim();                      // 이메일
     // ==
-    const expYr = $("#exp_yr").val().trim();                     // 경력연차
-    const eduLast = $("#edu_last").val().trim();                 // 최종학력
+    const expYr = ($("#exp_yr").val() || "").trim();                     // 경력연차
+    const eduLast = ($("#edu_last").val() || "").trim();                 // 최종학력
     // ==
-    const devType = $("#dev_type").val().trim();                 // 소속 구분 (dev_id에서 S: 직원, F: 프리랜서)
-    const workMd = $("#work_md").val().trim();                   // 근무 가능형태 (01: 상주, 02: 재택, 03: 혼합)
+    const devType = ($("#dev_type").val() || "").trim();                 // 소속 구분 (dev_id에서 S: 직원, F: 프리랜서)
+    const workMd = ($("#select_work_md").val() || "").trim();                   // 근무 가능형태 (01: 상주, 02: 재택, 03: 혼합)
     // ==
-    const hopeRaw = $("#hope_rate_amt").val().replace(/,/g, ""); // 희망단가 금액
-    const availDt = $("#avail_dt").val().trim();                 // 투입 가능일
-    const ctrtTyp = $("#ctrt_typ").val().trim();                 // 계약 형태 (01: 개인, 02: 법인)
+    const hopeRaw = $("#hope_rate_amt").val().replace(/,/g, "");        // 희망단가 금액
+    const availDt = ($("#avail_dt").val() || "").trim();                 // 투입 가능일
+    const ctrtTyp = ($("#select_ctrt_typ").val() || "").trim();                 // 계약 형태 (01: 개인, 02: 법인)
 
     // 최대 입력 가능 숫자
     const MAX_AMT = 999999999;
@@ -791,8 +949,8 @@ function validateUserForm() {
 
     // 근무 가능 형태
     if (!workMd || workMd == "") {
-        alert("근무 형태를 선택해주세요.");
-        $("#work_md").focus();
+        alert("근무형태를 선택해주세요.");
+        $("#select_work_md").focus();
         return false;
     }
 
@@ -818,7 +976,7 @@ function validateUserForm() {
     // 계약 형태
     if (!ctrtTyp || ctrtTyp == "") {
         alert("계약 형태를 선택해주세요.");
-        $("#ctrt_typ").focus();
+        $("#select_ctrt_typ").focus();
         return false;
     }
 
@@ -939,12 +1097,17 @@ function formatAmount(value) {
         .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
-// 현재 날짜
-function getToday() {
-  const d = new Date();
-  const yyyy = d.getFullYear();
-  const mm = String(d.getMonth() + 1).padStart(2, '0');
-  const dd = String(d.getDate()).padStart(2, '0');
-  return `${yyyy}-${mm}-${dd}`;
+// 엑셀 다운로드 처리
+const excelBtn = document.getElementById("btn-excel");
+if (excelBtn) {
+    excelBtn.addEventListener("click", function () {
+        const devId = document.getElementById("dev_id").value;
+        const devNm = document.getElementById("dev_nm").value;
+        if (!devId) {
+            alert("오류 : 개발자ID가 없습니다.");
+            return;
+        }
+        location.href =
+            `/common/getExcel?dev_id=${encodeURIComponent(devId)}&dev_nm=${encodeURIComponent(devNm)}`;
+    });
 }
-

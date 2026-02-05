@@ -33,9 +33,9 @@ public class CommonService {
     private static final String TEMPLATE_PATH = "templates/excel/ExcelDownload.xlsx";
 
     @QryLog(scrnCd = "COMMON", fnCd = "EXCEL_DOWNLOAD", opTyp = "DOWNLOAD", logParams = false)
-    public void download(HttpServletResponse response) throws IOException {
+    public void download(HttpServletResponse response, String devId) throws IOException {
 
-        Map<String, Object> map = Map.of("dev_id", "HCNC_F001");
+        Map<String, Object> map = Map.of("dev_id", devId);
         Map<String, Object> sheet1Data = this.sqlSession.selectOne("com.hcncinit.CommonMapper.get_dev_info_excel", map);
         List<Map<String, Object>> sheet2Data01 = this.sqlSession.selectList("com.hcncinit.CommonMapper.get_skl_info_excel_01", map);
         List<Map<String, Object>> sheet2Data02 = this.sqlSession.selectList("com.hcncinit.CommonMapper.get_skl_info_excel_02", map);

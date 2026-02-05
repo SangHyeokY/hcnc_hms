@@ -81,7 +81,7 @@ function loadHr012TableDataA() {
             window.hr012TableA.setData(tableData);
         },
         error: function() {
-            alert("Tab2A 데이터 로드 실패");
+            console.log("Tab2A 데이터 로드 실패");
         }
     });
 }
@@ -158,7 +158,7 @@ function loadHr012TableDataB() {
             window.hr012TableB.setData(tableData);
         },
         error: function() {
-            alert("Tab2B 데이터 로드 실패");
+            console.log("Tab2B 데이터 로드 실패");
         }
     });
 }
@@ -207,7 +207,7 @@ function validateHr012Form() {
 }
 
 function saveHr012TableData() {
-    if (!validateHr012Form()) return;
+    // if (!validateHr012Form()) return;
 
     const devId = window.currentDevId;
     const userId = $.trim($("#write_user_id").val());
