@@ -206,7 +206,7 @@ function buildTables() {
             { title: "부가정보3", field: "adinfo_03", formatter: amountFormatter },
             { title: "부가정보4", field: "adinfo_04", formatter: amountFormatter },
             { title: "부가정보5", field: "adinfo_05", formatter: amountFormatter },
-            { title: "사용여부", field: "use_yn", hozAlign: "center", width: 90 }
+            { title: "사용여부", field: "use_yn", hozAlign: "center" }
         ],
         data: [],
         rowSelected: function (row) {

@@ -619,7 +619,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .modal-content .title-area .type span{padding: 3px 9px; color: #4880FF; border-radius:8px; border: 1px solid #4880FF;}
 .modal-content top-article{padding-bottom:10px;}
 .modal-content ul {list-style: none; margin: 0; padding: 0;}
-.modal-content li.table-col {width: 100%; padding: 10px 0; gap: 10px;}
+.modal-content li.table-col {width: 100%; padding: 30px 0; gap: 20px;}
 .modal-content li.table-col .table-cell {width: 100%;}
 .modal-content .cell-tit {font-size: 12px; font-weight: 700; padding-bottom: 6px;}
 .modal-content .cell-info input,
