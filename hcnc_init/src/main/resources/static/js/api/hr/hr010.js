@@ -26,6 +26,8 @@ const changedTabs = {
     tab4: false
 };
 
+let isSaving = false;
+
 // ============================================================================== //
 
 // 문서 첫 생성 시 실행
@@ -119,6 +121,10 @@ $(document).ready(function () {
         const activeTab = $(".tab-btn.active").data("tab");
         console.log("현재 탭 :", activeTab);
 
+        if (isSaving) return;
+        isSaving = true;
+        showLoading();
+
         if (!validateUserForm()) {
             console.log("인적사항 유효성 검사 실패");
             return;
@@ -135,26 +141,46 @@ $(document).ready(function () {
             }
 
             // 인적사항 + 탭 저장
-            upsertUserBtn(function (success) {
-                if (!success) return;
+            upsertUserBtn(async function (success) {
+                if (!success) {
+                    hideLoading();
+                    isSaving = false;
+                    return;
+                }
 
                 if (currentMode !== "insert") {
-                    // if (activeTab === "tab1") saveHr011TableData();
-                    // else if (activeTab === "tab2") saveHr012TableData();
-                    // else if (activeTab === "tab3") saveHr013InlineRows();
-                    // else if (activeTab === "tab4") saveTab4All();
+                    try {
+                        console.log("저장을 시작합니다.")
 
-                    // 수정/변경된 값들을 한번에 저장
-                    if (changedTabs.tab1) saveHr011TableData();
-                    if (changedTabs.tab2) saveHr012TableData();
-                    if (changedTabs.tab3) saveHr013InlineRows();
-                    if (changedTabs.tab4) saveTab4All();
+                        // 수정/변경된 값들을 한번에 저장 (지연)
+                        if (changedTabs.tab1) await saveHr011TableData();
+                        if (changedTabs.tab2) await saveHr012TableData();
+                        if (changedTabs.tab3) await saveHr013InlineRows();
+                        if (changedTabs.tab4) await saveTab4All();
 
-                    // 저장이 끝나면 초기화
-                    Object.keys(changedTabs).forEach(k => changedTabs[k] = false);
-            }
+                        // 저장이 끝나면 초기화
+                        Object.keys(changedTabs).forEach(k => changedTabs[k] = false);
+                    } catch (e) {
+                         console.error(e);
+                    } finally {
+                        console.log("저장 작업을 종료합니다.")
+                        hideLoading();
+                        isSaving = false;
+
+                        if (currentMode == "insert"){
+                            alert("인적사항 정보가 저장되었습니다.");
+                            closeUserViewModal();
+                        }
+                        else {
+                           alert("인적사항 및 상세정보가 저장되었습니다.");
+                        }
+                    }
+                } else {
+                     hideLoading();
+                     isSaving = false;
+                }
+            });
         });
-    });
 
     // 근무형태 셀렉트 공통콤보
     setComCode("select_work_md", "WORK_MD", "", "cd", "cd_nm", function () {
@@ -508,14 +534,6 @@ function upsertUserBtn(callback)
 //                    tab4: "인적사항,\n평가 및 리스크\n정보가 저장되었습니다."
 //                };
 //                alert(msgMap[activeTab]);
-
-            if (currentMode == "insert"){
-                alert("인적사항 정보가 저장되었습니다.");
-                closeUserViewModal();
-            }
-            else {
-                alert("인적사항 및 상세정보가 저장되었습니다.");
-            }
 
             if (callback) callback(true);
             loadUserTableData();
@@ -1156,4 +1174,12 @@ if (excelBtn) {
         location.href =
             `/common/getExcel?dev_id=${encodeURIComponent(devId)}&dev_nm=${encodeURIComponent(devNm)}`;
     });
+}
+
+function showLoading() {
+    $("#loading-overlay").addClass("active");
+}
+
+function hideLoading() {
+    $("#loading-overlay").removeClass("active");
 }

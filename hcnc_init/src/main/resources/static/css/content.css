@@ -803,3 +803,37 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
   background-color: #f8f8f8 !important;
   color: #333;
 }
+
+/* 로딩 이미지 css */
+#loading-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 99999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+#loading-overlay.active {
+    display: flex;
+}
+
+#loading-overlay .loading-box {
+    background: #fff;
+    padding: 24px 32px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+}
+
+#loading-overlay img {
+    width: 64px;
+    height: 64px;
+}
+
+#loading-overlay p {
+    margin-top: 12px;
+    /* font-weight: 600; */
+    color: #333;
+}

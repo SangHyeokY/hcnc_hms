@@ -14,26 +14,26 @@ public class MainService {
     private SqlSession sqlSession;
 
     public Map<String, Object> pData(Map<String,Object> map){
-        Map<String, Object> result = new HashMap();
-        result = (Map<String, Object>)this.sqlSession.selectOne("com.hcncinit.MainMapper.pData", map);
+        Map<String, Object> result;
+        result = this.sqlSession.selectOne("com.hcncinit.MainMapper.pData", map);
         return result;
     };
 
     public Map<String, Object> eData(Map<String,Object> map){
-        Map<String, Object> result = new HashMap();
-        result = (Map<String, Object>)this.sqlSession.selectOne("com.hcncinit.MainMapper.eData", map);
+        Map<String, Object> result;
+        result = this.sqlSession.selectOne("com.hcncinit.MainMapper.eData", map);
         return result;
     };
 
     public Map<String, Object> sData(Map<String,Object> map){
-        Map<String, Object> result = new HashMap();
-        result = (Map<String, Object>)this.sqlSession.selectOne("com.hcncinit.MainMapper.sData", map);
+        Map<String, Object> result;
+        result = this.sqlSession.selectOne("com.hcncinit.MainMapper.sData", map);
         return result;
     };
 
     public Map<String, Object> gData(Map<String,Object> map){
-        Map<String, Object> result = new HashMap();
-        result = (Map<String, Object>)this.sqlSession.selectOne("com.hcncinit.MainMapper.gData", map);
+        Map<String, Object> result;
+        result = this.sqlSession.selectOne("com.hcncinit.MainMapper.gData", map);
         return result;
     };
 
@@ -64,8 +64,8 @@ public class MainService {
 
     // 인력관리 > 기본 인적사항 (상세) (임시/검색x), 따로 분류할건지는 논의
     public Map<String, Object> select_hr011(Map<String,Object> map){
-        Map<String, Object> result = new HashMap();
-        result = (Map<String, Object>)this.sqlSession.selectOne("com.hcncinit.MainMapper.select_hr011", map);
+        Map<String, Object> result;
+        result = this.sqlSession.selectOne("com.hcncinit.MainMapper.select_hr011", map);
         return result;
     };
 }
