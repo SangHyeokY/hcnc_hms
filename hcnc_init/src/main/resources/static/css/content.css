@@ -1,4 +1,6 @@
 @charset "UTF-8";
+option{background:#fff; color:#333;}
+
 /*=================================================================================
  * 로그인
  =================================================================================*/
@@ -515,7 +517,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .tag-input-box::after {
   display: none;
 }
-.tag-input-box:focus-within {border-color: #8bb7ff; box-shadow: 0 0 0 3px rgba(139, 183, 255, 0.25);}
+/* .tag-input-box:focus-within {border-color: #8bb7ff; box-shadow: 0 0 0 3px rgba(139, 183, 255, 0.25);} */
 .tag-input-box input {border: none; outline: none; background: transparent; min-width: 140px; padding: 4px 6px; font-size: 14px; color: #2f3542;}
 
 .tag-list {display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; text-align: left;}
