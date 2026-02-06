@@ -1078,6 +1078,9 @@ $('#excelFile').on('change', function(e) {
             let data = window.hr013Table.getData();
 
             result.data.forEach(function (item) {
+                if (item.inprj_yn?.toUpperCase() !== 'Y') {
+                    item.inprj_yn = 'N';
+                }
 
                 item.st_dt = item.st_dt.slice(0,10);
                 item.ed_dt = item.ed_dt.slice(0,10);
@@ -1110,6 +1113,7 @@ $('#excelFile').on('change', function(e) {
             })
 
             window.hr013Table.setData(data);
+            changedTabs.tab3 = true;
         },
         error: function (xhr) {
             // 서버 에러도 모달로 표시
