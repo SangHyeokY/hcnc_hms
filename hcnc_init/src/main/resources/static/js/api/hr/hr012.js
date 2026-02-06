@@ -332,7 +332,7 @@ function attachHr012TagSync() {
     });
 }
 
-
+// 태그 데이터를 배열로
 function parseSklList(value) {
     if (value == null) return [];
     if (Array.isArray(value)) return value;

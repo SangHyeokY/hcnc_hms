@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout/layout}">
+    layout:decorate="~{layout/layout}">
 
 <!-- 추가 버튼 정의 -->
 <th:block layout:fragment="additionalButtons">
@@ -75,11 +75,11 @@
 
                     <div class="fl-ac title-area">
                         <h5 class="mg-r5">인적사항
-<!--                            <span id="show_devId"></span>-->
+                            <!--                            <span id="show_devId"></span>-->
                         </h5>
-<!--                        <div class="type" id="devTypeWrap">-->
-<!--                            <span id="dev_type2" class="fw500 fs13"></span>-->
-<!--                        </div>-->
+                        <!--                        <div class="type" id="devTypeWrap">-->
+                        <!--                            <span id="dev_type2" class="fw500 fs13"></span>-->
+                        <!--                        </div>-->
                     </div>
 
                     <div class="modal-human-area fl-sa" id="TABLE_HR010_B">
@@ -110,7 +110,9 @@
                                         <th>성명</th>
                                         <td><input type="text" class="wp100" id="dev_nm" disabled></td>
                                         <th>개발자ID</th>
-                                        <td><div class="fl-ct wp100 fs16 none_editable_text" id="dev_id_input"></div></td>
+                                        <td>
+                                            <div class="fl-ct wp100 fs16 none_editable_text" id="dev_id_input"></div>
+                                        </td>
                                         <th>생년월일</th>
                                         <td><input type="date" class="wp100" id="brdt"></td>
                                     </tr>
@@ -145,7 +147,7 @@
                                                 <span class="fs16 none_editable_text" id="grade">계산중...
                                                 </span>
                                                 <span class="fs16 none_editable_text" id="score"
-                                                      style="padding-left:3px;">
+                                                    style="padding-left:3px;">
                                                 </span>
                                             </div>
                                         </td>
@@ -171,10 +173,12 @@
                                         <td colspan="5">
                                             <div class="tag-input">
                                                 <div class="tag-input-box">
+                                                    <input type="text" class="wp100 tag-input-field"
+                                                        id="main_lang_input" list="main_lang_datalist"
+                                                        placeholder="기술 입력/선택 후 Enter" />
                                                     <div class="tag-help"></div>
                                                     <ul class="tag-list" id="mainLangTagList"></ul>
-                                                    <input type="text" class="wp100 tag-input-field" id="main_lang_input" list="main_lang_datalist"
-                                                           placeholder="기술 입력/선택 후 Enter">
+
                                                 </div>
                                                 <div class="tag-select-row">
                                                     <input type="hidden" id="main_lang">
@@ -239,7 +243,8 @@
             <div class="modal-btn">
                 <ul>
                     <li>
-                        <button class="btn btn-excel" id="btn-excel" onclick="location.href='/common/getExcel'">엑셀 다운로드</button>
+                        <button class="btn btn-excel" id="btn-excel" onclick="location.href='/common/getExcel'">엑셀
+                            다운로드</button>
                     </li>
                     <li>
                         <button class="btn btn-save" id="btn-user-save">저장</button>
@@ -258,4 +263,5 @@
     <script src="/js/api/common.js"></script>
 
 </th:block>
+
 </html>

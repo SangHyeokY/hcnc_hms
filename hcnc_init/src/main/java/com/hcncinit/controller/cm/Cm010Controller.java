@@ -1,4 +1,4 @@
-package com.hcncinit.controller.cm010;
+package com.hcncinit.controller.cm;
 
 import java.util.List;
 import java.util.Map;
@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.hcncinit.service.cm010.Cm010Service;
+import com.hcncinit.service.cm.Cm010Service;
 
 @Controller
 @RequestMapping("/cm010")

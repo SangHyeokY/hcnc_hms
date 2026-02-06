@@ -20,6 +20,7 @@
             , ctrt_typ -- 계약형태
             , hope_rate_amt -- 단가
             , search_txt
+            , IFNULL(fn_total_score(dev_id), 0) score
         FROM tb_dev_info
         WHERE del_yn='N'
         AND use_yn='Y'
@@ -32,7 +33,7 @@
         <if test="dev_nm != null and dev_nm != ''">
             AND dev_nm LIKE CONCAT('%', #{dev_nm}, '%')
         </if>
-        ORDER BY upd_ts DESC
+        ORDER BY score DESC, dev_id
     </select>
 
     <!-- 인력관리 > 기본 인적사항 이미지 -->

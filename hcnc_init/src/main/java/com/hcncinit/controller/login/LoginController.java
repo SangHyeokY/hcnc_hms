@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.hcncinit.service.cm010.Cm010Service;
+import com.hcncinit.service.cm.Cm010Service;
 
 @Controller
 public class LoginController {

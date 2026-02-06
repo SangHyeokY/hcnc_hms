@@ -1042,10 +1042,14 @@ function initMainLangTags() {
         matchMode: "prefix"
     });
 
+    
+
     setComCode("main_lang_select", "skl_id", "", "cd", "cd_nm", function (res) {
         mainLangTagInput.setOptions(res || []);
         mainLangTagInput.setFromValue(pendingMainLangValue || $("#main_lang").val());
     });
+
+    
 }
 
 // 전화번호 자동 변환

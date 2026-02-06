@@ -229,15 +229,13 @@ function buildTables() {
 
 // 계약단가(,)
 function amountFormatter(cell) {
-    if (!cell.getValue() === null || cell.getValue() === undefined) {
+    var value = cell.getValue();
+    if (value === null || value === undefined || value === "") {
         return "";
     }
-    comma = function (str) {
-        str = String(str);
-        return str.replace(/(\d)(?=(?:\d{3})+(?!\d))/g, '$1,');
-    }
 
-    return comma(cell.getValue());
+    var str = String(value);
+    return str.replace(/(\d)(?=(?:\d{3})+(?!\d))/g, "$1,");
 }
 
 
