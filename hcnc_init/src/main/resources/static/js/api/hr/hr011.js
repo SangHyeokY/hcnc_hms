@@ -159,7 +159,7 @@ function loadHr011TableData(devId) {
     }
 
     $.ajax({
-        url: "/hr010/tab1",
+        url: "/hr011/tab1",
         type: "GET",
         data: { dev_id: devId },
         success: (res) => {
@@ -191,7 +191,7 @@ function saveHr011TableData() {
     };
 
     $.ajax({
-        url: "/hr010/tab1_upsert",
+        url: "/hr011/tab1_upsert",
         type: "POST",
         contentType: "application/json",
         data: JSON.stringify(param),
@@ -212,7 +212,7 @@ function deleteHr011() {
     if (!confirm("정말로 삭제하시겠습니까?")) return;
 
     $.ajax({
-        url: "/hr010/tab1_delete",
+        url: "/hr011/tab1_delete",
         type: "POST",
         contentType: "application/json",
         data: JSON.stringify({

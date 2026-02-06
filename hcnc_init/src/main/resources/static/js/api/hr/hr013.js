@@ -241,7 +241,7 @@ function loadHr013TableData() {
     if (!window.hr013Table) return;
 
     $.ajax({
-        url: "/hr010/tab3",
+        url: "/hr013/tab3",
         type: "GET",
         data: { dev_id: dev_id },
         success: function (res) {
@@ -382,7 +382,7 @@ function saveHr013Row() {
     }
 
     $.ajax({
-        url: "/hr010/tab3_save",
+        url: "/hr013/tab3_save",
         type: "POST",
         data: payload,
         success: function (response) {
@@ -475,7 +475,7 @@ function saveHr013InlineRows() {
         }
 
         requests.push($.ajax({
-            url: "/hr010/tab3_save",
+            url: "/hr013/tab3_save",
             type: "POST",
             data: {
                 dev_id: devId,
@@ -496,7 +496,7 @@ function saveHr013InlineRows() {
 
     hr013DeletedIds.forEach(function (id) {
         requests.push($.ajax({
-            url: "/hr010/tab3_delete",
+            url: "/hr013/tab3_delete",
             type: "POST",
             data: { dev_prj_id: id, dev_id: devId }
         }));

@@ -172,7 +172,7 @@ function loadHr014TableDataA() {
     if (!window.hr014TableA) return;
 
     $.ajax({
-        url: "/hr015/a/list",
+        url: "/hr014/a/list",
         type: "GET",
         data: { dev_id: devId },
         success: function(response) {
@@ -263,7 +263,7 @@ function loadHr014TableDataB() {
     // if (!window.hr014TableB) return;
 
     $.ajax({
-        url: "/hr015/b/list",
+        url: "/hr014/b/list",
         type: "GET",
         data: { dev_id: devId },
         success: function(response) {
@@ -294,7 +294,7 @@ function saveTableA(showAlert) {
         return;
     }
     $.ajax({
-        url: "/hr015/a/save",
+        url: "/hr014/a/save",
         type: "POST",
         data: {
             dev_id: window.currentDevId || $("#dev_id").val(),
@@ -324,7 +324,7 @@ function saveTableB(showAlert) {
     riskState.re_in_yn = $("#HR015_REIN_CHECK").is(":checked") ? "Y" : "N";
 
     $.ajax({
-        url: "/hr015/b/save",
+        url: "/hr014/b/save",
         type: "POST",
         data: {
             dev_id: window.currentDevId || $("#dev_id").val(),

@@ -1,9 +1,7 @@
 package com.hcncinit.controller;
 
 import com.hcncinit.service.CommonService;
-import com.hcncinit.service.hr010.Hr010Service;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;

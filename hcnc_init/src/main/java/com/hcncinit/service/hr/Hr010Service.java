@@ -1,4 +1,4 @@
-package com.hcncinit.service.hr010;
+package com.hcncinit.service.hr;
 
 import com.hcncinit.logging.QryLog;
 import java.util.List;
@@ -13,7 +13,7 @@ public class Hr010Service {
     @Autowired
     private SqlSession sqlSession;
 
-    // [인적관리] - [기본 인적사항]
+    // [인적관리] - [기본 인적사항] - Main 화면/팝업
 
     // [기본 인적사항] > 조회
     @QryLog(scrnCd = "HR010", fnCd = "DEV_LIST", opTyp = "SELECT")

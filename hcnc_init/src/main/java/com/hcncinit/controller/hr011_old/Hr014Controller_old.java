@@ -1,4 +1,4 @@
-package com.hcncinit.controller.hr011;
+package com.hcncinit.controller.hr011_old;
 
 import java.util.List;
 import java.util.Map;
@@ -11,14 +11,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.hcncinit.service.hr011.Hr014Service;
+import com.hcncinit.service.hr011_old.Hr014Service_old;
 
 @Controller
 @RequestMapping("/hr014")
-public class Hr014Controller {
+public class Hr014Controller_old {
 
     @Autowired
-    private Hr014Service hr014Service;
+    private Hr014Service_old hr014Service;
 
     @RequestMapping("/list")
     public ModelAndView list(@RequestParam(required = false) Map<String, Object> map) {

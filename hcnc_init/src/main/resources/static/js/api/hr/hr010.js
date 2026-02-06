@@ -499,8 +499,8 @@ function upsertUserBtn(callback)
             if (response && response.dev_id) {
                 window.currentDevId = response.dev_id;
                 $("#dev_id").val(response.dev_id);
+                // openUserModal("view");
             }
-
 //                const msgMap = {
 //                    tab1: "인적사항,\n소속 및 계약정보\n정보가 저장되었습니다.",
 //                    tab2: "인적사항,\n보유역량 및 숙련도\n정보가 저장되었습니다.",
@@ -796,7 +796,6 @@ function setModalMode(mode) {
     $tagBox.toggleClass("is-readonly", isView);
     $tagBox.find(".tag-help").toggle(!isView);
 
-    window.hr010ReadOnly = isView;
     updateTabActions($(".tab-btn.active").data("tab"));
 
     // Tab 연동

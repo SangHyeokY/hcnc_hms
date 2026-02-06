@@ -1,4 +1,4 @@
-package com.hcncinit.service.hr010;
+package com.hcncinit.service.hr;
 
 import com.hcncinit.logging.QryLog;
 import org.apache.ibatis.session.SqlSession;
