@@ -48,10 +48,11 @@ function buildHr012TableA() {
         layout: "fitColumns",
         placeholder: "데이터 없음",
         cellEdited: function (cell) {
-            console.log("cellEdited A !!!!");
-            console.log(cell.getValue());
+            // console.log("cellEdited A !!!!");
+            // console.log(cell.getValue());
             changedTabs.tab2 = true;
             if (cell.getField && cell.getField() === "skl_id_lst") {
+                hr012HasPendingChange = true;
                 syncHr012TableBFromA(); // 수정된 셀이 태그컬럼->숙련도테이블 동기화
             }
         },
