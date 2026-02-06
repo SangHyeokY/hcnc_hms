@@ -1,11 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE mapper
-        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.hcncinit.Hr010Mapper">
 
-    <!-- 인력관리 > 기본 인적사항 (임시/검색x) -->
+    <!-- 인력관리 > 기본 인적사항 조회 -->
     <select id="select_hr010" parameterType="map" resultType="map">
         SELECT dev_id
             , dev_nm -- 성명
@@ -38,7 +35,7 @@
         ORDER BY upd_ts DESC
     </select>
 
-    <!-- 인력관리 > 기본 인적사항 -->
+    <!-- 인력관리 > 기본 인적사항 이미지 -->
     <select id="select_hr010_img" parameterType="map" resultType="_byte[]">
         SELECT dev_img
         FROM tb_dev_info
@@ -130,7 +127,7 @@
         WHERE dev_id LIKE CONCAT(#{dev_type}, '%')
     </select>
 
-    <!-- 인적사항 삭제 -->
+    <!-- 인적사항 > 데이터 삭제 -->
     <update id="delete_hr010" parameterType="map">
         UPDATE tb_dev_info
         SET del_yn = 'Y',
@@ -141,7 +138,7 @@
         WHERE dev_id = #{dev_id}
     </update>
 
-    <!-- 인적사항 => 등급 계산 -->
+    <!-- 인적사항 > 등급 계산 -->
     <select id="dev_score" resultType="hashmap" parameterType="string">
         WITH param AS
         (
@@ -307,8 +304,5 @@
         ) T
         LIMIT 1;
     </select>
-
-
-
 
 </mapper>

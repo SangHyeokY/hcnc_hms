@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE mapper
-        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.hcncinit.Hr012Mapper">
-    <!-- 보유역량 및 숙련도 - 보유역량 -->
+
+    <!-- [Tab2] 보유역량 및 숙련도 > 보유역량 -->
     <select id="select_tab2_1" resultType="hashmap" parameterType="string">
         WITH grp AS (
             SELECT 	cd
@@ -43,7 +41,7 @@
         ;
     </select>
 
-    <!-- 보유역량 및 숙련도 - 보유역량 신규/수정 저장 -->
+    <!-- [Tab2] 보유역량 및 숙련도 > 보유역량 신규/수정 저장 -->
     <insert id="upsert_tab2_1" parameterType="map">
         <if test='type == "d"'>
         UPDATE  tb_dev_skl_info
@@ -83,7 +81,7 @@
         </if>
     </insert>
 
-    <!-- 보유역량 및 숙련도 - 숙련도 -->
+    <!-- [Tab2] 보유역량 및 숙련도 > 숙련도 조회 -->
     <select id="select_tab2_2" resultType="hashmap" parameterType="string">
         SELECT  skl.skl_id
             ,   cd.cd_nm
@@ -105,7 +103,7 @@
         ORDER BY skl.skl_id
     </select>
 
-    <!-- 보유역량 및 숙련도 - 숙련도 저장 -->
+    <!-- [Tab2] 보유역량 및 숙련도 > 숙련도 저장 -->
     <update id="save_tab2_2" parameterType="map">
         UPDATE  tb_dev_skl_info
             SET lvl = #{lvl}
