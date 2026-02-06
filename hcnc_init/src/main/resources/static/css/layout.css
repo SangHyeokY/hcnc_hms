@@ -64,15 +64,15 @@ footer {width:100%; height:30px; line-height: 30px; padding:0 20px; display: fle
 .left-menu .nav .lnb-menu ul .on {display: block;}
 .left-menu .nav .lnb-menu .dep1.no-bg a {background:none;}
 .left-menu .nav .lnb-menu .dep1 > li{position:relative;}
-.left-menu .nav .lnb-menu .dep1 > li > a {display: flex; align-items: center; padding: 12px 28px 12px 36px; font-weight: 600; font-size: 14px; color:#838c96 }
-.left-menu .nav .lnb-menu .dep1 > li:nth-child(1) > a{background: url('../images/common/lnb-one.png') 10px center no-repeat; background-size: 19px;  }
-.left-menu .nav .lnb-menu .dep1 > li:nth-child(2) > a{background: url('../images/common/lnb-two.png') 10px center no-repeat; background-size: 21px; }
+.left-menu .nav .lnb-menu .dep1 > li > a {display: flex; align-items: center; padding: 12px 20px 12px 40px; font-weight: 600; font-size: 14px; color:#838c96 }
+.left-menu .nav .lnb-menu .dep1 > li:nth-child(1) > a{background: url('../images/common/lnb-ico-01.png') 10px center no-repeat; background-size: 21px;  }
+.left-menu .nav .lnb-menu .dep1 > li:nth-child(2) > a{background: url('../images/common/lnb-ico-02.png') 10px center no-repeat; background-size: 21px; }
 .left-menu .nav .lnb-menu .dep1 > li:nth-child(3) > a{background: url('../images/common/lnb-three.png') 10px center no-repeat; background-size: 21px; }
 .left-menu .nav .lnb-menu .dep1 > li:nth-child(4) > a{background: url('../images/common/lnb-four.png') 10px center no-repeat; background-size: 21px; }
 .left-menu .nav .lnb-menu .dep1 > li:nth-child(5) > a{background: url('../images/common/lnb-five.png') 10px center no-repeat; background-size: 21px; }
 .left-menu .nav .lnb-menu .dep1 > li.on > a {background-color: #4880FF !important; color:#fff; font-weight: 600; border-radius: 8px; }
-.left-menu .nav .lnb-menu .dep1 > li.on:nth-child(1) > a{background: url('../images/common/lnb-one-w.png') 6px center no-repeat; background-size: 28px;  }
-.left-menu .nav .lnb-menu .dep1 > li.on:nth-child(2) > a{background: url('../images/common/lnb-two-w.png') 10px center no-repeat; background-size: 20px; }
+.left-menu .nav .lnb-menu .dep1 > li.on:nth-child(1) > a{background: url('../images/common/lnb-ico-01-click.png') 10px center no-repeat; background-size: 21px;  }
+.left-menu .nav .lnb-menu .dep1 > li.on:nth-child(2) > a{background: url('../images/common/lnb-ico-02-click.png') 10px center no-repeat; background-size: 21px;  }
 .left-menu .nav .lnb-menu .dep1 > li.on:nth-child(3) > a{background: url('../images/common/lnb-three-w.png') 10px center no-repeat; background-size: 20px; }
 .left-menu .nav .lnb-menu .dep1 > li.on:nth-child(4) > a{background: url('../images/common/lnb-four-w.png') 12px center no-repeat; background-size: 17px; }
 .left-menu .nav .lnb-menu .dep1 > li.on:nth-child(5) > a{background: url('../images/common/lnb-five-w.png') 10px center no-repeat; background-size: 22px; }
