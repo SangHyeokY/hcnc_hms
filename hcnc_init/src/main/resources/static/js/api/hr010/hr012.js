@@ -1,4 +1,7 @@
 let tableData_old = [];
+let hr012TableAReady = false;   // A 테이블 데이터 로드 완료 판단
+let hr012RowTags = new Map();   // 분야별 태그 상태 저장 맵
+let hr012HasPendingChange = false;  // A/B 테이블 데이터 차이 판단
 
 // hr012.js
 window.initTab2 = function() {
@@ -9,6 +12,7 @@ window.initTab2 = function() {
     // 테이블 초기화 (한 번만 수행)
     if (!window.hr012TableA) buildHr012TableA();
     if (!window.hr012TableB) buildHr012TableB();
+    attachHr012TagSync();   // 태그 변경 이벤트 받을 리스너
 
     // 초기 데이터 로드
     loadHr012TableDataA();
@@ -46,6 +50,10 @@ function buildHr012TableA() {
         cellEdited: function (cell) {
             console.log("cellEdited A !!!!");
             console.log(cell.getValue());
+            changedTabs.tab2 = true;
+            if (cell.getField && cell.getField() === "skl_id_lst") {
+                syncHr012TableBFromA(); // 수정된 셀이 태그컬럼->숙련도테이블 동기화
+            }
         },
         columns: [
             { title: "코드", field: "cd", visible: false },
@@ -61,6 +69,9 @@ function buildHr012TableA() {
 function loadHr012TableDataA() {
     const devId = window.currentDevId;
     if (!window.hr012TableA) return;
+    hr012TableAReady = false;
+    hr012RowTags.clear();
+    hr012HasPendingChange = false;
 
     $.ajax({
         url: "/hr010/tab2",
@@ -78,11 +89,18 @@ function loadHr012TableDataA() {
             const tableData = dataArray.map(item => ({
                 cd: item.cd,
                 cd_nm: item.cd_nm,
-                skl_id_lst: (item.skl_id_lst !== undefined) ? JSON.parse(item.skl_id_lst) : []}
-            ));
-            tableData_old = structuredClone(tableData);
+                skl_id_lst: parseSklList(item.skl_id_lst)
+            }));
+            tableData.forEach(row => {
+                const key = row.cd || row.grp_cd || row.cd_nm;
+                if (!key) return;
+                hr012RowTags.set(String(key), normalizeTagList(row.skl_id_lst));
+            });
+            tableData_old = cloneTableData(tableData);
 
             window.hr012TableA.setData(tableData);
+            hr012TableAReady = true;
+            // 초기 로드에서는 숙련도 목록을 건드리지 않음
         },
         error: function() {
             console.log("Tab2A 데이터 로드 실패");
@@ -166,6 +184,7 @@ function loadHr012TableDataB() {
             }));
 
             window.hr012TableB.setData(tableData);
+            // 초기 로드에서는 숙련도 목록을 건드리지 않음
         },
         error: function() {
             console.log("Tab2B 데이터 로드 실패");
@@ -239,14 +258,12 @@ function saveHr012TableData() {
             userId: userId
         }
     });
-    // 수정한 후 데이터
+    // 수정한 후 데이터 (현재 UI 상태 기준: 보유역량 태그 변경 반영)
     codes = [];
-    hr012TableA.getData().forEach(row => {
-        if (row.skl_id_lst !== undefined)
-            Object.values(row.skl_id_lst).forEach(item => {
-                if (item.code !== undefined)
-                    codes.push(item.code);
-            });
+    collectHr012SkillsFromA().forEach(item => {
+        if (item && item.skl_id != null) {
+            codes.push(String(item.skl_id));
+        }
     });
     let param = codes.map(data => {
         return {
@@ -276,4 +293,137 @@ function saveHr012TableData() {
         },
         error: () => alert("저장 실패")
     });
+}
+
+// 태그 데이터를 표준배열로
+function normalizeTagList(value) {
+    if (!value) return [];
+    if (Array.isArray(value)) return value;
+    if (typeof value === "string") {
+        const raw = value.trim();
+        if (!raw) return [];
+        try {
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed)) return parsed;
+        } catch (e) {
+            // fallthrough to comma split
+        }
+        return raw.split(",").map(v => v.trim()).filter(Boolean).map(code => ({
+            code: code,
+            label: code
+        }));
+    }
+    return [];
+}
+
+//태그 변경 이벤트 리스너 등록 함수
+function attachHr012TagSync() {
+    const tableEl = document.getElementById("TABLE_HR012_A");
+    if (!tableEl || tableEl.__tagSyncBound) return;
+    tableEl.__tagSyncBound = true;
+    tableEl.addEventListener("tagEditor:change", function (e) {
+        const detail = e.detail || {};  // 이벤트에 payload
+        const rowData = detail.rowData || {};   // 변경된 행의 데이터
+        const key = rowData.cd || rowData.grp_cd || rowData.cd_nm;
+        if (!key) return;
+        hr012RowTags.set(String(key), normalizeTagList(detail.tags || []));
+        hr012HasPendingChange = true;
+        syncHr012TableBFromA();
+    });
+}
+
+
+function parseSklList(value) {
+    if (value == null) return [];
+    if (Array.isArray(value)) return value;
+    if (typeof value === "string") {
+        const trimmed = value.trim();
+        if (!trimmed) return [];
+        try {
+            const parsed = JSON.parse(trimmed);
+            return Array.isArray(parsed) ? parsed : [];
+        } catch (e) {
+            return [];
+        }
+    }
+    return [];
+}
+
+function cloneTableData(data) {
+    if (typeof structuredClone === "function") {
+        try {
+            return structuredClone(data);
+        } catch (e) {
+            // fallback below
+        }
+    }
+    try {
+        return JSON.parse(JSON.stringify(data));
+    } catch (e) {
+        return Array.isArray(data) ? data.slice() : [];
+    }
+}
+
+function collectHr012SkillsFromA() {
+    if (hr012RowTags && hr012RowTags.size) {
+        const map = new Map();
+        hr012RowTags.forEach(tags => {
+            normalizeTagList(tags).forEach(tag => {
+                const code = tag.code || tag.cd || tag.value || tag.id || tag;
+                if (!code) return;
+                const label = tag.label || tag.cd_nm || tag.name || code;
+                map.set(String(code), String(label));
+            });
+        });
+        return Array.from(map, ([code, label]) => ({
+            skl_id: code,
+            cd_nm: label
+        }));
+    }
+    if (!window.hr012TableA) return [];
+    const map = new Map();
+    window.hr012TableA.getData().forEach(row => {
+        const tags = normalizeTagList(row.skl_id_lst);
+        tags.forEach(tag => {
+            const code = tag.code || tag.cd || tag.value || tag.id || tag;
+            if (!code) return;
+            const label = tag.label || tag.cd_nm || tag.name || code;
+            map.set(String(code), String(label));
+        });
+    });
+    return Array.from(map, ([code, label]) => ({
+        skl_id: code,
+        cd_nm: label
+    }));
+}
+
+function syncHr012TableBFromA() {
+    if (!window.hr012TableB || !hr012TableAReady) return;
+    if (!hr012HasPendingChange) return;
+    const skills = collectHr012SkillsFromA();
+    const existing = window.hr012TableB.getData ? window.hr012TableB.getData() : [];
+    const existingMap = new Map();
+    existing.forEach(row => {
+        if (row && row.skl_id != null) {
+            existingMap.set(String(row.skl_id), row);
+        }
+    });
+
+    const merged = skills.map(skill => {
+        const prev = existingMap.get(String(skill.skl_id));
+        if (prev) {
+            return Object.assign({}, prev, { cd_nm: skill.cd_nm });
+        }
+        return {
+            skl_id: skill.skl_id,
+            cd_nm: skill.cd_nm,
+            lv1: false,
+            lv2: false,
+            lv3: false,
+            lv4: false,
+            lv5: false
+        };
+    });
+
+    window.hr012TableB.setData(merged);
 }
