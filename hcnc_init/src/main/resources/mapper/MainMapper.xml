@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hcncinit.MainMapper">
+    <select id="pData" resultType="map">
+        SELECT P_IDX, PAGE_NM, M_ID, SCORE, CHK_OPT, MEMO
+          FROM tb_p_data
+         WHERE PAGE_NM = #{code}
+    </select>
+    <select id="eData" resultType="map">
+        SELECT E_IDX, PAGE_NM, M_ID, SCORE, CHK_OPT, MEMO
+          FROM tb_e_data
+         WHERE PAGE_NM = #{code}
+    </select>
+    <select id="sData" resultType="map">
+        SELECT S_IDX, PAGE_NM, M_ID, SCORE, CHK_OPT, MEMO
+          FROM tb_s_data
+         WHERE PAGE_NM = #{code}
+    </select>
+    <select id="gData" resultType="map">
+        SELECT G_IDX, PAGE_NM, M_ID, SCORE, CHK_OPT, MEMO
+          FROM tb_g_data
+         WHERE PAGE_NM = #{code}
+    </select>
+    <update id="pUpdate">
+      UPDATE tb_p_data
+         SET SCORE=#{score}, CHK_OPT=#{check}
+       WHERE PAGE_NM = #{code};
+    </update>
+    <update id="eUpdate">
+      UPDATE tb_e_data
+         SET SCORE=#{score}, CHK_OPT=#{check}
+       WHERE PAGE_NM = #{code};
+    </update>
+    <update id="sUpdate">
+      UPDATE tb_s_data
+         SET SCORE=#{score}, CHK_OPT=#{check}
+       WHERE PAGE_NM = #{code};
+    </update>
+    <update id="gUpdate">
+      UPDATE tb_g_data
+         SET SCORE=#{score}, CHK_OPT=#{check}
+       WHERE PAGE_NM = #{code};
+    </update>
+
+    <!-- 인력관리 > 기본 인적사항 (임시/검색x), 따로 분류할건지는 논의 -->
+    <select id="select_hr010" parameterType="map" resultType="map">
+        SELECT DATE_FORMAT(brdt, '%Y-%m-%d') AS brdt,
+               DATE_FORMAT(avail_dt, '%Y-%m-%d') AS avail_dt,
+               dev_id,
+               dev_nm,
+               tel,
+               email,
+               region,
+               main_lang,
+               exp_yr,
+               edu_last,
+               cert_txt,
+               hope_rate_amt,
+               avail_dt,
+               ctrt_typ
+        FROM tb_dev_info
+        WHERE 1=1
+        <if test="dev_nm != null and dev_nm != ''">
+            AND dev_nm LIKE CONCAT('%', #{dev_nm}, '%')
+        </if>
+    </select>
+
+    <!-- 인력관리 > 기본 인적사항 (상세) (임시/검색x), 임시로 가장 첫번째 데이터 불러오기 // 당장은 단순하게 -->
+    <select id="select_hr011" parameterType="map" resultType="map">
+        SELECT DATE_FORMAT(brdt, '%Y-%m-%d') AS brdt,
+               DATE_FORMAT(avail_dt, '%Y-%m-%d') AS avail_dt,
+               dev_id,
+               dev_nm,
+               tel,
+               email,
+               region,
+               main_lang,
+               exp_yr,
+               edu_last,
+               cert_txt,
+               work_md,
+               hope_rate_amt,
+               avail_dt,
+               ctrt_typ,
+               note,
+               use_yn,
+               del_yn,
+               crt_ts,
+               crt_by,
+               upd_ts,
+               upd_by
+        FROM tb_dev_info
+        WHERE dev_nm = 'test'
+    </select>
+
+</mapper>
