@@ -258,14 +258,12 @@ function saveHr012TableData() {
             userId: userId
         }
     });
-    // 수정한 후 데이터
+    // 수정한 후 데이터 (현재 UI 상태 기준: 보유역량 태그 변경 반영)
     codes = [];
-    hr012TableA.getData().forEach(row => {
-        if (row.skl_id_lst !== undefined)
-            Object.values(row.skl_id_lst).forEach(item => {
-                if (item.code !== undefined)
-                    codes.push(item.code);
-            });
+    collectHr012SkillsFromA().forEach(item => {
+        if (item && item.skl_id != null) {
+            codes.push(String(item.skl_id));
+        }
     });
     let param = codes.map(data => {
         return {
