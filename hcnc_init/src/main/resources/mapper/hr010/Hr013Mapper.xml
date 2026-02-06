@@ -1,11 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE mapper
-        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.hcncinit.Hr013Mapper">
 
-    <!-- 개발자 프로젝트/단가 이력 조회 -->
+    <!-- [Tab3] 개발자 프로젝트/단가 이력 > 조회 -->
     <select id="selectList" resultType="hashmap" parameterType="map">
         SELECT	prj.dev_prj_id
              , 	prj.dev_id
@@ -59,46 +56,46 @@
         ;
     </select>
 
-    <!-- 프로젝트 등록 -->
+    <!-- [Tab3] 프로젝트 > 등록 -->
     <insert id="insertProject" parameterType="map" useGeneratedKeys="true" keyProperty="dev_prj_id">
         INSERT INTO tb_dev_prj_info (
-        dev_id,
-        st_dt,
-        ed_dt,
-        cust_nm,
-        prj_nm,
-        job_cd,
-        stack_txt,
-        alloc_pct,
-        remark,
-        inprj_yn,
-        use_yn,
-        del_yn,
-        crt_ts,
-        crt_by,
-        upd_ts,
-        upd_by
+            dev_id,
+            st_dt,
+            ed_dt,
+            cust_nm,
+            prj_nm,
+            job_cd,
+            stack_txt,
+            alloc_pct,
+            remark,
+            inprj_yn,
+            use_yn,
+            del_yn,
+            crt_ts,
+            crt_by,
+            upd_ts,
+            upd_by
         ) VALUES (
-        #{dev_id},
-        #{st_dt},
-        #{ed_dt},
-        #{cust_nm},
-        #{prj_nm},
-        #{job_cd},
-        #{stack_txt},
-        #{alloc_pct},
-        #{remark},
-        #{inprj_yn},
-        'Y',
-        'N',
-        NOW(),
-        #{userId},
-        NOW(),
-        #{userId}
+            #{dev_id},
+            #{st_dt},
+            #{ed_dt},
+            #{cust_nm},
+            #{prj_nm},
+            #{job_cd},
+            #{stack_txt},
+            #{alloc_pct},
+            #{remark},
+            #{inprj_yn},
+            'Y',
+            'N',
+            NOW(),
+            #{userId},
+            NOW(),
+            #{userId}
         )
     </insert>
 
-    <!-- 프로젝트 수정 -->
+    <!-- [Tab3] 프로젝트 > 수정 -->
     <update id="updateProject" parameterType="map">
         UPDATE tb_dev_prj_info
         SET st_dt = #{st_dt},
@@ -115,7 +112,7 @@
         WHERE dev_prj_id = #{dev_prj_id}
     </update>
 
-    <!-- 프로젝트 삭제(소프트) -->
+    <!-- [Tab3] 프로젝트 > 삭제(소프트) -->
     <update id="deleteProject" parameterType="map">
         UPDATE tb_dev_prj_info
         SET del_yn = 'Y',
@@ -124,7 +121,7 @@
         WHERE dev_prj_id = #{dev_prj_id}
     </update>
 
-    <!-- 단가 이력 삭제(소프트) -->
+    <!-- [Tab3] 단가 이력 > 삭제(소프트) -->
     <update id="deleteRateByProject" parameterType="map">
         UPDATE tb_dev_rate_info
         SET del_yn = 'Y',
@@ -134,7 +131,7 @@
         AND dev_id = #{dev_id}
     </update>
 
-    <!-- 최신 단가 조회 -->
+    <!-- [Tab3] 최신 단가 조회 -->
     <select id="selectLatestRate" resultType="java.math.BigDecimal" parameterType="map">
         SELECT rate_amt
         FROM tb_dev_rate_info
@@ -146,30 +143,30 @@
         LIMIT 1
     </select>
 
-    <!-- 단가 이력 저장 -->
+    <!-- [Tab3] 단가 이력 저장 -->
     <insert id="insertRate" parameterType="map">
         INSERT INTO tb_dev_rate_info (
-        dev_prj_id,
-        dev_id,
-        rate_amt,
-        remark,
-        use_yn,
-        del_yn,
-        crt_ts,
-        crt_by,
-        upd_ts,
-        upd_by
+            dev_prj_id,
+            dev_id,
+            rate_amt,
+            remark,
+            use_yn,
+            del_yn,
+            crt_ts,
+            crt_by,
+            upd_ts,
+            upd_by
         ) VALUES (
-        #{dev_prj_id},
-        #{dev_id},
-        #{rate_amt},
-        #{remark},
-        'Y',
-        'N',
-        NOW(),
-        #{userId},
-        NOW(),
-        #{userId}
+            #{dev_prj_id},
+            #{dev_id},
+            #{rate_amt},
+            #{remark},
+            'Y',
+            'N',
+            NOW(),
+            #{userId},
+            NOW(),
+            #{userId}
         )
     </insert>
 
