@@ -38,6 +38,22 @@ public class Cm040Service {
         return this.sqlSession.insert("com.hcncinit.Cm040Mapper.upsertDetail", map);
     }
 
+    @QryLog(scrnCd = "CM040", fnCd = "CODE_DTL_UPDATE", opTyp = "UPDATE")
+    public int detailUpdate(Map<String, Object> map) {
+        // 상세코드 수정 저장 (코드 변경 포함)
+        return this.sqlSession.update("com.hcncinit.Cm040Mapper.updateDetail", map);
+    }
+
+    @QryLog(scrnCd = "CM040", fnCd = "CODE_DTL_DUP_STATUS", opTyp = "SELECT")
+    public String detailDupStatus(Map<String, Object> map) {
+        // 상세코드 중복 상태(del_yn) 확인
+        Object status = this.sqlSession.selectOne("com.hcncinit.Cm040Mapper.detailDupStatus", map);
+        if (status == null) {
+            return null;
+        }
+        return String.valueOf(status);
+    }
+
     public void applyDetailDefaults(Map<String, Object> map) {
         if (map == null) {
             return;
@@ -53,6 +69,10 @@ public class Cm040Service {
 
         String mode = String.valueOf(map.getOrDefault("mode", "")).toLowerCase();
         boolean isInsert = "insert".equals(mode) || isBlank(map.get("cd"));
+
+        if ("update".equals(mode) && isBlank(map.get("pre_cd")) && !isBlank(map.get("cd"))) {
+            map.put("pre_cd", map.get("cd"));
+        }
 
         if (isInsert) {
             if (isBlank(map.get("cd"))) {
