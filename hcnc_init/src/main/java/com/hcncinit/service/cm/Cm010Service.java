@@ -1,4 +1,4 @@
-package com.hcncinit.service.cm010;
+package com.hcncinit.service.cm;
 
 import com.hcncinit.logging.QryLog;
 import java.util.HashMap;
