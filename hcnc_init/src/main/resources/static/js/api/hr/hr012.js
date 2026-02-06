@@ -15,8 +15,10 @@ window.initTab2 = function() {
     attachHr012TagSync();   // 태그 변경 이벤트 받을 리스너
 
     // 초기 데이터 로드
-    loadHr012TableDataA();
-    loadHr012TableDataB();
+    if (window.currentDevId) {
+        loadHr012TableDataA();
+        loadHr012TableDataB();
+    }
 
     // A/B 테이블 보여주기/숨기기
     $("#TABLE_HR012_A").show();
@@ -193,106 +195,139 @@ function loadHr012TableDataB() {
     });
 }
 
-function saveHr012TableB(){
-    if (!window.hr012TableB) return;
-
-    const devId = window.currentDevId;
-    const tableData = window.hr012TableB.getData(); // 데이터 임시 저장
-    const saveList = tableData.map(row => {
-        let lvl = 0;
-        if (row.lv5) lvl = 5;
-        else if (row.lv4) lvl = 4;
-        else if (row.lv3) lvl = 3;
-        else if (row.lv2) lvl = 2;
-        else if (row.lv1) lvl = 1;
-        else lvl = 0;
-
-        return {
-            devId: devId,
-            sklId: row.skl_id,
-            lvl: lvl
-        };
-    });
-
-    $.ajax({
-        url: "/hr012/tab2_2_save",
-        type: "POST",
-        contentType: "application/json; charset=utf-8",
-        data: JSON.stringify(saveList),
-        success: function(response) {
-            // alert("숙련도 저장 완료!");
-            loadHr012TableDataB();
-        },
-        error: function() {
-            alert("숙련도 저장 실패");
-        }
-    });
-}
-
+//function saveHr012TableB(devId) {
+//    return new Promise((resolve, reject) => {
+//        if (!window.hr012TableB) return reject("Tab2B 테이블 없음");
+//        if (!devId) return reject("devId 없음");
+//
+//        const tableData = window.hr012TableB.getData(); // 데이터 임시 저장
+//        const saveList = tableData.map(row => {
+//            let lvl = 0;
+//            if (row.lv5) lvl = 5;
+//            else if (row.lv4) lvl = 4;
+//            else if (row.lv3) lvl = 3;
+//            else if (row.lv2) lvl = 2;
+//            else if (row.lv1) lvl = 1;
+//
+//            return {
+//                devId: devId,
+//                sklId: row.skl_id,
+//                lvl: lvl
+//            };
+//        });
+//
+//        console.log("Tab2_숙련도 저장한 데이터");
+//        console.table(saveList);
+//
+//        $.ajax({
+//            url: "/hr012/tab2_2_save",
+//            type: "POST",
+//            contentType: "application/json; charset=utf-8",
+//            data: JSON.stringify(saveList),
+//            success: function(response) {
+//                loadHr012TableDataB();
+//                resolve(); // ← 여기가 중요!
+//            },
+//            error: function() {
+//                reject("숙련도 저장 실패"); // ← 실패 처리
+//            }
+//        });
+//    });
+//}
 
 // 유효성 검사
 function validateHr012Form() {
-
     return true;
 }
 
 function saveHr012TableData() {
-    // if (!validateHr012Form()) return;
+    return new Promise((resolve, reject) => {
+        if (!changedTabs.tab2) return resolve(); // 수정사항 없으면 바로 종료
+        const devId = window.currentDevId;
+        if (!devId) {
+            return reject("dev_id 없음");
+        }
+        const userId = $.trim($("#write_user_id").val());
 
-    const devId = window.currentDevId;
-    const userId = $.trim($("#write_user_id").val());
-
-    // 수정하기 전 데이터
-    let codes = [];
-    tableData_old.forEach(row => {
-        if (row.skl_id_lst !== undefined)
-            Object.values(row.skl_id_lst).forEach(item => {
-                if (item.code !== undefined)
-                    codes.push(item.code);
-            });
-    });
-    const param_old = codes.map(data => {
-        return {
+        // --- param 준비 (A 테이블 수정 + 삭제) ---
+        let codes = [];
+        tableData_old.forEach(row => {
+            if (row.skl_id_lst !== undefined)
+                Object.values(row.skl_id_lst).forEach(item => {
+                    if (item.code !== undefined)
+                        codes.push(item.code);
+                });
+        });
+        const param_old = codes.map(data => ({
             type: "d",
             dev_id: devId,
             skl_id: data,
             userId: userId
-        }
-    });
-    // 수정한 후 데이터 (현재 UI 상태 기준: 보유역량 태그 변경 반영)
-    codes = [];
-    collectHr012SkillsFromA().forEach(item => {
-        if (item && item.skl_id != null) {
-            codes.push(String(item.skl_id));
-        }
-    });
-    let param = codes.map(data => {
-        return {
+        }));
+
+        codes = [];
+        collectHr012SkillsFromA().forEach(item => {
+            if (item && item.skl_id != null) {
+                codes.push(String(item.skl_id));
+            }
+        });
+        let param = codes.map(data => ({
             type: "c",
             dev_id: devId,
             skl_id: data,
             userId: userId
-        }
-    });
-    // 삭제 된 데이터
-    const delparam = param_old.filter(a => !param.some(b => b.skl_id === a.skl_id));
+        }));
+        const delparam = param_old.filter(a => !param.some(b => b.skl_id === a.skl_id));
+        param = [...param, ...delparam.filter(x => !param.some(y => y.skl_id === x.skl_id))];
 
-    // 수정 + 삭제 데이터 병합
-    param = [
-        ...param,
-        ...delparam.filter(x => !param.some(y => y.skl_id === x.skl_id)),
-    ];
+        // --- A/B 테이블 저장 함수 ---
+        const saveA = () => new Promise((resolveA, rejectA) => {
+            $.ajax({
+                url: "/hr012/tab2_1_save",
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify(param),
+                success: () => {
+                    loadHr012TableDataA();  // 새로고침
+                    resolveA();
+                },
+                error: () => rejectA("보유역량 저장 실패")
+            });
+        });
 
-    $.ajax({
-        url: "/hr012/tab2_1_save",
-        type: "POST",
-        contentType: "application/json",
-        data: JSON.stringify(param),
-        success: () => {
-            loadHr012TableDataA();
-            saveHr012TableB();
-        },
-        error: () => alert("저장 실패")
+        const saveB = () => new Promise((resolveB, rejectB) => {
+            const tableData = window.hr012TableB.getData();
+            const saveList = tableData.map(row => {
+                let lvl = 0;
+                if (row.lv5) lvl = 5;
+                else if (row.lv4) lvl = 4;
+                else if (row.lv3) lvl = 3;
+                else if (row.lv2) lvl = 2;
+                else if (row.lv1) lvl = 1;
+                return { devId, sklId: row.skl_id, lvl };
+            });
+
+            $.ajax({
+                url: "/hr012/tab2_2_save",
+                type: "POST",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify(saveList),
+                success: () => {
+                    loadHr012TableDataB(); // 새로고침
+                    resolveB();
+                },
+                error: () => rejectB("숙련도 저장 실패")
+            });
+        });
+
+        // --- A/B 순차 저장 ---
+        saveA()
+            .then(() => saveB())
+            .then(() => {
+                changedTabs.tab2 = false;
+                resolve();
+            })
+            .catch(err => reject(err));
     });
 }
 
