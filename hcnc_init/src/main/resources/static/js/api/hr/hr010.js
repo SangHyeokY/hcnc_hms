@@ -81,7 +81,7 @@ $(document).ready(function () {
     $(".btn-main-edit").on("click", function () {
         const rowData = btnEditView("수정할 ");
         if (!rowData) return;
-        loadUserTableImgData(rowData);
+        loadUserTableImgDataAsync(rowData);
         openUserModal("update", rowData);
     });
 
@@ -92,7 +92,7 @@ $(document).ready(function () {
     $(".btn-main-view").on("click", function () {
         const rowData = btnEditView("조회할 ");
         if (!rowData) return;
-        loadUserTableImgData(rowData);
+        loadUserTableImgDataAsync(rowData);
         openUserModal("view", rowData);
     });
 
@@ -377,7 +377,7 @@ function buildUserTable() {
         },
         rowDblClick: function (e, row) {
             var rowData = row.getData();
-            loadUserTableImgData(rowData);
+            loadUserTableImgDataAsync(rowData);
             openUserModal("view", rowData);
         }
     });
@@ -423,29 +423,36 @@ function loadUserTableData() {
 }
 
 // db로부터 리스트 불러오기
-function loadUserTableImgData(data) {
-    if (!userTable || typeof userTable.setData !== "function") {
-        return;
-    }
-    $.ajax({
-        url: "/hr010/list/img",
-        type: "GET",
-        xhrFields: { responseType: "arraybuffer" }, // ★ 핵심
-        data: data,
-        success: function (response) {
-            const blob = new Blob([response], { type: "image/jpeg" });
-            const imgUrl = URL.createObjectURL(blob);
-
-            if (response.byteLength > 0)
-                $("#dev_img").show();
-            else
-                $("#dev_img").hide();
-
-            $("#dev_img")[0].src = imgUrl;
-        },
-        error: function (e) {
-            alert("사용자 데이터를 불러오는 중 오류가 발생했습니다.");
+function loadUserTableImgDataAsync(data) {
+    return new Promise((resolve, reject) => {
+        if (!userTable || typeof userTable.setData !== "function") {
+            resolve(); // 테이블 없으면 그냥 resolve
+            return;
         }
+
+        $.ajax({
+            url: "/hr010/list/img",
+            type: "GET",
+            xhrFields: { responseType: "arraybuffer" },
+            data: data,
+            success: function (response) {
+                const blob = new Blob([response], { type: "image/jpeg" });
+                const imgUrl = URL.createObjectURL(blob);
+
+                if (response.byteLength > 0)
+                    $("#dev_img").show();
+                else
+                    $("#dev_img").hide();
+
+                $("#dev_img")[0].src = imgUrl;
+                resolve(); // 완료 시 resolve
+            },
+            error: function (e) {
+                console.error(e);
+                alert("사용자 데이터를 불러오는 중 오류가 발생했습니다.");
+                resolve(); // 에러여도 UI는 표시 가능하도록 resolve
+            }
+        });
     });
 }
 
@@ -551,19 +558,22 @@ function deleteUserRows() {
 // ============================================================================== //
 
 // 모달(팝업) 열리는 이벤트 처리
-openUserModal = function(mode, data) {
+openUserModal = async function(mode, data) {
     currentMode = mode;
     initTabs = true;
     const $modal = $("#view-user-area");
 
-    if(mode === "insert") clearUserForm();
-    else fillUserForm(data || userTable.getSelectedRows()[0].getData());
-
-    setModalMode(mode);
+    showLoading();
     $modal.removeClass("show");
     $modal.show();
 
+    if(mode === "insert") clearUserForm();
+    else fillUserForm(data || userTable.getSelectedRows()[0].getData());
+    setModalMode(mode);
+
     initAllTabs(); // 모든 tab 초기화
+
+    // setComCode 이것도 해야 함
 
     // 항상 tab1 활성화
     $(".tab-btn").removeClass("active");
@@ -572,21 +582,25 @@ openUserModal = function(mode, data) {
     $("#tab1").show();
 
     window.hr014TabInitialized = false;
-
-    updateTabActions("tab1");
-    refreshTabLayout("tab1");
-
     initMainLangTags();
 
     if (mode !== "insert" && data?.dev_id) {
-        requestAnimationFrame(() => {
-            loadUserScore(data.dev_id);
-        });
+        console.log("Promise로 팝업에 띄울 데이터 호출 중...");
+        updateTabActions("tab1");
+        refreshTabLayout("tab1");
+        // 모두 Promise로 변경
+        await Promise.all([
+            loadUserScoreAsync(data.dev_id),
+            loadUserTableImgDataAsync(data)
+        ]);
+        console.log("Tab1 새로고침 완료");
     }
 
+    // 팝업 표시 완료 + 로딩 종료
     setTimeout(() => {
         initTabs = false;
         $modal.addClass("show");
+        hideLoading();
     }, 100);
 };
 
@@ -1061,20 +1075,26 @@ function formatNumber(num) {
 }
 
 // 점수 계산
-function loadUserScore(devId) {
-    // 최초값
-    $("#grade").text("계산중...");
-    $("#score").text("");
+function loadUserScoreAsync(devId) {
+    return new Promise((resolve, reject) => {
+        $("#grade").text("계산중...");
+        $("#score").text("");
 
-    $.ajax({
-        url: "/hr010/getScore",
-        type: "GET",
-        data: { dev_id: devId },
-        success: function(res) {
-            const data = res.res || {};
-            $("#grade").text(data.rank || "");
-            $("#score").text(`(${data.score || 0}점)`);
-        }
+        $.ajax({
+            url: "/hr010/getScore",
+            type: "GET",
+            data: { dev_id: devId },
+            success: function(res) {
+                const data = res.res || {};
+                $("#grade").text(data.rank || "");
+                $("#score").text(`(${data.score || 0}점)`);
+                resolve(); // 완료 시 resolve 호출
+            },
+            error: function(err) {
+                console.error(err);
+                reject(err); // 에러 시 reject 호출
+            }
+        });
     });
 }
 
@@ -1127,7 +1147,14 @@ if (excelBtn) {
 }
 
 function showLoading() {
-    $("#loading-overlay").addClass("active");
+    const $overlay = $("#loading-overlay");
+    const $text = $overlay.find("p");
+    if (isSaving){
+        $text.text("저장 중입니다...");
+    } else {
+        $text.text("로딩 중입니다...");
+    }
+    $overlay.addClass("active");
 }
 
 function hideLoading() {

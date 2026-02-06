@@ -1082,8 +1082,8 @@ $('#excelFile').on('change', function(e) {
                     item.inprj_yn = 'N';
                 }
 
-                item.st_dt = item.st_dt.slice(0,10);
-                item.ed_dt = item.ed_dt.slice(0,10);
+                item.st_dt = item.st_dt ? item.st_dt.slice(0, 10) : "";
+                item.ed_dt = item.ed_dt ? item.ed_dt.slice(0, 10) : "";
 
                 // 입력된 job_cd가 실제로 공통코드에 있는 정보인지 확인
                 var jobcdYn = false;
