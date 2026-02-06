@@ -117,7 +117,7 @@ $(document).ready(function () {
     });
 
     // 인적사항 및 tab 정보 저장 (통합 저장)
-    $(document).on("click", "#btn-user-save", function () {
+    $(document).on("click", "#btn-user-save", async function () {
         const activeTab = $(".tab-btn.active").data("tab");
         console.log("현재 탭 :", activeTab);
 
@@ -125,62 +125,50 @@ $(document).ready(function () {
         isSaving = true;
         showLoading();
 
-        if (!validateUserForm()) {
-            console.log("인적사항 유효성 검사 실패");
-            return;
-        }
-
-        if (currentMode === "insert" || currentMode === "view") {
-                console.log("Tab Mode 구분 : ", currentMode);
-            } else {
-                // update 모드에서만 탭별 검사
-                if (changedTabs.tab1 && !validateHr011Form()) return;
-                if (changedTabs.tab2 && !validateHr012Form()) return;
-                if (changedTabs.tab3 && !window.hr013Table) return;
-                if (changedTabs.tab4 && !window.hr014TableA) return;
+        try {
+            // 기본 유효성
+            if (!validateUserForm()) {
+                throw new Error("인적사항 유효성 실패");
             }
 
-            // 인적사항 + 탭 저장
-            upsertUserBtn(async function (success) {
-                if (!success) {
-                    hideLoading();
-                    isSaving = false;
-                    return;
-                }
+            if (currentMode !== "insert" && currentMode !== "view") {
+                if (changedTabs.tab1 && !validateHr011Form()) throw new Error("tab1 검증 실패");
+                if (changedTabs.tab2 && !validateHr012Form()) throw new Error("tab2 검증 실패");
+                if (changedTabs.tab3 && !window.hr013Table) throw new Error("tab3 없음");
+                if (changedTabs.tab4 && !window.hr014TableA) throw new Error("tab4 없음");
+            }
 
-                if (currentMode !== "insert") {
-                    try {
-                        console.log("저장을 시작합니다.")
+            // 인적사항 저장 (여기서 서버 작업 끝날 때까지 대기)
+            const success = await upsertUserBtn();
+            if (!success) {throw new Error("인적사항 저장 실패");}
 
-                        // 수정/변경된 값들을 한번에 저장 (지연)
-                        if (changedTabs.tab1) await saveHr011TableData();
-                        if (changedTabs.tab2) await saveHr012TableData();
-                        if (changedTabs.tab3) await saveHr013InlineRows();
-                        if (changedTabs.tab4) await saveTab4All();
+            // 탭 저장 (순차)
+            if (changedTabs.tab1) await saveHr011TableData();
+            if (changedTabs.tab2) await saveHr012TableData();
+            if (changedTabs.tab3) await saveHr013InlineRows();
+            if (changedTabs.tab4) await saveTab4All();
 
-                        // 저장이 끝나면 초기화
-                        Object.keys(changedTabs).forEach(k => changedTabs[k] = false);
-                    } catch (e) {
-                         console.error(e);
-                    } finally {
-                        console.log("저장 작업을 종료합니다.")
-                        hideLoading();
-                        isSaving = false;
+            Object.keys(changedTabs).forEach(k => changedTabs[k] = false);
 
-                        if (currentMode == "insert"){
-                            alert("인적사항 정보가 저장되었습니다.");
-                            closeUserViewModal();
-                        }
-                        else {
-                           alert("인적사항 및 상세정보가 저장되었습니다.");
-                        }
-                    }
-                } else {
-                     hideLoading();
-                     isSaving = false;
-                }
-            });
-        });
+            // 완료 알림
+            alert(
+                currentMode === "insert"
+                    ? "인적사항 정보가 저장되었습니다."
+                    : "인적사항 및 상세정보가 저장되었습니다."
+            );
+            if (currentMode === "insert") {
+                closeUserViewModal();
+            }
+        } catch (e) {
+            console.error(e);
+            alert("저장 중 오류가 발생했습니다.");
+        } finally {
+            hideLoading();
+            isSaving = false;
+            loadUserTableData();
+            console.log("저장 작업 종료, 로딩 상태 :", isSaving); // false여야 정상
+        }
+    });
 
     // 근무형태 셀렉트 공통콤보
     setComCode("select_work_md", "WORK_MD", "", "cd", "cd_nm", function () {
@@ -464,14 +452,10 @@ function loadUserTableImgData(data) {
 // ============================================================================== //
 
 // 데이터 신규 등록/수정 이벤트
-function upsertUserBtn(callback)
-{
-     if (!validateUserForm()) {
-         if (callback) callback(false);
-         return;
-     }
+function upsertUserBtn() {
+    return new Promise((resolve, reject) => {
 
-     var payload = {
+        var payload = {
         dev_id: $("#dev_id").val(),
         dev_nm: $("#dev_nm").val(),
         brdt: $("#brdt").val(),
@@ -491,7 +475,7 @@ function upsertUserBtn(callback)
     };
 
     const activeTab = $(".tab-btn.active").data("tab");
-    const file = $("#fileProfile")[0].files[0]; // 또는 payload.dev_img
+    const file = $("#fileProfile")[0].files[0];
     const fd = new FormData();
 
     // 1) 텍스트 필드들 추가
@@ -504,65 +488,31 @@ function upsertUserBtn(callback)
     // 2) 파일 추가 (컨트롤러 @RequestPart 이름과 동일해야 함)
     if (file) fd.append("dev_img", file);
 
-    $.ajax({
-        url: "/hr010/upsert",
-        type: "POST",
-        data: fd,
-        processData: false,
-        contentType: false,
-        dataType: "json",
-        success: function (response) {
+        $.ajax({
+            url: "/hr010/upsert",
+            type: "POST",
+            data: fd,
+            processData: false,
+            contentType: false,
+            dataType: "json",
 
-            if (!response || response.success === false) {
-                const msg = response?.message || "저장에 실패했습니다.";
-                alert(msg);
-
-                if (callback) callback(false);
-                return;
+            success: function (response) {
+                if (!response || response.success === false) {
+                    alert(response?.message || "저장에 실패했습니다.");
+                    resolve(false);
+                    return;
+                }
+                if (response.dev_id) {
+                    window.currentDevId = response.dev_id;
+                    $("#dev_id").val(response.dev_id);
+                }
+                resolve(true);
+            },
+            error: function (xhr) {
+                alert("저장 중 오류가 발생했습니다.");
+                 reject(xhr);
             }
-
-            // 정상적으로 되었을 경우
-            if (response && response.dev_id) {
-                window.currentDevId = response.dev_id;
-                $("#dev_id").val(response.dev_id);
-                // openUserModal("view");
-            }
-//                const msgMap = {
-//                    tab1: "인적사항,\n소속 및 계약정보\n정보가 저장되었습니다.",
-//                    tab2: "인적사항,\n보유역량 및 숙련도\n정보가 저장되었습니다.",
-//                    tab3: "인적사항,\n프로젝트\n정보가 저장되었습니다.",
-//                    tab4: "인적사항,\n평가 및 리스크\n정보가 저장되었습니다."
-//                };
-//                alert(msgMap[activeTab]);
-
-            if (callback) callback(true);
-            loadUserTableData();
-        },
-        error: function (xhr, status, error) {
-            let msg = "저장 중 오류가 발생했습니다.";
-
-            if (xhr.responseJSON && xhr.responseJSON.message) {
-                msg = xhr.responseJSON.message;
-            }
-
-            else if (xhr.responseText) {
-                console.error("Server Error:", xhr.responseText);
-            }
-
-            if (xhr.status === 400) {
-                msg = "ERROR_CODE : 400";
-            } else if (xhr.status === 401) {
-                msg = "ERROR_CODE : 401";
-            } else if (xhr.status === 403) {
-                msg = "ERROR_CODE : 403";
-            } else if (xhr.status === 500) {
-                msg = "ERROR_CODE : 500\n서버 오류가 발생했습니다. 관리자에게 문의하세요.";
-            }
-
-            alert(msg);
-
-            if (callback) callback(false);
-        }
+        });
     });
 }
 
