@@ -455,6 +455,7 @@ function upsertMainBtn() {
 function upsertDetailBtn() {
     var grpCd = $.trim($("#write_detail_grp_cd").val());
     var cd = $.trim($("#write_detail_cd").val());
+    var preCd = $.trim($("#write_detail_cd_origin").val());
     var cdNm = $.trim($("#write_detail_cd_nm").val());
     var sortNo = parseInt($("#write_detail_sort_no").val(), 10);
 
@@ -481,12 +482,17 @@ function upsertDetailBtn() {
         return;
     }
 
+    if (detailMode === "update" && !preCd) {
+        preCd = cd;
+    }
+
     $.ajax({
         url: "/cm040/detail/save",
         type: "POST",
         data: {
             grp_cd: grpCd,
             cd: cd,
+            pre_cd: preCd,
             cd_nm: cdNm,
             sort_no: sortNo,
             adinfo_01: $.trim($("#write_detail_adinfo_01").val()),
@@ -503,7 +509,7 @@ function upsertDetailBtn() {
                 loadDetailTableData(grpCd);
                 alert("저장되었습니다.");
             } else {
-                alert("저장에 실패했습니다.");
+                alert(response.message || "저장에 실패했습니다.");
             }
         },
         error: function () {
@@ -582,7 +588,8 @@ function openDetailWriteModal(type) {
 
         var mainData = selectedMain[0].getData();
         $("#write_detail_grp_cd").val(mainData.cd);
-        $("#write_detail_cd").val("").prop("disabled", true).attr("placeholder", "자동");
+        $("#write_detail_cd").val("");
+        $("#write_detail_cd_origin").val("");
         $("#write_detail_cd_nm").val("");
 
         var maxSort = detailTable.getData()
@@ -607,7 +614,8 @@ function openDetailWriteModal(type) {
 
         var rowData = selectedDetail[0].getData();
         $("#write_detail_grp_cd").val(rowData.grp_cd);
-        $("#write_detail_cd").val(rowData.cd).prop("disabled", true).attr("placeholder", "");
+        $("#write_detail_cd").val(rowData.cd);
+        $("#write_detail_cd_origin").val(rowData.cd);
         $("#write_detail_cd_nm").val(rowData.cd_nm);
         $("#write_detail_sort_no").val(rowData.sort_no);
         $("#write_detail_adinfo_01").val(rowData.adinfo_01 || "");
