@@ -1,4 +1,4 @@
-package com.hcncinit.controller.hr011;
+package com.hcncinit.controller.hr;
 
 import java.util.List;
 import java.util.Map;
@@ -12,39 +12,31 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.hcncinit.service.hr011.Hr015Service;
+import com.hcncinit.service.hr.Hr014Service;
 
 @Controller
-@RequestMapping("/hr015")
-public class Hr015Controller {
+@RequestMapping("/hr014")
+public class Hr014Controller {
 
     @Autowired
-    private Hr015Service hr015Service;
+    private Hr014Service hr014Service;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
+    // [인적관리] - [기본 인적사항] - [Tab4][평가 및 리스크]
+
+    // [Tab4_A][관리자 평가] > 조회
     @RequestMapping("/a/list")
-    // 탭1 평가 목록 조회
     public ModelAndView listA(@RequestParam(required = false) Map<String, Object> map) {
         applyDefaults(map);
         ModelAndView mv = new ModelAndView("jsonView");
-        List<Map<String, Object>> list = hr015Service.listA(map);
+        List<Map<String, Object>> list = hr014Service.listA(map);
         mv.addObject("success", true);
         mv.addObject("list", list);
         return mv;
     }
 
-    @RequestMapping("/b/list")
-    // 탭2 리스크 조회
-    public ModelAndView listB(@RequestParam(required = false) Map<String, Object> map) {
-        applyDefaults(map);
-        ModelAndView mv = new ModelAndView("jsonView");
-        List<Map<String, Object>> list = hr015Service.listB(map);
-        mv.addObject("success", true);
-        mv.addObject("list", list);
-        return mv;
-    }
-
+    // [Tab4_A][관리자 평가] > 저장
     @RequestMapping("/a/save")
     // 탭1 평가 저장
     public ModelAndView saveA(@RequestParam Map<String, Object> map, HttpSession session) {
@@ -53,21 +45,35 @@ public class Hr015Controller {
         applyDefaults(map);
         List<Map<String, Object>> rows = parseRows(map.get("rows"));
         map.put("rows", rows);
-        int res = hr015Service.saveA(map);
+        int res = hr014Service.saveA(map);
         mv.addObject("success", rows.isEmpty() || res > 0);
         return mv;
     }
 
+    // [Tab4_B][리스크 관리] > 조회
+    @RequestMapping("/b/list")
+    public ModelAndView listB(@RequestParam(required = false) Map<String, Object> map) {
+        applyDefaults(map);
+        ModelAndView mv = new ModelAndView("jsonView");
+        List<Map<String, Object>> list = hr014Service.listB(map);
+        mv.addObject("success", true);
+        mv.addObject("list", list);
+        return mv;
+    }
+
+    // [Tab4_B][리스크 관리] > 저장
     @RequestMapping("/b/save")
     // 탭2 리스크 저장
     public ModelAndView saveB(@RequestParam Map<String, Object> map, HttpSession session) {
         ModelAndView mv = new ModelAndView("jsonView");
         applyLoginUser(map, session);
         applyDefaults(map);
-        int res = hr015Service.saveB(map);
+        int res = hr014Service.saveB(map);
         mv.addObject("success", res > 0);
         return mv;
     }
+
+    // =============================================================================== //
 
     private void applyLoginUser(Map<String, Object> map, HttpSession session) {
         Object loginUserId = session.getAttribute("LOGIN_USER_ID");
@@ -97,6 +103,8 @@ public class Hr015Controller {
             map.put("eval_grp_b", "eval_id_b");
         }
     }
+
+    // =============================================================================== //
 
     private List<Map<String, Object>> parseRows(Object rowsObj) {
         if (rowsObj == null) {

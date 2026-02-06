@@ -1,35 +1,32 @@
-package com.hcncinit.service.hr010;
+package com.hcncinit.service.hr011_old;
 
-import com.hcncinit.logging.QryLog;
+import java.util.List;
+import java.util.Map;
+import java.math.BigDecimal;
+
 import org.apache.ibatis.session.SqlSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.Map;
-
-@Service("Hr013Service")
-public class Hr013Service {
+@Service("Hr014Service_old")
+public class Hr014Service_old {
 
     @Autowired
     private SqlSession sqlSession;
 
-    @QryLog(scrnCd = "HR010", fnCd = "TAB3_LIST", opTyp = "SELECT")
     public List<Map<String, Object>> list(Map<String, Object> map) {
         // 단가/프로젝트 이력 조회
-        return this.sqlSession.selectList("com.hcncinit.Hr013Mapper.selectList", map);
+        return this.sqlSession.selectList("com.hcncinit.Hr014Mapper.selectList", map);
     }
 
-    @QryLog(scrnCd = "HR010", fnCd = "TAB3_SAVE", opTyp = "UPSERT")
     public int save(Map<String, Object> map) {
         // 프로젝트 저장 + 단가 이력 저장
         Object devPrjId = map.get("dev_prj_id");
         int res;
         if (devPrjId == null || String.valueOf(devPrjId).trim().isEmpty()) {
-            res = this.sqlSession.insert("com.hcncinit.Hr013Mapper.insertProject", map);
+            res = this.sqlSession.insert("com.hcncinit.Hr014Mapper.insertProject", map);
         } else {
-            res = this.sqlSession.update("com.hcncinit.Hr013Mapper.updateProject", map);
+            res = this.sqlSession.update("com.hcncinit.Hr014Mapper.updateProject", map);
         }
 
         if (res > 0) {
@@ -38,12 +35,11 @@ public class Hr013Service {
         return res;
     }
 
-    @QryLog(scrnCd = "HR010", fnCd = "TAB3_DELETE", opTyp = "DELETE")
     public int delete(Map<String, Object> map) {
         // 프로젝트 삭제(소프트)
-        int res = this.sqlSession.update("com.hcncinit.Hr013Mapper.deleteProject", map);
+        int res = this.sqlSession.update("com.hcncinit.Hr014Mapper.deleteProject", map);
         if (res > 0) {
-            this.sqlSession.update("com.hcncinit.Hr013Mapper.deleteRateByProject", map);
+            this.sqlSession.update("com.hcncinit.Hr014Mapper.deleteRateByProject", map);
         }
         return res;
     }
@@ -55,11 +51,11 @@ public class Hr013Service {
             return;
         }
 
-        Object latest = this.sqlSession.selectOne("com.hcncinit.Hr013Mapper.selectLatestRate", map);
+        Object latest = this.sqlSession.selectOne("com.hcncinit.Hr014Mapper.selectLatestRate", map);
         BigDecimal latestRate = toDecimal(latest);
 
         if (latestRate == null || latestRate.compareTo(newRate) != 0) {
-            this.sqlSession.insert("com.hcncinit.Hr013Mapper.insertRate", map);
+            this.sqlSession.insert("com.hcncinit.Hr014Mapper.insertRate", map);
         }
     }
 
@@ -77,5 +73,4 @@ public class Hr013Service {
             return null;
         }
     }
-
 }

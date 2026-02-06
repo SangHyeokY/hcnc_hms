@@ -75,7 +75,7 @@ function loadHr012TableDataA() {
     hr012HasPendingChange = false;
 
     $.ajax({
-        url: "/hr010/tab2",
+        url: "/hr012/tab2",
         type: "GET",
         data: { dev_id: devId },
         success: function(response) {
@@ -167,7 +167,7 @@ function loadHr012TableDataB() {
     if (!window.hr012TableB) return;
 
     $.ajax({
-        url: "/hr010/tab2_2",
+        url: "/hr012/tab2_2",
         type: "GET",
         data: { dev_id: devId },
         success: function(response) {
@@ -215,7 +215,7 @@ function saveHr012TableB(){
     });
 
     $.ajax({
-        url: "/hr010/tab2_2_save",
+        url: "/hr012/tab2_2_save",
         type: "POST",
         contentType: "application/json; charset=utf-8",
         data: JSON.stringify(saveList),
@@ -284,7 +284,7 @@ function saveHr012TableData() {
     ];
 
     $.ajax({
-        url: "/hr010/tab2_1_save",
+        url: "/hr012/tab2_1_save",
         type: "POST",
         contentType: "application/json",
         data: JSON.stringify(param),

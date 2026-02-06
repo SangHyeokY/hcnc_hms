@@ -1,55 +1,61 @@
-package com.hcncinit.controller.hr011;
+package com.hcncinit.controller.hr;
+
+import com.hcncinit.service.hr.Hr013Service;
+import jakarta.servlet.http.HttpSession;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
 
 import java.util.List;
 import java.util.Map;
 
-import jakarta.servlet.http.HttpSession;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.ModelAndView;
-
-import com.hcncinit.service.hr011.Hr014Service;
-
 @Controller
-@RequestMapping("/hr014")
-public class Hr014Controller {
+@RequestMapping("/hr013")
+public class Hr013Controller {
 
     @Autowired
-    private Hr014Service hr014Service;
+    private Hr013Service hr013Service; // tab3
 
-    @RequestMapping("/list")
+    // [인적관리] - [기본 인적사항] - [Tab3][프로젝트]
+
+    // [Tab3][프로젝트] > 조회
+    @RequestMapping("/tab3")
     public ModelAndView list(@RequestParam(required = false) Map<String, Object> map) {
+        // System.out.println("tab3 : "+map); // map => dev_id
         applyDefaults(map);
         ModelAndView mv = new ModelAndView("jsonView");
-        List<Map<String, Object>> list = hr014Service.list(map);
+        List<Map<String, Object>> list = hr013Service.list(map);
         mv.addObject("success", true);
         mv.addObject("list", list);
+        // System.out.println("tab3 담음 : "+list);
         return mv;
     }
 
-    @RequestMapping("/save")
+    // [Tab3][프로젝트] > 등록/저장
+    @RequestMapping("/tab3_save")
     public ModelAndView save(@RequestParam Map<String, Object> map, HttpSession session) {
         ModelAndView mv = new ModelAndView("jsonView");
         applyLoginUser(map, session);
         applyDefaults(map);
         normalizeNumbers(map);
-        int res = hr014Service.save(map);
+        int res = hr013Service.save(map);
         mv.addObject("success", res > 0);
         return mv;
     }
 
-    @RequestMapping("/delete")
+    // [Tab3][프로젝트] > 삭제
+    @RequestMapping("/tab3_delete")
     public ModelAndView delete(@RequestParam Map<String, Object> map, HttpSession session) {
         ModelAndView mv = new ModelAndView("jsonView");
         applyLoginUser(map, session);
         applyDefaults(map);
-        int res = hr014Service.delete(map);
+        int res = hr013Service.delete(map);
         mv.addObject("success", res > 0);
         return mv;
     }
+
+    // =============================================================================== //
 
     private void applyLoginUser(Map<String, Object> map, HttpSession session) {
         Object loginUserId = session.getAttribute("LOGIN_USER_ID");
@@ -66,6 +72,8 @@ public class Hr014Controller {
             map.put("dev_id", "");
         }
     }
+
+    // =============================================================================== //
 
     private void normalizeNumbers(Map<String, Object> map) {
         if (map == null) {

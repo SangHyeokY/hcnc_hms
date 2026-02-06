@@ -1,6 +1,5 @@
 package com.hcncinit.service;
 
-import com.hcncinit.logging.QryLog;
 import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
@@ -38,25 +37,21 @@ public class MainService {
         return result;
     };
 
-    @QryLog(scrnCd = "MAIN", fnCd = "MAIN_P_UPDATE", opTyp = "UPDATE")
     public int pUpdate(Map<String,Object> map){
         int result = this.sqlSession.update("com.hcncinit.MainMapper.pUpdate", map);
         return result;
     }
 
-    @QryLog(scrnCd = "MAIN", fnCd = "MAIN_E_UPDATE", opTyp = "UPDATE")
     public int eUpdate(Map<String,Object> map){
         int result = this.sqlSession.update("com.hcncinit.MainMapper.eUpdate", map);
         return result;
     }
 
-    @QryLog(scrnCd = "MAIN", fnCd = "MAIN_S_UPDATE", opTyp = "UPDATE")
     public int sUpdate(Map<String,Object> map){
         int result = this.sqlSession.update("com.hcncinit.MainMapper.sUpdate", map);
         return result;
     }
 
-    @QryLog(scrnCd = "MAIN", fnCd = "MAIN_G_UPDATE", opTyp = "UPDATE")
     public int gUpdate(Map<String,Object> map){
         int result = this.sqlSession.update("com.hcncinit.MainMapper.gUpdate", map);
         return result;
