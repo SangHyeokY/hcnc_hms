@@ -1053,3 +1053,72 @@ function formatPercentInput(value) {
     if (raw === "") return "";
     return raw + "%";
 }
+
+$('#btnUpload').on('click', function() {
+    $('#excelFile').click();
+});
+
+$('#excelFile').on('change', function(e) {
+    const file = e.target.files[0];
+    e.target.value = '';
+
+    if (!file) return alert("파일을 선택하세요.");
+    else console.log('파일 선택 완료:', file.name);
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    $.ajax({
+        url: "/api/excel/upload.do",
+        type: "POST",
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function (result) {
+            let data = window.hr013Table.getData();
+
+            result.data.forEach(function (item) {
+                if (item.inprj_yn?.toUpperCase() !== 'Y') {
+                    item.inprj_yn = 'N';
+                }
+
+                item.st_dt = item.st_dt.slice(0,10);
+                item.ed_dt = item.ed_dt.slice(0,10);
+
+                // 입력된 job_cd가 실제로 공통코드에 있는 정보인지 확인
+                var jobcdYn = false;
+                hr013JobOptions.forEach(function(d) {
+                    if (item.job_cd.toUpperCase() === d.cd_nm.toUpperCase())
+                    {
+                        item.job_cd = d.cd;
+                        if (!jobcdYn) jobcdYn = true;
+                    }
+                });
+                // 존재하지 않는 job_cd일 경우 공백처리
+                if (!jobcdYn)
+                    item.job_cd = null;
+
+                var skl_lst = [];
+                item.skl_id_lst?.split(',').map(x => x.trim()).forEach(function(skl_id) {
+                    hr013SkillOptions.forEach(function(d) {
+                        if (skl_id.toUpperCase() === d.cd_nm.toUpperCase())
+                        {
+                            skl_lst.push({code: d.cd, label: d.cd_nm});
+                        }
+                    });
+                });
+                item.skl_id_lst = skl_lst;
+
+                data.push(item);
+            })
+
+            window.hr013Table.setData(data);
+            changedTabs.tab3 = true;
+        },
+        error: function (xhr) {
+            // 서버 에러도 모달로 표시
+            const msg = xhr.responseText || ("HTTP " + xhr.status);
+            // openModal(msg);
+        }
+    });
+});

@@ -64,7 +64,37 @@ public class Cm040Controller {
         applyLoginUser(map, session);
         cm040Service.ensureUser(map);
         cm040Service.applyDetailDefaults(map);
-        int res = cm040Service.detailUpsert(map);
+        String mode = String.valueOf(map.getOrDefault("mode", "")).toLowerCase();
+        int res;
+        boolean isUpdate = "update".equals(mode);
+        boolean shouldCheck = !isUpdate;
+
+        if (isUpdate) {
+            Object preCd = map.get("pre_cd");
+            Object cd = map.get("cd");
+            if (preCd != null && cd != null && !String.valueOf(preCd).equals(String.valueOf(cd))) {
+                shouldCheck = true;
+            }
+        }
+
+        if (shouldCheck) {
+            String dupStatus = cm040Service.detailDupStatus(map);
+            if (dupStatus != null && !dupStatus.trim().isEmpty()) {
+                mv.addObject("success", false);
+                if ("N".equalsIgnoreCase(dupStatus)) {
+                    mv.addObject("message", "이미 존재하는 코드입니다.");
+                } else {
+                    mv.addObject("message", "사용할 수 없는 코드입니다.");
+                }
+                return mv;
+            }
+        }
+
+        if (isUpdate) {
+            res = cm040Service.detailUpdate(map);
+        } else {
+            res = cm040Service.detailUpsert(map);
+        }
         mv.addObject("success", res > 0);
         return mv;
     }

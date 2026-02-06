@@ -81,6 +81,19 @@
            AND sort_no &gt; 0
     </select>
 
+    <!-- 상세코드 중복 상태(del_yn) 확인 -->
+    <select id="detailDupStatus" resultType="string" parameterType="map">
+        SELECT del_yn
+          FROM tb_cd_mst
+         WHERE grp_cd = #{parent_grp_cd}
+           AND cd = #{cd}
+           AND sort_no &gt; 0
+        <if test="pre_cd != null and pre_cd != ''">
+            AND cd != #{pre_cd}
+        </if>
+        LIMIT 1
+    </select>
+
     <!-- 코드그룹 신규/수정 저장 -->
     <insert id="upsertMain" parameterType="map">
         INSERT INTO tb_cd_mst (
@@ -162,6 +175,25 @@
             upd_ts = NOW(),
             upd_by = #{userId}
     </insert>
+
+    <!-- 상세코드 수정 저장 (코드 변경 포함) -->
+    <update id="updateDetail" parameterType="map">
+        UPDATE tb_cd_mst
+           SET cd = #{cd},
+               cd_nm = #{cd_nm},
+               sort_no = #{sort_no},
+               adinfo_01 = #{adinfo_01},
+               adinfo_02 = #{adinfo_02},
+               adinfo_03 = #{adinfo_03},
+               adinfo_04 = #{adinfo_04},
+               adinfo_05 = #{adinfo_05},
+               use_yn = #{use_yn},
+               del_yn = 'N',
+               upd_ts = NOW(),
+               upd_by = #{userId}
+         WHERE grp_cd = #{parent_grp_cd}
+           AND cd = #{pre_cd}
+    </update>
 
     <!-- 코드그룹 삭제 처리 -->
     <update id="deleteMain" parameterType="map">
