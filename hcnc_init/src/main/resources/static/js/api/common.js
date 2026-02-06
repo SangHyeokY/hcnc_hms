@@ -355,7 +355,21 @@ function tagEditor(cell, onRendered, success, cancel, test) {
             datalistSelector: "#" + datalist.id,
             tags: tags,
             getValue: function (item) { return item.cd; },
-            getLabel: function (item) { return item.cd_nm; }
+            getLabel: function (item) { return item.cd_nm; },
+            onTagChange: function (updatedTags) {
+                try {
+                    container.dispatchEvent(new CustomEvent("tagEditor:change", {
+                        bubbles: true,  // 이벤트가 상위 요소 전파 설정
+                        detail: {   // 이벤트에 실어 보낼 데이터
+                            tags: updatedTags || [],
+                            field: cell.getField ? cell.getField() : null,  // 어떤 컬럼
+                            rowData: cell.getRow ? cell.getRow().getData() : null   // 어떤 행
+                        }
+                    }));
+                } catch (e) {
+                    // ignore event errors
+                }
+            }
         });
 
         setComCode(null, "skl_id", cell.getData().cd_nm, "cd", "cd_nm", function (res) {
@@ -494,8 +508,8 @@ function createTagInput(config) {
             $help.toggle(tags.length === 0);
         }
         syncHidden();
-        if (typeof onTagChange === "function") {
-            onTagChange();
+        if (typeof onTagChange === "function") {    // 콜백이 있으면 실행준비
+            onTagChange(tags.slice());  // 태그 배열의 복사본을 전달
         }
     }
 
