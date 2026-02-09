@@ -74,11 +74,11 @@ const Layout = {
   },
 
   refreshResponsiveLayout() {
-    // 사이드바 전환 애니메이션 이후 레이아웃 기준으로 테이블 폭을 다시 계산한다.
-    setTimeout(() => {
+    // 토글 직후 프레임에서 레이아웃 기준으로 테이블 폭을 다시 계산한다.
+    requestAnimationFrame(() => {
       window.dispatchEvent(new Event("resize"));
       this.redrawTabulators();
-    }, 220);
+    });
   },
 
   redrawTabulators() {

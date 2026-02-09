@@ -6,14 +6,15 @@
 .main-container-wrap {width:100%; min-width: 1200px; position: relative; background-color:#EFF1F6; min-width:1200px; min-height:calc(100vh - 90px)}
 .main-container-wrap header .header {width:100%; max-width:1300px; margin:0 auto; height:50px;}
 
-.container-wrap {display: grid; min-height:calc(100vh - 80px); grid-template-columns: 248px 1fr;  grid-template-rows: 100vh; background:#EDEFF5; position: relative; transition: grid-template-columns 0.2s ease;}
+.container-wrap {display: grid; min-height:calc(100vh - 80px); grid-template-columns: 248px 1fr;  grid-template-rows: 100vh; background:#EDEFF5; position: relative;}
 .container-wrap .lnb-wrap {height: calc(100vh - 80px); background-color:#fff; position: relative; box-shadow: 0px 3px 6px 0px rgba(0,0,0,0.13);}
 .container-wrap .container .contents-wrap {padding:20px 20px; height: 100vh; display:grid; gap:20px; grid-auto-rows: 36px auto;}
 .container-wrap .container .contents-wrap:has(.search-area){ grid-auto-rows: 36px 70px auto;}
-.container-wrap > header {min-width: 0; overflow: hidden; transition: width 0.2s ease, padding 0.2s ease;}
+.container-wrap > header {min-width: 0; overflow: hidden;}
 .container-wrap.is-collapsed {grid-template-columns: 0 1fr;}
 .container-wrap.is-collapsed > header {width: 0; padding: 0; box-shadow: none;}
 
+/* 좌측 lnb 토글 버튼 */
 .lnb-toggle-handle {
   position: absolute;
   top: 13%;
@@ -33,7 +34,6 @@
   cursor: pointer;
   transform: translateY(-50%);
   z-index: 250;
-  transition: left 0.2s ease;
 }
 
 .container-wrap.is-collapsed .lnb-toggle-handle {
