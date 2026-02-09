@@ -4,8 +4,10 @@ import java.util.Map;
 
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -21,9 +23,24 @@ public class LoginController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @PostMapping("/pwChg")
+    public ModelAndView pwChg(@RequestParam Map<String, Object> map) {
+
+        ModelAndView mv = new ModelAndView("jsonView");
+        String userId = map.get("username") == null ? "" : String.valueOf(map.get("username")).trim();
+        String password = map.get("password") == null ? "" : String.valueOf(map.get("password"));
+
+        map.put("password", passwordEncoder.encode(password));
+
+        System.out.println("cm010Service = " + cm010Service); // ⭐ null 여부 즉시 확인
+        cm010Service.pwChg(map);
+        mv.addObject("success", true);
+        return mv;
+    }
+
     // 로그인
     @PostMapping("/login")
-    public ModelAndView login(@RequestParam Map<String, Object> map, HttpSession session) {
+    public ModelAndView login(@RequestParam Map<String, Object> map, HttpSession session, Model model) {
         ModelAndView mv = new ModelAndView("jsonView");
         String userId = map.get("username") == null ? "" : String.valueOf(map.get("username")).trim();
         String password = map.get("password") == null ? "" : String.valueOf(map.get("password"));
@@ -50,7 +67,14 @@ public class LoginController {
 
         session.setAttribute("LOGIN_USER_ID", userId);
         session.setAttribute("LOGIN_AUTH", user.get("role_cd"));
+        session.setAttribute("LOGIN_LOCK", user.get("lock_yn"));
+        session.setAttribute("LOGIN_PW_CHG", user.get("pwd_chg_yn"));
         cm010Service.updateLastLogin(userId);
+
+        model.addAttribute("LOGIN_USER_ID", userId);
+        model.addAttribute("LOGIN_AUTH", user.get("role_cd"));
+        model.addAttribute("LOGIN_LOCK", user.get("lock_yn"));
+        model.addAttribute("LOGIN_PW_CHG", user.get("pwd_chg_yn"));
 
         mv.addObject("success", true);
         return mv;

@@ -17,6 +17,8 @@
 <body data-context-path="/">
 
 <input type="hidden" id="LOGIN_AUTH" th:value="${LOGIN_AUTH}" />
+<input type="hidden" id="LOGIN_LOCK" th:value="${LOGIN_LOCK}" />
+<input type="hidden" id="LOGIN_PW_CHG" th:value="${LOGIN_PW_CHG}" />
 
 <div id="loading-overlay">
     <div class="loading-box">
@@ -90,6 +92,7 @@
       </div>
     </div>
 </div>
+
 <script>
     (function () {
         var ctx = document.body.dataset.contextPath;
