@@ -71,7 +71,7 @@ option{background:#fff; color:#333;}
 .tabulator-row .tabulator-cell + .tabulator-cell {border-left: 1px solid #f3f3f3 !important;}
 .tabulator-row {background-color: #fff !important;}
 /* .tabulator-row .tabulator-cell {background-color: #fff !important; padding: 2px 10px !important; max-height: 34px; line-height: 30px;} */
-.tabulator-row .tabulator-cell {font-size: 15px; font-weight: 400; background-color: #fff !important; padding: 2px 10px !important; line-height: 30px;}
+.tabulator-row .tabulator-cell {font-size: 16px; font-weight: 400; background-color: #fff !important; padding: 2px 10px !important; line-height: 30px;}
 .tabulator-row .tabulator-cell:last-child {border-right: 0 !important;}
 .tabulator-row:nth-child(2n) .tabulator-cell {background-color: #FBFCFE !important;}
 .tabulator-row.tabulator-selectable:hover .tabulator-cell {background-color: #f3fcff !important; color: #0092c7;}
@@ -627,7 +627,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .common-code-section .content-body {height: auto;} /* overflow-x: hidden */
 .common-code-section .tabulator {width: 100%; height: auto;}
 .common-code-section .tabulator-tableHolder {height: auto;}
-.detail-sort-hint {font-size: 12px; color: #7b8794; margin-left: auto; margin-right: 10px;}
+.detail-sort-hint {color: #7b8794; margin-left: auto; margin-right: 10px;} /*font-size: 12px; */
 /* Hide layout-level buttons on common code page */
 .contents-wrap:has(.common-code-page) > section.white-full > .content-title .btn-area {display: none;}
 
