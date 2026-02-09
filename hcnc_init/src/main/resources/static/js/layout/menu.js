@@ -34,11 +34,12 @@ const Menu = {
       if (menu.visible === false) return;
       const hasChildren =
         menu.children && menu.children.some((chi) => chi.visible !== false);
+      const itemClass = hasChildren ? "has-children" : "no-children";
       const href = menu.path
         ? appendBasePath(menu.path)
         : "javascript:void(0);";
       html += `
-            <li ${hasChildren ? "" : 'class=""'} data-name="${menu.name}">
+            <li class="${itemClass}" data-name="${menu.name}">
                 <a href="${href}">
                     <span class="menu-title">${menu.title}</span>
                 </a>
