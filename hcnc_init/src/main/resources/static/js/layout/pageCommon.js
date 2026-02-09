@@ -87,13 +87,19 @@ const PageCommon = {
     let html = ``;
 
     // 1depth
+//    if (this.currentPage.depth1) {
+//      html += `<li><a href="${appendBasePath(
+//        this.currentPage.depth1.path || ""
+//      )}">
+//                            ${this.currentPage.depth1.title}
+//                     </a></li>`;
+//    }
     if (this.currentPage.depth1) {
-      html += `<li><a href="${appendBasePath(
-        this.currentPage.depth1.path || ""
-      )}">
-                            ${this.currentPage.depth1.title}
-                     </a></li>`;
+      html += `<li>
+        <span>${this.currentPage.depth1.title}</span>
+      </li>`;
     }
+
     // 2depth
     if (this.currentPage.depth2) {
       html += `<li><a href="${appendBasePath(
