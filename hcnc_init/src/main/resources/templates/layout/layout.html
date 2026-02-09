@@ -27,6 +27,13 @@
     <div class="container-wrap">
         <!-- 페이지의 1dept을 불러오는 영역 -->
         <th:block th:insert="~{fragments/header :: headerFragment}"></th:block>
+        <button
+            type="button"
+            class="lnb-toggle-handle"
+            aria-label="사이드바 접기/펼치기"
+        >
+            <span class="lnb-toggle-icon" aria-hidden="true">&#9664;</span>
+        </button>
         <div class="container">
             <div class="contents-wrap" id="">
                 <th:block th:replace="~{fragments/page-common :: pageCommonFragment}"></th:block>
