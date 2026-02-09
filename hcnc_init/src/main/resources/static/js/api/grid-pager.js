@@ -159,7 +159,7 @@
             return;
         }
         enforcePaginatorSymbols(table);
-        counterEl.textContent = "현재 조회되는 데이터 수 " + getGridCount(table) + "건";
+        counterEl.textContent = "총 데이터 수 " + getGridCount(table) + "건";
         applyResponsiveFooterLayout(table, counterEl);
     }
 
