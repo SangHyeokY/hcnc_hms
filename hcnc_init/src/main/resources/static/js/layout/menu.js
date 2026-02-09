@@ -31,6 +31,8 @@ const Menu = {
   createMenu(menuDataList, depth = 1) {
     let html = "";
     menuDataList.forEach((menu) => {
+      if (menu.title === "시스템" && LOGIN_AUTH.value !== "01") return;
+
       if (menu.visible === false) return;
       const hasChildren =
         menu.children && menu.children.some((chi) => chi.visible !== false);

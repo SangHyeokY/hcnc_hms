@@ -1,6 +1,8 @@
 package com.hcncinit.controller;
 
+import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
@@ -43,23 +45,32 @@ public class PageController {
     }
 
     @GetMapping("/cm040")
-    public ModelAndView commonCode() {
+    public ModelAndView commonCode(HttpSession session, Model model) {
         ModelAndView mv = new ModelAndView();
         mv.setViewName("views/cm020/cm040");
+
+        String auth = (String) session.getAttribute("LOGIN_AUTH");
+        model.addAttribute("LOGIN_AUTH", auth);
         return mv;
     }
 
     @GetMapping("/cm010")
-    public ModelAndView userManage() {
+    public ModelAndView userManage(HttpSession session, Model model) {
         ModelAndView mv = new ModelAndView();
         mv.setViewName("views/cm010/cm010");
+
+        String auth = (String) session.getAttribute("LOGIN_AUTH");
+        model.addAttribute("LOGIN_AUTH", auth);
         return mv;
     }
 
     @GetMapping("/hr010")
-    public ModelAndView hr010() {
+    public ModelAndView hr010(HttpSession session, Model model) {
         ModelAndView mv = new ModelAndView();
         mv.setViewName("views/hr/hr010");
+
+        String auth = (String) session.getAttribute("LOGIN_AUTH");
+        model.addAttribute("LOGIN_AUTH", auth);
         return mv;
     }
 
