@@ -44,6 +44,33 @@ const savedTabs = [];
 $(document).ready(async function () {
     buildUserTable();
 
+    // 근무형태 셀렉트 공통콤보
+    setComCode("select_work_md", "WORK_MD", "", "cd", "cd_nm", function () {
+        workMdOptions = $("#select_work_md option").map(function () {
+            return { cd: this.value, cd_nm: $(this).text() };
+        }).get();
+        initSelectDefault("select_work_md", "상주/재택/혼합");
+        if (window.userTable) {
+            window.userTable.redraw(true);
+        }
+        workMdMap = getWorkMdMap();
+    });
+
+    // 개인, 법인 셀렉트 공통콤보
+    setComCode("select_ctrt_typ", "CTRT_TYP", "", "cd", "cd_nm", function () {
+        ctrtTypOptions = $("#select_ctrt_typ option").map(function () {
+            return { cd: this.value, cd_nm: $(this).text() };
+        }).get();
+        initSelectDefault("select_ctrt_typ", "개인/법인");
+        ctrtTypMap = getCtrtTypMap();
+        if (window.userTable) {
+            const col = window.userTable.getColumn("ctrt_typ");
+            if (col) {
+                col.getCells().forEach(cell => cell.reformat());
+            }
+        }
+    });
+
     // 테이블 로딩이 끝날 때 까지 로딩바 표시
     showLoading();
     await loadUserTableData();
@@ -223,32 +250,6 @@ $(document).ready(async function () {
             console.log("저장 작업 종료, 로딩 상태 :", isSaving); // false여야 정상
         }
     });
-
-    // ================================================ //
-
-    // 근무형태 셀렉트 공통콤보
-    setComCode("select_work_md", "WORK_MD", "", "cd", "cd_nm", function () {
-        workMdOptions = $("#select_work_md option").map(function () {
-            return { cd: this.value, cd_nm: $(this).text() };
-        }).get();
-        initSelectDefault("select_work_md", "상주/재택/혼합");
-        if (window.userTable) {
-            window.userTable.redraw(true);
-        }
-        workMdMap = getWorkMdMap();
-    });
-
-    // 개인, 법인 셀렉트 공통콤보
-    setComCode("select_ctrt_typ", "CTRT_TYP", "", "cd", "cd_nm", function () {
-        ctrtTypOptions = $("#select_ctrt_typ option").map(function () {
-            return { cd: this.value, cd_nm: $(this).text() };
-        }).get();
-        initSelectDefault("select_ctrt_typ", "개인/법인");
-        if (window.userTable) {
-            window.userTable.redraw(true);
-        }
-        ctrtTypMap = getCtrtTypMap();
-    });
 });
 
 // ============================================================================== //
@@ -372,6 +373,7 @@ function buildUserTable() {
     // 테이블 정의
     userTable = new Tabulator("#TABLE_HR010_A", {
         layout: "fitColumns",
+        height: "100%",
         headerSort: true,
         placeholder: "데이터 없음",
         headerHozAlign: "center",
@@ -396,28 +398,26 @@ function buildUserTable() {
                     e.stopPropagation();
                     e.preventDefault();
                 },
+                frozen: true,
                 width: 50,
                 headerSort: false,
                 download: false
             },
-            { title: "dev_id", field: "dev_id", visible: false },
-            { title: "성명", field: "dev_nm", hozAlign: "center", headerSort: true , widthGrow:1, minWidth: 100 },
+            { title: "성명", field: "dev_nm", hozAlign: "center", headerSort: true , widthGrow:1, minWidth: 100, frozen: true},
             {
                 title: "평가 등급",
                 field: "grade",
                 hozAlign: "center",
-                widthGrow:2, minWidth: 120,
+                widthGrow:2, minWidth: 120, frozen: true,
                 formatter: function (cell) {
                     const d = cell.getRow().getData();
                     if (!d.grade) return "-";
                     return formatGradeLabel(d.grade, d.score);
                 }
             },
-            { title: "생년월일", field: "brdt", headerSort: true, widthGrow: 2, minWidth: 120 },
-            { title: "연락처", field: "tel", widthGrow: 3, minWidth: 150, headerSort: false },
-            { title: "이메일", field: "email", widthGrow:4, minWidth: 180, headerSort: false },
-            { title: "거주지역", field: "region", widthGrow:1, minWidth: 100 },
-            {   title: "주 개발언어", field: "main_lang_nm", widthGrow: 4, minWidth: 180,
+            {   title: "주 개발언어",
+                field: "main_lang_nm",
+                widthGrow: 4, minWidth: 180, frozen: true,
                 formatter: function (cell) {
                     const value = cell.getValue();
                     if (!value) return "";
@@ -428,6 +428,12 @@ function buildUserTable() {
                         .join(", ");
                 }
             },
+            { title: "희망단가", field: "hope_rate_amt", hozAlign: "right", formatter: amountFormatter, widthGrow:3, minWidth: 150, frozen: true},
+            { title: "dev_id", field: "dev_id", visible: false },
+            { title: "생년월일", field: "brdt", headerSort: true, widthGrow: 2, minWidth: 120 },
+            { title: "연락처", field: "tel", widthGrow: 3, minWidth: 150, headerSort: false },
+            { title: "이메일", field: "email", widthGrow:4, minWidth: 180, headerSort: false },
+            { title: "거주지역", field: "region", widthGrow:1, minWidth: 100 },
             {
                 title: "경력연차",
                 field: "exp_yr",
@@ -440,13 +446,12 @@ function buildUserTable() {
             },
             { title: "최종학력", field: "edu_last", widthGrow:4, minWidth: 180, headerSort: false },
             { title: "보유 자격증", field: "cert_txt" , widthGrow:4, minWidth: 180, headerSort: false },
-            { title: "희망단가", field: "hope_rate_amt", hozAlign: "right", formatter: amountFormatter, widthGrow:2, minWidth: 120 },
             { title: "투입 가능 시점", field: "avail_dt", widthGrow:2, minWidth: 120 },
             {   title: "계약 형태",
                 field: "ctrt_typ",
-                formatter: function(cell) {
-                    var val = normalizeJobValue(cell.getValue()) || "";
-                    return ctrtTypMap[val] || val;
+                formatter: function (cell) {
+                    const val = cell.getValue();
+                    return (ctrtTypMap && ctrtTypMap[val]) ? ctrtTypMap[val] : val;
                 }, editor: false, editable: false, widthGrow: 1, minWidth: 100
             },
         ],
