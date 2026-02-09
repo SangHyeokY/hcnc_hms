@@ -1,9 +1,11 @@
-// hr011.js
-// 통합 저장 (Tab1)
+// 사용자 관리 - 소속 및 계약 정보 hr011.js (hcnc_hms)
+
+// view일 때는 수정 불가, update일 때는 수정 가능
 $(document).on("tab:readonly", function (_, isReadOnly) {
     setHr011Mode(isReadOnly ? "view" : "update");
 });
 
+// mode 초기값 : view, 테이블 데이터 초기값 : null
 let hr011Mode = "view";
 window.hr011Data = null;
 
@@ -15,8 +17,9 @@ var bizTypOptions = [];
 
 // ============================================================================== //
 
+// Tab1 초기값 설정
 window.initTab1 = function () {
-    // 개인/법인 셀렉트 공통콤보
+    // 개인, 법인 셀렉트 공통콤보
     setComCode("select_biz_typ", "BIZ_TYP", "", "cd", "cd_nm", function () {
         bizTypOptions = $("#select_biz_typ option").map(function () {
             return { cd: this.value, cd_nm: $(this).text() };
@@ -29,7 +32,7 @@ window.initTab1 = function () {
     });
 };
 
-// 역할 코드 -> 라벨 맵 생성
+// 역할 코드 -> 라벨 맵 생성 (사업자 유형 : 개인/개인사업자/법인)
 function getBizTypMap() {
     var map = {};
     if (bizTypOptions && bizTypOptions.length) {
@@ -49,7 +52,7 @@ function getBizTypMap() {
     return map;
 }
 
-// 콤보 기본 옵션/선택 처리
+// 콤보 기본 옵션, 선택 처리
 function initSelectDefault(selectId, placeholderText) {
     var $sel = $("#" + selectId);
     if ($sel.find("option[value='']").length === 0) {
@@ -90,23 +93,22 @@ function normalizeJobValue(value) {
 
 // 모드 제어 함수
 function setHr011Mode(mode) {
-
     hr011Mode = mode;
-    const isView = mode === "view";
-    const isEditable = mode === "insert" || mode === "update";
+    const isView = mode === "view"; // view일 때는 수정불가능
+    const isEditable = mode === "insert" || mode === "update"; // insert와 update는 수정가능
     $("#modal-title").text(
         isView ? "상세" : mode === "insert" ? "등록" : "수정"
     );
     const $fields = $(HR011_FIELDS);
 
-    if (isEditable) {
+    if (isEditable) { // insert, update mode일 때
         $fields
             .prop("disabled", false)
             .prop("readonly", false)
             .removeAttr("disabled")
             .removeAttr("readonly")
             .removeClass("is-readonly");
-    } else {
+    } else { // view mode일 때
         $fields
             .prop("disabled", true)
             .prop("readonly", true)
@@ -114,7 +116,9 @@ function setHr011Mode(mode) {
     }
 }
 
+// Tab1 조회할 시, 데이터 표시
 function openHr011(mode) {
+    // 수정 mode
     if (mode === "update") {
         if (!window.hr011Data) {
             alert("수정할 데이터가 없습니다.");
@@ -124,7 +128,7 @@ function openHr011(mode) {
         return;
     }
 
-    // 신규 등록 시 최초 입력용
+    // 신규 등록(insert) 시 최초 입력을 위한 초기화
     if (mode === "insert") {
         clearHr011Form();
         window.hr011Data = null;
@@ -132,9 +136,11 @@ function openHr011(mode) {
         return;
     }
 
+    // 해당 조건이 모두 아니라면 view mode
     setHr011Mode("view");
 }
 
+// Tab1에 데이터 채워넣기
 function fillHr011Form(data) {
     $("#org_nm").val(data.org_nm || "");
     $("#st_dt").val(data.st_dt || "");
@@ -147,17 +153,20 @@ function fillHr011Form(data) {
     }
 }
 
+// Tab1의 데이터 초기화
 function clearHr011Form() {
     $(HR011_FIELDS).val("");
 }
 
+// Tab1에 '소속 및 계약정보' 테이블 불러오기
 function loadHr011TableData(devId) {
     if (!devId) {
-        clearHr011Form();
+        clearHr011Form(); // 데이터 초기화
         setHr011Mode("insert");
         return;
     }
 
+    // db로부터 데이터 조회하기
     $.ajax({
         url: "/hr011/tab1",
         type: "GET",
@@ -165,8 +174,8 @@ function loadHr011TableData(devId) {
         success: (res) => {
             const data = res?.res ?? null;
             window.hr011Data = data;
-            clearHr011Form();
-            if (data) {fillHr011Form(data);}
+            clearHr011Form(); // 데이터 초기화
+            if (data) {fillHr011Form(data);} // db로부터 받아온 데이터 채우기
           },
         error: () => {
             console.log("데이터 조회 실패");
@@ -176,6 +185,7 @@ function loadHr011TableData(devId) {
     });
 }
 
+// '소속 및 계약정보' 테이블 데이터 수정, 저장
 function saveHr011TableData() {
     // if (!validateHr011Form()) return; // hr010.js로 이관
 
@@ -204,6 +214,7 @@ function saveHr011TableData() {
     });
 }
 
+// Tab1 데이터 삭제 (미사용 중)
 function deleteHr011() {
     if (!window.hr011Data?.ctrt_id) {
         alert("삭제할 데이터가 없습니다.");
@@ -231,12 +242,15 @@ function deleteHr011() {
 
 // 유효성 검사
 function validateHr011Form() {
-    const orgNm   = $("#org_nm").val().trim();
-    const bizTyp  = $("#select_biz_typ").val().trim();
-    const stDt    = $("#st_dt").val();
-    const edDt    = $("#ed_dt").val();
-    const amtRaw  = unformatNumber($("#amt").val());
 
+    // 값 가져오기
+    const orgNm   = $("#org_nm").val().trim();         // 소속사
+    const stDt    = $("#st_dt").val();                 // 계약 시작일
+    const edDt    = $("#ed_dt").val();                 // 계약 종료일
+    const bizTyp  = $("#select_biz_typ").val().trim(); // 사업자 유형
+    const amtRaw  = unformatNumber($("#amt").val());   // 계약 금액
+
+    // 최대 입력 가능 숫자
     const MAX_AMT = 999999999;
 
     if (!orgNm) {
