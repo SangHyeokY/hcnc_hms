@@ -1,4 +1,29 @@
 export const menuData = [
+
+  {
+    title: "인력관리",
+    visible: true,
+    children: [
+      {
+        title: "기본 인적사항",
+        path: "/hr010",
+        type: "A",
+        visible: true,
+      },
+      {
+        title: "인적사항 (상세기능) - 프로젝트",
+        path: "/hr014",
+        type: "A",
+        visible: false,
+      },
+      {
+        title: "인적사항 (상세기능) - 평가 및 리스크 탭",
+        path: "/hr015",
+        type: "A",
+        visible: false,
+      },
+    ],
+  },
   {
     title: "시스템",
     visible: true,
@@ -37,30 +62,8 @@ export const menuData = [
     ],
   },
 
-  {
-    title: "인력관리",
-    visible: true,
-    children: [
-      {
-        title: "기본 인적사항",
-        path: "/hr010",
-        type: "A",
-        visible: true,
-      },
-      {
-        title: "인적사항 (상세기능) - 프로젝트",
-        path: "/hr014",
-        type: "A",
-        visible: false,
-      },
-      {
-        title: "인적사항 (상세기능) - 평가 및 리스크 탭",
-        path: "/hr015",
-        type: "A",
-        visible: false,
-      },
-    ],
-  },
+
+
   {
     title: "Title",
     path: "/#",
