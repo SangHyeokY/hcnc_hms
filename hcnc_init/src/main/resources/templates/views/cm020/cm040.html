@@ -4,6 +4,7 @@
 
 <th:block layout:fragment="searchCondition">
     <div class="search-select">
+        <label for="searchUseYn">사용여부 &nbsp;</label>
         <select name="searchUseYn" id="searchUseYn">
             <option value="">사용여부 전체</option>
             <option value="Y">사용</option>
@@ -12,8 +13,8 @@
     </div>
     <div class="search-input">
         <p class="fl-ac">
-            <label for="searchKeyword"></label>
-            <input type="text" id="searchKeyword" name="searchKeyword" placeholder="코드그룹/코드그룹명 검색" />
+            <label for="searchKeyword">검색어 &nbsp;</label>
+            <input type="text" class="w300" id="searchKeyword" name="searchKeyword" placeholder="코드그룹/코드그룹명 검색" />
         </p>
     </div>
 </th:block>

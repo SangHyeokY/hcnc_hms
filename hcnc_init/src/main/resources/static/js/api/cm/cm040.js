@@ -7,6 +7,9 @@ var mainTable;
 var detailTable;
 var mainMode = "insert";
 var detailMode = "insert";
+var currentDetailGrpCd = "";
+var amountSuffixGroupCds = ["job_cd"];
+var pointSuffixGroupCds = ["rank", "grade", "grd_cd", "grade_cd"];
 
 $(document).ready(function () {
     buildTables();
@@ -160,6 +163,7 @@ function buildTables() {
             if (data.length !== 0) {
                 loadDetailTableData(data[0].cd);
             } else if (detailTable && typeof detailTable.clearData === "function") {
+                currentDetailGrpCd = "";
                 detailTable.clearData();
             }
         }
@@ -227,15 +231,31 @@ function buildTables() {
     });
 }
 
-// 계약단가(,)
+// 숫자형 부가정보 포맷: 그룹코드별 단위(원/점) 부여
 function amountFormatter(cell) {
     var value = cell.getValue();
     if (value === null || value === undefined || value === "") {
         return "";
     }
 
-    var str = String(value);
-    return str.replace(/(\d)(?=(?:\d{3})+(?!\d))/g, "$1,");
+    var str = String(value).trim();
+    var numeric = str.replace(/,/g, "");
+    var isNumeric = /^-?\d+(?:\.\d+)?$/.test(numeric);
+
+    if (!isNumeric) {
+        return str;
+    }
+
+    var numberValue = Number(numeric);
+    var formatted = numberValue.toLocaleString("ko-KR");
+
+    if (amountSuffixGroupCds.indexOf(currentDetailGrpCd) > -1) {
+        return formatted + "원";
+    }
+    if (pointSuffixGroupCds.indexOf(currentDetailGrpCd) > -1) {
+        return formatted + "점";
+    }
+    return formatted;
 }
 
 
@@ -260,6 +280,7 @@ function loadMainTableData() {
         success: function (response) {
             mainTable.setData(response.list || []);
             if (detailTable && typeof detailTable.clearData === "function") {
+                currentDetailGrpCd = "";
                 detailTable.clearData();
             }
         },
@@ -276,9 +297,11 @@ function loadDetailTableData(grpCd) {
     }
 
     if (!grpCd) {
+        currentDetailGrpCd = "";
         detailTable.clearData();
         return;
     }
+    currentDetailGrpCd = String(grpCd).toLowerCase();
 
     $.ajax({
         url: "/cm040/detail/list",
