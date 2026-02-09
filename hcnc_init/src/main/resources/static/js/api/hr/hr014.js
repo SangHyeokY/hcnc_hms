@@ -1,4 +1,5 @@
 // hr014.js
+// 리스크 탭(B) 임시 상태. 저장 전까지 화면 입력값을 여기에 유지한다.
 var riskState = {
     leave_txt: "",
     claim_txt: "",
@@ -14,9 +15,10 @@ var riskKeys = [
 ];
 var riskActiveKey = "leave_txt";
 
+// 상위 모달(view/update) 상태를 탭4 UI에 반영한다.
 $(document).off("tab:readonly.hr014").on("tab:readonly.hr014", function(_, isReadOnly) {
     applyTab4Readonly(!!isReadOnly);
-})
+});
 window.initTab4 = function() {
     // 서브 탭 초기 상태 설정
     var $tab4 = $("#tab4");
@@ -71,6 +73,7 @@ function initHr014Tabs() {
             $("#HR014_TAB_B").addClass("active");
         } else {
             $("#HR014_TAB_A").addClass("active");
+            // 숨김 상태였다가 다시 표시되는 Tabulator는 redraw가 필요하다.
             if (window.hr014TableA) {
                 window.hr014TableA.redraw(true);
             }
@@ -196,6 +199,7 @@ function scoreCheckboxFormatter(cell, formatterParams, onRendered) {
     const value = cell.getValue();
     const checked = value === "Y" ? "checked" : "";
     const disabled = window.hr010ReadOnly ? "disabled" : "";
+    // 실제 점수 변경은 radio 자체가 아니라 cellClick(setScore)에서 처리한다.
     return `<input type="radio" ${checked} ${disabled} />`;
 }
 
@@ -230,6 +234,7 @@ function setScore(row, level) {
         if (window.hr010ReadOnly) {
             return;
         }
+        // 한 행에서 점수는 단일 선택이므로 먼저 전체 N으로 초기화한 뒤 선택 점수를 Y로 둔다.
         var data = row.getData();
         data.lv1 = "N";
         data.lv2 = "N";
@@ -366,6 +371,7 @@ function buildRiskList() {
         $btn.text(item.label);
         $btn.attr("data-key", item.key);
         $btn.on("click", function () {
+            // 텍스트 영역은 항상 현재 선택된 항목(riskActiveKey)과 동기화된다.
             setRiskActive(item.key);
         });
         $list.append($btn);
@@ -413,9 +419,11 @@ function buildSaveRows(rows) {
     }
 
     return rows.map(function (row) {
+        // 백엔드 응답 스키마가 다를 수 있어 eval_id 후보 키를 순차 탐색한다.
         var evalId = row.eval_id || row.cd || row.item_cd || "";
         var lvl = row.lvl;
 
+        // lvl이 비어있으면 lv1~lv5(Y/N)에서 역산한다.
         if (lvl == null || lvl === "") {
             if (row.lv1 === "Y") lvl = 1;
             else if (row.lv2 === "Y") lvl = 2;
@@ -457,6 +465,7 @@ function applyTab4Readonly(isReadOnly) {
     $("#HR015_RISK_TEXT").prop("disabled", isReadOnly);
     $("#HR015_REIN_CHECK").prop("disabled", isReadOnly);
     $("#TABLE_HR014_A").toggleClass("is-readonly", !!isReadOnly);
+    // tab2/tab4가 같은 id를 재사용하므로 tab4 영역으로 스코프를 제한한다.
     $(".tab4-content .hr014-side-tabs").toggleClass("is-readonly", !!isReadOnly);
 }
 
