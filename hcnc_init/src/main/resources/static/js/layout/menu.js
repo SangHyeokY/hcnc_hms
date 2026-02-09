@@ -27,8 +27,8 @@ const Menu = {
     this.toggleMenu();
     this.activeMenu();
   },
-  createMenu(menuDataList, depth = 1) {
 
+  createMenu(menuDataList, depth = 1) {
     let html = "";
     menuDataList.forEach((menu) => {
       if (menu.title === "시스템" && LOGIN_AUTH.value !== "01") return;
@@ -36,11 +36,12 @@ const Menu = {
       if (menu.visible === false) return;
       const hasChildren =
         menu.children && menu.children.some((chi) => chi.visible !== false);
+      const itemClass = hasChildren ? "has-children" : "no-children";
       const href = menu.path
         ? appendBasePath(menu.path)
         : "javascript:void(0);";
       html += `
-            <li ${hasChildren ? "" : 'class=""'} data-name="${menu.name}">
+            <li class="${itemClass}" data-name="${menu.name}">
                 <a href="${href}">
                     <span class="menu-title">${menu.title}</span>
                 </a>

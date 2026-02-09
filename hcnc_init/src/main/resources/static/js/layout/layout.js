@@ -9,6 +9,8 @@ const withBasePath = (path = "") => {
 const Layout = {
   // 초기화
   init() {
+    this.initSidebarToggle();
+
     const contentsWrap = document.querySelector(".contents-wrap");
     const article = document.querySelector("article");
 
@@ -43,6 +45,60 @@ const Layout = {
     if (pageSubTitle && menuItem.title) {
       pageSubTitle.textContent = menuItem.title;
     }
+  },
+
+  initSidebarToggle() {
+    const containerWrap = document.querySelector(".container-wrap");
+    const toggleBtn = document.querySelector(".lnb-toggle-handle");
+    const toggleIcon = document.querySelector(".lnb-toggle-icon");
+    if (!containerWrap || !toggleBtn || !toggleIcon) {
+      return;
+    }
+
+    const key = "sidebarShow";
+    const saved = localStorage.getItem(key);
+    const isExpanded = saved !== "N";
+    this.applySidebarState(containerWrap, toggleIcon, isExpanded);
+
+    toggleBtn.addEventListener("click", () => {
+      const nextExpanded = containerWrap.classList.contains("is-collapsed");
+      this.applySidebarState(containerWrap, toggleIcon, nextExpanded);
+      localStorage.setItem(key, nextExpanded ? "Y" : "N");
+    });
+  },
+
+  applySidebarState(containerWrap, toggleIcon, isExpanded) {
+    containerWrap.classList.toggle("is-collapsed", !isExpanded);
+    toggleIcon.textContent = isExpanded ? "◀" : "▶";
+    this.refreshResponsiveLayout();
+  },
+
+  refreshResponsiveLayout() {
+    // 토글 직후 프레임에서 레이아웃 기준으로 테이블 폭을 다시 계산한다.
+    requestAnimationFrame(() => {
+      window.dispatchEvent(new Event("resize"));
+      this.redrawTabulators();
+    });
+  },
+
+  redrawTabulators() {
+    Object.keys(window).forEach((key) => {
+      const value = window[key];
+      if (!value || typeof value !== "object") {
+        return;
+      }
+      if (typeof value.redraw !== "function") {
+        return;
+      }
+      if (typeof value.getData !== "function") {
+        return;
+      }
+      try {
+        value.redraw(true);
+      } catch (e) {
+        // 페이지별 초기화 시점 차이로 redraw가 실패할 수 있어 무시한다.
+      }
+    });
   },
 
 
