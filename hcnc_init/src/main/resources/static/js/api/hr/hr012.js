@@ -5,6 +5,11 @@ let hr012HasPendingChange = false;  // A/B 테이블 데이터 차이 판단
 
 // hr012.js
 window.initTab2 = function() {
+    $(document).off("tab:readonly.hr012").on("tab:readonly.hr012", function (_, isReadOnly) {
+        applyTab2Readonly(!!isReadOnly);
+    });
+    applyTab2Readonly(!!window.hr010ReadOnly);
+
     // 서브 탭 초기 상태 설정
     $(".hr012-tab-btn").removeClass("active");
     $(".hr012-tab-btn[data-tab='tab2-A']").addClass("active");
@@ -42,6 +47,11 @@ window.initTab2 = function() {
         }
     });
 };
+
+function applyTab2Readonly(isReadOnly) {
+    $(".tab2-content .hr014-side-tabs").toggleClass("is-readonly", !!isReadOnly);
+    $("#TABLE_HR012_A, #TABLE_HR012_B").toggleClass("is-readonly", !!isReadOnly);
+}
 
 function buildHr012TableA() {
     if (window.hr012TableA) return;

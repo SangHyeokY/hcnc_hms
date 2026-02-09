@@ -14,7 +14,9 @@ var riskKeys = [
 ];
 var riskActiveKey = "leave_txt";
 
-
+$(document).off("tab:readonly.hr014").on("tab:readonly.hr014", function(_, isReadOnly) {
+    applyTab4Readonly(!!isReadOnly);
+})
 window.initTab4 = function() {
     // 서브 탭 초기 상태 설정
     var $tab4 = $("#tab4");
@@ -455,6 +457,7 @@ function applyTab4Readonly(isReadOnly) {
     $("#HR015_RISK_TEXT").prop("disabled", isReadOnly);
     $("#HR015_REIN_CHECK").prop("disabled", isReadOnly);
     $("#TABLE_HR014_A").toggleClass("is-readonly", !!isReadOnly);
+    $(".tab4-content .hr014-side-tabs").toggleClass("is-readonly", !!isReadOnly);
 }
 
 window.applyTab4Readonly = applyTab4Readonly;
