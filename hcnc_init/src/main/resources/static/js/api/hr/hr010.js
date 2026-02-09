@@ -115,7 +115,7 @@ $(document).ready(async function () {
 
     // 조회 버튼이벤트
     $(".btn-main-view").on("click", function () {
-        const rowData = btnEditView("상세 볼 ");
+        const rowData = btnEditView("상세히 조회할 ");
         if (!rowData) return;
         loadUserTableImgDataAsync(rowData);
         openUserModal("view", rowData);
@@ -871,7 +871,7 @@ function setModalMode(mode) {
     // 등록 페이지의 경우
     if (isInsert) {
         $("#dev_id_input").text("-");
-        $("#grade").text("-");
+        $("#grade").text("");
     }
 
     if (isView) {
