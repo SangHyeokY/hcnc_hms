@@ -1,4 +1,5 @@
 // hr013.js
+// 탭3 편집 상태/참조 데이터 캐시
 var stackTagInput = null;
 var pendingStackValue = "";
 var lastNonInprjCustNm = "";
@@ -10,6 +11,7 @@ var hr013JobOptions = [];
 window.initTab3 = function () {
     if (!window.hr013Table) buildHr013Table();
     loadHr013TableData();
+    // 상위 모달의 view/update 상태를 탭3 테이블 readonly 스타일과 동기화한다.
     $(document).off("tab:readonly.hr013").on("tab:readonly.hr013", function (_, isReadOnly) {
         applyTab3Readonly(!!isReadOnly);
     });
@@ -50,7 +52,7 @@ window.initTab3 = function () {
         }
     });
 
-    
+    // 역할/기술스택 공통코드는 테이블 formatter/editor에서 재사용하므로 캐시해 둔다.
     setComCode("write_hr013_job_cd", "job_cd", "", "cd", "cd_nm", function () {
         hr013JobOptions = $("#write_hr013_job_cd option").map(function () {
             return { cd: this.value, cd_nm: $(this).text() };
@@ -254,6 +256,7 @@ function loadHr013TableData() {
                 row.role_nm = normalizeJobValue(row.role_nm) || "";
                 row.job_cd = normalizeJobValue(row.job_cd) || "";
 
+                // API의 skl_id_lst는 JSON 문자열이므로 Tabulator용 배열로 변환한다.
                 row.skl_id_lst = (row.skl_id_lst !== undefined) ? JSON.parse(row.skl_id_lst) : [];
                 return row;
             });
@@ -461,11 +464,13 @@ function saveHr013InlineRows() {
     var devId = window.currentDevId || $("#dev_id").val();
     var rows = window.hr013Table.getData();
 
+    // 수정 행 저장 + 삭제 큐(hr013DeletedIds) 반영을 하나의 비동기 묶음으로 처리한다.
     var requests = [];
 
     rows.forEach(function (row) {
         const code = $(row.skl_id_lst[0]).map(x => x.code);
 
+        // 필수 키가 비어 있는 임시 행은 저장 요청에서 제외한다.
         if (!row.inprj_yn || !row.st_dt || !row.ed_dt) {
             return;
         }
@@ -544,6 +549,7 @@ function toggleInprjValue(cell) {
     var data = row.getData();
     var next = data.inprj_yn === "Y" ? "N" : "Y";
     if (next === "Y") {
+        // 당사(Y) 전환 시 기존 고객사명은 _prev_cust_nm에 백업한다.
         var keep = data._prev_cust_nm || "";
         if (data.cust_nm && data.cust_nm !== "HCNC") {
             keep = data.cust_nm;
@@ -694,6 +700,7 @@ function startEditOnClick(e, cell) {
 
 // 이벤트/셀 객체 타입 분기
 function resolveCell(e, cell) {
+    // Tabulator 콜백마다 인자 순서가 달라 cell/e 어느 쪽이 셀 객체인지 흡수한다.
     if (cell && typeof cell.getRow === "function") {
         return cell;
     }
@@ -744,7 +751,7 @@ function stackTagEditor(cell, onRendered, success, cancel) {
     var docListenerBound = false;
     var docMouseDownHandler = null;
 
-    // 에디터 종료/저장
+    // 에디터 종료 시 hidden(csv) 값을 셀 값/표시 라벨에 함께 반영한다.
     function closeEditor() {
         if (closed) {
             return;
@@ -851,7 +858,7 @@ function stackTagEditor(cell, onRendered, success, cancel) {
                 e.preventDefault();
                 e.stopPropagation();
                 commitByInput(input.value);
-                // After adding the last tag, close and save the editor.
+                // 엔터/콤마 입력은 즉시 커밋 후 편집 종료한다.
                 closeEditor();
             }
             if (e.key === "Escape") {
@@ -921,6 +928,7 @@ function getSkillLabelList(value) {
             if (match) {
                 return match.cd_nm;
             }
+            // 업로드/과거데이터처럼 라벨이 들어온 경우에도 표시를 복원한다.
             var labelMatch = hr013SkillOptions.find(function (item) {
                 return String(item.cd_nm) === String(code);
             });
@@ -955,6 +963,7 @@ function normalizeJobRows() {
     Object.keys(map).forEach(function (code) {
         labelToCode[map[code]] = code;
     });
+    // 서버 데이터(role_nm/job_cd)가 섞여 와도 화면 편집 시 코드/라벨을 맞춰 둔다.
     window.hr013Table.getRows().forEach(function (row) {
         var data = row.getData();
         var code = normalizeJobValue(data.job_cd) || "";
@@ -996,6 +1005,7 @@ function normalizeJobCodes() {
     Object.keys(map).forEach(function (code) {
         labelToCode[map[code]] = code;
     });
+    // 코드가 우선이며, 라벨만 있는 값은 코드로 역매핑한다.
     window.hr013Table.getRows().forEach(function (row) {
         var data = row.getData();
         var current = normalizeJobValue(data.job_cd) || "";
@@ -1077,6 +1087,7 @@ $('#excelFile').on('change', function(e) {
         success: function (result) {
             let data = window.hr013Table.getData();
 
+            // 엑셀 업로드 값은 공통코드 기준(cd_nm -> cd)으로 정규화 후 테이블에 append한다.
             result.data.forEach(function (item) {
                 if (item.inprj_yn?.toUpperCase() !== 'Y') {
                     item.inprj_yn = 'N';
