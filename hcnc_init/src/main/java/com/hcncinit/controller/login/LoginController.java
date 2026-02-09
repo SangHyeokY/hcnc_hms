@@ -40,7 +40,6 @@ public class LoginController {
             mv.addObject("message", "아이디 또는 비밀번호가 올바르지 않습니다.");
             return mv;
         }
-
         String pwdHash = String.valueOf(user.get("pwd_hash"));
         // BCrypt 암호화 방식으로 암화화 된 데이터 혹은 일반 문자열로 저장된 데이터 모두 검증 (※ 추후 일반 문자열에 대한 조건은 제외해야 함.)
         if (!passwordEncoder.matches(password, pwdHash) && !pwdHash.equals(password)){
@@ -50,6 +49,7 @@ public class LoginController {
         }
 
         session.setAttribute("LOGIN_USER_ID", userId);
+        session.setAttribute("LOGIN_AUTH", user.get("role_cd"));
         cm010Service.updateLastLogin(userId);
 
         mv.addObject("success", true);

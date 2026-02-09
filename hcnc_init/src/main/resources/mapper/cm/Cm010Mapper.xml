@@ -67,6 +67,7 @@
              , user_nm
              , pwd_hash
              , lock_yn
+             , role_cd
         FROM tb_user_info
         WHERE user_id = #{userId}
           AND del_yn = 'N'
