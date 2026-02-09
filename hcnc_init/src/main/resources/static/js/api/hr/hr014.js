@@ -159,7 +159,7 @@ function buildHr014TableA() {
                 ]
             },
             {
-                title: "코멘트",
+                title: "평가의견",
                 field: "cmt",
                 widthGrow: 3,
 //                hozAlign: "center",
