@@ -41,9 +41,13 @@ const savedTabs = [];
 // ============================================================================== //
 
 // 문서 첫 생성 시 실행
-$(document).ready(function () {
+$(document).ready(async function () {
     buildUserTable();
-    loadUserTableData();
+
+    // 테이블 로딩이 끝날 때 까지 로딩바 표시
+    showLoading();
+    await loadUserTableData();
+    hideLoading();
 
     $(".tab-panel").hide(); // Tab 숨기기
 
@@ -66,15 +70,19 @@ $(document).ready(function () {
     // ================================================ //
 
     // 검색 버튼 이벤트
-    $(".btn-search").on("click", function (event) {
+    $(".btn-search").on("click", async function (event) {
         event.preventDefault();
-        loadUserTableData();
+        showLoading();
+        await loadUserTableData();
+        hideLoading();
     });
 
     // 검색어 이벤트 (Enter 입력)
-    $("#searchKeyword").on("keyup", function (event) {
+    $("#searchKeyword").on("keyup", async function (event) {
         if (event.key === "Enter") {
-            loadUserTableData();
+            showLoading();
+            await loadUserTableData();
+            hideLoading();
         }
     });
 
@@ -205,9 +213,13 @@ $(document).ready(function () {
             console.error(e);
             alert("저장 중 오류가 발생했습니다.");
         } finally {
-            hideLoading(); // 로딩바 숨김
             isSaving = false;
-            loadUserTableData();
+
+            showLoading();
+            userTable.clearData();
+            await loadUserTableData();
+            hideLoading();
+
             console.log("저장 작업 종료, 로딩 상태 :", isSaving); // false여야 정상
         }
     });
@@ -391,36 +403,15 @@ function buildUserTable() {
             { title: "dev_id", field: "dev_id", visible: false },
             { title: "성명", field: "dev_nm", hozAlign: "center", headerSort: true , widthGrow:1, minWidth: 90 },
             {
-                title: "평가 등급",
-                field: "grade",
-                hozAlign: "center",
-                widthGrow:1, minWidth: 90,
-                formatter: function (cell) {
-                    const row = cell.getRow();
-                    const rowData = cell.getRow().getData();
-                    const devId = rowData.dev_id;
-
-                    // 초기 표시
-                    cell.getElement().innerText = "계산중...";
-
-                    fetchUserScore(devId)
-                        .done(function (res) {
-                            const data = res.res || {};
-                            const rank = data.rank || "";
-                            const score = data.score || 0;
-
-                            row.update({
-                                grade: rank,
-                                score: score
-                            });
-
-                            cell.getElement().innerText = `${rank} (${score}점)`;
-                        })
-                        .fail(function () {
-                            cell.getElement().innerText = "-";
-                        });
-                    return "계산중...";
-                }
+               title: "평가 등급",
+               field: "grade",
+               hozAlign: "center",
+               widthGrow:1, minWidth: 90,
+               formatter: function (cell) {
+                   const d = cell.getRow().getData();
+                   if (!d.grade) return "-";
+                   return `${d.grade} (${d.score}점)`;
+               }
             },
             { title: "생년월일", field: "brdt", headerSort: true, widthGrow: 2, minWidth: 120 },
             { title: "연락처", field: "tel", widthGrow: 3, minWidth: 150 },
@@ -475,7 +466,7 @@ function buildUserTable() {
 // ============================================================================== //
 
 // db로부터 리스트 불러와서 인적사항 테이블에 넣기
-function loadUserTableData() {
+async function loadUserTableData() {
     if (!userTable || typeof userTable.setData !== "function") {
         return;
     }
@@ -483,7 +474,6 @@ function loadUserTableData() {
     // 키워드 검색
     let keyword = $("#searchKeyword").val().trim();
     if (keyword) {
-        // 공백이나 콤마를 기준으로 단어 나눔
         keyword = keyword
             .split(/[\s,]+/)
             .filter(w => w)
@@ -492,24 +482,56 @@ function loadUserTableData() {
     } else {
         keyword = null;
     }
-    console.log("키워드 : " + keyword);
+    console.log("키워드 :", keyword);
 
-    // db로부터 조회하기
-    $.ajax({
-        url: "/hr010/list",
-        type: "GET",
-        // xhrFields: { responseType: "arraybuffer" }, // ★ 핵심
-        data: {
-            dev_nm: $("#insertNM").val(),
-            searchKeyword: keyword
-        },
-        success: function (response) {
-            userTable.setData(response.res || []);
-        },
-        error: function (e) {
-            alert("사용자 데이터를 불러오는 중 오류가 발생했습니다.");
+    try {
+        // 리스트 불러오기
+        const response = await $.ajax({
+            url: "/hr010/list",
+            type: "GET",
+            data: {
+                dev_nm: $("#insertNM").val(),
+                searchKeyword: keyword
+            }
+        });
+
+        const list = response.res || [];
+        if (!list.length) {
+            userTable.setData([]);
+            return;
         }
-    });
+
+        // 점수 불러오기
+        const scorePromises = list.map(row =>
+            fetchUserScore(row.dev_id)
+                .then(res => ({
+                    dev_id: row.dev_id,
+                    ...(res.res || {})
+                }))
+                .catch(() => ({
+                    dev_id: row.dev_id
+                }))
+        );
+
+        const scores = await Promise.all(scorePromises);
+
+        const scoreMap = {};
+        scores.forEach(s => {
+            scoreMap[s.dev_id] = s;
+        });
+
+        list.forEach(row => {
+            const s = scoreMap[row.dev_id] || {};
+            row.grade = s.rank || "";
+            row.score = s.score || 0;
+        });
+
+        userTable.setData(list);
+        // userTable.setData(response.res || []);
+    } catch (e) {
+        console.error(e);
+        alert("사용자 데이터를 불러오는 중 오류가 발생했습니다.");
+    }
 }
 
 // db로부터 프로필 이미지 가져오기
