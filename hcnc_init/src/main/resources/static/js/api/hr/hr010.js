@@ -394,7 +394,7 @@ function buildUserTable() {
                 title: "평가 등급",
                 field: "grade",
                 hozAlign: "center",
-                widthGrow:1, minWidth: 90,
+                widthGrow:1, minWidth: 110,
                 formatter: function (cell) {
                     const row = cell.getRow();
                     const rowData = cell.getRow().getData();
@@ -414,7 +414,7 @@ function buildUserTable() {
                                 score: score
                             });
 
-                            cell.getElement().innerText = `${rank} (${score}점)`;
+                            cell.getElement().innerText = formatGradeLabel(rank, score);
                         })
                         .fail(function () {
                             cell.getElement().innerText = "-";
@@ -437,7 +437,16 @@ function buildUserTable() {
                         .join(", ");
                 }
             },
-            { title: "경력연차", field: "exp_yr", hozAlign: "center" , widthGrow:1, minWidth: 90 },
+            {
+                title: "경력연차",
+                field: "exp_yr",
+                hozAlign: "center",
+                widthGrow: 1,
+                minWidth: 90,
+                formatter: function (cell) {
+                    return formatCareerYearMonth(cell.getValue());
+                }
+            },
             { title: "최종학력", field: "edu_last", widthGrow:4, minWidth: 180 },
             { title: "보유 자격증", field: "cert_txt" , widthGrow:4, minWidth: 180 },
             { title: "희망단가", field: "hope_rate_amt", hozAlign: "right", formatter: amountFormatter, widthGrow:2, minWidth: 120 },
@@ -563,7 +572,7 @@ function upsertUserBtn() {
             exp_yr: $("#exp_yr").val(),
             edu_last: $("#edu_last").val(),
             cert_txt: $("#cert_txt").val(),
-            hope_rate_amt: $("#hope_rate_amt").val().replace(/,/g, ""),
+            hope_rate_amt: normalizeAmountValue($("#hope_rate_amt").val()),
             avail_dt: $("#avail_dt").val(),
             ctrt_typ: $("#select_ctrt_typ").val(),
             work_md: $("#select_work_md").val(),
@@ -720,7 +729,7 @@ function fillUserForm(d) {
         mainLangTagInput.setFromValue(pendingMainLangValue);
     }
 
-    $("#exp_yr").val(d.exp_yr || "");
+    $("#exp_yr").val(currentMode === "view" ? formatCareerYearMonth(d.exp_yr) : (d.exp_yr || ""));
     $("#edu_last").val(d.edu_last || "");
     $("#cert_txt").val(d.cert_txt || "");
     $("#avail_dt").val(d.avail_dt || "");
@@ -769,7 +778,7 @@ function fillUserForm(d) {
     const rank = d.grade || "";
     const score = d.score || 0;
     if (rank) {
-        $("#grade").text(`${rank} (${score}점)`);
+        $("#grade").text(formatGradeLabel(rank, score));
     } else {
         $("#grade").text("");
     }
@@ -948,7 +957,7 @@ function validateUserForm() {
     const devType = ($("#dev_type").val() || "").trim();         // 소속 구분 (dev_id에서 S: 직원, F: 프리랜서)
     const workMd = ($("#select_work_md").val() || "").trim();    // 근무 가능형태 (01: 상주, 02: 재택, 03: 혼합)
     // ==
-    const hopeRaw = $("#hope_rate_amt").val().replace(/,/g, ""); // 희망단가 금액
+    const hopeRaw = normalizeAmountValue($("#hope_rate_amt").val()); // 희망단가 금액
     const availDt = ($("#avail_dt").val() || "").trim();         // 투입 가능일
     const ctrtTyp = ($("#select_ctrt_typ").val() || "").trim();  // 계약 형태 (01: 개인, 02: 법인)
 
@@ -1120,7 +1129,7 @@ $("#exp_yr").on("input", function () {
 // 희망단가는 숫자만 입력 가능
 $("#hope_rate_amt").on("input", function () {
     let input_number = this.value.replace(/[^0-9]/g, "");
-    this.value = formatNumber(input_number);
+    this.value = formatAmount(input_number);
 });
 
 // 숫자에 콤마 표시
@@ -1182,17 +1191,61 @@ function amountFormatter(cell) {
     if (cell.getValue() === null || cell.getValue() === undefined || cell.getValue() === "") {
         return "";
     }
-    return formatNumber(cell.getValue());
+    return formatAmount(cell.getValue());
 }
 
 // 팝업에서도 마찬가지로 (,) 표시
 function formatAmount(value) {
     if (value === null || value === undefined || value === "") return "";
 
-    return value
+    const numeric = value
         .toString()
         .replace(/[^0-9]/g, "")
         .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    return numeric ? numeric + "원" : "";
+}
+
+function normalizeAmountValue(value) {
+    if (value === null || value === undefined) return "";
+    return String(value).replace(/[^0-9]/g, "");
+}
+
+function formatGradeLabel(rank, score) {
+    if (!rank) return "";
+    return `${rank}등급(${score || 0}점)`;
+}
+
+function formatCareerYearMonth(value) {
+    if (value === null || value === undefined || value === "") {
+        return "";
+    }
+
+    var raw = String(value).trim();
+    if (!raw) {
+        return "";
+    }
+
+    if (!/^\d+(\.\d+)?$/.test(raw)) {
+        return raw;
+    }
+
+    var parts = raw.split(".");
+    var years = parseInt(parts[0], 10) || 0;
+    if (parts.length === 1) {
+        return years + "년";
+    }
+
+    var monthsRaw = (parts[1] || "").replace(/0+$/g, "").replace(/^0+/g, "");
+    if (!monthsRaw) {
+        return years + "년";
+    }
+
+    var months = parseInt(monthsRaw, 10);
+    if (!months) {
+        return years + "년";
+    }
+
+    return years + "년" + months + "개월";
 }
 
 // 엑셀 다운로드 처리
