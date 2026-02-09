@@ -12,14 +12,14 @@
 <th:block layout:fragment="searchCondition">
     <div class="search-input">
         <p class="fl-ac">
-            <label for="insertNM" class=""></label>
-            <input type="text" id="insertNM" name="insertNM" placeholder="성명을 입력하세요" />
+            <label for="insertNM" class="">성명 &nbsp;</label>
+            <input type="text" class="w230" id="insertNM" name="insertNM" placeholder="성명을 입력하세요" />
         </p>
     </div>
     <div class="search-input">
         <p class="fl-ac">
-            <label for="searchKeyword" class=""></label>
-            <input type="text" id="searchKeyword" name="searchKeyword" placeholder="검색어를 입력하세요" />
+            <label for="searchKeyword" class="">검색어 &nbsp;</label>
+            <input type="text" class="w300" id="searchKeyword" name="searchKeyword" placeholder="성명/연락처/이메일/거주지역/기술 검색" />
         </p>
     </div>
 </th:block>
@@ -121,7 +121,27 @@
                                     </tr>
                                     <tr>
                                         <th>경력연차</th>
-                                        <td><input type="text" class="wp100" id="exp_yr" disabled></td>
+                                        <td>
+                                            <div class="career-spin-wrap">
+                                                <div class="career-spin-field">
+                                                    <input type="number" class="career-spin-input" id="exp_yr_year" min="0" max="99" step="1" value="0" disabled>
+                                                    <div class="career-spin-buttons">
+                                                        <button type="button" class="career-spin-btn" data-target="#exp_yr_year" data-step="1" aria-label="경력연차 년 증가">▲</button>
+                                                        <button type="button" class="career-spin-btn" data-target="#exp_yr_year" data-step="-1" aria-label="경력연차 년 감소">▼</button>
+                                                    </div>
+                                                </div>
+                                                <span>년</span>
+                                                <div class="career-spin-field">
+                                                    <input type="number" class="career-spin-input" id="exp_yr_month" min="0" max="99" step="1" value="0" disabled>
+                                                    <div class="career-spin-buttons">
+                                                        <button type="button" class="career-spin-btn" data-target="#exp_yr_month" data-step="1" aria-label="경력연차 개월 증가">▲</button>
+                                                        <button type="button" class="career-spin-btn" data-target="#exp_yr_month" data-step="-1" aria-label="경력연차 개월 감소">▼</button>
+                                                    </div>
+                                                </div>
+                                                <span>개월</span>
+                                                <input type="hidden" id="exp_yr">
+                                            </div>
+                                        </td>
                                         <th>최종학력</th>
                                         <td><input type="text" class="wp100" id="edu_last" disabled></td>
                                         <th>보유 자격증</th>

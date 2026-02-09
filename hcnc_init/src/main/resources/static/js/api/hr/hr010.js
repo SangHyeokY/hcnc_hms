@@ -41,9 +41,13 @@ const savedTabs = [];
 // ============================================================================== //
 
 // 문서 첫 생성 시 실행
-$(document).ready(function () {
+$(document).ready(async function () {
     buildUserTable();
-    loadUserTableData();
+
+    // 테이블 로딩이 끝날 때 까지 로딩바 표시
+    showLoading();
+    await loadUserTableData();
+    hideLoading();
 
     $(".tab-panel").hide(); // Tab 숨기기
 
@@ -66,15 +70,19 @@ $(document).ready(function () {
     // ================================================ //
 
     // 검색 버튼 이벤트
-    $(".btn-search").on("click", function (event) {
+    $(".btn-search").on("click", async function (event) {
         event.preventDefault();
-        loadUserTableData();
+        showLoading();
+        await loadUserTableData();
+        hideLoading();
     });
 
     // 검색어 이벤트 (Enter 입력)
-    $("#searchKeyword").on("keyup", function (event) {
+    $("#searchKeyword").on("keyup", async function (event) {
         if (event.key === "Enter") {
-            loadUserTableData();
+            showLoading();
+            await loadUserTableData();
+            hideLoading();
         }
     });
 
@@ -205,9 +213,13 @@ $(document).ready(function () {
             console.error(e);
             alert("저장 중 오류가 발생했습니다.");
         } finally {
-            hideLoading(); // 로딩바 숨김
             isSaving = false;
-            loadUserTableData();
+
+            showLoading();
+            userTable.clearData();
+            await loadUserTableData();
+            hideLoading();
+
             console.log("저장 작업 종료, 로딩 상태 :", isSaving); // false여야 정상
         }
     });
@@ -396,30 +408,9 @@ function buildUserTable() {
                 hozAlign: "center",
                 widthGrow:1, minWidth: 110,
                 formatter: function (cell) {
-                    const row = cell.getRow();
-                    const rowData = cell.getRow().getData();
-                    const devId = rowData.dev_id;
-
-                    // 초기 표시
-                    cell.getElement().innerText = "계산중...";
-
-                    fetchUserScore(devId)
-                        .done(function (res) {
-                            const data = res.res || {};
-                            const rank = data.rank || "";
-                            const score = data.score || 0;
-
-                            row.update({
-                                grade: rank,
-                                score: score
-                            });
-
-                            cell.getElement().innerText = formatGradeLabel(rank, score);
-                        })
-                        .fail(function () {
-                            cell.getElement().innerText = "-";
-                        });
-                    return "계산중...";
+                    const d = cell.getRow().getData();
+                    if (!d.grade) return "-";
+                    return formatGradeLabel(d.grade, d.score);
                 }
             },
             { title: "생년월일", field: "brdt", headerSort: true, widthGrow: 2, minWidth: 120 },
@@ -484,7 +475,7 @@ function buildUserTable() {
 // ============================================================================== //
 
 // db로부터 리스트 불러와서 인적사항 테이블에 넣기
-function loadUserTableData() {
+async function loadUserTableData() {
     if (!userTable || typeof userTable.setData !== "function") {
         return;
     }
@@ -492,7 +483,6 @@ function loadUserTableData() {
     // 키워드 검색
     let keyword = $("#searchKeyword").val().trim();
     if (keyword) {
-        // 공백이나 콤마를 기준으로 단어 나눔
         keyword = keyword
             .split(/[\s,]+/)
             .filter(w => w)
@@ -501,24 +491,56 @@ function loadUserTableData() {
     } else {
         keyword = null;
     }
-    console.log("키워드 : " + keyword);
+    console.log("키워드 :", keyword);
 
-    // db로부터 조회하기
-    $.ajax({
-        url: "/hr010/list",
-        type: "GET",
-        // xhrFields: { responseType: "arraybuffer" }, // ★ 핵심
-        data: {
-            dev_nm: $("#insertNM").val(),
-            searchKeyword: keyword
-        },
-        success: function (response) {
-            userTable.setData(response.res || []);
-        },
-        error: function (e) {
-            alert("사용자 데이터를 불러오는 중 오류가 발생했습니다.");
+    try {
+        // 리스트 불러오기
+        const response = await $.ajax({
+            url: "/hr010/list",
+            type: "GET",
+            data: {
+                dev_nm: $("#insertNM").val(),
+                searchKeyword: keyword
+            }
+        });
+
+        const list = response.res || [];
+        if (!list.length) {
+            userTable.setData([]);
+            return;
         }
-    });
+
+        // 점수 불러오기
+        const scorePromises = list.map(row =>
+            fetchUserScore(row.dev_id)
+                .then(res => ({
+                    dev_id: row.dev_id,
+                    ...(res.res || {})
+                }))
+                .catch(() => ({
+                    dev_id: row.dev_id
+                }))
+        );
+
+        const scores = await Promise.all(scorePromises);
+
+        const scoreMap = {};
+        scores.forEach(s => {
+            scoreMap[s.dev_id] = s;
+        });
+
+        list.forEach(row => {
+            const s = scoreMap[row.dev_id] || {};
+            row.grade = s.rank || "";
+            row.score = s.score || 0;
+        });
+
+        userTable.setData(list);
+        // userTable.setData(response.res || []);
+    } catch (e) {
+        console.error(e);
+        alert("사용자 데이터를 불러오는 중 오류가 발생했습니다.");
+    }
 }
 
 // db로부터 프로필 이미지 가져오기
@@ -569,7 +591,7 @@ function upsertUserBtn() {
             email: $("#email").val(),
             region: $("#region").val(),
             main_lang: $("#main_lang").val(),
-            exp_yr: $("#exp_yr").val(),
+            exp_yr: composeCareerExpValue(),
             edu_last: $("#edu_last").val(),
             cert_txt: $("#cert_txt").val(),
             hope_rate_amt: normalizeAmountValue($("#hope_rate_amt").val()),
@@ -729,7 +751,7 @@ function fillUserForm(d) {
         mainLangTagInput.setFromValue(pendingMainLangValue);
     }
 
-    $("#exp_yr").val(currentMode === "view" ? formatCareerYearMonth(d.exp_yr) : (d.exp_yr || ""));
+    setCareerSpinInputs(d.exp_yr);
     $("#edu_last").val(d.edu_last || "");
     $("#cert_txt").val(d.cert_txt || "");
     $("#avail_dt").val(d.avail_dt || "");
@@ -802,7 +824,7 @@ function clearUserForm() {
         mainLangTagInput.clear();
     }
 
-    $("#exp_yr").val("");
+    setCareerSpinInputs("");
     $("#edu_last").val("");
     $("#cert_txt").val("");
     $("#avail_dt").val("");
@@ -865,6 +887,8 @@ function setModalMode(mode) {
               .prop("disabled", false)
               .removeAttr("disabled");
     }
+    $(".career-spin-btn").prop("disabled", isView);
+
     // 등록 mode일 경우에만 '소속 구분' 입력 가능
     if (isInsert) {
         $("#dev_type").prop("disabled", false);
@@ -951,7 +975,8 @@ function validateUserForm() {
     const tel = ($("#tel").val() || "").trim();                  // 연락처
     const email = ($("#email").val() || "").trim();              // 이메일
     // ==
-    const expYr = ($("#exp_yr").val() || "").trim();             // 경력연차
+    const expYrYear = ($("#exp_yr_year").val() || "").trim();    // 경력연차(년)
+    const expYrMonth = ($("#exp_yr_month").val() || "").trim();  // 경력연차(개월)
     const eduLast = ($("#edu_last").val() || "").trim();         // 최종학력
     // ==
     const devType = ($("#dev_type").val() || "").trim();         // 소속 구분 (dev_id에서 S: 직원, F: 프리랜서)
@@ -1011,16 +1036,30 @@ function validateUserForm() {
     }
 
     // 경력연차
-    if (!expYr) {
-        alert("경력연차를 입력하세요.");
-        $("#exp_yr").focus();
+    if (expYrYear === "" || expYrMonth === "") {
+        alert("경력연차(년/개월)를 입력하세요.");
+        if (expYrYear === "") {
+            $("#exp_yr_year").focus();
+        } else {
+            $("#exp_yr_month").focus();
+        }
         return false;
     }
-    if (!/^\d+(\.\d+)?$/.test(expYr)) {
-        alert("경력연차는 숫자(소수점 포함)만 입력 가능합니다.");
-        $("#exp_yr").focus();
+    if (!/^\d+$/.test(expYrYear) || !/^\d+$/.test(expYrMonth)) {
+        alert("경력연차는 숫자만 입력 가능합니다.");
+        $("#exp_yr_year").focus();
         return false;
     }
+
+    var expYearNum = Number(expYrYear);
+    var expMonthNum = Number(expYrMonth);
+    if (expYearNum < 0 || expYearNum > 99 || expMonthNum < 0 || expMonthNum > 99) {
+        alert("경력연차의 년/개월은 0~99 범위로 입력하세요.");
+        $("#exp_yr_year").focus();
+        return false;
+    }
+
+    syncCareerExpValue();
 
     // 최종학력
     if (!eduLast) {
@@ -1111,19 +1150,28 @@ $("#tel").on("input", function () {
     }
 });
 
-// 경력연차 자동 변환
-$("#exp_yr").on("input", function () {
-    let val = this.value;
+// 경력연차(년/개월) 스핀 보정
+$("#exp_yr_year, #exp_yr_month").on("input change", function () {
+    this.value = clampCareerSpinValue(this.value);
+    syncCareerExpValue();
+});
 
-    // 숫자와 소수점만 허용
-    val = val.replace(/[^0-9.]/g, "");
-
-    // 소수점은 하나만 허용
-    const parts = val.split(".");
-    if (parts.length > 2) {
-        val = parts[0] + "." + parts.slice(1).join("");
+// 경력연차 커스텀 스핀 버튼(+/-)
+$(document).on("click", ".career-spin-btn", function () {
+    var targetSelector = $(this).data("target");
+    var step = parseInt($(this).data("step"), 10) || 0;
+    if (!targetSelector || step === 0) {
+        return;
     }
-    this.value = val;
+
+    var $target = $(targetSelector);
+    if (!$target.length || $target.prop("disabled")) {
+        return;
+    }
+
+    var current = clampCareerSpinValue($target.val());
+    var next = clampCareerSpinValue(current + step);
+    $target.val(next).trigger("input");
 });
 
 // 희망단가는 숫자만 입력 가능
@@ -1215,6 +1263,65 @@ function formatGradeLabel(rank, score) {
     return `${rank}등급(${score || 0}점)`;
 }
 
+function clampCareerSpinValue(value) {
+    var num = parseInt(value, 10);
+    if (!Number.isFinite(num) || isNaN(num)) {
+        return 0;
+    }
+    if (num < 0) return 0;
+    if (num > 99) return 99;
+    return num;
+}
+
+function parseCareerExpValue(value) {
+    if (value === null || value === undefined || value === "") {
+        return { years: 0, months: 0 };
+    }
+
+    var raw = String(value).trim();
+    if (!raw) {
+        return { years: 0, months: 0 };
+    }
+
+    if (/^\d+(\.\d+)?$/.test(raw)) {
+        var parts = raw.split(".");
+        var years = clampCareerSpinValue(parts[0]);
+        var months = 0;
+        if (parts.length > 1) {
+            var monthText = String(parts[1] || "").replace(/[^\d]/g, "");
+            months = clampCareerSpinValue(monthText || 0);
+        }
+        return { years: years, months: months };
+    }
+
+    var yearMatch = raw.match(/(\d+)\s*년/);
+    var monthMatch = raw.match(/(\d+)\s*개?월/);
+    return {
+        years: clampCareerSpinValue(yearMatch ? yearMatch[1] : 0),
+        months: clampCareerSpinValue(monthMatch ? monthMatch[1] : 0)
+    };
+}
+
+function setCareerSpinInputs(value) {
+    var parsed = parseCareerExpValue(value);
+    $("#exp_yr_year").val(parsed.years);
+    $("#exp_yr_month").val(parsed.months);
+    syncCareerExpValue();
+}
+
+function composeCareerExpValue() {
+    var years = clampCareerSpinValue($("#exp_yr_year").val());
+    var months = clampCareerSpinValue($("#exp_yr_month").val());
+    if (months === 0) {
+        return String(years);
+    }
+    return years + "." + months;
+}
+
+function syncCareerExpValue() {
+    $("#exp_yr").val(composeCareerExpValue());
+}
+
 function formatCareerYearMonth(value) {
     if (value === null || value === undefined || value === "") {
         return "";
@@ -1235,8 +1342,8 @@ function formatCareerYearMonth(value) {
         return years + "년";
     }
 
-    var monthsRaw = (parts[1] || "").replace(/0+$/g, "").replace(/^0+/g, "");
-    if (!monthsRaw) {
+    var monthsRaw = String(parts[1] || "");
+    if (!monthsRaw || /^0+$/.test(monthsRaw)) {
         return years + "년";
     }
 
