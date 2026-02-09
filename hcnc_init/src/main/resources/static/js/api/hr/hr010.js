@@ -88,7 +88,7 @@ $(document).ready(async function () {
 
     // 조회 버튼이벤트
     $(".btn-main-view").on("click", function () {
-        const rowData = btnEditView("조회할 ");
+        const rowData = btnEditView("상세 볼 ");
         if (!rowData) return;
         loadUserTableImgDataAsync(rowData);
         openUserModal("view", rowData);
