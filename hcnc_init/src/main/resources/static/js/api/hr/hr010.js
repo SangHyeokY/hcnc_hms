@@ -389,11 +389,43 @@ function buildUserTable() {
                 download: false
             },
             { title: "dev_id", field: "dev_id", visible: false },
-            { title: "성명", field: "dev_nm", hozAlign: "center", headerSort: true , widthGrow:1, minWidth: 80 },
+            { title: "성명", field: "dev_nm", hozAlign: "center", headerSort: true , widthGrow:1, minWidth: 90 },
+            {
+                title: "평가 등급",
+                field: "grade",
+                hozAlign: "center",
+                widthGrow:1, minWidth: 90,
+                formatter: function (cell) {
+                    const row = cell.getRow();
+                    const rowData = cell.getRow().getData();
+                    const devId = rowData.dev_id;
+
+                    // 초기 표시
+                    cell.getElement().innerText = "계산중...";
+
+                    fetchUserScore(devId)
+                        .done(function (res) {
+                            const data = res.res || {};
+                            const rank = data.rank || "";
+                            const score = data.score || 0;
+
+                            row.update({
+                                grade: rank,
+                                score: score
+                            });
+
+                            cell.getElement().innerText = `${rank} (${score}점)`;
+                        })
+                        .fail(function () {
+                            cell.getElement().innerText = "-";
+                        });
+                    return "계산중...";
+                }
+            },
             { title: "생년월일", field: "brdt", headerSort: true, widthGrow: 2, minWidth: 120 },
             { title: "연락처", field: "tel", widthGrow: 3, minWidth: 150 },
             { title: "이메일", field: "email", widthGrow:4, minWidth: 180 },
-            { title: "거주지역", field: "region", widthGrow:1, minWidth: 80 },
+            { title: "거주지역", field: "region", widthGrow:1, minWidth: 90 },
             {   title: "주 개발언어", field: "main_lang_nm", widthGrow: 4, minWidth: 180,
                 formatter: function (cell) {
                     const value = cell.getValue();
@@ -405,7 +437,7 @@ function buildUserTable() {
                         .join(", ");
                 }
             },
-            { title: "경력연차", field: "exp_yr", hozAlign: "center" , widthGrow:1, minWidth: 80 },
+            { title: "경력연차", field: "exp_yr", hozAlign: "center" , widthGrow:1, minWidth: 90 },
             { title: "최종학력", field: "edu_last", widthGrow:4, minWidth: 180 },
             { title: "보유 자격증", field: "cert_txt" , widthGrow:4, minWidth: 180 },
             { title: "희망단가", field: "hope_rate_amt", hozAlign: "right", formatter: amountFormatter, widthGrow:2, minWidth: 120 },
@@ -415,7 +447,7 @@ function buildUserTable() {
                 formatter: function(cell) {
                     var val = normalizeJobValue(cell.getValue()) || "";
                     return ctrtTypMap[val] || val;
-                }, editor: false, editable: false, widthGrow: 1, minWidth: 80
+                }, editor: false, editable: false, widthGrow: 1, minWidth: 90
             },
         ],
         data: [],
@@ -648,7 +680,7 @@ openUserModal = async function(mode, data) {
         refreshTabLayout("tab1");
         // 모두 Promise로 변경
         await Promise.all([
-            loadUserScoreAsync(data.dev_id),
+            // loadUserScoreAsync(data.dev_id),
             loadUserTableImgDataAsync(data)
         ]);
         // console.log("Tab1 새로고침 완료");
@@ -733,6 +765,14 @@ function fillUserForm(d) {
         $("#dev_type").val("");
         // $("#dev_type2").text("");
     }
+
+    const rank = d.grade || "";
+    const score = d.score || 0;
+    if (rank) {
+        $("#grade").text(`${rank} (${score}점)`);
+    } else {
+        $("#grade").text("");
+    }
 }
 
 // 팝업 닫히면 값 초기화하기
@@ -760,8 +800,8 @@ function clearUserForm() {
     $("#hope_rate_amt").val("");
     $("#dev_id_input").text("");
 
-    $("#grade").text("");
-    $("#score").text("");
+//    $("#grade").text("");
+//    $("#score").text("");
     $("#dev_type").val("");
 
     $("#select_work_md").val("");
@@ -770,6 +810,8 @@ function clearUserForm() {
     // $("#show_devId").text("");
     // $("#dev_type2").text("");
     // $("#devTypeWrap").hide();
+
+    $("#score").text("-");
 }
 
 // ============================================================================== //
@@ -1087,29 +1129,38 @@ function formatNumber(num) {
     return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
-// 점수 계산
-function loadUserScoreAsync(devId) {
-    return new Promise((resolve, reject) => {
-        $("#grade").text("계산중...");
-        $("#score").text("");
-
-        $.ajax({
-            url: "/hr010/getScore",
-            type: "GET",
-            data: { dev_id: devId },
-            success: function(res) {
-                const data = res.res || {};
-                $("#grade").text(data.rank || "");
-                $("#score").text(`(${data.score || 0}점)`);
-                resolve(); // 완료 시 resolve 호출
-            },
-            error: function(err) {
-                console.error(err);
-                reject(err); // 에러 시 reject 호출
-            }
-        });
+// 테이블에 점수 등급 표시
+function fetchUserScore(devId) {
+    return $.ajax({
+        url: "/hr010/getScore",
+        type: "GET",
+        data: { dev_id: devId }
     });
 }
+
+// 점수 계산
+//function loadUserScoreAsync(devId) {
+//    return new Promise((resolve, reject) => {
+//        $("#grade").text("계산중...");
+//        $("#score").text("");
+//
+//        $.ajax({
+//            url: "/hr010/getScore",
+//            type: "GET",
+//            data: { dev_id: devId },
+//            success: function(res) {
+//                const data = res.res || {};
+//                $("#grade").text(data.rank || "");
+//                $("#score").text(`(${data.score || 0}점)`);
+//                resolve(); // 완료 시 resolve 호출
+//            },
+//            error: function(err) {
+//                console.error(err);
+//                reject(err); // 에러 시 reject 호출
+//            }
+//        });
+//    });
+//}
 
 // alert 문자 가공
 function btnEditView(alertPrefix = "") {
