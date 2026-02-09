@@ -78,6 +78,137 @@ option{background:#fff; color:#333;}
 .tabulator-placeholder {background: #fff !important;}
 .tabulator-tableHolder {background: #fff !important;} /* overflow-x: hidden !important; */
 .tabulator .row-check {pointer-events: none;}
+.tabulator .tabulator-footer {
+  position: relative;
+  border-top: 1px solid #e6ebf2 !important;
+  background: #fff !important;
+  padding: 10px 16px 8px !important;
+  text-align: center !important;
+  min-height: 48px;
+}
+.tabulator .tabulator-footer .tabulator-page-size {
+  display: none !important;
+}
+.tabulator .tabulator-footer .tabulator-pages {
+  margin: 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+.tabulator .tabulator-footer .tabulator-page {
+  min-width: 24px;
+  height: 24px;
+  line-height: 24px;
+  border-radius: 0;
+  border: none;
+  background: transparent;
+  color: #5d6573;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 0;
+}
+.tabulator .tabulator-footer .tabulator-page.active {
+  font-weight: 700;
+  color: #111827;
+}
+.tabulator .tabulator-footer .tabulator-page[data-page="first"],
+.tabulator .tabulator-footer .tabulator-page[data-page="prev"],
+.tabulator .tabulator-footer .tabulator-page[data-page="next"],
+.tabulator .tabulator-footer .tabulator-page[data-page="last"] {
+  min-width: 44px;
+  width: 44px;
+  height: 44px;
+  line-height: 40px;
+  border: 2px solid #b9c1ce;
+  border-radius: 50%;
+  background: #fff;
+  padding: 0;
+  color: #232d3d;
+  font-size: 26px;
+  font-weight: 500;
+}
+.tabulator .tabulator-footer .tabulator-page.tabulator-page-disabled {
+  opacity: 1;
+  border-color: #dde2ea !important;
+  color: #d0d5dd !important;
+  background: #fff !important;
+}
+.tabulator .tabulator-footer .hcnc-grid-count {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  margin-left: 0;
+  font-size: 12px;
+  font-weight: 400;
+  color: #8f97a7;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.tabulator .tabulator-footer.hcnc-grid-footer-compact {
+  padding: 8px 12px 6px !important;
+  min-height: 76px;
+}
+.tabulator .tabulator-footer.hcnc-grid-footer-compact .tabulator-pages {
+  margin: 0 auto;
+}
+.tabulator .tabulator-footer.hcnc-grid-footer-compact .hcnc-grid-count {
+  position: static;
+  transform: none;
+  margin-top: 8px;
+  text-align: center;
+  white-space: normal;
+}
+
+/* 공통코드 > 코드그룹은 폭이 좁아 건수 텍스트를 항상 페이지 버튼 아래로 배치 */
+#TABLE_COMMON_MAIN .tabulator-footer {
+  background: #fff !important;
+  min-height: 76px;
+}
+
+#TABLE_COMMON_MAIN .tabulator-footer .hcnc-grid-count {
+  position: static;
+  left: auto;
+  top: auto;
+  transform: none;
+  display: block;
+  margin-top: 8px;
+  text-align: center;
+  white-space: normal;
+}
+
+/* 인적사항/사용자관리는 페이지네이션이 화면 하단에 고정되도록 컨테이너 높이를 보장 */
+.grid-pager-fixed {
+  height: calc(100% - 56px);
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.grid-pager-fixed-wrap {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+}
+.grid-pager-fixed-wrap > div {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+#TABLE_HR010_A.tabulator,
+#TABLE_USER.tabulator {
+  display: flex;
+  flex-direction: column;
+}
+#TABLE_HR010_A.tabulator .tabulator-tableHolder,
+#TABLE_USER.tabulator .tabulator-tableHolder {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+#TABLE_HR010_A.tabulator .tabulator-footer,
+#TABLE_USER.tabulator .tabulator-footer {
+  flex: 0 0 auto;
+  margin-top: auto;
+}
 
 #TABLE_HR013_A .row-check {
   pointer-events: auto;
@@ -946,6 +1077,16 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
     display: inline-flex;
     flex-direction: column;
     width: 20px;
+}
+
+/* 상세(view)에서는 경력연차 스핀 버튼 숨김 */
+#view-user-area.is-view-mode .career-spin-buttons {
+    display: none;
+}
+
+#view-user-area.is-view-mode .career-spin-input {
+    border-right: 1px solid #dcdcdc !important;
+    border-radius: 4px !important;
 }
 
 .career-spin-btn {

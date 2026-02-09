@@ -86,6 +86,8 @@ function buildHr014TableA() {
 
     window.hr014TableA = new Tabulator("#TABLE_HR014_A", {
         layout: "fitColumns",
+        // 관리자평가(A)는 현재 페이징 미사용. 필요 시 true/"local"로 즉시 전환 가능.
+        pagination: false,
         headerSort: true,
         placeholder: "데이터 없음",
         headerHozAlign: "center",

@@ -58,6 +58,8 @@ function buildHr012TableA() {
 
     window.hr012TableA = new Tabulator("#TABLE_HR012_A", {
         layout: "fitColumns",
+        // 보유역량(A)은 현재 페이징 미사용. 필요 시 true/"local"로 즉시 전환 가능.
+        pagination: false,
         placeholder: "데이터 없음",
         cellEdited: function (cell) {
             // console.log("cellEdited A !!!!");

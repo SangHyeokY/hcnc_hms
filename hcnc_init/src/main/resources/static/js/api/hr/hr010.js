@@ -857,6 +857,7 @@ function setModalMode(mode) {
 
     var $modal = $("#view-user-area");
     var $title = $modal.find("#modal-title");
+    $modal.toggleClass("is-view-mode", isView);
 
     // title 표시
     if (isView) $title.text("상세");
