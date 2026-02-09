@@ -48,7 +48,7 @@ footer {width:100%; height:30px; line-height: 30px; padding:0 20px; display: fle
 
 
 .profile h4{font-size:15px; font-weight:500; color:#B1B1B1;}
-.profile-area {justify-content: center; gap:4px;}
+.profile-area {justify-content: center; gap:10px;}
 .profile-area .profile{width:100%; background:#EDEFF5; padding:6.5px; border-radius: 8px; font-size:12px;}
 .profile-area .profile-img{position:relative; display:block; width: 32px; height: 32px; margin-right:4px; border-radius:50%; overflow:hidden; background-size:cover;}
 .profile-area .profile-img img {position:absolute; width:100%; top:0%; left:0%;}
@@ -65,7 +65,7 @@ footer {width:100%; height:30px; line-height: 30px; padding:0 20px; display: fle
 .left-menu .nav .lnb-menu .dep1.no-bg a {background:none;}
 .left-menu .nav .lnb-menu .dep1 > li{position:relative; margin-bottom: 15px;}
 .left-menu .nav .lnb-menu .dep1 > li > a {display: flex; align-items: center; padding: 12px 28px 12px 36px; font-weight: 600; font-size: 14px; color:#838c96 }
-.left-menu .nav .lnb-menu .dep1 > li > a:hover {background-color: #eef3fb !important; border-radius: 8px;}
+.left-menu .nav .lnb-menu .dep1 > li > a:hover {background-color: #EDEFF5 !important; border-radius: 8px;}
 .left-menu .nav .lnb-menu .dep1 > li:nth-child(1) > a{background: url('../images/common/lnb-one.png') 10px center no-repeat; background-size: 18px;  }
 .left-menu .nav .lnb-menu .dep1 > li:nth-child(2) > a{background: url('../images/common/lnb-two.png') 10px center no-repeat; background-size: 20px; }
 .left-menu .nav .lnb-menu .dep1 > li:nth-child(3) > a{background: url('../images/common/lnb-three.png') 10px center no-repeat; background-size: 21px; }
@@ -92,10 +92,10 @@ footer {width:100%; height:30px; line-height: 30px; padding:0 20px; display: fle
 .left-menu .nav .lnb-menu .dep1 > li > .dep2 > li:last-child:after{height:16px;}
 .left-menu .nav .lnb-menu .dep1 > li:nth-child(2) > .dep2 > li:after{height:22px;}
 
-.mem-area{border-bottom: 1px solid #C5CCD5; margin-bottom:10px;}
-.mem-area .logout-btn{width:100%; text-align: left; border:none; background:none; padding:10px; color:#6B727B;}
+.mem-area {border-bottom: 1px solid #C5CCD5; margin-bottom: 10px; padding:10px; display: flex; justify-content: space-between; align-items: center; color: #6B727B; font-weight: 500;}
+.mem-area .logout-btn{border:none; background:none; color:#6B727B; font-weight: 500;}
+.mem-area .ico-lock{display:inline-block; width:20px; height:20px; margin-right:4px; background:url('../icons/lnb-ico-logout.png')center center no-repeat; background-size:contain;}
 .mem-area .logout-btn:hover{color:#4880FF; font-weight:bold;}
-.mem-area .logout-btn .ico-lock{display:inline-block; width:20px; height:20px; margin-right:4px; background:url('../icons/lnb-ico-logout.png')center center no-repeat; background-size:contain;}
 
 /*=================================================================================
  * Container style

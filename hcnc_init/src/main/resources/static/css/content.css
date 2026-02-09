@@ -28,6 +28,22 @@ option{background:#fff; color:#333;}
 
 .pw-modal .modal-container {width: 30%;}
 
+/*=================================================================================*/
+.content-body .content-title h4 {
+  position: relative;
+  padding-left: 15px;
+}
+
+.content-body .content-title h4:before {
+    content:""; position:absolute;
+    top:50%; left:0;
+    transform:translateY(-50%);
+    display:block;
+    background:#4880FF;
+    width:6px;
+    height:24px;
+    border-radius:6px;
+}
 /*=================================================================================
  * Grid Table style
 =================================================================================*/
@@ -137,7 +153,6 @@ button.btn.btn-add-skill {
       font-size: 14px;
       font-weight: 500;
 }
-
 
 /*===============================================================================
   HR015,HR014 - score tables alignment
@@ -356,12 +371,14 @@ button.btn.btn-add-skill {
   color: #111827;
   font-weight: 700;
 }
+/*
 .tab4-content .hr014-side-tabs.is-readonly .hr014-tab-btn {
   cursor: default;
 }
 .tab4-content #TABLE_HR014_A .tabulator-row:nth-child(2n) .tabulator-cell {
   background-color: #FFFFFF !important;
 }
+*/
 .tab4-content #TABLE_HR014_A .tabulator-row .tabulator-cell {
   font-size: 14px;
 }
@@ -628,7 +645,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .modal-content .title-area{padding-bottom:8px;}
 .modal-content {width:100%; max-height: 760px; overflow: hidden; padding:14px;}
 .modal-content h5{position:relative; padding-left:10px; font-size:16px;}
-.modal-content h5:before{content:""; position:absolute; top:50%; left:0; transform:translateY(-50%); display:block; background:#4880FF; width:4px; height:16px; bordedr-radius:6px;}
+.modal-content h5:before{content:""; position:absolute; top:50%; left:0; transform:translateY(-50%); display:block; background:#4880FF; width:4px; height:16px; border-radius:6px;}
 .modal-content .title-area .type span{padding: 3px 9px; color: #4880FF; border-radius:8px; border: 1px solid #4880FF;}
 .modal-content top-article{padding-bottom:10px;}
 .modal-content ul {list-style: none; margin: 0; padding: 0;}
@@ -713,9 +730,6 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
     color : #61646D;
 }
 
-
-
-
 #TABLE_HR012_A > .tabulator-header {
     display: none;
 }
@@ -764,7 +778,6 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .tab2-content #TABLE_HR012_B.is-readonly * {
     cursor: default !important;
 }
-
 
 /* 셀 기본 설정 */
 .tabulator .tabulator-cell {

@@ -394,7 +394,17 @@ function buildUserTable() {
             { title: "연락처", field: "tel", widthGrow: 3, minWidth: 150 },
             { title: "이메일", field: "email", widthGrow:4, minWidth: 180 },
             { title: "거주지역", field: "region", widthGrow:1, minWidth: 80 },
-            { title: "주 개발언어", field: "main_lang_nm", widthGrow: 4, minWidth: 180 },
+            {   title: "주 개발언어", field: "main_lang_nm", widthGrow: 4, minWidth: 180,
+                formatter: function (cell) {
+                    const value = cell.getValue();
+                    if (!value) return "";
+                    // 콤마 뒤에 공백 추가
+                    return value
+                        .split(",")
+                        .map(v => v.trim())
+                        .join(", ");
+                }
+            },
             { title: "경력연차", field: "exp_yr", hozAlign: "center" , widthGrow:1, minWidth: 80 },
             { title: "최종학력", field: "edu_last", widthGrow:4, minWidth: 180 },
             { title: "보유 자격증", field: "cert_txt" , widthGrow:4, minWidth: 180 },

@@ -26,13 +26,14 @@
       </aside>
     </div>
     <div class="header-btn-wrap">
+
       <div class="mem-area">
-        <button
-          onclick="location.href='/logout'"
-          type="button"
-          class="logout-btn"
-        >
-          <span class="ico-lock"></span>Logout
+        <div>
+          <span class="ico-lock"></span>
+          <span th:text="${session.LOGIN_USER_ID} + ' 님'"></span>
+        </div>
+        <button onclick="location.href='/logout'" type="button" class="logout-btn">
+          <span class="">Logout</span>
         </button>
       </div>
 

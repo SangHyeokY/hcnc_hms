@@ -2,7 +2,7 @@
 
 
 *{margin:0;padding:0;}
-html, body{height:100%;}
+html, body{min-height: 100vh;}
 ol, ul, li, dl, dt, dd {
 	list-style: none;
 }

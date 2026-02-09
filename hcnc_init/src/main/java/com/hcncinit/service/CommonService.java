@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static com.hcncinit.config.PoiRowInsertUtil.*;
 
@@ -286,6 +287,10 @@ public class CommonService {
        공통 처리 (Map → Row)
        ========================================================= */
 
+    // 콤마(,) 뒤에 띄어쓰기 추가할 컬럼들 정의
+    private static final Set<String> COMMA_FORMAT_KEYS =
+            Set.of("main_lang", "skl_id_lst", "stack_txt");
+
     private void fillByMap(
             XSSFSheet sheet,
             List<Map<String, Object>> map,
@@ -303,6 +308,11 @@ public class CommonService {
 
             for (Map.Entry<String, Integer> entry : colMap.entrySet()) {
                 Object value = rowData.get(entry.getKey());
+
+                if (COMMA_FORMAT_KEYS.contains(entry.getKey())) {
+                    value = formatCommaText(value);
+                }
+
                 setCellValueKeepStyle(
                         sheet, row, templateRowIndex,
                         entry.getValue(), value);
@@ -326,6 +336,10 @@ public class CommonService {
 
             Object value = data.get(entry.getKey());
 
+            if (COMMA_FORMAT_KEYS.contains(entry.getKey())) {
+                value = formatCommaText(value);
+            }
+
             setCellValueKeepStyle(
                     sheet,
                     row,
@@ -335,4 +349,13 @@ public class CommonService {
             );
         }
     }
+
+    // 콤마(,) 뒤에 띄어쓰기 추가
+    private Object formatCommaText(Object value) {
+        if (!(value instanceof String str)) return value;
+        if (!str.contains(",")) return str;
+
+        return String.join(", ", str.split("\\s*,\\s*"));
+    }
+
 }
