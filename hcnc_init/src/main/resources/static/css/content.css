@@ -968,12 +968,13 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 ================================================================================*/
 .common-code-page{height:100%;}
 .common-code-page .form-wrap{height:100%;}
-.common-code-wrap {height:100%; display: flex; gap: 20px; align-items: stretch;  }
+.common-code-wrap {display: grid; grid-template-columns: 28% 1fr; gap: 20px; height: 100%; width: 100%; box-sizing: border-box;}
 .common-code-section {flex: 1 1 480px; min-height: 420px;}
-.common-code-section:first-child {flex: 0 0 28%; max-width: 28%;}
 .common-code-section .content-body {height: auto;} /* overflow-x: hidden */
 .common-code-section .tabulator {width: 100%; height: auto;}
 .common-code-section .tabulator-tableHolder {height: auto;}
+.common-code-section:first-child {width: 100%;}
+.common-code-section:last-child {width: 100%;}
 .detail-sort-hint {color: #7b8794; margin-left: auto; margin-right: 10px;} /*font-size: 12px; */
 /* Hide layout-level buttons on common code page */
 .contents-wrap:has(.common-code-page) > section.white-full > .content-title .btn-area {display: none;}
