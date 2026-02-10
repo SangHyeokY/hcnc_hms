@@ -1099,10 +1099,12 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
     color : #61646D;
 }*/
 
+#TABLE_MAIN_LANG_PICKER > .tabulator-header,
 #TABLE_HR012_A > .tabulator-header {
     display: none;
 }
 
+#TABLE_MAIN_LANG_PICKER .tabulator-table > .tabulator-row > .tabulator-cell:nth-child(2),
 #TABLE_HR012_A .tabulator-table > .tabulator-row > .tabulator-cell:nth-child(2) {
     background-color: #F1F4F9 !important;
     font-size: 14px;
@@ -1578,13 +1580,13 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
     padding: 10px 14px;
     border-radius: 8px;
     font-size: 16px;
-    width: 240px;
+    width: 900px;
     box-shadow: 0 2px 6px rgba(0,0,0,0.2);
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.2s;
     z-index: 10;
-    background: #e6f0ff;
+    background: #ffffff;
     color: #2c5282;
 }
 
@@ -1597,7 +1599,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
     transform: translateX(-50%);
     border-left: 6px solid transparent;
     border-right: 6px solid transparent;
-    border-top: 8px solid #e6f0ff;
+    border-top: 8px solid #ffffff;
     background: #e6f0ff;
     z-index: 11;
 }
@@ -1606,6 +1608,52 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 #aboutGrade:hover .tooltip {
     opacity: 1;
 }
+
+#aboutGrade .tooltip .score-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+#aboutGrade .tooltip .score-table th,
+#aboutGrade .tooltip .score-table td {
+  border: 1px solid #ccc;
+  padding: 12px;
+  vertical-align: top;
+}
+
+#aboutGrade .tooltip .score-table th {
+  background: #f5f5f5;
+  text-align: center;
+  font-weight: 600;
+  /*width: 20%;*/
+}
+
+#aboutGrade .tooltip .score-table .max-score {
+  display: block;
+  margin-top: 4px;
+  font-size: 13px;
+  color: #666;
+}
+
+#aboutGrade .tooltip .score-section {
+  margin-bottom: 12px;
+}
+
+#aboutGrade .tooltip .score-section strong {
+  display: block;
+  margin-bottom: 6px;
+}
+
+#aboutGrade .tooltip .score-section ul {
+  padding-left: 18px;
+  margin: 0;
+}
+
+#aboutGrade .tooltip .score-section li {
+  margin-bottom: 4px;
+}
+
 
 .career-spin-wrap {
     display: inline-flex;
