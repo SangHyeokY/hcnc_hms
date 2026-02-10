@@ -53,13 +53,13 @@ window.initTab2 = function() {
             window.hr012TableA.redraw();
             $("#TABLE_HR012_B").hide();
             if (!window.hr010ReadOnly) {
-                $("#btn_hr012_skill_picker").show();
+                $(".hr012-toolbar").show();
             }
         } else if (tabId === "tab2-B") {
             $("#TABLE_HR012_B").show();
             window.hr012TableB.redraw();
             $("#TABLE_HR012_A").hide();
-            $("#btn_hr012_skill_picker").hide();
+            $(".hr012-toolbar").hide();
             closeHr012SkillPicker(true);
         }
     });
@@ -88,7 +88,7 @@ function buildHr012TableA() {
         columns: [
             { title: "코드", field: "cd", visible: false },
             { title: "구분", field: "cd_nm", hozAlign: "left", width: 180, minWidth: 160 },
-            { title: "상세", field: "skl_id_lst", hozAlign: "left", minWidth: 720, formatter: tagFormatter },
+            { title: "상세", field: "skl_id_lst", hozAlign: "left",widthGrow: 1, formatter: tagFormatter },
             { title: "key", field: "key", visible: false }
         ],
         data: []
@@ -747,7 +747,7 @@ function buildHr012SkillPickerTable() {
 
     hr012SkillPickerTable = new Tabulator("#TABLE_HR012_SKILL_PICKER", {
         layout: "fitColumns",
-        height: "360px",
+        height: "362px",
         placeholder: "등록된 기술이 없습니다.",
         headerHozAlign: "center",
         columnDefaults: {

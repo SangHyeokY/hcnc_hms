@@ -60,7 +60,7 @@ option{background:#fff; color:#333;}
 /*=================================================================================
  * Grid Table style
 =================================================================================*/
-.tabulator {border-top: none !important; border-right: 0; border-left: 0; border-bottom: 0; height: 100%; border-radius: 8px 8px 0 0; max-width: 100%; overflow: hidden;}
+.tabulator {border-top: none !important; border-right: 0; border-left: 0; border-bottom: 0; height: 100%; border-radius: 8px 8px 0 0; max-width: 100%; background:#fff; border:none; overflow: hidden;}
 .tabulator-header {padding: 0 !important; margin: 0 !important; border-bottom: 0 !important; font-size: 1em !important;}
 .tabulator-header .tabulator-col {
   background-color: #F8F9FD !important;
@@ -531,6 +531,7 @@ button.btn.btn-add-skill {
   border: none;
   box-shadow: none;
   padding: 0;
+  height:100%;
 }
 /* .tab4-content {
   overflow: visible;
@@ -607,27 +608,27 @@ button.btn.btn-add-skill {
 }
 .hr014-tab-panel {
   display: none;
+  height:100%;
 }
 .hr014-tab-panel.active {
   display: block;
 }
-.risk-box-top {
-  display: block;
-}
+
 .risk-list-top {
   display: flex;
+  flex-direction:column;
   border: none;
-  margin-bottom: 10px;
+  gap: 10px;
 }
 .risk-list-top .risk-item {
   border: 1px solid transparent;
+  border-radius:50px;
   padding: 6px 12px;
   background: #e7e7e7;
   font-weight: 600;
   font-size: 13px;
   color: #6b7280;
 }
-.risk-list-top .risk-item:last-child{border-radius:0 6px 6px 0;}
 
 .risk-list-top .risk-item.active {
   background: #333;
@@ -823,6 +824,8 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 #main-lang-picker-area .main-lang-picker-content {
   max-height: 68vh;
   overflow: visible;
+  flex-direction: column;
+  height: auto;
 }
 #main-lang-picker-area .main-lang-picker-search-row {
   display: flex;
@@ -891,6 +894,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
   border: 1px solid #e2e8f0;
   border-radius: 8px;
   overflow: hidden;
+  height:367px !important;
 }
 #TABLE_MAIN_LANG_PICKER .tabulator-row .tabulator-cell {
   padding-top: 8px !important;
@@ -918,9 +922,9 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
   color: #1f5ccb;
 }
 #TABLE_MAIN_LANG_PICKER .main-lang-skill-chip.is-selected {
-  border-color: #4b83ff;
-  background: #e8f0ff;
-  color: #1b57c6;
+  border-color: #111;
+  background: #fff;
+  color: #111;
 }
 #TABLE_MAIN_LANG_PICKER .main-lang-skill-chip.is-flash {
   box-shadow: 0 0 0 2px rgba(72, 128, 255, 0.2);
@@ -1092,7 +1096,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .modal-human-area .table-area tr th{padding:0 10px; background:#F1F4F9; border-bottom:1px solid #F0F1F3;}
 .modal-human-area .table-area tr td{padding:4px;border-bottom:2px solid #F0F1F3;}
 
-.tab-area {position:relative; display: flex; width: 100%; padding-bottom:20px; gap: 0px; box-sizing: border-box; border-radius:8px; overflow:hidden;}
+.tab-area {position:relative; display: flex; width: 100%; margin-bottom:20px; gap: 0px; box-sizing: border-box; border-radius:8px; overflow:hidden;}
 /*.tab-area:before {content:""; position:absolute; left:0; bottom:1px; height:1px; width:100%; background:#ddd; z-index:-1;}*/
 .tab-btn, .tab-sub-btn {display:block; border-right:1px solid #ccc; flex:1; text-align: center; padding: 12px 10px; font-weight: 500; color: #555;background:#212E4114;cursor: pointer;}
 .tab-btn:last-child, .tab-sub-btn:last-child{border-right:none;}
@@ -1132,7 +1136,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 
 #TABLE_MAIN_LANG_PICKER .tabulator-table > .tabulator-row > .tabulator-cell:nth-child(2),
 #TABLE_HR012_A .tabulator-table > .tabulator-row > .tabulator-cell:nth-child(2) {
-    background-color: #F1F4F9 !important;
+    background-color: #fff !important;
     font-size: 14px;
     font-weight: bold;
 }
@@ -1152,18 +1156,18 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
     margin-bottom: 35px;
 }
 
-.hr012-tab-btn.active {
+.hr014-side-tabs > button.active {
     color: #E50019;
     font-weight: 700;
     border-bottom:3px solid #E50019;
 }
 
-.hr012-tab-btn {
+.hr014-side-tabs > button {
     border: none;
     min-width:180px;
     background: transparent;
     color: #7b8794;
-    padding: 4px 2px;
+    padding: 10px 2px;
     border-radius: 0;
     text-align: center;
     cursor: pointer;
@@ -1171,11 +1175,8 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
     font-weight: 500;
     position: relative;
 }
-.hr012-toolbar {
-    display: flex;
-    justify-content: flex-end;
-    margin-bottom: 8px;
-}
+.hr012-toolbar { display: flex; justify-content: space-between; align-items:center; margin-bottom: 8px; }
+.hr012-toolbar p.tool-title{font-weight:bold;}
 .hr012-toolbar button.btn.btn-add-skill {border: 1px solid #E50019; color: #E50019;  background: #fff;  border-radius: 8px;}
 
 .tab2-content #TABLE_HR012_A.is-readonly,
@@ -1190,6 +1191,10 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 #TABLE_HR012_A .tabulator-cell[data-field="skl_id_lst"],
 #TABLE_HR012_A .tabulator-cell[tabulator-field="skl_id_lst"] {
     white-space: nowrap !important;
+}
+#TABLE_HR012_A .tabulator-cell[tabulator-field="skl_id_lst"],
+#TABLE_HR012_A .tabulator-row:nth-child(2n) .tabulator-cell[tabulator-field="skl_id_lst"] {
+    background-color: #fff !important;
 }
 #TABLE_HR012_A .tabulator-cell[data-field="skl_id_lst"] .tag-list,
 #TABLE_HR012_A .tabulator-cell[tabulator-field="skl_id_lst"] .tag-list {
@@ -1263,8 +1268,11 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
     max-width: calc(100% - 40px);
 }
 #hr012-skill-picker-area .hr012-skill-picker-content {
+    height:auto;
     max-height: 68vh;
     overflow: visible;
+    flex-direction:column;
+
 }
 #hr012-skill-picker-area .hr012-skill-picker-search-row {
     display: flex;
