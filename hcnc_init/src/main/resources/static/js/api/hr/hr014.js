@@ -92,7 +92,7 @@ function buildHr014TableA() {
         placeholder: "데이터 없음",
         headerHozAlign: "center",
         columns: [
-            { title: "항 목", field: "cd_nm", widthGrow: 2 },
+            { title: "항 목", field: "cd_nm", hozAlign: "center", widthGrow: 2 },
             {
                 title: "점 수",
                 headerHozAlign: "center",

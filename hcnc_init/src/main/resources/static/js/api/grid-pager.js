@@ -34,6 +34,106 @@
         next: "›",
         last: "»"
     };
+    var CENTER_TITLE_REGEX = /^(코드|코드그룹|구분|연락처|생년월일|시작일|종료일|기간|투입 가능 시점|사용여부|활성화 여부|당사 여부|여부)$/i;
+    var CENTER_FIELD_REGEX = /(^|_)(cd|yn|tel|phone|brdt|birth|st_dt|ed_dt|st_ed_dt|avail_dt)$/i;
+    var RIGHT_TITLE_REGEX = /(금액|단가|점수|투입률|비율|건수|수량|정렬순서|합계|총액|가격)/i;
+    var RIGHT_FIELD_REGEX = /(amt|amount|rate|score|pct|percent|cnt|count|qty|price|cost|sort_no|sortno|total|sum|_no$)/i;
+
+    function toText(value) {
+        return String(value || "").trim();
+    }
+
+    function isSelectionColumn(field, title, col) {
+        if (field === "checkbox" || field === "_checked" || title === "선택") {
+            return true;
+        }
+        if (!field && !title && (col.download === false || typeof col.cellClick === "function")) {
+            return true;
+        }
+        return false;
+    }
+
+    function isNumericTitle(title) {
+        return /^\d+$/.test(title);
+    }
+
+    function isRightAlignedByFormatter(col) {
+        if (!col || typeof col.formatter !== "function") {
+            return false;
+        }
+        var name = toText(col.formatter.name).toLowerCase();
+        return /(amount|percent|percentage|number|money|price)/.test(name);
+    }
+
+    function resolveColumnAlign(col) {
+        var field = toText(col.field).toLowerCase();
+        var title = toText(col.title);
+        var titleLower = title.toLowerCase();
+
+        if (isSelectionColumn(field, title, col)) {
+            return "center";
+        }
+        if (isNumericTitle(title)) {
+            return "center";
+        }
+        if (CENTER_TITLE_REGEX.test(titleLower) || CENTER_FIELD_REGEX.test(field)) {
+            return "center";
+        }
+        if (RIGHT_TITLE_REGEX.test(title) || RIGHT_FIELD_REGEX.test(field) || isRightAlignedByFormatter(col)) {
+            return "right";
+        }
+        return "left";
+    }
+
+    function normalizeColumnAlignments(columns) {
+        if (!Array.isArray(columns)) {
+            return;
+        }
+        columns.forEach(function (col) {
+            if (!col || typeof col !== "object") {
+                return;
+            }
+
+            if (Array.isArray(col.columns) && col.columns.length) {
+                normalizeColumnAlignments(col.columns);
+            }
+
+            // 그룹 헤더(자식 컬럼만 보유)는 제외
+            if (!col.field && Array.isArray(col.columns) && col.columns.length) {
+                return;
+            }
+            // 컬럼에 명시된 정렬값이 있으면 공통 규칙보다 우선한다.
+            var align = toText(col.hozAlign).toLowerCase();
+            if (!align) {
+                align = resolveColumnAlign(col);
+                col.hozAlign = align;
+            }
+            var alignClass = "hcnc-align-" + align;
+            var prevCssClass = toText(col.cssClass);
+            if (!prevCssClass) {
+                col.cssClass = alignClass;
+            } else if ((" " + prevCssClass + " ").indexOf(" " + alignClass + " ") === -1) {
+                col.cssClass = prevCssClass + " " + alignClass;
+            }
+        });
+    }
+
+    function clearHeaderAlignments(columns) {
+        if (!Array.isArray(columns)) {
+            return;
+        }
+        columns.forEach(function (col) {
+            if (!col || typeof col !== "object") {
+                return;
+            }
+            if (Object.prototype.hasOwnProperty.call(col, "headerHozAlign")) {
+                delete col.headerHozAlign;
+            }
+            if (Array.isArray(col.columns) && col.columns.length) {
+                clearHeaderAlignments(col.columns);
+            }
+        });
+    }
 
     function toNumber(value) {  // 숫자 변환 실패시 문자열이면 0으로 변환
         var num = Number(value);
@@ -192,6 +292,11 @@
 
     function withDefaultPaging(options) {   // 옵션에 기본 페이징 주입
         var nextOptions = Object.assign({}, options || {});
+        if (Object.prototype.hasOwnProperty.call(nextOptions, "headerHozAlign")) {
+            delete nextOptions.headerHozAlign;
+        }
+        clearHeaderAlignments(nextOptions.columns);
+        normalizeColumnAlignments(nextOptions.columns);
 
         if (nextOptions.pagination === undefined) {
             nextOptions.pagination = "local";
