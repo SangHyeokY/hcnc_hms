@@ -13,6 +13,8 @@ window.currentDevId = null;
 var mainLangTagInput = null;
 var pendingMainLangValue = "";
 var mainLangPickerTable = null;
+var mainLangPickerTableReady = false;
+var mainLangPickerDraftSet = null;
 var mainLangPickerEventBound = false;
 var mainLangSkillOptions = [];
 var mainLangGroupOptions = [];
@@ -1398,12 +1400,12 @@ function initMainLangTags() {
         mainLangSkillOptions = Array.isArray(res) ? res : [];
         mainLangTagInput.setOptions(mainLangSkillOptions);
         mainLangTagInput.setFromValue(pendingMainLangValue || $("#main_lang").val());
-        syncMainLangPickerUi();
+        syncMainLangPickerUi(true);
     });
 
     getComCode("skl_grp", "", function (res) {
         mainLangGroupOptions = Array.isArray(res) ? res : [];
-        syncMainLangPickerUi();
+        syncMainLangPickerUi(true);
     });
 }
 
@@ -1423,7 +1425,12 @@ function bindMainLangPickerEvents() {
         openMainLangPicker();
     });
 
-    $(document).on("click", "#btn_main_lang_picker_close, #btn_main_lang_picker_close_x", function (e) {
+    $(document).on("click", "#btn_main_lang_picker_apply", function (e) {
+        e.preventDefault();
+        applyMainLangPickerSelection();
+    });
+
+    $(document).on("click", "#btn_main_lang_picker_close_x", function (e) {
         e.preventDefault();
         closeMainLangPicker();
     });
@@ -1443,7 +1450,7 @@ function bindMainLangPickerEvents() {
         if (!skillCode) {
             return;
         }
-        selectMainLangSkill(skillCode, false);
+        toggleMainLangSkill(skillCode);
     });
 
     $(document).on("input", "#main-lang-picker-search", function () {
@@ -1484,7 +1491,8 @@ function openMainLangPicker() {
         return;
     }
     buildMainLangPickerTable();
-    syncMainLangPickerUi();
+    mainLangPickerDraftSet = getMainLangSelectedCodeSet();
+    syncMainLangPickerUi(true);
 
     var $picker = $("#main-lang-picker-area");
     $picker.show();
@@ -1502,11 +1510,13 @@ function openMainLangPicker() {
 function closeMainLangPicker(immediate) {
     var $picker = $("#main-lang-picker-area");
     if (!$picker.length) {
+        mainLangPickerDraftSet = null;
         return;
     }
     $picker.removeClass("show");
     $("#main-lang-picker-suggest").hide().empty();
     if (immediate) {
+        mainLangPickerDraftSet = null;
         $picker.hide();
         return;
     }
@@ -1515,6 +1525,18 @@ function closeMainLangPicker(immediate) {
             $picker.hide();
         }
     }, 180);
+    mainLangPickerDraftSet = null;
+}
+
+function applyMainLangPickerSelection() {
+    if (!mainLangTagInput || !mainLangPickerDraftSet) {
+        closeMainLangPicker();
+        return;
+    }
+
+    var csv = Array.from(mainLangPickerDraftSet).join(",");
+    mainLangTagInput.setFromValue(csv);
+    closeMainLangPicker();
 }
 
 function buildMainLangPickerTable() {
@@ -1537,17 +1559,60 @@ function buildMainLangPickerTable() {
         ],
         data: []
     });
+    mainLangPickerTableReady = false;
 }
 
-function syncMainLangPickerUi() {
+function syncMainLangPickerUi(forceRebuild) {
     var totalCount = Array.isArray(mainLangSkillOptions) ? mainLangSkillOptions.length : 0;
-    var selectedCount = getMainLangSelectedCodeSet().size;
+    var selectedCount = getMainLangPickerSelectedSet().size;
     $("#main-lang-picker-meta").text("전체 기술 " + totalCount + "개 / 선택 " + selectedCount + "개");
 
     if (!mainLangPickerTable) {
         return;
     }
-    mainLangPickerTable.setData(buildMainLangPickerRows());
+
+    if (!forceRebuild && mainLangPickerTableReady) {
+        syncMainLangPickerChipState();
+        return;
+    }
+
+    var tableElement = mainLangPickerTable.getElement ? mainLangPickerTable.getElement() : null;
+    var holder = tableElement ? tableElement.querySelector(".tabulator-tableHolder") : null;
+    var prevTop = holder ? holder.scrollTop : 0;
+    var prevLeft = holder ? holder.scrollLeft : 0;
+
+    var afterRender = function () {
+        mainLangPickerTableReady = true;
+        syncMainLangPickerChipState();
+        var currentElement = mainLangPickerTable.getElement ? mainLangPickerTable.getElement() : null;
+        var currentHolder = currentElement ? currentElement.querySelector(".tabulator-tableHolder") : null;
+        if (currentHolder) {
+            currentHolder.scrollTop = prevTop;
+            currentHolder.scrollLeft = prevLeft;
+        }
+    };
+
+    var setResult = mainLangPickerTable.setData(buildMainLangPickerRows());
+    if (setResult && typeof setResult.then === "function") {
+        setResult.then(afterRender);
+    } else {
+        setTimeout(afterRender, 0);
+    }
+}
+
+function syncMainLangPickerChipState() {
+    var selectedCodes = getMainLangPickerSelectedSet();
+    $("#TABLE_MAIN_LANG_PICKER .main-lang-skill-chip").each(function () {
+        var code = String($(this).data("code") || "");
+        $(this).toggleClass("is-selected", selectedCodes.has(code));
+    });
+}
+
+function getMainLangPickerSelectedSet() {
+    if (mainLangPickerDraftSet instanceof Set) {
+        return mainLangPickerDraftSet;
+    }
+    return getMainLangSelectedCodeSet();
 }
 
 function getMainLangSelectedCodeSet() {
@@ -1647,7 +1712,7 @@ function mainLangSkillFormatter(cell) {
         return "";
     }
 
-    var selectedCodes = getMainLangSelectedCodeSet();
+    var selectedCodes = getMainLangPickerSelectedSet();
     var html = skills.map(function (skill) {
         var code = String(skill.code || "");
         var label = String(skill.label || code);
@@ -1681,7 +1746,10 @@ function selectMainLangSkill(skillCode, fromSearch) {
         return;
     }
 
-    mainLangTagInput.addByCode(code);
+    if (!(mainLangPickerDraftSet instanceof Set)) {
+        mainLangPickerDraftSet = getMainLangSelectedCodeSet();
+    }
+    mainLangPickerDraftSet.add(code);
     syncMainLangPickerUi();
     focusMainLangSkill(code);
 
@@ -1689,6 +1757,28 @@ function selectMainLangSkill(skillCode, fromSearch) {
         $("#main-lang-picker-search").val("");
         $("#main-lang-picker-suggest").hide().empty();
     }
+}
+
+function toggleMainLangSkill(skillCode) {
+    if (!mainLangTagInput) {
+        return;
+    }
+    var code = String(skillCode || "").trim();
+    if (!code) {
+        return;
+    }
+
+    if (!(mainLangPickerDraftSet instanceof Set)) {
+        mainLangPickerDraftSet = getMainLangSelectedCodeSet();
+    }
+
+    if (mainLangPickerDraftSet.has(code)) {
+        mainLangPickerDraftSet.delete(code);
+    } else {
+        mainLangPickerDraftSet.add(code);
+    }
+    syncMainLangPickerUi();
+    focusMainLangSkill(code);
 }
 
 function focusMainLangSkill(skillCode) {
@@ -1702,10 +1792,6 @@ function focusMainLangSkill(skillCode) {
         }).first();
         if (!$chip.length) {
             return;
-        }
-        var element = $chip.get(0);
-        if (element && typeof element.scrollIntoView === "function") {
-            element.scrollIntoView({ block: "center", inline: "nearest" });
         }
         $chip.addClass("is-flash");
         setTimeout(function () {

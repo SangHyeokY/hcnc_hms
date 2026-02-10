@@ -3,6 +3,8 @@ let hr012TableAReady = false;   // A 테이블 데이터 로드 완료 판단
 let hr012RowTags = new Map();   // 분야별 태그 상태 저장 맵
 let hr012HasPendingChange = false;  // A/B 테이블 데이터 차이 판단
 let hr012SkillPickerTable = null;
+let hr012SkillPickerTableReady = false;
+let hr012SkillPickerDraftMap = null;
 let hr012SkillPickerEventBound = false;
 let hr012SkillOptions = [];
 let hr012SkillGroupOptions = [];
@@ -376,6 +378,50 @@ function normalizeTagList(value) {
     return [];
 }
 
+function buildHr012CurrentTagMap() {
+    const map = new Map();
+
+    hr012RowTags.forEach(function (tags, key) {
+        const normalizedKey = String(key || "").toUpperCase();
+        if (!normalizedKey) {
+            return;
+        }
+        map.set(normalizedKey, normalizeTagList(tags));
+    });
+
+    if (window.hr012TableA && typeof window.hr012TableA.getRows === "function") {
+        window.hr012TableA.getRows().forEach(function (row) {
+            const data = row.getData() || {};
+            const key = String(data.cd || "").toUpperCase();
+            if (!key || map.has(key)) {
+                return;
+            }
+            map.set(key, normalizeTagList(data.skl_id_lst));
+        });
+    }
+
+    return map;
+}
+
+function isHr012TagListEqual(a, b) {
+    const left = normalizeTagList(a).map(function (tag) {
+        return String(tag.code || tag.cd || tag.value || tag.id || tag || "");
+    }).filter(Boolean).sort();
+    const right = normalizeTagList(b).map(function (tag) {
+        return String(tag.code || tag.cd || tag.value || tag.id || tag || "");
+    }).filter(Boolean).sort();
+
+    if (left.length !== right.length) {
+        return false;
+    }
+    for (let i = 0; i < left.length; i += 1) {
+        if (left[i] !== right[i]) {
+            return false;
+        }
+    }
+    return true;
+}
+
 //태그 변경 이벤트 리스너 등록 함수
 function attachHr012TagSync() {
     const tableEl = document.getElementById("TABLE_HR012_A");
@@ -502,7 +548,12 @@ function bindHr012SkillPickerEvents() {
         openHr012SkillPicker();
     });
 
-    $(document).on("click", "#btn_hr012_skill_picker_close, #btn_hr012_skill_picker_close_x", function (e) {
+    $(document).on("click", "#btn_hr012_skill_picker_apply", function (e) {
+        e.preventDefault();
+        applyHr012SkillPickerSelection();
+    });
+
+    $(document).on("click", "#btn_hr012_skill_picker_close_x", function (e) {
         e.preventDefault();
         closeHr012SkillPicker();
     });
@@ -565,7 +616,7 @@ function ensureHr012SkillPickerOptionsLoaded() {
         getComCode("skl_id", "", function (res) {
             hr012SkillOptions = Array.isArray(res) ? res : [];
             hr012SkillOptionsLoading = false;
-            syncHr012SkillPickerUi();
+            syncHr012SkillPickerUi(true);
         });
     }
     if (!hr012SkillGroupOptions.length && !hr012SkillGroupLoading) {
@@ -573,7 +624,7 @@ function ensureHr012SkillPickerOptionsLoaded() {
         getComCode("skl_grp", "", function (res) {
             hr012SkillGroupOptions = Array.isArray(res) ? res : [];
             hr012SkillGroupLoading = false;
-            syncHr012SkillPickerUi();
+            syncHr012SkillPickerUi(true);
         });
     }
 }
@@ -584,7 +635,8 @@ function openHr012SkillPicker() {
     }
     ensureHr012SkillPickerOptionsLoaded();
     buildHr012SkillPickerTable();
-    syncHr012SkillPickerUi();
+    hr012SkillPickerDraftMap = buildHr012CurrentTagMap();
+    syncHr012SkillPickerUi(true);
 
     const $picker = $("#hr012-skill-picker-area");
     $picker.show();
@@ -602,11 +654,13 @@ function openHr012SkillPicker() {
 function closeHr012SkillPicker(immediate) {
     const $picker = $("#hr012-skill-picker-area");
     if (!$picker.length) {
+        hr012SkillPickerDraftMap = null;
         return;
     }
     $picker.removeClass("show");
     $("#hr012-skill-picker-suggest").hide().empty();
     if (immediate) {
+        hr012SkillPickerDraftMap = null;
         $picker.hide();
         return;
     }
@@ -615,6 +669,56 @@ function closeHr012SkillPicker(immediate) {
             $picker.hide();
         }
     }, 180);
+    hr012SkillPickerDraftMap = null;
+}
+
+function applyHr012SkillPickerSelection() {
+    if (!(hr012SkillPickerDraftMap instanceof Map)) {
+        closeHr012SkillPicker();
+        return;
+    }
+
+    const rowMap = new Map();
+    if (window.hr012TableA && typeof window.hr012TableA.getRows === "function") {
+        window.hr012TableA.getRows().forEach(function (row) {
+            const data = row.getData() || {};
+            const key = String(data.cd || "").toUpperCase();
+            if (key) {
+                rowMap.set(key, row);
+            }
+        });
+    }
+
+    let hasChanged = false;
+    const allKeys = new Set();
+    hr012RowTags.forEach(function (_, key) { allKeys.add(String(key || "").toUpperCase()); });
+    hr012SkillPickerDraftMap.forEach(function (_, key) { allKeys.add(String(key || "").toUpperCase()); });
+
+    allKeys.forEach(function (key) {
+        if (!key) {
+            return;
+        }
+        const prevTags = normalizeTagList(hr012RowTags.get(key));
+        const nextTags = normalizeTagList(hr012SkillPickerDraftMap.get(key));
+
+        if (!isHr012TagListEqual(prevTags, nextTags)) {
+            hasChanged = true;
+        }
+
+        hr012RowTags.set(key, nextTags);
+        const row = rowMap.get(key);
+        if (row) {
+            row.update({ skl_id_lst: nextTags });
+        }
+    });
+
+    if (hasChanged) {
+        changedTabs.tab2 = true;
+        hr012HasPendingChange = true;
+        syncHr012TableBFromA();
+    }
+
+    closeHr012SkillPicker();
 }
 
 function buildHr012SkillPickerTable() {
@@ -637,9 +741,10 @@ function buildHr012SkillPickerTable() {
         ],
         data: []
     });
+    hr012SkillPickerTableReady = false;
 }
 
-function syncHr012SkillPickerUi() {
+function syncHr012SkillPickerUi(forceRebuild) {
     const totalCount = Array.isArray(hr012SkillOptions) ? hr012SkillOptions.length : 0;
     const selectedCount = getHr012SelectedCodeSet().size;
     $("#hr012-skill-picker-meta").text("전체 기술 " + totalCount + "개 / 선택 " + selectedCount + "개");
@@ -647,7 +752,42 @@ function syncHr012SkillPickerUi() {
     if (!hr012SkillPickerTable) {
         return;
     }
-    hr012SkillPickerTable.setData(buildHr012SkillPickerRows());
+
+    if (!forceRebuild && hr012SkillPickerTableReady) {
+        syncHr012SkillPickerChipState();
+        return;
+    }
+
+    const tableElement = hr012SkillPickerTable.getElement ? hr012SkillPickerTable.getElement() : null;
+    const holder = tableElement ? tableElement.querySelector(".tabulator-tableHolder") : null;
+    const prevTop = holder ? holder.scrollTop : 0;
+    const prevLeft = holder ? holder.scrollLeft : 0;
+
+    const afterRender = function () {
+        hr012SkillPickerTableReady = true;
+        syncHr012SkillPickerChipState();
+        const currentElement = hr012SkillPickerTable.getElement ? hr012SkillPickerTable.getElement() : null;
+        const currentHolder = currentElement ? currentElement.querySelector(".tabulator-tableHolder") : null;
+        if (currentHolder) {
+            currentHolder.scrollTop = prevTop;
+            currentHolder.scrollLeft = prevLeft;
+        }
+    };
+
+    const setResult = hr012SkillPickerTable.setData(buildHr012SkillPickerRows());
+    if (setResult && typeof setResult.then === "function") {
+        setResult.then(afterRender);
+    } else {
+        setTimeout(afterRender, 0);
+    }
+}
+
+function syncHr012SkillPickerChipState() {
+    const selectedCodes = getHr012SelectedCodeSet();
+    $("#TABLE_HR012_SKILL_PICKER .hr012-skill-chip").each(function () {
+        const code = String($(this).data("code") || "");
+        $(this).toggleClass("is-selected", selectedCodes.has(code));
+    });
 }
 
 function getHr012GroupCode(skillCode) {
@@ -758,7 +898,8 @@ function hr012SkillChipFormatter(cell) {
 
 function getHr012SelectedCodeSet() {
     const set = new Set();
-    hr012RowTags.forEach(function (tags) {
+    const source = (hr012SkillPickerDraftMap instanceof Map) ? hr012SkillPickerDraftMap : hr012RowTags;
+    source.forEach(function (tags) {
         normalizeTagList(tags).forEach(function (tag) {
             const code = tag.code || tag.cd || tag.value || tag.id || tag;
             if (code) {
@@ -773,6 +914,10 @@ function getHr012TagsByGroup(groupCode) {
     const key = String(groupCode || "").toUpperCase();
     if (!key) {
         return [];
+    }
+
+    if (hr012SkillPickerDraftMap instanceof Map && hr012SkillPickerDraftMap.has(key)) {
+        return normalizeTagList(hr012SkillPickerDraftMap.get(key));
     }
 
     if (hr012RowTags.has(key)) {
@@ -814,6 +959,18 @@ function setHr012TagsByGroup(groupCode, tags) {
     syncHr012SkillPickerUi();
 }
 
+function setHr012SkillPickerTagsByGroup(groupCode, tags) {
+    const key = String(groupCode || "").toUpperCase();
+    if (!key) {
+        return;
+    }
+    if (!(hr012SkillPickerDraftMap instanceof Map)) {
+        hr012SkillPickerDraftMap = buildHr012CurrentTagMap();
+    }
+    hr012SkillPickerDraftMap.set(key, normalizeTagList(tags));
+    syncHr012SkillPickerUi();
+}
+
 function toggleHr012Skill(skillCode) {
     const code = String(skillCode || "").trim();
     if (!code) {
@@ -836,7 +993,7 @@ function toggleHr012Skill(skillCode) {
         return String(a.label || a.code || "").localeCompare(String(b.label || b.code || ""), "ko");
     });
 
-    setHr012TagsByGroup(groupCode, tags);
+    setHr012SkillPickerTagsByGroup(groupCode, tags);
     focusHr012SkillChip(code);
 }
 
@@ -856,7 +1013,7 @@ function addHr012Skill(skillCode, fromSearch) {
         return String(a.label || a.code || "").localeCompare(String(b.label || b.code || ""), "ko");
     });
 
-    setHr012TagsByGroup(groupCode, tags);
+    setHr012SkillPickerTagsByGroup(groupCode, tags);
     focusHr012SkillChip(code);
 
     if (fromSearch) {
@@ -873,10 +1030,6 @@ function focusHr012SkillChip(skillCode) {
         }).first();
         if (!$chip.length) {
             return;
-        }
-        const element = $chip.get(0);
-        if (element && typeof element.scrollIntoView === "function") {
-            element.scrollIntoView({ block: "center", inline: "nearest" });
         }
         $chip.addClass("is-flash");
         setTimeout(function () {
