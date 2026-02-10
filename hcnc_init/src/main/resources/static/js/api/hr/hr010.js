@@ -805,6 +805,9 @@ async function deleteUserRows() {
         title: '경고',
         text: `'${firstRowData.dev_nm}' 사용자 정보를 삭제하시겠습니까?`,
         icon: 'warning',
+        showCancelButton: true,
+        cancelButtonText: '취소',
+        cancelButtonColor: '#212E41'
     });
     if (!firstResult.isConfirmed) return;
 
@@ -812,6 +815,9 @@ async function deleteUserRows() {
         title: '경고',
         text: `다시 확인 버튼을 누르시면 '${firstRowData.dev_nm}' 사용자의 데이터가 삭제되며, 되돌릴 수 없습니다.`,
         icon: 'warning',
+        showCancelButton: true,
+        cancelButtonText: '취소',
+        cancelButtonColor: '#212E41'
     });
     if (!secondResult.isConfirmed) return;
 

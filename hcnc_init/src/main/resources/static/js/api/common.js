@@ -1239,20 +1239,31 @@ function createGroupedSkillPicker(config) {
 /* =========================
  * 공통 Swal 토스트(toast) 함수
  * ========================= */
-function showAlert({ icon = 'info', title = '', text = '', confirmText = '확인' } = {}) {
+function showAlert({
+    icon = 'info',
+    title = '',
+    text = '',
+    confirmText = '확인',
+    showCancelButton = false,
+    cancelText = '취소',
+    cancelButtonColor = '#212E41'
+} = {}) {
     return Swal.fire({
-        icon: icon,
-        title: title,
-        text: text,
+        icon,
+        title,
+        text,
+
         showClass: { popup: '', backdrop: '' },
         hideClass: { popup: '', backdrop: '' },
         backdrop: true,
         allowOutsideClick: false,
+
+        showCancelButton,
         confirmButtonText: confirmText,
         confirmButtonColor: icon === 'error' ? '#212E41' : '#E50019',
-        showCancelButton: icon === 'warning', // 경고일 때만 취소 버튼
-        cancelButtonText: '취소',
-        cancelButtonColor: '#212E41',
+        cancelButtonText: cancelText,
+        cancelButtonColor,
+
         scrollbarPadding: false
     });
 }
