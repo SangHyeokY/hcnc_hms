@@ -1379,6 +1379,8 @@ function initMainLangTags() {
             getValue: function (item) { return item.cd; },
             getLabel: function (item) { return item.cd_nm; },
             matchMode: "prefix",
+            // 주개발언어는 x 삭제가 아닌 기술선택 팝업에서만 변경한다.
+            removable: false,
             onTagChange: function () {
                 syncMainLangPickerUi();
             }
