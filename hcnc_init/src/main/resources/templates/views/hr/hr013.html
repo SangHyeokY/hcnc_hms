@@ -107,12 +107,13 @@
                                             <div class="tag-input-box">
                                                 <div class="tag-help"></div>
                                                 <ul class="tag-list" id="hr013SkillTagList"></ul>
-                                                <input type="text" class="text" id="write_hr013_stack_input" list="write_hr013_stack_datalist" placeholder="기술 입력/선택 후 Enter">
+                                                <input type="text" class="text" id="write_hr013_stack_input" list="write_hr013_stack_datalist" placeholder="기술 입력/선택 후 Enter" style="display:none;">
                                             </div>
                                             <div class="tag-select-row">
-                                            <datalist id="write_hr013_stack_datalist"></datalist>
-                                            <select id="write_hr013_skl_cd" style="display:none"></select>
-                                            <input type="hidden" id="write_hr013_stack_txt">
+                                                <button type="button" class="btn btn-add-skill btn-hr013-skill-picker" id="btn_hr013_skill_picker">기술 선택</button>
+                                                <datalist id="write_hr013_stack_datalist"></datalist>
+                                                <select id="write_hr013_skl_cd" style="display:none"></select>
+                                                <input type="hidden" id="write_hr013_stack_txt">
                                             </div>
                                         </div>
                                     </div>
@@ -136,6 +137,38 @@
                 <ul>
                     <li><button class="btn btn-close" onclick="closeHr013Modal()">닫기</button></li>
                     <li><button class="btn btn-save btn-hr013-save">저장</button></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-wrap" id="hr013-skill-picker-area" style="display:none">
+        <div class="modal-container hr013-skill-picker-container">
+            <div class="header">
+                <h4>프로젝트 기술 선택</h4>
+                <div class="btn-area">
+                    <button class="close-btn" type="button" id="btn_hr013_skill_picker_close_x">
+                        <img src="../icons/icon-close.png" alt="" />
+                    </button>
+                </div>
+            </div>
+            <div class="modal-content hr013-skill-picker-content">
+                <div class="hr013-skill-picker-search-row">
+                    <label for="hr013-skill-picker-search">기술 검색</label>
+                    <div class="hr013-skill-picker-search-wrap">
+                        <input type="text" id="hr013-skill-picker-search" class="wp100"
+                               placeholder="기술명 입력 후 선택" autocomplete="off">
+                        <ul class="hr013-skill-picker-suggest" id="hr013-skill-picker-suggest"></ul>
+                    </div>
+                    <span class="hr013-skill-picker-meta" id="hr013-skill-picker-meta"></span>
+                </div>
+                <div id="TABLE_HR013_SKILL_PICKER"></div>
+            </div>
+            <div class="modal-btn">
+                <ul>
+                    <li>
+                        <button type="button" class="btn btn-close" id="btn_hr013_skill_picker_apply">적용</button>
+                    </li>
                 </ul>
             </div>
         </div>

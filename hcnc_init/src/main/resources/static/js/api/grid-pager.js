@@ -39,10 +39,12 @@
     var RIGHT_TITLE_REGEX = /(금액|단가|점수|투입률|비율|건수|수량|정렬순서|합계|총액|가격)/i;
     var RIGHT_FIELD_REGEX = /(amt|amount|rate|score|pct|percent|cnt|count|qty|price|cost|sort_no|sortno|total|sum|_no$)/i;
 
+    // null/undefined 안전 문자열 변환
     function toText(value) {
         return String(value || "").trim();
     }
 
+    // 체크박스/선택 전용 컬럼인지 판별
     function isSelectionColumn(field, title, col) {
         if (field === "checkbox" || field === "_checked" || title === "선택") {
             return true;
@@ -53,10 +55,12 @@
         return false;
     }
 
+    // 제목이 숫자 인덱스형인지 판별(예: 1,2,3)
     function isNumericTitle(title) {
         return /^\d+$/.test(title);
     }
 
+    // formatter 이름으로 숫자형 우측 정렬 후보 판별
     function isRightAlignedByFormatter(col) {
         if (!col || typeof col.formatter !== "function") {
             return false;
@@ -65,6 +69,7 @@
         return /(amount|percent|percentage|number|money|price)/.test(name);
     }
 
+    // 컬럼 정렬 규칙(선택/날짜/연락처 center, 금액/점수 right, 나머지 left)
     function resolveColumnAlign(col) {
         var field = toText(col.field).toLowerCase();
         var title = toText(col.title);
@@ -118,6 +123,7 @@
         });
     }
 
+    // 헤더 정렬은 화면별 커스텀 충돌 방지를 위해 제거
     function clearHeaderAlignments(columns) {
         if (!Array.isArray(columns)) {
             return;
@@ -194,28 +200,109 @@
     }
 
     function ensureCounterElement(table) {  // 건수 텍스트 span 생성/보장
+        if (table && table.__hcncGridCounterEl && document.body.contains(table.__hcncGridCounterEl)) {
+            return table.__hcncGridCounterEl;
+        }
         var tableEl = getTableElement(table);
         if (!tableEl) {
             return null;
         }
-        var footerEl = tableEl.querySelector(".tabulator-footer");
-        if (!footerEl) {
+        var counterEl = tableEl.querySelector("." + COUNTER_CLASS);
+        if (!counterEl && tableEl.id) {
+            counterEl = document.querySelector("." + COUNTER_CLASS + "[data-grid-for='" + tableEl.id + "']");
+        }
+
+        if (!counterEl) {
+            counterEl = document.createElement("span");
+            counterEl.className = COUNTER_CLASS;
+            if (tableEl.id) {
+                counterEl.setAttribute("data-grid-for", tableEl.id);
+            }
+        }
+
+        table.__hcncGridCounterEl = counterEl;
+        return counterEl;
+    }
+
+    // 현재 그리드와 짝이 되는 상단 content-title 블록 탐색
+    function findRelatedTitle(tableEl) {
+        if (!tableEl) {
             return null;
         }
-
-        var counterEl = footerEl.querySelector("." + COUNTER_CLASS);
-        if (counterEl) {
-            if (counterEl.parentElement !== footerEl) {
-                footerEl.appendChild(counterEl);
+        var walker = tableEl;
+        while (walker && walker !== document.body) {
+            var prev = walker.previousElementSibling;
+            while (prev) {
+                if (prev.classList && prev.classList.contains("content-title")) {
+                    return prev;
+                }
+                prev = prev.previousElementSibling;
             }
-            return counterEl;
+
+            var parent = walker.parentElement;
+            if (parent) {
+                for (var i = 0; i < parent.children.length; i += 1) {
+                    var child = parent.children[i];
+                    if (child.classList && child.classList.contains("content-title")) {
+                        return child;
+                    }
+                }
+            }
+            walker = parent;
         }
+        return null;
+    }
 
-        counterEl = document.createElement("span");
-        counterEl.className = COUNTER_CLASS;
-        footerEl.appendChild(counterEl);
+    // 제목 비교용 공백 제거 텍스트
+    function getNormalizedTitleText(titleEl) {
+        if (!titleEl) {
+            return "";
+        }
+        var titleNode = titleEl.querySelector("h4") || titleEl;
+        return toText(titleNode.textContent).replace(/\s+/g, "");
+    }
 
-        return counterEl;
+    // 특정 화면(코드그룹)은 카운터를 타이틀이 아닌 푸터에 유지
+    function shouldRenderCounterInTitle(tableEl, titleEl) {
+        if (!tableEl || !titleEl) {
+            return false;
+        }
+        if (tableEl.id === "TABLE_COMMON_MAIN") {
+            return false;
+        }
+        var titleText = getNormalizedTitleText(titleEl);
+        if (titleText.indexOf("코드그룹") > -1) {
+            return false;
+        }
+        return true;
+    }
+
+    // 카운터를 타이틀 영역으로 이동
+    function mountCounterToTitle(titleEl, counterEl) {
+        if (!titleEl || !counterEl) {
+            return;
+        }
+        var titleNode = titleEl.querySelector("h4") || titleEl;
+        if (counterEl.parentElement !== titleNode) {
+            titleNode.appendChild(counterEl);
+        }
+        counterEl.classList.add("hcnc-grid-count-title");
+    }
+
+    // 카운터를 푸터 영역으로 이동
+    function mountCounterToFooter(tableEl, counterEl) {
+        if (!tableEl || !counterEl) {
+            return false;
+        }
+        var footerEl = tableEl.querySelector(".tabulator-footer");
+        if (!footerEl) {
+            return false;
+        }
+        if (counterEl.parentElement !== footerEl) {
+            footerEl.appendChild(counterEl);
+        }
+        counterEl.classList.remove("hcnc-grid-count-title");
+        return true;
     }
 
     function applyResponsiveFooterLayout(table, counterEl) {    // 좁은 화면에서 compact모드 판단
@@ -257,13 +344,42 @@
     }
 
     function updateGridCounter(table) { // 건수/아이콘/반응형 한번에 갱신
+        var tableEl = getTableElement(table);
+        if (!tableEl) {
+            return;
+        }
         var counterEl = ensureCounterElement(table);
         if (!counterEl) {
             return;
         }
         enforcePaginatorSymbols(table);
         counterEl.textContent = "총 데이터 수 " + getGridCount(table) + "건";
-        applyResponsiveFooterLayout(table, counterEl);
+
+        var titleEl = findRelatedTitle(tableEl);
+        var inTitle = shouldRenderCounterInTitle(tableEl, titleEl);
+        if (inTitle) {
+            mountCounterToTitle(titleEl, counterEl);
+            var footerForTitle = tableEl.querySelector(".tabulator-footer");
+            if (footerForTitle) {
+                footerForTitle.classList.remove(FOOTER_COMPACT_CLASS);
+            }
+            return;
+        }
+
+        if (mountCounterToFooter(tableEl, counterEl)) {
+            applyResponsiveFooterLayout(table, counterEl);
+        }
+    }
+
+    function clearGridSelectionOnPageLoaded(table) { // 페이지 이동시 이전 페이지 선택 해제
+        if (!table || typeof table.getSelectedRows !== "function" || typeof table.deselectRow !== "function") {
+            return;
+        }
+        var selectedRows = table.getSelectedRows();
+        if (!Array.isArray(selectedRows) || selectedRows.length === 0) {
+            return;
+        }
+        table.deselectRow();
     }
 
     function refreshAllGridCounters() { // 전체 테이블 재계산
@@ -332,7 +448,10 @@
         wrapOptionCallback(nextOptions, "tableBuilt", updateGridCounter);
         wrapOptionCallback(nextOptions, "dataLoaded", updateGridCounter);
         wrapOptionCallback(nextOptions, "dataFiltered", updateGridCounter);
-        wrapOptionCallback(nextOptions, "pageLoaded", updateGridCounter);
+        wrapOptionCallback(nextOptions, "pageLoaded", function (table) {
+            updateGridCounter(table);
+            clearGridSelectionOnPageLoaded(table);
+        });
         wrapOptionCallback(nextOptions, "renderComplete", updateGridCounter);
 
         return nextOptions;

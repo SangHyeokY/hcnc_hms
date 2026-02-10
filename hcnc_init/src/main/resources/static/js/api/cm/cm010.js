@@ -140,6 +140,14 @@ function buildUserTable() {
     });
 }
 
+function getSearchUseYnValue() {
+    var $checked = $("input[name='searchUseYnRadio']:checked");
+    if ($checked.length > 0) {
+        return $checked.val();
+    }
+    return $("#searchUseYn").val();
+}
+
 // 사용자 목록 조회
 function loadUserTableData() {
     if (!userTable || typeof userTable.setData !== "function") {
@@ -148,12 +156,14 @@ function loadUserTableData() {
 
     selectCommonCodesForUser();
 
+    showLoading();
+
     $.ajax({
         url: "/cm010/list",
         type: "GET",
         data: {
             searchType: $("#searchType").val(),
-            searchUseYn: $("#searchUseYn").val(),
+            searchUseYn: getSearchUseYnValue(),
             searchKeyword: $("#searchKeyword").val()
 
         },
@@ -161,7 +171,14 @@ function loadUserTableData() {
             userTable.setData(response.list || []);
         },
         error: function () {
-            alert("사용자 데이터를 불러오는 중 오류가 발생했습니다.");
+            showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+                icon: 'error',
+                title: '오류',
+                text: '사용자 데이터를 불러오는 중 오류가 발생했습니다.'
+            });
+        },
+        complete: function () {
+            hideLoading();
         }
     });
 
@@ -179,28 +196,46 @@ function upsertUserBtn() {
     var roleCd = $.trim($("#write_role_cd").val());
 
     if (!userId) {
-        alert("아이디를 입력해주세요.");
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'warning',
+            title: '경고',
+            text: `'아이디'를 입력해주세요.`
+        });
         $("#write_user_id").focus();
         return;
     }
 
     if (!userNm) {
-        alert("이름을 입력해주세요.");
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'warning',
+            title: '경고',
+            text: `'이름'을 입력해주세요.`
+        });
         $("#write_user_nm").focus();
         return;
     }
 
     if (!roleCd) {
-        alert("역할을 선택해주세요.");
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'warning',
+            title: '경고',
+            text: `'역할'을 선택해주세요.`
+        });
         $("#write_role_cd").focus();
         return;
     }
 
     if (currentMode === "insert" && !pwdHash) {
-        alert("비밀번호를 입력해주세요.");
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'warning',
+            title: '경고',
+            text: `'비밀번호'를 입력해주세요.`
+        });
         $("#write_pwd_hash").focus();
         return;
     }
+
+    showLoading();
 
     $.ajax({
         url: "/cm010/save",
@@ -222,13 +257,28 @@ function upsertUserBtn() {
             if (response.success) {
                 closeUserWriteModal();
                 loadUserTableData();
-                alert("저장되었습니다.");
+                showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+                    icon: 'success',
+                    title: '완료',
+                    text: '저장되었습니다.'
+                });
             } else {
-                alert("저장에 실패했습니다.");
+                showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+                    icon: 'error',
+                    title: '오류',
+                    text: '저장에 실패했습니다.'
+                });
             }
         },
         error: function () {
-            alert("저장 중 오류가 발생했습니다.");
+            showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+                icon: 'error',
+                title: '오류',
+                text: '저장 중 오류가 발생했습니다.'
+            });
+        },
+        complete: function () {
+            hideLoading();
         }
     });
 }
@@ -265,7 +315,11 @@ function selectCommonCodesForUser(done) {
             fillSelect("#write_role_cd", []);
             fillSelect("#write_job_cd", []);
             fillSelect("#write_dept_cd", []);
-            alert("공통코드 조회 중 오류가 발생했습니다.");
+            showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+                icon: 'error',
+                title: '오류',
+                text: `'공통코드' 조회 중 오류가 발생했습니다.`
+            });
         }
     });
 }
@@ -287,13 +341,19 @@ function fillSelect(selector, list) {
 function deleteUserRows() {
     var selectedRows = userTable.getSelectedRows();
     if (selectedRows.length === 0) {
-        alert("삭제할 사용자를 선택해주세요.");
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'info',
+            title: '알림',
+            text: '삭제할 사용자를 선택해주세요.'
+        });
         return;
     }
 
     if (!confirm("선택한 사용자를 삭제하시겠습니까?")) {
         return;
     }
+
+    showLoading();
 
     var pending = selectedRows.length;
     selectedRows.forEach(function (row) {
@@ -304,12 +364,21 @@ function deleteUserRows() {
             complete: function () {
                 pending -= 1;
                 if (pending === 0) {
+                    hideLoading();
                     loadUserTableData();
-                    alert("삭제되었습니다.");
+                    showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+                        icon: 'success',
+                        title: '완료',
+                        text: '삭제되었습니다.'
+                    });
                 }
             },
             error: function () {
-                alert("삭제 중 오류가 발생했습니다.");
+                showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+                    icon: 'error',
+                    title: '오류',
+                    text: '삭제 중 오류가 발생했습니다.'
+                });
             }
         });
     });
@@ -344,11 +413,19 @@ function openUserWriteModal(type) {
     } else {
         var selectedRows = userTable.getSelectedRows();
         if (selectedRows.length === 0) {
-            alert("수정할 사용자를 선택해주세요.");
+            showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+                icon: 'info',
+                title: '알림',
+                text: '수정할 사용자를 선택해주세요.'
+            });
             return;
         }
         if (selectedRows.length > 1) {
-            alert("수정은 한 명만 선택해주세요.");
+            showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+                icon: 'info',
+                title: '알림',
+                text: '수정은 한 명만 선택해주세요.'
+            });
             return;
         }
         showModal();

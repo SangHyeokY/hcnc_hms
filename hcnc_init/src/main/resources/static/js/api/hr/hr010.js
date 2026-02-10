@@ -9,11 +9,7 @@ var currentMode = "insert";
 // 주 개발언어 태그 입력 공통 모듈
 var mainLangTagInput = null;
 var pendingMainLangValue = "";
-var mainLangPickerTable = null;
-var mainLangPickerTableReady = false;
-var mainLangPickerDraftSet = null;
-var mainLangSuggestActiveIndex = -1; // -1: hide
-var mainLangPickerEventBound = false;
+var mainLangPicker = null;
 var mainLangSkillOptions = [];
 var mainLangGroupOptions = [];
 
@@ -25,15 +21,17 @@ var ctrtTypOptions = [];
 var workMdMap = [];
 var workMdOptions = [];
 
-// '저장 완료' 알림 텍스트 저장
-var swalTitle = "";
-var swalText = "";
+// 저장된 탭 alert 표시하기 위한 리스트
+var savedTabs = [];
 
 // 탭 전체 입력/수정 여부 판단 => 전역 플래그
 let initTabs = false;
 
-// 저장/로딩중 팝업 표시 여부
+// 저장/로딩중 팝업 표시 여부 플래그
 let isSaving = false;
+
+// 저장 성공 여부 플래그
+let isSuccess = false;
 
 // 개발자ID
 window.currentDevId = null;
@@ -46,8 +44,12 @@ const changedTabs = {
     tab4: false  // 4번째 Tab
 };
 
-// 저장된 탭 alert 표시하기 위한 리스트
-const savedTabs = [];
+const tabNameMap = {
+    tab1: "소속 및 계약정보",
+    tab2: "보유역량 및 숙련도",
+    tab3: "프로젝트",
+    tab4: "평가 및 리스크"
+};
 
 // ============================================================================== //
 
@@ -98,9 +100,9 @@ $(document).ready(async function () {
 
         // 이미지 파일만 허용
         if (!file.type.startsWith("image/")) {
-            showAlert({
-                icon: 'error',
-                title: '업로드 오류',
+            showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+                icon: 'info',
+                title: '알림',
                 text: '이미지 파일만 선택 가능합니다.'
             });
             return;
@@ -221,12 +223,6 @@ $(document).ready(async function () {
 
                 console.log("탭 유효성 실패");
 
-                // 각 탭마다 유효성 검사 표시 다 적용시키고 난 뒤에, 이거 수정하기 !!!!!!!!!!!!!
-                showAlert({
-                    icon: 'error',
-                    title: '입력 오류',
-                    text: '상세정보 입력란을 확인해주세요.'
-                });
                 hideLoading();
                 isSaving = false;
                 return;
@@ -234,31 +230,48 @@ $(document).ready(async function () {
         }
 
         try {
-            // 인적사항 서버 저장
+            // 인적사항 저장
             const success = await upsertUserBtn();
             if (!success) {
                 throw new Error("인적사항 저장 실패");
             }
 
-            // 탭 데이터 순차 저장
-            if (changedTabs.tab1) {
-                await saveHr011TableData();
-                savedTabs.push("소속 및 계약정보");
-            }
-            if (changedTabs.tab2) {
-                await saveHr012TableData();
-                savedTabs.push("보유역량 및 숙련도");
-            }
-            if (changedTabs.tab3) {
-                await saveHr013InlineRows();
-                savedTabs.push("프로젝트");
-            }
-            if (changedTabs.tab4) {
-                await saveTab4All();
-                savedTabs.push("평가 및 리스크");
+            // 세부정보 저장
+            if(currentMode != "insert"){
+                // 탭 데이터 순차 저장
+                if (changedTabs.tab1) {
+                    await saveHr011TableData();
+                    savedTabs.push("소속 및 계약정보");
+                }
+                if (changedTabs.tab2) {
+                    await saveHr012TableData();
+                    savedTabs.push("보유역량 및 숙련도");
+                }
+                if (changedTabs.tab3) {
+                    await saveHr013InlineRows();
+                    savedTabs.push("프로젝트");
+                }
+                if (changedTabs.tab4) {
+                    await saveTab4All();
+                    savedTabs.push("평가 및 리스크");
+                }
             }
 
-            // 상태 초기화
+            // 저장 완료 후, 상태 플래그 변경
+            isSuccess = true;
+
+            // 저장한 탭의 이름 저장
+            const savedTabNames = savedTabs.map(n => `'${n}'`);
+
+            showAlert({
+                icon: 'success',
+                title: currentMode === "insert" ? "등록 완료" : "저장 완료",
+                text: savedTabs.length
+                    ? `${savedTabNames.join(", ")} 저장이 완료되었습니다.`
+                    : `'인적사항' 정보가 저장되었습니다.`
+            });
+
+            // 탭 상태 초기화
             Object.keys(changedTabs).forEach(k => changedTabs[k] = false);
 
             // 신규 등록이면 팝업 닫기
@@ -268,25 +281,22 @@ $(document).ready(async function () {
 
         } catch (e) {
             console.error(e);
-            showAlert({
+
+            showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
                 icon: 'error',
-                title: '저장 실패',
+                title: '오류',
                 text: '저장 중 오류가 발생했습니다.'
             });
+
         } finally {
-            // 테이블 리로드 & 로딩 숨김
-            userTable.clearData();
-            await loadUserTableData();
-            hideLoading();
-            isSaving = false;
+             isSaving = false;
+             hideLoading();
 
-            // Swal로 알림
-            showAlert({
-                icon: 'success',
-                title: swalTitle,
-                text: swalText,
-            });
-
+            // 저장에 성공했다면...
+            if (isSuccess) {
+                userTable.clearData();
+                await loadUserTableData();
+            }
             console.log("저장 작업 종료, 로딩 상태 :", isSaving); // false여야 정상
         }
     });
@@ -648,9 +658,9 @@ async function loadUserTableData() {
         // userTable.setData(response.res || []);
     } catch (e) {
         console.error(e);
-        showAlert({
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'error',
-            title: '조회 실패',
+            title: '오류',
             text: '사용자 데이터를 불러오는 중 오류가 발생했습니다.',
         });
     }
@@ -683,9 +693,9 @@ function loadUserTableImgDataAsync(data) {
             },
             error: function (e) {
                 console.error(e);
-                 showAlert({
+                 showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
                     icon: 'error',
-                    title: '프로필 이미지 오류',
+                    title: '오류',
                     text: '사용자 데이터를 불러오는 중 오류가 발생했습니다.',
                  });
                  resolve(); // 에러여도 UI는 표시 가능하도록 resolve
@@ -744,9 +754,9 @@ function upsertUserBtn() {
             success: function (response) {
                 if (!response || response.success === false) {
                     console.log(response?.message || "저장에 실패했습니다.");
-                    showAlert({
+                    showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
                         icon: 'error',
-                        title: '저장 실패',
+                        title: '오류',
                         text: '저장 중 오류가 발생했습니다.'
                     });
                     resolve(false);
@@ -760,25 +770,14 @@ function upsertUserBtn() {
             },
             error: function (xhr) {
                 console.log("저장 중 오류가 발생했습니다.");
-                showAlert({
+                showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
                     icon: 'error',
-                    title: '저장 실패',
+                    title: '오류',
                     text: '저장 중 오류가 발생했습니다.'
                 });
                 reject(xhr);
             }
         });
-
-        if (
-            currentMode === "insert" ||
-            (!changedTabs.tab1 && !changedTabs.tab2 && !changedTabs.tab3 && !changedTabs.tab4)
-        ) {
-            swalTitle = "인적사항 저장 완료";
-            swalText = "인적사항 정보가 저장되었습니다.";
-        } else {
-            swalTitle = "변경사항 저장 완료";
-            swalText = `인적사항\n- ${savedTabs.join("\n- ")}\n저장이 완료되었습니다.`;
-        }
     });
 }
 
@@ -790,7 +789,7 @@ async function deleteUserRows() {
 
     // 선택 없음
     if (selectedRows.length === 0) {
-        showAlert({
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'info',
             title: '알림',
             text: '삭제할 사용자를 선택해주세요.'
@@ -802,16 +801,16 @@ async function deleteUserRows() {
     var firstRowData = selectedRows[0].getData();
 
     // 1단계 확인 모달
-    const firstResult = await showAlert({
-        title: `${firstRowData.dev_nm} 사용자 정보 삭제`,
-        text: '삭제하시겠습니까?',
+    const firstResult = await showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+        title: '경고',
+        text: `'${firstRowData.dev_nm}' 사용자 정보를 삭제하시겠습니까?`,
         icon: 'warning',
     });
     if (!firstResult.isConfirmed) return;
 
-    const secondResult = await showAlert({
-        title: '정말로 삭제하시겠습니까?',
-        text: `${firstRowData.dev_nm} 사용자의 데이터가 삭제되며, 되돌릴 수 없습니다.`,
+    const secondResult = await showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+        title: '경고',
+        text: `다시 확인 버튼을 누르시면 '${firstRowData.dev_nm}' 사용자의 데이터가 삭제되며, 되돌릴 수 없습니다.`,
         icon: 'warning',
     });
     if (!secondResult.isConfirmed) return;
@@ -828,17 +827,17 @@ async function deleteUserRows() {
                 pending -= 1;
                 if (pending === 0) {
                     loadUserTableData();
-                    showAlert({
+                    showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
                         icon: 'success',
-                        title: '삭제 완료',
-                        text: `${firstRowData.dev_nm} 사용자의 데이터가 삭제되었습니다.`
+                        title: '완료',
+                        text: `'${firstRowData.dev_nm}' 사용자의 데이터가 삭제되었습니다.`
                     });
                 }
             },
             error: function () {
-                showAlert({
+                showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
                     icon: 'error',
-                    title: '삭제 실패',
+                    title: '오류',
                     text: '삭제 중 오류가 발생했습니다.'
                 });
             }
@@ -1075,6 +1074,9 @@ function setModalMode(mode) {
         if (typeof closeHr012SkillPicker === "function") {
             closeHr012SkillPicker(true);
         }
+        if (typeof closeHr013SkillPicker === "function") {
+            closeHr013SkillPicker(true);
+        }
     }
 
     const $tagBox = $("#mainLangTagList").closest(".tag-input-box");
@@ -1103,7 +1105,13 @@ function closeUserViewModal() {
     if (typeof closeHr012SkillPicker === "function") {
         closeHr012SkillPicker(true);
     }
+    if (typeof closeHr013SkillPicker === "function") {
+        closeHr013SkillPicker(true);
+    }
     $modal.removeClass("show");
+
+    // 초기화
+    savedTabs = [];
 
     setTimeout(() => {
         $modal.hide();
@@ -1171,10 +1179,10 @@ function validateUserForm() {
 
     // 개발자 이름
     if (!dev_nm) {
-        showAlert({
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
-            title: '인적사항 미입력',
-            text: '성명을 입력하세요.'
+            title: '경고',
+            text: `'성명'을 입력하세요.`
         });
         $("#dev_nm").focus();
         return false;
@@ -1182,10 +1190,10 @@ function validateUserForm() {
 
     // 생년월일
     if (!brdt) {
-        showAlert({
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
-            title: '인적사항 미입력',
-            text: '생년월일을 입력하세요.'
+            title: '경고',
+            text: `'생년월일'을 입력하세요.`
         });
         $("#brdt").focus();
         return false;
@@ -1193,10 +1201,10 @@ function validateUserForm() {
 
     // 전화번호
     if (!tel) {
-        showAlert({
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
-            title: '인적사항 미입력',
-            text: '연락처를 입력하세요.'
+            title: '경고',
+            text: `'연락처'를 입력하세요.`
         });
         $("#tel").focus();
         return false;
@@ -1204,10 +1212,10 @@ function validateUserForm() {
 
     // 전화번호 (숫자만 입력)
     if (!/^[0-9\-]+$/.test(tel)) {
-        showAlert({
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
-            title: '인적사항 미입력',
-            text: '연락처 형식이 올바르지 않습니다.'
+            title: '경고',
+            text: `'연락처' 형식이 올바르지 않습니다.`
         });
         $("#tel").focus();
         return false;
@@ -1215,10 +1223,10 @@ function validateUserForm() {
 
     // 이메일
     if (!email) {
-        showAlert({
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
-            title: '인적사항 미입력',
-            text: '이메일을 입력하세요.'
+            title: '경고',
+            text: `'이메일'을 입력하세요.`
         });
         $("#email").focus();
         return false;
@@ -1228,10 +1236,10 @@ function validateUserForm() {
         /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
 
     if (!emailRegex.test(email)) {
-        showAlert({
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
-            title: '인적사항 미입력',
-            text: '이메일 형식이 올바르지 않습니다.'
+            title: '경고',
+            text: `'이메일' 형식이 올바르지 않습니다.`
         });
         $("#email").focus();
         return false;
@@ -1239,10 +1247,10 @@ function validateUserForm() {
 
     // 경력연차
     if (expYrYear === "" || expYrMonth === "") {
-        showAlert({
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
-            title: '인적사항 미입력',
-            text: '경력연차(년/개월)를 입력하세요.'
+            title: '경고',
+            text: `'경력연차(년/개월)'를 입력하세요.`
         });
         if (expYrYear === "") {
             $("#exp_yr_year").focus();
@@ -1252,10 +1260,10 @@ function validateUserForm() {
         return false;
     }
     if (!/^\d+$/.test(expYrYear) || !/^\d+$/.test(expYrMonth)) {
-        showAlert({
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
-            title: '인적사항 미입력',
-            text: '경력연차(년/개월)를 입력하세요.'
+            title: '경고',
+            text: `'경력연차(년/개월)'를 입력하세요.`
         });
         $("#exp_yr_year").focus();
         return false;
@@ -1264,10 +1272,10 @@ function validateUserForm() {
     var expYearNum = Number(expYrYear);
     var expMonthNum = Number(expYrMonth);
     if (expYearNum < 0 || expYearNum > 99 || expMonthNum < 0 || expMonthNum > 12) {
-        showAlert({
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
-            title: '인적사항 미입력',
-            text: '경력연차는 년(0~99), 개월(0~12) 범위 내에서 입력해주세요.'
+            title: '경고',
+            text: `'경력연차'는 년(0~99), 개월(0~12) 범위 내에서 입력해주세요.`
         });
         $("#exp_yr_year").focus();
         return false;
@@ -1277,10 +1285,10 @@ function validateUserForm() {
 
     // 최종학력
     if (!eduLast) {
-        showAlert({
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
-            title: '인적사항 미입력',
-            text: '최종학력을 입력하세요.'
+            title: '경고',
+            text: `'최종학력'을 입력하세요.`
         });
         $("#edu_last").focus();
         return false;
@@ -1288,10 +1296,10 @@ function validateUserForm() {
 
     // 소속 구분
     if (!devType || devType == "") {
-        showAlert({
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
-            title: '인적사항 미입력',
-            text: '소속을 선택해주세요.'
+            title: '경고',
+            text: `'소속 구분'을 선택해주세요.`
         });
         $("#dev_type").focus();
         return false;
@@ -1299,10 +1307,10 @@ function validateUserForm() {
 
     // 근무 가능 형태
     if (!workMd || workMd == "") {
-        showAlert({
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
-            title: '인적사항 미입력',
-            text: '근무형태를 선택해주세요.'
+            title: '경고',
+            text: `'근무 가능 형태'를 선택해주세요.`
         });
         $("#select_work_md").focus();
         return false;
@@ -1310,19 +1318,19 @@ function validateUserForm() {
 
     // 희망단가
     if (!hopeRaw) {
-        showAlert({
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
-            title: '인적사항 미입력',
-            text: '희망단가를 입력해주세요.'
+            title: '경고',
+            text: `'희망단가'를 입력해주세요.`
         });
         $("#hope_rate_amt").focus();
         return false;
     }
     if (Number(hopeRaw) > MAX_AMT) {
-        showAlert({
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
-            title: '인적사항 미입력',
-            text: '희망단가는 최대 999,999,999원까지 입력 가능합니다.'
+            title: '경고',
+            text: `'희망단가'는 최대 999,999,999원까지 입력 가능합니다.`
         });
         $("#hope_rate_amt").focus();
         return false;
@@ -1330,10 +1338,10 @@ function validateUserForm() {
 
     // 투입 가능일
     if (!availDt) {
-        showAlert({
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
-            title: '인적사항 미입력',
-            text: '투입 가능 시점을 입력하세요.'
+            title: '경고',
+            text: `'투입 가능 시점'을 입력하세요.`
         });
         $("#avail_dt").focus();
         return false;
@@ -1341,10 +1349,10 @@ function validateUserForm() {
 
     // 계약 형태
     if (!ctrtTyp || ctrtTyp == "") {
-        showAlert({
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
-            title: '인적사항 미입력',
-            text: '계약 형태를 선택해주세요.'
+            title: '경고',
+            text: `'계약 형태'를 선택해주세요.`
         });
         $("#select_ctrt_typ").focus();
         return false;
@@ -1369,6 +1377,7 @@ function initMainLangTags() {
                 syncMainLangPickerUi();
             }
         });
+        initMainLangPicker();
         bindMainLangPickerEvents();
     }
 
@@ -1376,6 +1385,7 @@ function initMainLangTags() {
         mainLangSkillOptions = Array.isArray(res) ? res : [];
         mainLangTagInput.setOptions(mainLangSkillOptions);
         mainLangTagInput.setFromValue(pendingMainLangValue || $("#main_lang").val());
+        pendingMainLangValue = $("#main_lang").val() || pendingMainLangValue;
         syncMainLangPickerUi(true);
     });
 
@@ -1387,514 +1397,97 @@ function initMainLangTags() {
 
 // ============================================================================== //
 
-function bindMainLangPickerEvents() {
-    if (mainLangPickerEventBound) {
+// 공통 팩토리 기반 주개발언어 선택 팝업 초기화
+function initMainLangPicker() {
+    if (mainLangPicker || typeof createGroupedSkillPicker !== "function") {
         return;
     }
-    mainLangPickerEventBound = true;
-
-    $(document).on("click", "#main_lang_input, #btn_main_lang_picker", function (e) {
-        e.preventDefault();
-        if (currentMode === "view") {
-            return;
-        }
-        openMainLangPicker();
-    });
-
-    $(document).on("click", "#btn_main_lang_picker_apply", function (e) {
-        e.preventDefault();
-        applyMainLangPickerSelection();
-    });
-
-    $(document).on("click", "#btn_main_lang_picker_close_x", function (e) {
-        e.preventDefault();
-        closeMainLangPicker();
-    });
-
-    $(document).on("click", "#main-lang-picker-area", function (e) {
-        if (e.target === this) {
-            closeMainLangPicker();
-        }
-    });
-
-    $(document).on("click", "#TABLE_MAIN_LANG_PICKER .main-lang-skill-chip", function (e) {
-        e.preventDefault();
-        if (currentMode === "view") {
-            return;
-        }
-        var skillCode = String($(this).data("code") || "");
-        if (!skillCode) {
-            return;
-        }
-        toggleMainLangSkill(skillCode);
-    });
-
-    $(document).on("input", "#main-lang-picker-search", function () {
-        renderMainLangSuggestions($(this).val());
-    });
-
-    $(document).on("keydown", "#main-lang-picker-search", function (e) {
-        if (e.key === "ArrowDown") {
-            e.preventDefault();
-            moveMainLangSuggestionSelection(1);
-        } else if (e.key === "ArrowUp") {
-            e.preventDefault();
-            moveMainLangSuggestionSelection(-1);
-        } else if (e.key === "Enter") {
-            e.preventDefault();
-            var $active = getMainLangActiveSuggestItem();
-            if ($active.length) {
-                selectMainLangSkill(String($active.data("code") || ""), true);
-                return;
+    mainLangPicker = createGroupedSkillPicker({
+        namespace: "main_lang",
+        pickerAreaSelector: "#main-lang-picker-area",
+        openTriggerSelector: "#main_lang_input, #btn_main_lang_picker",
+        applyTriggerSelector: "#btn_main_lang_picker_apply",
+        closeTriggerSelector: "#btn_main_lang_picker_close_x",
+        tableSelector: "#TABLE_MAIN_LANG_PICKER",
+        searchInputSelector: "#main-lang-picker-search",
+        searchWrapSelector: ".main-lang-picker-search-wrap",
+        suggestListSelector: "#main-lang-picker-suggest",
+        metaSelector: "#main-lang-picker-meta",
+        chipClass: "main-lang-skill-chip",
+        chipWrapClass: "main-lang-skill-chip-wrap",
+        suggestItemClass: "main-lang-suggest-item",
+        flashClass: "is-flash",
+        groupColumnWidth: 180,
+        getSkillOptions: function () {
+            return mainLangSkillOptions || [];
+        },
+        getGroupOptions: function () {
+            return mainLangGroupOptions || [];
+        },
+        getSelectedCodes: function () {
+            var set = new Set();
+            String($("#main_lang").val() || "")
+                .split(",")
+                .forEach(function (item) {
+                    var code = $.trim(item);
+                    if (code) {
+                        set.add(code);
+                    }
+                });
+            return set;
+        },
+        isReadonly: function () {
+            return currentMode === "view";
+        },
+        onApply: function (payload) {
+            if (mainLangTagInput) {
+                mainLangTagInput.setFromValue(payload.csv || "");
             }
-            var $first = $("#main-lang-picker-suggest .main-lang-suggest-item").first();
-            if ($first.length) {
-                selectMainLangSkill(String($first.data("code") || ""), true);
-            }
-        } else if (e.key === "Escape") {
-            e.preventDefault();
-            closeMainLangPicker();
-        }
-    });
-
-    $(document).on("click", "#main-lang-picker-suggest .main-lang-suggest-item", function (e) {
-        e.preventDefault();
-        var skillCode = String($(this).data("code") || "");
-        if (!skillCode) {
-            return;
-        }
-        selectMainLangSkill(skillCode, true);
-    });
-
-    $(document).on("mouseenter", "#main-lang-picker-suggest .main-lang-suggest-item", function () {
-        var $items = $("#main-lang-picker-suggest .main-lang-suggest-item");
-        mainLangSuggestActiveIndex = $items.index(this);
-        syncMainLangSuggestionActive();
-    });
-
-    $(document).on("mousedown", function (e) {
-        if (!$(e.target).closest(".main-lang-picker-search-wrap").length) {
-            $("#main-lang-picker-suggest").hide();
+            pendingMainLangValue = payload.csv || "";
         }
     });
 }
 
+// 팝업 이벤트는 공통 유틸이 네임스페이스로 1회만 등록한다.
+function bindMainLangPickerEvents() {
+    initMainLangPicker();
+    if (mainLangPicker) {
+        mainLangPicker.bindEvents();
+    }
+}
+
+// 읽기 전용이 아닐 때만 팝업을 열고, 선택 원본은 hidden(#main_lang) 기준으로 로드한다.
 function openMainLangPicker() {
     if (currentMode === "view") {
         return;
     }
-    buildMainLangPickerTable();
-    mainLangPickerDraftSet = getMainLangSelectedCodeSet();
-    syncMainLangPickerUi(true);
-
-    var $picker = $("#main-lang-picker-area");
-    $picker.show();
-    setTimeout(function () {
-        $picker.addClass("show");
-    }, 0);
-
-    $("#main-lang-picker-search").val("");
-    renderMainLangSuggestions("");
-    setTimeout(function () {
-        $("#main-lang-picker-search").trigger("focus");
-    }, 40);
+    initMainLangPicker();
+    if (mainLangPicker) {
+        mainLangPicker.open();
+    }
 }
 
 function closeMainLangPicker(immediate) {
-    var $picker = $("#main-lang-picker-area");
-    if (!$picker.length) {
-        mainLangPickerDraftSet = null;
+    if (!mainLangPicker) {
         return;
     }
-    $picker.removeClass("show");
-    $("#main-lang-picker-suggest").hide().empty();
-    mainLangSuggestActiveIndex = -1;
-    if (immediate) {
-        mainLangPickerDraftSet = null;
-        $picker.hide();
-        return;
-    }
-    setTimeout(function () {
-        if (!$picker.hasClass("show")) {
-            $picker.hide();
-        }
-    }, 180);
-    mainLangPickerDraftSet = null;
+    mainLangPicker.close(immediate);
 }
 
+// "적용" 클릭 시에만 draft 선택값이 태그/hidden 값으로 확정 반영된다.
 function applyMainLangPickerSelection() {
-    if (!mainLangTagInput || !mainLangPickerDraftSet) {
+    if (!mainLangPicker) {
         closeMainLangPicker();
         return;
     }
-
-    var csv = Array.from(mainLangPickerDraftSet).join(",");
-    mainLangTagInput.setFromValue(csv);
-    closeMainLangPicker();
-}
-
-function buildMainLangPickerTable() {
-    if (mainLangPickerTable || !window.Tabulator || !document.getElementById("TABLE_MAIN_LANG_PICKER")) {
-        return;
-    }
-
-    mainLangPickerTable = new Tabulator("#TABLE_MAIN_LANG_PICKER", {
-        layout: "fitColumns",
-        height: "371px",
-        placeholder: "등록된 기술이 없습니다.",
-        headerHozAlign: "center",
-        columnDefaults: {
-            headerSort: false,
-            resizable: false
-        },
-        columns: [
-            { title: "분야", field: "groupName", width: 180, hozAlign: "left" },
-            { title: "기술", field: "skills", hozAlign: "left", formatter: mainLangSkillFormatter }
-        ],
-        data: []
-    });
-    mainLangPickerTableReady = false;
+    mainLangPicker.apply();
 }
 
 function syncMainLangPickerUi(forceRebuild) {
-    var totalCount = Array.isArray(mainLangSkillOptions) ? mainLangSkillOptions.length : 0;
-    var selectedCount = getMainLangPickerSelectedSet().size;
-    $("#main-lang-picker-meta").text("전체 기술 " + totalCount + "개 / 선택 " + selectedCount + "개");
-
-    if (!mainLangPickerTable) {
+    if (!mainLangPicker) {
         return;
     }
-
-    if (!forceRebuild && mainLangPickerTableReady) {
-        syncMainLangPickerChipState();
-        return;
-    }
-
-    var tableElement = mainLangPickerTable.getElement ? mainLangPickerTable.getElement() : null;
-    var holder = tableElement ? tableElement.querySelector(".tabulator-tableHolder") : null;
-    var prevTop = holder ? holder.scrollTop : 0;
-    var prevLeft = holder ? holder.scrollLeft : 0;
-
-    var afterRender = function () {
-        mainLangPickerTableReady = true;
-        syncMainLangPickerChipState();
-        var currentElement = mainLangPickerTable.getElement ? mainLangPickerTable.getElement() : null;
-        var currentHolder = currentElement ? currentElement.querySelector(".tabulator-tableHolder") : null;
-        if (currentHolder) {
-            currentHolder.scrollTop = prevTop;
-            currentHolder.scrollLeft = prevLeft;
-        }
-    };
-
-    var setResult = mainLangPickerTable.setData(buildMainLangPickerRows());
-    if (setResult && typeof setResult.then === "function") {
-        setResult.then(afterRender);
-    } else {
-        setTimeout(afterRender, 0);
-    }
-}
-
-function syncMainLangPickerChipState() {
-    var selectedCodes = getMainLangPickerSelectedSet();
-    $("#TABLE_MAIN_LANG_PICKER .main-lang-skill-chip").each(function () {
-        var code = String($(this).data("code") || "");
-        $(this).toggleClass("is-selected", selectedCodes.has(code));
-    });
-}
-
-function getMainLangPickerSelectedSet() {
-    if (mainLangPickerDraftSet instanceof Set) {
-        return mainLangPickerDraftSet;
-    }
-    return getMainLangSelectedCodeSet();
-}
-
-function getMainLangSelectedCodeSet() {
-    var set = new Set();
-    String($("#main_lang").val() || "")
-        .split(",")
-        .forEach(function (item) {
-            var code = $.trim(item);
-            if (code) {
-                set.add(code);
-            }
-        });
-    return set;
-}
-
-function getMainLangGroupCode(skillCode) {
-    var code = String(skillCode || "").trim();
-    if (!code) {
-        return "";
-    }
-    return code.substring(0, 2).toUpperCase();
-}
-
-function buildMainLangGroupNameMap() {
-    var groupNameMap = {};
-    (mainLangGroupOptions || []).forEach(function (group) {
-        var groupCode = String(group.cd || "").toUpperCase();
-        if (!groupCode) {
-            return;
-        }
-        groupNameMap[groupCode] = group.cd_nm || groupCode;
-    });
-    return groupNameMap;
-}
-
-function buildMainLangPickerRows() {
-    var groupRows = [];
-    var groupMap = {};
-
-    (mainLangGroupOptions || []).forEach(function (group, idx) {
-        var groupCode = String(group.cd || "").toUpperCase();
-        if (!groupCode) {
-            return;
-        }
-        var row = {
-            groupCode: groupCode,
-            groupName: group.cd_nm || groupCode,
-            sortOrder: idx,
-            skills: []
-        };
-        groupMap[groupCode] = row;
-        groupRows.push(row);
-    });
-
-    (mainLangSkillOptions || []).forEach(function (skill) {
-        var code = String(skill.cd || "");
-        if (!code) {
-            return;
-        }
-        var groupCode = getMainLangGroupCode(code);
-        if (!groupMap[groupCode]) {
-            groupMap[groupCode] = {
-                groupCode: groupCode,
-                groupName: groupCode || "기타",
-                sortOrder: 9999,
-                skills: []
-            };
-            groupRows.push(groupMap[groupCode]);
-        }
-        groupMap[groupCode].skills.push({
-            code: code,
-            label: String(skill.cd_nm || code)
-        });
-    });
-
-    groupRows.forEach(function (row) {
-        row.skills.sort(function (a, b) {
-            return a.label.localeCompare(b.label, "ko");
-        });
-    });
-
-    return groupRows
-        .filter(function (row) {
-            return row.skills.length > 0;
-        })
-        .sort(function (a, b) {
-            if (a.sortOrder !== b.sortOrder) {
-                return a.sortOrder - b.sortOrder;
-            }
-            return a.groupName.localeCompare(b.groupName, "ko");
-        });
-}
-
-function mainLangSkillFormatter(cell) {
-    var skills = cell.getValue() || [];
-    if (!skills.length) {
-        return "";
-    }
-
-    var selectedCodes = getMainLangPickerSelectedSet();
-    var html = skills.map(function (skill) {
-        var code = String(skill.code || "");
-        var label = String(skill.label || code);
-        var selectedClass = selectedCodes.has(code) ? " is-selected" : "";
-        return "<button type='button' class='main-lang-skill-chip" + selectedClass +
-            "' data-code='" + escapeHtmlAttr(code) + "'>" + escapeHtml(label) + "</button>";
-    }).join("");
-
-    return "<div class='main-lang-skill-chip-wrap'>" + html + "</div>";
-}
-
-function escapeHtml(value) {
-    return String(value || "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/\"/g, "&quot;")
-        .replace(/'/g, "&#39;");
-}
-
-function escapeHtmlAttr(value) {
-    return escapeHtml(value);
-}
-
-function selectMainLangSkill(skillCode, fromSearch) {
-    if (!mainLangTagInput) {
-        return;
-    }
-    var code = String(skillCode || "").trim();
-    if (!code) {
-        return;
-    }
-
-    if (!(mainLangPickerDraftSet instanceof Set)) {
-        mainLangPickerDraftSet = getMainLangSelectedCodeSet();
-    }
-    mainLangPickerDraftSet.add(code);
-    syncMainLangPickerUi();
-    focusMainLangSkill(code);
-
-    if (fromSearch) {
-        $("#main-lang-picker-search").val("");
-        $("#main-lang-picker-suggest").hide().empty();
-        mainLangSuggestActiveIndex = -1;
-    }
-}
-
-function toggleMainLangSkill(skillCode) {
-    if (!mainLangTagInput) {
-        return;
-    }
-    var code = String(skillCode || "").trim();
-    if (!code) {
-        return;
-    }
-
-    if (!(mainLangPickerDraftSet instanceof Set)) {
-        mainLangPickerDraftSet = getMainLangSelectedCodeSet();
-    }
-
-    if (mainLangPickerDraftSet.has(code)) {
-        mainLangPickerDraftSet.delete(code);
-    } else {
-        mainLangPickerDraftSet.add(code);
-    }
-    syncMainLangPickerUi();
-    focusMainLangSkill(code);
-}
-
-function focusMainLangSkill(skillCode) {
-    setTimeout(function () {
-        var code = String(skillCode || "");
-        if (!code) {
-            return;
-        }
-        var $chip = $("#TABLE_MAIN_LANG_PICKER .main-lang-skill-chip").filter(function () {
-            return String($(this).data("code") || "") === code;
-        }).first();
-        if (!$chip.length) {
-            return;
-        }
-        $chip.addClass("is-flash");
-        setTimeout(function () {
-            $chip.removeClass("is-flash");
-        }, 450);
-    }, 30);
-}
-
-function findMainLangSkillMatches(keyword, limit) {
-    var query = String(keyword || "").trim().toLowerCase();
-    if (!query) {
-        return [];
-    }
-    var max = limit || 20;
-    var groupNameMap = buildMainLangGroupNameMap();
-
-    return (mainLangSkillOptions || [])
-        .map(function (skill) {
-            var code = String(skill.cd || "");
-            var label = String(skill.cd_nm || code);
-            var groupCode = getMainLangGroupCode(code);
-            return {
-                code: code,
-                label: label,
-                groupName: groupNameMap[groupCode] || groupCode || "기타"
-            };
-        })
-        .filter(function (skill) {
-            var codeMatch = skill.code.toLowerCase().indexOf(query) >= 0;
-            var labelMatch = skill.label.toLowerCase().indexOf(query) >= 0;
-            return codeMatch || labelMatch;
-        })
-        .sort(function (a, b) {
-            return a.label.localeCompare(b.label, "ko");
-        })
-        .slice(0, max);
-}
-
-// 추천목록생성
-function renderMainLangSuggestions(keyword) {
-    var $suggest = $("#main-lang-picker-suggest");
-    var query = String(keyword || "").trim();
-    if (!query) {
-        mainLangSuggestActiveIndex = -1; // 미선택
-        $suggest.hide().empty();
-        return;
-    }
-
-    var matches = findMainLangSkillMatches(query, 20);
-    if (!matches.length) {
-        mainLangSuggestActiveIndex = -1;
-        $suggest.hide().empty();
-        return;
-    }
-
-    var html = matches.map(function (item) {
-        return "<li class='main-lang-suggest-item' data-code='" + escapeHtmlAttr(item.code) + "'>" +
-            "<span class='name'>" + escapeHtml(item.label) + "</span>" +
-            "<span class='group'>" + escapeHtml(item.groupName) + "</span>" +
-            "</li>";
-    }).join("");
-
-    $suggest.html(html).show();
-    mainLangSuggestActiveIndex = -1;
-    syncMainLangSuggestionActive();
-}
-
-function moveMainLangSuggestionSelection(step) {
-    var $items = $("#main-lang-picker-suggest .main-lang-suggest-item");
-    if (!$items.length || !$("#main-lang-picker-suggest").is(":visible")) {
-        return;
-    }
-    var max = $items.length - 1;
-    if (mainLangSuggestActiveIndex < 0) {
-        mainLangSuggestActiveIndex = step > 0 ? 0 : max;
-    } else {
-        mainLangSuggestActiveIndex += step;
-        if (mainLangSuggestActiveIndex < 0) {
-            mainLangSuggestActiveIndex = 0;
-        }
-        if (mainLangSuggestActiveIndex > max) {
-            mainLangSuggestActiveIndex = max;
-        }
-    }
-    syncMainLangSuggestionActive();
-}
-
-function syncMainLangSuggestionActive() {
-    var $items = $("#main-lang-picker-suggest .main-lang-suggest-item");
-    $items.removeClass("is-active");
-    if (!$items.length || mainLangSuggestActiveIndex < 0) {
-        return;
-    }
-    var $active = $items.eq(mainLangSuggestActiveIndex);
-    $active.addClass("is-active");
-    var container = $("#main-lang-picker-suggest").get(0);
-    var element = $active.get(0);
-    if (container && element && typeof element.scrollIntoView === "function") {
-        element.scrollIntoView({ block: "nearest" });
-    }
-}
-
-function getMainLangActiveSuggestItem() {
-    var $items = $("#main-lang-picker-suggest .main-lang-suggest-item");
-    if (!$items.length || mainLangSuggestActiveIndex < 0) {
-        return $();
-    }
-    return $items.eq(mainLangSuggestActiveIndex);
+    mainLangPicker.sync(forceRebuild);
 }
 
 // ============================================================================== //
@@ -1967,11 +1560,52 @@ $(document).on("click", ".career-spin-btn", function () {
     normalizeCareerSpinInputs();
 });
 
-// 희망단가는 숫자만 입력 가능
-$("#hope_rate_amt").on("input", function () {
-    let input_number = this.value.replace(/[^0-9]/g, "");
-    this.value = formatAmount(input_number);
-});
+// 희망단가 입력: 숫자만 허용하고 "원" 접미사 앞에서만 커서가 움직이도록 제어한다.
+$("#hope_rate_amt")
+    .on("input", function () {
+        var raw = this.value || "";
+        var caret = Number.isFinite(this.selectionStart) ? this.selectionStart : raw.length;
+        var digitsBeforeCaret = countAmountDigitsBeforeCaret(raw, caret);
+        var inputNumber = normalizeAmountValue(raw);
+        var formatted = formatAmount(inputNumber);
+        this.value = formatted;
+        setAmountCaretByDigitIndex(this, digitsBeforeCaret);
+    })
+    .on("focus", function () {
+        moveAmountCaretToEditableEnd(this);
+    })
+    .on("click", function () {
+        var input = this;
+        setTimeout(function () {
+            clampAmountCaretToEditableRange(input);
+        }, 0);
+    })
+    .on("keydown", function (e) {
+        var value = this.value || "";
+        var suffixIndex = getAmountEditableEndIndex(value);
+        var start = Number.isFinite(this.selectionStart) ? this.selectionStart : suffixIndex;
+        var end = Number.isFinite(this.selectionEnd) ? this.selectionEnd : suffixIndex;
+
+        // 커서가 "원" 뒤로 가지 않도록 제한
+        if ((e.key === "ArrowRight" || e.key === "End") && start >= suffixIndex && end >= suffixIndex) {
+            e.preventDefault();
+            this.setSelectionRange(suffixIndex, suffixIndex);
+            return;
+        }
+
+        // 커서가 "원" 뒤에 있으면 우선 "원" 앞으로 이동
+        if (e.key === "Backspace" && start === end && start > suffixIndex) {
+            e.preventDefault();
+            this.setSelectionRange(suffixIndex, suffixIndex);
+            return;
+        }
+
+        // Delete로 "원" 자체를 지우는 동작은 막음
+        if (e.key === "Delete" && start === end && start >= suffixIndex) {
+            e.preventDefault();
+            return;
+        }
+    });
 
 // 숫자에 콤마 표시
 function formatNumber(num) {
@@ -1994,9 +1628,9 @@ function btnEditView(alertPrefix = "") {
     const rows = userTable.getSelectedRows();
     const prefix = alertPrefix || "";
     if (rows.length !== 1) {
-            showAlert({
-                icon: 'warning',
-                title: '대상 선택 없음',
+            showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+                icon: 'info',
+                title: '알림',
                 text:
                     prefix +
                     (rows.length === 0
@@ -2030,6 +1664,65 @@ function formatAmount(value) {
 function normalizeAmountValue(value) {
     if (value === null || value === undefined) return "";
     return String(value).replace(/[^0-9]/g, "");
+}
+
+// "원" 접미사를 제외한 마지막 편집 가능 인덱스를 반환한다.
+function getAmountEditableEndIndex(value) {
+    var text = String(value || "");
+    return text.endsWith("원") ? text.length - 1 : text.length;
+}
+
+// 클릭/포커스 후 커서가 "원" 뒤로 나가지 않도록 강제로 보정한다.
+function clampAmountCaretToEditableRange(input) {
+    if (!input) return;
+    var end = getAmountEditableEndIndex(input.value);
+    var start = Number.isFinite(input.selectionStart) ? input.selectionStart : end;
+    var finish = Number.isFinite(input.selectionEnd) ? input.selectionEnd : end;
+    var nextStart = Math.min(Math.max(start, 0), end);
+    var nextEnd = Math.min(Math.max(finish, 0), end);
+    if (nextStart !== start || nextEnd !== finish) {
+        input.setSelectionRange(nextStart, nextEnd);
+    }
+}
+
+// 초기 포커스 시 커서를 항상 숫자 마지막으로 보낸다.
+function moveAmountCaretToEditableEnd(input) {
+    if (!input) return;
+    var end = getAmountEditableEndIndex(input.value);
+    input.setSelectionRange(end, end);
+}
+
+// 포맷팅 전/후 커서 위치를 유지하기 위해 커서 앞 숫자 개수를 센다.
+function countAmountDigitsBeforeCaret(value, caret) {
+    var text = String(value || "");
+    var cursor = Math.max(0, Math.min(Number.isFinite(caret) ? caret : text.length, text.length));
+    return text.slice(0, cursor).replace(/[^0-9]/g, "").length;
+}
+
+// 숫자 개수 기준으로 포맷팅 이후 커서 위치를 복원한다.
+function setAmountCaretByDigitIndex(input, digitCount) {
+    if (!input) return;
+    var text = String(input.value || "");
+    var editableEnd = getAmountEditableEndIndex(text);
+
+    if (!digitCount || digitCount <= 0) {
+        input.setSelectionRange(0, 0);
+        return;
+    }
+
+    var seen = 0;
+    var pos = editableEnd;
+    for (var i = 0; i < editableEnd; i += 1) {
+        if (/[0-9]/.test(text.charAt(i))) {
+            seen += 1;
+        }
+        if (seen >= digitCount) {
+            pos = i + 1;
+            break;
+        }
+    }
+    pos = Math.min(pos, editableEnd);
+    input.setSelectionRange(pos, pos);
 }
 
 function formatGradeLabel(rank, score) {
@@ -2114,7 +1807,11 @@ function setCareerSpinInputs(value) {
     $("#exp_yr_year").val(parsed.years);
     $("#exp_yr_month").val(parsed.months);
     normalizeCareerSpinInputs();
-    syncCareerExpText(value);
+    if ($("#exp_yr_text").length === 0) {
+        $(".career-spin-wrap").closest("td").append('<span id="exp_yr_text" class="career-exp-text"></span>');
+    }
+    // 빈값으로 들어와도 정규화된 표시값(예: 0개월)이 유지되도록 현재 입력값 기준으로 표시
+    syncCareerExpText(composeCareerExpValue());
 }
 
 function composeCareerExpValue() {
@@ -2133,7 +1830,7 @@ function syncCareerExpValue() {
 
 function syncCareerExpText(value) {
     var source = value;
-    if (source === undefined) {
+    if (source === undefined || source === 0) {
         source = $("#exp_yr").val();
     }
     $("#exp_yr_text").text(formatCareerYearMonth(source));
@@ -2156,16 +1853,25 @@ function formatCareerYearMonth(value) {
     var parts = raw.split(".");
     var years = parseInt(parts[0], 10) || 0;
     if (parts.length === 1) {
+        if (years === 0) {
+            return "0개월";
+        }
         return years + "년";
     }
 
     var monthsRaw = String(parts[1] || "");
     if (!monthsRaw || /^0+$/.test(monthsRaw)) {
+        if (years === 0) {
+            return "0개월";
+        }
         return years + "년";
     }
 
     var months = parseInt(monthsRaw, 10);
     if (!months) {
+        if (years === 0) {
+            return "0개월";
+        }
         return years + "년";
     }
 
@@ -2179,10 +1885,10 @@ if (excelBtn) {
         const devId = document.getElementById("dev_id").value;
         const devNm = document.getElementById("dev_nm").value;
         if (!devId) {
-            showAlert({
+            showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
                 icon: 'error',
-                title: '엑셀 다운로드 오류',
-                text: '개발자ID가 없습니다.'
+                title: '오류',
+                text: `'개발자ID'가 없습니다.`
             });
             return;
         }

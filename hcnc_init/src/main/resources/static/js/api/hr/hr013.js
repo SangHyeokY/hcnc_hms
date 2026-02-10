@@ -6,6 +6,8 @@ var lastNonInprjCustNm = "";
 var hr013DeletedIds = [];
 var hr013SkillOptions = [];
 var hr013JobOptions = [];
+var hr013SkillGroupOptions = [];
+var hr013SkillPicker = null;
 
 // 프로젝트 탭 초기화 (버튼/콤보/태그/테이블)
 window.initTab3 = function () {
@@ -79,12 +81,19 @@ window.initTab3 = function () {
                 matchMode: "prefix"
             });
         }
+        bindHr013SkillPickerEvents();
         stackTagInput.setOptions(res || []);
         stackTagInput.setFromValue(pendingStackValue || $("#write_hr013_stack_txt").val());
+        syncHr013SkillPickerUi(true);
         if (window.hr013Table) {
             syncStackLabelsFromCodes();
             window.hr013Table.redraw(true);
         }
+    });
+
+    getComCode("skl_grp", "", function (res) {
+        hr013SkillGroupOptions = Array.isArray(res) ? res : [];
+        syncHr013SkillPickerUi(true);
     });
 };
 
@@ -175,7 +184,7 @@ function buildHr013Table() {
                 },
                 cellClick: startEditOnClick, width: 110
             },
-            { title: "계약단가", field: "rate_amt", hozAlign: "right", formatter: amountFormatter, editor: "input", editable: isHr013Editable, cellClick: startEditOnClick , width: 110},
+            { title: "계약단가", field: "rate_amt", hozAlign: "right", formatter: hr013AmountFormatter, editor: "input", editable: isHr013Editable, cellClick: startEditOnClick , width: 110},
             {
                 title: "역할",
                 field: "job_cd",
@@ -192,8 +201,14 @@ function buildHr013Table() {
                 },
                 cellClick: startEditOnClick, width: 90
             },
-            { title: "기술스택", field: "skl_id_lst", hozAlign: "left", editor: tagEditor, formatter: tagFormatter,
-                editable: () => currentMode !== "view" },
+            {
+                title: "기술스택",
+                field: "skl_id_lst",
+                hozAlign: "left",
+                formatter: hr013TableSkillFormatter,
+                editable: false,
+                cellClick: hr013TableSkillCellClick
+            },
             // { title: "기술스택", field: "stack_txt", formatter: skillDisplayFormatter, editor: stackTagEditor, editable: isHr013Editable, cellClick: startEditOnClick },
             { title: "투입률", field: "alloc_pct", hozAlign: "center", formatter: percentageFormatter, width: 90, editor: "input", editable: isHr013Editable, cellClick: startEditOnClick },
             { title: "비고", field: "remark", editor: "input", editable: isHr013Editable, cellClick: startEditOnClick , width: 200}
@@ -216,12 +231,17 @@ window.applyTab3Readonly = applyTab3Readonly;
 function openHr013Modal(mode) {
     var title = mode === "edit" ? "수정" : "등록";
     $("#hr013-type").text(title);
+    closeHr013SkillPicker(true);
 
     if (mode === "edit") {
         var rowData = getHr013SelectedRow();
 
         if (!rowData) {
-            alert("수정할 행을 체크해주세요.");
+            showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+                icon: 'info',
+                title: '알림',
+                text: '수정할 행을 선택해주세요.'
+            });
             return;
         }
         fillHr013Form(rowData);
@@ -234,7 +254,368 @@ function openHr013Modal(mode) {
 
 // 프로젝트 이력 모달 닫기
 function closeHr013Modal() {
+    closeHr013SkillPicker(true);
     $("#write-hr013-area").hide();
+}
+
+// 기술 선택 팝업 공통 팩토리 초기화(최초 1회)
+function initHr013SkillPicker() {
+    if (hr013SkillPicker || typeof createGroupedSkillPicker !== "function") {
+        return;
+    }
+
+    hr013SkillPicker = createGroupedSkillPicker({
+        namespace: "hr013",
+        pickerAreaSelector: "#hr013-skill-picker-area",
+        openTriggerSelector: "#btn_hr013_skill_picker",
+        applyTriggerSelector: "#btn_hr013_skill_picker_apply",
+        closeTriggerSelector: "#btn_hr013_skill_picker_close_x",
+        tableSelector: "#TABLE_HR013_SKILL_PICKER",
+        searchInputSelector: "#hr013-skill-picker-search",
+        searchWrapSelector: ".hr013-skill-picker-search-wrap",
+        suggestListSelector: "#hr013-skill-picker-suggest",
+        metaSelector: "#hr013-skill-picker-meta",
+        chipClass: "hr013-skill-chip",
+        chipWrapClass: "hr013-skill-chip-wrap",
+        suggestItemClass: "hr013-skill-suggest-item",
+        flashClass: "is-flash",
+        groupColumnWidth: 170,
+        getSkillOptions: function () {
+            return hr013SkillOptions || [];
+        },
+        getGroupOptions: function () {
+            return hr013SkillGroupOptions || [];
+        },
+        // 모달/그리드 어느 화면에서 열렸는지에 따라 현재 선택값 원본을 분기한다.
+        getSelectedCodes: function (context) {
+            if (context && context.type === "grid" && context.row) {
+                return getHr013RowSelectedCodeSet(context.row);
+            }
+            return getHr013SelectedCodeSet();
+        },
+        // 모달 내부 버튼으로 열릴 때는 기본 context를 modal로 고정한다.
+        getContextFromOpenEvent: function () {
+            return { type: "modal", row: null };
+        },
+        isReadonly: function () {
+            return currentMode === "view" || window.hr010ReadOnly;
+        },
+        // "적용" 버튼을 눌렀을 때만 실제 원본 데이터(모달 hidden/그리드 row)를 갱신한다.
+        onApply: function (payload) {
+            var csv = payload && payload.csv ? payload.csv : "";
+            var context = payload && payload.context ? payload.context : null;
+
+            if (context && context.type === "grid" && context.row && typeof context.row.update === "function") {
+                context.row.update({
+                    skl_id_lst: getHr013SkillArrayFromCsv(csv),
+                    stack_txt: csv,
+                    stack_txt_nm: getSkillLabelList(csv)
+                });
+                changedTabs.tab3 = true;
+                return;
+            }
+
+            if (stackTagInput) {
+                stackTagInput.setFromValue(csv);
+            } else {
+                $("#write_hr013_stack_txt").val(csv);
+            }
+            pendingStackValue = csv;
+        }
+    });
+}
+
+// 팝업 이벤트는 공통 유틸 내부에서 네임스페이스로 1회 바인딩한다.
+function bindHr013SkillPickerEvents() {
+    initHr013SkillPicker();
+    if (hr013SkillPicker) {
+        hr013SkillPicker.bindEvents();
+    }
+}
+
+// sourceType(modal/grid)에 따라 선택 원본을 분기해서 팝업을 연다.
+function openHr013SkillPicker(sourceType, row) {
+    if (currentMode === "view" || window.hr010ReadOnly) {
+        return;
+    }
+    initHr013SkillPicker();
+    if (!hr013SkillPicker) {
+        return;
+    }
+    var contextType = sourceType === "grid" ? "grid" : "modal";
+    if (contextType === "grid" && (!row || typeof row.getData !== "function")) {
+        return;
+    }
+    hr013SkillPicker.open({
+        type: contextType,
+        row: contextType === "grid" ? row : null
+    });
+}
+
+function closeHr013SkillPicker(immediate) {
+    if (!hr013SkillPicker) {
+        return;
+    }
+    hr013SkillPicker.close(immediate);
+}
+
+function applyHr013SkillPickerSelection() {
+    if (!hr013SkillPicker) {
+        closeHr013SkillPicker();
+        return;
+    }
+    hr013SkillPicker.apply();
+}
+
+function syncHr013SkillPickerUi(forceRebuild) {
+    if (!hr013SkillPicker) {
+        return;
+    }
+    hr013SkillPicker.sync(forceRebuild);
+}
+
+// 모달 hidden(csv) 값에서 현재 선택 코드를 Set으로 복원한다.
+function getHr013SelectedCodeSet() {
+    var set = new Set();
+    var csv = $("#write_hr013_stack_txt").val();
+    String(csv || "")
+        .split(",")
+        .forEach(function (item) {
+            var code = $.trim(item);
+            if (code) {
+                set.add(code);
+            }
+        });
+    return set;
+}
+
+// 인라인 그리드 행의 기술값(skl_id_lst/stack_txt)도 동일한 Set 포맷으로 복원한다.
+function getHr013RowSelectedCodeSet(row) {
+    var set = new Set();
+    if (!row || typeof row.getData !== "function") {
+        return set;
+    }
+    var data = row.getData() || {};
+    var codes = getHr013SkillCodeList(data.skl_id_lst || data.stack_txt || "");
+    codes.forEach(function (code) {
+        set.add(code);
+    });
+    return set;
+}
+
+// stack_txt/skl_id_lst가 CSV/JSON/객체 배열이어도 코드 배열로 정규화한다.
+function getHr013SkillCodeList(value) {
+    if (value == null) {
+        return [];
+    }
+    if (Array.isArray(value)) {
+        return value
+            .map(function (item) {
+                if (typeof item === "string") {
+                    return resolveHr013SkillCodeToken(item);
+                }
+                if (item && typeof item === "object") {
+                    return resolveHr013SkillCodeToken(extractHr013SkillCode(item) || extractHr013SkillLabel(item, ""));
+                }
+                return "";
+            })
+            .filter(function (code) {
+                return !!code;
+            });
+    }
+    var raw = String(value).trim();
+    if (!raw) {
+        return [];
+    }
+    if (raw.charAt(0) === "[") {
+        try {
+            var parsed = JSON.parse(raw);
+            return getHr013SkillCodeList(parsed);
+        } catch (e) {
+            // ignore parse error and fallback to csv split
+        }
+    }
+    return raw
+        .split(",")
+        .map(function (item) {
+            return resolveHr013SkillCodeToken(item);
+        })
+        .filter(function (item) {
+            return !!item;
+        });
+}
+
+function getHr013SkillLabelByCode(code) {
+    var key = String(code || "").trim();
+    if (!key) {
+        return "";
+    }
+    var found = (hr013SkillOptions || []).find(function (item) {
+        return String(item.cd || "") === key;
+    });
+    return found ? String(found.cd_nm || found.cd || key) : key;
+}
+
+// 단일 토큰(코드/라벨/깨진 문자열)을 최종 코드값으로 보정한다. ex[object Object]
+function resolveHr013SkillCodeToken(token) {
+    var raw = $.trim(String(token || ""));
+    if (!raw) {
+        return "";
+    }
+    var compact = raw.replace(/\s+/g, "").toLowerCase();
+    if (compact === "[objectobject]") {
+        return "";
+    }
+    var byCode = (hr013SkillOptions || []).find(function (item) {
+        return String(item.cd || "") === raw;
+    });
+    if (byCode) {
+        return String(byCode.cd || "");
+    }
+    var byLabel = (hr013SkillOptions || []).find(function (item) {
+        return String(item.cd_nm || "") === raw;
+    });
+    if (byLabel) {
+        return String(byLabel.cd || "");
+    }
+    return raw;
+}
+
+// 중첩 객체에서도 code 계열 키를 찾아 기술코드를 추출한다.
+function extractHr013SkillCode(item) {
+    if (item == null) {
+        return "";
+    }
+    if (typeof item === "string" || typeof item === "number") {
+        return $.trim(String(item));
+    }
+    var current = item;
+    var guard = 0;
+    while (current && typeof current === "object" && guard < 6) {
+        var candidate = current.code || current.cd || current.value || current.id || current.key;
+        if (candidate == null) {
+            break;
+        }
+        if (typeof candidate === "string" || typeof candidate === "number") {
+            return $.trim(String(candidate));
+        }
+        current = candidate;
+        guard += 1;
+    }
+    return "";
+}
+
+// 중첩 객체에서도 label 계열 키를 찾아 표시 라벨을 추출한다.
+function extractHr013SkillLabel(item, fallbackCode) {
+    if (item == null) {
+        return getHr013SkillLabelByCode(fallbackCode || "");
+    }
+    var current = item;
+    var guard = 0;
+    while (current && typeof current === "object" && guard < 6) {
+        var labelCandidate = current.label || current.cd_nm || current.name || current.nm || current.text;
+        if (labelCandidate != null) {
+            if (typeof labelCandidate === "string" || typeof labelCandidate === "number") {
+                return $.trim(String(labelCandidate));
+            }
+            current = labelCandidate;
+            guard += 1;
+            continue;
+        }
+        break;
+    }
+    return getHr013SkillLabelByCode(fallbackCode || extractHr013SkillCode(item));
+}
+
+// 저장/표시 공통 포맷: 어떤 입력이 와도 [{code,label}] 배열로 맞춘다.
+function normalizeHr013SkillRows(value, fallback) {
+    if (Array.isArray(value)) {
+        return value
+            .map(function (item) {
+                if (typeof item === "string") {
+                    var code = $.trim(item);
+                    if (!code) {
+                        return null;
+                    }
+                    return {
+                        code: code,
+                        label: getHr013SkillLabelByCode(code)
+                    };
+                }
+                if (item && typeof item === "object") {
+                    var objCode = extractHr013SkillCode(item);
+                    if (!objCode) {
+                        return null;
+                    }
+                    return {
+                        code: objCode,
+                        label: extractHr013SkillLabel(item, objCode)
+                    };
+                }
+                return null;
+            })
+            .filter(function (item) {
+                return !!item;
+            });
+    }
+    var codes = getHr013SkillCodeList(value);
+    if (!codes.length && fallback != null && fallback !== "") {
+        codes = getHr013SkillCodeList(fallback);
+    }
+    return codes.map(function (code) {
+        return {
+            code: code,
+            label: getHr013SkillLabelByCode(code)
+        };
+    });
+}
+
+function getHr013SkillArrayFromCsv(csv) {
+    return normalizeHr013SkillRows(csv, "");
+}
+
+function getHr013SkillCsvForSave(value, fallback) {
+    var codes = getHr013SkillCodeList(value);
+    if (!codes.length && fallback != null && fallback !== "") {
+        codes = getHr013SkillCodeList(fallback);
+    }
+    return codes.join(",");
+}
+
+function getHr013SkillLabelText(value, fallback) {
+    if (Array.isArray(value)) {
+        return value
+            .map(function (item) {
+                if (typeof item === "string") {
+                    return getHr013SkillLabelByCode(item);
+                }
+                if (item && typeof item === "object") {
+                    var code = extractHr013SkillCode(item);
+                    return extractHr013SkillLabel(item, code);
+                }
+                return "";
+            })
+            .filter(function (label) {
+                return !!label;
+            })
+            .join(", ");
+    }
+    var codes = getHr013SkillCodeList(value);
+    if (!codes.length && fallback != null && fallback !== "") {
+        codes = getHr013SkillCodeList(fallback);
+    }
+    return codes.map(function (code) {
+        return getHr013SkillLabelByCode(code);
+    }).join(", ");
+}
+
+function hr013EscapeHtml(value) {
+    return String(value || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\"/g, "&quot;")
+        .replace(/'/g, "&#39;");
 }
 
 // 프로젝트 데이터 조회 후 테이블 반영
@@ -255,9 +636,10 @@ function loadHr013TableData() {
                 }
                 row.role_nm = normalizeJobValue(row.role_nm) || "";
                 row.job_cd = normalizeJobValue(row.job_cd) || "";
-
-                // API의 skl_id_lst는 JSON 문자열이므로 Tabulator용 배열로 변환한다.
-                row.skl_id_lst = (row.skl_id_lst !== undefined) ? JSON.parse(row.skl_id_lst) : [];
+                row.rate_amt = parseHr013RateAmountValue(row.rate_amt);
+                row.skl_id_lst = normalizeHr013SkillRows(row.skl_id_lst, row.stack_txt);
+                row.stack_txt = getHr013SkillCsvForSave(row.skl_id_lst, row.stack_txt);
+                row.stack_txt_nm = getSkillLabelList(row.stack_txt);
                 return row;
             });
             window.hr013Table.setData(normalized);
@@ -292,7 +674,7 @@ function fillHr013Form(data) {
     lastNonInprjCustNm = data.inprj_yn === "Y" ? "" : (data.cust_nm || "");
     applyInprjCustomerName(data.inprj_yn, data.cust_nm);
     $("#write_hr013_prj_nm").val(data.prj_nm || "");
-    $("#write_hr013_rate_amt").val(formatNumberInput(data.rate_amt));
+    $("#write_hr013_rate_amt").val(formatNumberInput(parseHr013RateAmountValue(data.rate_amt)));
     $("#write_hr013_job_cd").val(data.job_cd || "");
     $("#write_hr013_alloc_pct").val(formatPercentInput(data.alloc_pct));
     $("#write_hr013_remark").val(data.remark || "");
@@ -300,6 +682,7 @@ function fillHr013Form(data) {
     if (stackTagInput) {
         stackTagInput.setFromValue(pendingStackValue);
     }
+    syncHr013SkillPickerUi(true);
 
 
     // console.log("input value : " + $("#write_hr013_st_dt").val());
@@ -322,6 +705,7 @@ function clearHr013Form() {
     if (stackTagInput) {
         stackTagInput.clear();
     }
+    syncHr013SkillPickerUi(true);
 }
 
 // 저장 버튼
@@ -348,39 +732,75 @@ function saveHr013Row() {
     }
 
     if (!payload.inprj_yn) {
-        alert("당사 여부를 선택해주세요.");
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'warning',
+            title: '경고',
+            text: `'당사 여부'를 선택해주세요.`
+        });
         return;
     }
     if (!payload.st_dt) {
-        alert("시작일을 입력해주세요.");
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'warning',
+            title: '경고',
+            text: `'시작일'을 입력해주세요.`
+        });
         return;
     }
     if (!payload.ed_dt) {
-        alert("종료일을 입력해주세요.");
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'warning',
+            title: '경고',
+            text: `'종료일'을 입력해주세요.`
+        });
         return;
     }
     if (!payload.cust_nm) {
-        alert("고객사를 입력해주세요.");
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'warning',
+            title: '경고',
+            text: `'고객사'를 입력해주세요.`
+        });
         return;
     }
     if (!payload.prj_nm) {
-        alert("프로젝트명을 입력해주세요.");
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'warning',
+            title: '경고',
+            text: `'프로젝트명'을 입력해주세요.`
+        });
         return;
     }
     if (!payload.rate_amt) {
-        alert("계약단가를 입력해주세요.");
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'warning',
+            title: '경고',
+            text: `'계약단가'를 입력해주세요.`
+        });
         return;
     }
     if (!payload.job_cd) {
-        alert("역할을 선택해주세요.");
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'warning',
+            title: '경고',
+            text: `'역할'을 선택해주세요.`
+        });
         return;
     }
     if (!payload.alloc_pct) {
-        alert("투입률을 입력해주세요.");
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'warning',
+            title: '경고',
+            text: `'투입률'을 입력해주세요.`
+        });
         return;
     }
     if (!payload.stack_txt) {
-        alert("기술스택을 선택해주세요.");
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'warning',
+            title: '경고',
+            text: `'기술스택'을 선택해주세요.`
+        });
         return;
     }
 
@@ -394,11 +814,20 @@ function saveHr013Row() {
                 loadHr013TableData();
                 // alert("저장되었습니다.");
             } else {
-                alert("저장에 실패했습니다.");
+                // alert("저장에 실패했습니다.");
+                showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+                    icon: 'error',
+                    title: '오류',
+                    text: '저장 중 오류가 발생했습니다.'
+                });
             }
         },
         error: function () {
-            alert("저장 중 오류가 발생했습니다.");
+            showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+                icon: 'error',
+                title: '오류',
+                text: '저장 중 오류가 발생했습니다.'
+            });
         }
     });
 }
@@ -425,7 +854,7 @@ function inprjCheckboxFormatter(cell) {
 
 // 선택 행 임시 삭제
 // 체크된 행을 임시 삭제(실제 삭제는 저장 시)
-function removeHr013SelectedRows() {
+async function removeHr013SelectedRows() {
     if (!window.hr013Table) {
         return;
     }
@@ -433,12 +862,23 @@ function removeHr013SelectedRows() {
         return row.getData()._checked;
     });
     if (!rows || rows.length === 0) {
-        alert("삭제할 행을 선택해주세요.");
+        // alert("삭제할 행을 선택해주세요.");
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'info',
+            title: '알림',
+            text: '삭제할 행을 선택해주세요.'
+        });
         return;
     }
-    if (!confirm("선택한 행을 정말로 삭제하시겠습니까?")) {
-        return;
-    }
+
+    const result = await showAlert({
+        icon: 'warning',
+        title: '경고',
+        text: '선택한 행을 정말로 삭제하시겠습니까?',
+    });
+
+    if (!result.isConfirmed) return;
+
     rows.forEach(function (row) {
         var data = row.getData();
         if (data.dev_prj_id) {
@@ -468,12 +908,12 @@ function saveHr013InlineRows() {
     var requests = [];
 
     rows.forEach(function (row) {
-        const code = $(row.skl_id_lst[0]).map(x => x.code);
-
         // 필수 키가 비어 있는 임시 행은 저장 요청에서 제외한다.
         if (!row.inprj_yn || !row.st_dt || !row.ed_dt) {
             return;
         }
+        var stackCsv = getHr013SkillCsvForSave(row.skl_id_lst, row.stack_txt);
+        var rateAmt = parseHr013RateAmountValue(row.rate_amt);
         var custNm = row.cust_nm || "";
         if (row.inprj_yn === "Y") {
             custNm = "HCNC";
@@ -490,9 +930,9 @@ function saveHr013InlineRows() {
                 ed_dt: normalizeDateForSave(row.ed_dt),
                 cust_nm: custNm,
                 prj_nm: row.prj_nm || "",
-                rate_amt: row.rate_amt || "",
+                rate_amt: rateAmt || "",
                 job_cd: row.job_cd || "",
-                stack_txt: Object.values(row.skl_id_lst).map(item => item.code).toString() || "", //row.stack_txt || "",
+                stack_txt: stackCsv,
                 alloc_pct: row.alloc_pct || "",
                 remark: row.remark || ""
             }
@@ -515,7 +955,11 @@ function saveHr013InlineRows() {
         hr013DeletedIds = [];
         loadHr013TableData();
     }).fail(function () {
-        alert("프로젝트 저장 중 오류가 발생했습니다.");
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'error',
+            title: '오류',
+            text: `'프로젝트' 저장 중 오류가 발생했습니다.`
+        });
     });
 }
 
@@ -536,6 +980,7 @@ function addHr013Row() {
         prj_nm: "",
         rate_amt: "",
         job_cd: "",
+        skl_id_lst: [],
         stack_txt: "",
         alloc_pct: "",
         remark: ""
@@ -708,6 +1153,32 @@ function resolveCell(e, cell) {
         return e;
     }
     return null;
+}
+
+function hr013TableSkillFormatter(cell) {
+    var value = cell.getValue();
+    var rowData = cell.getRow() ? cell.getRow().getData() : {};
+    var labelText = getHr013SkillLabelText(value, rowData ? rowData.stack_txt : "");
+    var textHtml = labelText ? hr013EscapeHtml(labelText) : "-";
+
+    if (window.hr010ReadOnly) {
+        return "<span class='hr013-stack-text'>" + textHtml + "</span>";
+    }
+    return "<div class='hr013-stack-cell'>" +
+        "<span class='hr013-stack-text'>" + textHtml + "</span>" +
+        "<button type='button' class='btn btn-add-skill btn-hr013-cell-skill-picker'>기술 선택</button>" +
+        "</div>";
+}
+
+function hr013TableSkillCellClick(e, cell) {
+    if (!isHr013Editable()) {
+        return;
+    }
+    var target = e && e.target ? e.target : null;
+    if (!target || !$(target).closest(".btn-hr013-cell-skill-picker").length) {
+        return;
+    }
+    openHr013SkillPicker("grid", cell.getRow());
 }
 
 // 날짜 입력 에디터
@@ -945,10 +1416,14 @@ function syncStackLabelsFromCodes() {
     }
     window.hr013Table.getRows().forEach(function (row) {
         var data = row.getData();
-        var codes = normalizeTagValue(data.stack_txt || "");
+        var codes = getHr013SkillCsvForSave(data.skl_id_lst, data.stack_txt || "");
         var nextLabel = getSkillLabelList(codes);
-        if (codes && data.stack_txt_nm !== nextLabel) {
-            row.update({ stack_txt: codes, stack_txt_nm: nextLabel });
+        if (data.stack_txt !== codes || data.stack_txt_nm !== nextLabel) {
+            row.update({
+                skl_id_lst: normalizeHr013SkillRows(data.skl_id_lst, codes),
+                stack_txt: codes,
+                stack_txt_nm: nextLabel
+            });
         }
     });
 }
@@ -1031,11 +1506,13 @@ function percentageFormatter(cell) {
 }
 
 // 계약단가(,),(테이블표)
-function amountFormatter(cell) {
-    if (cell.getValue() === null || cell.getValue() === undefined || cell.getValue() === "") {
-        return "";
+function hr013AmountFormatter(cell) {
+    var value = cell && typeof cell.getValue === "function" ? cell.getValue() : cell;
+    var parsed = parseHr013RateAmountValue(value);
+    if (!parsed) {
+        return "-";
     }
-    return formatNumberInput(cell.getValue());
+    return formatNumberInput(parsed);
 
 }
 
@@ -1056,6 +1533,55 @@ function formatNumberInput(value) {
     return raw.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
+// rate_amt가 숫자/문자열/객체 어떤 형태여도 숫자 문자열로 통일한다.
+function parseHr013RateAmountValue(value) {
+    if (value === null || value === undefined) {
+        return "";
+    }
+    if (typeof value === "number") {
+        if (!Number.isFinite(value)) {
+            return "";
+        }
+        return String(Math.trunc(value));
+    }
+    if (typeof value === "string") {
+        return normalizeAmountString(value);
+    }
+    if (typeof value === "object") {
+        var keys = ["rate_amt", "amount", "value", "val", "num", "number", "rawValue", "intVal"];
+        for (var i = 0; i < keys.length; i += 1) {
+            var key = keys[i];
+            if (!Object.prototype.hasOwnProperty.call(value, key)) {
+                continue;
+            }
+            var nested = parseHr013RateAmountValue(value[key]);
+            if (nested) {
+                return nested;
+            }
+        }
+        try {
+            var asText = String(value);
+            return normalizeAmountString(asText);
+        } catch (e) {
+            return "";
+        }
+    }
+    return "";
+}
+
+// [object Object] 같은 깨진 문자열을 방어하고 숫자만 남긴다.
+function normalizeAmountString(text) {
+    var raw = String(text || "").trim();
+    if (!raw) {
+        return "";
+    }
+    if (raw === "[object Object]") {
+        return "";
+    }
+    var digits = raw.replace(/[^\d]/g, "");
+    return digits || "";
+}
+
 // 퍼센트 포맷(입력값)
 function formatPercentInput(value) {
     if (value === null || value === undefined) return "";
@@ -1072,7 +1598,12 @@ $('#excelFile').on('change', function(e) {
     const file = e.target.files[0];
     e.target.value = '';
 
-    if (!file) return alert("파일을 선택하세요.");
+    if (!file) return showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+          icon: 'info',
+          title: '알림',
+          text: '파일을 선택하세요.'
+      });
+
     else console.log('파일 선택 완료:', file.name);
 
     const formData = new FormData();
