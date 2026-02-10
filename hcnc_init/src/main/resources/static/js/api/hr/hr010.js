@@ -1075,6 +1075,9 @@ function setModalMode(mode) {
         if (typeof closeHr012SkillPicker === "function") {
             closeHr012SkillPicker(true);
         }
+        if (typeof closeHr013SkillPicker === "function") {
+            closeHr013SkillPicker(true);
+        }
     }
 
     const $tagBox = $("#mainLangTagList").closest(".tag-input-box");
@@ -1102,6 +1105,9 @@ function closeUserViewModal() {
     closeMainLangPicker(true);
     if (typeof closeHr012SkillPicker === "function") {
         closeHr012SkillPicker(true);
+    }
+    if (typeof closeHr013SkillPicker === "function") {
+        closeHr013SkillPicker(true);
     }
     $modal.removeClass("show");
 
