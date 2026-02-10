@@ -2114,7 +2114,11 @@ function setCareerSpinInputs(value) {
     $("#exp_yr_year").val(parsed.years);
     $("#exp_yr_month").val(parsed.months);
     normalizeCareerSpinInputs();
-    syncCareerExpText(value);
+    if ($("#exp_yr_text").length === 0) {
+        $(".career-spin-wrap").closest("td").append('<span id="exp_yr_text" class="career-exp-text"></span>');
+    }
+    // 빈값으로 들어와도 정규화된 표시값(예: 0개월)이 유지되도록 현재 입력값 기준으로 표시
+    syncCareerExpText(composeCareerExpValue());
 }
 
 function composeCareerExpValue() {
@@ -2133,7 +2137,7 @@ function syncCareerExpValue() {
 
 function syncCareerExpText(value) {
     var source = value;
-    if (source === undefined) {
+    if (source === undefined || source === 0) {
         source = $("#exp_yr").val();
     }
     $("#exp_yr_text").text(formatCareerYearMonth(source));
@@ -2156,16 +2160,25 @@ function formatCareerYearMonth(value) {
     var parts = raw.split(".");
     var years = parseInt(parts[0], 10) || 0;
     if (parts.length === 1) {
+        if (years === 0) {
+            return "0개월";
+        }
         return years + "년";
     }
 
     var monthsRaw = String(parts[1] || "");
     if (!monthsRaw || /^0+$/.test(monthsRaw)) {
+        if (years === 0) {
+            return "0개월";
+        }
         return years + "년";
     }
 
     var months = parseInt(monthsRaw, 10);
     if (!months) {
+        if (years === 0) {
+            return "0개월";
+        }
         return years + "년";
     }
 

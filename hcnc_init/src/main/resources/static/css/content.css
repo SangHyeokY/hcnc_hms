@@ -131,16 +131,16 @@ option{background:#fff; color:#333;}
 .tabulator .tabulator-footer .tabulator-page[data-page="prev"],
 .tabulator .tabulator-footer .tabulator-page[data-page="next"],
 .tabulator .tabulator-footer .tabulator-page[data-page="last"] {
-  min-width: 44px;
-  width: 44px;
-  height: 44px;
-  line-height: 40px;
+  min-width: 31px;
+  width: 31px;
+  height: 31px;
+  line-height: 29px;
   border: 2px solid #b9c1ce;
   border-radius: 50%;
   background: #fff;
   padding: 0;
   color: #232d3d;
-  font-size: 26px;
+  font-size: 18px;
   font-weight: 500;
 }
 .tabulator .tabulator-footer .tabulator-page.tabulator-page-disabled {
@@ -1536,11 +1536,13 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
     width: 58px !important;
     min-width: 58px !important;
     padding: 0 6px !important;
-    text-align: left;
-    border: 0 !important;
+    height: 34px;
+    line-height: 34px;
+    text-align: center;
+    border: 1px solid #dee2e7 !important;
     border-right: 0 !important;
-    border-radius: 0 !important;
-    background: transparent !important;
+    border-radius: 4px 0 0 4px !important;
+    background: #fff !important;
     box-shadow: none !important;
 }
 
