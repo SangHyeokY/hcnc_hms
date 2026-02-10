@@ -71,12 +71,11 @@ public class LoginController {
         session.setAttribute("LOGIN_PW_CHG", user.get("pwd_chg_yn"));
         cm010Service.updateLastLogin(userId);
 
-        model.addAttribute("LOGIN_USER_ID", userId);
-        model.addAttribute("LOGIN_AUTH", user.get("role_cd"));
-        model.addAttribute("LOGIN_LOCK", user.get("lock_yn"));
-        model.addAttribute("LOGIN_PW_CHG", user.get("pwd_chg_yn"));
-
         mv.addObject("success", true);
+        mv.addObject("LOGIN_USER_ID", userId);
+        mv.addObject("LOGIN_AUTH", user.get("role_cd"));
+        mv.addObject("LOGIN_LOCK", user.get("lock_yn"));
+        mv.addObject("LOGIN_PW_CHG", user.get("pwd_chg_yn"));
         return mv;
     }
 

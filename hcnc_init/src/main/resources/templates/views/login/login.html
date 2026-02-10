@@ -97,8 +97,9 @@
           });
           const data = await response.json();
           if (data && data.success) {
-
-            if (showPwChgModal())
+            if (data.LOGIN_PW_CHG === "Y")
+              showPwChgModal(data.LOGIN_USER_ID);
+            else
               window.location.href = `${basePath}/hr010`;
           } else {
             alert((data && data.message) || "아이디 또는 비밀번호가 올바르지 않습니다.");
