@@ -194,28 +194,104 @@
     }
 
     function ensureCounterElement(table) {  // 건수 텍스트 span 생성/보장
+        if (table && table.__hcncGridCounterEl && document.body.contains(table.__hcncGridCounterEl)) {
+            return table.__hcncGridCounterEl;
+        }
         var tableEl = getTableElement(table);
         if (!tableEl) {
             return null;
         }
-        var footerEl = tableEl.querySelector(".tabulator-footer");
-        if (!footerEl) {
+        var counterEl = tableEl.querySelector("." + COUNTER_CLASS);
+        if (!counterEl && tableEl.id) {
+            counterEl = document.querySelector("." + COUNTER_CLASS + "[data-grid-for='" + tableEl.id + "']");
+        }
+
+        if (!counterEl) {
+            counterEl = document.createElement("span");
+            counterEl.className = COUNTER_CLASS;
+            if (tableEl.id) {
+                counterEl.setAttribute("data-grid-for", tableEl.id);
+            }
+        }
+
+        table.__hcncGridCounterEl = counterEl;
+        return counterEl;
+    }
+
+    function findRelatedTitle(tableEl) {
+        if (!tableEl) {
             return null;
         }
-
-        var counterEl = footerEl.querySelector("." + COUNTER_CLASS);
-        if (counterEl) {
-            if (counterEl.parentElement !== footerEl) {
-                footerEl.appendChild(counterEl);
+        var walker = tableEl;
+        while (walker && walker !== document.body) {
+            var prev = walker.previousElementSibling;
+            while (prev) {
+                if (prev.classList && prev.classList.contains("content-title")) {
+                    return prev;
+                }
+                prev = prev.previousElementSibling;
             }
-            return counterEl;
+
+            var parent = walker.parentElement;
+            if (parent) {
+                for (var i = 0; i < parent.children.length; i += 1) {
+                    var child = parent.children[i];
+                    if (child.classList && child.classList.contains("content-title")) {
+                        return child;
+                    }
+                }
+            }
+            walker = parent;
         }
+        return null;
+    }
 
-        counterEl = document.createElement("span");
-        counterEl.className = COUNTER_CLASS;
-        footerEl.appendChild(counterEl);
+    function getNormalizedTitleText(titleEl) {
+        if (!titleEl) {
+            return "";
+        }
+        var titleNode = titleEl.querySelector("h4") || titleEl;
+        return toText(titleNode.textContent).replace(/\s+/g, "");
+    }
 
-        return counterEl;
+    function shouldRenderCounterInTitle(tableEl, titleEl) {
+        if (!tableEl || !titleEl) {
+            return false;
+        }
+        if (tableEl.id === "TABLE_COMMON_MAIN") {
+            return false;
+        }
+        var titleText = getNormalizedTitleText(titleEl);
+        if (titleText.indexOf("코드그룹") > -1) {
+            return false;
+        }
+        return true;
+    }
+
+    function mountCounterToTitle(titleEl, counterEl) {
+        if (!titleEl || !counterEl) {
+            return;
+        }
+        var titleNode = titleEl.querySelector("h4") || titleEl;
+        if (counterEl.parentElement !== titleNode) {
+            titleNode.appendChild(counterEl);
+        }
+        counterEl.classList.add("hcnc-grid-count-title");
+    }
+
+    function mountCounterToFooter(tableEl, counterEl) {
+        if (!tableEl || !counterEl) {
+            return false;
+        }
+        var footerEl = tableEl.querySelector(".tabulator-footer");
+        if (!footerEl) {
+            return false;
+        }
+        if (counterEl.parentElement !== footerEl) {
+            footerEl.appendChild(counterEl);
+        }
+        counterEl.classList.remove("hcnc-grid-count-title");
+        return true;
     }
 
     function applyResponsiveFooterLayout(table, counterEl) {    // 좁은 화면에서 compact모드 판단
@@ -257,13 +333,31 @@
     }
 
     function updateGridCounter(table) { // 건수/아이콘/반응형 한번에 갱신
+        var tableEl = getTableElement(table);
+        if (!tableEl) {
+            return;
+        }
         var counterEl = ensureCounterElement(table);
         if (!counterEl) {
             return;
         }
         enforcePaginatorSymbols(table);
         counterEl.textContent = "총 데이터 수 " + getGridCount(table) + "건";
-        applyResponsiveFooterLayout(table, counterEl);
+
+        var titleEl = findRelatedTitle(tableEl);
+        var inTitle = shouldRenderCounterInTitle(tableEl, titleEl);
+        if (inTitle) {
+            mountCounterToTitle(titleEl, counterEl);
+            var footerForTitle = tableEl.querySelector(".tabulator-footer");
+            if (footerForTitle) {
+                footerForTitle.classList.remove(FOOTER_COMPACT_CLASS);
+            }
+            return;
+        }
+
+        if (mountCounterToFooter(tableEl, counterEl)) {
+            applyResponsiveFooterLayout(table, counterEl);
+        }
     }
 
     function refreshAllGridCounters() { // 전체 테이블 재계산

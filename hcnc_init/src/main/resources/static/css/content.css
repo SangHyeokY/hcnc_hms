@@ -161,6 +161,17 @@ option{background:#fff; color:#333;}
   white-space: nowrap;
   pointer-events: none;
 }
+/* 총 데이터 수 */
+.content-title h4 .hcnc-grid-count-title {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 10px;
+  font-size: 12px;
+  font-weight: 400;
+  color: #8f97a7;
+  white-space: nowrap;
+  pointer-events: none;
+}
 .tabulator .tabulator-footer.hcnc-grid-footer-compact {
   padding: 8px 12px 6px !important;
   min-height: 76px;
