@@ -956,13 +956,14 @@ function fillUserForm(d) {
         }
     }
 
-    const rank = d.grade || "";
+    const rank = d.grade || "-";
     const score = d.score || 0;
     if (rank) {
         $("#grade").text(formatGradeLabel(rank, score));
     } else {
         $("#grade").text("");
     }
+    $("#aboutGrade").show();
 }
 
 // 팝업 닫히면 값 초기화하기
@@ -989,19 +990,11 @@ function clearUserForm() {
     $("#avail_dt").val("");
     $("#hope_rate_amt").val("");
     $("#dev_id_input").text("");
-
-//    $("#grade").text("");
-//    $("#score").text("");
     $("#dev_type").val("");
-
     $("#select_work_md").val("");
     $("#select_ctrt_typ").val("");
-
-    // $("#show_devId").text("");
-    // $("#dev_type2").text("");
-    // $("#devTypeWrap").hide();
-
-    $("#score").text("-");
+    $("#grade").text("");
+    $("#aboutGrade").hide();
 }
 
 // ============================================================================== //
@@ -1026,7 +1019,7 @@ function setModalMode(mode) {
     // 등록 페이지의 경우
     if (isInsert) {
         $("#dev_id_input").text("-");
-        $("#grade").text("");
+        $("#grade").text("-");
     }
 
     if (isView) {
@@ -1915,30 +1908,6 @@ function fetchUserScore(devId) {
         data: { dev_id: devId }
     });
 }
-
-// 점수 계산
-//function loadUserScoreAsync(devId) {
-//    return new Promise((resolve, reject) => {
-//        $("#grade").text("계산중...");
-//        $("#score").text("");
-//
-//        $.ajax({
-//            url: "/hr010/getScore",
-//            type: "GET",
-//            data: { dev_id: devId },
-//            success: function(res) {
-//                const data = res.res || {};
-//                $("#grade").text(data.rank || "");
-//                $("#score").text(`(${data.score || 0}점)`);
-//                resolve(); // 완료 시 resolve 호출
-//            },
-//            error: function(err) {
-//                console.error(err);
-//                reject(err); // 에러 시 reject 호출
-//            }
-//        });
-//    });
-//}
 
 // alert 문자 가공
 function btnEditView(alertPrefix = "") {
