@@ -318,4 +318,14 @@
         </if>
     </insert>
 
+    <!-- 사용자 패스워드 변경 -->
+    <update id="pwChgUser" parameterType="map">
+        UPDATE tb_user_info
+        SET pwd_hash = #{password},
+            login_fail_cnt = 0,
+            lock_yn = 'N',
+            pwd_chg_ts = NOW()
+        WHERE user_id = #{username}
+    </update>
+
 </mapper>

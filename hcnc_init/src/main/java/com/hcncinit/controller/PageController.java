@@ -50,7 +50,11 @@ public class PageController {
         mv.setViewName("views/cm020/cm040");
 
         String auth = (String) session.getAttribute("LOGIN_AUTH");
+        String lock = (String) session.getAttribute("LOGIN_LOCK");
+        String pwchg = (String) session.getAttribute("LOGIN_PW_CHG");
         model.addAttribute("LOGIN_AUTH", auth);
+        model.addAttribute("LOGIN_LOCK", lock);
+        model.addAttribute("LOGIN_PW_CHG", pwchg);
         return mv;
     }
 
@@ -60,7 +64,11 @@ public class PageController {
         mv.setViewName("views/cm010/cm010");
 
         String auth = (String) session.getAttribute("LOGIN_AUTH");
+        String lock = (String) session.getAttribute("LOGIN_LOCK");
+        String pwchg = (String) session.getAttribute("LOGIN_PW_CHG");
         model.addAttribute("LOGIN_AUTH", auth);
+        model.addAttribute("LOGIN_LOCK", lock);
+        model.addAttribute("LOGIN_PW_CHG", pwchg);
         return mv;
     }
 
@@ -70,7 +78,11 @@ public class PageController {
         mv.setViewName("views/hr/hr010");
 
         String auth = (String) session.getAttribute("LOGIN_AUTH");
+        String lock = (String) session.getAttribute("LOGIN_LOCK");
+        String pwchg = (String) session.getAttribute("LOGIN_PW_CHG");
         model.addAttribute("LOGIN_AUTH", auth);
+        model.addAttribute("LOGIN_LOCK", lock);
+        model.addAttribute("LOGIN_PW_CHG", pwchg);
         return mv;
     }
 

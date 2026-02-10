@@ -60,4 +60,9 @@ public class Cm010Service {
             map.put("userId", "system");
         }
     }
+
+    public int pwChg(Map<String,Object> map){
+        return this.sqlSession.insert("com.hcncinit.CommonMapper.pwChgUser", map);
+    };
+
 }

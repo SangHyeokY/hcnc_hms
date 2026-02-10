@@ -10,7 +10,13 @@
   <script>
     window.__CONTEXT_PATH__ = "";
   </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script th:src="@{/js/api/login.js}" src="/js/api/login.js"></script>
 </head>
+
+<input type="hidden" id="LOGIN_USER_ID" th:value="${session.LOGIN_USER_ID}" />
+<input type="hidden" id="LOGIN_LOCK" th:value="${session.LOGIN_LOCK}" />
+<input type="hidden" id="LOGIN_PW_CHG" th:value="${session.LOGIN_PW_CHG}" />
 
 <body>
   <div id="app-wrapper">
@@ -91,7 +97,9 @@
           });
           const data = await response.json();
           if (data && data.success) {
-            window.location.href = `${basePath}/hr010`;
+
+            if (showPwChgModal())
+              window.location.href = `${basePath}/hr010`;
           } else {
             alert((data && data.message) || "아이디 또는 비밀번호가 올바르지 않습니다.");
           }
@@ -101,6 +109,48 @@
       });
     })();
   </script>
+
+  <div class="modal-wrap content" id="user-pwchange-area" style="display: none">
+    <div class="modal-container">
+      <div class="header">
+        <h4>사용자 관리 <span class="edit-mode">등록</span></h4>
+        <span class="modal-close" onclick="closePwChgModal()"></span>
+      </div>
+      <div class="modal-content">
+        <article>
+          <div class="div-table">
+            <ul>
+              <li class="table-col fl-ac">
+                <div class="table-cell">
+                  <p class="cell-tit">아이디</p>
+                  <div class="cell-info"><input type="text" class="text" id="user_pwchg_id"
+                                                placeholder="아이디" readonly></div>
+                </div>
+              </li>
+              <li class="table-col fl-ac">
+                <div class="table-cell">
+                  <p class="cell-tit">비밀번호</p>
+                  <div class="cell-info"><input type="password" class="text" id="user_pwchg_hash"
+                                                placeholder="비밀번호"></div>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </article>
+      </div>
+      <div class="modal-btn">
+        <ul>
+          <li>
+            <button class="btn btn-close" onclick="closePwChgModal()">
+              닫기
+            </button>
+          </li>
+          <li><button class="btn btn-save" id="btn-pwchange-save">저장</button></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
 </body>
 
 </html>
