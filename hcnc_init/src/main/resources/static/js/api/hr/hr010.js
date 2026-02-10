@@ -226,11 +226,16 @@ $(document).ready(async function () {
             Object.keys(changedTabs).forEach(k => changedTabs[k] = false);
 
             // 저장 완료 알림
-            alert(
-                currentMode === "insert"
-                    ? "인적사항 정보가 저장되었습니다."
-                    : `인적사항\n- ${savedTabs.join("\n- ")}\n저장이 완료되었습니다.`
-            );
+            if (
+                currentMode === "insert" ||
+                (!changedTabs.tab1 && !changedTabs.tab2 && !changedTabs.tab3 && !changedTabs.tab4)
+            ) {
+                alert("인적사항 정보가 저장되었습니다.");
+            } else {
+                alert(
+                    `인적사항\n- ${savedTabs.join("\n- ")}\n저장이 완료되었습니다.`
+                );
+            }
 
             // 신규 등록이었을 경우, 팝업 종료
             if (currentMode === "insert") {
@@ -782,24 +787,15 @@ function fillUserForm(d) {
         $("#select_ctrt_typ").val("");
     }
 
+    $("#dev_type").val(""); // 기본값 초기화
+
+    // '소속 구분' 값 재할당
     if (d.dev_id) {
         if (d.dev_id.startsWith("HCNC_F")) {
             $("#dev_type").val("HCNC_F");
-            // $("#dev_type2").text("프리랜서");
-            // $("#devTypeWrap").show();
         } else if (d.dev_id.startsWith("HCNC_S")) {
             $("#dev_type").val("HCNC_S");
-            // $("#dev_type2").text("사원");
-            // $("#devTypeWrap").show();
-        } else {
-            // console.log("dev_id 값이 잘못 되었습니다.")
-            $("#dev_type").val("");
-            // $("#dev_type2").text("");
         }
-    } else {
-        // console.log("dev_id 값이 존재하지 않습니다.")
-        $("#dev_type").val("");
-        // $("#dev_type2").text("");
     }
 
     const rank = d.grade || "";
