@@ -108,7 +108,7 @@ public class CommonService {
             // ★ 병합도 복사 (원하는 경우)
             copyRowMerges(sheet, startRow + 1, startRow);
         }
-        deleteRowAndFixMerges(sheet, startRow + i, true);
+        deleteRowAndFixMerges(sheet, startRow + i, false);
 
         Map<String, Integer> colMap = Map.of(
                 "cd_nm", 1,
@@ -117,7 +117,7 @@ public class CommonService {
 
         fillByMap(sheet, data01, startRow, templateRowIndex, colMap);
 
-        startRow = startRow + i + 4; // 4: 타이틀 및 공백 영역
+        startRow = startRow + i + 5; // 5: 타이틀 및 공백 영역
 
         i = 0;
         for (; i < data02.size(); i++) {
@@ -193,7 +193,7 @@ public class CommonService {
     }
 
     private void fillSheet5(XSSFSheet sheet, List<Map<String, Object>> data01, List<Map<String, Object>> data02) {
-        int startRow = 4;
+        int startRow = 5;
         int templateRowIndex = 2;
 
         int i = 0;
