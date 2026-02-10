@@ -1264,6 +1264,9 @@ async function removeHr013SelectedRows() {
         icon: 'warning',
         title: '경고',
         text: '선택한 행을 정말로 삭제하시겠습니까?',
+        showCancelButton: true,
+        cancelButtonText: '취소',
+        cancelButtonColor: '#212E41'
     });
 
     if (!result.isConfirmed) return;
