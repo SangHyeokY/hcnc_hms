@@ -1973,11 +1973,52 @@ $(document).on("click", ".career-spin-btn", function () {
     normalizeCareerSpinInputs();
 });
 
-// 희망단가는 숫자만 입력 가능
-$("#hope_rate_amt").on("input", function () {
-    let input_number = this.value.replace(/[^0-9]/g, "");
-    this.value = formatAmount(input_number);
-});
+// 희망단가 입력: 숫자만 허용 + 커서를 항상 "원" 앞(편집 가능 구간)에 유지
+$("#hope_rate_amt")
+    .on("input", function () {
+        var raw = this.value || "";
+        var caret = Number.isFinite(this.selectionStart) ? this.selectionStart : raw.length;
+        var digitsBeforeCaret = countAmountDigitsBeforeCaret(raw, caret);
+        var inputNumber = normalizeAmountValue(raw);
+        var formatted = formatAmount(inputNumber);
+        this.value = formatted;
+        setAmountCaretByDigitIndex(this, digitsBeforeCaret);
+    })
+    .on("focus", function () {
+        moveAmountCaretToEditableEnd(this);
+    })
+    .on("click", function () {
+        var input = this;
+        setTimeout(function () {
+            clampAmountCaretToEditableRange(input);
+        }, 0);
+    })
+    .on("keydown", function (e) {
+        var value = this.value || "";
+        var suffixIndex = getAmountEditableEndIndex(value);
+        var start = Number.isFinite(this.selectionStart) ? this.selectionStart : suffixIndex;
+        var end = Number.isFinite(this.selectionEnd) ? this.selectionEnd : suffixIndex;
+
+        // 커서가 "원" 뒤로 가지 않도록 제한
+        if ((e.key === "ArrowRight" || e.key === "End") && start >= suffixIndex && end >= suffixIndex) {
+            e.preventDefault();
+            this.setSelectionRange(suffixIndex, suffixIndex);
+            return;
+        }
+
+        // 커서가 "원" 뒤에 있으면 우선 "원" 앞으로 이동
+        if (e.key === "Backspace" && start === end && start > suffixIndex) {
+            e.preventDefault();
+            this.setSelectionRange(suffixIndex, suffixIndex);
+            return;
+        }
+
+        // Delete로 "원" 자체를 지우는 동작은 막음
+        if (e.key === "Delete" && start === end && start >= suffixIndex) {
+            e.preventDefault();
+            return;
+        }
+    });
 
 // 숫자에 콤마 표시
 function formatNumber(num) {
@@ -2036,6 +2077,60 @@ function formatAmount(value) {
 function normalizeAmountValue(value) {
     if (value === null || value === undefined) return "";
     return String(value).replace(/[^0-9]/g, "");
+}
+
+function getAmountEditableEndIndex(value) {
+    var text = String(value || "");
+    return text.endsWith("원") ? text.length - 1 : text.length;
+}
+
+function clampAmountCaretToEditableRange(input) {
+    if (!input) return;
+    var end = getAmountEditableEndIndex(input.value);
+    var start = Number.isFinite(input.selectionStart) ? input.selectionStart : end;
+    var finish = Number.isFinite(input.selectionEnd) ? input.selectionEnd : end;
+    var nextStart = Math.min(Math.max(start, 0), end);
+    var nextEnd = Math.min(Math.max(finish, 0), end);
+    if (nextStart !== start || nextEnd !== finish) {
+        input.setSelectionRange(nextStart, nextEnd);
+    }
+}
+
+function moveAmountCaretToEditableEnd(input) {
+    if (!input) return;
+    var end = getAmountEditableEndIndex(input.value);
+    input.setSelectionRange(end, end);
+}
+
+function countAmountDigitsBeforeCaret(value, caret) {
+    var text = String(value || "");
+    var cursor = Math.max(0, Math.min(Number.isFinite(caret) ? caret : text.length, text.length));
+    return text.slice(0, cursor).replace(/[^0-9]/g, "").length;
+}
+
+function setAmountCaretByDigitIndex(input, digitCount) {
+    if (!input) return;
+    var text = String(input.value || "");
+    var editableEnd = getAmountEditableEndIndex(text);
+
+    if (!digitCount || digitCount <= 0) {
+        input.setSelectionRange(0, 0);
+        return;
+    }
+
+    var seen = 0;
+    var pos = editableEnd;
+    for (var i = 0; i < editableEnd; i += 1) {
+        if (/[0-9]/.test(text.charAt(i))) {
+            seen += 1;
+        }
+        if (seen >= digitCount) {
+            pos = i + 1;
+            break;
+        }
+    }
+    pos = Math.min(pos, editableEnd);
+    input.setSelectionRange(pos, pos);
 }
 
 function formatGradeLabel(rank, score) {
