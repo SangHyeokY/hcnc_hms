@@ -104,8 +104,8 @@
     padding-left:20px;
     height: 36px;
     border-radius: 20px;
-    border: 1px solid #4880FF;
-    background: url("../icons/ico-search.png") 16px center no-repeat #4880FF;
+    border: 1px solid #212E41;
+    background: url("../icons/ico-search.png") 16px center no-repeat #212E41;
     background-size:20px;
     color: #fff;
     /*font-size: 14px;*/
@@ -360,8 +360,8 @@ input[type="checkbox"]:before {
 input[type="checkbox"]:checked:before {
     /* 체크박스를 체크했을때 */
     color: #fff; 
-    border-color: #3A3F49;
-    background: #3A3F49;
+    border-color: #ED2455;
+    background: #ED2455;
 }
 input[type="checkbox"]:checked:after {
     content: "";
@@ -392,10 +392,10 @@ input[type="checkbox"]:checked:after {
 #type-f .file-list li{margin-bottom:20px;}
 .file-box3{display: flex; position: relative; overflow: hidden; border: 1px solid #d9d9d9; border-radius: 4px; width:100%; height:auto; cursor: pointer; background: #F8F8F8; padding:18px 22px; border: 1px solid #DEE2E7; border-radius: 8px;} 
 .file-box3 .file-desc {font-weight: 700; font-size: 20px; text-align: center; color: #000000;}
-.file-box3 dd{padding:5px; background: #FFFFFF; border: 1px solid #4880FF; border-radius: 6px; font-weight: 600; font-size: 14px; text-align: center; color: #0554f8;}
+.file-box3 dd{padding:5px; background: #FFFFFF; border: 1px solid #E50019; border-radius: 6px; font-weight: 600; font-size: 14px; text-align: center; color: #0554f8;}
 .file-box3 dd .img-area{width:13px; height:13px; margin-right: 6px; background: url('../icons/icon_file.png') center center no-repeat; background-size: contain;}
 .file-box3.active{background: linear-gradient(0deg, rgba(0, 198, 165, 0.08), rgba(0, 198, 165, 0.08)), #F8F8F8; border: 1px solid #DEE2E7;}
-.file-box3.active dd{background: #4880FF; border-radius: 6px; color: #fff;}
+.file-box3.active dd{background:#E50019 ; border-radius: 6px; color: #fff;}
 .file-box3.active dd .img-area{background: url('../icons/icon_file_w.png') center center no-repeat; background-size: contain;}
 
 
