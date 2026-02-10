@@ -1540,7 +1540,7 @@ function buildMainLangPickerTable() {
 
     mainLangPickerTable = new Tabulator("#TABLE_MAIN_LANG_PICKER", {
         layout: "fitColumns",
-        height: "360px",
+        height: "371px",
         placeholder: "등록된 기술이 없습니다.",
         headerHozAlign: "center",
         columnDefaults: {
