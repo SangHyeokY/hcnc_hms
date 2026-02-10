@@ -15,6 +15,7 @@ var pendingMainLangValue = "";
 var mainLangPickerTable = null;
 var mainLangPickerTableReady = false;
 var mainLangPickerDraftSet = null;
+var mainLangSuggestActiveIndex = -1; // -1: hide
 var mainLangPickerEventBound = false;
 var mainLangSkillOptions = [];
 var mainLangGroupOptions = [];
@@ -1458,8 +1459,19 @@ function bindMainLangPickerEvents() {
     });
 
     $(document).on("keydown", "#main-lang-picker-search", function (e) {
-        if (e.key === "Enter") {
+        if (e.key === "ArrowDown") {
             e.preventDefault();
+            moveMainLangSuggestionSelection(1);
+        } else if (e.key === "ArrowUp") {
+            e.preventDefault();
+            moveMainLangSuggestionSelection(-1);
+        } else if (e.key === "Enter") {
+            e.preventDefault();
+            var $active = getMainLangActiveSuggestItem();
+            if ($active.length) {
+                selectMainLangSkill(String($active.data("code") || ""), true);
+                return;
+            }
             var $first = $("#main-lang-picker-suggest .main-lang-suggest-item").first();
             if ($first.length) {
                 selectMainLangSkill(String($first.data("code") || ""), true);
@@ -1477,6 +1489,12 @@ function bindMainLangPickerEvents() {
             return;
         }
         selectMainLangSkill(skillCode, true);
+    });
+
+    $(document).on("mouseenter", "#main-lang-picker-suggest .main-lang-suggest-item", function () {
+        var $items = $("#main-lang-picker-suggest .main-lang-suggest-item");
+        mainLangSuggestActiveIndex = $items.index(this);
+        syncMainLangSuggestionActive();
     });
 
     $(document).on("mousedown", function (e) {
@@ -1515,6 +1533,7 @@ function closeMainLangPicker(immediate) {
     }
     $picker.removeClass("show");
     $("#main-lang-picker-suggest").hide().empty();
+    mainLangSuggestActiveIndex = -1;
     if (immediate) {
         mainLangPickerDraftSet = null;
         $picker.hide();
@@ -1756,6 +1775,7 @@ function selectMainLangSkill(skillCode, fromSearch) {
     if (fromSearch) {
         $("#main-lang-picker-search").val("");
         $("#main-lang-picker-suggest").hide().empty();
+        mainLangSuggestActiveIndex = -1;
     }
 }
 
@@ -1830,16 +1850,19 @@ function findMainLangSkillMatches(keyword, limit) {
         .slice(0, max);
 }
 
+// 추천목록생성
 function renderMainLangSuggestions(keyword) {
     var $suggest = $("#main-lang-picker-suggest");
     var query = String(keyword || "").trim();
     if (!query) {
+        mainLangSuggestActiveIndex = -1; // 미선택
         $suggest.hide().empty();
         return;
     }
 
     var matches = findMainLangSkillMatches(query, 20);
     if (!matches.length) {
+        mainLangSuggestActiveIndex = -1;
         $suggest.hide().empty();
         return;
     }
@@ -1852,6 +1875,51 @@ function renderMainLangSuggestions(keyword) {
     }).join("");
 
     $suggest.html(html).show();
+    mainLangSuggestActiveIndex = -1;
+    syncMainLangSuggestionActive();
+}
+
+function moveMainLangSuggestionSelection(step) {
+    var $items = $("#main-lang-picker-suggest .main-lang-suggest-item");
+    if (!$items.length || !$("#main-lang-picker-suggest").is(":visible")) {
+        return;
+    }
+    var max = $items.length - 1;
+    if (mainLangSuggestActiveIndex < 0) {
+        mainLangSuggestActiveIndex = step > 0 ? 0 : max;
+    } else {
+        mainLangSuggestActiveIndex += step;
+        if (mainLangSuggestActiveIndex < 0) {
+            mainLangSuggestActiveIndex = 0;
+        }
+        if (mainLangSuggestActiveIndex > max) {
+            mainLangSuggestActiveIndex = max;
+        }
+    }
+    syncMainLangSuggestionActive();
+}
+
+function syncMainLangSuggestionActive() {
+    var $items = $("#main-lang-picker-suggest .main-lang-suggest-item");
+    $items.removeClass("is-active");
+    if (!$items.length || mainLangSuggestActiveIndex < 0) {
+        return;
+    }
+    var $active = $items.eq(mainLangSuggestActiveIndex);
+    $active.addClass("is-active");
+    var container = $("#main-lang-picker-suggest").get(0);
+    var element = $active.get(0);
+    if (container && element && typeof element.scrollIntoView === "function") {
+        element.scrollIntoView({ block: "nearest" });
+    }
+}
+
+function getMainLangActiveSuggestItem() {
+    var $items = $("#main-lang-picker-suggest .main-lang-suggest-item");
+    if (!$items.length || mainLangSuggestActiveIndex < 0) {
+        return $();
+    }
+    return $items.eq(mainLangSuggestActiveIndex);
 }
 
 // ============================================================================== //
