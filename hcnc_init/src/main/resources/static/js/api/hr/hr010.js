@@ -9,11 +9,7 @@ var currentMode = "insert";
 // 주 개발언어 태그 입력 공통 모듈
 var mainLangTagInput = null;
 var pendingMainLangValue = "";
-var mainLangPickerTable = null;
-var mainLangPickerTableReady = false;
-var mainLangPickerDraftSet = null;
-var mainLangSuggestActiveIndex = -1; // -1: hide
-var mainLangPickerEventBound = false;
+var mainLangPicker = null;
 var mainLangSkillOptions = [];
 var mainLangGroupOptions = [];
 
@@ -1381,6 +1377,7 @@ function initMainLangTags() {
                 syncMainLangPickerUi();
             }
         });
+        initMainLangPicker();
         bindMainLangPickerEvents();
     }
 
@@ -1388,6 +1385,7 @@ function initMainLangTags() {
         mainLangSkillOptions = Array.isArray(res) ? res : [];
         mainLangTagInput.setOptions(mainLangSkillOptions);
         mainLangTagInput.setFromValue(pendingMainLangValue || $("#main_lang").val());
+        pendingMainLangValue = $("#main_lang").val() || pendingMainLangValue;
         syncMainLangPickerUi(true);
     });
 
@@ -1399,514 +1397,97 @@ function initMainLangTags() {
 
 // ============================================================================== //
 
-function bindMainLangPickerEvents() {
-    if (mainLangPickerEventBound) {
+// 공통 팩토리 기반 주개발언어 선택 팝업 초기화
+function initMainLangPicker() {
+    if (mainLangPicker || typeof createGroupedSkillPicker !== "function") {
         return;
     }
-    mainLangPickerEventBound = true;
-
-    $(document).on("click", "#main_lang_input, #btn_main_lang_picker", function (e) {
-        e.preventDefault();
-        if (currentMode === "view") {
-            return;
-        }
-        openMainLangPicker();
-    });
-
-    $(document).on("click", "#btn_main_lang_picker_apply", function (e) {
-        e.preventDefault();
-        applyMainLangPickerSelection();
-    });
-
-    $(document).on("click", "#btn_main_lang_picker_close_x", function (e) {
-        e.preventDefault();
-        closeMainLangPicker();
-    });
-
-    $(document).on("click", "#main-lang-picker-area", function (e) {
-        if (e.target === this) {
-            closeMainLangPicker();
-        }
-    });
-
-    $(document).on("click", "#TABLE_MAIN_LANG_PICKER .main-lang-skill-chip", function (e) {
-        e.preventDefault();
-        if (currentMode === "view") {
-            return;
-        }
-        var skillCode = String($(this).data("code") || "");
-        if (!skillCode) {
-            return;
-        }
-        toggleMainLangSkill(skillCode);
-    });
-
-    $(document).on("input", "#main-lang-picker-search", function () {
-        renderMainLangSuggestions($(this).val());
-    });
-
-    $(document).on("keydown", "#main-lang-picker-search", function (e) {
-        if (e.key === "ArrowDown") {
-            e.preventDefault();
-            moveMainLangSuggestionSelection(1);
-        } else if (e.key === "ArrowUp") {
-            e.preventDefault();
-            moveMainLangSuggestionSelection(-1);
-        } else if (e.key === "Enter") {
-            e.preventDefault();
-            var $active = getMainLangActiveSuggestItem();
-            if ($active.length) {
-                selectMainLangSkill(String($active.data("code") || ""), true);
-                return;
+    mainLangPicker = createGroupedSkillPicker({
+        namespace: "main_lang",
+        pickerAreaSelector: "#main-lang-picker-area",
+        openTriggerSelector: "#main_lang_input, #btn_main_lang_picker",
+        applyTriggerSelector: "#btn_main_lang_picker_apply",
+        closeTriggerSelector: "#btn_main_lang_picker_close_x",
+        tableSelector: "#TABLE_MAIN_LANG_PICKER",
+        searchInputSelector: "#main-lang-picker-search",
+        searchWrapSelector: ".main-lang-picker-search-wrap",
+        suggestListSelector: "#main-lang-picker-suggest",
+        metaSelector: "#main-lang-picker-meta",
+        chipClass: "main-lang-skill-chip",
+        chipWrapClass: "main-lang-skill-chip-wrap",
+        suggestItemClass: "main-lang-suggest-item",
+        flashClass: "is-flash",
+        groupColumnWidth: 180,
+        getSkillOptions: function () {
+            return mainLangSkillOptions || [];
+        },
+        getGroupOptions: function () {
+            return mainLangGroupOptions || [];
+        },
+        getSelectedCodes: function () {
+            var set = new Set();
+            String($("#main_lang").val() || "")
+                .split(",")
+                .forEach(function (item) {
+                    var code = $.trim(item);
+                    if (code) {
+                        set.add(code);
+                    }
+                });
+            return set;
+        },
+        isReadonly: function () {
+            return currentMode === "view";
+        },
+        onApply: function (payload) {
+            if (mainLangTagInput) {
+                mainLangTagInput.setFromValue(payload.csv || "");
             }
-            var $first = $("#main-lang-picker-suggest .main-lang-suggest-item").first();
-            if ($first.length) {
-                selectMainLangSkill(String($first.data("code") || ""), true);
-            }
-        } else if (e.key === "Escape") {
-            e.preventDefault();
-            closeMainLangPicker();
-        }
-    });
-
-    $(document).on("click", "#main-lang-picker-suggest .main-lang-suggest-item", function (e) {
-        e.preventDefault();
-        var skillCode = String($(this).data("code") || "");
-        if (!skillCode) {
-            return;
-        }
-        selectMainLangSkill(skillCode, true);
-    });
-
-    $(document).on("mouseenter", "#main-lang-picker-suggest .main-lang-suggest-item", function () {
-        var $items = $("#main-lang-picker-suggest .main-lang-suggest-item");
-        mainLangSuggestActiveIndex = $items.index(this);
-        syncMainLangSuggestionActive();
-    });
-
-    $(document).on("mousedown", function (e) {
-        if (!$(e.target).closest(".main-lang-picker-search-wrap").length) {
-            $("#main-lang-picker-suggest").hide();
+            pendingMainLangValue = payload.csv || "";
         }
     });
 }
 
+// 팝업 이벤트는 공통 유틸이 네임스페이스로 1회만 등록한다.
+function bindMainLangPickerEvents() {
+    initMainLangPicker();
+    if (mainLangPicker) {
+        mainLangPicker.bindEvents();
+    }
+}
+
+// 읽기 전용이 아닐 때만 팝업을 열고, 선택 원본은 hidden(#main_lang) 기준으로 로드한다.
 function openMainLangPicker() {
     if (currentMode === "view") {
         return;
     }
-    buildMainLangPickerTable();
-    mainLangPickerDraftSet = getMainLangSelectedCodeSet();
-    syncMainLangPickerUi(true);
-
-    var $picker = $("#main-lang-picker-area");
-    $picker.show();
-    setTimeout(function () {
-        $picker.addClass("show");
-    }, 0);
-
-    $("#main-lang-picker-search").val("");
-    renderMainLangSuggestions("");
-    setTimeout(function () {
-        $("#main-lang-picker-search").trigger("focus");
-    }, 40);
+    initMainLangPicker();
+    if (mainLangPicker) {
+        mainLangPicker.open();
+    }
 }
 
 function closeMainLangPicker(immediate) {
-    var $picker = $("#main-lang-picker-area");
-    if (!$picker.length) {
-        mainLangPickerDraftSet = null;
+    if (!mainLangPicker) {
         return;
     }
-    $picker.removeClass("show");
-    $("#main-lang-picker-suggest").hide().empty();
-    mainLangSuggestActiveIndex = -1;
-    if (immediate) {
-        mainLangPickerDraftSet = null;
-        $picker.hide();
-        return;
-    }
-    setTimeout(function () {
-        if (!$picker.hasClass("show")) {
-            $picker.hide();
-        }
-    }, 180);
-    mainLangPickerDraftSet = null;
+    mainLangPicker.close(immediate);
 }
 
+// "적용" 클릭 시에만 draft 선택값이 태그/hidden 값으로 확정 반영된다.
 function applyMainLangPickerSelection() {
-    if (!mainLangTagInput || !mainLangPickerDraftSet) {
+    if (!mainLangPicker) {
         closeMainLangPicker();
         return;
     }
-
-    var csv = Array.from(mainLangPickerDraftSet).join(",");
-    mainLangTagInput.setFromValue(csv);
-    closeMainLangPicker();
-}
-
-function buildMainLangPickerTable() {
-    if (mainLangPickerTable || !window.Tabulator || !document.getElementById("TABLE_MAIN_LANG_PICKER")) {
-        return;
-    }
-
-    mainLangPickerTable = new Tabulator("#TABLE_MAIN_LANG_PICKER", {
-        layout: "fitColumns",
-        height: "360px",
-        placeholder: "등록된 기술이 없습니다.",
-        headerHozAlign: "center",
-        columnDefaults: {
-            headerSort: false,
-            resizable: false
-        },
-        columns: [
-            { title: "분야", field: "groupName", width: 180, hozAlign: "left" },
-            { title: "기술", field: "skills", hozAlign: "left", formatter: mainLangSkillFormatter }
-        ],
-        data: []
-    });
-    mainLangPickerTableReady = false;
+    mainLangPicker.apply();
 }
 
 function syncMainLangPickerUi(forceRebuild) {
-    var totalCount = Array.isArray(mainLangSkillOptions) ? mainLangSkillOptions.length : 0;
-    var selectedCount = getMainLangPickerSelectedSet().size;
-    $("#main-lang-picker-meta").text("전체 기술 " + totalCount + "개 / 선택 " + selectedCount + "개");
-
-    if (!mainLangPickerTable) {
+    if (!mainLangPicker) {
         return;
     }
-
-    if (!forceRebuild && mainLangPickerTableReady) {
-        syncMainLangPickerChipState();
-        return;
-    }
-
-    var tableElement = mainLangPickerTable.getElement ? mainLangPickerTable.getElement() : null;
-    var holder = tableElement ? tableElement.querySelector(".tabulator-tableHolder") : null;
-    var prevTop = holder ? holder.scrollTop : 0;
-    var prevLeft = holder ? holder.scrollLeft : 0;
-
-    var afterRender = function () {
-        mainLangPickerTableReady = true;
-        syncMainLangPickerChipState();
-        var currentElement = mainLangPickerTable.getElement ? mainLangPickerTable.getElement() : null;
-        var currentHolder = currentElement ? currentElement.querySelector(".tabulator-tableHolder") : null;
-        if (currentHolder) {
-            currentHolder.scrollTop = prevTop;
-            currentHolder.scrollLeft = prevLeft;
-        }
-    };
-
-    var setResult = mainLangPickerTable.setData(buildMainLangPickerRows());
-    if (setResult && typeof setResult.then === "function") {
-        setResult.then(afterRender);
-    } else {
-        setTimeout(afterRender, 0);
-    }
-}
-
-function syncMainLangPickerChipState() {
-    var selectedCodes = getMainLangPickerSelectedSet();
-    $("#TABLE_MAIN_LANG_PICKER .main-lang-skill-chip").each(function () {
-        var code = String($(this).data("code") || "");
-        $(this).toggleClass("is-selected", selectedCodes.has(code));
-    });
-}
-
-function getMainLangPickerSelectedSet() {
-    if (mainLangPickerDraftSet instanceof Set) {
-        return mainLangPickerDraftSet;
-    }
-    return getMainLangSelectedCodeSet();
-}
-
-function getMainLangSelectedCodeSet() {
-    var set = new Set();
-    String($("#main_lang").val() || "")
-        .split(",")
-        .forEach(function (item) {
-            var code = $.trim(item);
-            if (code) {
-                set.add(code);
-            }
-        });
-    return set;
-}
-
-function getMainLangGroupCode(skillCode) {
-    var code = String(skillCode || "").trim();
-    if (!code) {
-        return "";
-    }
-    return code.substring(0, 2).toUpperCase();
-}
-
-function buildMainLangGroupNameMap() {
-    var groupNameMap = {};
-    (mainLangGroupOptions || []).forEach(function (group) {
-        var groupCode = String(group.cd || "").toUpperCase();
-        if (!groupCode) {
-            return;
-        }
-        groupNameMap[groupCode] = group.cd_nm || groupCode;
-    });
-    return groupNameMap;
-}
-
-function buildMainLangPickerRows() {
-    var groupRows = [];
-    var groupMap = {};
-
-    (mainLangGroupOptions || []).forEach(function (group, idx) {
-        var groupCode = String(group.cd || "").toUpperCase();
-        if (!groupCode) {
-            return;
-        }
-        var row = {
-            groupCode: groupCode,
-            groupName: group.cd_nm || groupCode,
-            sortOrder: idx,
-            skills: []
-        };
-        groupMap[groupCode] = row;
-        groupRows.push(row);
-    });
-
-    (mainLangSkillOptions || []).forEach(function (skill) {
-        var code = String(skill.cd || "");
-        if (!code) {
-            return;
-        }
-        var groupCode = getMainLangGroupCode(code);
-        if (!groupMap[groupCode]) {
-            groupMap[groupCode] = {
-                groupCode: groupCode,
-                groupName: groupCode || "기타",
-                sortOrder: 9999,
-                skills: []
-            };
-            groupRows.push(groupMap[groupCode]);
-        }
-        groupMap[groupCode].skills.push({
-            code: code,
-            label: String(skill.cd_nm || code)
-        });
-    });
-
-    groupRows.forEach(function (row) {
-        row.skills.sort(function (a, b) {
-            return a.label.localeCompare(b.label, "ko");
-        });
-    });
-
-    return groupRows
-        .filter(function (row) {
-            return row.skills.length > 0;
-        })
-        .sort(function (a, b) {
-            if (a.sortOrder !== b.sortOrder) {
-                return a.sortOrder - b.sortOrder;
-            }
-            return a.groupName.localeCompare(b.groupName, "ko");
-        });
-}
-
-function mainLangSkillFormatter(cell) {
-    var skills = cell.getValue() || [];
-    if (!skills.length) {
-        return "";
-    }
-
-    var selectedCodes = getMainLangPickerSelectedSet();
-    var html = skills.map(function (skill) {
-        var code = String(skill.code || "");
-        var label = String(skill.label || code);
-        var selectedClass = selectedCodes.has(code) ? " is-selected" : "";
-        return "<button type='button' class='main-lang-skill-chip" + selectedClass +
-            "' data-code='" + escapeHtmlAttr(code) + "'>" + escapeHtml(label) + "</button>";
-    }).join("");
-
-    return "<div class='main-lang-skill-chip-wrap'>" + html + "</div>";
-}
-
-function escapeHtml(value) {
-    return String(value || "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/\"/g, "&quot;")
-        .replace(/'/g, "&#39;");
-}
-
-function escapeHtmlAttr(value) {
-    return escapeHtml(value);
-}
-
-function selectMainLangSkill(skillCode, fromSearch) {
-    if (!mainLangTagInput) {
-        return;
-    }
-    var code = String(skillCode || "").trim();
-    if (!code) {
-        return;
-    }
-
-    if (!(mainLangPickerDraftSet instanceof Set)) {
-        mainLangPickerDraftSet = getMainLangSelectedCodeSet();
-    }
-    mainLangPickerDraftSet.add(code);
-    syncMainLangPickerUi();
-    focusMainLangSkill(code);
-
-    if (fromSearch) {
-        $("#main-lang-picker-search").val("");
-        $("#main-lang-picker-suggest").hide().empty();
-        mainLangSuggestActiveIndex = -1;
-    }
-}
-
-function toggleMainLangSkill(skillCode) {
-    if (!mainLangTagInput) {
-        return;
-    }
-    var code = String(skillCode || "").trim();
-    if (!code) {
-        return;
-    }
-
-    if (!(mainLangPickerDraftSet instanceof Set)) {
-        mainLangPickerDraftSet = getMainLangSelectedCodeSet();
-    }
-
-    if (mainLangPickerDraftSet.has(code)) {
-        mainLangPickerDraftSet.delete(code);
-    } else {
-        mainLangPickerDraftSet.add(code);
-    }
-    syncMainLangPickerUi();
-    focusMainLangSkill(code);
-}
-
-function focusMainLangSkill(skillCode) {
-    setTimeout(function () {
-        var code = String(skillCode || "");
-        if (!code) {
-            return;
-        }
-        var $chip = $("#TABLE_MAIN_LANG_PICKER .main-lang-skill-chip").filter(function () {
-            return String($(this).data("code") || "") === code;
-        }).first();
-        if (!$chip.length) {
-            return;
-        }
-        $chip.addClass("is-flash");
-        setTimeout(function () {
-            $chip.removeClass("is-flash");
-        }, 450);
-    }, 30);
-}
-
-function findMainLangSkillMatches(keyword, limit) {
-    var query = String(keyword || "").trim().toLowerCase();
-    if (!query) {
-        return [];
-    }
-    var max = limit || 20;
-    var groupNameMap = buildMainLangGroupNameMap();
-
-    return (mainLangSkillOptions || [])
-        .map(function (skill) {
-            var code = String(skill.cd || "");
-            var label = String(skill.cd_nm || code);
-            var groupCode = getMainLangGroupCode(code);
-            return {
-                code: code,
-                label: label,
-                groupName: groupNameMap[groupCode] || groupCode || "기타"
-            };
-        })
-        .filter(function (skill) {
-            var codeMatch = skill.code.toLowerCase().indexOf(query) >= 0;
-            var labelMatch = skill.label.toLowerCase().indexOf(query) >= 0;
-            return codeMatch || labelMatch;
-        })
-        .sort(function (a, b) {
-            return a.label.localeCompare(b.label, "ko");
-        })
-        .slice(0, max);
-}
-
-// 추천목록생성
-function renderMainLangSuggestions(keyword) {
-    var $suggest = $("#main-lang-picker-suggest");
-    var query = String(keyword || "").trim();
-    if (!query) {
-        mainLangSuggestActiveIndex = -1; // 미선택
-        $suggest.hide().empty();
-        return;
-    }
-
-    var matches = findMainLangSkillMatches(query, 20);
-    if (!matches.length) {
-        mainLangSuggestActiveIndex = -1;
-        $suggest.hide().empty();
-        return;
-    }
-
-    var html = matches.map(function (item) {
-        return "<li class='main-lang-suggest-item' data-code='" + escapeHtmlAttr(item.code) + "'>" +
-            "<span class='name'>" + escapeHtml(item.label) + "</span>" +
-            "<span class='group'>" + escapeHtml(item.groupName) + "</span>" +
-            "</li>";
-    }).join("");
-
-    $suggest.html(html).show();
-    mainLangSuggestActiveIndex = -1;
-    syncMainLangSuggestionActive();
-}
-
-function moveMainLangSuggestionSelection(step) {
-    var $items = $("#main-lang-picker-suggest .main-lang-suggest-item");
-    if (!$items.length || !$("#main-lang-picker-suggest").is(":visible")) {
-        return;
-    }
-    var max = $items.length - 1;
-    if (mainLangSuggestActiveIndex < 0) {
-        mainLangSuggestActiveIndex = step > 0 ? 0 : max;
-    } else {
-        mainLangSuggestActiveIndex += step;
-        if (mainLangSuggestActiveIndex < 0) {
-            mainLangSuggestActiveIndex = 0;
-        }
-        if (mainLangSuggestActiveIndex > max) {
-            mainLangSuggestActiveIndex = max;
-        }
-    }
-    syncMainLangSuggestionActive();
-}
-
-function syncMainLangSuggestionActive() {
-    var $items = $("#main-lang-picker-suggest .main-lang-suggest-item");
-    $items.removeClass("is-active");
-    if (!$items.length || mainLangSuggestActiveIndex < 0) {
-        return;
-    }
-    var $active = $items.eq(mainLangSuggestActiveIndex);
-    $active.addClass("is-active");
-    var container = $("#main-lang-picker-suggest").get(0);
-    var element = $active.get(0);
-    if (container && element && typeof element.scrollIntoView === "function") {
-        element.scrollIntoView({ block: "nearest" });
-    }
-}
-
-function getMainLangActiveSuggestItem() {
-    var $items = $("#main-lang-picker-suggest .main-lang-suggest-item");
-    if (!$items.length || mainLangSuggestActiveIndex < 0) {
-        return $();
-    }
-    return $items.eq(mainLangSuggestActiveIndex);
+    mainLangPicker.sync(forceRebuild);
 }
 
 // ============================================================================== //

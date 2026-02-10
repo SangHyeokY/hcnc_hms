@@ -611,6 +611,600 @@ function createTagInput(config) {
 }
 
 /* =========================
+ * 그룹형 기술 선택 팝업 공통 유틸
+ * - 분야/기술 그리드
+ * - 검색 자동완성 + 방향키 선택
+ * - draft 선택 후 적용 버튼 반영
+ * ========================= */
+function createGroupedSkillPicker(config) {
+    var cfg = Object.assign({
+        namespace: "default",
+        pickerAreaSelector: "",
+        openTriggerSelector: "",
+        applyTriggerSelector: "",
+        closeTriggerSelector: "",
+        tableSelector: "",
+        searchInputSelector: "",
+        searchWrapSelector: "",
+        suggestListSelector: "",
+        metaSelector: "",
+        chipClass: "hcnc-skill-chip",
+        chipWrapClass: "hcnc-skill-chip-wrap",
+        flashClass: "is-flash",
+        suggestItemClass: "hcnc-skill-suggest-item",
+        tableHeight: "360px",
+        groupColumnTitle: "분야",
+        skillColumnTitle: "기술",
+        groupColumnWidth: 170,
+        skillColumnWidthGrow: 3,
+        emptyText: "등록된 기술이 없습니다.",
+        getSkillOptions: function () { return []; },
+        getGroupOptions: function () { return []; },
+        getSelectedCodes: function () { return []; },
+        getGroupCode: function (skillCode) {
+            var code = String(skillCode || "").trim();
+            return code ? code.substring(0, 2).toUpperCase() : "";
+        },
+        isReadonly: function () { return false; },
+        getContextFromOpenEvent: null,
+        metaTextBuilder: null,
+        onApply: null
+    }, config || {});
+
+    var ns = ".hcncSkillPicker_" + cfg.namespace;
+    var state = {
+        table: null,
+        tableReady: false,
+        // draftSet: 팝업에서만 임시 선택 상태를 유지하고 "적용"에서만 원본에 반영한다.
+        draftSet: null,
+        suggestActiveIndex: -1,
+        eventBound: false,
+        context: null
+    };
+
+    function escapeHtml(value) {
+        return String(value || "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/\"/g, "&quot;")
+            .replace(/'/g, "&#39;");
+    }
+
+    function getSkillOptions() {
+        var list = cfg.getSkillOptions ? cfg.getSkillOptions() : [];
+        return Array.isArray(list) ? list : [];
+    }
+
+    function getGroupOptions() {
+        var list = cfg.getGroupOptions ? cfg.getGroupOptions() : [];
+        return Array.isArray(list) ? list : [];
+    }
+
+    function normalizeSet(value) {
+        var set = new Set();
+        if (!value) {
+            return set;
+        }
+        if (value instanceof Set) {
+            value.forEach(function (v) {
+                var code = String(v || "").trim();
+                if (code) {
+                    set.add(code);
+                }
+            });
+            return set;
+        }
+        if (Array.isArray(value)) {
+            value.forEach(function (v) {
+                var code = String(v || "").trim();
+                if (code) {
+                    set.add(code);
+                }
+            });
+            return set;
+        }
+        if (typeof value === "string") {
+            value.split(",").forEach(function (v) {
+                var code = String(v || "").trim();
+                if (code) {
+                    set.add(code);
+                }
+            });
+        }
+        return set;
+    }
+
+    function getSelectedSet() {
+        if (state.draftSet instanceof Set) {
+            return state.draftSet;
+        }
+        // 아직 팝업을 열지 않은 상태면 실제 원본 데이터에서 현재 선택값을 계산한다.
+        return normalizeSet(cfg.getSelectedCodes ? cfg.getSelectedCodes(state.context) : []);
+    }
+
+    function ensureCounterMeta() {
+        if (!cfg.metaSelector) {
+            return;
+        }
+        var totalCount = getSkillOptions().length;
+        var selectedCount = getSelectedSet().size;
+        var text = typeof cfg.metaTextBuilder === "function"
+            ? cfg.metaTextBuilder(totalCount, selectedCount)
+            : ("전체 기술 " + totalCount + "개 / 선택 " + selectedCount + "개");
+        $(cfg.metaSelector).text(text);
+    }
+
+    function buildGroupNameMap() {
+        var groupNameMap = {};
+        getGroupOptions().forEach(function (group) {
+            var groupCode = String(group.cd || "").toUpperCase();
+            if (!groupCode) {
+                return;
+            }
+            groupNameMap[groupCode] = group.cd_nm || groupCode;
+        });
+        return groupNameMap;
+    }
+
+    function buildRows() {
+        var groupRows = [];
+        var groupMap = {};
+
+        getGroupOptions().forEach(function (group, idx) {
+            var groupCode = String(group.cd || "").toUpperCase();
+            if (!groupCode) {
+                return;
+            }
+            var row = {
+                groupCode: groupCode,
+                groupName: group.cd_nm || groupCode,
+                sortOrder: idx,
+                skills: []
+            };
+            groupMap[groupCode] = row;
+            groupRows.push(row);
+        });
+
+        getSkillOptions().forEach(function (skill) {
+            var code = String(skill.cd || "");
+            if (!code) {
+                return;
+            }
+            var groupCode = cfg.getGroupCode(code);
+            if (!groupMap[groupCode]) {
+                groupMap[groupCode] = {
+                    groupCode: groupCode,
+                    groupName: groupCode || "기타",
+                    sortOrder: 9999,
+                    skills: []
+                };
+                groupRows.push(groupMap[groupCode]);
+            }
+            groupMap[groupCode].skills.push({
+                code: code,
+                label: String(skill.cd_nm || code)
+            });
+        });
+
+        groupRows.forEach(function (row) {
+            row.skills.sort(function (a, b) {
+                return a.label.localeCompare(b.label, "ko");
+            });
+        });
+
+        return groupRows
+            .filter(function (row) { return row.skills.length > 0; })
+            .sort(function (a, b) {
+                if (a.sortOrder !== b.sortOrder) {
+                    return a.sortOrder - b.sortOrder;
+                }
+                return a.groupName.localeCompare(b.groupName, "ko");
+            });
+    }
+
+    function skillFormatter(cell) {
+        var skills = cell.getValue() || [];
+        if (!skills.length) {
+            return "";
+        }
+        var selected = getSelectedSet();
+        var html = skills.map(function (skill) {
+            var code = String(skill.code || "");
+            var label = String(skill.label || code);
+            var selectedClass = selected.has(code) ? " is-selected" : "";
+            return "<button type='button' class='" + cfg.chipClass + selectedClass + "' data-code='" +
+                escapeHtml(code) + "'>" + escapeHtml(label) + "</button>";
+        }).join("");
+        return "<div class='" + cfg.chipWrapClass + "'>" + html + "</div>";
+    }
+
+    function buildTableIfNeeded() {
+        if (state.table || !window.Tabulator || !document.querySelector(cfg.tableSelector)) {
+            return;
+        }
+        state.table = new Tabulator(cfg.tableSelector, {
+            layout: "fitColumns",
+            height: cfg.tableHeight,
+            placeholder: cfg.emptyText,
+            headerHozAlign: "center",
+            columnDefaults: {
+                headerSort: false,
+                resizable: false
+            },
+            columns: [
+                { title: cfg.groupColumnTitle, field: "groupName", width: cfg.groupColumnWidth, hozAlign: "left" },
+                { title: cfg.skillColumnTitle, field: "skills", hozAlign: "left", formatter: skillFormatter, widthGrow: cfg.skillColumnWidthGrow }
+            ],
+            data: []
+        });
+        state.tableReady = false;
+    }
+
+    function syncChipState() {
+        var selected = getSelectedSet();
+        $(cfg.tableSelector + " ." + cfg.chipClass).each(function () {
+            var code = String($(this).data("code") || "");
+            $(this).toggleClass("is-selected", selected.has(code));
+        });
+    }
+
+    function sync(forceRebuild) {
+        ensureCounterMeta();
+        if (!state.table) {
+            return;
+        }
+        if (!forceRebuild && state.tableReady) {
+            syncChipState();
+            return;
+        }
+
+        var tableEl = state.table.getElement ? state.table.getElement() : null;
+        var holder = tableEl ? tableEl.querySelector(".tabulator-tableHolder") : null;
+        var prevTop = holder ? holder.scrollTop : 0;
+        var prevLeft = holder ? holder.scrollLeft : 0;
+
+        // setData 이후에도 스크롤이 튀지 않도록 이전 위치를 복원한다.
+        var afterRender = function () {
+            state.tableReady = true;
+            syncChipState();
+            var currentEl = state.table.getElement ? state.table.getElement() : null;
+            var currentHolder = currentEl ? currentEl.querySelector(".tabulator-tableHolder") : null;
+            if (currentHolder) {
+                currentHolder.scrollTop = prevTop;
+                currentHolder.scrollLeft = prevLeft;
+            }
+        };
+
+        var setResult = state.table.setData(buildRows());
+        if (setResult && typeof setResult.then === "function") {
+            setResult.then(afterRender);
+        } else {
+            setTimeout(afterRender, 0);
+        }
+    }
+
+    function close(immediate) {
+        var $picker = $(cfg.pickerAreaSelector);
+        if (!$picker.length) {
+            state.draftSet = null;
+            state.context = null;
+            return;
+        }
+        $picker.removeClass("show");
+        $(cfg.suggestListSelector).hide().empty();
+        state.suggestActiveIndex = -1;
+        if (immediate) {
+            state.draftSet = null;
+            state.context = null;
+            $picker.hide();
+            return;
+        }
+        setTimeout(function () {
+            if (!$picker.hasClass("show")) {
+                $picker.hide();
+            }
+        }, 180);
+        state.draftSet = null;
+        state.context = null;
+    }
+
+    function open(context) {
+        if (cfg.isReadonly && cfg.isReadonly(context)) {
+            return;
+        }
+        state.context = context || null;
+        buildTableIfNeeded();
+        state.draftSet = normalizeSet(cfg.getSelectedCodes ? cfg.getSelectedCodes(state.context) : []);
+        sync(true);
+
+        var $picker = $(cfg.pickerAreaSelector);
+        $picker.show();
+        setTimeout(function () {
+            $picker.addClass("show");
+        }, 0);
+
+        $(cfg.searchInputSelector).val("");
+        renderSuggestions("");
+        setTimeout(function () {
+            $(cfg.searchInputSelector).trigger("focus");
+        }, 40);
+    }
+
+    function applySelection() {
+        if (!(state.draftSet instanceof Set)) {
+            close();
+            return;
+        }
+        var codes = Array.from(state.draftSet);
+        var csv = codes.join(",");
+        if (typeof cfg.onApply === "function") {
+            cfg.onApply({
+                codes: codes,
+                csv: csv,
+                context: state.context
+            });
+        }
+        close();
+    }
+
+    function focusSkill(code) {
+        setTimeout(function () {
+            var $chip = $(cfg.tableSelector + " ." + cfg.chipClass).filter(function () {
+                return String($(this).data("code") || "") === String(code || "");
+            }).first();
+            if (!$chip.length) {
+                return;
+            }
+            $chip.addClass(cfg.flashClass);
+            setTimeout(function () {
+                $chip.removeClass(cfg.flashClass);
+            }, 450);
+        }, 30);
+    }
+
+    function selectSkill(code, fromSearch) {
+        var normalized = String(code || "").trim();
+        if (!normalized) {
+            return;
+        }
+        if (!(state.draftSet instanceof Set)) {
+            state.draftSet = normalizeSet(cfg.getSelectedCodes ? cfg.getSelectedCodes(state.context) : []);
+        }
+        state.draftSet.add(normalized);
+        sync();
+        focusSkill(normalized);
+        if (fromSearch) {
+            $(cfg.searchInputSelector).val("");
+            $(cfg.suggestListSelector).hide().empty();
+            state.suggestActiveIndex = -1;
+        }
+    }
+
+    function toggleSkill(code) {
+        var normalized = String(code || "").trim();
+        if (!normalized) {
+            return;
+        }
+        if (!(state.draftSet instanceof Set)) {
+            state.draftSet = normalizeSet(cfg.getSelectedCodes ? cfg.getSelectedCodes(state.context) : []);
+        }
+        if (state.draftSet.has(normalized)) {
+            state.draftSet.delete(normalized);
+        } else {
+            state.draftSet.add(normalized);
+        }
+        sync();
+        focusSkill(normalized);
+    }
+
+    function findMatches(keyword, limit) {
+        var query = String(keyword || "").trim().toLowerCase();
+        if (!query) {
+            return [];
+        }
+        var max = limit || 20;
+        var groupNameMap = buildGroupNameMap();
+
+        return getSkillOptions()
+            .map(function (skill) {
+                var code = String(skill.cd || "");
+                var label = String(skill.cd_nm || code);
+                var groupCode = cfg.getGroupCode(code);
+                return {
+                    code: code,
+                    label: label,
+                    groupName: groupNameMap[groupCode] || groupCode || "기타"
+                };
+            })
+            .filter(function (item) {
+                return item.code.toLowerCase().indexOf(query) > -1 || item.label.toLowerCase().indexOf(query) > -1;
+            })
+            .sort(function (a, b) {
+                return a.label.localeCompare(b.label, "ko");
+            })
+            .slice(0, max);
+    }
+
+    function renderSuggestions(keyword) {
+        var $suggest = $(cfg.suggestListSelector);
+        var query = String(keyword || "").trim();
+        if (!query) {
+            state.suggestActiveIndex = -1;
+            $suggest.hide().empty();
+            return;
+        }
+        var matches = findMatches(query, 20);
+        if (!matches.length) {
+            state.suggestActiveIndex = -1;
+            $suggest.hide().empty();
+            return;
+        }
+        var html = matches.map(function (item) {
+            return "<li class='" + cfg.suggestItemClass + "' data-code='" + escapeHtml(item.code) + "'>" +
+                "<span class='name'>" + escapeHtml(item.label) + "</span>" +
+                "<span class='group'>" + escapeHtml(item.groupName) + "</span>" +
+                "</li>";
+        }).join("");
+        $suggest.html(html).show();
+        state.suggestActiveIndex = -1;
+        syncSuggestionActive();
+    }
+
+    function moveSuggestionSelection(step) {
+        var $items = $(cfg.suggestListSelector + " ." + cfg.suggestItemClass);
+        if (!$items.length || !$(cfg.suggestListSelector).is(":visible")) {
+            return;
+        }
+        var max = $items.length - 1;
+        if (state.suggestActiveIndex < 0) {
+            state.suggestActiveIndex = step > 0 ? 0 : max;
+        } else {
+            state.suggestActiveIndex += step;
+            if (state.suggestActiveIndex < 0) {
+                state.suggestActiveIndex = 0;
+            }
+            if (state.suggestActiveIndex > max) {
+                state.suggestActiveIndex = max;
+            }
+        }
+        syncSuggestionActive();
+    }
+
+    function syncSuggestionActive() {
+        var $items = $(cfg.suggestListSelector + " ." + cfg.suggestItemClass);
+        $items.removeClass("is-active");
+        if (!$items.length || state.suggestActiveIndex < 0) {
+            return;
+        }
+        var $active = $items.eq(state.suggestActiveIndex);
+        $active.addClass("is-active");
+        var container = $(cfg.suggestListSelector).get(0);
+        var element = $active.get(0);
+        if (container && element && typeof element.scrollIntoView === "function") {
+            element.scrollIntoView({ block: "nearest" });
+        }
+    }
+
+    function getActiveSuggestItem() {
+        var $items = $(cfg.suggestListSelector + " ." + cfg.suggestItemClass);
+        if (!$items.length || state.suggestActiveIndex < 0) {
+            return $();
+        }
+        return $items.eq(state.suggestActiveIndex);
+    }
+
+    function bindEvents() {
+        if (state.eventBound) {
+            return;
+        }
+        state.eventBound = true;
+        // 모든 이벤트는 namespace 기반으로 1회 등록되어 중복 바인딩을 방지한다.
+
+        if (cfg.openTriggerSelector) {
+            $(document).on("click" + ns, cfg.openTriggerSelector, function (e) {
+                e.preventDefault();
+                var context = typeof cfg.getContextFromOpenEvent === "function"
+                    ? cfg.getContextFromOpenEvent(e, this)
+                    : null;
+                if (cfg.isReadonly && cfg.isReadonly(context)) {
+                    return;
+                }
+                open(context);
+            });
+        }
+
+        if (cfg.applyTriggerSelector) {
+            $(document).on("click" + ns, cfg.applyTriggerSelector, function (e) {
+                e.preventDefault();
+                applySelection();
+            });
+        }
+
+        if (cfg.closeTriggerSelector) {
+            $(document).on("click" + ns, cfg.closeTriggerSelector, function (e) {
+                e.preventDefault();
+                close();
+            });
+        }
+
+        $(document).on("click" + ns, cfg.pickerAreaSelector, function (e) {
+            if (e.target === this) {
+                close();
+            }
+        });
+
+        $(document).on("click" + ns, cfg.tableSelector + " ." + cfg.chipClass, function (e) {
+            e.preventDefault();
+            var code = String($(this).data("code") || "");
+            if (!code) {
+                return;
+            }
+            toggleSkill(code);
+        });
+
+        $(document).on("input" + ns, cfg.searchInputSelector, function () {
+            renderSuggestions($(this).val());
+        });
+
+        $(document).on("keydown" + ns, cfg.searchInputSelector, function (e) {
+            if (e.key === "ArrowDown") {
+                e.preventDefault();
+                moveSuggestionSelection(1);
+            } else if (e.key === "ArrowUp") {
+                e.preventDefault();
+                moveSuggestionSelection(-1);
+            } else if (e.key === "Enter") {
+                e.preventDefault();
+                var $active = getActiveSuggestItem();
+                if ($active.length) {
+                    selectSkill(String($active.data("code") || ""), true);
+                    return;
+                }
+                var $first = $(cfg.suggestListSelector + " ." + cfg.suggestItemClass).first();
+                if ($first.length) {
+                    selectSkill(String($first.data("code") || ""), true);
+                }
+            } else if (e.key === "Escape") {
+                e.preventDefault();
+                close();
+            }
+        });
+
+        $(document).on("click" + ns, cfg.suggestListSelector + " ." + cfg.suggestItemClass, function (e) {
+            e.preventDefault();
+            var code = String($(this).data("code") || "");
+            if (!code) {
+                return;
+            }
+            selectSkill(code, true);
+        });
+
+        $(document).on("mouseenter" + ns, cfg.suggestListSelector + " ." + cfg.suggestItemClass, function () {
+            var $items = $(cfg.suggestListSelector + " ." + cfg.suggestItemClass);
+            state.suggestActiveIndex = $items.index(this);
+            syncSuggestionActive();
+        });
+
+        $(document).on("mousedown" + ns, function (e) {
+            if (!cfg.searchWrapSelector || !$(e.target).closest(cfg.searchWrapSelector).length) {
+                $(cfg.suggestListSelector).hide();
+            }
+        });
+    }
+
+    return {
+        bindEvents: bindEvents,
+        open: open,
+        close: close,
+        apply: applySelection,
+        sync: sync,
+        getSelectedSet: getSelectedSet,
+        escapeHtml: escapeHtml
+    };
+}
+
+/* =========================
  * 공통 Swal 토스트(toast) 함수
  * ========================= */
 function showAlert({ icon = 'info', title = '', text = '', confirmText = '확인' } = {}) {

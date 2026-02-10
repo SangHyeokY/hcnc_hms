@@ -7,12 +7,7 @@ var hr013DeletedIds = [];
 var hr013SkillOptions = [];
 var hr013JobOptions = [];
 var hr013SkillGroupOptions = [];
-var hr013SkillPickerTable = null;
-var hr013SkillPickerTableReady = false;
-var hr013SkillPickerDraftSet = null;
-var hr013SkillSuggestActiveIndex = -1;
-var hr013SkillPickerEventBound = false;
-var hr013SkillPickerContext = null;
+var hr013SkillPicker = null;
 
 // 프로젝트 탭 초기화 (버튼/콤보/태그/테이블)
 window.initTab3 = function () {
@@ -263,94 +258,79 @@ function closeHr013Modal() {
     $("#write-hr013-area").hide();
 }
 
-// 기술 선택 팝업 이벤트는 중복 바인딩을 막고 1회만 등록한다.
-function bindHr013SkillPickerEvents() {
-    if (hr013SkillPickerEventBound) {
+// 기술 선택 팝업 공통 팩토리 초기화(최초 1회)
+function initHr013SkillPicker() {
+    if (hr013SkillPicker || typeof createGroupedSkillPicker !== "function") {
         return;
     }
-    hr013SkillPickerEventBound = true;
 
-    $(document).on("click", "#btn_hr013_skill_picker", function (e) {
-        e.preventDefault();
-        if (currentMode === "view" || window.hr010ReadOnly) {
-            return;
-        }
-        openHr013SkillPicker("modal");
-    });
+    hr013SkillPicker = createGroupedSkillPicker({
+        namespace: "hr013",
+        pickerAreaSelector: "#hr013-skill-picker-area",
+        openTriggerSelector: "#btn_hr013_skill_picker",
+        applyTriggerSelector: "#btn_hr013_skill_picker_apply",
+        closeTriggerSelector: "#btn_hr013_skill_picker_close_x",
+        tableSelector: "#TABLE_HR013_SKILL_PICKER",
+        searchInputSelector: "#hr013-skill-picker-search",
+        searchWrapSelector: ".hr013-skill-picker-search-wrap",
+        suggestListSelector: "#hr013-skill-picker-suggest",
+        metaSelector: "#hr013-skill-picker-meta",
+        chipClass: "hr013-skill-chip",
+        chipWrapClass: "hr013-skill-chip-wrap",
+        suggestItemClass: "hr013-skill-suggest-item",
+        flashClass: "is-flash",
+        groupColumnWidth: 170,
+        getSkillOptions: function () {
+            return hr013SkillOptions || [];
+        },
+        getGroupOptions: function () {
+            return hr013SkillGroupOptions || [];
+        },
+        // 모달/그리드 어느 화면에서 열렸는지에 따라 현재 선택값 원본을 분기한다.
+        getSelectedCodes: function (context) {
+            if (context && context.type === "grid" && context.row) {
+                return getHr013RowSelectedCodeSet(context.row);
+            }
+            return getHr013SelectedCodeSet();
+        },
+        // 모달 내부 버튼으로 열릴 때는 기본 context를 modal로 고정한다.
+        getContextFromOpenEvent: function () {
+            return { type: "modal", row: null };
+        },
+        isReadonly: function () {
+            return currentMode === "view" || window.hr010ReadOnly;
+        },
+        // "적용" 버튼을 눌렀을 때만 실제 원본 데이터(모달 hidden/그리드 row)를 갱신한다.
+        onApply: function (payload) {
+            var csv = payload && payload.csv ? payload.csv : "";
+            var context = payload && payload.context ? payload.context : null;
 
-    $(document).on("click", "#btn_hr013_skill_picker_apply", function (e) {
-        e.preventDefault();
-        applyHr013SkillPickerSelection();
-    });
-
-    $(document).on("click", "#btn_hr013_skill_picker_close_x", function (e) {
-        e.preventDefault();
-        closeHr013SkillPicker();
-    });
-
-    $(document).on("click", "#hr013-skill-picker-area", function (e) {
-        if (e.target === this) {
-            closeHr013SkillPicker();
-        }
-    });
-
-    $(document).on("click", "#TABLE_HR013_SKILL_PICKER .hr013-skill-chip", function (e) {
-        e.preventDefault();
-        var code = String($(this).data("code") || "");
-        if (!code) {
-            return;
-        }
-        toggleHr013Skill(code);
-    });
-
-    $(document).on("input", "#hr013-skill-picker-search", function () {
-        renderHr013SkillSuggestions($(this).val());
-    });
-
-    $(document).on("keydown", "#hr013-skill-picker-search", function (e) {
-        if (e.key === "ArrowDown") {
-            e.preventDefault();
-            moveHr013SuggestionSelection(1);
-        } else if (e.key === "ArrowUp") {
-            e.preventDefault();
-            moveHr013SuggestionSelection(-1);
-        } else if (e.key === "Enter") {
-            e.preventDefault();
-            var $active = getHr013ActiveSuggestItem();
-            if ($active.length) {
-                selectHr013Skill(String($active.data("code") || ""), true);
+            if (context && context.type === "grid" && context.row && typeof context.row.update === "function") {
+                context.row.update({
+                    skl_id_lst: getHr013SkillArrayFromCsv(csv),
+                    stack_txt: csv,
+                    stack_txt_nm: getSkillLabelList(csv)
+                });
+                changedTabs.tab3 = true;
                 return;
             }
-            var $first = $("#hr013-skill-picker-suggest .hr013-skill-suggest-item").first();
-            if ($first.length) {
-                selectHr013Skill(String($first.data("code") || ""), true);
+
+            if (stackTagInput) {
+                stackTagInput.setFromValue(csv);
+            } else {
+                $("#write_hr013_stack_txt").val(csv);
             }
-        } else if (e.key === "Escape") {
-            e.preventDefault();
-            closeHr013SkillPicker();
+            pendingStackValue = csv;
         }
     });
+}
 
-    $(document).on("click", "#hr013-skill-picker-suggest .hr013-skill-suggest-item", function (e) {
-        e.preventDefault();
-        var code = String($(this).data("code") || "");
-        if (!code) {
-            return;
-        }
-        selectHr013Skill(code, true);
-    });
-
-    $(document).on("mouseenter", "#hr013-skill-picker-suggest .hr013-skill-suggest-item", function () {
-        var $items = $("#hr013-skill-picker-suggest .hr013-skill-suggest-item");
-        hr013SkillSuggestActiveIndex = $items.index(this);
-        syncHr013SuggestionActive();
-    });
-
-    $(document).on("mousedown", function (e) {
-        if (!$(e.target).closest(".hr013-skill-picker-search-wrap").length) {
-            $("#hr013-skill-picker-suggest").hide();
-        }
-    });
+// 팝업 이벤트는 공통 유틸 내부에서 네임스페이스로 1회 바인딩한다.
+function bindHr013SkillPickerEvents() {
+    initHr013SkillPicker();
+    if (hr013SkillPicker) {
+        hr013SkillPicker.bindEvents();
+    }
 }
 
 // sourceType(modal/grid)에 따라 선택 원본을 분기해서 팝업을 연다.
@@ -358,165 +338,43 @@ function openHr013SkillPicker(sourceType, row) {
     if (currentMode === "view" || window.hr010ReadOnly) {
         return;
     }
+    initHr013SkillPicker();
+    if (!hr013SkillPicker) {
+        return;
+    }
     var contextType = sourceType === "grid" ? "grid" : "modal";
     if (contextType === "grid" && (!row || typeof row.getData !== "function")) {
         return;
     }
-    hr013SkillPickerContext = {
+    hr013SkillPicker.open({
         type: contextType,
         row: contextType === "grid" ? row : null
-    };
-
-    buildHr013SkillPickerTable();
-    hr013SkillPickerDraftSet = contextType === "grid"
-        ? getHr013RowSelectedCodeSet(row)
-        : getHr013SelectedCodeSet();
-    syncHr013SkillPickerUi(true);
-
-    var $picker = $("#hr013-skill-picker-area");
-    $picker.show();
-    setTimeout(function () {
-        $picker.addClass("show");
-    }, 0);
-
-    $("#hr013-skill-picker-search").val("");
-    renderHr013SkillSuggestions("");
-    setTimeout(function () {
-        $("#hr013-skill-picker-search").trigger("focus");
-    }, 40);
+    });
 }
 
-// 팝업 종료 시 draft/context를 함께 비워 다음 열기 시 상태가 섞이지 않게 한다.
 function closeHr013SkillPicker(immediate) {
-    var $picker = $("#hr013-skill-picker-area");
-    if (!$picker.length) {
-        hr013SkillPickerDraftSet = null;
-        hr013SkillPickerContext = null;
+    if (!hr013SkillPicker) {
         return;
     }
-    $picker.removeClass("show");
-    $("#hr013-skill-picker-suggest").hide().empty();
-    hr013SkillSuggestActiveIndex = -1;
-    if (immediate) {
-        hr013SkillPickerDraftSet = null;
-        hr013SkillPickerContext = null;
-        $picker.hide();
-        return;
-    }
-    setTimeout(function () {
-        if (!$picker.hasClass("show")) {
-            $picker.hide();
-        }
-    }, 180);
-    hr013SkillPickerDraftSet = null;
-    hr013SkillPickerContext = null;
+    hr013SkillPicker.close(immediate);
 }
 
-// "적용" 클릭 시에만 실제 데이터(모달 hidden/그리드 row)에 반영한다.
 function applyHr013SkillPickerSelection() {
-    if (!(hr013SkillPickerDraftSet instanceof Set)) {
+    if (!hr013SkillPicker) {
         closeHr013SkillPicker();
         return;
     }
-    var csv = Array.from(hr013SkillPickerDraftSet).join(",");
-    if (hr013SkillPickerContext && hr013SkillPickerContext.type === "grid" && hr013SkillPickerContext.row) {
-        hr013SkillPickerContext.row.update({
-            skl_id_lst: getHr013SkillArrayFromCsv(csv),
-            stack_txt: csv,
-            stack_txt_nm: getSkillLabelList(csv)
-        });
-        changedTabs.tab3 = true;
-        closeHr013SkillPicker();
-        return;
-    }
-
-    if (stackTagInput) {
-        stackTagInput.setFromValue(csv);
-    } else {
-        $("#write_hr013_stack_txt").val(csv);
-    }
-    pendingStackValue = csv;
-    closeHr013SkillPicker();
+    hr013SkillPicker.apply();
 }
 
-// 분야/기술 2열 구조의 선택용 Tabulator를 최초 1회 생성한다.
-function buildHr013SkillPickerTable() {
-    if (hr013SkillPickerTable || !window.Tabulator || !document.getElementById("TABLE_HR013_SKILL_PICKER")) {
-        return;
-    }
-
-    hr013SkillPickerTable = new Tabulator("#TABLE_HR013_SKILL_PICKER", {
-        layout: "fitColumns",
-        height: "360px",
-        placeholder: "등록된 기술이 없습니다.",
-        headerHozAlign: "center",
-        columnDefaults: {
-            headerSort: false,
-            resizable: false
-        },
-        columns: [
-            { title: "분야", field: "groupName", width: 170, hozAlign: "left" },
-            { title: "기술", field: "skills", hozAlign: "left", formatter: hr013SkillFormatter, widthGrow: 3 }
-        ],
-        data: []
-    });
-    hr013SkillPickerTableReady = false;
-}
-
-// 선택 개수 메타와 칩 선택 상태를 동기화하고, 리렌더 시 스크롤 위치를 유지한다.
 function syncHr013SkillPickerUi(forceRebuild) {
-    var totalCount = Array.isArray(hr013SkillOptions) ? hr013SkillOptions.length : 0;
-    var selectedCount = getHr013PickerSelectedSet().size;
-    $("#hr013-skill-picker-meta").text("전체 기술 " + totalCount + "개 / 선택 " + selectedCount + "개");
-
-    if (!hr013SkillPickerTable) {
+    if (!hr013SkillPicker) {
         return;
     }
-
-    if (!forceRebuild && hr013SkillPickerTableReady) {
-        syncHr013SkillPickerChipState();
-        return;
-    }
-
-    var tableElement = hr013SkillPickerTable.getElement ? hr013SkillPickerTable.getElement() : null;
-    var holder = tableElement ? tableElement.querySelector(".tabulator-tableHolder") : null;
-    var prevTop = holder ? holder.scrollTop : 0;
-    var prevLeft = holder ? holder.scrollLeft : 0;
-
-    var afterRender = function () {
-        hr013SkillPickerTableReady = true;
-        syncHr013SkillPickerChipState();
-        var currentElement = hr013SkillPickerTable.getElement ? hr013SkillPickerTable.getElement() : null;
-        var currentHolder = currentElement ? currentElement.querySelector(".tabulator-tableHolder") : null;
-        if (currentHolder) {
-            currentHolder.scrollTop = prevTop;
-            currentHolder.scrollLeft = prevLeft;
-        }
-    };
-
-    var setResult = hr013SkillPickerTable.setData(buildHr013SkillPickerRows());
-    if (setResult && typeof setResult.then === "function") {
-        setResult.then(afterRender);
-    } else {
-        setTimeout(afterRender, 0);
-    }
+    hr013SkillPicker.sync(forceRebuild);
 }
 
-function syncHr013SkillPickerChipState() {
-    var selectedCodes = getHr013PickerSelectedSet();
-    $("#TABLE_HR013_SKILL_PICKER .hr013-skill-chip").each(function () {
-        var code = String($(this).data("code") || "");
-        $(this).toggleClass("is-selected", selectedCodes.has(code));
-    });
-}
-
-function getHr013PickerSelectedSet() {
-    if (hr013SkillPickerDraftSet instanceof Set) {
-        return hr013SkillPickerDraftSet;
-    }
-    return getHr013SelectedCodeSet();
-}
-
+// 모달 hidden(csv) 값에서 현재 선택 코드를 Set으로 복원한다.
 function getHr013SelectedCodeSet() {
     var set = new Set();
     var csv = $("#write_hr013_stack_txt").val();
@@ -531,6 +389,7 @@ function getHr013SelectedCodeSet() {
     return set;
 }
 
+// 인라인 그리드 행의 기술값(skl_id_lst/stack_txt)도 동일한 Set 포맷으로 복원한다.
 function getHr013RowSelectedCodeSet(row) {
     var set = new Set();
     if (!row || typeof row.getData !== "function") {
@@ -750,102 +609,6 @@ function getHr013SkillLabelText(value, fallback) {
     }).join(", ");
 }
 
-function getHr013GroupCode(skillCode) {
-    var code = String(skillCode || "").trim();
-    if (!code) {
-        return "";
-    }
-    return code.substring(0, 2).toUpperCase();
-}
-
-function buildHr013GroupNameMap() {
-    var groupNameMap = {};
-    (hr013SkillGroupOptions || []).forEach(function (group) {
-        var groupCode = String(group.cd || "").toUpperCase();
-        if (!groupCode) {
-            return;
-        }
-        groupNameMap[groupCode] = group.cd_nm || groupCode;
-    });
-    return groupNameMap;
-}
-
-function buildHr013SkillPickerRows() {
-    var groupRows = [];
-    var groupMap = {};
-
-    (hr013SkillGroupOptions || []).forEach(function (group, idx) {
-        var groupCode = String(group.cd || "").toUpperCase();
-        if (!groupCode) {
-            return;
-        }
-        var row = {
-            groupCode: groupCode,
-            groupName: group.cd_nm || groupCode,
-            sortOrder: idx,
-            skills: []
-        };
-        groupMap[groupCode] = row;
-        groupRows.push(row);
-    });
-
-    (hr013SkillOptions || []).forEach(function (skill) {
-        var code = String(skill.cd || "");
-        if (!code) {
-            return;
-        }
-        var groupCode = getHr013GroupCode(code);
-        if (!groupMap[groupCode]) {
-            groupMap[groupCode] = {
-                groupCode: groupCode,
-                groupName: groupCode || "기타",
-                sortOrder: 9999,
-                skills: []
-            };
-            groupRows.push(groupMap[groupCode]);
-        }
-        groupMap[groupCode].skills.push({
-            code: code,
-            label: String(skill.cd_nm || code)
-        });
-    });
-
-    groupRows.forEach(function (row) {
-        row.skills.sort(function (a, b) {
-            return a.label.localeCompare(b.label, "ko");
-        });
-    });
-
-    return groupRows
-        .filter(function (row) {
-            return row.skills.length > 0;
-        })
-        .sort(function (a, b) {
-            if (a.sortOrder !== b.sortOrder) {
-                return a.sortOrder - b.sortOrder;
-            }
-            return a.groupName.localeCompare(b.groupName, "ko");
-        });
-}
-
-function hr013SkillFormatter(cell) {
-    var skills = cell.getValue() || [];
-    if (!skills.length) {
-        return "";
-    }
-
-    var selectedCodes = getHr013PickerSelectedSet();
-    var html = skills.map(function (skill) {
-        var code = String(skill.code || "");
-        var label = String(skill.label || code);
-        var selectedClass = selectedCodes.has(code) ? " is-selected" : "";
-        return "<button type='button' class='hr013-skill-chip" + selectedClass +
-            "' data-code='" + hr013EscapeHtmlAttr(code) + "'>" + hr013EscapeHtml(label) + "</button>";
-    }).join("");
-
-    return "<div class='hr013-skill-chip-wrap'>" + html + "</div>";
-}
-
 function hr013EscapeHtml(value) {
     return String(value || "")
         .replace(/&/g, "&amp;")
@@ -853,169 +616,6 @@ function hr013EscapeHtml(value) {
         .replace(/>/g, "&gt;")
         .replace(/\"/g, "&quot;")
         .replace(/'/g, "&#39;");
-}
-
-function hr013EscapeHtmlAttr(value) {
-    return hr013EscapeHtml(value);
-}
-
-function selectHr013Skill(skillCode, fromSearch) {
-    var code = String(skillCode || "").trim();
-    if (!code) {
-        return;
-    }
-
-    if (!(hr013SkillPickerDraftSet instanceof Set)) {
-        hr013SkillPickerDraftSet = getHr013SelectedCodeSet();
-    }
-    hr013SkillPickerDraftSet.add(code);
-    syncHr013SkillPickerUi();
-    focusHr013Skill(code);
-
-    if (fromSearch) {
-        $("#hr013-skill-picker-search").val("");
-        $("#hr013-skill-picker-suggest").hide().empty();
-        hr013SkillSuggestActiveIndex = -1;
-    }
-}
-
-function toggleHr013Skill(skillCode) {
-    var code = String(skillCode || "").trim();
-    if (!code) {
-        return;
-    }
-
-    if (!(hr013SkillPickerDraftSet instanceof Set)) {
-        hr013SkillPickerDraftSet = getHr013SelectedCodeSet();
-    }
-
-    if (hr013SkillPickerDraftSet.has(code)) {
-        hr013SkillPickerDraftSet.delete(code);
-    } else {
-        hr013SkillPickerDraftSet.add(code);
-    }
-    syncHr013SkillPickerUi();
-    focusHr013Skill(code);
-}
-
-function focusHr013Skill(skillCode) {
-    setTimeout(function () {
-        var code = String(skillCode || "");
-        if (!code) {
-            return;
-        }
-        var $chip = $("#TABLE_HR013_SKILL_PICKER .hr013-skill-chip").filter(function () {
-            return String($(this).data("code") || "") === code;
-        }).first();
-        if (!$chip.length) {
-            return;
-        }
-        $chip.addClass("is-flash");
-        setTimeout(function () {
-            $chip.removeClass("is-flash");
-        }, 450);
-    }, 30);
-}
-
-function findHr013SkillMatches(keyword, limit) {
-    var query = String(keyword || "").trim().toLowerCase();
-    if (!query) {
-        return [];
-    }
-    var max = limit || 20;
-    var groupNameMap = buildHr013GroupNameMap();
-
-    return (hr013SkillOptions || [])
-        .map(function (skill) {
-            var code = String(skill.cd || "");
-            var label = String(skill.cd_nm || code);
-            var groupCode = getHr013GroupCode(code);
-            return {
-                code: code,
-                label: label,
-                groupName: groupNameMap[groupCode] || groupCode || "기타"
-            };
-        })
-        .filter(function (skill) {
-            var codeMatch = skill.code.toLowerCase().indexOf(query) >= 0;
-            var labelMatch = skill.label.toLowerCase().indexOf(query) >= 0;
-            return codeMatch || labelMatch;
-        })
-        .sort(function (a, b) {
-            return a.label.localeCompare(b.label, "ko");
-        })
-        .slice(0, max);
-}
-
-function renderHr013SkillSuggestions(keyword) {
-    var $suggest = $("#hr013-skill-picker-suggest");
-    var query = String(keyword || "").trim();
-    if (!query) {
-        hr013SkillSuggestActiveIndex = -1;
-        $suggest.hide().empty();
-        return;
-    }
-
-    var matches = findHr013SkillMatches(query, 20);
-    if (!matches.length) {
-        hr013SkillSuggestActiveIndex = -1;
-        $suggest.hide().empty();
-        return;
-    }
-
-    var html = matches.map(function (item) {
-        return "<li class='hr013-skill-suggest-item' data-code='" + hr013EscapeHtmlAttr(item.code) + "'>" +
-            "<span class='name'>" + hr013EscapeHtml(item.label) + "</span>" +
-            "<span class='group'>" + hr013EscapeHtml(item.groupName) + "</span>" +
-            "</li>";
-    }).join("");
-
-    $suggest.html(html).show();
-    hr013SkillSuggestActiveIndex = -1;
-    syncHr013SuggestionActive();
-}
-
-function moveHr013SuggestionSelection(step) {
-    var $items = $("#hr013-skill-picker-suggest .hr013-skill-suggest-item");
-    if (!$items.length || !$("#hr013-skill-picker-suggest").is(":visible")) {
-        return;
-    }
-    var max = $items.length - 1;
-    if (hr013SkillSuggestActiveIndex < 0) {
-        hr013SkillSuggestActiveIndex = step > 0 ? 0 : max;
-    } else {
-        hr013SkillSuggestActiveIndex += step;
-        if (hr013SkillSuggestActiveIndex < 0) {
-            hr013SkillSuggestActiveIndex = 0;
-        }
-        if (hr013SkillSuggestActiveIndex > max) {
-            hr013SkillSuggestActiveIndex = max;
-        }
-    }
-    syncHr013SuggestionActive();
-}
-
-function syncHr013SuggestionActive() {
-    var $items = $("#hr013-skill-picker-suggest .hr013-skill-suggest-item");
-    $items.removeClass("is-active");
-    if (!$items.length || hr013SkillSuggestActiveIndex < 0) {
-        return;
-    }
-    var $active = $items.eq(hr013SkillSuggestActiveIndex);
-    $active.addClass("is-active");
-    var container = $("#hr013-skill-picker-suggest").get(0);
-    var element = $active.get(0);
-    if (container && element && typeof element.scrollIntoView === "function") {
-        element.scrollIntoView({ block: "nearest" });
-    }
-}
-
-function getHr013ActiveSuggestItem() {
-    var $items = $("#hr013-skill-picker-suggest .hr013-skill-suggest-item");
-    if (!$items.length || hr013SkillSuggestActiveIndex < 0) {
-        return $();
-    }
-    return $items.eq(hr013SkillSuggestActiveIndex);
 }
 
 // 프로젝트 데이터 조회 후 테이블 반영
