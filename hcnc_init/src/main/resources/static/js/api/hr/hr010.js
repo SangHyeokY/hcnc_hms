@@ -38,6 +38,10 @@ let isSaving = false;
 // 저장된 탭 alert 표시하기 위한 리스트
 const savedTabs = [];
 
+// 저장 완료 알림
+var swalTitle = "";
+var swalText = "";
+
 // ============================================================================== //
 
 // 문서 첫 생성 시 실행
@@ -87,7 +91,18 @@ $(document).ready(async function () {
 
         // 이미지 파일만 허용
         if (!file.type.startsWith("image/")) {
-            alert("이미지 파일만 선택 가능합니다.");
+            Swal.fire({
+                icon: 'warning',
+                title: '업로드 오류',
+                text: '이미지 파일만 선택 가능합니다.',
+                showClass: { popup: '', backdrop: '' },
+                hideClass: { popup: '', backdrop: '' },
+                backdrop: true,
+                allowOutsideClick: false,
+                confirmButtonText: '확인',
+                confirmButtonColor: '#3085d6',
+                scrollbarPadding: false
+            });
             return;
         }
         $("#dev_img").show();
@@ -183,29 +198,70 @@ $(document).ready(async function () {
         const activeTab = $(".tab-btn.active").data("tab");
         console.log("현재 탭 :", activeTab);
 
-        // 로딩바 표시
         if (isSaving) return;
+
+        // 로딩 표시
         isSaving = true;
         showLoading();
 
+        // 기본 유효성 검사
+        if (!validateUserForm()) {
+            console.log("인적사항 유효성 실패");
+
+            // 각 탭마다 유효성 검사 표시 다 적용시키고 난 뒤에, 이거 지우기
+            Swal.fire({
+                icon: 'warning',
+                title: '입력 오류',
+                text: '인적사항을 확인해주세요.',
+                showClass: { popup: '', backdrop: '' },
+                hideClass: { popup: '', backdrop: '' },
+                backdrop: true,
+                allowOutsideClick: false,
+                confirmButtonText: '확인',
+                confirmButtonColor: '#3085d6',
+                scrollbarPadding: false
+            });
+            hideLoading();
+            isSaving = false;
+            return;
+        }
+
+        // 탭별 유효성 검사 (update 모드만)
+        if (currentMode !== "insert" && currentMode !== "view") {
+            if ((changedTabs.tab1 && !validateHr011Form()) ||
+                (changedTabs.tab2 && !validateHr012Form()) ||
+                (changedTabs.tab3 && !window.hr013Table) ||
+                (changedTabs.tab4 && !window.hr014TableA)) {
+
+                console.log("탭 유효성 실패");
+
+                // 각 탭마다 유효성 검사 표시 다 적용시키고 난 뒤에, 이거 수정하기
+                Swal.fire({
+                    icon: 'warning',
+                    title: '입력 오류',
+                    text: '상세정보 입력란을 확인해주세요.',
+                    showClass: { popup: '', backdrop: '' },
+                    hideClass: { popup: '', backdrop: '' },
+                    backdrop: true,
+                    allowOutsideClick: false,
+                    confirmButtonText: '확인',
+                    confirmButtonColor: '#3085d6',
+                    scrollbarPadding: false
+                });
+                hideLoading();
+                isSaving = false;
+                return;
+            }
+        }
+
         try {
-            // 기본 유효성 검사
-            if (!validateUserForm()) {
-                throw new Error("인적사항 유효성 실패");
-            }
-            // mode가 update일 때, tab별로 유효성 검사
-            if (currentMode !== "insert" && currentMode !== "view") {
-                if (changedTabs.tab1 && !validateHr011Form()) throw new Error("tab1 검증 실패");
-                if (changedTabs.tab2 && !validateHr012Form()) throw new Error("tab2 검증 실패");
-                if (changedTabs.tab3 && !window.hr013Table) throw new Error("tab3 없음");
-                if (changedTabs.tab4 && !window.hr014TableA) throw new Error("tab4 없음");
-            }
-
-            // 인적사항 저장 (여기서 서버 작업 끝날 때까지 대기)
+            // 인적사항 서버 저장
             const success = await upsertUserBtn();
-            if (!success) {throw new Error("인적사항 저장 실패");}
+            if (!success) {
+                throw new Error("인적사항 저장 실패");
+            }
 
-            // 탭 변경 내용을 DB에 저장 (순차)
+            // 탭 데이터 순차 저장
             if (changedTabs.tab1) {
                 await saveHr011TableData();
                 savedTabs.push("소속 및 계약정보");
@@ -223,34 +279,48 @@ $(document).ready(async function () {
                 savedTabs.push("평가 및 리스크");
             }
 
+            // 상태 초기화
             Object.keys(changedTabs).forEach(k => changedTabs[k] = false);
 
-            // 저장 완료 알림
-            if (
-                currentMode === "insert" ||
-                (!changedTabs.tab1 && !changedTabs.tab2 && !changedTabs.tab3 && !changedTabs.tab4)
-            ) {
-                alert("인적사항 정보가 저장되었습니다.");
-            } else {
-                alert(
-                    `인적사항\n- ${savedTabs.join("\n- ")}\n저장이 완료되었습니다.`
-                );
-            }
-
-            // 신규 등록이었을 경우, 팝업 종료
+            // 신규 등록이면 팝업 닫기
             if (currentMode === "insert") {
                 closeUserViewModal();
             }
+
         } catch (e) {
             console.error(e);
-            alert("저장 중 오류가 발생했습니다.");
+            Swal.fire({
+                icon: 'error',
+                title: '저장 실패',
+                text: '저장 중 오류가 발생했습니다.',
+                showClass: { popup: '', backdrop: '' },
+                hideClass: { popup: '', backdrop: '' },
+                backdrop: true,
+                allowOutsideClick: false,
+                confirmButtonText: '확인',
+                confirmButtonColor: '#d33',
+                scrollbarPadding: false
+            });
         } finally {
-            isSaving = false;
-
-            showLoading();
+            // 테이블 리로드 & 로딩 숨김
             userTable.clearData();
             await loadUserTableData();
             hideLoading();
+            isSaving = false;
+
+            // Swal로 알림
+            Swal.fire({
+                icon: 'success',
+                title: swalTitle,
+                text: swalText,
+                showClass: { popup: '', backdrop: '' },
+                hideClass: { popup: '', backdrop: '' },
+                backdrop: true,
+                allowOutsideClick: false,
+                confirmButtonText: '확인',
+                confirmButtonColor: '#3085d6',
+                scrollbarPadding: false
+            });
 
             console.log("저장 작업 종료, 로딩 상태 :", isSaving); // false여야 정상
         }
@@ -444,8 +514,8 @@ function buildUserTable() {
                 }
             },
             { title: "dev_id", field: "dev_id", visible: false },
-            { title: "생년월일", field: "brdt", headerSort: true, widthGrow: 2, minWidth: 120 },
-            { title: "연락처", field: "tel", widthGrow: 3, minWidth: 150, headerSort: false },
+            { title: "생년월일", field: "brdt", hozAlign: "center", headerSort: true, widthGrow: 2, minWidth: 120 },
+            { title: "연락처", field: "tel", hozAlign: "center", widthGrow: 3, minWidth: 150, headerSort: false },
             {   title: "이메일",
                 field: "email", widthGrow:4, minWidth: 180, headerSort: false,
                 formatter: function (cell) {
@@ -478,7 +548,6 @@ function buildUserTable() {
             {
                 title: "경력연차",
                 field: "exp_yr",
-                hozAlign: "center",
                 widthGrow: 1,
                 minWidth: 100,
                 formatter: function(cell){
@@ -515,9 +584,10 @@ function buildUserTable() {
                     </div>`;
                 }
             },
-            { title: "투입 가능 시점", field: "avail_dt", widthGrow:2, minWidth: 120 },
+            { title: "투입 가능 시점", field: "avail_dt", hozAlign: "center", widthGrow:2, minWidth: 120 },
             {   title: "계약 형태",
                 field: "ctrt_typ",
+                hozAlign: "center",
                 formatter: function (cell) {
                     const val = cell.getValue();
                     return (ctrtTypMap && ctrtTypMap[val]) ? ctrtTypMap[val] : val;
@@ -613,7 +683,18 @@ async function loadUserTableData() {
         // userTable.setData(response.res || []);
     } catch (e) {
         console.error(e);
-        alert("사용자 데이터를 불러오는 중 오류가 발생했습니다.");
+        Swal.fire({
+            icon: 'warning',
+            title: '조회 오류',
+            text: '사용자 데이터를 불러오는 중 오류가 발생했습니다.',
+            showClass: { popup: '', backdrop: '' },
+            hideClass: { popup: '', backdrop: '' },
+            backdrop: true,
+            allowOutsideClick: false,
+            confirmButtonText: '확인',
+            confirmButtonColor: '#3085d6',
+            scrollbarPadding: false
+        });
     }
 }
 
@@ -644,7 +725,18 @@ function loadUserTableImgDataAsync(data) {
             },
             error: function (e) {
                 console.error(e);
-                alert("사용자 데이터를 불러오는 중 오류가 발생했습니다.");
+                Swal.fire({
+                    icon: 'warning',
+                    title: '프로필 이미지 오류',
+                    text: '사용자 데이터를 불러오는 중 오류가 발생했습니다.',
+                    showClass: { popup: '', backdrop: '' },
+                    hideClass: { popup: '', backdrop: '' },
+                    backdrop: true,
+                    allowOutsideClick: false,
+                    confirmButtonText: '확인',
+                    confirmButtonColor: '#3085d6',
+                    scrollbarPadding: false
+                });
                 resolve(); // 에러여도 UI는 표시 가능하도록 resolve
             }
         });
@@ -715,38 +807,127 @@ function upsertUserBtn() {
                  reject(xhr);
             }
         });
+
+        if (
+            currentMode === "insert" ||
+            (!changedTabs.tab1 && !changedTabs.tab2 && !changedTabs.tab3 && !changedTabs.tab4)
+        ) {
+            swalTitle = "인적사항 저장 완료";
+            swalText = "인적사항 정보가 저장되었습니다.";
+        } else {
+            swalTitle = "변경사항 저장 완료";
+            swalText = `인적사항\n- ${savedTabs.join("\n- ")}\n저장이 완료되었습니다.`;
+        }
     });
 }
 
 // ============================================================================== //
 
-// 데이터 삭제 이벤트
+// 데이터 삭제 요청 - toast 방식  추가해야될 사항(현재 삭제하겠냐는 문구에 잡힌 파라미터 수정 필요)
 function deleteUserRows() {
     var selectedRows = userTable.getSelectedRows();
-    if (selectedRows.length === 0) {
-        alert("삭제할 사용자를 선택해주세요.");
-        return;
-    }
-    if (!confirm("선택한 사용자를 삭제하시겠습니까?")) {
-        return;
-    }
-    var pending = selectedRows.length;
 
-    selectedRows.forEach(function (row) {
-        $.ajax({
-            url: "/hr010/delete",
-            type: "POST",
-            data: { dev_id: row.getData().dev_id },
-            complete: function () {
-                pending -= 1;
-                if (pending === 0) {
-                    loadUserTableData();
-                    alert("삭제되었습니다.");
-                }
-            },
-            error: function () {
-                alert("삭제 중 오류가 발생했습니다.");
-            }
+    // 선택 없음
+    if (selectedRows.length === 0) {
+        Swal.fire({
+            title: '알림',
+            text: '삭제할 사용자를 선택해주세요.',
+            icon: 'info',
+            showClass: { popup: '', backdrop: '' }, // 애니메이션 제거
+            hideClass: { popup: '', backdrop: '' },
+            backdrop: true,
+            allowOutsideClick: false,
+            confirmButtonText: '확인',
+            confirmButtonColor: '#3085d6',
+            scrollbarPadding: false
+        });
+        return;
+    }
+
+    // 선택된 첫 번째 행의 이름 가져오기
+    var firstRowData = selectedRows[0].getData();
+
+    // 1단계 확인 모달
+    Swal.fire({
+        title: `${firstRowData.dev_nm} 사용자 정보 삭제`,
+        text: '삭제하시겠습니까?',
+        icon: 'warning',
+        showClass: { popup: '', backdrop: '' },
+        hideClass: { popup: '', backdrop: '' },
+        backdrop: true,
+        allowOutsideClick: false,
+        showCancelButton: true,
+        confirmButtonText: '확인',
+        cancelButtonText: '취소',
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#aaa',
+        scrollbarPadding: false
+    }).then((firstResult) => {
+        if (!firstResult.isConfirmed) return;
+
+        // 2단계 최종 확인 모달
+        Swal.fire({
+            title: '정말로 삭제하시겠습니까?',
+            text: `${firstRowData.dev_nm} 사용자의 데이터가 삭제되며, 되돌릴 수 없습니다.`,
+            icon: 'warning',
+            showClass: { popup: '', backdrop: '' },
+            hideClass: { popup: '', backdrop: '' },
+            backdrop: true,
+            allowOutsideClick: false,
+            showCancelButton: true,
+            confirmButtonText: '삭제',
+            cancelButtonText: '취소',
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#aaa',
+            scrollbarPadding: false
+        }).then((secondResult) => {
+            if (!secondResult.isConfirmed) return;
+
+            // 실제 삭제 Ajax 호출
+            var pending = selectedRows.length;
+
+            selectedRows.forEach(function (row) {
+                $.ajax({
+                    url: "/hr010/delete",
+                    type: "POST",
+                    data: { dev_id: row.getData().dev_id },
+                    success: function () {
+                        pending -= 1;
+                        if (pending === 0) {
+                            loadUserTableData();
+
+                            Swal.fire({
+                                icon: 'success',
+                                title: '삭제 완료',
+                                text: '선택한 사용자가 삭제되었습니다.',
+                                toast: false,                     // 일반 팝업처럼 크게
+                                showClass: { popup: '', backdrop: '' }, // 애니메이션 제거
+                                hideClass: { popup: '', backdrop: '' },
+                                backdrop: true,                   // 배경 어둡게
+                                allowOutsideClick: false,         // 배경 클릭 시 닫히지 않음
+                                confirmButtonText: '확인',        // 확인 버튼 표시
+                                confirmButtonColor: '#3085d6',
+                                scrollbarPadding: false           // 화면 밀림 방지
+                            });
+                        }
+                    },
+                    error: function () {
+                        Swal.fire({
+                            icon: 'error',
+                            title: '삭제 실패',
+                            text: '삭제 중 오류가 발생했습니다.',
+                            toast: false,                     // 일반 팝업처럼 크게
+                            showClass: { popup: '', backdrop: '' }, // 애니메이션 제거
+                            hideClass: { popup: '', backdrop: '' },
+                            backdrop: true,                   // 배경 어둡게
+                            allowOutsideClick: false,         // 배경 클릭 시 닫히지 않음
+                            confirmButtonText: '확인',        // 확인 버튼 표시
+                            confirmButtonColor: '#3085d6',
+                            scrollbarPadding: false           // 화면 밀림 방지
+                        });
+                    }
+                });
+            });
         });
     });
 }

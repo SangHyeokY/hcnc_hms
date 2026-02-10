@@ -48,6 +48,11 @@ option{background:#fff; color:#333;}
 #hms-table, #hms-table-wrap {
     height: calc(100% - 35px);
 }
+
+/* toast 팝업 뒤 배경 */
+.swal2-container {
+    background-color: rgba(0, 0, 0, 0.45) !important; /* 어둡게 */
+}
 /*=================================================================================
  * Grid Table style
 =================================================================================*/
@@ -987,7 +992,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 #loading-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.4);
+    background: rgba(0, 0, 0, 0.45);
     z-index: 99999;
     display: none;
     align-items: center;
