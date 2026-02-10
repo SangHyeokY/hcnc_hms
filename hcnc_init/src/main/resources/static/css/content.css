@@ -1007,6 +1007,21 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
   margin-left: 0;
 }
 
+/* 사용자관리 수정 모달: 비고 입력칸 포함 모든 입력영역이 잘리지 않도록 폭 고정 */
+#write-user-area .modal-content {
+  grid-template-columns: 1fr;
+  overflow-y: auto;
+}
+#write-user-area .modal-content li.table-col.fl-ac .table-cell {
+  flex: 1 1 0;
+  width: auto;
+  min-width: 0;
+}
+#write-user-area #write_remark {
+  width: 100%;
+  min-width: 0;
+}
+
 .modal-container-detail {display: flex; flex-direction: column; max-height: 76vh; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; min-width:960px;background: #fff; border-radius: 6px; padding: 20px; box-sizing: border-box;}
 .modal-container-detail .close-btn{background:none; border:none; }
 .modal-container-detail .close-btn img{width:16px; }
