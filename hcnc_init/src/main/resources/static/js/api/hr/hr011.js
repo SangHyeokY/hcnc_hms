@@ -228,7 +228,7 @@ async function deleteHr011() {
         await showAlert({
             icon: 'error',
             title: '오류',
-            text: '소속 및 계약정보 데이터가 존재하지 않습니다.'
+            text: `'소속 및 계약정보' 데이터가 존재하지 않습니다.`
         });
         return;
     }

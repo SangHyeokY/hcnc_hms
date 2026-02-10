@@ -272,7 +272,7 @@ $(document).ready(async function () {
                 title: currentMode === "insert" ? "등록 완료" : "저장 완료",
                 text: savedTabs.length
                     ? `${savedTabNames.join(", ")} 저장이 완료되었습니다.`
-                    : "인적사항 정보가 저장되었습니다."
+                    : `'인적사항' 정보가 저장되었습니다.`
             });
 
             // 탭 상태 초기화
