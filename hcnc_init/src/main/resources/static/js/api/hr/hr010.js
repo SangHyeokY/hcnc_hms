@@ -9,6 +9,12 @@ var currentMode = "insert";
 // 주 개발언어 태그 입력 공통 모듈
 var mainLangTagInput = null;
 var pendingMainLangValue = "";
+var mainLangPickerTable = null;
+var mainLangPickerTableReady = false;
+var mainLangPickerDraftSet = null;
+var mainLangPickerEventBound = false;
+var mainLangSkillOptions = [];
+var mainLangGroupOptions = [];
 
 // 개인/법인 공통코드
 var ctrtTypMap = [];
@@ -1041,7 +1047,10 @@ function setModalMode(mode) {
               .prop("disabled", false)
               .removeAttr("disabled");
     }
+    // 주 개발언어 입력창은 팝업 트리거 전용으로 항상 readonly 유지
+    $("#main_lang_input").prop("readonly", true);
     $(".career-spin-btn").prop("disabled", isView);
+    syncCareerExpText();
 
     // 등록 mode일 경우에만 '소속 구분' 입력 가능
     if (isInsert) {
@@ -1054,8 +1063,14 @@ function setModalMode(mode) {
     $("#btn-user-save").toggle(isInsert || isUpdate);
     $("#btn-excel").toggle(isView);
     $(".tab-article").toggle(!isInsert);
-    $("#main_lang_input").toggle(!isView);
+    $("#main_lang_input, #btn_main_lang_picker").toggle(!isView);
     $(".showingbtn").toggle(isUpdate || isInsert);
+    if (isView) {
+        closeMainLangPicker(true);
+        if (typeof closeHr012SkillPicker === "function") {
+            closeHr012SkillPicker(true);
+        }
+    }
 
     const $tagBox = $("#mainLangTagList").closest(".tag-input-box");
     $tagBox.toggleClass("is-readonly", isView);
@@ -1079,6 +1094,10 @@ function broadcastTabReadonly(isReadOnly) {
 function closeUserViewModal() {
     // document.getElementById("view-user-area").style.display = "none";
     const $modal = $("#view-user-area");
+    closeMainLangPicker(true);
+    if (typeof closeHr012SkillPicker === "function") {
+        closeHr012SkillPicker(true);
+    }
     $modal.removeClass("show");
 
     setTimeout(() => {
@@ -1245,6 +1264,8 @@ function validateUserForm() {
             title: '인적사항 미입력',
             text: '경력연차의 년/개월은 0~99 범위로 입력하세요.'
         });
+    if (expYearNum < 0 || expYearNum > 99 || expMonthNum < 0 || expMonthNum > 12) {
+        alert("경력연차의 년은 0~99, 개월은 0~12 범위로 입력하세요.");
         $("#exp_yr_year").focus();
         return false;
     }
@@ -1331,26 +1352,479 @@ function validateUserForm() {
 
 // ============================================================================== //
 
-// 주 개발언어 태그 공통화 초기화
+// 주 개발언어 태그/팝업 초기화
 function initMainLangTags() {
-    if (mainLangTagInput) {
-        return;
+    if (!mainLangTagInput) {
+        mainLangTagInput = createTagInput({
+            inputSelector: "#main_lang_input",
+            listSelector: "#mainLangTagList",
+            hiddenSelector: "#main_lang",
+            getValue: function (item) { return item.cd; },
+            getLabel: function (item) { return item.cd_nm; },
+            matchMode: "prefix",
+            onTagChange: function () {
+                syncMainLangPickerUi();
+            }
+        });
+        bindMainLangPickerEvents();
     }
-    mainLangTagInput = createTagInput({
-        inputSelector: "#main_lang_input",
-        listSelector: "#mainLangTagList",
-        hiddenSelector: "#main_lang",
-        datalistSelector: "#main_lang_datalist",
-        getValue: function (item) { return item.cd; },
-        getLabel: function (item) { return item.cd_nm; },
-        matchMode: "prefix"
+
+    setComCode("main_lang_select", "skl_id", "", "cd", "cd_nm", function (res) {
+        mainLangSkillOptions = Array.isArray(res) ? res : [];
+        mainLangTagInput.setOptions(mainLangSkillOptions);
+        mainLangTagInput.setFromValue(pendingMainLangValue || $("#main_lang").val());
+        syncMainLangPickerUi(true);
     });
 
-    // 공통 콤보 박스
-    setComCode("main_lang_select", "skl_id", "", "cd", "cd_nm", function (res) {
-        mainLangTagInput.setOptions(res || []);
-        mainLangTagInput.setFromValue(pendingMainLangValue || $("#main_lang").val());
+    getComCode("skl_grp", "", function (res) {
+        mainLangGroupOptions = Array.isArray(res) ? res : [];
+        syncMainLangPickerUi(true);
     });
+}
+
+// ============================================================================== //
+
+function bindMainLangPickerEvents() {
+    if (mainLangPickerEventBound) {
+        return;
+    }
+    mainLangPickerEventBound = true;
+
+    $(document).on("click", "#main_lang_input, #btn_main_lang_picker", function (e) {
+        e.preventDefault();
+        if (currentMode === "view") {
+            return;
+        }
+        openMainLangPicker();
+    });
+
+    $(document).on("click", "#btn_main_lang_picker_apply", function (e) {
+        e.preventDefault();
+        applyMainLangPickerSelection();
+    });
+
+    $(document).on("click", "#btn_main_lang_picker_close_x", function (e) {
+        e.preventDefault();
+        closeMainLangPicker();
+    });
+
+    $(document).on("click", "#main-lang-picker-area", function (e) {
+        if (e.target === this) {
+            closeMainLangPicker();
+        }
+    });
+
+    $(document).on("click", "#TABLE_MAIN_LANG_PICKER .main-lang-skill-chip", function (e) {
+        e.preventDefault();
+        if (currentMode === "view") {
+            return;
+        }
+        var skillCode = String($(this).data("code") || "");
+        if (!skillCode) {
+            return;
+        }
+        toggleMainLangSkill(skillCode);
+    });
+
+    $(document).on("input", "#main-lang-picker-search", function () {
+        renderMainLangSuggestions($(this).val());
+    });
+
+    $(document).on("keydown", "#main-lang-picker-search", function (e) {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            var $first = $("#main-lang-picker-suggest .main-lang-suggest-item").first();
+            if ($first.length) {
+                selectMainLangSkill(String($first.data("code") || ""), true);
+            }
+        } else if (e.key === "Escape") {
+            e.preventDefault();
+            closeMainLangPicker();
+        }
+    });
+
+    $(document).on("click", "#main-lang-picker-suggest .main-lang-suggest-item", function (e) {
+        e.preventDefault();
+        var skillCode = String($(this).data("code") || "");
+        if (!skillCode) {
+            return;
+        }
+        selectMainLangSkill(skillCode, true);
+    });
+
+    $(document).on("mousedown", function (e) {
+        if (!$(e.target).closest(".main-lang-picker-search-wrap").length) {
+            $("#main-lang-picker-suggest").hide();
+        }
+    });
+}
+
+function openMainLangPicker() {
+    if (currentMode === "view") {
+        return;
+    }
+    buildMainLangPickerTable();
+    mainLangPickerDraftSet = getMainLangSelectedCodeSet();
+    syncMainLangPickerUi(true);
+
+    var $picker = $("#main-lang-picker-area");
+    $picker.show();
+    setTimeout(function () {
+        $picker.addClass("show");
+    }, 0);
+
+    $("#main-lang-picker-search").val("");
+    renderMainLangSuggestions("");
+    setTimeout(function () {
+        $("#main-lang-picker-search").trigger("focus");
+    }, 40);
+}
+
+function closeMainLangPicker(immediate) {
+    var $picker = $("#main-lang-picker-area");
+    if (!$picker.length) {
+        mainLangPickerDraftSet = null;
+        return;
+    }
+    $picker.removeClass("show");
+    $("#main-lang-picker-suggest").hide().empty();
+    if (immediate) {
+        mainLangPickerDraftSet = null;
+        $picker.hide();
+        return;
+    }
+    setTimeout(function () {
+        if (!$picker.hasClass("show")) {
+            $picker.hide();
+        }
+    }, 180);
+    mainLangPickerDraftSet = null;
+}
+
+function applyMainLangPickerSelection() {
+    if (!mainLangTagInput || !mainLangPickerDraftSet) {
+        closeMainLangPicker();
+        return;
+    }
+
+    var csv = Array.from(mainLangPickerDraftSet).join(",");
+    mainLangTagInput.setFromValue(csv);
+    closeMainLangPicker();
+}
+
+function buildMainLangPickerTable() {
+    if (mainLangPickerTable || !window.Tabulator || !document.getElementById("TABLE_MAIN_LANG_PICKER")) {
+        return;
+    }
+
+    mainLangPickerTable = new Tabulator("#TABLE_MAIN_LANG_PICKER", {
+        layout: "fitColumns",
+        height: "360px",
+        placeholder: "등록된 기술이 없습니다.",
+        headerHozAlign: "center",
+        columnDefaults: {
+            headerSort: false,
+            resizable: false
+        },
+        columns: [
+            { title: "분야", field: "groupName", width: 180, hozAlign: "left" },
+            { title: "기술", field: "skills", hozAlign: "left", formatter: mainLangSkillFormatter }
+        ],
+        data: []
+    });
+    mainLangPickerTableReady = false;
+}
+
+function syncMainLangPickerUi(forceRebuild) {
+    var totalCount = Array.isArray(mainLangSkillOptions) ? mainLangSkillOptions.length : 0;
+    var selectedCount = getMainLangPickerSelectedSet().size;
+    $("#main-lang-picker-meta").text("전체 기술 " + totalCount + "개 / 선택 " + selectedCount + "개");
+
+    if (!mainLangPickerTable) {
+        return;
+    }
+
+    if (!forceRebuild && mainLangPickerTableReady) {
+        syncMainLangPickerChipState();
+        return;
+    }
+
+    var tableElement = mainLangPickerTable.getElement ? mainLangPickerTable.getElement() : null;
+    var holder = tableElement ? tableElement.querySelector(".tabulator-tableHolder") : null;
+    var prevTop = holder ? holder.scrollTop : 0;
+    var prevLeft = holder ? holder.scrollLeft : 0;
+
+    var afterRender = function () {
+        mainLangPickerTableReady = true;
+        syncMainLangPickerChipState();
+        var currentElement = mainLangPickerTable.getElement ? mainLangPickerTable.getElement() : null;
+        var currentHolder = currentElement ? currentElement.querySelector(".tabulator-tableHolder") : null;
+        if (currentHolder) {
+            currentHolder.scrollTop = prevTop;
+            currentHolder.scrollLeft = prevLeft;
+        }
+    };
+
+    var setResult = mainLangPickerTable.setData(buildMainLangPickerRows());
+    if (setResult && typeof setResult.then === "function") {
+        setResult.then(afterRender);
+    } else {
+        setTimeout(afterRender, 0);
+    }
+}
+
+function syncMainLangPickerChipState() {
+    var selectedCodes = getMainLangPickerSelectedSet();
+    $("#TABLE_MAIN_LANG_PICKER .main-lang-skill-chip").each(function () {
+        var code = String($(this).data("code") || "");
+        $(this).toggleClass("is-selected", selectedCodes.has(code));
+    });
+}
+
+function getMainLangPickerSelectedSet() {
+    if (mainLangPickerDraftSet instanceof Set) {
+        return mainLangPickerDraftSet;
+    }
+    return getMainLangSelectedCodeSet();
+}
+
+function getMainLangSelectedCodeSet() {
+    var set = new Set();
+    String($("#main_lang").val() || "")
+        .split(",")
+        .forEach(function (item) {
+            var code = $.trim(item);
+            if (code) {
+                set.add(code);
+            }
+        });
+    return set;
+}
+
+function getMainLangGroupCode(skillCode) {
+    var code = String(skillCode || "").trim();
+    if (!code) {
+        return "";
+    }
+    return code.substring(0, 2).toUpperCase();
+}
+
+function buildMainLangGroupNameMap() {
+    var groupNameMap = {};
+    (mainLangGroupOptions || []).forEach(function (group) {
+        var groupCode = String(group.cd || "").toUpperCase();
+        if (!groupCode) {
+            return;
+        }
+        groupNameMap[groupCode] = group.cd_nm || groupCode;
+    });
+    return groupNameMap;
+}
+
+function buildMainLangPickerRows() {
+    var groupRows = [];
+    var groupMap = {};
+
+    (mainLangGroupOptions || []).forEach(function (group, idx) {
+        var groupCode = String(group.cd || "").toUpperCase();
+        if (!groupCode) {
+            return;
+        }
+        var row = {
+            groupCode: groupCode,
+            groupName: group.cd_nm || groupCode,
+            sortOrder: idx,
+            skills: []
+        };
+        groupMap[groupCode] = row;
+        groupRows.push(row);
+    });
+
+    (mainLangSkillOptions || []).forEach(function (skill) {
+        var code = String(skill.cd || "");
+        if (!code) {
+            return;
+        }
+        var groupCode = getMainLangGroupCode(code);
+        if (!groupMap[groupCode]) {
+            groupMap[groupCode] = {
+                groupCode: groupCode,
+                groupName: groupCode || "기타",
+                sortOrder: 9999,
+                skills: []
+            };
+            groupRows.push(groupMap[groupCode]);
+        }
+        groupMap[groupCode].skills.push({
+            code: code,
+            label: String(skill.cd_nm || code)
+        });
+    });
+
+    groupRows.forEach(function (row) {
+        row.skills.sort(function (a, b) {
+            return a.label.localeCompare(b.label, "ko");
+        });
+    });
+
+    return groupRows
+        .filter(function (row) {
+            return row.skills.length > 0;
+        })
+        .sort(function (a, b) {
+            if (a.sortOrder !== b.sortOrder) {
+                return a.sortOrder - b.sortOrder;
+            }
+            return a.groupName.localeCompare(b.groupName, "ko");
+        });
+}
+
+function mainLangSkillFormatter(cell) {
+    var skills = cell.getValue() || [];
+    if (!skills.length) {
+        return "";
+    }
+
+    var selectedCodes = getMainLangPickerSelectedSet();
+    var html = skills.map(function (skill) {
+        var code = String(skill.code || "");
+        var label = String(skill.label || code);
+        var selectedClass = selectedCodes.has(code) ? " is-selected" : "";
+        return "<button type='button' class='main-lang-skill-chip" + selectedClass +
+            "' data-code='" + escapeHtmlAttr(code) + "'>" + escapeHtml(label) + "</button>";
+    }).join("");
+
+    return "<div class='main-lang-skill-chip-wrap'>" + html + "</div>";
+}
+
+function escapeHtml(value) {
+    return String(value || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+}
+
+function escapeHtmlAttr(value) {
+    return escapeHtml(value);
+}
+
+function selectMainLangSkill(skillCode, fromSearch) {
+    if (!mainLangTagInput) {
+        return;
+    }
+    var code = String(skillCode || "").trim();
+    if (!code) {
+        return;
+    }
+
+    if (!(mainLangPickerDraftSet instanceof Set)) {
+        mainLangPickerDraftSet = getMainLangSelectedCodeSet();
+    }
+    mainLangPickerDraftSet.add(code);
+    syncMainLangPickerUi();
+    focusMainLangSkill(code);
+
+    if (fromSearch) {
+        $("#main-lang-picker-search").val("");
+        $("#main-lang-picker-suggest").hide().empty();
+    }
+}
+
+function toggleMainLangSkill(skillCode) {
+    if (!mainLangTagInput) {
+        return;
+    }
+    var code = String(skillCode || "").trim();
+    if (!code) {
+        return;
+    }
+
+    if (!(mainLangPickerDraftSet instanceof Set)) {
+        mainLangPickerDraftSet = getMainLangSelectedCodeSet();
+    }
+
+    if (mainLangPickerDraftSet.has(code)) {
+        mainLangPickerDraftSet.delete(code);
+    } else {
+        mainLangPickerDraftSet.add(code);
+    }
+    syncMainLangPickerUi();
+    focusMainLangSkill(code);
+}
+
+function focusMainLangSkill(skillCode) {
+    setTimeout(function () {
+        var code = String(skillCode || "");
+        if (!code) {
+            return;
+        }
+        var $chip = $("#TABLE_MAIN_LANG_PICKER .main-lang-skill-chip").filter(function () {
+            return String($(this).data("code") || "") === code;
+        }).first();
+        if (!$chip.length) {
+            return;
+        }
+        $chip.addClass("is-flash");
+        setTimeout(function () {
+            $chip.removeClass("is-flash");
+        }, 450);
+    }, 30);
+}
+
+function findMainLangSkillMatches(keyword, limit) {
+    var query = String(keyword || "").trim().toLowerCase();
+    if (!query) {
+        return [];
+    }
+    var max = limit || 20;
+    var groupNameMap = buildMainLangGroupNameMap();
+
+    return (mainLangSkillOptions || [])
+        .map(function (skill) {
+            var code = String(skill.cd || "");
+            var label = String(skill.cd_nm || code);
+            var groupCode = getMainLangGroupCode(code);
+            return {
+                code: code,
+                label: label,
+                groupName: groupNameMap[groupCode] || groupCode || "기타"
+            };
+        })
+        .filter(function (skill) {
+            var codeMatch = skill.code.toLowerCase().indexOf(query) >= 0;
+            var labelMatch = skill.label.toLowerCase().indexOf(query) >= 0;
+            return codeMatch || labelMatch;
+        })
+        .sort(function (a, b) {
+            return a.label.localeCompare(b.label, "ko");
+        })
+        .slice(0, max);
+}
+
+function renderMainLangSuggestions(keyword) {
+    var $suggest = $("#main-lang-picker-suggest");
+    var query = String(keyword || "").trim();
+    if (!query) {
+        $suggest.hide().empty();
+        return;
+    }
+
+    var matches = findMainLangSkillMatches(query, 20);
+    if (!matches.length) {
+        $suggest.hide().empty();
+        return;
+    }
+
+    var html = matches.map(function (item) {
+        return "<li class='main-lang-suggest-item' data-code='" + escapeHtmlAttr(item.code) + "'>" +
+            "<span class='name'>" + escapeHtml(item.label) + "</span>" +
+            "<span class='group'>" + escapeHtml(item.groupName) + "</span>" +
+            "</li>";
+    }).join("");
+
+    $suggest.html(html).show();
 }
 
 // ============================================================================== //
@@ -1370,8 +1844,7 @@ $("#tel").on("input", function () {
 
 // 경력연차(년/개월) 스핀 보정
 $("#exp_yr_year, #exp_yr_month").on("input change", function () {
-    this.value = clampCareerSpinValue(this.value);
-    syncCareerExpValue();
+    normalizeCareerSpinInputs();
 });
 
 // 경력연차 커스텀 스핀 버튼(+/-)
@@ -1387,9 +1860,41 @@ $(document).on("click", ".career-spin-btn", function () {
         return;
     }
 
-    var current = clampCareerSpinValue($target.val());
-    var next = clampCareerSpinValue(current + step);
-    $target.val(next).trigger("input");
+    var currentYear = clampCareerYearValue($("#exp_yr_year").val());
+    var currentMonth = clampCareerMonthValue($("#exp_yr_month").val());
+
+    if (targetSelector === "#exp_yr_month") {
+        if (step > 0) {
+            if (currentYear >= 99 && currentMonth >= 12) {
+                currentYear = 0;
+                currentMonth = 0;
+            } else
+            if (currentMonth >= 12) {
+                currentMonth = 0;
+                currentYear = clampCareerYearValue(currentYear + 1);
+            } else {
+                currentMonth = clampCareerMonthValue(currentMonth + 1);
+            }
+        } else {
+            if (currentMonth <= 0 && currentYear > 0) {
+                currentYear = clampCareerYearValue(currentYear - 1);
+                currentMonth = 12;
+            } else {
+                currentMonth = clampCareerMonthValue(currentMonth - 1);
+            }
+        }
+    } else {
+        if (step > 0 && currentYear >= 99 && currentMonth >= 12) {
+            currentYear = 0;
+            currentMonth = 0;
+        } else {
+            currentYear = clampCareerYearValue(currentYear + step);
+        }
+    }
+
+    $("#exp_yr_year").val(currentYear);
+    $("#exp_yr_month").val(currentMonth);
+    normalizeCareerSpinInputs();
 });
 
 // 희망단가는 숫자만 입력 가능
@@ -1486,7 +1991,7 @@ function formatGradeLabel(rank, score) {
     return `${rank}등급 (${score || 0}점)`;
 }
 
-function clampCareerSpinValue(value) {
+function clampCareerYearValue(value) {
     var num = parseInt(value, 10);
     if (!Number.isFinite(num) || isNaN(num)) {
         return 0;
@@ -1494,6 +1999,39 @@ function clampCareerSpinValue(value) {
     if (num < 0) return 0;
     if (num > 99) return 99;
     return num;
+}
+
+function clampCareerMonthValue(value) {
+    var num = parseInt(value, 10);
+    if (!Number.isFinite(num) || isNaN(num)) {
+        return 0;
+    }
+    if (num < 0) return 0;
+    if (num > 12) return 12;
+    return num;
+}
+
+function normalizeCareerSpinInputs() {
+    var years = clampCareerYearValue($("#exp_yr_year").val());
+    var monthsRaw = parseInt($("#exp_yr_month").val(), 10);
+    var months = Number.isFinite(monthsRaw) && !isNaN(monthsRaw) ? monthsRaw : 0;
+
+    if (months < 0) {
+        months = 0;
+    }
+    if (months > 12) {
+        years = clampCareerYearValue(years + Math.floor(months / 12));
+        months = months % 12;
+    }
+    if (years >= 99 && months > 12) {
+        months = 12;
+    }
+
+    months = clampCareerMonthValue(months);
+
+    $("#exp_yr_year").val(years);
+    $("#exp_yr_month").val(months);
+    syncCareerExpValue();
 }
 
 function parseCareerExpValue(value) {
@@ -1508,11 +2046,11 @@ function parseCareerExpValue(value) {
 
     if (/^\d+(\.\d+)?$/.test(raw)) {
         var parts = raw.split(".");
-        var years = clampCareerSpinValue(parts[0]);
+        var years = clampCareerYearValue(parts[0]);
         var months = 0;
         if (parts.length > 1) {
             var monthText = String(parts[1] || "").replace(/[^\d]/g, "");
-            months = clampCareerSpinValue(monthText || 0);
+            months = clampCareerMonthValue(monthText || 0);
         }
         return { years: years, months: months };
     }
@@ -1520,8 +2058,8 @@ function parseCareerExpValue(value) {
     var yearMatch = raw.match(/(\d+)\s*년/);
     var monthMatch = raw.match(/(\d+)\s*개?월/);
     return {
-        years: clampCareerSpinValue(yearMatch ? yearMatch[1] : 0),
-        months: clampCareerSpinValue(monthMatch ? monthMatch[1] : 0)
+        years: clampCareerYearValue(yearMatch ? yearMatch[1] : 0),
+        months: clampCareerMonthValue(monthMatch ? monthMatch[1] : 0)
     };
 }
 
@@ -1529,12 +2067,13 @@ function setCareerSpinInputs(value) {
     var parsed = parseCareerExpValue(value);
     $("#exp_yr_year").val(parsed.years);
     $("#exp_yr_month").val(parsed.months);
-    syncCareerExpValue();
+    normalizeCareerSpinInputs();
+    syncCareerExpText(value);
 }
 
 function composeCareerExpValue() {
-    var years = clampCareerSpinValue($("#exp_yr_year").val());
-    var months = clampCareerSpinValue($("#exp_yr_month").val());
+    var years = clampCareerYearValue($("#exp_yr_year").val());
+    var months = clampCareerMonthValue($("#exp_yr_month").val());
     if (months === 0) {
         return String(years);
     }
@@ -1543,6 +2082,15 @@ function composeCareerExpValue() {
 
 function syncCareerExpValue() {
     $("#exp_yr").val(composeCareerExpValue());
+    syncCareerExpText();
+}
+
+function syncCareerExpText(value) {
+    var source = value;
+    if (source === undefined) {
+        source = $("#exp_yr").val();
+    }
+    $("#exp_yr_text").text(formatCareerYearMonth(source));
 }
 
 function formatCareerYearMonth(value) {

@@ -10,11 +10,46 @@
                     <button type="button" class="hr012-tab-btn active" data-tab="tab2-A">보유역량</button>
                     <button type="button" class="hr012-tab-btn" data-tab="tab2-B">숙련도</button>
                 </div>
+                <div class="hr012-toolbar">
+                    <button type="button" class="btn btn-add-skill" id="btn_hr012_skill_picker">기술 선택</button>
+                </div>
                 <div class="content-body">
                     <!-- Tabulator 테이블 div -->
                     <div id="TABLE_HR012_A"></div>
                     <!-- Tabulator 테이블 div -->
                     <div id="TABLE_HR012_B" style="display:none;"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-wrap" id="hr012-skill-picker-area" style="display:none">
+            <div class="modal-container hr012-skill-picker-container">
+                <div class="header">
+                    <h4>보유역량 기술 선택</h4>
+                    <div class="btn-area">
+                        <button class="close-btn" type="button" id="btn_hr012_skill_picker_close_x">
+                            <img src="../icons/icon-close.png" alt="" />
+                        </button>
+                    </div>
+                </div>
+                <div class="modal-content hr012-skill-picker-content">
+                    <div class="hr012-skill-picker-search-row">
+                        <label for="hr012-skill-picker-search">기술 검색</label>
+                        <div class="hr012-skill-picker-search-wrap">
+                            <input type="text" id="hr012-skill-picker-search" class="wp100"
+                                   placeholder="기술명 입력 후 선택" autocomplete="off">
+                            <ul class="hr012-skill-picker-suggest" id="hr012-skill-picker-suggest"></ul>
+                        </div>
+                        <span class="hr012-skill-picker-meta" id="hr012-skill-picker-meta"></span>
+                    </div>
+                    <div id="TABLE_HR012_SKILL_PICKER"></div>
+                </div>
+                <div class="modal-btn">
+                    <ul>
+                        <li>
+                            <button type="button" class="btn btn-close" id="btn_hr012_skill_picker_apply">적용</button>
+                        </li>
+                    </ul>
                 </div>
             </div>
         </div>
