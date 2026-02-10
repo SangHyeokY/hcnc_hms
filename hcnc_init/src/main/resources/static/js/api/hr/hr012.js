@@ -2,6 +2,12 @@ let tableData_old = [];
 let hr012TableAReady = false;   // A 테이블 데이터 로드 완료 판단
 let hr012RowTags = new Map();   // 분야별 태그 상태 저장 맵
 let hr012HasPendingChange = false;  // A/B 테이블 데이터 차이 판단
+let hr012SkillPickerTable = null;
+let hr012SkillPickerEventBound = false;
+let hr012SkillOptions = [];
+let hr012SkillGroupOptions = [];
+let hr012SkillOptionsLoading = false;
+let hr012SkillGroupLoading = false;
 
 // hr012.js
 window.initTab2 = function() {
@@ -9,10 +15,13 @@ window.initTab2 = function() {
         applyTab2Readonly(!!isReadOnly);
     });
     applyTab2Readonly(!!window.hr010ReadOnly);
+    bindHr012SkillPickerEvents();
+    ensureHr012SkillPickerOptionsLoaded();
 
     // 서브 탭 초기 상태 설정
     $(".hr012-tab-btn").removeClass("active");
     $(".hr012-tab-btn[data-tab='tab2-A']").addClass("active");
+    $("#btn_hr012_skill_picker").show();
 
     // 테이블 초기화 (한 번만 수행)
     if (!window.hr012TableA) buildHr012TableA();
@@ -40,41 +49,43 @@ window.initTab2 = function() {
             $("#TABLE_HR012_A").show();
             window.hr012TableA.redraw();
             $("#TABLE_HR012_B").hide();
+            if (!window.hr010ReadOnly) {
+                $("#btn_hr012_skill_picker").show();
+            }
         } else if (tabId === "tab2-B") {
             $("#TABLE_HR012_B").show();
             window.hr012TableB.redraw();
             $("#TABLE_HR012_A").hide();
+            $("#btn_hr012_skill_picker").hide();
+            closeHr012SkillPicker(true);
         }
     });
+
+    applyTab2Readonly(!!window.hr010ReadOnly);
 };
 
 function applyTab2Readonly(isReadOnly) {
     $(".tab2-content .hr014-side-tabs").toggleClass("is-readonly", !!isReadOnly);
     $("#TABLE_HR012_A, #TABLE_HR012_B").toggleClass("is-readonly", !!isReadOnly);
+    $("#btn_hr012_skill_picker").toggle(!isReadOnly && $(".hr012-tab-btn.active").data("tab") === "tab2-A");
+    if (isReadOnly) {
+        closeHr012SkillPicker(true);
+    }
 }
 
 function buildHr012TableA() {
     if (window.hr012TableA) return;
 
     window.hr012TableA = new Tabulator("#TABLE_HR012_A", {
-        layout: "fitColumns",
+        layout: "fitDataStretch",
         // 보유역량(A)은 현재 페이징 미사용. 필요 시 true/"local"로 즉시 전환 가능.
         pagination: false,
         placeholder: "데이터 없음",
-        cellEdited: function (cell) {
-            // console.log("cellEdited A !!!!");
-            // console.log(cell.getValue());
-            changedTabs.tab2 = true;
-            if (cell.getField && cell.getField() === "skl_id_lst") {
-                hr012HasPendingChange = true;
-                syncHr012TableBFromA(); // 수정된 셀이 태그컬럼->숙련도테이블 동기화
-            }
-        },
+        height: "100%",
         columns: [
             { title: "코드", field: "cd", visible: false },
-            { title: "구분", field: "cd_nm", hozAlign: "left", width: 180},
-            { title: "상세", field: "skl_id_lst", hozAlign: "left", editor: tagEditor, formatter: tagFormatter,
-                editable: () => currentMode !== "view" },
+            { title: "구분", field: "cd_nm", hozAlign: "left", width: 180, minWidth: 160 },
+            { title: "상세", field: "skl_id_lst", hozAlign: "left", minWidth: 720, formatter: tagFormatter },
             { title: "key", field: "key", visible: false }
         ],
         data: []
@@ -102,19 +113,20 @@ function loadHr012TableDataA() {
             }
 
             const tableData = dataArray.map(item => ({
-                cd: item.cd,
+                cd: String(item.cd || "").toUpperCase(),
                 cd_nm: item.cd_nm,
                 skl_id_lst: parseSklList(item.skl_id_lst)
             }));
             tableData.forEach(row => {
                 const key = row.cd || row.grp_cd || row.cd_nm;
                 if (!key) return;
-                hr012RowTags.set(String(key), normalizeTagList(row.skl_id_lst));
+                hr012RowTags.set(String(key).toUpperCase(), normalizeTagList(row.skl_id_lst));
             });
             tableData_old = cloneTableData(tableData);
 
             window.hr012TableA.setData(tableData);
             hr012TableAReady = true;
+            syncHr012SkillPickerUi();
             // 초기 로드에서는 숙련도 목록을 건드리지 않음
         },
         error: function() {
@@ -374,7 +386,7 @@ function attachHr012TagSync() {
         const rowData = detail.rowData || {};   // 변경된 행의 데이터
         const key = rowData.cd || rowData.grp_cd || rowData.cd_nm;
         if (!key) return;
-        hr012RowTags.set(String(key), normalizeTagList(detail.tags || []));
+        hr012RowTags.set(String(key).toUpperCase(), normalizeTagList(detail.tags || []));
         hr012HasPendingChange = true;
         syncHr012TableBFromA();
     });
@@ -474,4 +486,462 @@ function syncHr012TableBFromA() {
     });
 
     window.hr012TableB.setData(merged);
+}
+
+function bindHr012SkillPickerEvents() {
+    if (hr012SkillPickerEventBound) {
+        return;
+    }
+    hr012SkillPickerEventBound = true;
+
+    $(document).on("click", "#btn_hr012_skill_picker", function (e) {
+        e.preventDefault();
+        if (currentMode === "view") {
+            return;
+        }
+        openHr012SkillPicker();
+    });
+
+    $(document).on("click", "#btn_hr012_skill_picker_close, #btn_hr012_skill_picker_close_x", function (e) {
+        e.preventDefault();
+        closeHr012SkillPicker();
+    });
+
+    $(document).on("click", "#hr012-skill-picker-area", function (e) {
+        if (e.target === this) {
+            closeHr012SkillPicker();
+        }
+    });
+
+    $(document).on("click", "#TABLE_HR012_SKILL_PICKER .hr012-skill-chip", function (e) {
+        e.preventDefault();
+        const code = String($(this).data("code") || "");
+        if (!code) {
+            return;
+        }
+        toggleHr012Skill(code);
+    });
+
+    $(document).on("input", "#hr012-skill-picker-search", function () {
+        renderHr012SkillSuggestions($(this).val());
+    });
+
+    $(document).on("keydown", "#hr012-skill-picker-search", function (e) {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            const $first = $("#hr012-skill-picker-suggest .hr012-skill-suggest-item").first();
+            if ($first.length) {
+                addHr012Skill(String($first.data("code") || ""), true);
+            }
+        } else if (e.key === "Escape") {
+            e.preventDefault();
+            closeHr012SkillPicker();
+        }
+    });
+
+    $(document).on("click", "#hr012-skill-picker-suggest .hr012-skill-suggest-item", function (e) {
+        e.preventDefault();
+        const code = String($(this).data("code") || "");
+        if (!code) {
+            return;
+        }
+        addHr012Skill(code, true);
+    });
+
+    $(document).on("mousedown", function (e) {
+        if (!$(e.target).closest(".hr012-skill-picker-search-wrap").length) {
+            $("#hr012-skill-picker-suggest").hide();
+        }
+    });
+
+    $(document).on("click", ".tab-btn", function () {
+        closeHr012SkillPicker(true);
+    });
+}
+
+function ensureHr012SkillPickerOptionsLoaded() {
+    if (!hr012SkillOptions.length && !hr012SkillOptionsLoading) {
+        hr012SkillOptionsLoading = true;
+        getComCode("skl_id", "", function (res) {
+            hr012SkillOptions = Array.isArray(res) ? res : [];
+            hr012SkillOptionsLoading = false;
+            syncHr012SkillPickerUi();
+        });
+    }
+    if (!hr012SkillGroupOptions.length && !hr012SkillGroupLoading) {
+        hr012SkillGroupLoading = true;
+        getComCode("skl_grp", "", function (res) {
+            hr012SkillGroupOptions = Array.isArray(res) ? res : [];
+            hr012SkillGroupLoading = false;
+            syncHr012SkillPickerUi();
+        });
+    }
+}
+
+function openHr012SkillPicker() {
+    if (currentMode === "view") {
+        return;
+    }
+    ensureHr012SkillPickerOptionsLoaded();
+    buildHr012SkillPickerTable();
+    syncHr012SkillPickerUi();
+
+    const $picker = $("#hr012-skill-picker-area");
+    $picker.show();
+    setTimeout(function () {
+        $picker.addClass("show");
+    }, 0);
+
+    $("#hr012-skill-picker-search").val("");
+    renderHr012SkillSuggestions("");
+    setTimeout(function () {
+        $("#hr012-skill-picker-search").trigger("focus");
+    }, 40);
+}
+
+function closeHr012SkillPicker(immediate) {
+    const $picker = $("#hr012-skill-picker-area");
+    if (!$picker.length) {
+        return;
+    }
+    $picker.removeClass("show");
+    $("#hr012-skill-picker-suggest").hide().empty();
+    if (immediate) {
+        $picker.hide();
+        return;
+    }
+    setTimeout(function () {
+        if (!$picker.hasClass("show")) {
+            $picker.hide();
+        }
+    }, 180);
+}
+
+function buildHr012SkillPickerTable() {
+    if (hr012SkillPickerTable || !window.Tabulator || !document.getElementById("TABLE_HR012_SKILL_PICKER")) {
+        return;
+    }
+
+    hr012SkillPickerTable = new Tabulator("#TABLE_HR012_SKILL_PICKER", {
+        layout: "fitColumns",
+        height: "360px",
+        placeholder: "등록된 기술이 없습니다.",
+        headerHozAlign: "center",
+        columnDefaults: {
+            headerSort: false,
+            resizable: false
+        },
+        columns: [
+            { title: "분야", field: "groupName", width: 170, hozAlign: "left" },
+            { title: "기술", field: "skills", hozAlign: "left", formatter: hr012SkillChipFormatter, widthGrow: 3 }
+        ],
+        data: []
+    });
+}
+
+function syncHr012SkillPickerUi() {
+    const totalCount = Array.isArray(hr012SkillOptions) ? hr012SkillOptions.length : 0;
+    const selectedCount = getHr012SelectedCodeSet().size;
+    $("#hr012-skill-picker-meta").text("전체 기술 " + totalCount + "개 / 선택 " + selectedCount + "개");
+
+    if (!hr012SkillPickerTable) {
+        return;
+    }
+    hr012SkillPickerTable.setData(buildHr012SkillPickerRows());
+}
+
+function getHr012GroupCode(skillCode) {
+    const code = String(skillCode || "").trim();
+    if (!code) {
+        return "";
+    }
+    return code.substring(0, 2).toUpperCase();
+}
+
+function getHr012GroupNameMap() {
+    const map = {};
+    (hr012SkillGroupOptions || []).forEach(function (group) {
+        const groupCode = String(group.cd || "").toUpperCase();
+        if (!groupCode) {
+            return;
+        }
+        map[groupCode] = group.cd_nm || groupCode;
+    });
+    return map;
+}
+
+function getHr012SkillLabelMap() {
+    const map = {};
+    (hr012SkillOptions || []).forEach(function (item) {
+        const code = String(item.cd || "");
+        if (!code) {
+            return;
+        }
+        map[code] = String(item.cd_nm || code);
+    });
+    return map;
+}
+
+function buildHr012SkillPickerRows() {
+    const groupRows = [];
+    const groupMap = {};
+
+    (hr012SkillGroupOptions || []).forEach(function (group, idx) {
+        const groupCode = String(group.cd || "").toUpperCase();
+        if (!groupCode) {
+            return;
+        }
+        const row = {
+            groupCode: groupCode,
+            groupName: group.cd_nm || groupCode,
+            sortOrder: idx,
+            skills: []
+        };
+        groupMap[groupCode] = row;
+        groupRows.push(row);
+    });
+
+    (hr012SkillOptions || []).forEach(function (skill) {
+        const code = String(skill.cd || "");
+        if (!code) {
+            return;
+        }
+        const groupCode = getHr012GroupCode(code);
+        if (!groupMap[groupCode]) {
+            groupMap[groupCode] = {
+                groupCode: groupCode,
+                groupName: groupCode || "기타",
+                sortOrder: 9999,
+                skills: []
+            };
+            groupRows.push(groupMap[groupCode]);
+        }
+        groupMap[groupCode].skills.push({
+            code: code,
+            label: String(skill.cd_nm || code)
+        });
+    });
+
+    groupRows.forEach(function (row) {
+        row.skills.sort(function (a, b) {
+            return a.label.localeCompare(b.label, "ko");
+        });
+    });
+
+    return groupRows
+        .filter(function (row) {
+            return row.skills.length > 0;
+        })
+        .sort(function (a, b) {
+            if (a.sortOrder !== b.sortOrder) {
+                return a.sortOrder - b.sortOrder;
+            }
+            return a.groupName.localeCompare(b.groupName, "ko");
+        });
+}
+
+function hr012SkillChipFormatter(cell) {
+    const skills = cell.getValue() || [];
+    if (!skills.length) {
+        return "";
+    }
+    const selected = getHr012SelectedCodeSet();
+    const html = skills.map(function (skill) {
+        const code = String(skill.code || "");
+        const label = String(skill.label || code);
+        const selectedClass = selected.has(code) ? " is-selected" : "";
+        return "<button type='button' class='hr012-skill-chip" + selectedClass + "' data-code='" +
+            hr012EscapeHtml(code) + "'>" + hr012EscapeHtml(label) + "</button>";
+    }).join("");
+    return "<div class='hr012-skill-chip-wrap'>" + html + "</div>";
+}
+
+function getHr012SelectedCodeSet() {
+    const set = new Set();
+    hr012RowTags.forEach(function (tags) {
+        normalizeTagList(tags).forEach(function (tag) {
+            const code = tag.code || tag.cd || tag.value || tag.id || tag;
+            if (code) {
+                set.add(String(code));
+            }
+        });
+    });
+    return set;
+}
+
+function getHr012TagsByGroup(groupCode) {
+    const key = String(groupCode || "").toUpperCase();
+    if (!key) {
+        return [];
+    }
+
+    if (hr012RowTags.has(key)) {
+        return normalizeTagList(hr012RowTags.get(key));
+    }
+
+    if (!window.hr012TableA) {
+        return [];
+    }
+    const row = window.hr012TableA.getRows().find(function (item) {
+        const data = item.getData() || {};
+        return String(data.cd || "").toUpperCase() === key;
+    });
+    if (!row) {
+        return [];
+    }
+    return normalizeTagList(row.getData().skl_id_lst);
+}
+
+function setHr012TagsByGroup(groupCode, tags) {
+    const key = String(groupCode || "").toUpperCase();
+    if (!key || !window.hr012TableA) {
+        return;
+    }
+    const nextTags = normalizeTagList(tags);
+    hr012RowTags.set(key, nextTags);
+
+    const targetRow = window.hr012TableA.getRows().find(function (row) {
+        const data = row.getData() || {};
+        return String(data.cd || "").toUpperCase() === key;
+    });
+    if (targetRow) {
+        targetRow.update({ skl_id_lst: nextTags });
+    }
+
+    changedTabs.tab2 = true;
+    hr012HasPendingChange = true;
+    syncHr012TableBFromA();
+    syncHr012SkillPickerUi();
+}
+
+function toggleHr012Skill(skillCode) {
+    const code = String(skillCode || "").trim();
+    if (!code) {
+        return;
+    }
+    const groupCode = getHr012GroupCode(code);
+    const labels = getHr012SkillLabelMap();
+    const label = labels[code] || code;
+
+    const tags = getHr012TagsByGroup(groupCode).slice();
+    const idx = tags.findIndex(function (tag) {
+        return String(tag.code || "") === code;
+    });
+    if (idx >= 0) {
+        tags.splice(idx, 1);
+    } else {
+        tags.push({ code: code, label: label });
+    }
+    tags.sort(function (a, b) {
+        return String(a.label || a.code || "").localeCompare(String(b.label || b.code || ""), "ko");
+    });
+
+    setHr012TagsByGroup(groupCode, tags);
+    focusHr012SkillChip(code);
+}
+
+function addHr012Skill(skillCode, fromSearch) {
+    const code = String(skillCode || "").trim();
+    if (!code) {
+        return;
+    }
+    const groupCode = getHr012GroupCode(code);
+    const labels = getHr012SkillLabelMap();
+    const label = labels[code] || code;
+    const tags = getHr012TagsByGroup(groupCode).slice();
+    if (!tags.some(function (tag) { return String(tag.code || "") === code; })) {
+        tags.push({ code: code, label: label });
+    }
+    tags.sort(function (a, b) {
+        return String(a.label || a.code || "").localeCompare(String(b.label || b.code || ""), "ko");
+    });
+
+    setHr012TagsByGroup(groupCode, tags);
+    focusHr012SkillChip(code);
+
+    if (fromSearch) {
+        $("#hr012-skill-picker-search").val("");
+        $("#hr012-skill-picker-suggest").hide().empty();
+    }
+}
+
+function focusHr012SkillChip(skillCode) {
+    setTimeout(function () {
+        const code = String(skillCode || "");
+        const $chip = $("#TABLE_HR012_SKILL_PICKER .hr012-skill-chip").filter(function () {
+            return String($(this).data("code") || "") === code;
+        }).first();
+        if (!$chip.length) {
+            return;
+        }
+        const element = $chip.get(0);
+        if (element && typeof element.scrollIntoView === "function") {
+            element.scrollIntoView({ block: "center", inline: "nearest" });
+        }
+        $chip.addClass("is-flash");
+        setTimeout(function () {
+            $chip.removeClass("is-flash");
+        }, 450);
+    }, 30);
+}
+
+function findHr012SkillMatches(keyword, limit) {
+    const query = String(keyword || "").trim().toLowerCase();
+    if (!query) {
+        return [];
+    }
+    const max = limit || 20;
+    const groupNameMap = getHr012GroupNameMap();
+
+    return (hr012SkillOptions || [])
+        .map(function (skill) {
+            const code = String(skill.cd || "");
+            const label = String(skill.cd_nm || code);
+            const groupCode = getHr012GroupCode(code);
+            return {
+                code: code,
+                label: label,
+                groupName: groupNameMap[groupCode] || groupCode || "기타"
+            };
+        })
+        .filter(function (skill) {
+            return skill.code.toLowerCase().indexOf(query) >= 0 ||
+                skill.label.toLowerCase().indexOf(query) >= 0;
+        })
+        .sort(function (a, b) {
+            return a.label.localeCompare(b.label, "ko");
+        })
+        .slice(0, max);
+}
+
+function renderHr012SkillSuggestions(keyword) {
+    const $suggest = $("#hr012-skill-picker-suggest");
+    const query = String(keyword || "").trim();
+    if (!query) {
+        $suggest.hide().empty();
+        return;
+    }
+
+    const matches = findHr012SkillMatches(query, 20);
+    if (!matches.length) {
+        $suggest.hide().empty();
+        return;
+    }
+
+    const html = matches.map(function (item) {
+        return "<li class='hr012-skill-suggest-item' data-code='" + hr012EscapeHtml(item.code) + "'>" +
+            "<span class='name'>" + hr012EscapeHtml(item.label) + "</span>" +
+            "<span class='group'>" + hr012EscapeHtml(item.groupName) + "</span>" +
+            "</li>";
+    }).join("");
+    $suggest.html(html).show();
+}
+
+function hr012EscapeHtml(value) {
+    return String(value || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\"/g, "&quot;")
+        .replace(/'/g, "&#39;");
 }

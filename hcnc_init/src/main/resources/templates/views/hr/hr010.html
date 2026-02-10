@@ -192,16 +192,17 @@
                                         <td colspan="5">
                                             <div class="tag-input">
                                                 <div class="tag-input-box">
-                                                    <input type="text" class="wp100 tag-input-field"
-                                                        id="main_lang_input" list="main_lang_datalist"
-                                                        placeholder="기술 입력/선택 후 Enter" />
+                                                    <!-- <input type="text" class="wp100 tag-input-field"
+                                                        id="main_lang_input"
+                                                        placeholder=""
+                                                        readonly /> -->
                                                     <div class="tag-help"></div>
                                                     <ul class="tag-list" id="mainLangTagList"></ul>
 
                                                 </div>
                                                 <div class="tag-select-row">
+                                                    <button type="button" class="btn btn-add-skill btn-main-lang-picker" id="btn_main_lang_picker">기술 선택</button>
                                                     <input type="hidden" id="main_lang">
-                                                    <datalist id="main_lang_datalist"></datalist>
                                                     <select id="main_lang_select" style="display:none"></select>
                                                 </div>
                                             </div>
@@ -279,6 +280,38 @@
             </div><!-- modal-btn -->
         </div><!-- modal-container-detail -->
     </div><!-- modal-wrap -->
+
+    <div class="modal-wrap" id="main-lang-picker-area" style="display:none">
+        <div class="modal-container main-lang-picker-container">
+            <div class="header">
+                <h4>주 개발언어 선택</h4>
+                <div class="btn-area">
+                    <button class="close-btn" type="button" id="btn_main_lang_picker_close_x">
+                        <img src="../icons/icon-close.png" alt="" />
+                    </button>
+                </div>
+            </div>
+            <div class="modal-content main-lang-picker-content">
+                <div class="main-lang-picker-search-row">
+                    <label for="main-lang-picker-search">기술 검색</label>
+                    <div class="main-lang-picker-search-wrap">
+                        <input type="text" id="main-lang-picker-search" class="wp100" placeholder="기술명 입력 후 선택"
+                            autocomplete="off">
+                        <ul class="main-lang-picker-suggest" id="main-lang-picker-suggest"></ul>
+                    </div>
+                    <span class="main-lang-picker-meta" id="main-lang-picker-meta"></span>
+                </div>
+                <div id="TABLE_MAIN_LANG_PICKER"></div>
+            </div>
+            <div class="modal-btn">
+                <ul>
+                    <li>
+                        <button type="button" class="btn btn-close" id="btn_main_lang_picker_close">확인</button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
 
     <!-- scripts -->
     <script src="/js/api/hr/hr011.js"></script>
