@@ -91,6 +91,10 @@ function buildHr014TableA() {
         headerSort: true,
         placeholder: "데이터 없음",
         headerHozAlign: "center",
+        // 평가의견 입력이 변경되면 탭 저장 대상에 포함
+        cellEdited: function () {
+            changedTabs.tab4 = true;
+        },
         columns: [
             { title: "항 목", field: "cd_nm", hozAlign: "center", widthGrow: 2 },
             {
@@ -164,10 +168,18 @@ function buildHr014TableA() {
                 title: "평가의견",
                 field: "cmt",
                 widthGrow: 3,
-//                hozAlign: "center",
-//                formatter: commentInputFormatter,
-//                headerVertical: "middle",
-//                headerSort: false
+                headerSort: false,
+                editor: "input",
+                editable: function () {
+                    return !window.hr010ReadOnly;
+                },
+                // 수정 모드에서는 셀 클릭 시 바로 텍스트 입력 편집 시작
+                cellClick: function (e, cell) {
+                    if (window.hr010ReadOnly || !cell || typeof cell.edit !== "function") {
+                        return;
+                    }
+                    cell.edit();
+                }
             }
         ],
         data: []

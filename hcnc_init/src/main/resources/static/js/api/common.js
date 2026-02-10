@@ -452,6 +452,8 @@ function createTagInput(config) {
     var getValue = config.getValue;
     var getLabel = config.getLabel;
     var matchMode = config.matchMode || "prefix";
+    // removable=false면 태그의 개별 x 삭제 버튼을 렌더링하지 않는다.
+    var removable = config.removable !== false;
     var onTagChange = config.onTagChange;
     var options = [];
     var map = {};
@@ -500,8 +502,10 @@ function createTagInput(config) {
             var $item = $("<li class=\"tag-item\"></li>");
             $item.attr("data-code", tag.code);
             $item.append(document.createTextNode(tag.label));
-            var $remove = $("<button type=\"button\" class=\"tag-remove\" aria-label=\"태그 삭제\">x</button>");
-            $item.append($remove);
+            if (removable) {
+                var $remove = $("<button type=\"button\" class=\"tag-remove\" aria-label=\"태그 삭제\">x</button>");
+                $item.append($remove);
+            }
             $list.append($item);
         });
         if ($help && $help.length) {
@@ -579,6 +583,9 @@ function createTagInput(config) {
     }
 
     $list.on("mousedown", ".tag-remove", function (e) {
+        if (!removable) {
+            return;
+        }
         e.preventDefault(); // 포커스 이동 차단
         var code = $(this).closest(".tag-item").data("code");
         removeByCode(code);
