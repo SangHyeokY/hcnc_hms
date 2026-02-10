@@ -11,6 +11,12 @@ var currentDetailGrpCd = "";
 var amountSuffixGroupCds = ["job_cd"];
 var pointSuffixGroupCds = ["rank", "grade", "grd_cd", "grade_cd"];
 
+// 저장/로딩중 팝업 표시 여부 플래그
+let isSaving = false;
+
+// 저장 성공 여부 플래그
+let isSuccess = false;
+
 $(document).ready(function () {
     buildTables();
     loadMainTableData();
@@ -46,13 +52,21 @@ $(document).ready(function () {
 
     $(".btn-detail-sort-save").on("click", function () {
         if (!detailTable || typeof detailTable.getData !== "function") {
-            alert("상세 테이블이 초기화되지 않았습니다.");
+            showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+                icon: 'warning',
+                title: '경고',
+                text: `'상세 테이블'이 초기화되지 않았습니다.`
+            });
             return;
         }
 
         var rows = detailTable.getData();
         if (!rows.length) {
-            alert("저장할 정렬 데이터가 없습니다.");
+            showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+                icon: 'warning',
+                title: '경고',
+                text: '저장할 정렬 데이터가 없습니다.'
+            });
             return;
         }
 
@@ -64,7 +78,11 @@ $(document).ready(function () {
             rowData.sort_no = index + 1;
         });
         applyDetailSort(rows);
-        alert("정렬순서를 저장했습니다.");
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'success',
+            title: '완료',
+            text: '정렬순서를 저장했습니다.'
+        });
     });
 
     $(".btn-main-save").on("click", function () {
@@ -293,7 +311,11 @@ function loadMainTableData() {
             }
         },
         error: function () {
-            alert("코드그룹 데이터를 불러오는 중 오류가 발생했습니다.");
+            showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+                icon: 'error',
+                title: '오류',
+                text: `'코드그룹' 데이터를 불러오는 중 오류가 발생했습니다.`
+            });
         }
     });
 }
@@ -319,7 +341,11 @@ function loadDetailTableData(grpCd) {
             detailTable.setData(response.list || []);
         },
         error: function () {
-            alert("상세코드 데이터를 불러오는 중 오류가 발생했습니다.");
+            showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+                icon: 'error',
+                title: '오류',
+                text: `'상세코드' 데이터를 불러오는 중 오류가 발생했습니다.`
+            });
         }
     });
 }
@@ -354,11 +380,15 @@ function applyDetailSort(rows) {
 function deleteMainRows() {
     var selectedRows = mainTable.getSelectedRows();
     if (selectedRows.length === 0) {
-        alert("삭제할 코드그룹을 선택해주세요.");
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'info',
+            title: '알림',
+            text: `삭제할 '코드그룹'을 선택해주세요.`
+        });
         return;
     }
 
-    if (!confirm("선택한 코드그룹을 삭제하시겠습니까?")) {
+    if (!confirm(`선택한 '코드그룹'을 삭제하시겠습니까?`)) {
         return;
     }
 
@@ -376,7 +406,11 @@ function deleteMainRows() {
             success: function (response) {
                 if (!response.success) {
                     allSucceeded = false;
-                    alert(response.message || "삭제할 수 없습니다.");
+                    showAlert({
+                        icon: 'error',
+                        title: '오류',
+                        text: response.message || '삭제할 수 없습니다.'
+                    });
                 }
             },
             complete: function () {
@@ -384,13 +418,21 @@ function deleteMainRows() {
                 if (pending === 0) {
                     loadMainTableData();
                     if (allSucceeded) {
-                        alert("삭제되었습니다.");
+                        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+                            icon: 'success',
+                            title: '완료',
+                            text: '삭제되었습니다.'
+                        });
                     }
                 }
             },
             error: function () {
                 allSucceeded = false;
-                alert("코드그룹 삭제 중 오류가 발생했습니다.");
+                showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+                    icon: 'error',
+                    title: '오류',
+                    text: `'코드그룹' 삭제 중 오류가 발생했습니다.`
+                });
             }
         });
     });
@@ -400,11 +442,15 @@ function deleteMainRows() {
 function deleteDetailRows() {
     var selectedRows = detailTable.getSelectedRows();
     if (selectedRows.length === 0) {
-        alert("삭제할 상세코드를 선택해주세요.");
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'info',
+            title: '알림',
+            text: `삭제할 '상세코드'를 선택해주세요.`
+        });
         return;
     }
 
-    if (!confirm("선택한 상세코드를 삭제하시겠습니까?")) {
+    if (!confirm(`선택한 '상세코드'를 삭제하시겠습니까?`)) {
         return;
     }
 
@@ -423,11 +469,19 @@ function deleteDetailRows() {
                 pending -= 1;
                 if (pending === 0) {
                     loadDetailTableData(grpCd);
-                    alert("삭제되었습니다.");
+                    showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+                        icon: 'success',
+                        title: '완료',
+                        text: '삭제되었습니다.'
+                    });
                 }
             },
             error: function () {
-                alert("상세코드 삭제 중 오류가 발생했습니다.");
+                showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+                    icon: 'error',
+                    title: '오류',
+                    text: `'상세코드' 삭제 중 오류가 발생했습니다.`
+                });
             }
         });
     });
@@ -441,19 +495,31 @@ function upsertMainBtn() {
     var code = $.trim($("#write_main_cd").val());
 
     if (!grpCd) {
-        alert("코드그룹을 입력해주세요.");
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'warning',
+            title: '경고',
+            text: `'코드그룹'을 입력해주세요.`
+        });
         $("#write_main_grp_cd").focus();
         return;
     }
 
     if (!code) {
-        alert("코드를 입력해주세요.");
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'warning',
+            title: '경고',
+            text: `'코드'를 입력해주세요.`
+        });
         $("#write_main_cd").focus();
         return;
     }
 
     if (!grpNm) {
-        alert("코드그룹명을 입력해주세요.");
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'warning',
+            title: '경고',
+            text: `'코드그룹명'을 입력해주세요.`
+        });
         $("#write_main_grp_nm").focus();
         return;
     }
@@ -471,13 +537,25 @@ function upsertMainBtn() {
             if (response.success) {
                 closeMainWriteModal();
                 loadMainTableData();
-                alert("저장되었습니다.");
+                showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+                    icon: 'success',
+                    title: '완료',
+                    text: '저장되었습니다.'
+                });
             } else {
-                alert("저장에 실패했습니다.");
+                showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+                    icon: 'error',
+                    title: '오류',
+                    text: '저장에 실패했습니다.'
+                });
             }
         },
         error: function () {
-            alert("저장 중 오류가 발생했습니다.");
+            showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+                icon: 'error',
+                title: '오류',
+                text: '저장 중 오류가 발생했습니다.'
+            });
         }
     });
 }
@@ -491,24 +569,40 @@ function upsertDetailBtn() {
     var sortNo = parseInt($("#write_detail_sort_no").val(), 10);
 
     if (!grpCd) {
-        alert("코드그룹을 선택해주세요.");
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'warning',
+            title: '경고',
+            text: `'코드그룹'을 선택해주세요.`
+        });
         return;
     }
 
     if (detailMode !== "insert" && !cd) {
-        alert("코드를 입력해주세요.");
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'warning',
+            title: '경고',
+            text: `'코드'를 입력해주세요.`
+        });
         $("#write_detail_cd").focus();
         return;
     }
 
     if (!cdNm) {
-        alert("코드명을 입력해주세요.");
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'warning',
+            title: '경고',
+            text: `'코드명'을 입력해주세요.`
+        });
         $("#write_detail_cd_nm").focus();
         return;
     }
 
     if (!sortNo || sortNo < 1) {
-        alert("정렬순서를 입력해주세요.");
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'warning',
+            title: '경고',
+            text: `'정렬순서'를 입력해주세요.`
+        });
         $("#write_detail_sort_no").focus();
         return;
     }
@@ -538,13 +632,25 @@ function upsertDetailBtn() {
             if (response.success) {
                 closeDetailWriteModal();
                 loadDetailTableData(grpCd);
-                alert("저장되었습니다.");
+                showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+                    icon: 'success',
+                    title: '완료',
+                    text: '저장되었습니다.'
+                });
             } else {
-                alert(response.message || "저장에 실패했습니다.");
+                showAlert({
+                    icon: 'error',
+                    title: '오류',
+                    text: response.message || '저장에 실패했습니다.'
+                });
             }
         },
         error: function () {
-            alert("저장 중 오류가 발생했습니다.");
+            showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+                icon: 'error',
+                title: '오류',
+                text: '저장 중 오류가 발생했습니다.'
+            });
         }
     });
 }
@@ -563,11 +669,19 @@ function openMainWriteModal(type) {
     } else {
         var selectedRows = mainTable.getSelectedRows();
         if (selectedRows.length === 0) {
-            alert("수정할 코드그룹을 선택해주세요.");
+            showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+                icon: 'info',
+                title: '알림',
+                text: `수정할 '코드그룹'을 선택해주세요.`
+            });
             return;
         }
         if (selectedRows.length > 1) {
-            alert("수정은 한 개만 선택해주세요.");
+            showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+                icon: 'info',
+                title: '알림',
+                text: '수정은 한 개만 선택해주세요.'
+            });
             return;
         }
 
@@ -601,19 +715,31 @@ function openDetailWriteModal(type) {
     $("#detail-type").text(type === "insert" ? "등록" : "수정");
 
     if (!detailTable || typeof detailTable.getData !== "function") {
-        alert("상세 테이블이 초기화되지 않았습니다.");
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'warning',
+            title: '경고',
+            text: `'상세 테이블'이 초기화되지 않았습니다.`
+        });
         return;
     }
 
     if (type === "insert") {
         if (!mainTable || typeof mainTable.getSelectedRows !== "function") {
-            alert("코드그룹 테이블이 초기화되지 않았습니다.");
+            showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+                icon: 'warning',
+                title: '경고',
+                text: `'코드그룹 테이블'이 초기화되지 않았습니다.`
+            });
             return;
         }
 
         var selectedMain = mainTable.getSelectedRows();
         if (selectedMain.length === 0) {
-            alert("코드그룹을 먼저 선택해주세요.");
+            showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+                icon: 'warning',
+                title: '경고',
+                text: `'코드그룹'을 먼저 선택해주세요.`
+            });
             return;
         }
 
@@ -635,11 +761,19 @@ function openDetailWriteModal(type) {
     } else {
         var selectedDetail = detailTable.getSelectedRows();
         if (selectedDetail.length === 0) {
-            alert("수정할 상세코드를 선택해주세요.");
+            showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+                icon: 'info',
+                title: '알림',
+                text: `수정할 '상세코드'를 선택해주세요.`
+            });
             return;
         }
         if (selectedDetail.length > 1) {
-            alert("수정은 한 개만 선택해주세요.");
+            showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+                icon: 'info',
+                title: '알림',
+                text: '수정은 한 개만 선택해주세요.'
+            });
             return;
         }
 

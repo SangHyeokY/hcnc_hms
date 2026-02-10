@@ -169,7 +169,11 @@ function loadUserTableData() {
             userTable.setData(response.list || []);
         },
         error: function () {
-            alert("사용자 데이터를 불러오는 중 오류가 발생했습니다.");
+            showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+                icon: 'error',
+                title: '오류',
+                text: '사용자 데이터를 불러오는 중 오류가 발생했습니다.'
+            });
         }
     });
 
@@ -187,25 +191,41 @@ function upsertUserBtn() {
     var roleCd = $.trim($("#write_role_cd").val());
 
     if (!userId) {
-        alert("아이디를 입력해주세요.");
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'warning',
+            title: '경고',
+            text: `'아이디'를 입력해주세요.`
+        });
         $("#write_user_id").focus();
         return;
     }
 
     if (!userNm) {
-        alert("이름을 입력해주세요.");
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'warning',
+            title: '경고',
+            text: `'이름'을 입력해주세요.`
+        });
         $("#write_user_nm").focus();
         return;
     }
 
     if (!roleCd) {
-        alert("역할을 선택해주세요.");
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'warning',
+            title: '경고',
+            text: `'역할'을 선택해주세요.`
+        });
         $("#write_role_cd").focus();
         return;
     }
 
     if (currentMode === "insert" && !pwdHash) {
-        alert("비밀번호를 입력해주세요.");
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'warning',
+            title: '경고',
+            text: `'비밀번호'를 입력해주세요.`
+        });
         $("#write_pwd_hash").focus();
         return;
     }
@@ -230,13 +250,25 @@ function upsertUserBtn() {
             if (response.success) {
                 closeUserWriteModal();
                 loadUserTableData();
-                alert("저장되었습니다.");
+                showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+                    icon: 'success',
+                    title: '완료',
+                    text: '저장되었습니다.'
+                });
             } else {
-                alert("저장에 실패했습니다.");
+                showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+                    icon: 'error',
+                    title: '오류',
+                    text: '저장에 실패했습니다.'
+                });
             }
         },
         error: function () {
-            alert("저장 중 오류가 발생했습니다.");
+            showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+                icon: 'error',
+                title: '오류',
+                text: '저장 중 오류가 발생했습니다.'
+            });
         }
     });
 }
@@ -273,7 +305,11 @@ function selectCommonCodesForUser(done) {
             fillSelect("#write_role_cd", []);
             fillSelect("#write_job_cd", []);
             fillSelect("#write_dept_cd", []);
-            alert("공통코드 조회 중 오류가 발생했습니다.");
+            showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+                icon: 'error',
+                title: '오류',
+                text: `'공통코드' 조회 중 오류가 발생했습니다.`
+            });
         }
     });
 }
@@ -295,7 +331,11 @@ function fillSelect(selector, list) {
 function deleteUserRows() {
     var selectedRows = userTable.getSelectedRows();
     if (selectedRows.length === 0) {
-        alert("삭제할 사용자를 선택해주세요.");
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'info',
+            title: '알림',
+            text: '삭제할 사용자를 선택해주세요.'
+        });
         return;
     }
 
@@ -313,11 +353,19 @@ function deleteUserRows() {
                 pending -= 1;
                 if (pending === 0) {
                     loadUserTableData();
-                    alert("삭제되었습니다.");
+                    showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+                        icon: 'success',
+                        title: '완료',
+                        text: '삭제되었습니다.'
+                    });
                 }
             },
             error: function () {
-                alert("삭제 중 오류가 발생했습니다.");
+                showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+                    icon: 'error',
+                    title: '오류',
+                    text: '삭제 중 오류가 발생했습니다.'
+                });
             }
         });
     });
@@ -352,11 +400,19 @@ function openUserWriteModal(type) {
     } else {
         var selectedRows = userTable.getSelectedRows();
         if (selectedRows.length === 0) {
-            alert("수정할 사용자를 선택해주세요.");
+            showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+                icon: 'info',
+                title: '알림',
+                text: '수정할 사용자를 선택해주세요.'
+            });
             return;
         }
         if (selectedRows.length > 1) {
-            alert("수정은 한 명만 선택해주세요.");
+            showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+                icon: 'info',
+                title: '알림',
+                text: '수정은 한 명만 선택해주세요.'
+            });
             return;
         }
         showModal();

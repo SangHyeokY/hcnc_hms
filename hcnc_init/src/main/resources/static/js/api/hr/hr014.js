@@ -295,9 +295,9 @@ function loadHr014TableDataB() {
 // ================================================================================= //
 
 // 탭1 평가 저장
-function saveTableA(showAlert) {
-    if (showAlert === undefined) {
-        showAlert = true;
+function saveTableA(alertFlag) {
+    if (alertFlag === undefined) {
+        alertFlag = true;
     }
     if (!window.hr014TableA) {
         return;
@@ -312,7 +312,7 @@ function saveTableA(showAlert) {
         success: function (response) {
             if (response.success) {
                 loadHr014TableDataA();
-                if (showAlert) {
+                if (alertFlag) {
                     alert("저장되었습니다.");
                 }
             } else {
@@ -326,9 +326,9 @@ function saveTableA(showAlert) {
 }
 
 // 탭2 리스크 저장
-function saveTableB(showAlert) {
-    if (showAlert === undefined) {
-        showAlert = true;
+function saveTableB(alertFlag) {
+    if (alertFlag === undefined) {
+        alertFlag = true;
     }
     riskState.re_in_yn = $("#HR015_REIN_CHECK").is(":checked") ? "Y" : "N";
 
@@ -346,7 +346,7 @@ function saveTableB(showAlert) {
         success: function (response) {
             if (response.success) {
                 loadHr014TableDataB();
-                if (showAlert) {
+                if (alertFlag) {
                     alert("저장되었습니다.");
                 }
             } else {
@@ -457,8 +457,8 @@ function saveTab4Active() {
 
 // 탭4 전체 저장 (평가 + 리스크)
 function saveTab4All() {
-    saveTableA(false);
-    saveTableB(false);
+    saveTableA(false); // alert 끔
+    saveTableB(false); // alert 끔
 }
 
 window.saveTab4All = saveTab4All;

@@ -53,6 +53,10 @@ option{background:#fff; color:#333;}
 .swal2-container {
     background-color: rgba(0, 0, 0, 0.45) !important; /* 어둡게 */
 }
+.swal2-html-container {
+    color: #333333;
+    font-size: 20px;
+}
 /*=================================================================================
  * Grid Table style
 =================================================================================*/
@@ -1560,7 +1564,8 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 #loading-overlay p {
     margin-top: 12px;
     /* font-weight: 600; */
-    color: #333;
+    color: #333333;
+    font-size: 20px;
 }
 
 /* 인적사항 등급에 대한 말풍선 css */
