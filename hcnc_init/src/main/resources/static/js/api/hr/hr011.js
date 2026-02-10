@@ -121,7 +121,11 @@ function openHr011(mode) {
     // 수정 mode
     if (mode === "update") {
         if (!window.hr011Data) {
-            alert("수정할 데이터가 없습니다.");
+            showAlert({
+                icon: 'error',
+                title: '데이터 조회 실패',
+                text: '소속 및 계약정보 데이터가 존재하지 않습니다.'
+            });
             return;
         }
         setHr011Mode("update");
@@ -210,14 +214,23 @@ function saveHr011TableData() {
             // setHr011Mode("view");
             loadHr011TableData(window.currentDevId);
         },
-        error: () => alert("저장 실패")
+        error: () => showAlert({
+                         icon: 'error',
+                         title: '저장 실패',
+                         text: '소속 및 계약정보 저장 중 오류가 발생했습니다.'
+                     });
     });
 }
 
 // Tab1 데이터 삭제 (미사용 중)
 function deleteHr011() {
     if (!window.hr011Data?.ctrt_id) {
-        alert("삭제할 데이터가 없습니다.");
+        // alert("삭제할 데이터가 없습니다.");
+        showAlert({
+            icon: 'error',
+            title: '데이터 조회 실패',
+            text: '소속 및 계약정보 데이터가 존재하지 않습니다.'
+        });
         return;
     }
     if (!confirm("정말로 삭제하시겠습니까?")) return;
@@ -231,7 +244,7 @@ function deleteHr011() {
             devId: window.currentDevId
         }),
         success: () => {
-            alert("삭제되었습니다.");
+            alert("삭제되었습니다."); // 여기서부터 마저 수정하기
             loadHr011TableData(window.currentDevId);
         },
         error: () => alert("삭제 실패")

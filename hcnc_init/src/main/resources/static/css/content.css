@@ -331,6 +331,29 @@ button.btn.btn-add-skill {
 #TABLE_HR013_A.is-readonly .tabulator-row .tabulator-cell {
   cursor: default;
 }
+#TABLE_HR013_A.is-readonly .tabulator-cell[data-field="skl_id_lst"] .tag-list,
+#TABLE_HR013_A.is-readonly .tabulator-cell[tabulator-field="skl_id_lst"] .tag-list {
+  gap: 0;
+}
+#TABLE_HR013_A.is-readonly .tabulator-cell[data-field="skl_id_lst"] .tag-item,
+#TABLE_HR013_A.is-readonly .tabulator-cell[tabulator-field="skl_id_lst"] .tag-item {
+  background: transparent !important;
+  color: #333 !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  height: auto !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  line-height: 1.5 !important;
+}
+#TABLE_HR013_A.is-readonly .tabulator-cell[data-field="skl_id_lst"] .tag-item::after,
+#TABLE_HR013_A.is-readonly .tabulator-cell[tabulator-field="skl_id_lst"] .tag-item::after {
+  content: ", ";
+}
+#TABLE_HR013_A.is-readonly .tabulator-cell[data-field="skl_id_lst"] .tag-item:last-child::after,
+#TABLE_HR013_A.is-readonly .tabulator-cell[tabulator-field="skl_id_lst"] .tag-item:last-child::after {
+  content: "";
+}
 
 /*===============================================================================
   HR015 - risk memo
@@ -702,7 +725,25 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .tag-input-box.is-readonly .tag-list{width:100%; justify-content: flex-start;}
 
 .tag-item {display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 999px; background: #e6f0ff; color: #2c5282; font-size: 13px; font-weight: 600; height: 32px;}
-/*.tag-input-box.is-readonly .tag-item{background:none; color:#333; }*/
+.tag-input-box.is-readonly .tag-list {
+  gap: 0;
+}
+.tag-input-box.is-readonly .tag-item {
+  background: transparent;
+  color: #333;
+  border-radius: 0;
+  padding: 0;
+  height: auto;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.5;
+}
+.tag-input-box.is-readonly .tag-item::after {
+  content: ", ";
+}
+.tag-input-box.is-readonly .tag-item:last-child::after {
+  content: "";
+}
 .tag-select-row {display: flex; align-items: center; gap: 8px; margin-top: 6px;}
 .tag-select-row select {min-width: 140px;}
 .tag-help {background:#f8fafc; font-size: 12px; color: #6b7280; margin-bottom: 6px;}
@@ -806,6 +847,9 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 }
 #main-lang-picker-area .main-lang-picker-suggest .main-lang-suggest-item:hover {
   background: #f2f6ff;
+}
+#main-lang-picker-area .main-lang-picker-suggest .main-lang-suggest-item.is-active {
+  background: #e8f0ff;
 }
 #main-lang-picker-area .main-lang-picker-suggest .main-lang-suggest-item .name {
   color: #1f2937;
@@ -1065,11 +1109,70 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 #TABLE_HR012_A .tabulator-tableHolder {
     overflow-x: auto !important;
 }
-#TABLE_HR012_A .tabulator-cell[data-field="skl_id_lst"] {
+#TABLE_HR012_A .tabulator-cell[data-field="skl_id_lst"],
+#TABLE_HR012_A .tabulator-cell[tabulator-field="skl_id_lst"] {
     white-space: nowrap !important;
 }
-#TABLE_HR012_A .tabulator-cell[data-field="skl_id_lst"] .tag-list {
+#TABLE_HR012_A .tabulator-cell[data-field="skl_id_lst"] .tag-list,
+#TABLE_HR012_A .tabulator-cell[tabulator-field="skl_id_lst"] .tag-list {
     flex-wrap: nowrap;
+}
+#TABLE_HR012_A.is-readonly .tabulator-cell[data-field="skl_id_lst"] .tag-list,
+#TABLE_HR012_A.is-readonly .tabulator-cell[tabulator-field="skl_id_lst"] .tag-list {
+    gap: 0;
+}
+#TABLE_HR012_A.is-readonly .tabulator-cell[data-field="skl_id_lst"] .tag-item,
+#TABLE_HR012_A.is-readonly .tabulator-cell[tabulator-field="skl_id_lst"] .tag-item {
+    background: transparent;
+    color: #333;
+    border-radius: 0;
+    padding: 0;
+    height: auto;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.5;
+}
+#TABLE_HR012_A.is-readonly .tabulator-cell[data-field="skl_id_lst"] .tag-item::after,
+#TABLE_HR012_A.is-readonly .tabulator-cell[tabulator-field="skl_id_lst"] .tag-item::after {
+    content: ", ";
+}
+#TABLE_HR012_A.is-readonly .tabulator-cell[data-field="skl_id_lst"] .tag-item:last-child::after,
+#TABLE_HR012_A.is-readonly .tabulator-cell[tabulator-field="skl_id_lst"] .tag-item:last-child::after {
+    content: "";
+}
+#TABLE_HR012_A.is-readonly .tabulator-cell[data-field="skl_id_lst"] .tag-input-box .tag-item,
+#TABLE_HR012_A.is-readonly .tabulator-cell[tabulator-field="skl_id_lst"] .tag-input-box .tag-item {
+    background: transparent !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    height: auto !important;
+}
+/* 상세보기 모달에서는 is-readonly 클래스 유무와 관계없이 텍스트 전용 표시 */
+#view-user-area.is-view-mode #TABLE_HR012_A .tabulator-cell[data-field="skl_id_lst"] .tag-item,
+#view-user-area.is-view-mode #TABLE_HR012_A .tabulator-cell[tabulator-field="skl_id_lst"] .tag-item {
+    background: transparent !important;
+    color: #333 !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    height: auto !important;
+    font-size: 14px !important;
+    font-weight: 400 !important;
+    line-height: 1.5 !important;
+}
+#view-user-area.is-view-mode #TABLE_HR012_A .tabulator-cell[data-field="skl_id_lst"] .tag-item::after,
+#view-user-area.is-view-mode #TABLE_HR012_A .tabulator-cell[tabulator-field="skl_id_lst"] .tag-item::after {
+    content: ", ";
+}
+#view-user-area.is-view-mode #TABLE_HR012_A .tabulator-cell[data-field="skl_id_lst"] .tag-item:last-child::after,
+#view-user-area.is-view-mode #TABLE_HR012_A .tabulator-cell[tabulator-field="skl_id_lst"] .tag-item:last-child::after {
+    content: "";
+}
+
+/* 상세 보기의 주개발언어 태그는 가운데 정렬 */
+#view-user-area.is-view-mode #TABLE_HR010_B #mainLangTagList {
+    width: 100%;
+    justify-content: center !important;
+    text-align: center !important;
 }
 
 #hr012-skill-picker-area {
@@ -1135,6 +1238,9 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 }
 #hr012-skill-picker-area .hr012-skill-picker-suggest .hr012-skill-suggest-item:hover {
     background: #f2f6ff;
+}
+#hr012-skill-picker-area .hr012-skill-picker-suggest .hr012-skill-suggest-item.is-active {
+    background: #e8f0ff;
 }
 #hr012-skill-picker-area .hr012-skill-picker-suggest .hr012-skill-suggest-item .name {
     color: #1f2937;
@@ -1342,8 +1448,14 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
     margin: 0;
 }
 
+.career-exp-text {
+    display: none;
+    line-height: 32px;
+    
+}
+
 .career-exp-cell {
-    text-align: left;
+    text-align: center;
 }
 
 .career-spin-input {
@@ -1370,8 +1482,16 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 }
 
 /* 상세(view)에서는 경력연차 스핀 버튼 숨김 */
+#view-user-area.is-view-mode .career-spin-wrap {
+    display: none;
+}
+
 #view-user-area.is-view-mode .career-spin-buttons {
     display: none;
+}
+
+#view-user-area.is-view-mode .career-exp-text {
+    display: inline-block;
 }
 
 #view-user-area.is-view-mode .career-spin-input {
