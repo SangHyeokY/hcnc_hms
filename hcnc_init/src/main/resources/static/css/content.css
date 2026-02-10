@@ -135,16 +135,16 @@ option{background:#fff; color:#333;}
 .tabulator .tabulator-footer .tabulator-page[data-page="prev"],
 .tabulator .tabulator-footer .tabulator-page[data-page="next"],
 .tabulator .tabulator-footer .tabulator-page[data-page="last"] {
-  min-width: 44px;
-  width: 44px;
-  height: 44px;
-  line-height: 40px;
+  min-width: 31px;
+  width: 31px;
+  height: 31px;
+  line-height: 29px;
   border: 2px solid #b9c1ce;
   border-radius: 50%;
   background: #fff;
   padding: 0;
   color: #232d3d;
-  font-size: 26px;
+  font-size: 18px;
   font-weight: 500;
 }
 .tabulator .tabulator-footer .tabulator-page.tabulator-page-disabled {
@@ -159,6 +159,17 @@ option{background:#fff; color:#333;}
   top: 50%;
   transform: translateY(-50%);
   margin-left: 0;
+  font-size: 12px;
+  font-weight: 400;
+  color: #8f97a7;
+  white-space: nowrap;
+  pointer-events: none;
+}
+/* 총 데이터 수 */
+.content-title h4 .hcnc-grid-count-title {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 10px;
   font-size: 12px;
   font-weight: 400;
   color: #8f97a7;
@@ -279,6 +290,26 @@ option{background:#fff; color:#333;}
 #TABLE_HR013_A .tabulator-row.stack-editing .tag-list {
   width: 100%;
   flex-wrap: wrap;
+}
+#TABLE_HR013_A .hr013-stack-cell {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+}
+#TABLE_HR013_A .hr013-stack-text {
+  display: inline-block;
+  min-width: 0;
+  white-space: normal;
+  word-break: break-word;
+  line-height: 1.4;
+}
+#TABLE_HR013_A .btn-hr013-cell-skill-picker {
+  flex: 0 0 auto;
+  min-width: 72px;
+  padding: 4px 8px;
+  font-size: 12px;
 }
 
 .tabulator-row .tabulator-cell .tabulator-data-tree-control {width: 16px !important; height: 16px !important; background-color: #ED242C !important; border: none !important;}
@@ -1000,6 +1031,21 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
   margin-left: 0;
 }
 
+/* 사용자관리 수정 모달: 비고 입력칸 포함 모든 입력영역이 잘리지 않도록 폭 고정 */
+#write-user-area .modal-content {
+  grid-template-columns: 1fr;
+  overflow-y: auto;
+}
+#write-user-area .modal-content li.table-col.fl-ac .table-cell {
+  flex: 1 1 0;
+  width: auto;
+  min-width: 0;
+}
+#write-user-area #write_remark {
+  width: 100%;
+  min-width: 0;
+}
+
 .modal-container-detail {display: flex; flex-direction: column; max-height: 76vh; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; min-width:960px;background: #fff; border-radius: 6px; padding: 20px; box-sizing: border-box;}
 .modal-container-detail .close-btn{background:none; border:none; }
 .modal-container-detail .close-btn img{width:16px; }
@@ -1057,10 +1103,12 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
     color : #61646D;
 }*/
 
+#TABLE_MAIN_LANG_PICKER > .tabulator-header,
 #TABLE_HR012_A > .tabulator-header {
     display: none;
 }
 
+#TABLE_MAIN_LANG_PICKER .tabulator-table > .tabulator-row > .tabulator-cell:nth-child(2),
 #TABLE_HR012_A .tabulator-table > .tabulator-row > .tabulator-cell:nth-child(2) {
     background-color: #F1F4F9 !important;
     font-size: 14px;
@@ -1302,6 +1350,126 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
     }
 }
 
+#hr013-skill-picker-area {
+    z-index: 1100;
+}
+#hr013-skill-picker-area .hr013-skill-picker-container {
+    width: 860px;
+    min-width: 0;
+    max-width: calc(100% - 40px);
+}
+#hr013-skill-picker-area .hr013-skill-picker-content {
+    max-height: 68vh;
+    overflow: visible;
+}
+#hr013-skill-picker-area .hr013-skill-picker-search-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+#hr013-skill-picker-area .hr013-skill-picker-search-row > label {
+    min-width: 56px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #222;
+}
+#hr013-skill-picker-area .hr013-skill-picker-search-wrap {
+    position: relative;
+    flex: 1;
+}
+#hr013-skill-picker-area #hr013-skill-picker-search {
+    height: 34px;
+    padding: 6px 10px;
+    border: 1px solid #cfd6e3;
+    border-radius: 6px;
+}
+#hr013-skill-picker-area .hr013-skill-picker-meta {
+    font-size: 12px;
+    color: #697386;
+    white-space: nowrap;
+}
+#hr013-skill-picker-area .hr013-skill-picker-suggest {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    display: none;
+    max-height: 220px;
+    overflow-y: auto;
+    border: 1px solid #d7ddea;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 10px 20px rgba(30, 48, 90, 0.12);
+    z-index: 3;
+}
+#hr013-skill-picker-area .hr013-skill-picker-suggest .hr013-skill-suggest-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 8px 10px;
+    cursor: pointer;
+}
+#hr013-skill-picker-area .hr013-skill-picker-suggest .hr013-skill-suggest-item:hover {
+    background: #f2f6ff;
+}
+#hr013-skill-picker-area .hr013-skill-picker-suggest .hr013-skill-suggest-item.is-active {
+    background: #e8f0ff;
+}
+#hr013-skill-picker-area .hr013-skill-picker-suggest .hr013-skill-suggest-item .name {
+    color: #1f2937;
+    font-size: 14px;
+}
+#hr013-skill-picker-area .hr013-skill-picker-suggest .hr013-skill-suggest-item .group {
+    color: #607090;
+    font-size: 12px;
+}
+#TABLE_HR013_SKILL_PICKER {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+#TABLE_HR013_SKILL_PICKER .tabulator-row .tabulator-cell {
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
+    vertical-align: top;
+}
+#TABLE_HR013_SKILL_PICKER .hr013-skill-chip-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+#TABLE_HR013_SKILL_PICKER .hr013-skill-chip {
+    border: 1px solid #d8e1ef;
+    border-radius: 999px;
+    background: #fff;
+    color: #324255;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1;
+    padding: 6px 10px;
+    cursor: pointer;
+}
+#TABLE_HR013_SKILL_PICKER .hr013-skill-chip:hover {
+    border-color: #84aaf0;
+    color: #1f5ccb;
+}
+#TABLE_HR013_SKILL_PICKER .hr013-skill-chip.is-selected {
+    border-color: #4b83ff;
+    background: #e8f0ff;
+    color: #1b57c6;
+}
+#TABLE_HR013_SKILL_PICKER .hr013-skill-chip.is-flash {
+    box-shadow: 0 0 0 2px rgba(72, 128, 255, 0.2);
+}
+@media (max-width: 900px) {
+    #hr013-skill-picker-area .hr013-skill-picker-search-row {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}
+
 /* 셀 기본 설정 */
 .tabulator .tabulator-cell {
   white-space: normal !important;   /* 줄바꿈 허용 */
@@ -1417,13 +1585,13 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
     padding: 10px 14px;
     border-radius: 8px;
     font-size: 16px;
-    width: 240px;
+    width: 900px;
     box-shadow: 0 2px 6px rgba(0,0,0,0.2);
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.2s;
     z-index: 10;
-    background: #e6f0ff;
+    background: #ffffff;
     color: #2c5282;
 }
 
@@ -1436,7 +1604,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
     transform: translateX(-50%);
     border-left: 6px solid transparent;
     border-right: 6px solid transparent;
-    border-top: 8px solid #e6f0ff;
+    border-top: 8px solid #ffffff;
     background: #e6f0ff;
     z-index: 11;
 }
@@ -1445,6 +1613,52 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 #aboutGrade:hover .tooltip {
     opacity: 1;
 }
+
+#aboutGrade .tooltip .score-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+#aboutGrade .tooltip .score-table th,
+#aboutGrade .tooltip .score-table td {
+  border: 1px solid #ccc;
+  padding: 12px;
+  vertical-align: top;
+}
+
+#aboutGrade .tooltip .score-table th {
+  background: #f5f5f5;
+  text-align: center;
+  font-weight: 600;
+  /*width: 20%;*/
+}
+
+#aboutGrade .tooltip .score-table .max-score {
+  display: block;
+  margin-top: 4px;
+  font-size: 13px;
+  color: #666;
+}
+
+#aboutGrade .tooltip .score-section {
+  margin-bottom: 12px;
+}
+
+#aboutGrade .tooltip .score-section strong {
+  display: block;
+  margin-bottom: 6px;
+}
+
+#aboutGrade .tooltip .score-section ul {
+  padding-left: 18px;
+  margin: 0;
+}
+
+#aboutGrade .tooltip .score-section li {
+  margin-bottom: 4px;
+}
+
 
 .career-spin-wrap {
     display: inline-flex;
@@ -1467,11 +1681,13 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
     width: 58px !important;
     min-width: 58px !important;
     padding: 0 6px !important;
-    text-align: left;
-    border: 0 !important;
+    height: 34px;
+    line-height: 34px;
+    text-align: center;
+    border: 1px solid #dee2e7 !important;
     border-right: 0 !important;
-    border-radius: 0 !important;
-    background: transparent !important;
+    border-radius: 4px 0 0 4px !important;
+    background: #fff !important;
     box-shadow: none !important;
 }
 
