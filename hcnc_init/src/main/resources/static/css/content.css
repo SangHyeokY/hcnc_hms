@@ -131,16 +131,16 @@ option{background:#fff; color:#333;}
 .tabulator .tabulator-footer .tabulator-page[data-page="prev"],
 .tabulator .tabulator-footer .tabulator-page[data-page="next"],
 .tabulator .tabulator-footer .tabulator-page[data-page="last"] {
-  min-width: 44px;
-  width: 44px;
-  height: 44px;
-  line-height: 40px;
+  min-width: 31px;
+  width: 31px;
+  height: 31px;
+  line-height: 29px;
   border: 2px solid #b9c1ce;
   border-radius: 50%;
   background: #fff;
   padding: 0;
   color: #232d3d;
-  font-size: 26px;
+  font-size: 18px;
   font-weight: 500;
 }
 .tabulator .tabulator-footer .tabulator-page.tabulator-page-disabled {
