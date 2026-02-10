@@ -207,6 +207,7 @@ function buildHr013Table() {
                 hozAlign: "left",
                 formatter: hr013TableSkillFormatter,
                 editable: false,
+                width: 280,
                 cellClick: hr013TableSkillCellClick
             },
             // { title: "기술스택", field: "stack_txt", formatter: skillDisplayFormatter, editor: stackTagEditor, editable: isHr013Editable, cellClick: startEditOnClick },
