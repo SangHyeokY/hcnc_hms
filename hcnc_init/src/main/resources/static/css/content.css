@@ -76,6 +76,12 @@ option{background:#fff; color:#333;}
 .tabulator-row {background-color: #fff !important;}
 /* .tabulator-row .tabulator-cell {background-color: #fff !important; padding: 2px 10px !important; max-height: 34px; line-height: 30px;} */
 .tabulator-row .tabulator-cell {font-size: 16px; font-weight: 400; background-color: #fff !important; padding: 2px 10px !important; line-height: 30px;}
+.tabulator-row .tabulator-cell.tabulator-align-left,
+.tabulator-row .tabulator-cell.hcnc-align-left {text-align: left !important;}
+.tabulator-row .tabulator-cell.tabulator-align-center,
+.tabulator-row .tabulator-cell.hcnc-align-center {text-align: center !important;}
+.tabulator-row .tabulator-cell.tabulator-align-right,
+.tabulator-row .tabulator-cell.hcnc-align-right {text-align: right !important;}
 .tabulator-row .tabulator-cell:last-child {border-right: 0 !important;}
 .tabulator-row:nth-child(2n) .tabulator-cell {background-color: #FBFCFE !important;}
 .tabulator-row.tabulator-selectable:hover .tabulator-cell {background-color: #f3fcff !important; color: #0092c7;}
@@ -207,6 +213,10 @@ option{background:#fff; color:#333;}
 #TABLE_USER.tabulator .tabulator-tableHolder {
   flex: 1 1 auto;
   min-height: 0;
+}
+#TABLE_HR010_A.tabulator .tabulator-header,
+#TABLE_USER.tabulator .tabulator-header {
+  flex: 0 0 auto; /* 높이 고정 */
 }
 #TABLE_HR010_A.tabulator .tabulator-footer,
 #TABLE_USER.tabulator .tabulator-footer {
@@ -1061,15 +1071,23 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
     display: inline-flex;
     align-items: center;
     gap: 6px;
+    margin: 0;
+}
+
+.career-exp-cell {
+    text-align: left;
 }
 
 .career-spin-input {
     width: 58px !important;
     min-width: 58px !important;
     padding: 0 6px !important;
-    text-align: right;
+    text-align: left;
+    border: 0 !important;
     border-right: 0 !important;
-    border-radius: 4px 0 0 4px !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
 }
 
 .career-spin-field {
@@ -1089,8 +1107,10 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 }
 
 #view-user-area.is-view-mode .career-spin-input {
-    border-right: 1px solid #dcdcdc !important;
-    border-radius: 4px !important;
+    border: 0 !important;
+    border-right: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
 }
 
 .career-spin-btn {

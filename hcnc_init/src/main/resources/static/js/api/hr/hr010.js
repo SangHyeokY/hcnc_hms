@@ -226,11 +226,16 @@ $(document).ready(async function () {
             Object.keys(changedTabs).forEach(k => changedTabs[k] = false);
 
             // 저장 완료 알림
-            alert(
-                currentMode === "insert"
-                    ? "인적사항 정보가 저장되었습니다."
-                    : `인적사항\n- ${savedTabs.join("\n- ")}\n저장이 완료되었습니다.`
-            );
+            if (
+                currentMode === "insert" ||
+                (!changedTabs.tab1 && !changedTabs.tab2 && !changedTabs.tab3 && !changedTabs.tab4)
+            ) {
+                alert("인적사항 정보가 저장되었습니다.");
+            } else {
+                alert(
+                    `인적사항\n- ${savedTabs.join("\n- ")}\n저장이 완료되었습니다.`
+                );
+            }
 
             // 신규 등록이었을 경우, 팝업 종료
             if (currentMode === "insert") {
@@ -421,31 +426,95 @@ function buildUserTable() {
                 formatter: function (cell) {
                     const value = cell.getValue();
                     if (!value) return "";
-                    // 콤마 뒤에 공백 추가
-                    return value
-                        .split(",")
-                        .map(v => v.trim())
-                        .join(", ");
+                    return `<div style="
+                        text-align:left;
+                        white-space: nowrap;
+                        overflow: hidden;
+                        text-overflow: ellipsis;">
+                        ${value.split(",").map(v => v.trim()).join(", ")}
+                    </div>`;
                 }
             },
-            { title: "희망단가", field: "hope_rate_amt", hozAlign: "right", formatter: amountFormatter, widthGrow:3, minWidth: 150, frozen: true},
+            {   title: "희망단가",
+                field: "hope_rate_amt",
+                widthGrow: 3, minWidth: 150, frozen: true,
+                formatter: function(cell){
+                    const value = cell.getValue();
+                    return `<div style="text-align:right;">${amountFormatter(value)}</div>`;
+                }
+            },
             { title: "dev_id", field: "dev_id", visible: false },
             { title: "생년월일", field: "brdt", headerSort: true, widthGrow: 2, minWidth: 120 },
             { title: "연락처", field: "tel", widthGrow: 3, minWidth: 150, headerSort: false },
-            { title: "이메일", field: "email", widthGrow:4, minWidth: 180, headerSort: false },
-            { title: "거주지역", field: "region", widthGrow:1, minWidth: 100 },
+            {   title: "이메일",
+                field: "email", widthGrow:4, minWidth: 180, headerSort: false,
+                formatter: function (cell) {
+                    const value = cell.getValue();
+                    if (!value) return "";
+                    return `<div style="
+                        text-align:left;
+                        white-space: nowrap;
+                        overflow: hidden;
+                        text-overflow: ellipsis;">
+                        ${value}
+                    </div>`;
+                }
+            },
+            {   title: "거주지역",
+                field: "region",
+                widthGrow:1, minWidth: 100,
+                formatter: function(cell){
+                    const value = cell.getValue();
+                    if (!value) return "";
+                    return `<div style="
+                        text-align:left;
+                        white-space: nowrap;
+                        overflow: hidden;
+                        text-overflow: ellipsis;">
+                        ${value}
+                    </div>`;
+                }
+            },
             {
                 title: "경력연차",
                 field: "exp_yr",
                 hozAlign: "center",
                 widthGrow: 1,
                 minWidth: 100,
-                formatter: function (cell) {
-                    return formatCareerYearMonth(cell.getValue());
+                formatter: function(cell){
+                    return `<div style="text-align:right;">${formatCareerYearMonth(cell.getValue())}</div>`;
                 }
             },
-            { title: "최종학력", field: "edu_last", widthGrow:4, minWidth: 180, headerSort: false },
-            { title: "보유 자격증", field: "cert_txt" , widthGrow:4, minWidth: 180, headerSort: false },
+            {   title: "최종학력",
+                field: "edu_last",
+                widthGrow:4, minWidth: 180, headerSort: false,
+                formatter: function (cell) {
+                    const value = cell.getValue();
+                    if (!value) return "";
+                    return `<div style="
+                        text-align:left;
+                        white-space: nowrap;
+                        overflow: hidden;
+                        text-overflow: ellipsis;">
+                        ${value}
+                    </div>`;
+                }
+            },
+            {   title: "보유 자격증",
+                field: "cert_txt" ,
+                widthGrow:4, minWidth: 180, headerSort: false,
+                formatter: function (cell) {
+                    const value = cell.getValue();
+                    if (!value) return "";
+                    return `<div style="
+                        text-align:left;
+                        white-space: nowrap;
+                        overflow: hidden;
+                        text-overflow: ellipsis;">
+                        ${value}
+                    </div>`;
+                }
+            },
             { title: "투입 가능 시점", field: "avail_dt", widthGrow:2, minWidth: 120 },
             {   title: "계약 형태",
                 field: "ctrt_typ",
@@ -782,24 +851,15 @@ function fillUserForm(d) {
         $("#select_ctrt_typ").val("");
     }
 
+    $("#dev_type").val(""); // 기본값 초기화
+
+    // '소속 구분' 값 재할당
     if (d.dev_id) {
         if (d.dev_id.startsWith("HCNC_F")) {
             $("#dev_type").val("HCNC_F");
-            // $("#dev_type2").text("프리랜서");
-            // $("#devTypeWrap").show();
         } else if (d.dev_id.startsWith("HCNC_S")) {
             $("#dev_type").val("HCNC_S");
-            // $("#dev_type2").text("사원");
-            // $("#devTypeWrap").show();
-        } else {
-            // console.log("dev_id 값이 잘못 되었습니다.")
-            $("#dev_type").val("");
-            // $("#dev_type2").text("");
         }
-    } else {
-        // console.log("dev_id 값이 존재하지 않습니다.")
-        $("#dev_type").val("");
-        // $("#dev_type2").text("");
     }
 
     const rank = d.grade || "";
@@ -1241,11 +1301,11 @@ function btnEditView(alertPrefix = "") {
 }
 
 // 계약단가(,),(테이블표)
-function amountFormatter(cell) {
-    if (cell.getValue() === null || cell.getValue() === undefined || cell.getValue() === "") {
+function amountFormatter(value, data, cell, row, options) {
+    if (value === null || value === undefined || value === "") {
         return "";
     }
-    return formatAmount(cell.getValue());
+    return formatAmount(value);
 }
 
 // 팝업에서도 마찬가지로 (,) 표시
