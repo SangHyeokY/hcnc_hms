@@ -1979,7 +1979,7 @@ $(document).on("click", ".career-spin-btn", function () {
     normalizeCareerSpinInputs();
 });
 
-// 희망단가 입력: 숫자만 허용 + 커서를 항상 "원" 앞(편집 가능 구간)에 유지
+// 희망단가 입력: 숫자만 허용하고 "원" 접미사 앞에서만 커서가 움직이도록 제어한다.
 $("#hope_rate_amt")
     .on("input", function () {
         var raw = this.value || "";
@@ -2085,11 +2085,13 @@ function normalizeAmountValue(value) {
     return String(value).replace(/[^0-9]/g, "");
 }
 
+// "원" 접미사를 제외한 마지막 편집 가능 인덱스를 반환한다.
 function getAmountEditableEndIndex(value) {
     var text = String(value || "");
     return text.endsWith("원") ? text.length - 1 : text.length;
 }
 
+// 클릭/포커스 후 커서가 "원" 뒤로 나가지 않도록 강제로 보정한다.
 function clampAmountCaretToEditableRange(input) {
     if (!input) return;
     var end = getAmountEditableEndIndex(input.value);
@@ -2102,18 +2104,21 @@ function clampAmountCaretToEditableRange(input) {
     }
 }
 
+// 초기 포커스 시 커서를 항상 숫자 마지막으로 보낸다.
 function moveAmountCaretToEditableEnd(input) {
     if (!input) return;
     var end = getAmountEditableEndIndex(input.value);
     input.setSelectionRange(end, end);
 }
 
+// 포맷팅 전/후 커서 위치를 유지하기 위해 커서 앞 숫자 개수를 센다.
 function countAmountDigitsBeforeCaret(value, caret) {
     var text = String(value || "");
     var cursor = Math.max(0, Math.min(Number.isFinite(caret) ? caret : text.length, text.length));
     return text.slice(0, cursor).replace(/[^0-9]/g, "").length;
 }
 
+// 숫자 개수 기준으로 포맷팅 이후 커서 위치를 복원한다.
 function setAmountCaretByDigitIndex(input, digitCount) {
     if (!input) return;
     var text = String(input.value || "");

@@ -263,6 +263,7 @@ function closeHr013Modal() {
     $("#write-hr013-area").hide();
 }
 
+// 기술 선택 팝업 이벤트는 중복 바인딩을 막고 1회만 등록한다.
 function bindHr013SkillPickerEvents() {
     if (hr013SkillPickerEventBound) {
         return;
@@ -352,6 +353,7 @@ function bindHr013SkillPickerEvents() {
     });
 }
 
+// sourceType(modal/grid)에 따라 선택 원본을 분기해서 팝업을 연다.
 function openHr013SkillPicker(sourceType, row) {
     if (currentMode === "view" || window.hr010ReadOnly) {
         return;
@@ -384,6 +386,7 @@ function openHr013SkillPicker(sourceType, row) {
     }, 40);
 }
 
+// 팝업 종료 시 draft/context를 함께 비워 다음 열기 시 상태가 섞이지 않게 한다.
 function closeHr013SkillPicker(immediate) {
     var $picker = $("#hr013-skill-picker-area");
     if (!$picker.length) {
@@ -409,6 +412,7 @@ function closeHr013SkillPicker(immediate) {
     hr013SkillPickerContext = null;
 }
 
+// "적용" 클릭 시에만 실제 데이터(모달 hidden/그리드 row)에 반영한다.
 function applyHr013SkillPickerSelection() {
     if (!(hr013SkillPickerDraftSet instanceof Set)) {
         closeHr013SkillPicker();
@@ -435,6 +439,7 @@ function applyHr013SkillPickerSelection() {
     closeHr013SkillPicker();
 }
 
+// 분야/기술 2열 구조의 선택용 Tabulator를 최초 1회 생성한다.
 function buildHr013SkillPickerTable() {
     if (hr013SkillPickerTable || !window.Tabulator || !document.getElementById("TABLE_HR013_SKILL_PICKER")) {
         return;
@@ -458,6 +463,7 @@ function buildHr013SkillPickerTable() {
     hr013SkillPickerTableReady = false;
 }
 
+// 선택 개수 메타와 칩 선택 상태를 동기화하고, 리렌더 시 스크롤 위치를 유지한다.
 function syncHr013SkillPickerUi(forceRebuild) {
     var totalCount = Array.isArray(hr013SkillOptions) ? hr013SkillOptions.length : 0;
     var selectedCount = getHr013PickerSelectedSet().size;
@@ -538,6 +544,7 @@ function getHr013RowSelectedCodeSet(row) {
     return set;
 }
 
+// stack_txt/skl_id_lst가 CSV/JSON/객체 배열이어도 코드 배열로 정규화한다.
 function getHr013SkillCodeList(value) {
     if (value == null) {
         return [];
@@ -590,6 +597,7 @@ function getHr013SkillLabelByCode(code) {
     return found ? String(found.cd_nm || found.cd || key) : key;
 }
 
+// 단일 토큰(코드/라벨/깨진 문자열)을 최종 코드값으로 보정한다. ex[object Object]
 function resolveHr013SkillCodeToken(token) {
     var raw = $.trim(String(token || ""));
     if (!raw) {
@@ -614,6 +622,7 @@ function resolveHr013SkillCodeToken(token) {
     return raw;
 }
 
+// 중첩 객체에서도 code 계열 키를 찾아 기술코드를 추출한다.
 function extractHr013SkillCode(item) {
     if (item == null) {
         return "";
@@ -637,6 +646,7 @@ function extractHr013SkillCode(item) {
     return "";
 }
 
+// 중첩 객체에서도 label 계열 키를 찾아 표시 라벨을 추출한다.
 function extractHr013SkillLabel(item, fallbackCode) {
     if (item == null) {
         return getHr013SkillLabelByCode(fallbackCode || "");
@@ -658,6 +668,7 @@ function extractHr013SkillLabel(item, fallbackCode) {
     return getHr013SkillLabelByCode(fallbackCode || extractHr013SkillCode(item));
 }
 
+// 저장/표시 공통 포맷: 어떤 입력이 와도 [{code,label}] 배열로 맞춘다.
 function normalizeHr013SkillRows(value, fallback) {
     if (Array.isArray(value)) {
         return value
@@ -1922,6 +1933,7 @@ function formatNumberInput(value) {
     return raw.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
+// rate_amt가 숫자/문자열/객체 어떤 형태여도 숫자 문자열로 통일한다.
 function parseHr013RateAmountValue(value) {
     if (value === null || value === undefined) {
         return "";
@@ -1957,6 +1969,7 @@ function parseHr013RateAmountValue(value) {
     return "";
 }
 
+// [object Object] 같은 깨진 문자열을 방어하고 숫자만 남긴다.
 function normalizeAmountString(text) {
     var raw = String(text || "").trim();
     if (!raw) {
