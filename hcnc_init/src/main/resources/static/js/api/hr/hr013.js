@@ -189,7 +189,7 @@ function buildHr013Table() {
                 },
                 cellClick: startEditOnClick, width: 110
             },
-            { title: "계약단가", field: "rate_amt", hozAlign: "right", formatter: amountFormatter, editor: "input", editable: isHr013Editable, cellClick: startEditOnClick , width: 110},
+            { title: "계약단가", field: "rate_amt", hozAlign: "right", formatter: hr013AmountFormatter, editor: "input", editable: isHr013Editable, cellClick: startEditOnClick , width: 110},
             {
                 title: "역할",
                 field: "job_cd",
@@ -1025,6 +1025,7 @@ function loadHr013TableData() {
                 }
                 row.role_nm = normalizeJobValue(row.role_nm) || "";
                 row.job_cd = normalizeJobValue(row.job_cd) || "";
+                row.rate_amt = parseHr013RateAmountValue(row.rate_amt);
                 row.skl_id_lst = normalizeHr013SkillRows(row.skl_id_lst, row.stack_txt);
                 row.stack_txt = getHr013SkillCsvForSave(row.skl_id_lst, row.stack_txt);
                 row.stack_txt_nm = getSkillLabelList(row.stack_txt);
@@ -1062,7 +1063,7 @@ function fillHr013Form(data) {
     lastNonInprjCustNm = data.inprj_yn === "Y" ? "" : (data.cust_nm || "");
     applyInprjCustomerName(data.inprj_yn, data.cust_nm);
     $("#write_hr013_prj_nm").val(data.prj_nm || "");
-    $("#write_hr013_rate_amt").val(formatNumberInput(data.rate_amt));
+    $("#write_hr013_rate_amt").val(formatNumberInput(parseHr013RateAmountValue(data.rate_amt)));
     $("#write_hr013_job_cd").val(data.job_cd || "");
     $("#write_hr013_alloc_pct").val(formatPercentInput(data.alloc_pct));
     $("#write_hr013_remark").val(data.remark || "");
@@ -1301,6 +1302,7 @@ function saveHr013InlineRows() {
             return;
         }
         var stackCsv = getHr013SkillCsvForSave(row.skl_id_lst, row.stack_txt);
+        var rateAmt = parseHr013RateAmountValue(row.rate_amt);
         var custNm = row.cust_nm || "";
         if (row.inprj_yn === "Y") {
             custNm = "HCNC";
@@ -1317,7 +1319,7 @@ function saveHr013InlineRows() {
                 ed_dt: normalizeDateForSave(row.ed_dt),
                 cust_nm: custNm,
                 prj_nm: row.prj_nm || "",
-                rate_amt: row.rate_amt || "",
+                rate_amt: rateAmt || "",
                 job_cd: row.job_cd || "",
                 stack_txt: stackCsv,
                 alloc_pct: row.alloc_pct || "",
@@ -1893,11 +1895,13 @@ function percentageFormatter(cell) {
 }
 
 // 계약단가(,),(테이블표)
-function amountFormatter(cell) {
-    if (cell.getValue() === null || cell.getValue() === undefined || cell.getValue() === "") {
-        return "";
+function hr013AmountFormatter(cell) {
+    var value = cell && typeof cell.getValue === "function" ? cell.getValue() : cell;
+    var parsed = parseHr013RateAmountValue(value);
+    if (!parsed) {
+        return "-";
     }
-    return formatNumberInput(cell.getValue());
+    return formatNumberInput(parsed);
 
 }
 
@@ -1916,6 +1920,53 @@ function formatNumberInput(value) {
     var raw = String(value).replace(/[^\d]/g, "");
     if (raw === "") return "";
     return raw.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+function parseHr013RateAmountValue(value) {
+    if (value === null || value === undefined) {
+        return "";
+    }
+    if (typeof value === "number") {
+        if (!Number.isFinite(value)) {
+            return "";
+        }
+        return String(Math.trunc(value));
+    }
+    if (typeof value === "string") {
+        return normalizeAmountString(value);
+    }
+    if (typeof value === "object") {
+        var keys = ["rate_amt", "amount", "value", "val", "num", "number", "rawValue", "intVal"];
+        for (var i = 0; i < keys.length; i += 1) {
+            var key = keys[i];
+            if (!Object.prototype.hasOwnProperty.call(value, key)) {
+                continue;
+            }
+            var nested = parseHr013RateAmountValue(value[key]);
+            if (nested) {
+                return nested;
+            }
+        }
+        try {
+            var asText = String(value);
+            return normalizeAmountString(asText);
+        } catch (e) {
+            return "";
+        }
+    }
+    return "";
+}
+
+function normalizeAmountString(text) {
+    var raw = String(text || "").trim();
+    if (!raw) {
+        return "";
+    }
+    if (raw === "[object Object]") {
+        return "";
+    }
+    var digits = raw.replace(/[^\d]/g, "");
+    return digits || "";
 }
 
 // 퍼센트 포맷(입력값)
