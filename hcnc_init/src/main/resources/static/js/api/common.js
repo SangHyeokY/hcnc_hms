@@ -452,6 +452,8 @@ function createTagInput(config) {
     var getValue = config.getValue;
     var getLabel = config.getLabel;
     var matchMode = config.matchMode || "prefix";
+    // removable=false면 태그의 개별 x 삭제 버튼을 렌더링하지 않는다.
+    var removable = config.removable !== false;
     var onTagChange = config.onTagChange;
     var options = [];
     var map = {};
@@ -500,8 +502,10 @@ function createTagInput(config) {
             var $item = $("<li class=\"tag-item\"></li>");
             $item.attr("data-code", tag.code);
             $item.append(document.createTextNode(tag.label));
-            var $remove = $("<button type=\"button\" class=\"tag-remove\" aria-label=\"태그 삭제\">x</button>");
-            $item.append($remove);
+            if (removable) {
+                var $remove = $("<button type=\"button\" class=\"tag-remove\" aria-label=\"태그 삭제\">x</button>");
+                $item.append($remove);
+            }
             $list.append($item);
         });
         if ($help && $help.length) {
@@ -579,6 +583,9 @@ function createTagInput(config) {
     }
 
     $list.on("mousedown", ".tag-remove", function (e) {
+        if (!removable) {
+            return;
+        }
         e.preventDefault(); // 포커스 이동 차단
         var code = $(this).closest(".tag-item").data("code");
         removeByCode(code);
@@ -1232,20 +1239,31 @@ function createGroupedSkillPicker(config) {
 /* =========================
  * 공통 Swal 토스트(toast) 함수
  * ========================= */
-function showAlert({ icon = 'info', title = '', text = '', confirmText = '확인' } = {}) {
+function showAlert({
+    icon = 'info',
+    title = '',
+    text = '',
+    confirmText = '확인',
+    showCancelButton = false,
+    cancelText = '취소',
+    cancelButtonColor = '#212E41'
+} = {}) {
     return Swal.fire({
-        icon: icon,
-        title: title,
-        text: text,
+        icon,
+        title,
+        text,
+
         showClass: { popup: '', backdrop: '' },
         hideClass: { popup: '', backdrop: '' },
         backdrop: true,
         allowOutsideClick: false,
+
+        showCancelButton,
         confirmButtonText: confirmText,
         confirmButtonColor: icon === 'error' ? '#212E41' : '#E50019',
-        showCancelButton: icon === 'warning', // 경고일 때만 취소 버튼
-        cancelButtonText: '취소',
-        cancelButtonColor: '#212E41',
+        cancelButtonText: cancelText,
+        cancelButtonColor,
+
         scrollbarPadding: false
     });
 }

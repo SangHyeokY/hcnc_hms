@@ -338,8 +338,9 @@ function fillSelect(selector, list) {
 
 
 // 사용자 삭제 처리
-function deleteUserRows() {
-    var selectedRows = userTable.getSelectedRows();
+async function deleteUserRows() {
+    const selectedRows = userTable.getSelectedRows();
+
     if (selectedRows.length === 0) {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'info',
@@ -349,8 +350,17 @@ function deleteUserRows() {
         return;
     }
 
-    if (!confirm("선택한 사용자를 삭제하시겠습니까?")) {
-        return;
+    const result = await showAlert({
+        icon: 'warning',
+        title: '경고',
+        text: '선택한 사용자를 삭제하시겠습니까?',
+        showCancelButton: true,
+        cancelButtonText: '취소',
+        cancelButtonColor: '#212E41'
+    });
+
+    if (!result.isConfirmed) {
+        return; // 취소
     }
 
     showLoading();
