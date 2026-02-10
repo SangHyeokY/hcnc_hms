@@ -502,7 +502,7 @@ function buildUserTable() {
                     const value = cell.getValue();
                     if (!value) return "";
                     return `<div style="
-                        text-align:left;
+                        text-align:center;
                         white-space: nowrap;
                         overflow: hidden;
                         text-overflow: ellipsis;">
@@ -1012,10 +1012,21 @@ function setModalMode(mode) {
     var $title = $modal.find("#modal-title");
     $modal.toggleClass("is-view-mode", isView);
 
-    // title 표시
-    if (isView) $title.text("상세");
-    else if (isInsert) $title.text("등록");
-    else if (isUpdate) $title.text("수정");
+    // title 표시 ===================================== //
+    if (isView) mode = "view";
+    else if (isInsert) mode = "insert";
+    else if (isUpdate) mode = "update";
+    if (mode) {
+        $title.text(
+            mode === "view" ? "상세" :
+            mode === "insert" ? "등록" :
+            "수정"
+        );
+        $modal
+            .removeClass("view insert update")
+            .addClass(mode);
+    }
+    // title 표시 ===================================== //
 
     // 등록 페이지의 경우
     if (isInsert) {

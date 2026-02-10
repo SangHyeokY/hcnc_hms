@@ -218,7 +218,7 @@ function saveHr011TableData() {
                          icon: 'error',
                          title: '저장 실패',
                          text: '소속 및 계약정보 저장 중 오류가 발생했습니다.'
-                     });
+                     })
     });
 }
 
