@@ -3,19 +3,28 @@
     layout:decorate="~{layout/layout}">
 
 <th:block layout:fragment="searchCondition">
-    <div class="search-select">
-        <label for="searchUseYn">사용여부 &nbsp;</label>
-        <select name="searchUseYn" id="searchUseYn">
-            <option value="">사용여부 전체</option>
-            <option value="Y">사용</option>
-            <option value="N">미사용</option>
-        </select>
-    </div>
     <div class="search-input">
         <p class="fl-ac">
             <label for="searchKeyword">검색어 &nbsp;</label>
             <input type="text" class="w400" id="searchKeyword" name="searchKeyword" placeholder="코드그룹/코드그룹명 검색" />
         </p>
+    </div>
+    <div class="search-select search-useyn-radio">
+        <label class="search-useyn-label">사용여부 &nbsp;</label>
+        <div class="radio-box search-useyn-options">
+            <label for="searchUseYnAll">
+                <input type="radio" id="searchUseYnAll" name="searchUseYnRadio" value="" checked>
+                전체
+            </label>
+            <label for="searchUseYnY">
+                <input type="radio" id="searchUseYnY" name="searchUseYnRadio" value="Y">
+                사용
+            </label>
+            <label for="searchUseYnN">
+                <input type="radio" id="searchUseYnN" name="searchUseYnRadio" value="N">
+                미사용
+            </label>
+        </div>
     </div>
 </th:block>
 

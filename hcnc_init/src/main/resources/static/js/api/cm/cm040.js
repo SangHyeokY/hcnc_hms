@@ -258,6 +258,14 @@ function amountFormatter(cell) {
     return formatted;
 }
 
+function getSearchUseYnValue() {
+    var $checked = $("input[name='searchUseYnRadio']:checked");
+    if ($checked.length > 0) {
+        return $checked.val();
+    }
+    return $("#searchUseYn").val();
+}
+
 
 
 
@@ -268,7 +276,7 @@ function loadMainTableData() {
     }
 
     var keyword = $.trim($("#searchKeyword").val());
-    var useYn = $("#searchUseYn").val();
+    var useYn = getSearchUseYnValue();
 
     $.ajax({
         url: "/cm040/main/list",

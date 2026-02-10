@@ -140,6 +140,14 @@ function buildUserTable() {
     });
 }
 
+function getSearchUseYnValue() {
+    var $checked = $("input[name='searchUseYnRadio']:checked");
+    if ($checked.length > 0) {
+        return $checked.val();
+    }
+    return $("#searchUseYn").val();
+}
+
 // 사용자 목록 조회
 function loadUserTableData() {
     if (!userTable || typeof userTable.setData !== "function") {
@@ -153,7 +161,7 @@ function loadUserTableData() {
         type: "GET",
         data: {
             searchType: $("#searchType").val(),
-            searchUseYn: $("#searchUseYn").val(),
+            searchUseYn: getSearchUseYnValue(),
             searchKeyword: $("#searchKeyword").val()
 
         },
