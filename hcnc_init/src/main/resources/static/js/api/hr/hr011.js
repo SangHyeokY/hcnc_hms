@@ -121,10 +121,10 @@ function openHr011(mode) {
     // 수정 mode
     if (mode === "update") {
         if (!window.hr011Data) {
-            showAlert({
+            showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
                 icon: 'error',
-                title: '데이터 조회 실패',
-                text: '소속 및 계약정보 데이터가 존재하지 않습니다.'
+                title: '오류',
+                text: `'소속 및 계약정보' 데이터가 존재하지 않습니다.`
             });
             return;
         }
@@ -214,26 +214,32 @@ function saveHr011TableData() {
             // setHr011Mode("view");
             loadHr011TableData(window.currentDevId);
         },
-        error: () => showAlert({
+        error: () => showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
                          icon: 'error',
-                         title: '저장 실패',
-                         text: '소속 및 계약정보 저장 중 오류가 발생했습니다.'
+                         title: '오류',
+                         text: `'소속 및 계약정보' 저장 중 오류가 발생했습니다.`
                      })
     });
 }
 
 // Tab1 데이터 삭제 (미사용 중)
-function deleteHr011() {
+async function deleteHr011() {
     if (!window.hr011Data?.ctrt_id) {
-        // alert("삭제할 데이터가 없습니다.");
-        showAlert({
+        await showAlert({
             icon: 'error',
-            title: '데이터 조회 실패',
+            title: '오류',
             text: '소속 및 계약정보 데이터가 존재하지 않습니다.'
         });
         return;
     }
-    if (!confirm("정말로 삭제하시겠습니까?")) return;
+
+    const result = await showAlert({
+        icon: 'warning',
+        title: '경고',
+        text: '정말로 삭제하시겠습니까?',
+    });
+
+    if (!result.isConfirmed) return;
 
     $.ajax({
         url: "/hr011/tab1_delete",
@@ -244,10 +250,18 @@ function deleteHr011() {
             devId: window.currentDevId
         }),
         success: () => {
-            alert("삭제되었습니다."); // 여기서부터 마저 수정하기
+            showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+                icon: 'success',
+                title: '완료',
+                text: `'소속 및 계약정보' 데이터가 삭제되었습니다.`
+            });
             loadHr011TableData(window.currentDevId);
         },
-        error: () => alert("삭제 실패")
+        error: () => showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+                                 icon: 'error',
+                                 title: '오류',
+                                 text: `'소속 및 계약정보' 데이터를 삭제하는 중 오류가 발생했습니다.`
+                             })
     });
 }
 
@@ -267,49 +281,81 @@ function validateHr011Form() {
     const MAX_AMT = 999999999;
 
     if (!orgNm) {
-        alert("소속사를 입력해주세요.");
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'warning',
+            title: '경고',
+            text: `'소속사'를 입력해주세요.`
+        });
         $("#org_nm").focus();
         return false;
     }
 
     if (!stDt) {
-        alert("계약 시작일을 입력해주세요.");
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'warning',
+            title: '경고',
+            text: `'계약 시작일'을 입력해주세요.`
+        });
         $("#st_dt").focus();
         return false;
     }
 
     if (!edDt) {
-        alert("계약 종료일을 입력해주세요.");
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'warning',
+            title: '경고',
+            text: `'계약 종료일'을 입력해주세요.`
+        });
         $("#ed_dt").focus();
         return false;
     }
 
     if (new Date(stDt) > new Date(edDt)) {
-        alert("계약 종료일은 시작일 이후여야 합니다.");
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'warning',
+            title: '경고',
+            text: `'계약 종료일'은 '계약 시작일' 이후여야 합니다.`
+        });
         $("#ed_dt").focus();
         return false;
     }
 
     if (!bizTyp || bizTyp == null) {
-        alert("사업자 유형을 선택해주세요.");
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'warning',
+            title: '경고',
+            text: `'사업자 유형'을 선택해주세요.`
+        });
         $("#select_biz_typ").focus();
         return false;
     }
 
     if (!amtRaw) {
-        alert("계약 금액을 입력해주세요.");
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'warning',
+            title: '경고',
+            text: `'계약 금액'을 입력해주세요.`
+        });
         $("#amt").focus();
         return false;
     }
 
     if (isNaN(amtRaw) || Number(amtRaw) <= 0) {
-        alert("계약 금액은 0보다 큰 숫자여야 합니다.");
+         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'warning',
+            title: '경고',
+            text: `'계약 금액'은 0보다 큰 숫자여야 합니다.`
+        });
         $("#amt").focus();
         return false;
     }
 
     if (Number(amtRaw) > MAX_AMT) {
-        alert("계약 금액은 최대 999,999,999원까지 입력 가능합니다.");
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'warning',
+            title: '경고',
+            text: `'계약 금액'은 최대 999,999,999원까지 입력 가능합니다.`
+        });
         $("#amt").focus();
         return false;
     }

@@ -221,7 +221,11 @@ function openHr013Modal(mode) {
         var rowData = getHr013SelectedRow();
 
         if (!rowData) {
-            alert("수정할 행을 체크해주세요.");
+            showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+                icon: 'info',
+                title: '알림',
+                text: '수정할 행을 선택해주세요.'
+            });
             return;
         }
         fillHr013Form(rowData);
@@ -348,39 +352,75 @@ function saveHr013Row() {
     }
 
     if (!payload.inprj_yn) {
-        alert("당사 여부를 선택해주세요.");
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'warning',
+            title: '경고',
+            text: `'당사 여부'를 선택해주세요.`
+        });
         return;
     }
     if (!payload.st_dt) {
-        alert("시작일을 입력해주세요.");
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'warning',
+            title: '경고',
+            text: `'시작일'을 입력해주세요.`
+        });
         return;
     }
     if (!payload.ed_dt) {
-        alert("종료일을 입력해주세요.");
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'warning',
+            title: '경고',
+            text: `'종료일'을 입력해주세요.`
+        });
         return;
     }
     if (!payload.cust_nm) {
-        alert("고객사를 입력해주세요.");
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'warning',
+            title: '경고',
+            text: `'고객사'를 입력해주세요.`
+        });
         return;
     }
     if (!payload.prj_nm) {
-        alert("프로젝트명을 입력해주세요.");
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'warning',
+            title: '경고',
+            text: `'프로젝트명'을 입력해주세요.`
+        });
         return;
     }
     if (!payload.rate_amt) {
-        alert("계약단가를 입력해주세요.");
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'warning',
+            title: '경고',
+            text: `'계약단가'를 입력해주세요.`
+        });
         return;
     }
     if (!payload.job_cd) {
-        alert("역할을 선택해주세요.");
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'warning',
+            title: '경고',
+            text: `'역할'을 선택해주세요.`
+        });
         return;
     }
     if (!payload.alloc_pct) {
-        alert("투입률을 입력해주세요.");
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'warning',
+            title: '경고',
+            text: `'투입률'을 입력해주세요.`
+        });
         return;
     }
     if (!payload.stack_txt) {
-        alert("기술스택을 선택해주세요.");
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'warning',
+            title: '경고',
+            text: `'기술스택'을 선택해주세요.`
+        });
         return;
     }
 
@@ -394,11 +434,20 @@ function saveHr013Row() {
                 loadHr013TableData();
                 // alert("저장되었습니다.");
             } else {
-                alert("저장에 실패했습니다.");
+                // alert("저장에 실패했습니다.");
+                showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+                    icon: 'error',
+                    title: '오류',
+                    text: '저장 중 오류가 발생했습니다.'
+                });
             }
         },
         error: function () {
-            alert("저장 중 오류가 발생했습니다.");
+            showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+                icon: 'error',
+                title: '오류',
+                text: '저장 중 오류가 발생했습니다.'
+            });
         }
     });
 }
@@ -425,7 +474,7 @@ function inprjCheckboxFormatter(cell) {
 
 // 선택 행 임시 삭제
 // 체크된 행을 임시 삭제(실제 삭제는 저장 시)
-function removeHr013SelectedRows() {
+async function removeHr013SelectedRows() {
     if (!window.hr013Table) {
         return;
     }
@@ -433,12 +482,23 @@ function removeHr013SelectedRows() {
         return row.getData()._checked;
     });
     if (!rows || rows.length === 0) {
-        alert("삭제할 행을 선택해주세요.");
+        // alert("삭제할 행을 선택해주세요.");
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'info',
+            title: '알림',
+            text: '삭제할 행을 선택해주세요.'
+        });
         return;
     }
-    if (!confirm("선택한 행을 정말로 삭제하시겠습니까?")) {
-        return;
-    }
+
+    const result = await showAlert({
+        icon: 'warning',
+        title: '경고',
+        text: '선택한 행을 정말로 삭제하시겠습니까?',
+    });
+
+    if (!result.isConfirmed) return;
+
     rows.forEach(function (row) {
         var data = row.getData();
         if (data.dev_prj_id) {
@@ -515,7 +575,11 @@ function saveHr013InlineRows() {
         hr013DeletedIds = [];
         loadHr013TableData();
     }).fail(function () {
-        alert("프로젝트 저장 중 오류가 발생했습니다.");
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'error',
+            title: '오류',
+            text: `'프로젝트' 저장 중 오류가 발생했습니다.`
+        });
     });
 }
 
@@ -1072,7 +1136,12 @@ $('#excelFile').on('change', function(e) {
     const file = e.target.files[0];
     e.target.value = '';
 
-    if (!file) return alert("파일을 선택하세요.");
+    if (!file) return showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+          icon: 'info',
+          title: '알림',
+          text: '파일을 선택하세요.'
+      });
+
     else console.log('파일 선택 완료:', file.name);
 
     const formData = new FormData();

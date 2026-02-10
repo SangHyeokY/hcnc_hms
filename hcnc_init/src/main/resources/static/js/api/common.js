@@ -623,10 +623,10 @@ function showAlert({ icon = 'info', title = '', text = '', confirmText = '확인
         backdrop: true,
         allowOutsideClick: false,
         confirmButtonText: confirmText,
-        confirmButtonColor: icon === 'error' ? '#d33' : '#3085d6',
-//        showCancelButton: icon === 'warning', // 경고일 때만 취소 버튼
-//        cancelButtonText: '취소',
-//        cancelButtonColor: '#aaa',
+        confirmButtonColor: icon === 'error' ? '#212E41' : '#E50019',
+        showCancelButton: icon === 'warning', // 경고일 때만 취소 버튼
+        cancelButtonText: '취소',
+        cancelButtonColor: '#212E41',
         scrollbarPadding: false
     });
 }

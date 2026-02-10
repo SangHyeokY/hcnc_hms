@@ -25,15 +25,17 @@ var ctrtTypOptions = [];
 var workMdMap = [];
 var workMdOptions = [];
 
-// '저장 완료' 알림 텍스트 저장
-var swalTitle = "";
-var swalText = "";
+// 저장된 탭 alert 표시하기 위한 리스트
+var savedTabs = [];
 
 // 탭 전체 입력/수정 여부 판단 => 전역 플래그
 let initTabs = false;
 
-// 저장/로딩중 팝업 표시 여부
+// 저장/로딩중 팝업 표시 여부 플래그
 let isSaving = false;
+
+// 저장 성공 여부 플래그
+let isSuccess = false;
 
 // 개발자ID
 window.currentDevId = null;
@@ -46,8 +48,12 @@ const changedTabs = {
     tab4: false  // 4번째 Tab
 };
 
-// 저장된 탭 alert 표시하기 위한 리스트
-const savedTabs = [];
+const tabNameMap = {
+    tab1: "소속 및 계약정보",
+    tab2: "보유역량 및 숙련도",
+    tab3: "프로젝트",
+    tab4: "평가 및 리스크"
+};
 
 // ============================================================================== //
 
@@ -98,9 +104,9 @@ $(document).ready(async function () {
 
         // 이미지 파일만 허용
         if (!file.type.startsWith("image/")) {
-            showAlert({
-                icon: 'error',
-                title: '업로드 오류',
+            showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+                icon: 'info',
+                title: '알림',
                 text: '이미지 파일만 선택 가능합니다.'
             });
             return;
@@ -221,12 +227,6 @@ $(document).ready(async function () {
 
                 console.log("탭 유효성 실패");
 
-                // 각 탭마다 유효성 검사 표시 다 적용시키고 난 뒤에, 이거 수정하기 !!!!!!!!!!!!!
-                showAlert({
-                    icon: 'error',
-                    title: '입력 오류',
-                    text: '상세정보 입력란을 확인해주세요.'
-                });
                 hideLoading();
                 isSaving = false;
                 return;
@@ -234,31 +234,48 @@ $(document).ready(async function () {
         }
 
         try {
-            // 인적사항 서버 저장
+            // 인적사항 저장
             const success = await upsertUserBtn();
             if (!success) {
                 throw new Error("인적사항 저장 실패");
             }
 
-            // 탭 데이터 순차 저장
-            if (changedTabs.tab1) {
-                await saveHr011TableData();
-                savedTabs.push("소속 및 계약정보");
-            }
-            if (changedTabs.tab2) {
-                await saveHr012TableData();
-                savedTabs.push("보유역량 및 숙련도");
-            }
-            if (changedTabs.tab3) {
-                await saveHr013InlineRows();
-                savedTabs.push("프로젝트");
-            }
-            if (changedTabs.tab4) {
-                await saveTab4All();
-                savedTabs.push("평가 및 리스크");
+            // 세부정보 저장
+            if(currentMode != "insert"){
+                // 탭 데이터 순차 저장
+                if (changedTabs.tab1) {
+                    await saveHr011TableData();
+                    savedTabs.push("소속 및 계약정보");
+                }
+                if (changedTabs.tab2) {
+                    await saveHr012TableData();
+                    savedTabs.push("보유역량 및 숙련도");
+                }
+                if (changedTabs.tab3) {
+                    await saveHr013InlineRows();
+                    savedTabs.push("프로젝트");
+                }
+                if (changedTabs.tab4) {
+                    await saveTab4All();
+                    savedTabs.push("평가 및 리스크");
+                }
             }
 
-            // 상태 초기화
+            // 저장 완료 후, 상태 플래그 변경
+            isSuccess = true;
+
+            // 저장한 탭의 이름 저장
+            const savedTabNames = savedTabs.map(n => `'${n}'`);
+
+            showAlert({
+                icon: 'success',
+                title: currentMode === "insert" ? "등록 완료" : "저장 완료",
+                text: savedTabs.length
+                    ? `${savedTabNames.join(", ")} 저장이 완료되었습니다.`
+                    : "인적사항 정보가 저장되었습니다."
+            });
+
+            // 탭 상태 초기화
             Object.keys(changedTabs).forEach(k => changedTabs[k] = false);
 
             // 신규 등록이면 팝업 닫기
@@ -268,25 +285,22 @@ $(document).ready(async function () {
 
         } catch (e) {
             console.error(e);
-            showAlert({
+
+            showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
                 icon: 'error',
-                title: '저장 실패',
+                title: '오류',
                 text: '저장 중 오류가 발생했습니다.'
             });
+
         } finally {
-            // 테이블 리로드 & 로딩 숨김
-            userTable.clearData();
-            await loadUserTableData();
-            hideLoading();
-            isSaving = false;
+             isSaving = false;
+             hideLoading();
 
-            // Swal로 알림
-            showAlert({
-                icon: 'success',
-                title: swalTitle,
-                text: swalText,
-            });
-
+            // 저장에 성공했다면...
+            if (isSuccess) {
+                userTable.clearData();
+                await loadUserTableData();
+            }
             console.log("저장 작업 종료, 로딩 상태 :", isSaving); // false여야 정상
         }
     });
@@ -648,9 +662,9 @@ async function loadUserTableData() {
         // userTable.setData(response.res || []);
     } catch (e) {
         console.error(e);
-        showAlert({
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'error',
-            title: '조회 실패',
+            title: '오류',
             text: '사용자 데이터를 불러오는 중 오류가 발생했습니다.',
         });
     }
@@ -683,9 +697,9 @@ function loadUserTableImgDataAsync(data) {
             },
             error: function (e) {
                 console.error(e);
-                 showAlert({
+                 showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
                     icon: 'error',
-                    title: '프로필 이미지 오류',
+                    title: '오류',
                     text: '사용자 데이터를 불러오는 중 오류가 발생했습니다.',
                  });
                  resolve(); // 에러여도 UI는 표시 가능하도록 resolve
@@ -744,9 +758,9 @@ function upsertUserBtn() {
             success: function (response) {
                 if (!response || response.success === false) {
                     console.log(response?.message || "저장에 실패했습니다.");
-                    showAlert({
+                    showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
                         icon: 'error',
-                        title: '저장 실패',
+                        title: '오류',
                         text: '저장 중 오류가 발생했습니다.'
                     });
                     resolve(false);
@@ -760,25 +774,14 @@ function upsertUserBtn() {
             },
             error: function (xhr) {
                 console.log("저장 중 오류가 발생했습니다.");
-                showAlert({
+                showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
                     icon: 'error',
-                    title: '저장 실패',
+                    title: '오류',
                     text: '저장 중 오류가 발생했습니다.'
                 });
                 reject(xhr);
             }
         });
-
-        if (
-            currentMode === "insert" ||
-            (!changedTabs.tab1 && !changedTabs.tab2 && !changedTabs.tab3 && !changedTabs.tab4)
-        ) {
-            swalTitle = "인적사항 저장 완료";
-            swalText = "인적사항 정보가 저장되었습니다.";
-        } else {
-            swalTitle = "변경사항 저장 완료";
-            swalText = `인적사항\n- ${savedTabs.join("\n- ")}\n저장이 완료되었습니다.`;
-        }
     });
 }
 
@@ -790,7 +793,7 @@ async function deleteUserRows() {
 
     // 선택 없음
     if (selectedRows.length === 0) {
-        showAlert({
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'info',
             title: '알림',
             text: '삭제할 사용자를 선택해주세요.'
@@ -802,16 +805,16 @@ async function deleteUserRows() {
     var firstRowData = selectedRows[0].getData();
 
     // 1단계 확인 모달
-    const firstResult = await showAlert({
-        title: `${firstRowData.dev_nm} 사용자 정보 삭제`,
-        text: '삭제하시겠습니까?',
+    const firstResult = await showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+        title: '경고',
+        text: `'${firstRowData.dev_nm}' 사용자 정보를 삭제하시겠습니까?`,
         icon: 'warning',
     });
     if (!firstResult.isConfirmed) return;
 
-    const secondResult = await showAlert({
-        title: '정말로 삭제하시겠습니까?',
-        text: `${firstRowData.dev_nm} 사용자의 데이터가 삭제되며, 되돌릴 수 없습니다.`,
+    const secondResult = await showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+        title: '경고',
+        text: `다시 확인 버튼을 누르시면 '${firstRowData.dev_nm}' 사용자의 데이터가 삭제되며, 되돌릴 수 없습니다.`,
         icon: 'warning',
     });
     if (!secondResult.isConfirmed) return;
@@ -828,17 +831,17 @@ async function deleteUserRows() {
                 pending -= 1;
                 if (pending === 0) {
                     loadUserTableData();
-                    showAlert({
+                    showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
                         icon: 'success',
-                        title: '삭제 완료',
-                        text: `${firstRowData.dev_nm} 사용자의 데이터가 삭제되었습니다.`
+                        title: '완료',
+                        text: `'${firstRowData.dev_nm}' 사용자의 데이터가 삭제되었습니다.`
                     });
                 }
             },
             error: function () {
-                showAlert({
+                showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
                     icon: 'error',
-                    title: '삭제 실패',
+                    title: '오류',
                     text: '삭제 중 오류가 발생했습니다.'
                 });
             }
@@ -1105,6 +1108,9 @@ function closeUserViewModal() {
     }
     $modal.removeClass("show");
 
+    // 초기화
+    savedTabs = [];
+
     setTimeout(() => {
         $modal.hide();
         clearUserForm();
@@ -1171,10 +1177,10 @@ function validateUserForm() {
 
     // 개발자 이름
     if (!dev_nm) {
-        showAlert({
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
-            title: '인적사항 미입력',
-            text: '성명을 입력하세요.'
+            title: '경고',
+            text: `'성명'을 입력하세요.`
         });
         $("#dev_nm").focus();
         return false;
@@ -1182,10 +1188,10 @@ function validateUserForm() {
 
     // 생년월일
     if (!brdt) {
-        showAlert({
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
-            title: '인적사항 미입력',
-            text: '생년월일을 입력하세요.'
+            title: '경고',
+            text: `'생년월일'을 입력하세요.`
         });
         $("#brdt").focus();
         return false;
@@ -1193,10 +1199,10 @@ function validateUserForm() {
 
     // 전화번호
     if (!tel) {
-        showAlert({
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
-            title: '인적사항 미입력',
-            text: '연락처를 입력하세요.'
+            title: '경고',
+            text: `'연락처'를 입력하세요.`
         });
         $("#tel").focus();
         return false;
@@ -1204,10 +1210,10 @@ function validateUserForm() {
 
     // 전화번호 (숫자만 입력)
     if (!/^[0-9\-]+$/.test(tel)) {
-        showAlert({
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
-            title: '인적사항 미입력',
-            text: '연락처 형식이 올바르지 않습니다.'
+            title: '경고',
+            text: `'연락처' 형식이 올바르지 않습니다.`
         });
         $("#tel").focus();
         return false;
@@ -1215,10 +1221,10 @@ function validateUserForm() {
 
     // 이메일
     if (!email) {
-        showAlert({
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
-            title: '인적사항 미입력',
-            text: '이메일을 입력하세요.'
+            title: '경고',
+            text: `'이메일'을 입력하세요.`
         });
         $("#email").focus();
         return false;
@@ -1228,10 +1234,10 @@ function validateUserForm() {
         /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
 
     if (!emailRegex.test(email)) {
-        showAlert({
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
-            title: '인적사항 미입력',
-            text: '이메일 형식이 올바르지 않습니다.'
+            title: '경고',
+            text: `'이메일' 형식이 올바르지 않습니다.`
         });
         $("#email").focus();
         return false;
@@ -1239,10 +1245,10 @@ function validateUserForm() {
 
     // 경력연차
     if (expYrYear === "" || expYrMonth === "") {
-        showAlert({
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
-            title: '인적사항 미입력',
-            text: '경력연차(년/개월)를 입력하세요.'
+            title: '경고',
+            text: `'경력연차(년/개월)'를 입력하세요.`
         });
         if (expYrYear === "") {
             $("#exp_yr_year").focus();
@@ -1252,10 +1258,10 @@ function validateUserForm() {
         return false;
     }
     if (!/^\d+$/.test(expYrYear) || !/^\d+$/.test(expYrMonth)) {
-        showAlert({
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
-            title: '인적사항 미입력',
-            text: '경력연차(년/개월)를 입력하세요.'
+            title: '경고',
+            text: `'경력연차(년/개월)'를 입력하세요.`
         });
         $("#exp_yr_year").focus();
         return false;
@@ -1264,10 +1270,10 @@ function validateUserForm() {
     var expYearNum = Number(expYrYear);
     var expMonthNum = Number(expYrMonth);
     if (expYearNum < 0 || expYearNum > 99 || expMonthNum < 0 || expMonthNum > 12) {
-        showAlert({
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
-            title: '인적사항 미입력',
-            text: '경력연차는 년(0~99), 개월(0~12) 범위 내에서 입력해주세요.'
+            title: '경고',
+            text: `'경력연차'는 년(0~99), 개월(0~12) 범위 내에서 입력해주세요.`
         });
         $("#exp_yr_year").focus();
         return false;
@@ -1277,10 +1283,10 @@ function validateUserForm() {
 
     // 최종학력
     if (!eduLast) {
-        showAlert({
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
-            title: '인적사항 미입력',
-            text: '최종학력을 입력하세요.'
+            title: '경고',
+            text: `'최종학력'을 입력하세요.`
         });
         $("#edu_last").focus();
         return false;
@@ -1288,10 +1294,10 @@ function validateUserForm() {
 
     // 소속 구분
     if (!devType || devType == "") {
-        showAlert({
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
-            title: '인적사항 미입력',
-            text: '소속을 선택해주세요.'
+            title: '경고',
+            text: `'소속 구분'을 선택해주세요.`
         });
         $("#dev_type").focus();
         return false;
@@ -1299,10 +1305,10 @@ function validateUserForm() {
 
     // 근무 가능 형태
     if (!workMd || workMd == "") {
-        showAlert({
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
-            title: '인적사항 미입력',
-            text: '근무형태를 선택해주세요.'
+            title: '경고',
+            text: `'근무 가능 형태'를 선택해주세요.`
         });
         $("#select_work_md").focus();
         return false;
@@ -1310,19 +1316,19 @@ function validateUserForm() {
 
     // 희망단가
     if (!hopeRaw) {
-        showAlert({
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
-            title: '인적사항 미입력',
-            text: '희망단가를 입력해주세요.'
+            title: '경고',
+            text: `'희망단가'를 입력해주세요.`
         });
         $("#hope_rate_amt").focus();
         return false;
     }
     if (Number(hopeRaw) > MAX_AMT) {
-        showAlert({
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
-            title: '인적사항 미입력',
-            text: '희망단가는 최대 999,999,999원까지 입력 가능합니다.'
+            title: '경고',
+            text: `'희망단가'는 최대 999,999,999원까지 입력 가능합니다.`
         });
         $("#hope_rate_amt").focus();
         return false;
@@ -1330,10 +1336,10 @@ function validateUserForm() {
 
     // 투입 가능일
     if (!availDt) {
-        showAlert({
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
-            title: '인적사항 미입력',
-            text: '투입 가능 시점을 입력하세요.'
+            title: '경고',
+            text: `'투입 가능 시점'을 입력하세요.`
         });
         $("#avail_dt").focus();
         return false;
@@ -1341,10 +1347,10 @@ function validateUserForm() {
 
     // 계약 형태
     if (!ctrtTyp || ctrtTyp == "") {
-        showAlert({
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
-            title: '인적사항 미입력',
-            text: '계약 형태를 선택해주세요.'
+            title: '경고',
+            text: `'계약 형태'를 선택해주세요.`
         });
         $("#select_ctrt_typ").focus();
         return false;
@@ -1994,9 +2000,9 @@ function btnEditView(alertPrefix = "") {
     const rows = userTable.getSelectedRows();
     const prefix = alertPrefix || "";
     if (rows.length !== 1) {
-            showAlert({
-                icon: 'warning',
-                title: '대상 선택 없음',
+            showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+                icon: 'info',
+                title: '알림',
                 text:
                     prefix +
                     (rows.length === 0
@@ -2179,10 +2185,10 @@ if (excelBtn) {
         const devId = document.getElementById("dev_id").value;
         const devNm = document.getElementById("dev_nm").value;
         if (!devId) {
-            showAlert({
+            showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
                 icon: 'error',
-                title: '엑셀 다운로드 오류',
-                text: '개발자ID가 없습니다.'
+                title: '오류',
+                text: `'개발자ID'가 없습니다.`
             });
             return;
         }
