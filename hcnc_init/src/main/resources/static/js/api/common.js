@@ -615,8 +615,17 @@ function createTagInput(config) {
  * - 분야/기술 그리드
  * - 검색 자동완성 + 방향키 선택
  * - draft 선택 후 적용 버튼 반영
+ * [핵심 흐름]
+ * 1) open(context): 원본 선택값을 draftSet으로 복사해서 팝업 편집 시작
+ * 2) select/toggle: draftSet만 변경(원본 미변경)
+ * 3) apply(): draftSet -> CSV 변환 후 onApply(payload)로 최종 반영
+ * 4) close(): draft/context 초기화
  * ========================= */
 function createGroupedSkillPicker(config) {
+    // cfg: 화면별 selector/callback 주입용 계약 객체
+    // - getSelectedCodes(context): 현재 원본 선택값(Set/Array/CSV) 반환
+    // - getContextFromOpenEvent(e, el): openTrigger 클릭 시 context 구성
+    // - onApply({codes,csv,context}): "적용" 클릭 시 최종 반영 처리
     var cfg = Object.assign({
         namespace: "default",
         pickerAreaSelector: "",
@@ -655,10 +664,12 @@ function createGroupedSkillPicker(config) {
     var state = {
         table: null,
         tableReady: false,
-        // draftSet: 팝업에서만 임시 선택 상태를 유지하고 "적용"에서만 원본에 반영한다.
+        // draftSet: 팝업 내부 임시 상태(취소/닫기 시 폐기, 적용 시에만 원본 반영)
         draftSet: null,
+        // 검색 추천 목록에서 현재 키보드 선택된 항목 index
         suggestActiveIndex: -1,
         eventBound: false,
+        // context: 어떤 소스(modal/grid row)에서 열렸는지 식별하기 위한 실행 컨텍스트
         context: null
     };
 
@@ -682,6 +693,7 @@ function createGroupedSkillPicker(config) {
     }
 
     function normalizeSet(value) {
+        // 화면별로 값 형식이 달라도(Set/Array/CSV) 내부 처리는 Set 하나로 통일
         var set = new Set();
         if (!value) {
             return set;
@@ -748,6 +760,7 @@ function createGroupedSkillPicker(config) {
     }
 
     function buildRows() {
+        // 그리드 데이터는 "분야 1행 + 분야별 기술칩 묶음" 구조로 생성한다.
         var groupRows = [];
         var groupMap = {};
 
@@ -820,6 +833,7 @@ function createGroupedSkillPicker(config) {
     }
 
     function buildTableIfNeeded() {
+        // Tabulator 인스턴스는 최초 1회만 생성하고 이후 데이터만 교체한다.
         if (state.table || !window.Tabulator || !document.querySelector(cfg.tableSelector)) {
             return;
         }
@@ -850,6 +864,8 @@ function createGroupedSkillPicker(config) {
     }
 
     function sync(forceRebuild) {
+        // sync(false): 칩 선택상태만 빠르게 반영
+        // sync(true): 행 데이터(setData)까지 재구성
         ensureCounterMeta();
         if (!state.table) {
             return;
@@ -885,6 +901,7 @@ function createGroupedSkillPicker(config) {
     }
 
     function close(immediate) {
+        // immediate=true: 애니메이션 없이 즉시 종료(모달 닫힘/초기화 시 사용)
         var $picker = $(cfg.pickerAreaSelector);
         if (!$picker.length) {
             state.draftSet = null;
@@ -910,6 +927,8 @@ function createGroupedSkillPicker(config) {
     }
 
     function open(context) {
+        // open 시점에 항상 원본 -> draft 복사본을 만든다.
+        // 이후 편집은 draft에서만 진행되므로 취소가 안전하다.
         if (cfg.isReadonly && cfg.isReadonly(context)) {
             return;
         }
@@ -932,6 +951,7 @@ function createGroupedSkillPicker(config) {
     }
 
     function applySelection() {
+        // 적용 시점에만 최종 CSV를 만들고 화면별 저장 책임은 onApply 콜백으로 위임
         if (!(state.draftSet instanceof Set)) {
             close();
             return;
@@ -964,6 +984,7 @@ function createGroupedSkillPicker(config) {
     }
 
     function selectSkill(code, fromSearch) {
+        // 검색 추천에서 선택한 경우(fromSearch=true) 입력/추천 상태를 초기화
         var normalized = String(code || "").trim();
         if (!normalized) {
             return;
@@ -999,6 +1020,7 @@ function createGroupedSkillPicker(config) {
     }
 
     function findMatches(keyword, limit) {
+        // 검색 대상: 기술코드(cd) + 기술명(cd_nm)
         var query = String(keyword || "").trim().toLowerCase();
         if (!query) {
             return [];
@@ -1052,6 +1074,7 @@ function createGroupedSkillPicker(config) {
     }
 
     function moveSuggestionSelection(step) {
+        // 방향키 이동은 리스트 범위를 벗어나지 않도록 clamp 처리
         var $items = $(cfg.suggestListSelector + " ." + cfg.suggestItemClass);
         if (!$items.length || !$(cfg.suggestListSelector).is(":visible")) {
             return;
@@ -1099,7 +1122,7 @@ function createGroupedSkillPicker(config) {
             return;
         }
         state.eventBound = true;
-        // 모든 이벤트는 namespace 기반으로 1회 등록되어 중복 바인딩을 방지한다.
+        // 모든 이벤트는 namespace 기반으로 1회 등록(중복 바인딩/메모리 누수 방지)
 
         if (cfg.openTriggerSelector) {
             $(document).on("click" + ns, cfg.openTriggerSelector, function (e) {
@@ -1148,6 +1171,8 @@ function createGroupedSkillPicker(config) {
         });
 
         $(document).on("keydown" + ns, cfg.searchInputSelector, function (e) {
+            // 검색 input 키보드 UX:
+            // ArrowUp/Down 이동, Enter 선택, Escape 닫기
             if (e.key === "ArrowDown") {
                 e.preventDefault();
                 moveSuggestionSelection(1);
