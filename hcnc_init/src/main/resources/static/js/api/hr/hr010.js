@@ -1258,14 +1258,12 @@ function validateUserForm() {
 
     var expYearNum = Number(expYrYear);
     var expMonthNum = Number(expYrMonth);
-    if (expYearNum < 0 || expYearNum > 99 || expMonthNum < 0 || expMonthNum > 99) {
+    if (expYearNum < 0 || expYearNum > 99 || expMonthNum < 0 || expMonthNum > 12) {
         showAlert({
             icon: 'warning',
             title: '인적사항 미입력',
-            text: '경력연차의 년/개월은 0~99 범위로 입력하세요.'
+            text: '경력연차는 년(0~99), 개월(0~12) 범위 내에서 입력해주세요.'
         });
-    if (expYearNum < 0 || expYearNum > 99 || expMonthNum < 0 || expMonthNum > 12) {
-        alert("경력연차의 년은 0~99, 개월은 0~12 범위로 입력하세요.");
         $("#exp_yr_year").focus();
         return false;
     }
