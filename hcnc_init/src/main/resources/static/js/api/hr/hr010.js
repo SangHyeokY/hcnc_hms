@@ -478,6 +478,7 @@ function buildUserTable() {
             {
                 title: "경력연차",
                 field: "exp_yr",
+                hozAlign: "center",
                 widthGrow: 1,
                 minWidth: 100,
                 formatter: function(cell){

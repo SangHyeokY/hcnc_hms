@@ -195,7 +195,7 @@ function buildHr013Table() {
             { title: "기술스택", field: "skl_id_lst", hozAlign: "left", editor: tagEditor, formatter: tagFormatter,
                 editable: () => currentMode !== "view" },
             // { title: "기술스택", field: "stack_txt", formatter: skillDisplayFormatter, editor: stackTagEditor, editable: isHr013Editable, cellClick: startEditOnClick },
-            { title: "투입률", field: "alloc_pct", hozAlign: "right", formatter: percentageFormatter, width: 90, editor: "input", editable: isHr013Editable, cellClick: startEditOnClick },
+            { title: "투입률", field: "alloc_pct", hozAlign: "center", formatter: percentageFormatter, width: 90, editor: "input", editable: isHr013Editable, cellClick: startEditOnClick },
             { title: "비고", field: "remark", editor: "input", editable: isHr013Editable, cellClick: startEditOnClick , width: 200}
         ],
         data: []
