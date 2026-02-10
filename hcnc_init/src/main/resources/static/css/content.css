@@ -1339,8 +1339,14 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
     margin: 0;
 }
 
+.career-exp-text {
+    display: none;
+    line-height: 32px;
+    
+}
+
 .career-exp-cell {
-    text-align: left;
+    text-align: center;
 }
 
 .career-spin-input {
@@ -1367,8 +1373,16 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 }
 
 /* 상세(view)에서는 경력연차 스핀 버튼 숨김 */
+#view-user-area.is-view-mode .career-spin-wrap {
+    display: none;
+}
+
 #view-user-area.is-view-mode .career-spin-buttons {
     display: none;
+}
+
+#view-user-area.is-view-mode .career-exp-text {
+    display: inline-block;
 }
 
 #view-user-area.is-view-mode .career-spin-input {
