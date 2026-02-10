@@ -1,3 +1,6 @@
+/*****
+ * 그리드 공통 페이징/건수 표시 - grid-pager.js (hcnc_hms)
+ */
 (function (window) {
     "use strict";
 
@@ -8,8 +11,8 @@
     var OriginalTabulator = window.Tabulator;
     var DEFAULT_PAGE_SIZE = 10;
     var DEFAULT_PAGE_SIZES = [10, 20, 50, 100];
-    var COUNTER_CLASS = "hcnc-grid-count";
-    var FOOTER_COMPACT_CLASS = "hcnc-grid-footer-compact";
+    var COUNTER_CLASS = "hcnc-grid-count"; 
+    var FOOTER_COMPACT_CLASS = "hcnc-grid-footer-compact";  // 공통코드 > 코드그룹은 폭이 좁아 건수 텍스트를 항상 페이지 버튼 아래로 배치
     var trackedTables = [];
     var resizeTimer = null;
     var PAGINATION_SYMBOL_LANG = {
@@ -32,12 +35,12 @@
         last: "»"
     };
 
-    function toNumber(value) {
+    function toNumber(value) {  // 숫자 변환 실패시 문자열이면 0으로 변환
         var num = Number(value);
         return Number.isFinite(num) ? num : 0;
     }
 
-    function getGridCount(table) {
+    function getGridCount(table) {  // 그리드 공통 페이징/건수 표시
         if (!table) {
             return 0;
         }
@@ -80,7 +83,7 @@
         return 0;
     }
 
-    function getTableElement(table) {
+    function getTableElement(table) {   // Tabulator 루트 DOM 찾기
         if (!table) {
             return null;
         }
@@ -90,7 +93,7 @@
         return table.element || null;
     }
 
-    function ensureCounterElement(table) {
+    function ensureCounterElement(table) {  // 건수 텍스트 span 생성/보장
         var tableEl = getTableElement(table);
         if (!tableEl) {
             return null;
@@ -115,7 +118,7 @@
         return counterEl;
     }
 
-    function applyResponsiveFooterLayout(table, counterEl) {
+    function applyResponsiveFooterLayout(table, counterEl) {    // 좁은 화면에서 compact모드 판단
         var tableEl = getTableElement(table);
         if (!tableEl || !counterEl) {
             return;
@@ -134,12 +137,12 @@
         var reserved = 56; // 좌/우 여백 + 간격
         var requiredWidth = pagesWidth + counterWidth + reserved;
 
-        if (requiredWidth > footerWidth) {
+        if (requiredWidth > footerWidth) {  // 좌/우 여백 + 간격 + 건수 텍스트 + 간격
             footerEl.classList.add(FOOTER_COMPACT_CLASS);
         }
     }
 
-    function enforcePaginatorSymbols(table) {
+    function enforcePaginatorSymbols(table) {   // 페이징버튼 강제 적용
         var tableEl = getTableElement(table);
         if (!tableEl) {
             return;
@@ -153,7 +156,7 @@
         });
     }
 
-    function updateGridCounter(table) {
+    function updateGridCounter(table) { // 건수/아이콘/반응형 한번에 갱신
         var counterEl = ensureCounterElement(table);
         if (!counterEl) {
             return;
@@ -163,7 +166,7 @@
         applyResponsiveFooterLayout(table, counterEl);
     }
 
-    function refreshAllGridCounters() {
+    function refreshAllGridCounters() { // 전체 테이블 재계산
         trackedTables = trackedTables.filter(function (table) {
             if (!table) {
                 return false;
@@ -177,7 +180,7 @@
         });
     }
 
-    function wrapOptionCallback(options, key, afterFn) {
+    function wrapOptionCallback(options, key, afterFn) {    // 기존 콜백 보존하며 후처리 연결
         var original = options[key];
         options[key] = function () {
             if (typeof original === "function") {
@@ -187,7 +190,7 @@
         };
     }
 
-    function withDefaultPaging(options) {
+    function withDefaultPaging(options) {   // 옵션에 기본 페이징 주입
         var nextOptions = Object.assign({}, options || {});
 
         if (nextOptions.pagination === undefined) {
@@ -230,13 +233,13 @@
         return nextOptions;
     }
 
-    function PatchedTabulator(element, options) {
+    function PatchedTabulator(element, options) {   // Tabulator 생성자 자체를 래핑
         var instance = new OriginalTabulator(element, withDefaultPaging(options));
         trackedTables.push(instance);
         return instance;
     }
 
-    Object.getOwnPropertyNames(OriginalTabulator).forEach(function (key) {
+    Object.getOwnPropertyNames(OriginalTabulator).forEach(function (key) {  // 원본 정적 속성복사 + prototype 유지
         if (["prototype", "length", "name", "arguments", "caller"].indexOf(key) > -1) {
             return;
         }
@@ -250,11 +253,11 @@
 
     PatchedTabulator.prototype = OriginalTabulator.prototype;
 
-    window.Tabulator = PatchedTabulator;
-    window.updateTabulatorGridCount = updateGridCounter;
-    window.__HCNC_GRID_PAGER_PATCHED__ = true;
+    window.Tabulator = PatchedTabulator;    // Tabulator 연결
+    window.updateTabulatorGridCount = updateGridCounter;    // 건수 갱신
+    window.__HCNC_GRID_PAGER_PATCHED__ = true;  // 패치 완료
 
-    window.addEventListener("resize", function () {
+    window.addEventListener("resize", function () { // 전체 테이블 재계산
         clearTimeout(resizeTimer);
         resizeTimer = setTimeout(refreshAllGridCounters, 80);
     });
