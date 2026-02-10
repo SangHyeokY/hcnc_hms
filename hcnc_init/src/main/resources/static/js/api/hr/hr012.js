@@ -5,6 +5,7 @@ let hr012HasPendingChange = false;  // A/B 테이블 데이터 차이 판단
 let hr012SkillPickerTable = null;
 let hr012SkillPickerTableReady = false;
 let hr012SkillPickerDraftMap = null;
+let hr012SuggestActiveIndex = -1;
 let hr012SkillPickerEventBound = false;
 let hr012SkillOptions = [];
 let hr012SkillGroupOptions = [];
@@ -578,8 +579,19 @@ function bindHr012SkillPickerEvents() {
     });
 
     $(document).on("keydown", "#hr012-skill-picker-search", function (e) {
-        if (e.key === "Enter") {
+        if (e.key === "ArrowDown") {
             e.preventDefault();
+            moveHr012SuggestionSelection(1);
+        } else if (e.key === "ArrowUp") {
+            e.preventDefault();
+            moveHr012SuggestionSelection(-1);
+        } else if (e.key === "Enter") {
+            e.preventDefault();
+            const $active = getHr012ActiveSuggestItem();
+            if ($active.length) {
+                addHr012Skill(String($active.data("code") || ""), true);
+                return;
+            }
             const $first = $("#hr012-skill-picker-suggest .hr012-skill-suggest-item").first();
             if ($first.length) {
                 addHr012Skill(String($first.data("code") || ""), true);
@@ -597,6 +609,12 @@ function bindHr012SkillPickerEvents() {
             return;
         }
         addHr012Skill(code, true);
+    });
+
+    $(document).on("mouseenter", "#hr012-skill-picker-suggest .hr012-skill-suggest-item", function () {
+        const $items = $("#hr012-skill-picker-suggest .hr012-skill-suggest-item");
+        hr012SuggestActiveIndex = $items.index(this);
+        syncHr012SuggestionActive();
     });
 
     $(document).on("mousedown", function (e) {
@@ -659,6 +677,7 @@ function closeHr012SkillPicker(immediate) {
     }
     $picker.removeClass("show");
     $("#hr012-skill-picker-suggest").hide().empty();
+    hr012SuggestActiveIndex = -1;
     if (immediate) {
         hr012SkillPickerDraftMap = null;
         $picker.hide();
@@ -1019,6 +1038,7 @@ function addHr012Skill(skillCode, fromSearch) {
     if (fromSearch) {
         $("#hr012-skill-picker-search").val("");
         $("#hr012-skill-picker-suggest").hide().empty();
+        hr012SuggestActiveIndex = -1;
     }
 }
 
@@ -1071,12 +1091,14 @@ function renderHr012SkillSuggestions(keyword) {
     const $suggest = $("#hr012-skill-picker-suggest");
     const query = String(keyword || "").trim();
     if (!query) {
+        hr012SuggestActiveIndex = -1;
         $suggest.hide().empty();
         return;
     }
 
     const matches = findHr012SkillMatches(query, 20);
     if (!matches.length) {
+        hr012SuggestActiveIndex = -1;
         $suggest.hide().empty();
         return;
     }
@@ -1088,6 +1110,51 @@ function renderHr012SkillSuggestions(keyword) {
             "</li>";
     }).join("");
     $suggest.html(html).show();
+    hr012SuggestActiveIndex = -1;
+    syncHr012SuggestionActive();
+}
+
+function moveHr012SuggestionSelection(step) {
+    const $items = $("#hr012-skill-picker-suggest .hr012-skill-suggest-item");
+    if (!$items.length || !$("#hr012-skill-picker-suggest").is(":visible")) {
+        return;
+    }
+    const max = $items.length - 1;
+    if (hr012SuggestActiveIndex < 0) {
+        hr012SuggestActiveIndex = step > 0 ? 0 : max;
+    } else {
+        hr012SuggestActiveIndex += step;
+        if (hr012SuggestActiveIndex < 0) {
+            hr012SuggestActiveIndex = 0;
+        }
+        if (hr012SuggestActiveIndex > max) {
+            hr012SuggestActiveIndex = max;
+        }
+    }
+    syncHr012SuggestionActive();
+}
+
+function syncHr012SuggestionActive() {
+    const $items = $("#hr012-skill-picker-suggest .hr012-skill-suggest-item");
+    $items.removeClass("is-active");
+    if (!$items.length || hr012SuggestActiveIndex < 0) {
+        return;
+    }
+    const $active = $items.eq(hr012SuggestActiveIndex);
+    $active.addClass("is-active");
+    const container = $("#hr012-skill-picker-suggest").get(0);
+    const element = $active.get(0);
+    if (container && element && typeof element.scrollIntoView === "function") {
+        element.scrollIntoView({ block: "nearest" });
+    }
+}
+
+function getHr012ActiveSuggestItem() {
+    const $items = $("#hr012-skill-picker-suggest .hr012-skill-suggest-item");
+    if (!$items.length || hr012SuggestActiveIndex < 0) {
+        return $();
+    }
+    return $items.eq(hr012SuggestActiveIndex);
 }
 
 function hr012EscapeHtml(value) {

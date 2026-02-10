@@ -331,6 +331,29 @@ button.btn.btn-add-skill {
 #TABLE_HR013_A.is-readonly .tabulator-row .tabulator-cell {
   cursor: default;
 }
+#TABLE_HR013_A.is-readonly .tabulator-cell[data-field="skl_id_lst"] .tag-list,
+#TABLE_HR013_A.is-readonly .tabulator-cell[tabulator-field="skl_id_lst"] .tag-list {
+  gap: 0;
+}
+#TABLE_HR013_A.is-readonly .tabulator-cell[data-field="skl_id_lst"] .tag-item,
+#TABLE_HR013_A.is-readonly .tabulator-cell[tabulator-field="skl_id_lst"] .tag-item {
+  background: transparent !important;
+  color: #333 !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  height: auto !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  line-height: 1.5 !important;
+}
+#TABLE_HR013_A.is-readonly .tabulator-cell[data-field="skl_id_lst"] .tag-item::after,
+#TABLE_HR013_A.is-readonly .tabulator-cell[tabulator-field="skl_id_lst"] .tag-item::after {
+  content: ", ";
+}
+#TABLE_HR013_A.is-readonly .tabulator-cell[data-field="skl_id_lst"] .tag-item:last-child::after,
+#TABLE_HR013_A.is-readonly .tabulator-cell[tabulator-field="skl_id_lst"] .tag-item:last-child::after {
+  content: "";
+}
 
 /*===============================================================================
   HR015 - risk memo
@@ -825,6 +848,9 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 #main-lang-picker-area .main-lang-picker-suggest .main-lang-suggest-item:hover {
   background: #f2f6ff;
 }
+#main-lang-picker-area .main-lang-picker-suggest .main-lang-suggest-item.is-active {
+  background: #e8f0ff;
+}
 #main-lang-picker-area .main-lang-picker-suggest .main-lang-suggest-item .name {
   color: #1f2937;
   font-size: 14px;
@@ -1209,6 +1235,9 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 }
 #hr012-skill-picker-area .hr012-skill-picker-suggest .hr012-skill-suggest-item:hover {
     background: #f2f6ff;
+}
+#hr012-skill-picker-area .hr012-skill-picker-suggest .hr012-skill-suggest-item.is-active {
+    background: #e8f0ff;
 }
 #hr012-skill-picker-area .hr012-skill-picker-suggest .hr012-skill-suggest-item .name {
     color: #1f2937;
