@@ -360,6 +360,17 @@
         }
     }
 
+    function clearGridSelectionOnPageLoaded(table) { // 페이지 이동시 이전 페이지 선택 해제
+        if (!table || typeof table.getSelectedRows !== "function" || typeof table.deselectRow !== "function") {
+            return;
+        }
+        var selectedRows = table.getSelectedRows();
+        if (!Array.isArray(selectedRows) || selectedRows.length === 0) {
+            return;
+        }
+        table.deselectRow();
+    }
+
     function refreshAllGridCounters() { // 전체 테이블 재계산
         trackedTables = trackedTables.filter(function (table) {
             if (!table) {
@@ -426,7 +437,10 @@
         wrapOptionCallback(nextOptions, "tableBuilt", updateGridCounter);
         wrapOptionCallback(nextOptions, "dataLoaded", updateGridCounter);
         wrapOptionCallback(nextOptions, "dataFiltered", updateGridCounter);
-        wrapOptionCallback(nextOptions, "pageLoaded", updateGridCounter);
+        wrapOptionCallback(nextOptions, "pageLoaded", function (table) {
+            updateGridCounter(table);
+            clearGridSelectionOnPageLoaded(table);
+        });
         wrapOptionCallback(nextOptions, "renderComplete", updateGridCounter);
 
         return nextOptions;
