@@ -1795,6 +1795,53 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
     margin: 0 !important;
 }
 
+
+#user-pwchange-area.modal-wrap.content { display:none; position:fixed; inset:0; z-index:1; background:rgba(17,24,39,0.45); padding:24px; box-sizing:border-box; }
+
+#user-pwchange-area .modal-container { margin:0 auto; background:#fff; border-radius:16px; box-shadow:0 20px 60px rgba(0,0,0,0.18); overflow:hidden; }
+
+#user-pwchange-area .modal-content { padding:16px 18px 0 18px; flex-direction: column; height: auto; }
+
+#user-pwchange-area .pw-notice { background:#f8fafc; border:1px solid #e5e7eb; border-radius:14px; padding:12px; }
+
+#user-pwchange-area .pw-notice__title { font-size:13px; font-weight:700; color:#111827; margin-bottom:6px; }
+
+#user-pwchange-area .pw-notice__desc { font-size:12px; color:#6b7280; line-height:1.5; }
+
+#user-pwchange-area .pw-chip-wrap { margin-top:10px; display:flex; flex-wrap:wrap; gap:6px; }
+
+#user-pwchange-area .pw-chip { font-size:12px; color:#374151; background:#ffffff; border:1px solid #e5e7eb; padding:4px 8px; border-radius:999px; }
+
+#user-pwchange-area .pw-article { padding:14px 0 0 0; }
+
+#user-pwchange-area .div-table { margin:0; }
+
+#user-pwchange-area .pw-form-list { list-style:none; padding:0; margin:0; display:grid; gap:12px; }
+
+#user-pwchange-area .table-col.fl-ac { display:block; padding: 10px 0; }
+
+#user-pwchange-area .table-cell { width:100%; }
+
+#user-pwchange-area .cell-tit { margin:0 0 6px 0; font-size:12px; font-weight:700; color:#374151; }
+
+#user-pwchange-area .cell-info { width:100%; }
+
+#user-pwchange-area input.text { width:100%; box-sizing:border-box; height:40px; padding:0 12px; border-radius:10px; font-size:13px; outline:none; color:#111827; background:#fff; border:1px solid #d1d5db; }
+
+#user-pwchange-area input.text[readonly] { border:1px solid #e5e7eb; background:#f9fafb; }
+
+#user-pwchange-area .pw-help { margin-top:6px; font-size:12px; color:#6b7280; line-height:1.4; }
+
+#user-pwchange-area .pw-error { margin-top:6px; font-size:12px; color:#ef4444; display:none; }
+
+#user-pwchange-area .modal-btn { padding:14px 18px 16px 18px; border-top:1px solid #e5e7eb; margin-top:16px; }
+
+#user-pwchange-area .pw-btn-list { list-style:none; padding:0; margin:0; display:flex; justify-content:flex-end; gap:10px; }
+
+#user-pwchange-area .btn.btn-close { min-width:90px; height:38px; padding:0 14px; border-radius:10px; border:1px solid #d1d5db; background:#fff; color:#374151; font-weight:700; cursor:pointer; }
+
+#user-pwchange-area .btn.btn-save { min-width:90px; height:38px; padding:0 14px; border-radius:10px; border:1px solid #ef4444; background:#ef4444; color:#fff; font-weight:800; cursor:pointer; }
+
 @media screen and (max-height: 800px) {
     .modal-container-detail {
         max-height: 80vh;
