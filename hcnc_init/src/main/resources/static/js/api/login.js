@@ -1,20 +1,16 @@
-function showPwChgModal() {
+function showPwChgModal(userid) {
     const modal = document.getElementById("user-pwchange-area");
     const id = document.getElementById("user_pwchg_id");
     const pw = document.getElementById("user_pwchg_hash");
 
-    if (LOGIN_PW_CHG.value === 'Y') {
-        id.value = LOGIN_USER_ID.value;
-        pw.value = "";
-        modal.classList.remove("show");
-        modal.style.display = "block";
-        modal.offsetHeight;
-        setTimeout(() => {
-            modal.classList.add("show");
-        }, 100);
-    }
-    else
-        return true;
+    id.value = userid;
+    pw.value = "";
+    modal.classList.remove("show");
+    modal.style.display = "block";
+    modal.offsetHeight;
+    setTimeout(() => {
+        modal.classList.add("show");
+    }, 100);
 }
 
 // 사용자 등록/수정 모달 닫기
