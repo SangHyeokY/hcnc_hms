@@ -637,7 +637,8 @@ function showAlert({ icon = 'info', title = '', text = '', confirmText = '확인
 function showLoading() {
     const $overlay = $("#loading-overlay");
     const $text = $overlay.find("p");
-    if (isSaving){
+
+    if (typeof isSaving !== "undefined" && isSaving) {
         $text.text("저장 중입니다...");
     } else {
         $text.text("로딩 중입니다...");

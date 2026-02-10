@@ -1535,36 +1535,39 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
     inset: 0;
     background: rgba(0, 0, 0, 0.45);
     z-index: 99999;
-    display: none;
+    display: flex;
     align-items: center;
     justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.25s ease, visibility 0.25s ease;
 }
 
 /* 로딩 활성화 */
 #loading-overlay.active {
-    display: flex;
+    opacity: 1;
+    visibility: visible;
 }
 
 /* 로딩 팝업 */
 #loading-overlay .loading-box {
     background: #fff;
-    padding: 24px 32px;
-    border-radius: 12px;
+    padding: 32px 44px;
+    border-radius: 14px;
     text-align: center;
     box-shadow: 0 8px 24px rgba(0,0,0,0.2);
 }
 
-/* 로딩 팝업 이미지 */
+/* 로딩 이미지 */
 #loading-overlay img {
-    width: 64px;
-    height: 64px;
+    width: 80px;
+    height: 80px;
 }
 
-/* 로딩 팝업 내 문구 */
+/* 로딩 문구 */
 #loading-overlay p {
     margin-top: 12px;
-    /* font-weight: 600; */
-    color: #333333;
+    color: #333;
     font-size: 20px;
 }
 

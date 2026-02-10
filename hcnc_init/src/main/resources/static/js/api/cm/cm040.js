@@ -12,7 +12,7 @@ var amountSuffixGroupCds = ["job_cd"];
 var pointSuffixGroupCds = ["rank", "grade", "grd_cd", "grade_cd"];
 
 // 저장/로딩중 팝업 표시 여부 플래그
-let isSaving = false;
+var isSaving = false;
 
 // 저장 성공 여부 플래그
 let isSuccess = false;
@@ -70,18 +70,37 @@ $(document).ready(function () {
             return;
         }
 
-        if (!confirm("현재 정렬순서를 저장 하시겠습니까?")) {
-            return;
-        }
+//        if (!confirm("현재 정렬순서를 저장 하시겠습니까?")) {
+//            return;
+//        }
 
         rows.forEach(function (rowData, index) {
             rowData.sort_no = index + 1;
         });
         applyDetailSort(rows);
-        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
-            icon: 'success',
-            title: '완료',
-            text: '정렬순서를 저장했습니다.'
+
+        showAlert({
+            icon: 'info',
+            title: '알림',
+            text: '현재 정렬순서를 저장하시겠습니까?',
+        }).then(result => {
+            if (!result.isConfirmed) return;
+
+            isSaving = true;
+            showLoading();
+
+            rows.forEach(function (rowData, index) {
+                rowData.sort_no = index + 1;
+            });
+
+            applyDetailSort(rows);
+
+            hideLoading();
+            showAlert({
+                icon: 'success',
+                title: '완료',
+                text: '정렬순서를 저장했습니다.'
+            });
         });
     });
 
@@ -296,6 +315,9 @@ function loadMainTableData() {
     var keyword = $.trim($("#searchKeyword").val());
     var useYn = getSearchUseYnValue();
 
+    isSaving = false;
+    showLoading(); // 로딩바 표시
+
     $.ajax({
         url: "/cm040/main/list",
         type: "GET",
@@ -316,6 +338,9 @@ function loadMainTableData() {
                 title: '오류',
                 text: `'코드그룹' 데이터를 불러오는 중 오류가 발생했습니다.`
             });
+        },
+        complete: function () {
+            hideLoading();
         }
     });
 }
@@ -333,6 +358,9 @@ function loadDetailTableData(grpCd) {
     }
     currentDetailGrpCd = String(grpCd).toLowerCase();
 
+     isSaving = false;
+     showLoading();
+
     $.ajax({
         url: "/cm040/detail/list",
         type: "GET",
@@ -346,6 +374,9 @@ function loadDetailTableData(grpCd) {
                 title: '오류',
                 text: `'상세코드' 데이터를 불러오는 중 오류가 발생했습니다.`
             });
+        },
+        complete: function () {
+            hideLoading();
         }
     });
 }

@@ -156,6 +156,8 @@ function loadUserTableData() {
 
     selectCommonCodesForUser();
 
+    showLoading();
+
     $.ajax({
         url: "/cm010/list",
         type: "GET",
@@ -174,6 +176,9 @@ function loadUserTableData() {
                 title: '오류',
                 text: '사용자 데이터를 불러오는 중 오류가 발생했습니다.'
             });
+        },
+        complete: function () {
+            hideLoading();
         }
     });
 
@@ -230,6 +235,8 @@ function upsertUserBtn() {
         return;
     }
 
+    showLoading();
+
     $.ajax({
         url: "/cm010/save",
         type: "POST",
@@ -269,6 +276,9 @@ function upsertUserBtn() {
                 title: '오류',
                 text: '저장 중 오류가 발생했습니다.'
             });
+        },
+        complete: function () {
+            hideLoading();
         }
     });
 }
@@ -343,6 +353,8 @@ function deleteUserRows() {
         return;
     }
 
+    showLoading();
+
     var pending = selectedRows.length;
     selectedRows.forEach(function (row) {
         $.ajax({
@@ -352,6 +364,7 @@ function deleteUserRows() {
             complete: function () {
                 pending -= 1;
                 if (pending === 0) {
+                    hideLoading();
                     loadUserTableData();
                     showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
                         icon: 'success',
