@@ -609,3 +609,41 @@ function createTagInput(config) {
         addByLabel: addByLabel
     };
 }
+
+/* =========================
+ * 공통 Swal 토스트(toast) 함수
+ * ========================= */
+function showAlert({ icon = 'info', title = '', text = '', confirmText = '확인' } = {}) {
+    return Swal.fire({
+        icon: icon,
+        title: title,
+        text: text,
+        showClass: { popup: '', backdrop: '' },
+        hideClass: { popup: '', backdrop: '' },
+        backdrop: true,
+        allowOutsideClick: false,
+        confirmButtonText: confirmText,
+        confirmButtonColor: icon === 'error' ? '#d33' : '#3085d6',
+//        showCancelButton: icon === 'warning', // 경고일 때만 취소 버튼
+//        cancelButtonText: '취소',
+//        cancelButtonColor: '#aaa',
+        scrollbarPadding: false
+    });
+}
+
+/* =========================
+ * 로딩바 표시 / 숨김
+ * ========================= */
+function showLoading() {
+    const $overlay = $("#loading-overlay");
+    const $text = $overlay.find("p");
+    if (isSaving){
+        $text.text("저장 중입니다...");
+    } else {
+        $text.text("로딩 중입니다...");
+    }
+    $overlay.addClass("active");
+}
+function hideLoading() {
+    $("#loading-overlay").removeClass("active");
+}

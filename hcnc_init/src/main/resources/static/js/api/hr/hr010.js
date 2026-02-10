@@ -6,9 +6,6 @@ var userTable;
 // 모드(insert: 등록 / update: 수정 / view: 상세조회)
 var currentMode = "insert";
 
-// 개발자ID
-window.currentDevId = null;
-
 // 주 개발언어 태그 입력 공통 모듈
 var mainLangTagInput = null;
 var pendingMainLangValue = "";
@@ -21,8 +18,18 @@ var ctrtTypOptions = [];
 var workMdMap = [];
 var workMdOptions = [];
 
+// '저장 완료' 알림 텍스트 저장
+var swalTitle = "";
+var swalText = "";
+
 // 탭 전체 입력/수정 여부 판단 => 전역 플래그
 let initTabs = false;
+
+// 저장/로딩중 팝업 표시 여부
+let isSaving = false;
+
+// 개발자ID
+window.currentDevId = null;
 
 // 탭 개별 입력/수정 여부 판단
 const changedTabs = {
@@ -32,15 +39,8 @@ const changedTabs = {
     tab4: false  // 4번째 Tab
 };
 
-// 저장/로딩중 팝업 표시 여부
-let isSaving = false;
-
 // 저장된 탭 alert 표시하기 위한 리스트
 const savedTabs = [];
-
-// 저장 완료 알림
-var swalTitle = "";
-var swalText = "";
 
 // ============================================================================== //
 
@@ -91,17 +91,10 @@ $(document).ready(async function () {
 
         // 이미지 파일만 허용
         if (!file.type.startsWith("image/")) {
-            Swal.fire({
-                icon: 'warning',
+            showAlert({
+                icon: 'error',
                 title: '업로드 오류',
-                text: '이미지 파일만 선택 가능합니다.',
-                showClass: { popup: '', backdrop: '' },
-                hideClass: { popup: '', backdrop: '' },
-                backdrop: true,
-                allowOutsideClick: false,
-                confirmButtonText: '확인',
-                confirmButtonColor: '#3085d6',
-                scrollbarPadding: false
+                text: '이미지 파일만 선택 가능합니다.'
             });
             return;
         }
@@ -130,7 +123,7 @@ $(document).ready(async function () {
 
     // 조회 버튼이벤트
     $(".btn-main-view").on("click", function () {
-        const rowData = btnEditView("상세히 조회할 ");
+        const rowData = btnEditView("상세정보를 조회할 ");
         if (!rowData) return;
         loadUserTableImgDataAsync(rowData);
         openUserModal("view", rowData);
@@ -207,20 +200,6 @@ $(document).ready(async function () {
         // 기본 유효성 검사
         if (!validateUserForm()) {
             console.log("인적사항 유효성 실패");
-
-            // 각 탭마다 유효성 검사 표시 다 적용시키고 난 뒤에, 이거 지우기
-            Swal.fire({
-                icon: 'warning',
-                title: '입력 오류',
-                text: '인적사항을 확인해주세요.',
-                showClass: { popup: '', backdrop: '' },
-                hideClass: { popup: '', backdrop: '' },
-                backdrop: true,
-                allowOutsideClick: false,
-                confirmButtonText: '확인',
-                confirmButtonColor: '#3085d6',
-                scrollbarPadding: false
-            });
             hideLoading();
             isSaving = false;
             return;
@@ -235,18 +214,11 @@ $(document).ready(async function () {
 
                 console.log("탭 유효성 실패");
 
-                // 각 탭마다 유효성 검사 표시 다 적용시키고 난 뒤에, 이거 수정하기
-                Swal.fire({
-                    icon: 'warning',
+                // 각 탭마다 유효성 검사 표시 다 적용시키고 난 뒤에, 이거 수정하기 !!!!!!!!!!!!!
+                showAlert({
+                    icon: 'error',
                     title: '입력 오류',
-                    text: '상세정보 입력란을 확인해주세요.',
-                    showClass: { popup: '', backdrop: '' },
-                    hideClass: { popup: '', backdrop: '' },
-                    backdrop: true,
-                    allowOutsideClick: false,
-                    confirmButtonText: '확인',
-                    confirmButtonColor: '#3085d6',
-                    scrollbarPadding: false
+                    text: '상세정보 입력란을 확인해주세요.'
                 });
                 hideLoading();
                 isSaving = false;
@@ -289,17 +261,10 @@ $(document).ready(async function () {
 
         } catch (e) {
             console.error(e);
-            Swal.fire({
+            showAlert({
                 icon: 'error',
                 title: '저장 실패',
-                text: '저장 중 오류가 발생했습니다.',
-                showClass: { popup: '', backdrop: '' },
-                hideClass: { popup: '', backdrop: '' },
-                backdrop: true,
-                allowOutsideClick: false,
-                confirmButtonText: '확인',
-                confirmButtonColor: '#d33',
-                scrollbarPadding: false
+                text: '저장 중 오류가 발생했습니다.'
             });
         } finally {
             // 테이블 리로드 & 로딩 숨김
@@ -309,17 +274,10 @@ $(document).ready(async function () {
             isSaving = false;
 
             // Swal로 알림
-            Swal.fire({
+            showAlert({
                 icon: 'success',
                 title: swalTitle,
                 text: swalText,
-                showClass: { popup: '', backdrop: '' },
-                hideClass: { popup: '', backdrop: '' },
-                backdrop: true,
-                allowOutsideClick: false,
-                confirmButtonText: '확인',
-                confirmButtonColor: '#3085d6',
-                scrollbarPadding: false
             });
 
             console.log("저장 작업 종료, 로딩 상태 :", isSaving); // false여야 정상
@@ -683,17 +641,10 @@ async function loadUserTableData() {
         // userTable.setData(response.res || []);
     } catch (e) {
         console.error(e);
-        Swal.fire({
-            icon: 'warning',
-            title: '조회 오류',
+        showAlert({
+            icon: 'error',
+            title: '조회 실패',
             text: '사용자 데이터를 불러오는 중 오류가 발생했습니다.',
-            showClass: { popup: '', backdrop: '' },
-            hideClass: { popup: '', backdrop: '' },
-            backdrop: true,
-            allowOutsideClick: false,
-            confirmButtonText: '확인',
-            confirmButtonColor: '#3085d6',
-            scrollbarPadding: false
         });
     }
 }
@@ -725,19 +676,12 @@ function loadUserTableImgDataAsync(data) {
             },
             error: function (e) {
                 console.error(e);
-                Swal.fire({
-                    icon: 'warning',
+                 showAlert({
+                    icon: 'error',
                     title: '프로필 이미지 오류',
                     text: '사용자 데이터를 불러오는 중 오류가 발생했습니다.',
-                    showClass: { popup: '', backdrop: '' },
-                    hideClass: { popup: '', backdrop: '' },
-                    backdrop: true,
-                    allowOutsideClick: false,
-                    confirmButtonText: '확인',
-                    confirmButtonColor: '#3085d6',
-                    scrollbarPadding: false
-                });
-                resolve(); // 에러여도 UI는 표시 가능하도록 resolve
+                 });
+                 resolve(); // 에러여도 UI는 표시 가능하도록 resolve
             }
         });
     });
@@ -792,7 +736,12 @@ function upsertUserBtn() {
 
             success: function (response) {
                 if (!response || response.success === false) {
-                    alert(response?.message || "저장에 실패했습니다.");
+                    console.log(response?.message || "저장에 실패했습니다.");
+                    showAlert({
+                        icon: 'error',
+                        title: '저장 실패',
+                        text: '저장 중 오류가 발생했습니다.'
+                    });
                     resolve(false);
                     return;
                 }
@@ -803,8 +752,13 @@ function upsertUserBtn() {
                 resolve(true);
             },
             error: function (xhr) {
-                alert("저장 중 오류가 발생했습니다.");
-                 reject(xhr);
+                console.log("저장 중 오류가 발생했습니다.");
+                showAlert({
+                    icon: 'error',
+                    title: '저장 실패',
+                    text: '저장 중 오류가 발생했습니다.'
+                });
+                reject(xhr);
             }
         });
 
@@ -824,22 +778,15 @@ function upsertUserBtn() {
 // ============================================================================== //
 
 // 데이터 삭제 요청 - toast 방식  추가해야될 사항(현재 삭제하겠냐는 문구에 잡힌 파라미터 수정 필요)
-function deleteUserRows() {
+async function deleteUserRows() {
     var selectedRows = userTable.getSelectedRows();
 
     // 선택 없음
     if (selectedRows.length === 0) {
-        Swal.fire({
-            title: '알림',
-            text: '삭제할 사용자를 선택해주세요.',
+        showAlert({
             icon: 'info',
-            showClass: { popup: '', backdrop: '' }, // 애니메이션 제거
-            hideClass: { popup: '', backdrop: '' },
-            backdrop: true,
-            allowOutsideClick: false,
-            confirmButtonText: '확인',
-            confirmButtonColor: '#3085d6',
-            scrollbarPadding: false
+            title: '알림',
+            text: '삭제할 사용자를 선택해주세요.'
         });
         return;
     }
@@ -848,86 +795,46 @@ function deleteUserRows() {
     var firstRowData = selectedRows[0].getData();
 
     // 1단계 확인 모달
-    Swal.fire({
+    const firstResult = await showAlert({
         title: `${firstRowData.dev_nm} 사용자 정보 삭제`,
         text: '삭제하시겠습니까?',
         icon: 'warning',
-        showClass: { popup: '', backdrop: '' },
-        hideClass: { popup: '', backdrop: '' },
-        backdrop: true,
-        allowOutsideClick: false,
-        showCancelButton: true,
-        confirmButtonText: '확인',
-        cancelButtonText: '취소',
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#aaa',
-        scrollbarPadding: false
-    }).then((firstResult) => {
-        if (!firstResult.isConfirmed) return;
+    });
+    if (!firstResult.isConfirmed) return;
 
-        // 2단계 최종 확인 모달
-        Swal.fire({
-            title: '정말로 삭제하시겠습니까?',
-            text: `${firstRowData.dev_nm} 사용자의 데이터가 삭제되며, 되돌릴 수 없습니다.`,
-            icon: 'warning',
-            showClass: { popup: '', backdrop: '' },
-            hideClass: { popup: '', backdrop: '' },
-            backdrop: true,
-            allowOutsideClick: false,
-            showCancelButton: true,
-            confirmButtonText: '삭제',
-            cancelButtonText: '취소',
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#aaa',
-            scrollbarPadding: false
-        }).then((secondResult) => {
-            if (!secondResult.isConfirmed) return;
+    const secondResult = await showAlert({
+        title: '정말로 삭제하시겠습니까?',
+        text: `${firstRowData.dev_nm} 사용자의 데이터가 삭제되며, 되돌릴 수 없습니다.`,
+        icon: 'warning',
+    });
+    if (!secondResult.isConfirmed) return;
 
-            // 실제 삭제 Ajax 호출
-            var pending = selectedRows.length;
+    // 실제 삭제 Ajax 호출
+    var pending = selectedRows.length;
 
-            selectedRows.forEach(function (row) {
-                $.ajax({
-                    url: "/hr010/delete",
-                    type: "POST",
-                    data: { dev_id: row.getData().dev_id },
-                    success: function () {
-                        pending -= 1;
-                        if (pending === 0) {
-                            loadUserTableData();
-
-                            Swal.fire({
-                                icon: 'success',
-                                title: '삭제 완료',
-                                text: '선택한 사용자가 삭제되었습니다.',
-                                toast: false,                     // 일반 팝업처럼 크게
-                                showClass: { popup: '', backdrop: '' }, // 애니메이션 제거
-                                hideClass: { popup: '', backdrop: '' },
-                                backdrop: true,                   // 배경 어둡게
-                                allowOutsideClick: false,         // 배경 클릭 시 닫히지 않음
-                                confirmButtonText: '확인',        // 확인 버튼 표시
-                                confirmButtonColor: '#3085d6',
-                                scrollbarPadding: false           // 화면 밀림 방지
-                            });
-                        }
-                    },
-                    error: function () {
-                        Swal.fire({
-                            icon: 'error',
-                            title: '삭제 실패',
-                            text: '삭제 중 오류가 발생했습니다.',
-                            toast: false,                     // 일반 팝업처럼 크게
-                            showClass: { popup: '', backdrop: '' }, // 애니메이션 제거
-                            hideClass: { popup: '', backdrop: '' },
-                            backdrop: true,                   // 배경 어둡게
-                            allowOutsideClick: false,         // 배경 클릭 시 닫히지 않음
-                            confirmButtonText: '확인',        // 확인 버튼 표시
-                            confirmButtonColor: '#3085d6',
-                            scrollbarPadding: false           // 화면 밀림 방지
-                        });
-                    }
+    selectedRows.forEach(function (row) {
+        $.ajax({
+            url: "/hr010/delete",
+            type: "POST",
+            data: { dev_id: row.getData().dev_id },
+            success: function () {
+                pending -= 1;
+                if (pending === 0) {
+                    loadUserTableData();
+                    showAlert({
+                        icon: 'success',
+                        title: '삭제 완료',
+                        text: `${firstRowData.dev_nm} 사용자의 데이터가 삭제되었습니다.`
+                    });
+                }
+            },
+            error: function () {
+                showAlert({
+                    icon: 'error',
+                    title: '삭제 실패',
+                    text: '삭제 중 오류가 발생했습니다.'
                 });
-            });
+            }
         });
     });
 }
@@ -1240,35 +1147,55 @@ function validateUserForm() {
 
     // 개발자 이름
     if (!dev_nm) {
-        alert("성명을 입력하세요.");
+        showAlert({
+            icon: 'warning',
+            title: '인적사항 미입력',
+            text: '성명을 입력하세요.'
+        });
         $("#dev_nm").focus();
         return false;
     }
 
     // 생년월일
     if (!brdt) {
-        alert("생년월일을 입력하세요.");
+        showAlert({
+            icon: 'warning',
+            title: '인적사항 미입력',
+            text: '생년월일을 입력하세요.'
+        });
         $("#brdt").focus();
         return false;
     }
 
     // 전화번호
     if (!tel) {
-        alert("연락처를 입력하세요.");
+        showAlert({
+            icon: 'warning',
+            title: '인적사항 미입력',
+            text: '연락처를 입력하세요.'
+        });
         $("#tel").focus();
         return false;
     }
 
     // 전화번호 (숫자만 입력)
     if (!/^[0-9\-]+$/.test(tel)) {
-        alert("연락처 형식이 올바르지 않습니다.");
+        showAlert({
+            icon: 'warning',
+            title: '인적사항 미입력',
+            text: '연락처 형식이 올바르지 않습니다.'
+        });
         $("#tel").focus();
         return false;
     }
 
     // 이메일
     if (!email) {
-        alert("이메일을 입력하세요.");
+        showAlert({
+            icon: 'warning',
+            title: '인적사항 미입력',
+            text: '이메일을 입력하세요.'
+        });
         $("#email").focus();
         return false;
     }
@@ -1277,14 +1204,22 @@ function validateUserForm() {
         /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
 
     if (!emailRegex.test(email)) {
-        alert("이메일 형식이 올바르지 않습니다.");
+        showAlert({
+            icon: 'warning',
+            title: '인적사항 미입력',
+            text: '이메일 형식이 올바르지 않습니다.'
+        });
         $("#email").focus();
         return false;
     }
 
     // 경력연차
     if (expYrYear === "" || expYrMonth === "") {
-        alert("경력연차(년/개월)를 입력하세요.");
+        showAlert({
+            icon: 'warning',
+            title: '인적사항 미입력',
+            text: '경력연차(년/개월)를 입력하세요.'
+        });
         if (expYrYear === "") {
             $("#exp_yr_year").focus();
         } else {
@@ -1293,7 +1228,11 @@ function validateUserForm() {
         return false;
     }
     if (!/^\d+$/.test(expYrYear) || !/^\d+$/.test(expYrMonth)) {
-        alert("경력연차는 숫자만 입력 가능합니다.");
+        showAlert({
+            icon: 'warning',
+            title: '인적사항 미입력',
+            text: '경력연차(년/개월)를 입력하세요.'
+        });
         $("#exp_yr_year").focus();
         return false;
     }
@@ -1301,7 +1240,11 @@ function validateUserForm() {
     var expYearNum = Number(expYrYear);
     var expMonthNum = Number(expYrMonth);
     if (expYearNum < 0 || expYearNum > 99 || expMonthNum < 0 || expMonthNum > 99) {
-        alert("경력연차의 년/개월은 0~99 범위로 입력하세요.");
+        showAlert({
+            icon: 'warning',
+            title: '인적사항 미입력',
+            text: '경력연차의 년/개월은 0~99 범위로 입력하세요.'
+        });
         $("#exp_yr_year").focus();
         return false;
     }
@@ -1310,47 +1253,75 @@ function validateUserForm() {
 
     // 최종학력
     if (!eduLast) {
-        alert("최종학력을 입력하세요.");
+        showAlert({
+            icon: 'warning',
+            title: '인적사항 미입력',
+            text: '최종학력을 입력하세요.'
+        });
         $("#edu_last").focus();
         return false;
     }
 
     // 소속 구분
     if (!devType || devType == "") {
-        alert("소속을 선택해주세요.");
+        showAlert({
+            icon: 'warning',
+            title: '인적사항 미입력',
+            text: '소속을 선택해주세요.'
+        });
         $("#dev_type").focus();
         return false;
     }
 
     // 근무 가능 형태
     if (!workMd || workMd == "") {
-        alert("근무형태를 선택해주세요.");
+        showAlert({
+            icon: 'warning',
+            title: '인적사항 미입력',
+            text: '근무형태를 선택해주세요.'
+        });
         $("#select_work_md").focus();
         return false;
     }
 
     // 희망단가
     if (!hopeRaw) {
-        alert("희망단가를 입력해주세요.");
+        showAlert({
+            icon: 'warning',
+            title: '인적사항 미입력',
+            text: '희망단가를 입력해주세요.'
+        });
         $("#hope_rate_amt").focus();
         return false;
     }
     if (Number(hopeRaw) > MAX_AMT) {
-        alert("희망단가는 최대 999,999,999원까지 입력 가능합니다.");
+        showAlert({
+            icon: 'warning',
+            title: '인적사항 미입력',
+            text: '희망단가는 최대 999,999,999원까지 입력 가능합니다.'
+        });
         $("#hope_rate_amt").focus();
         return false;
     }
 
     // 투입 가능일
     if (!availDt) {
-        alert("투입 가능 시점을 입력하세요.");
+        showAlert({
+            icon: 'warning',
+            title: '인적사항 미입력',
+            text: '투입 가능 시점을 입력하세요.'
+        });
         $("#avail_dt").focus();
         return false;
     }
 
     // 계약 형태
     if (!ctrtTyp || ctrtTyp == "") {
-        alert("계약 형태를 선택해주세요.");
+        showAlert({
+            icon: 'warning',
+            title: '인적사항 미입력',
+            text: '계약 형태를 선택해주세요.'
+        });
         $("#select_ctrt_typ").focus();
         return false;
     }
@@ -1470,14 +1441,19 @@ function fetchUserScore(devId) {
 function btnEditView(alertPrefix = "") {
     if (!userTable) return null;
     const rows = userTable.getSelectedRows();
-    if (rows.length === 0) {
-        alert(alertPrefix + "대상을 선택하세요.");
-        return null;
-    }
-    if (rows.length > 1) {
-        alert(alertPrefix + "한 명만 선택해주세요.");
-        return null;
-    }
+    const prefix = alertPrefix || "";
+    if (rows.length !== 1) {
+            showAlert({
+                icon: 'warning',
+                title: '대상 선택 없음',
+                text:
+                    prefix +
+                    (rows.length === 0
+                        ? '대상을 선택하세요.'
+                        : '한 명만 선택해주세요.')
+            });
+            return null;
+        }
     return rows[0].getData();
 }
 
@@ -1609,27 +1585,14 @@ if (excelBtn) {
         const devId = document.getElementById("dev_id").value;
         const devNm = document.getElementById("dev_nm").value;
         if (!devId) {
-            alert("오류 : 개발자ID가 없습니다.");
+            showAlert({
+                icon: 'error',
+                title: '엑셀 다운로드 오류',
+                text: '개발자ID가 없습니다.'
+            });
             return;
         }
         location.href =
             `/common/getExcel?dev_id=${encodeURIComponent(devId)}&dev_nm=${encodeURIComponent(devNm)}`;
     });
-}
-
-// 로딩바 표시
-function showLoading() {
-    const $overlay = $("#loading-overlay");
-    const $text = $overlay.find("p");
-    if (isSaving){
-        $text.text("저장 중입니다...");
-    } else {
-        $text.text("로딩 중입니다...");
-    }
-    $overlay.addClass("active");
-}
-
-// 로딩바 숨김
-function hideLoading() {
-    $("#loading-overlay").removeClass("active");
 }
