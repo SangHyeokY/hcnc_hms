@@ -4,6 +4,23 @@
 
 <th:block th:fragment="tab3Content">
     <div class="content list-area tab3-content">
+        <div class="tab-actions" data-tab="tab3">
+            <div class="btn-area">
+                <button type="button" onclick="location.href='/templates/ExcelUpload_Temp.xlsx'">
+                    <img src="./images/common/btn-ico-download.png" alt="엑셀 양식 다운로드">엑셀 양식 다운로드
+                </button>
+                <input type="file" id="excelFile" style="display: none" accept=".xls,.xlsx"/>
+                <button type="button" id="btnUpload">
+                    <img src="./images/common/btn-ico-upload.png" alt="엑셀 파일 업로드">엑셀 파일 업로드
+                </button>
+                <button type="button" class="btn btn-tab3-add">
+                    <img src="./images/common/btn-ico-plus.png" alt="등록">등록
+                </button>
+                <button type="button" class="btn btn-tab3-remove">
+                    <img src="./images/common/btn-ico-minus.png" alt="삭제">삭제
+                </button>
+            </div>
+        </div>
         <div class="content-body">
             <!-- Tab3 내용 -->
             <div id="TABLE_HR013_A"></div>

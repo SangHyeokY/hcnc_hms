@@ -49,8 +49,8 @@
     </div>
 
     <!-- ================= 모달 ================= -->
-    <div class="modal-wrap" id="view-user-area" style="display:none">
-        <div class="modal-container-detail">
+    <div class="modal-wrap " id="view-user-area" style="display:none">
+        <div class="modal-container-detail main-human-modal">
 
             <!-- header -->
             <div class="header">
@@ -63,7 +63,7 @@
             </div>
 
             <!-- modal-content -->
-            <div class="modal-content">
+            <div class="modal-content hr010-main-pop">
 
                 <!-- ================= 상단 인적사항 ================= -->
                 <div class="top-article">
@@ -75,11 +75,12 @@
                     <div class="modal-human-area fl-sa" id="TABLE_HR010_B">
                         <div class="table-area">
                             <table>
+                                <tr class="hidden"><th>직원코드</th><td><div class="fl-ct wp100 fs16 none_editable_text" id="dev_id_input"></div></td></tr>
                                 <tr>
                                     <th>성명</th>
                                     <td colspan="2"><input type="text" class="wp100" id="dev_nm" disabled></td>
                                     <td>
-                                        <select id="dev_type" class="wp100">
+                                        <select id="dev_type" class="wp100 dev-type">
                                             <option value="">프리랜서/직원</option>
                                             <option value="HCNC_F">프리랜서</option>
                                             <option value="HCNC_S">직원</option>
@@ -87,52 +88,37 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <th>직원아이디</th>
-                                    <td colspan="3">
-                                        <div class="fl-ct wp100 fs16 none_editable_text" id="dev_id_input"></div>
-                                    </td>
-                                </tr>
-                                <tr>
                                     <th>생년월일</th>
-                                    <td><input type="date" class="wp100" id="brdt"></td>
-                                    <td colspan="2" rowspan="4">
+                                    <td colspan="2" ><input type="date" class="wp100" id="brdt"></td>
+                                    <td rowspan="4">
                                         <div class="pic-area fd-col">
                                             <div class="profile-area">
                                                 <img id="dev_img" src="" alt="profile" />
-                                            </div>
-                                            <div class="upload">
-                                                <input id="fileProfile" type="file" class="file">
-                                                <button type="button" class="showingbtn">사진 업로드</button>
+                                                <div class="upload">
+                                                    <input id="fileProfile" type="file" class="file">
+                                                </div>
                                             </div>
                                         </div>
                                     </td>
                                 </tr>
                                 <tr>
                                     <th>연락처</th>
-                                    <td><input type="text" class="wp100" id="tel" disabled></td>
+                                    <td colspan="2" ><input type="text" class="wp100" id="tel" disabled></td>
                                 </tr>
                                 <tr>
                                     <th>이메일</th>
-                                    <td><input type="email" class="wp100" id="email" disabled></td>
+                                    <td colspan="2" ><input type="email" class="wp100" id="email" disabled></td>
                                 </tr>
                                 <tr>
                                     <th>거주지역</th>
-                                    <td><input type="text" class="wp100" id="region" disabled></td>
+                                    <td colspan="2" ><input type="text" class="wp100" id="region" disabled></td>
                                 </tr>
                                 <tr>
-                                    <th>주개발언어</th>
+                                    <th>
+                                        근무가능형태
+                                    </th>
                                     <td>
-                                        <div class="tag-input">
-                                            <div class="tag-input-box">
-                                                <div class="tag-help"></div>
-                                                <ul class="tag-list" id="mainLangTagList"></ul>
-                                            </div>
-                                            <div class="tag-select-row">
-                                                <button type="button" class="btn btn-add-skill btn-main-lang-picker" id="btn_main_lang_picker">기술 선택</button>
-                                                <input type="hidden" id="main_lang">
-                                                <select id="main_lang_select" style="display:none"></select>
-                                            </div>
-                                        </div>
+                                        <select id="select_work_md" class="wp100"></select>
                                     </td>
                                     <th rowspan="3">등급</th>
                                     <td rowspan="3">
@@ -319,8 +305,24 @@
                                     <td colspan="3"><input type="text" class="wp100" id="cert_txt" disabled></td>
                                 </tr>
                                 <tr>
-                                    <th>근무가능형태</th>
-                                    <td colspan="3"><select id="select_work_md" class="wp100"></select></td>
+                                    <th>
+                                        <div class="fd-col fl-ac">
+                                        <p>주개발언어</p>
+                                        <div class="tag-select-row">
+                                            <button type="button" class="btn btn-add-skill btn-main-lang-picker" id="btn_main_lang_picker">기술 선택</button>
+                                            <input type="hidden" id="main_lang">
+                                            <select id="main_lang_select" style="display:none"></select>
+                                        </div>
+                                        </div>
+                                    </th>
+                                    <td colspan="3">
+                                        <div class="tag-input">
+                                            <div class="tag-input-box">
+                                                <div class="tag-help"></div>
+                                                <ul class="tag-list" id="mainLangTagList"></ul>
+                                            </div>
+                                        </div>
+                                    </td>
                                 </tr>
                                 <tr>
                                     <th>단가</th>
@@ -341,38 +343,15 @@
 
                 <!-- ================= 탭 영역 ================= -->
                 <div class="tab-article">
-                    <div class="fl-ac title-area mg-t15">
+                    <div class="fl-ac title-area">
                         <h5 class="mg-r5">상세정보</h5>
                     </div>
                     <!-- 좌측 -->
-                    <div class="tab-area mg-b15">
-                        <span class="tab-btn fs13 active" data-tab="tab1">소속 및 계약정보</span>
-                        <span class="tab-btn fs13" data-tab="tab2">보유역량 및 숙련도</span>
-                        <span class="tab-btn fs13" data-tab="tab3">프로젝트</span>
-                        <span class="tab-btn fs13" data-tab="tab4">평가 및 리스크</span>
-                    </div>
-
-                    <div class="tab-action-bar">
-                        <div class="tab-actions" data-tab="tab1"></div>
-                        <div class="tab-actions" data-tab="tab2"></div>
-                        <div class="tab-actions" data-tab="tab3">
-                            <div class="btn-area">
-                                <button type="button" onclick="location.href='/templates/ExcelUpload_Temp.xlsx'">
-                                    <img src="./images/common/btn-ico-download.png" alt="엑셀 양식 다운로드">엑셀 양식 다운로드
-                                </button>
-                                <input type="file" id="excelFile" style="display: none" accept=".xls,.xlsx"/>
-                                <button type="button" id="btnUpload">
-                                    <img src="./images/common/btn-ico-upload.png" alt="엑셀 파일 업로드">엑셀 파일 업로드
-                                </button>
-                                <button type="button" class="btn btn-tab3-add">
-                                    <img src="./images/common/btn-ico-plus.png" alt="등록">등록
-                                </button>
-                                <button type="button" class="btn btn-tab3-remove">
-                                    <img src="./images/common/btn-ico-minus.png" alt="삭제">삭제
-                                </button>
-                            </div>
-                        </div>
-                        <div class="tab-actions" data-tab="tab4"></div>
+                    <div class="tab-area">
+                        <span class="tab-btn active" data-tab="tab1">소속 및 계약정보</span>
+                        <span class="tab-btn" data-tab="tab2">보유역량 및 숙련도</span>
+                        <span class="tab-btn" data-tab="tab3">프로젝트</span>
+                        <span class="tab-btn" data-tab="tab4">평가 및 리스크</span>
                     </div>
 
                     <div class="tab-content">

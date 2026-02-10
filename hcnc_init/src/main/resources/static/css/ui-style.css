@@ -44,6 +44,7 @@
  .subtabs .subtab-m:nth-child(5) .num {background-color: #ECEFFF; color:#364CC5; }
  .subtabs .subtab-m:nth-child(6) .num {background-color: #FFF3F8; color:#FF0066; } */
  .subtab-content {display: none; width: 100%; height: calc(100% - 40px);}
+
  .subtab-content.active {display: block; background-color: #fff; padding:20px; border-radius: 0 8px 8px 8px; border:1px solid #E0E3E8; margin-bottom:20px;}
  .sanctner {position: relative; color:#0184E4; margin-left: 10px;}
  .sanctner::before {content: ''; position: absolute; top: -8px; left: -12px; display: inline-block; width: 6px; height: 6px; background-color: #0184E4; border-radius: 10px; margin: 7px 4px;}
