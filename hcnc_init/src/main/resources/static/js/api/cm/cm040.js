@@ -538,13 +538,13 @@ function upsertMainBtn() {
                 closeMainWriteModal();
                 loadMainTableData();
                 showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
-                    icon: 'success",
+                    icon: 'success',
                     title: '완료',
                     text: '저장되었습니다.'
                 });
             } else {
                 showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
-                    icon: 'error",
+                    icon: 'error',
                     title: '오류',
                     text: '저장에 실패했습니다.'
                 });
@@ -552,7 +552,7 @@ function upsertMainBtn() {
         },
         error: function () {
             showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
-                icon: 'error",
+                icon: 'error',
                 title: '오류',
                 text: '저장 중 오류가 발생했습니다.'
             });
@@ -570,7 +570,7 @@ function upsertDetailBtn() {
 
     if (!grpCd) {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
-            icon: 'warning",
+            icon: 'warning',
             title: '경고',
             text: `'코드그룹'을 선택해주세요.`
         });
@@ -579,7 +579,7 @@ function upsertDetailBtn() {
 
     if (detailMode !== "insert" && !cd) {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
-            icon: 'warning",
+            icon: 'warning',
             title: '경고',
             text: `'코드'를 입력해주세요.`
         });
@@ -589,7 +589,7 @@ function upsertDetailBtn() {
 
     if (!cdNm) {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
-            icon: 'warning",
+            icon: 'warning',
             title: '경고',
             text: `'코드명'을 입력해주세요.`
         });
@@ -599,7 +599,7 @@ function upsertDetailBtn() {
 
     if (!sortNo || sortNo < 1) {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
-            icon: 'warning",
+            icon: 'warning',
             title: '경고',
             text: `'정렬순서'를 입력해주세요.`
         });
@@ -633,7 +633,7 @@ function upsertDetailBtn() {
                 closeDetailWriteModal();
                 loadDetailTableData(grpCd);
                 showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
-                    icon: 'success",
+                    icon: 'success',
                     title: '완료',
                     text: '저장되었습니다.'
                 });
@@ -647,7 +647,7 @@ function upsertDetailBtn() {
         },
         error: function () {
             showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
-                icon: 'error",
+                icon: 'error',
                 title: '오류',
                 text: '저장 중 오류가 발생했습니다.'
             });
@@ -670,7 +670,7 @@ function openMainWriteModal(type) {
         var selectedRows = mainTable.getSelectedRows();
         if (selectedRows.length === 0) {
             showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
-                icon: 'info",
+                icon: 'info',
                 title: '알림',
                 text: `수정할 '코드그룹'을 선택해주세요.`
             });
@@ -678,7 +678,7 @@ function openMainWriteModal(type) {
         }
         if (selectedRows.length > 1) {
             showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
-                icon: 'info",
+                icon: 'info',
                 title: '알림',
                 text: '수정은 한 개만 선택해주세요.'
             });
@@ -716,7 +716,7 @@ function openDetailWriteModal(type) {
 
     if (!detailTable || typeof detailTable.getData !== "function") {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
-            icon: 'warning",
+            icon: 'warning',
             title: '경고',
             text: `'상세 테이블'이 초기화되지 않았습니다.`
         });
@@ -726,7 +726,7 @@ function openDetailWriteModal(type) {
     if (type === "insert") {
         if (!mainTable || typeof mainTable.getSelectedRows !== "function") {
             showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
-                icon: 'warning",
+                icon: 'warning',
                 title: '경고',
                 text: `'코드그룹 테이블'이 초기화되지 않았습니다.`
             });
@@ -736,7 +736,7 @@ function openDetailWriteModal(type) {
         var selectedMain = mainTable.getSelectedRows();
         if (selectedMain.length === 0) {
             showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
-                icon: 'warning",
+                icon: 'warning',
                 title: '경고',
                 text: `'코드그룹'을 먼저 선택해주세요.`
             });
@@ -762,7 +762,7 @@ function openDetailWriteModal(type) {
         var selectedDetail = detailTable.getSelectedRows();
         if (selectedDetail.length === 0) {
             showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
-                icon: 'info",
+                icon: 'info',
                 title: '알림',
                 text: `수정할 '상세코드'를 선택해주세요.`
             });
@@ -770,7 +770,7 @@ function openDetailWriteModal(type) {
         }
         if (selectedDetail.length > 1) {
             showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
-                icon: 'info",
+                icon: 'info',
                 title: '알림',
                 text: '수정은 한 개만 선택해주세요.'
             });
