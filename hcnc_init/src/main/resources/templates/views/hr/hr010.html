@@ -73,130 +73,130 @@
                     </div>
 
                     <div class="modal-human-area fl-sa" id="TABLE_HR010_B">
-                        <!-- 사진 -->
-                        <div class="pic-area fd-col">
-                            <div class="profile-area">
-                                <img id="dev_img" src="" alt="profile" />
-                            </div>
-                            <div class="upload">
-                                <input id="fileProfile" type="file" class="file">
-                                <button type="button" class="showingbtn">사진 업로드</button>
-                            </div>
-                        </div>
-
-                        <!-- 테이블 -->
                         <div class="table-area">
                             <table>
-                                <colgroup>
-                                    <col style="width: 13%;">
-                                    <col style="width: 20%;">
-                                    <col style="width: 13%;">
-                                    <col style="width: 20%;">
-                                    <col style="width: 13%;">
-                                    <col style="width: 20%;">
-                                </colgroup>
-                                <tbody>
-                                    <tr>
-                                        <th>성명</th>
-                                        <td><input type="text" class="wp100" id="dev_nm" disabled></td>
-                                        <th>개발자ID</th>
-                                        <td><div class="fl-ct wp100 fs16 none_editable_text" id="dev_id_input"></div></td>
-                                        <th>생년월일</th>
-                                        <td><input type="date" class="wp100" id="brdt"></td>
-                                    </tr>
-                                    <tr>
-                                        <th>연락처</th>
-                                        <td><input type="text" class="wp100" id="tel" disabled></td>
-                                        <th>이메일</th>
-                                        <td><input type="email" class="wp100" id="email" disabled></td>
-                                        <th>거주지역</th>
-                                        <td><input type="text" class="wp100" id="region" disabled></td>
-                                    </tr>
-                                    <tr>
-                                        <th>경력연차</th>
-                                        <td class="career-exp-cell">
-                                            <div class="career-spin-wrap">
-                                                <div class="career-spin-field">
-                                                    <input type="number" class="career-spin-input" id="exp_yr_year" min="0" max="99" step="1" value="0" disabled>
-                                                    <div class="career-spin-buttons">
-                                                        <button type="button" class="career-spin-btn" data-target="#exp_yr_year" data-step="1" aria-label="경력연차 년 증가">▲</button>
-                                                        <button type="button" class="career-spin-btn" data-target="#exp_yr_year" data-step="-1" aria-label="경력연차 년 감소">▼</button>
-                                                    </div>
-                                                </div>
-                                                <span>년</span>
-                                                <div class="career-spin-field">
-                                                    <input type="number" class="career-spin-input" id="exp_yr_month" min="0" max="12" step="1" value="0" disabled>
-                                                    <div class="career-spin-buttons">
-                                                        <button type="button" class="career-spin-btn" data-target="#exp_yr_month" data-step="1" aria-label="경력연차 개월 증가">▲</button>
-                                                        <button type="button" class="career-spin-btn" data-target="#exp_yr_month" data-step="-1" aria-label="경력연차 개월 감소">▼</button>
-                                                    </div>
-                                                </div>
-                                                <span>개월</span>
-                                                <input type="hidden" id="exp_yr">
+                                <tr>
+                                    <th>성명</th>
+                                    <td colspan="2"><input type="text" class="wp100" id="dev_nm" disabled></td>
+                                    <td>
+                                        <select id="dev_type" class="wp100">
+                                            <option value="">프리랜서/직원</option>
+                                            <option value="HCNC_F">프리랜서</option>
+                                            <option value="HCNC_S">직원</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>직원아이디</th>
+                                    <td colspan="3">
+                                        <div class="fl-ct wp100 fs16 none_editable_text" id="dev_id_input"></div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>생년월일</th>
+                                    <td><input type="date" class="wp100" id="brdt"></td>
+                                    <td colspan="2" rowspan="4">
+                                        <div class="pic-area fd-col">
+                                            <div class="profile-area">
+                                                <img id="dev_img" src="" alt="profile" />
                                             </div>
-                                            <span id="exp_yr_text" class="career-exp-text"></span>
-                                        </td>
-                                        <th>최종학력</th>
-                                        <td><input type="text" class="wp100" id="edu_last" disabled></td>
-                                        <th>보유 자격증</th>
-                                        <td><input type="text" class="wp100" id="cert_txt" disabled></td>
-                                    </tr>
-                                    <tr>
-                                        <th>소속 구분</th>
-                                        <td>
-                                            <select id="dev_type" class="wp100">
-                                                <option value="">프리랜서/직원</option>
-                                                <option value="HCNC_F">프리랜서</option>
-                                                <option value="HCNC_S">직원</option>
-                                            </select>
-                                        </td>
-                                        <th>등급</th>
-                                        <td>
-                                            <div class="fl-ct fl-ac wp100">
-                                                <span class="fs16" id="grade"></span>
-                                                <div id="aboutGrade">
-                                                    <img src="../icons/ico-support.png" alt="상세보기" />
-                                                    <div class="tooltip">
-                                                        등급은 점수 기반으로 자동 산정됩니다.<br>
-                                                        프로젝트, 숙련도, 평가 점수가 반영됩니다.<br>
-                                                        테스트 텍스트
-                                                    </div>
+                                            <div class="upload">
+                                                <input id="fileProfile" type="file" class="file">
+                                                <button type="button" class="showingbtn">사진 업로드</button>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>연락처</th>
+                                    <td><input type="text" class="wp100" id="tel" disabled></td>
+                                </tr>
+                                <tr>
+                                    <th>이메일</th>
+                                    <td><input type="email" class="wp100" id="email" disabled></td>
+                                </tr>
+                                <tr>
+                                    <th>거주지역</th>
+                                    <td><input type="text" class="wp100" id="region" disabled></td>
+                                </tr>
+                                <tr>
+                                    <th>주개발언어</th>
+                                    <td>
+                                        <div class="tag-input">
+                                            <div class="tag-input-box">
+                                                <div class="tag-help"></div>
+                                                <ul class="tag-list" id="mainLangTagList"></ul>
+                                            </div>
+                                            <div class="tag-select-row">
+                                                <button type="button" class="btn btn-add-skill btn-main-lang-picker" id="btn_main_lang_picker">기술 선택</button>
+                                                <input type="hidden" id="main_lang">
+                                                <select id="main_lang_select" style="display:none"></select>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <th rowspan="3">등급</th>
+                                    <td rowspan="3">
+                                        <div class="fl-ct wp100">
+                                            <span class="fs16" id="grade"></span>
+                                            <div id="aboutGrade">
+                                                <img src="../icons/ico-support.png" alt="상세보기" />
+                                                <div class="tooltip">
+                                                    등급은 점수 기반으로 자동 산정됩니다.<br>
+                                                    프로젝트, 숙련도, 평가 점수가 반영됩니다.<br>
+                                                    테스트 텍스트
                                                 </div>
                                             </div>
-                                        </td>
-                                        <th>근무 가능 형태</th>
-                                        <td><select id="select_work_md" class="wp100"></select></td>
-                                    </tr>
-                                    <tr>
-                                        <th>희망단가</th>
-                                        <td><input type="text" class="wp100" id="hope_rate_amt" disabled></td>
-                                        <th>투입 가능 시점</th>
-                                        <td><input type="date" class="wp100" id="avail_dt"></td>
-                                        <th>계약 형태</th>
-                                        <td><select id="select_ctrt_typ" class="wp100"></select></td>
-                                    </tr>
-                                    <tr style="height: 45px;">
-                                        <th>주 개발언어</th>
-                                        <td colspan="5">
-                                            <div class="tag-input">
-                                                <div class="tag-input-box">
-                                                    <!-- <input type="text" class="wp100 tag-input-field"
-                                                        id="main_lang_input"
-                                                        placeholder=""
-                                                        readonly /> -->
-                                                    <div class="tag-help"></div>
-                                                    <ul class="tag-list" id="mainLangTagList"></ul>
-
-                                                </div>
-                                                <div class="tag-select-row">
-                                                    <button type="button" class="btn btn-add-skill btn-main-lang-picker" id="btn_main_lang_picker">기술 선택</button>
-                                                    <input type="hidden" id="main_lang">
-                                                    <select id="main_lang_select" style="display:none"></select>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>경력연차</th>
+                                    <td>
+                                        <div class="career-spin-wrap">
+                                            <div class="career-spin-field">
+                                                <input type="number" class="career-spin-input" id="exp_yr_year" min="0" max="99" step="1" value="0" disabled>
+                                                <div class="career-spin-buttons">
+                                                    <button type="button" class="career-spin-btn" data-target="#exp_yr_year" data-step="1" aria-label="경력연차 년 증가">▲</button>
+                                                    <button type="button" class="career-spin-btn" data-target="#exp_yr_year" data-step="-1" aria-label="경력연차 년 감소">▼</button>
                                                 </div>
                                             </div>
-                                        </td>
-                                    </tr>
-                                </tbody>
+                                            <span>년</span>
+                                            <div class="career-spin-field">
+                                                <input type="number" class="career-spin-input" id="exp_yr_month" min="0" max="99" step="1" value="0" disabled>
+                                                <div class="career-spin-buttons">
+                                                    <button type="button" class="career-spin-btn" data-target="#exp_yr_month" data-step="1" aria-label="경력연차 개월 증가">▲</button>
+                                                    <button type="button" class="career-spin-btn" data-target="#exp_yr_month" data-step="-1" aria-label="경력연차 개월 감소">▼</button>
+                                                </div>
+                                            </div>
+                                            <span>개월</span>
+                                            <input type="hidden" id="exp_yr">
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>최종학력</th>
+                                    <td><input type="text" class="wp100" id="edu_last" disabled></td>
+                                </tr>
+                                <tr>
+                                    <th>보유자격증</th>
+                                    <td colspan="3"><input type="text" class="wp100" id="cert_txt" disabled></td>
+                                </tr>
+                                <tr>
+                                    <th>근무가능형태</th>
+                                    <td colspan="3"><select id="select_work_md" class="wp100"></select></td>
+                                </tr>
+                                <tr>
+                                    <th>단가</th>
+                                    <td colspan="3"><input type="text" class="wp100" id="hope_rate_amt" disabled></td>
+                                </tr>
+                                <tr>
+                                    <th>투입가능시점</th>
+                                    <td colspan="3"><input type="date" class="wp100" id="avail_dt"></td>
+                                </tr>
+                                <tr>
+                                    <th>계약형태</th>
+                                    <td colspan="3"><select id="select_ctrt_typ" class="wp100"></select></td>
+                                </tr>
                             </table>
                         </div>
                     </div>
