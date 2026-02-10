@@ -233,6 +233,10 @@
         FROM	tb_dev_info dev
                     LEFT JOIN tb_dev_avl_info avl
                               ON	dev.dev_id = avl.dev_id
+                                  AND avl.del_yn = 'N'
+                                  AND avl.use_yn = 'Y'
+        WHERE   dev.del_yn = 'N'
+          AND dev.use_yn = 'Y'
         ORDER BY dev.dev_id
     </select>
 
