@@ -39,10 +39,12 @@
     var RIGHT_TITLE_REGEX = /(금액|단가|점수|투입률|비율|건수|수량|정렬순서|합계|총액|가격)/i;
     var RIGHT_FIELD_REGEX = /(amt|amount|rate|score|pct|percent|cnt|count|qty|price|cost|sort_no|sortno|total|sum|_no$)/i;
 
+    // null/undefined 안전 문자열 변환
     function toText(value) {
         return String(value || "").trim();
     }
 
+    // 체크박스/선택 전용 컬럼인지 판별
     function isSelectionColumn(field, title, col) {
         if (field === "checkbox" || field === "_checked" || title === "선택") {
             return true;
@@ -53,10 +55,12 @@
         return false;
     }
 
+    // 제목이 숫자 인덱스형인지 판별(예: 1,2,3)
     function isNumericTitle(title) {
         return /^\d+$/.test(title);
     }
 
+    // formatter 이름으로 숫자형 우측 정렬 후보 판별
     function isRightAlignedByFormatter(col) {
         if (!col || typeof col.formatter !== "function") {
             return false;
@@ -65,6 +69,7 @@
         return /(amount|percent|percentage|number|money|price)/.test(name);
     }
 
+    // 컬럼 정렬 규칙(선택/날짜/연락처 center, 금액/점수 right, 나머지 left)
     function resolveColumnAlign(col) {
         var field = toText(col.field).toLowerCase();
         var title = toText(col.title);
@@ -118,6 +123,7 @@
         });
     }
 
+    // 헤더 정렬은 화면별 커스텀 충돌 방지를 위해 제거
     function clearHeaderAlignments(columns) {
         if (!Array.isArray(columns)) {
             return;
@@ -218,6 +224,7 @@
         return counterEl;
     }
 
+    // 현재 그리드와 짝이 되는 상단 content-title 블록 탐색
     function findRelatedTitle(tableEl) {
         if (!tableEl) {
             return null;
@@ -246,6 +253,7 @@
         return null;
     }
 
+    // 제목 비교용 공백 제거 텍스트
     function getNormalizedTitleText(titleEl) {
         if (!titleEl) {
             return "";
@@ -254,6 +262,7 @@
         return toText(titleNode.textContent).replace(/\s+/g, "");
     }
 
+    // 특정 화면(코드그룹)은 카운터를 타이틀이 아닌 푸터에 유지
     function shouldRenderCounterInTitle(tableEl, titleEl) {
         if (!tableEl || !titleEl) {
             return false;
@@ -268,6 +277,7 @@
         return true;
     }
 
+    // 카운터를 타이틀 영역으로 이동
     function mountCounterToTitle(titleEl, counterEl) {
         if (!titleEl || !counterEl) {
             return;
@@ -279,6 +289,7 @@
         counterEl.classList.add("hcnc-grid-count-title");
     }
 
+    // 카운터를 푸터 영역으로 이동
     function mountCounterToFooter(tableEl, counterEl) {
         if (!tableEl || !counterEl) {
             return false;
