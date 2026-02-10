@@ -57,7 +57,7 @@
                 <h4>인력 관리 <span id="modal-title">상세</span></h4>
                 <div class="btn-area">
                     <button class="close-btn" onclick="closeUserViewModal()">
-                        <img src="../icons/icon-close.png" alt="닫기" />
+                        <img src="../icons/icon-close.png" alt="" />
                     </button>
                 </div>
             </div>
@@ -141,9 +141,145 @@
                                             <div id="aboutGrade">
                                                 <img src="../icons/ico-support.png" alt="상세보기" />
                                                 <div class="tooltip">
-                                                    등급은 점수 기반으로 자동 산정됩니다.<br>
-                                                    프로젝트, 숙련도, 평가 점수가 반영됩니다.<br>
-                                                    테스트 텍스트
+                                                    <table class="score-table">
+                                                        <thead>
+                                                        <tr>
+                                                            <th>
+                                                                보유기술
+                                                                <span class="max-score">40점</span>
+                                                            </th>
+                                                            <th>
+                                                                업무태도
+                                                                <span class="max-score">30점</span>
+                                                            </th>
+                                                            <th>
+                                                                재계약의사
+                                                                <span class="max-score">20점</span>
+                                                            </th>
+                                                            <th>
+                                                                단가경쟁력
+                                                                <span class="max-score">10점</span>
+                                                            </th>
+                                                        </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                        <tr>
+                                                            <!-- 보유기술 -->
+                                                            <td>
+                                                                <div class="score-section">
+                                                                    보유한 기술 개수에 따라 등급이 산정됩니다.
+                                                                </div>
+
+                                                                <div class="score-section">
+                                                                    <strong>S 등급</strong>
+                                                                    <ul>
+                                                                        <li>15개 이상 & 90점 이상</li>
+                                                                    </ul>
+                                                                </div>
+
+                                                                <div class="score-section">
+                                                                    <strong>A 등급</strong>
+                                                                    <ul>
+                                                                        <li>10 ~ 15개 & 60 ~ 90점</li>
+                                                                    </ul>
+                                                                </div>
+
+                                                                <div class="score-section">
+                                                                    <strong>B 등급</strong>
+                                                                    <ul>
+                                                                        <li>5 ~ 10개 & 30 ~ 60점</li>
+                                                                    </ul>
+                                                                </div>
+
+                                                                <div class="score-section">
+                                                                    <strong>C 등급</strong>
+                                                                    <ul>
+                                                                        <li>5개 미만 & 30점 미만</li>
+                                                                    </ul>
+                                                                </div>
+                                                            </td>
+
+                                                            <!-- 업무태도 -->
+                                                            <td>
+                                                                <div class="score-section">
+                                                                    평가 점수 기준으로 등급이 산정됩니다.
+                                                                </div>
+
+                                                                <div class="score-section">
+                                                                    <strong>S 등급</strong>
+                                                                    <ul>
+                                                                        <li>21점 초과</li>
+                                                                    </ul>
+                                                                </div>
+
+                                                                <div class="score-section">
+                                                                    <strong>A 등급</strong>
+                                                                    <ul>
+                                                                        <li>15 ~ 21점</li>
+                                                                    </ul>
+                                                                </div>
+
+                                                                <div class="score-section">
+                                                                    <strong>B 등급</strong>
+                                                                    <ul>
+                                                                        <li>10 ~ 15점</li>
+                                                                    </ul>
+                                                                </div>
+
+                                                                <div class="score-section">
+                                                                    <strong>C 등급</strong>
+                                                                    <ul>
+                                                                        <li>10점 미만</li>
+                                                                    </ul>
+                                                                </div>
+                                                            </td>
+
+                                                            <!-- 재계약의사 -->
+                                                            <td>
+                                                                <div class="score-section">
+                                                                    <ul>
+                                                                        <li>재계약 의사 있음</li>
+                                                                    </ul>
+                                                                </div>
+                                                            </td>
+
+                                                            <td>
+                                                                <div class="score-section">
+                                                                    직무 유형에 따라 기준 단가가 다르게 적용됩니다. (PM/PL/개발자)
+                                                                </div>
+
+                                                                <div class="score-section">
+                                                                    <strong>S 등급</strong>
+                                                                    <ul>
+                                                                        <li>1,000 / 800 / 600만원 이하</li>
+                                                                    </ul>
+                                                                </div>
+
+                                                                <div class="score-section">
+                                                                    <strong>A 등급</strong>
+                                                                    <ul>
+                                                                        <li>1,000 / 800 / 600 ~ 1,200 / 900 / 700만원</li>
+                                                                    </ul>
+                                                                </div>
+
+                                                                <div class="score-section">
+                                                                    <strong>B 등급</strong>
+                                                                    <ul>
+                                                                        <li>1,200 / 900 / 700 ~ 1,300 / 1,000 / 800만원</li>
+                                                                    </ul>
+                                                                </div>
+
+                                                                <div class="score-section">
+                                                                    <strong>C 등급</strong>
+                                                                    <ul>
+                                                                        <li>1,300 / 1,000 / 800만원 초과</li>
+                                                                    </ul>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                        </tbody>
+                                                    </table>
+
                                                 </div>
                                             </div>
                                         </div>
