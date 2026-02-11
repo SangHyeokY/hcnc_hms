@@ -983,6 +983,21 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .common-code-section .tabulator-tableHolder {height: auto;}
 .common-code-section:first-child {width: 100%;}
 .common-code-section:last-child {width: 100%;}
+/* 상세코드: 줄바꿈 대신 컬럼 폭/내부 스크롤로 처리 */
+#TABLE_COMMON_DETAIL .tabulator-tableHolder {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+#TABLE_COMMON_DETAIL .tabulator-row {
+  height: 44px !important;
+  min-height: 44px !important;
+}
+#TABLE_COMMON_DETAIL .tabulator-cell,
+#TABLE_COMMON_DETAIL .tabulator-cell > div {
+  white-space: nowrap !important;
+  word-break: keep-all !important;
+  overflow-wrap: normal !important;
+}
 .detail-sort-hint {color: #7b8794; margin-left: auto; margin-right: 10px;} /*font-size: 12px; */
 /* Hide layout-level buttons on common code page */
 .contents-wrap:has(.common-code-page) > section.white-full > .content-title .btn-area {display: none;}
