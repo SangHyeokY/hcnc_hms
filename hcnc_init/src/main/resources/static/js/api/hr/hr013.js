@@ -282,7 +282,7 @@ function initHr013SkillPicker() {
         chipWrapClass: "hr013-skill-chip-wrap",
         suggestItemClass: "hr013-skill-suggest-item",
         flashClass: "is-flash",
-        groupColumnWidth: 170,
+        groupColumnWidth: 180,
         getSkillOptions: function () {
             return hr013SkillOptions || [];
         },
