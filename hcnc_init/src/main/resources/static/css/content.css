@@ -2330,7 +2330,7 @@ section.search-area .search-btn-area .btn-search {
 
 #view-user-area #HR014_TAB_B .risk-detail textarea {
   min-height: 0;
-  height: height: calc(100% - 40px);
+  height: calc(100% - 40px);
   max-height: 100%;
   resize: none;
 }
