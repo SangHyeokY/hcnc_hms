@@ -2252,12 +2252,6 @@ section.search-area .search-btn-area .btn-search {
   padding-bottom: 0 !important;
 }
 
-/* 소속/계약정보 비고 높이 축소 */
-#TABLE_HR011_A #remark {
-  height: 72px;
-  min-height: 72px;
-  max-height: 72px;
-}
 
 /* 등록 첫 화면(탭 숨김)에서 팝업 자체 스크롤 방지 */
 #view-user-area.insert .modal-container-detail.main-human-modal {
@@ -2334,25 +2328,6 @@ section.search-area .search-btn-area .btn-search {
   resize: none;
 }
 
-/* HR010 탭1(소속/계약) + 경력연차 높이 재조정 */
-#view-user-area #tab1 .content-body {
-  overflow: hidden;
-}
-
-#view-user-area #TABLE_HR011_A tbody tr:not(:last-child) {
-  height: 46px;
-}
-
-#view-user-area #TABLE_HR011_A tbody tr:last-child {
-  height: 132px;
-}
-
-/* 비고 입력칸을 다시 넓히되, 팝업 전체 스크롤은 생기지 않게 균형값으로 고정 */
-#view-user-area #TABLE_HR011_A #remark {
-  height: 100px;
-  min-height: 100px;
-  max-height: 100px;
-}
 
 /* 인적사항 경력연차 행 높이 미세 축소 */
 #view-user-area #TABLE_HR010_B .career-exp-cell {
