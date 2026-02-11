@@ -964,10 +964,12 @@ function fillUserForm(d) {
 
     const rank = d.grade || "-";
     const score = d.score || 0;
-    if (rank) {
-        $("#grade").text(formatGradeLabel(rank, score));
+    if (rank,score) {
+        $("#grade").text(rank+"<span class='unit'>등급</span>");
+        $("#score").text(score+"점");
     } else {
         $("#grade").text("");
+        $("#score").text("");
     }
     $("#aboutGrade").show();
 }
@@ -1000,6 +1002,7 @@ function clearUserForm() {
     $("#select_work_md").val("");
     $("#select_ctrt_typ").val("");
     $("#grade").text("");
+    $("#score").text("");
     $("#aboutGrade").hide();
 }
 
@@ -1037,6 +1040,7 @@ function setModalMode(mode) {
     if (isInsert) {
         $("#dev_id_input").text("-");
         $("#grade").text("-");
+        $("#score").text("");
     }
 
     if (isView) {
