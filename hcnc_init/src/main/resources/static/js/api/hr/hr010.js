@@ -57,6 +57,10 @@ const tabNameMap = {
 $(document).ready(async function () {
     buildUserTable();
 
+    // console.log(Swal); // swal 오류 확인용
+
+    // HR010 화면의 상단 검색 버튼 텍스트를 디자인 시안과 동일하게 맞춘다.
+    $(".search-btn-area .btn-search").text("조회");
 
     // 근무형태 셀렉트 공통콤보
     setComCode("select_work_md", "WORK_MD", "", "cd", "cd_nm", function () {

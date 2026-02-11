@@ -1253,8 +1253,8 @@ function showAlert({
         title,
         text,
 
-        showClass: { popup: '', backdrop: '' },
-        hideClass: { popup: '', backdrop: '' },
+        // showClass: { popup: '', backdrop: '' },
+        // hideClass: { popup: '', backdrop: '' },
         backdrop: true,
         allowOutsideClick: false,
 
