@@ -2152,3 +2152,42 @@ section.search-area .search-btn-area .btn-search {
 .contents-wrap:has(#TABLE_HR010_A) .grid-pager-fixed {
   height: calc(100% - 94px);
 }
+
+/* HR013 skill picker: align design with main language picker */
+.modal-container.hr013-skill-picker-container .btn-area button {
+  width: 40px;
+  height: 40px;
+}
+.modal-container.hr013-skill-picker-container .btn-area button img {
+  width: 100%;
+}
+#hr013-skill-picker-area .hr013-skill-picker-container {
+  width: 820px;
+  min-width: 0;
+  max-width: calc(100% - 40px);
+}
+#hr013-skill-picker-area .hr013-skill-picker-content {
+  max-height: 68vh;
+  overflow: visible;
+  flex-direction: column;
+  height: auto;
+}
+#hr013-skill-picker-area .tabulator .tabulator-header,
+#hr013-skill-picker-area .tabulator .tabulator-footer {
+  display: none !important;
+}
+#hr013-skill-picker-area .tabulator .tabulator-tableHolder {
+  height: 100% !important;
+  overflow-x: hidden;
+}
+#TABLE_HR013_SKILL_PICKER {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  overflow: hidden;
+  height: 367px !important;
+}
+#TABLE_HR013_SKILL_PICKER .hr013-skill-chip.is-selected {
+  border-color: #111;
+  background: #fff;
+  color: #111;
+}
