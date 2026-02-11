@@ -57,6 +57,7 @@ option{background:#fff; color:#333;}
 #hms-table, #hms-table-wrap {
     height: calc(100% - 35px);
 }
+*/
 
 /* toast 팝업 뒤 배경 */
 .swal2-container {
@@ -219,6 +220,13 @@ option{background:#fff; color:#333;}
   background: #E50019;
   margin-right: 8px;
 }
+/* 총 데이터 수 색상 */
+.hcnc-grid-count-title .hcnc-grid-count-number {
+    color: #E50019;
+    font-weight: 500;
+    margin-left: 4px;
+}
+
 .tabulator .tabulator-footer.hcnc-grid-footer-compact {
   padding: 8px 12px 6px !important;
   min-height: 76px;
@@ -1042,6 +1050,12 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 /* Hide layout-level buttons on common code page */
 .contents-wrap:has(.common-code-page) > section.white-full > .content-title .btn-area {display: none;}
 
+/* 섹션 제목 */
+.page-sub-title {
+    display: flex;
+    align-items: center;
+}
+
 /*===============================================================================
   Modal
 ================================================================================*/
@@ -1145,10 +1159,13 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .insert .top-article,
 .update .top-article{width:100%;}
 .modal-human-area .table-area{width: 100%;}
-.modal-human-area .table-area input[type="text"]:read-only ,
-.modal-human-area .table-area :disabled{text-align:center;}
+
+.modal-human-area .table-area input[type="text"]:read-only,
+.modal-human-area .table-area :disabled{text-align:left;}
+/*
 .modal-com-area .table-area input[type="text"]:read-only ,
 .modal-com-area .table-area :disabled{text-align:left;}
+*/
 .modal-human-area .table-area table {width: 100%; height: 100%;}
 .modal-human-area .table-area tr:nth-child(1) th{border-top:1px solid #F0F1F3;}
 .modal-human-area .table-area tr:nth-child(1) td{border-top:1px solid #F0F1F3;}
@@ -1216,7 +1233,8 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 }
 
 #TABLE_HR011_A #amt,
-#TABLE_HR011_A #amt.is-readonly {
+#TABLE_HR011_A #amt.is-readonly,
+#hope_rate_amt {
     text-align: right;
 }
 
@@ -1779,8 +1797,10 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
     
 }
 
-.career-exp-cell {
-    text-align: center;
+#exp_yr_text {
+    width: 100%;
+    text-align: left;
+    padding: 0 10px;
 }
 
 .career-spin-input {
