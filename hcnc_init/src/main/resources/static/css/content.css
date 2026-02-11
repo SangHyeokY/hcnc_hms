@@ -1129,13 +1129,6 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .modal-content .cell-info select {width: 100%;}
 
 /* 인력관리 팝업 - 테이블 */
-.modal-content #main-modal-table th {
-    min-width: 120px !important;
-}
-.modal-content #main-modal-table th.grade-th {
-    width: 40px !important;
-    min-width: 40px !important;
-}
 .modal-content #main-modal-table tr > td,
 .modal-content #main-modal-table tr > th {
     height: 42px;
@@ -1227,7 +1220,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .modal-human-area .table-area table {width: 100%; height: 100%;}
 .modal-human-area .table-area tr:nth-child(1) th{border-top:1px solid #F0F1F3;}
 .modal-human-area .table-area tr:nth-child(1) td{border-top:1px solid #F0F1F3;}
-.modal-human-area .table-area tr th{padding:0 10px; background:#F1F4F9; border-bottom:1px solid #F0F1F3;}
+.modal-human-area .table-area tr th{background:#F1F4F9; border-bottom:1px solid #F0F1F3;} /* padding:0 10px;  */
 .modal-human-area .table-area tr td{padding:4px;border-bottom:2px solid #F0F1F3;}
 
 .tab-area {position:relative; display: flex; width: 100%; margin-bottom:20px; gap: 0px; box-sizing: border-box; border-radius:8px; overflow:hidden;}
@@ -1862,7 +1855,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 }
 
 .career-spin-input {
-    width: 30px !important;
+    width: 40px !important;
     padding: 0 6px !important;
     height: 34px;
     line-height: 34px;
@@ -2468,7 +2461,7 @@ section.search-area .search-btn-area .btn-search {
 }
 
 #view-user-area:not(.insert) .modal-content.hr010-main-pop {
-  height: calc(92vh - 235px);
+  height: 90vh;
   overflow-y: hidden;
 }
 
