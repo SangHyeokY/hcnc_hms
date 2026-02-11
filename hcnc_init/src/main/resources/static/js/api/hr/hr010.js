@@ -974,7 +974,7 @@ function fillUserForm(d) {
     const rank = d.grade || "-";
     const score = d.score || 0;
     if (rank,score) {
-        $("#grade").text(rank+"<span class='unit'>등급</span>");
+        $("#grade").text(rank);
         $("#score").text(score+"점");
     } else {
         $("#grade").text("");
