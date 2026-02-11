@@ -1174,6 +1174,11 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
     margin-bottom: 35px;
 }
 
+#TABLE_HR011_A #amt,
+#TABLE_HR011_A #amt.is-readonly {
+    text-align: right;
+}
+
 .hr014-side-tabs > button.active {
     color: #E50019;
     font-weight: 700;
