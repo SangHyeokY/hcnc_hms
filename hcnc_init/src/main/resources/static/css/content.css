@@ -2479,3 +2479,34 @@ section.search-area .search-btn-area .btn-search {
   height: calc(92vh - 235px);
   overflow-y: hidden;
 }
+
+/* HR010 등록(insert) 화면 깨짐 방지: 폭/높이/라벨 폭 별도 고정 */
+#view-user-area.insert .modal-container-detail.main-human-modal {
+  width: 760px;
+  max-width: calc(100% - 32px);
+  max-height: 92vh;
+  overflow: hidden;
+}
+
+#view-user-area.insert .modal-content.hr010-main-pop {
+  height: calc(92vh - 130px);
+  max-height: calc(92vh - 130px);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+#view-user-area.insert #TABLE_HR010_B .table-area table {
+  table-layout: fixed;
+}
+
+#view-user-area.insert #TABLE_HR010_B .table-area th {
+  width: 82px;
+  white-space: nowrap;
+  word-break: keep-all;
+}
+
+/* HR010 등록 모달: 직원/프리랜서 select 폭 국소 조정 */
+#view-user-area.insert #dev_type {
+  min-width: 173px !important;
+  width: 100%;
+}
