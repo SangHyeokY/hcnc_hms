@@ -75,6 +75,10 @@ option{background:#fff; color:#333;}
 .swal2-btn-radius {
     border-radius: 8px !important;
 }
+
+#searchType {
+    background: #F6F6F6;
+}
 /*=================================================================================
  * Grid Table style
 =================================================================================*/
@@ -839,7 +843,10 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .tag-input-box.is-readonly .tag-item:last-child::after {
   content: "";
 }
+
+/* 기술 선택 태그 */
 .tag-select-row {display: flex; align-items: center; gap: 8px; padding: 0 10px 4px 10px;}
+
 .tag-select-row select {min-width: 140px;}
 .tag-help {background:#f8fafc; font-size: 12px; color: #6b7280; margin-bottom: 6px;}
 .tag-input-box .tag-help {margin-bottom: 0; white-space: nowrap;}
@@ -956,6 +963,18 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
   color: #607090;
   font-size: 12px;
 }
+#dev_type {
+    background: #ED24551F;
+    border-radius: 4px;
+    border: none;
+    -webkit-text-fill-color: #ED2455;
+    font-weight: 500;
+}
+.select-dev-type {
+    background: url(../images/common/ico-arrow-down.png) calc(100% - 10px) center no-repeat #ED24551F !important;
+    background-size: 14px !important;
+}
+
 #TABLE_MAIN_LANG_PICKER {
   border: 1px solid #e2e8f0;
   border-radius: 8px;
