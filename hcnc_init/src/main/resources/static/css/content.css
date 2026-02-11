@@ -45,9 +45,11 @@ option{background:#fff; color:#333;}
     border-radius:6px;
 }
 
+/*
 #hms-table, #hms-table-wrap {
     height: calc(100% - 35px);
 }
+*/
 
 /* toast 팝업 뒤 배경 */
 .swal2-container {
@@ -170,11 +172,17 @@ option{background:#fff; color:#333;}
   display: inline-flex;
   align-items: center;
   margin-left: 10px;
-  font-size: 12px;
-  font-weight: 400;
+  font-size: 16px;
+  font-weight: 500;
   color: #8f97a7;
   white-space: nowrap;
   pointer-events: none;
+}
+/* 총 데이터 수 색상 */
+.hcnc-grid-count-title .hcnc-grid-count-number {
+    color: #E50019;
+    font-weight: 500;
+    margin-left: 4px;
 }
 .tabulator .tabulator-footer.hcnc-grid-footer-compact {
   padding: 8px 12px 6px !important;
@@ -342,7 +350,7 @@ button.btn.btn-add-skill {
   HR015,HR014 - score tables alignment
 ================================================================================*/
 #TABLE_HR015_A .tabulator-col.tabulator-sortable,
-.tabulator-col.tabulator-sortable {
+.tabulator-col {
     align-content: center;
 }
 #TABLE_HR014_A input[type="radio"],
@@ -394,9 +402,9 @@ button.btn.btn-add-skill {
 ================================================================================*/
 .risk-box {
   display: grid;
-  grid-template-columns: 160px 1fr;
+  grid-template-columns: 110px 1fr;
   gap: 12px;
-  margin-bottom: 12px;
+  height: 100%;
 }
 .risk-list {
   border: 1px solid #dcdcdc;
@@ -422,9 +430,6 @@ button.btn.btn-add-skill {
   cursor: pointer;
   font-size: 14px;
 }
-.risk-list .risk-item:last-child {
-  border-bottom: none;
-}
 .risk-list .risk-item.active {
   background: #eaf2ff;
   font-weight: 700;
@@ -435,7 +440,7 @@ button.btn.btn-add-skill {
   border: 1px solid #dcdcdc;
   border-radius: 6px;
   padding: 10px 12px;
-
+  height: calc(100% - 4px);
 }
 .risk-extra {
   margin: 10px 14px 12px;
@@ -543,7 +548,7 @@ button.btn.btn-add-skill {
   position: relative;
   z-index: 2;
 }
-.hr014-tab-wrap {display: flex; flex-direction:column; gap: 16px; height: 100%;}
+.hr014-tab-wrap {display: flex; flex-direction:column; gap: 10px; height: 100%;}
 .hr014-side-tabs {
   display: flex;
   width: 100%;
@@ -621,17 +626,20 @@ button.btn.btn-add-skill {
   gap: 10px;
 }
 .risk-list-top .risk-item {
-  border: 1px solid transparent;
+  border: 1px solid rgba(1, 0, 0, 0.2);
   border-radius:50px;
   padding: 6px 12px;
-  background: #e7e7e7;
+  background: #ffffff;
   font-weight: 600;
   font-size: 13px;
   color: #6b7280;
+  text-align: center;
+  align-content: center;
+  height: 40px;
 }
 
 .risk-list-top .risk-item.active {
-  background: #333;
+  background: #E52237;
   color: #fff;
 }
 .risk-box-top .risk-detail textarea {
@@ -980,9 +988,30 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .common-code-section .tabulator-tableHolder {height: auto;}
 .common-code-section:first-child {width: 100%;}
 .common-code-section:last-child {width: 100%;}
+/* 상세코드: 줄바꿈 대신 컬럼 폭/내부 스크롤로 처리 */
+#TABLE_COMMON_DETAIL .tabulator-tableHolder {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+#TABLE_COMMON_DETAIL .tabulator-row {
+  height: 44px !important;
+  min-height: 44px !important;
+}
+#TABLE_COMMON_DETAIL .tabulator-cell,
+#TABLE_COMMON_DETAIL .tabulator-cell > div {
+  white-space: nowrap !important;
+  word-break: keep-all !important;
+  overflow-wrap: normal !important;
+}
 .detail-sort-hint {color: #7b8794; margin-left: auto; margin-right: 10px;} /*font-size: 12px; */
 /* Hide layout-level buttons on common code page */
 .contents-wrap:has(.common-code-page) > section.white-full > .content-title .btn-area {display: none;}
+
+/* 섹션 제목 */
+.page-sub-title {
+    display: flex;
+    align-items: center;
+}
 
 /*===============================================================================
   Modal
@@ -1000,7 +1029,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .modal-wrap .header .modal-close:before {content: "×"; line-height: 1;}
 .modal-content .title-area{padding-bottom:8px;}
 
-.modal-content {display:flex; width:100%; height: 682.59px; gap:20px; overflow-Y: auto; padding:20px;}
+.modal-content {display:flex; width:100%; height: 685px; gap:20px; overflow-Y: auto; padding:15px 20px;}
 .modal-content.main-lang-picker-content{flex-direction:column; height:auto;}
 .modal-content.main-lang-picker-content .tabulator .tabulator-header,
 .modal-content.main-lang-picker-content .tabulator .tabulator-footer{display:none !important;}
@@ -1014,7 +1043,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .modal-content .title-area .type span{padding: 3px 9px; color: #E50019; border-radius:8px; border: 1px solid #E50019;}
 .modal-content top-article{padding-bottom:10px;}
 .modal-content ul {list-style: none; margin: 0; padding: 0;}
-.modal-content li.table-col {width: 100%; padding: 30px 0; gap: 20px;}
+.modal-content li.table-col {width: 100%; padding: 25px 0; gap: 20px;}
 .modal-content li.table-col .table-cell {width: 100%;}
 .modal-content .cell-tit {font-size: 12px; font-weight: 700; padding-bottom: 6px;}
 .modal-content .cell-info input,
@@ -1073,24 +1102,28 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .modal-container-detail .close-btn{background:none; border:none; }
 .modal-container-detail .close-btn img{width:16px; }
 
-.modal-human-area {width:100%;}
+.modal-human-area {width:100%; flex:1;}
 .modal-human-area .pic-area{width: 100%; cursor:point;}
 .modal-human-area .pic-area .profile-area{position:relative; width:100%; padding-top: 100%; border:1px solid #ddd; background:url("../images/common/bg-userimg.png")center center no-repeat #ECECEE; background-size:contain; border-radius:9px; overflow:hidden;}
 .modal-human-area .pic-area .profile-area img{position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:100%; height:100%;}
-.modal-human-area .upload{width:100%; height:100%; padding-top: 15px; position:relative;}
+.modal-human-area .upload{width:100%; height:100%; padding-top: 15px; position:absolute; top:0; left:0; cursor: pointer;}
 .insert .main-human-modal .modal-human-area .upload{padding-top:15px; position:absolute; top:0; left:0; z-index:10;}
 .modal-human-area .upload .file{width:100%; height:100%; position: absolute; top:0; left:0; opacity:0; z-index:1; cursor:pointer;}
 .modal-human-area .upload .showingbtn{width:100%; height:30px; border-radius:4px; border:1px dotted #ccc; color:#333}
 
 .insert .main-human-modal .modal-human-area .upload .showingbtn{display:none;}
+.top-article{display: flex; flex-direction: column;}
 .insert .top-article,
 .update .top-article{width:100%;}
 .modal-human-area .table-area{width: 100%;}
-.modal-human-area .table-area input[type="text"]:read-only ,
-.modal-human-area .table-area :disabled{text-align:center;}
+
+.modal-human-area .table-area input[type="text"]:read-only,
+.modal-human-area .table-area :disabled{text-align:left;}
+/*
 .modal-com-area .table-area input[type="text"]:read-only ,
 .modal-com-area .table-area :disabled{text-align:left;}
-.modal-human-area .table-area table {width: 100%}
+*/
+.modal-human-area .table-area table {width: 100%; height: 100%;}
 .modal-human-area .table-area tr:nth-child(1) th{border-top:1px solid #F0F1F3;}
 .modal-human-area .table-area tr:nth-child(1) td{border-top:1px solid #F0F1F3;}
 .modal-human-area .table-area tr th{padding:0 10px; background:#F1F4F9; border-bottom:1px solid #F0F1F3;}
@@ -1156,6 +1189,12 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
     margin-bottom: 35px;
 }
 
+#TABLE_HR011_A #amt,
+#TABLE_HR011_A #amt.is-readonly,
+#hope_rate_amt {
+    text-align: right;
+}
+
 .hr014-side-tabs > button.active {
     color: #E50019;
     font-weight: 700;
@@ -1175,9 +1214,16 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
     font-weight: 500;
     position: relative;
 }
-.hr012-toolbar { display: flex; justify-content: space-between; align-items:center; margin-bottom: 8px; }
-.hr012-toolbar p.tool-title{font-weight:bold;}
-.hr012-toolbar button.btn.btn-add-skill {border: 1px solid #E50019; color: #E50019;  background: #fff;  border-radius: 8px;}
+
+.hr012-toolbar-01,
+.hr012-toolbar-02,
+.hr014-toolbar-01,
+.hr014-toolbar-02 { display: flex; justify-content: space-between; align-items:center; height: 40px }
+.hr012-toolbar-01 p.tool-title,
+.hr012-toolbar-02 p.tool-title,
+.hr014-toolbar-01 p.tool-title,
+.hr014-toolbar-02 p.tool-title{font-size: 18px; font-weight:bold;}
+.hr012-toolbar-01 button.btn.btn-add-skill {border: 1px solid #E50019; color: #E50019;  background: #fff;  border-radius: 8px;}
 
 .tab2-content #TABLE_HR012_A.is-readonly,
 .tab2-content #TABLE_HR012_B.is-readonly,
@@ -1651,7 +1697,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 #aboutGrade .tooltip .score-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 14px;
+  font-size: 12px;
 }
 
 #aboutGrade .tooltip .score-table th,
@@ -1677,6 +1723,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 
 #aboutGrade .tooltip .score-section {
   margin-bottom: 12px;
+  display: flex;
 }
 
 #aboutGrade .tooltip .score-section strong {
@@ -1707,8 +1754,10 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
     
 }
 
-.career-exp-cell {
-    text-align: center;
+#exp_yr_text {
+    width: 100%;
+    text-align: left;
+    padding: 0 10px;
 }
 
 .career-spin-input {
@@ -1794,6 +1843,53 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
     appearance: none !important;
     margin: 0 !important;
 }
+
+
+#user-pwchange-area.modal-wrap.content { display:none; position:fixed; inset:0; z-index:1; background:rgba(17,24,39,0.45); padding:24px; box-sizing:border-box; }
+
+#user-pwchange-area .modal-container { margin:0 auto; background:#fff; border-radius:16px; box-shadow:0 20px 60px rgba(0,0,0,0.18); overflow:hidden; }
+
+#user-pwchange-area .modal-content { padding:16px 18px 0 18px; flex-direction: column; height: auto; }
+
+#user-pwchange-area .pw-notice { background:#f8fafc; border:1px solid #e5e7eb; border-radius:14px; padding:12px; }
+
+#user-pwchange-area .pw-notice__title { font-size:13px; font-weight:700; color:#111827; margin-bottom:6px; }
+
+#user-pwchange-area .pw-notice__desc { font-size:12px; color:#6b7280; line-height:1.5; }
+
+#user-pwchange-area .pw-chip-wrap { margin-top:10px; display:flex; flex-wrap:wrap; gap:6px; }
+
+#user-pwchange-area .pw-chip { font-size:12px; color:#374151; background:#ffffff; border:1px solid #e5e7eb; padding:4px 8px; border-radius:999px; }
+
+#user-pwchange-area .pw-article { padding:14px 0 0 0; }
+
+#user-pwchange-area .div-table { margin:0; }
+
+#user-pwchange-area .pw-form-list { list-style:none; padding:0; margin:0; display:grid; gap:12px; }
+
+#user-pwchange-area .table-col.fl-ac { display:block; padding: 10px 0; }
+
+#user-pwchange-area .table-cell { width:100%; }
+
+#user-pwchange-area .cell-tit { margin:0 0 6px 0; font-size:12px; font-weight:700; color:#374151; }
+
+#user-pwchange-area .cell-info { width:100%; }
+
+#user-pwchange-area input.text { width:100%; box-sizing:border-box; height:40px; padding:0 12px; border-radius:10px; font-size:13px; outline:none; color:#111827; background:#fff; border:1px solid #d1d5db; }
+
+#user-pwchange-area input.text[readonly] { border:1px solid #e5e7eb; background:#f9fafb; }
+
+#user-pwchange-area .pw-help { margin-top:6px; font-size:12px; color:#6b7280; line-height:1.4; }
+
+#user-pwchange-area .pw-error { margin-top:6px; font-size:12px; color:#ef4444; display:none; }
+
+#user-pwchange-area .modal-btn { padding:14px 18px 16px 18px; border-top:1px solid #e5e7eb; margin-top:16px; }
+
+#user-pwchange-area .pw-btn-list { list-style:none; padding:0; margin:0; display:flex; justify-content:flex-end; gap:10px; }
+
+#user-pwchange-area .btn.btn-close { min-width:90px; height:38px; padding:0 14px; border-radius:10px; border:1px solid #d1d5db; background:#fff; color:#374151; font-weight:700; cursor:pointer; }
+
+#user-pwchange-area .btn.btn-save { min-width:90px; height:38px; padding:0 14px; border-radius:10px; border:1px solid #ef4444; background:#ef4444; color:#fff; font-weight:800; cursor:pointer; }
 
 @media screen and (max-height: 800px) {
     .modal-container-detail {

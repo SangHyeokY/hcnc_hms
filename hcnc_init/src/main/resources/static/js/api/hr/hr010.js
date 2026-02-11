@@ -87,6 +87,10 @@ $(document).ready(async function () {
     // 테이블 로딩이 끝날 때 까지 로딩바 표시
     showLoading();
     await loadUserTableData();
+
+    // 로딩 완료 후 테이블 건수 표시
+    if (window.userTable) updateTabulatorGridCount(window.userTable);
+
     hideLoading();
 
     $(".tab-panel").hide(); // Tab 숨기기
@@ -118,6 +122,7 @@ $(document).ready(async function () {
         event.preventDefault();
         showLoading();
         await loadUserTableData();
+        if (window.userTable) updateTabulatorGridCount(window.userTable);
         hideLoading();
     });
 
@@ -126,6 +131,7 @@ $(document).ready(async function () {
         if (event.key === "Enter") {
             showLoading();
             await loadUserTableData();
+            if (window.userTable) updateTabulatorGridCount(window.userTable);
             hideLoading();
         }
     });
@@ -929,7 +935,7 @@ function fillUserForm(d) {
     $("#edu_last").val(d.edu_last || "");
     $("#cert_txt").val(d.cert_txt || "");
     $("#avail_dt").val(d.avail_dt || "");
-    $("#dev_id_input").text(d.dev_id || "");
+    // $("#dev_id_input").text(d.dev_id || "");
 
     $("#hope_rate_amt").val(
         formatAmount(d.hope_rate_amt)
@@ -997,7 +1003,7 @@ function clearUserForm() {
     $("#cert_txt").val("");
     $("#avail_dt").val("");
     $("#hope_rate_amt").val("");
-    $("#dev_id_input").text("");
+    // $("#dev_id_input").text("");
     $("#dev_type").val("");
     $("#select_work_md").val("");
     $("#select_ctrt_typ").val("");
@@ -1020,10 +1026,6 @@ function setModalMode(mode) {
     var $title = $modal.find("#modal-title");
     $modal.toggleClass("is-view-mode", isView);
 
-    // title 표시 ===================================== //
-    if (isView) mode = "view";
-    else if (isInsert) mode = "insert";
-    else if (isUpdate) mode = "update";
     if (mode) {
         $title.text(
             mode === "view" ? "상세" :
@@ -1034,44 +1036,41 @@ function setModalMode(mode) {
             .removeClass("view insert update")
             .addClass(mode);
     }
-    // title 표시 ===================================== //
 
-    // 등록 페이지의 경우
+    // ================================
+    // 공통 입력 제어 (조회 기준)
+    // ================================
+    const isReadOnly = isView;
+
+    $modal.find("input, textarea")
+          .prop("readonly", isReadOnly)
+          .prop("disabled", isReadOnly);
+
+    $modal.find("select")
+          .not("#dev_type")
+          .prop("disabled", isReadOnly);
+
+
+    // ================================
+    // dev_type 전용 제어
+    // ================================
+    $modal.find("#dev_type")
+          .toggleClass("ta-c", !isInsert)   // 등록만 왼쪽 정렬
+          .prop("disabled", !isInsert); // 등록이 아니면 모두 disabled
+
+
+    // ================================
+    // 등록 전용 처리
+    // ================================
     if (isInsert) {
-        $("#dev_id_input").text("-");
         $("#grade").text("-");
         $("#score").text("");
     }
 
-    if (isView) {
-        // 조회 mode => 수정불가
-        $modal.find("input, textarea")
-              .prop("readonly", true)
-              .prop("disabled", true);
-        $modal.find("select").prop("disabled", true);
-    }
-    else {
-        // 등록, 수정 mode => 수정가능
-        $modal.find("input, textarea")
-              .prop("readonly", false)
-              .prop("disabled", false)
-              .removeAttr("readonly")
-              .removeAttr("disabled");
-        $modal.find("select")
-              .prop("disabled", false)
-              .removeAttr("disabled");
-    }
     // 주 개발언어 입력창은 팝업 트리거 전용으로 항상 readonly 유지
     $("#main_lang_input").prop("readonly", true);
     $(".career-spin-btn").prop("disabled", isView);
     syncCareerExpText();
-
-    // 등록 mode일 경우에만 '소속 구분' 입력 가능
-    if (isInsert) {
-        $("#dev_type").prop("disabled", false);
-    } else {
-        $("#dev_type").prop("disabled", true);
-    }
 
     // Mode에 따른 버튼 숨김/표시
     $("#btn-user-save").toggle(isInsert || isUpdate);

@@ -9,7 +9,7 @@ $(document).on("tab:readonly", function (_, isReadOnly) {
 let hr011Mode = "view";
 window.hr011Data = null;
 
-const HR011_FIELDS = "#org_nm, #select_biz_typ, #st_dt, #ed_dt, #amt, #remark"; // 데이터 담을 상수
+// const HR011_FIELDS = "#org_nm, #select_biz_typ, #st_dt, #ed_dt, #amt, #remark"; // 데이터 담을 상수
 
 // 사업자 유형 공통코드
 var bizTypMap = [];
@@ -99,21 +99,32 @@ function setHr011Mode(mode) {
     $("#modal-title").text(
         isView ? "상세" : mode === "insert" ? "등록" : "수정"
     );
-    const $fields = $(HR011_FIELDS);
 
-    if (isEditable) { // insert, update mode일 때
-        $fields
-            .prop("disabled", false)
-            .prop("readonly", false)
-            .removeAttr("disabled")
-            .removeAttr("readonly")
-            .removeClass("is-readonly");
-    } else { // view mode일 때
-        $fields
-            .prop("disabled", true)
-            .prop("readonly", true)
-            .addClass("is-readonly");
+    $("#org_nm").prop("readonly", !isEditable).toggleClass("is-readonly", !isEditable);
+    $("#select_biz_typ").prop("disabled", !isEditable).toggleClass("is-readonly", !isEditable);
+    $("#st_dt").prop("readonly", !isEditable).toggleClass("is-readonly", !isEditable);
+    $("#ed_dt").prop("readonly", !isEditable).toggleClass("is-readonly", !isEditable);
+    $("#remark").prop("readonly", !isEditable).toggleClass("is-readonly", !isEditable);
+
+    if (!isEditable) {
+        $("#amt").prop("readonly", true).addClass("is-readonly");
+    } else {
+        $("#amt").prop("readonly", false).removeClass("is-readonly");
     }
+
+//    if (isEditable) { // insert, update mode일 때
+//        $fields
+//            .prop("disabled", false)
+//            .prop("readonly", false)
+//            .removeAttr("disabled")
+//            .removeAttr("readonly")
+//            .removeClass("is-readonly");
+//    } else { // view mode일 때
+//        $fields
+//            .prop("disabled", true)
+//            .prop("readonly", true)
+//            .addClass("is-readonly");
+//    }
 }
 
 // Tab1 조회할 시, 데이터 표시
@@ -149,9 +160,8 @@ function fillHr011Form(data) {
     $("#org_nm").val(data.org_nm || "");
     $("#st_dt").val(data.st_dt || "");
     $("#ed_dt").val(data.ed_dt || "");
-    $("#amt").val(formatNumber(data.amt));
     $("#remark").val(data.remark || "");
-
+    $("#amt").val(formatAmount(data.amt));
     if ($("#select_biz_typ option").length > 0) {
         $("#select_biz_typ").val(data.biz_typ || "");
     }
@@ -159,7 +169,8 @@ function fillHr011Form(data) {
 
 // Tab1의 데이터 초기화
 function clearHr011Form() {
-    $(HR011_FIELDS).val("");
+    $("#org_nm, #select_biz_typ, #st_dt, #ed_dt, #remark").val("");
+    $("#amt").val("0원");
 }
 
 // Tab1에 '소속 및 계약정보' 테이블 불러오기
@@ -200,7 +211,7 @@ function saveHr011TableData() {
         bizTyp: $("#select_biz_typ").val(),
         stDt: $("#st_dt").val(),
         edDt: $("#ed_dt").val(),
-        amt: unformatNumber($("#amt").val()),
+        amt: normalizeAmountValue($("#amt").val()),
         remark: $("#remark").val()
     };
 
@@ -278,7 +289,7 @@ function validateHr011Form() {
     const stDt    = $("#st_dt").val();                 // 계약 시작일
     const edDt    = $("#ed_dt").val();                 // 계약 종료일
     const bizTyp  = $("#select_biz_typ").val().trim(); // 사업자 유형
-    const amtRaw  = unformatNumber($("#amt").val());   // 계약 금액
+    const amtRaw  = normalizeAmountValue($("#amt").val());   // 계약 금액
 
     // 최대 입력 가능 숫자
     const MAX_AMT = 999999999;
@@ -375,12 +386,97 @@ function formatNumber(num) {
 }
 
 // 숫자만 입력
-$("#amt").on("input", function () {
-    let input_number = this.value.replace(/[^0-9]/g, "");
-    this.value = formatNumber(input_number);
-});
+$("#amt")
+    .on("input", function () {
+        const raw = this.value || "";
+        const caret = Number.isFinite(this.selectionStart) ? this.selectionStart : raw.length;
+        const digitsBeforeCaret = countAmountDigitsBeforeCaret(raw, caret);
+        const inputNumber = normalizeAmountValue(raw);
+        const formatted = formatAmount(inputNumber);
+        this.value = formatted;
+        setAmountCaretByDigitIndex(this, digitsBeforeCaret);
+    })
+    .on("focus", function () {
+        moveAmountCaretToEditableEnd(this);
+    })
+    .on("click", function () {
+        const input = this;
+        setTimeout(function () {
+            clampAmountCaretToEditableRange(input);
+        }, 0);
+    })
+    .on("keydown", function (e) {
+        const value = this.value || "";
+        const suffixIndex = getAmountEditableEndIndex(value);
+        const start = Number.isFinite(this.selectionStart) ? this.selectionStart : suffixIndex;
+        const end = Number.isFinite(this.selectionEnd) ? this.selectionEnd : suffixIndex;
+
+        if ((e.key === "ArrowRight" || e.key === "End") && start >= suffixIndex && end >= suffixIndex) {
+            e.preventDefault();
+            this.setSelectionRange(suffixIndex, suffixIndex);
+            return;
+        }
+
+        if (e.key === "Backspace" && start === end && start > suffixIndex) {
+            e.preventDefault();
+            this.setSelectionRange(suffixIndex, suffixIndex);
+            return;
+        }
+
+        if (e.key === "Delete" && start === end && start >= suffixIndex) {
+            e.preventDefault();
+            return;
+        }
+    });
 
 // 문자열 가공
-function unformatNumber(str) {
+function normalizeAmountValue(str) {
     return str ? str.replace(/,/g, "") : "";
+}
+
+function formatAmount(num) {
+    if (!num) return "0원";
+    return formatNumber(num) + "원";
+}
+
+// caret 위치 계산: 숫자 기준
+function countAmountDigitsBeforeCaret(value, caret) {
+    let count = 0;
+    for (let i = 0; i < caret; i++) {
+        if (/\d/.test(value[i])) count++;
+    }
+    return count;
+}
+
+// caret 위치 재설정
+function setAmountCaretByDigitIndex(input, digitIndex) {
+    const value = input.value || "";
+    let digitsSeen = 0;
+    let pos = 0;
+    while (pos < value.length && digitsSeen < digitIndex) {
+        if (/\d/.test(value[pos])) digitsSeen++;
+        pos++;
+    }
+    input.setSelectionRange(pos, pos);
+}
+
+// caret를 항상 "원" 앞 끝으로 이동
+function moveAmountCaretToEditableEnd(input) {
+    const suffixIndex = getAmountEditableEndIndex(input.value);
+    input.setSelectionRange(suffixIndex, suffixIndex);
+}
+
+// "원" 바로 뒤로 커서 못 가게 제한
+function clampAmountCaretToEditableRange(input) {
+    const suffixIndex = getAmountEditableEndIndex(input.value);
+    const start = input.selectionStart;
+    const end = input.selectionEnd;
+    if (start > suffixIndex || end > suffixIndex) {
+        input.setSelectionRange(suffixIndex, suffixIndex);
+    }
+}
+
+// editable 끝 인덱스 계산
+function getAmountEditableEndIndex(value) {
+    return value ? value.length - (value.endsWith("원") ? 1 : 0) : 0;
 }

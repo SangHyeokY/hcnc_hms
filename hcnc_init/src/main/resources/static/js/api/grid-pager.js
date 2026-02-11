@@ -14,6 +14,7 @@
     var COUNTER_CLASS = "hcnc-grid-count"; 
     var FOOTER_COMPACT_CLASS = "hcnc-grid-footer-compact";  // 공통코드 > 코드그룹은 폭이 좁아 건수 텍스트를 항상 페이지 버튼 아래로 배치
     var trackedTables = [];
+    var viewTableId = null; // table의 id값을 임시 저장
     var resizeTimer = null;
     var PAGINATION_SYMBOL_LANG = {
         pagination: {
@@ -115,8 +116,8 @@
             }
             var alignClass = "hcnc-align-" + align;
             var prevCssClass = toText(col.cssClass);
-            if (!prevCssClass) {
-                col.cssClass = alignClass;
+                                    if (!prevCssClass) {
+                                        col.cssClass = alignClass;
             } else if ((" " + prevCssClass + " ").indexOf(" " + alignClass + " ") === -1) {
                 col.cssClass = prevCssClass + " " + alignClass;
             }
@@ -200,17 +201,17 @@
     }
 
     function ensureCounterElement(table) {  // 건수 텍스트 span 생성/보장
-        if (table && table.__hcncGridCounterEl && document.body.contains(table.__hcncGridCounterEl)) {
+        if (!table) return null;
+        if (table.__hcncGridCounterEl && document.body.contains(table.__hcncGridCounterEl)) {
             return table.__hcncGridCounterEl;
         }
         var tableEl = getTableElement(table);
-        if (!tableEl) {
-            return null;
-        }
-        var counterEl = tableEl.querySelector("." + COUNTER_CLASS);
-        if (!counterEl && tableEl.id) {
-            counterEl = document.querySelector("." + COUNTER_CLASS + "[data-grid-for='" + tableEl.id + "']");
-        }
+        if (!tableEl) return null;
+
+        // tableId 기준으로만 counter를 찾음 => 동일한 id를 가진 테이블에서만 해당하는 counter 값 표시
+        var counterEl = tableEl.id
+            ? document.querySelector("." + COUNTER_CLASS + "[data-grid-for='" + tableEl.id + "']")
+            : null;
 
         if (!counterEl) {
             counterEl = document.createElement("span");
@@ -345,15 +346,17 @@
 
     function updateGridCounter(table) { // 건수/아이콘/반응형 한번에 갱신
         var tableEl = getTableElement(table);
-        if (!tableEl) {
-            return;
-        }
+        if (!tableEl || tableEl.id !== viewTableId) return; // 현재 보고 있는 id의 테이블 아니면 무시
+
         var counterEl = ensureCounterElement(table);
-        if (!counterEl) {
-            return;
-        }
+        if (!counterEl) return;
+
         enforcePaginatorSymbols(table);
-        counterEl.textContent = "총 데이터 수 " + getGridCount(table) + "건";
+        // counterEl.textContent = "총 데이터 수 " + getGridCount(table) + "건";
+        var count = getGridCount(table);
+        counterEl.innerHTML = '총 데이터 수 <span class="hcnc-grid-count-number">'
+                                + count +
+                              '</span>건';
 
         var titleEl = findRelatedTitle(tableEl);
         var inTitle = shouldRenderCounterInTitle(tableEl, titleEl);
@@ -458,8 +461,16 @@
     }
 
     function PatchedTabulator(element, options) {   // Tabulator 생성자 자체를 래핑
+        var tableEl = (typeof element === "string") ? document.querySelector(element) : element;
+        var tableId = tableEl ? tableEl.id : ""; // 테이블 id 저장
+
+        if (viewTableId && viewTableId !== tableId) {
+            console.log("조회 중인 테이블이 바뀌었습니다 : 기존 테이블 => " + viewTableId + ", 새 테이블 => " + tableId);
+            return new OriginalTabulator(element, withDefaultPaging(options)); // 그냥 생성만
+        }
         var instance = new OriginalTabulator(element, withDefaultPaging(options));
         trackedTables.push(instance);
+        viewTableId = tableId;
         return instance;
     }
 

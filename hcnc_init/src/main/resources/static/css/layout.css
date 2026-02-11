@@ -150,7 +150,7 @@ footer {width:100%; height:30px; line-height: 30px; padding:0 20px; display: fle
   height: 50%;
 } */
 
-.mem-area {background:#212E41; border-radius:5px; margin-bottom: 10px; padding:10px; display: flex; color: #fff; font-weight: 500;} /* align-items: center;  */
+.mem-area {background:#212E41; border-radius:8px; margin-bottom: 10px; padding:10px; display: flex; color: #fff; font-weight: 500;} /* align-items: center;  */
 .mem-area > div span{display:none;}
 .mem-area > div span.ico-lock{display:block;}
 .mem-area .logout-btn{border:none; background:none; color:#fff; font-weight: 500;}
@@ -162,7 +162,7 @@ footer {width:100%; height:30px; line-height: 30px; padding:0 20px; display: fle
 =================================================================================*/
  /* Title */
  .container-wrap h3 {font-size: 26px; font-weight:700; color:#000; }
- .content-title{padding-bottom:20px; }
+ .content-title{padding-bottom:20px; padding-top: 10px; }
  .content-body{ width: 100%; height:100%;}
  .container-wrap h4 {font-size:24px; font-weight:700; color:#000; }
  .title-wrap {display:flex; justify-content: space-between; align-items: center;}
