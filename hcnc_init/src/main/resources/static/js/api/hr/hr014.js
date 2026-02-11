@@ -102,11 +102,6 @@ function buildHr014TableA() {
         columns: [
             { title: "항 목", field: "cd_nm", hozAlign: "center", width: 125, minWidth: 125, maxWidth: 125 },
             {
-                title: "점 수",
-                headerHozAlign: "center",
-                headerVertical: "middle",
-                columns: [
-                    {
                         title: "1",
                         field: "lv1",
                         hozAlign: "center",
@@ -165,8 +160,6 @@ function buildHr014TableA() {
                         },
                         headerVertical: "middle",
                         headerSort: false
-                    }
-                ]
             },
             {
                 title: "평가의견",

@@ -193,9 +193,9 @@ function buildUserTable() {
         rowSelectionChanged: function () {
             syncTableCheckboxes(userTable);
         },
-        rowDblClick: function (e, row) {
-            openUserViewModal(row.getData());
-        }
+        // rowDblClick: function (e, row) {
+        //     openUserViewModal(row.getData());
+        // }
     });
 }
 

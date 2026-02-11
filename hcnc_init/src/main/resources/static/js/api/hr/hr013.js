@@ -148,8 +148,8 @@ function buildHr013Table() {
 
     window.hr013Table = new Tabulator("#TABLE_HR013_A", {
         layout: "fitColumns",
-        placeholder: "데이터 없음",
         paginationSize: 8,
+        placeholder: "데이터 없음",
         height: "100%",
         selectable: false,
         cellEdited: function () {
