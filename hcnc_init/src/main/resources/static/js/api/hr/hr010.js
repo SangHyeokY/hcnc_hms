@@ -961,6 +961,7 @@ openUserModal = async function(mode, data) {
     $(".tab-panel").hide();
     $("#tab1").show();
 
+    // 인력 관리 등록 시, 정해진 탭에 따라 자동으로 선택
     if(mode === "insert") {
         const activeTabBtn = document.querySelector(".hr010-user-type-tab.active");
         const devType = activeTabBtn?.dataset.userType === "freelancer" ? "HCNC_F" : "HCNC_S";
@@ -1090,7 +1091,6 @@ function clearUserForm() {
     $("#cert_txt").val("");
     $("#avail_dt").val("");
     $("#hope_rate_amt").val("");
-    // $("#dev_id_input").text("");
     $("#dev_type").val("");
     $("#select_work_md").val("");
     $("#select_ctrt_typ").val("");
@@ -1142,7 +1142,7 @@ function setModalMode(mode) {
     // dev_type 전용 제어
     // ================================
     $modal.find("#dev_type")
-          .toggleClass("ta-c", !isInsert)   // 등록만 왼쪽 정렬
+          .toggleClass("select-dev-type", isInsert) // 등록만 셀렉트 추가
           .prop("disabled", !isInsert); // 등록이 아니면 모두 disabled
 
 
