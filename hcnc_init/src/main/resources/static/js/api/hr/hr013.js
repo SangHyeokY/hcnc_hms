@@ -99,6 +99,49 @@ window.initTab3 = function () {
 
 let jobMap = [];
 
+function updateHr013StackRowState(row) {
+    if (!row || typeof row.getElement !== "function") {
+        return;
+    }
+
+    var rowEl = row.getElement();
+    if (!rowEl) {
+        return;
+    }
+
+    var stackText = rowEl.querySelector(".hr013-stack-text");
+    if (!stackText) {
+        rowEl.classList.remove("stack-multi-line");
+        return;
+    }
+
+    rowEl.classList.remove("stack-multi-line");
+
+    var shouldExpand = stackText.scrollHeight > (stackText.clientHeight + 1);
+    rowEl.classList.toggle("stack-multi-line", shouldExpand);
+
+    if (shouldExpand && typeof row.normalizeHeight === "function") {
+        row.normalizeHeight();
+    }
+}
+
+function scheduleHr013StackRowState(row) {
+    if (!row) {
+        return;
+    }
+
+    var run = function () {
+        updateHr013StackRowState(row);
+    };
+
+    if (typeof window !== "undefined" && typeof window.requestAnimationFrame === "function") {
+        window.requestAnimationFrame(run);
+        return;
+    }
+
+    setTimeout(run, 0);
+}
+
 // 프로젝트 테이블 생성
 function buildHr013Table() {
     if (!document.getElementById("TABLE_HR013_A")) return;
@@ -107,9 +150,16 @@ function buildHr013Table() {
         layout: "fitColumns",
         placeholder: "데이터 없음",
         paginationSize: 8,
+        height: "100%",
         selectable: false,
         cellEdited: function () {
            changedTabs.tab3 = true;
+        },
+        rowFormatter: function (row) {
+            scheduleHr013StackRowState(row);
+        },
+        rowUpdated: function (row) {
+            scheduleHr013StackRowState(row);
         },
         columns: [
             {
@@ -309,11 +359,20 @@ function initHr013SkillPicker() {
             var context = payload && payload.context ? payload.context : null;
 
             if (context && context.type === "grid" && context.row && typeof context.row.update === "function") {
-                context.row.update({
+                var updateResult = context.row.update({
                     skl_id_lst: getHr013SkillArrayFromCsv(csv),
                     stack_txt: csv,
                     stack_txt_nm: getSkillLabelList(csv)
                 });
+
+                if (updateResult && typeof updateResult.then === "function") {
+                    updateResult.then(function () {
+                        scheduleHr013StackRowState(context.row);
+                    });
+                } else {
+                    scheduleHr013StackRowState(context.row);
+                }
+
                 changedTabs.tab3 = true;
                 return;
             }
