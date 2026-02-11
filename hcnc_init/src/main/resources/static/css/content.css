@@ -2268,12 +2268,6 @@ section.search-area .search-btn-area .btn-search {
   padding-bottom: 0 !important;
 }
 
-/* 소속/계약정보 비고 높이 축소 */
-#TABLE_HR011_A #remark {
-  height: 72px;
-  min-height: 72px;
-  max-height: 72px;
-}
 
 /* 등록 첫 화면(탭 숨김)에서 팝업 자체 스크롤 방지 */
 #view-user-area.insert .modal-container-detail.main-human-modal {
@@ -2350,25 +2344,6 @@ section.search-area .search-btn-area .btn-search {
   resize: none;
 }
 
-/* HR010 탭1(소속/계약) + 경력연차 높이 재조정 */
-#view-user-area #tab1 .content-body {
-  overflow: hidden;
-}
-
-#view-user-area #TABLE_HR011_A tbody tr:not(:last-child) {
-  height: 46px;
-}
-
-#view-user-area #TABLE_HR011_A tbody tr:last-child {
-  height: 132px;
-}
-
-/* 비고 입력칸을 다시 넓히되, 팝업 전체 스크롤은 생기지 않게 균형값으로 고정 */
-#view-user-area #TABLE_HR011_A #remark {
-  height: 100px;
-  min-height: 100px;
-  max-height: 100px;
-}
 
 /* 인적사항 경력연차 행 높이 미세 축소 */
 #view-user-area #TABLE_HR010_B .career-exp-cell {
@@ -2495,4 +2470,35 @@ section.search-area .search-btn-area .btn-search {
 #view-user-area:not(.insert) .modal-content.hr010-main-pop {
   height: calc(92vh - 235px);
   overflow-y: hidden;
+}
+
+/* HR010 등록(insert) 화면 깨짐 방지: 폭/높이/라벨 폭 별도 고정 */
+#view-user-area.insert .modal-container-detail.main-human-modal {
+  width: 760px;
+  max-width: calc(100% - 32px);
+  max-height: 92vh;
+  overflow: hidden;
+}
+
+#view-user-area.insert .modal-content.hr010-main-pop {
+  height: calc(92vh - 130px);
+  max-height: calc(92vh - 130px);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+#view-user-area.insert #TABLE_HR010_B .table-area table {
+  table-layout: fixed;
+}
+
+#view-user-area.insert #TABLE_HR010_B .table-area th {
+  width: 82px;
+  white-space: nowrap;
+  word-break: keep-all;
+}
+
+/* HR010 등록 모달: 직원/프리랜서 select 폭 국소 조정 */
+#view-user-area.insert #dev_type {
+  min-width: 173px !important;
+  width: 100%;
 }
