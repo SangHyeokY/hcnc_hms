@@ -490,7 +490,6 @@ function buildUserTable() {
                     const value = cell.getValue();
                     if (!value) return "";
                     return `<div style="
-                        text-align:left;
                         white-space: nowrap;
                         overflow: hidden;
                         text-overflow: ellipsis;">

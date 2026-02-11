@@ -1264,6 +1264,12 @@ function showAlert({
         cancelButtonText: cancelText,
         cancelButtonColor,
 
+        customClass: {
+            popup: 'swal2-radius',
+            confirmButton: 'swal2-btn-radius',
+            cancelButton: 'swal2-btn-radius'
+        },
+
         scrollbarPadding: false
     });
 }

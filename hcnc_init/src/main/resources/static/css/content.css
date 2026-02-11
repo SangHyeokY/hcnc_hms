@@ -67,6 +67,14 @@ option{background:#fff; color:#333;}
     color: #333333;
     font-size: 20px;
 }
+
+.swal2-radius {
+    border-radius: 12px !important;
+}
+
+.swal2-btn-radius {
+    border-radius: 8px !important;
+}
 /*=================================================================================
  * Grid Table style
 =================================================================================*/
@@ -824,7 +832,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .tag-input-box.is-readonly .tag-item:last-child::after {
   content: "";
 }
-.tag-select-row {display: flex; align-items: center; gap: 8px; margin-top: 6px;}
+.tag-select-row {display: flex; align-items: center; gap: 8px; padding: 0 10px 4px 10px;}
 .tag-select-row select {min-width: 140px;}
 .tag-help {background:#f8fafc; font-size: 12px; color: #6b7280; margin-bottom: 6px;}
 .tag-input-box .tag-help {margin-bottom: 0; white-space: nowrap;}
@@ -1061,7 +1069,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 ================================================================================*/
 .modal-wrap {position: fixed; inset: 0; background: rgba(0, 0, 0, 0.45); z-index: 999;opacity: 0; transform: translateY(10px); transition: opacity 0.25s ease, transform 0.25s ease; pointer-events: none;}
 .modal-wrap.show {opacity: 1; transform: translateY(0); pointer-events: auto;}
-.modal-container {display: flex; flex-direction: column; max-height: 90vh; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); min-width: 560px; max-width: calc(100% - 32px); background: #fff; border-radius: 6px; box-sizing: border-box;}
+.modal-container {display: flex; flex-direction: column; max-height: 90vh; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); min-width: 560px; max-width: calc(100% - 32px); background: #fff; border-radius: 12px; box-sizing: border-box;}
 
 .modal-wrap .header {display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; border-bottom: 1px solid #eee;}
 .modal-wrap .header h4 {font-size: 18px; color: #000; font-weight: 700;}
@@ -1072,7 +1080,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .modal-wrap .header .modal-close:before {content: "×"; line-height: 1;}
 .modal-content .title-area{padding-bottom:8px;}
 
-.modal-content {display:flex; width:100%; height: 685px; gap:20px; padding:15px 20px;} /* overflow-Y: auto; */ /* 임시로 빼둠 */
+.modal-content {display:flex; width:100%; height: 685px; gap:20px; padding:15px 20px; overflow-Y: auto;}
 .modal-content.main-lang-picker-content{flex-direction:column; height:auto;}
 .modal-content.main-lang-picker-content .tabulator .tabulator-header,
 .modal-content.main-lang-picker-content .tabulator .tabulator-footer{display:none !important;}
@@ -1140,7 +1148,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
   min-width: 0;
 }
 
-.modal-container-detail {display: flex; flex-direction: column; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; min-width: 1240px; max-width: 1280px;background: #fff; border-radius: 6px; box-sizing: border-box;}
+.modal-container-detail {display: flex; flex-direction: column; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; min-width: 1240px; max-width: 1280px;background: #fff; border-radius: 12px; box-sizing: border-box;}
 .insert .modal-container-detail.main-human-modal{width:600px; min-width:auto; overflow:hidden;}
 .modal-container-detail .close-btn{background:none; border:none; }
 .modal-container-detail .close-btn img{width:16px; }
@@ -1673,7 +1681,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 #loading-overlay .loading-box {
     background: #fff;
     padding: 32px 44px;
-    border-radius: 14px;
+    border-radius: 12px;
     text-align: center;
     box-shadow: 0 8px 24px rgba(0,0,0,0.2);
 }
@@ -1696,7 +1704,6 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
     position: relative;
     display: inline-block;
     cursor: pointer;
-    padding-left: 6px;
 }
 
 /* 말풍선 박스 */
@@ -1797,10 +1804,12 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
     
 }
 
-#exp_yr_text {
+/* 경력연차 레이아웃 */
+#exp_yr_text, .tag-input {
+    display: flex;
     width: 100%;
-    text-align: left;
     padding: 0 10px;
+    justify-content: flex-start;
 }
 
 .career-spin-input {
@@ -1955,7 +1964,7 @@ section.search-area .search-info .hr010-search-name-input {
 }
 
 section.search-area .search-info .hr010-search-keyword-input {
-    width: 1021px !important;
+    min-width: 600px !important;
 }
 
 section.search-area .search-info .hr010-search-input::placeholder {
