@@ -5,6 +5,9 @@ var userTable;
 
 // 모드(insert: 등록 / update: 수정 / view: 상세조회)
 var currentMode = "insert";
+var currentHr010UserTypeTab = "staff";
+var hr010SourceRows = [];
+
 
 // 주 개발언어 태그 입력 공통 모듈
 var mainLangTagInput = null;
@@ -59,8 +62,24 @@ $(document).ready(async function () {
 
     // console.log(Swal); // swal 오류 확인용
 
-    // HR010 화면의 상단 검색 버튼 텍스트를 디자인 시안과 동일하게 맞춘다.
+    // 탭별 이벤트 정의
     $(".search-btn-area .btn-search").text("조회");
+
+    $(".hr010-user-type-tab").on("click", function () {
+        var nextType = String($(this).data("userType") || "staff");
+        if (currentHr010UserTypeTab === nextType) {
+            return;
+        }
+
+        currentHr010UserTypeTab = nextType;
+        $(".hr010-user-type-tab").removeClass("active");
+        $(this).addClass("active");
+
+        applyHr010UserTypeFilter();
+        if (window.userTable) {
+            updateTabulatorGridCount(window.userTable);
+        }
+    });
 
     // 근무형태 셀렉트 공통콤보
     setComCode("select_work_md", "WORK_MD", "", "cd", "cd_nm", function () {
@@ -610,6 +629,54 @@ function buildUserTable() {
 }
 
 // ============================================================================== //
+// 타입 판별/필터 함수
+function resolveHr010UserType(row) {
+    if (!row || typeof row !== "object") {
+        return "staff";
+    }
+
+    var devType = String(row.dev_type || "").toUpperCase();
+    if (devType === "HCNC_F" || devType === "F") {
+        return "freelancer";
+    }
+    if (devType === "HCNC_S" || devType === "S") {
+        return "staff";
+    }
+
+    var devId = String(row.dev_id || "").toUpperCase();
+    if (devId.indexOf("HCNC_F") === 0) {
+        return "freelancer";
+    }
+    if (devId.indexOf("HCNC_S") === 0) {
+        return "staff";
+    }
+
+    return "staff";
+}
+
+function filterHr010RowsByType(list) {
+    if (!Array.isArray(list)) {
+        return [];
+    }
+
+    if (currentHr010UserTypeTab === "freelancer") {
+        return list.filter(function (row) {
+            return resolveHr010UserType(row) === "freelancer";
+        });
+    }
+
+    return list.filter(function (row) {
+        return resolveHr010UserType(row) !== "freelancer";
+    });
+}
+
+function applyHr010UserTypeFilter() {
+    if (!userTable || typeof userTable.setData !== "function") {
+        return;
+    }
+
+    userTable.setData(filterHr010RowsByType(hr010SourceRows));
+}
 
 // db로부터 리스트 불러와서 인적사항 테이블에 넣기
 async function loadUserTableData() {
@@ -643,7 +710,8 @@ async function loadUserTableData() {
 
         const list = response.res || [];
         if (!list.length) {
-            userTable.setData([]);
+            hr010SourceRows = [];
+            applyHr010UserTypeFilter();
             return;
         }
 
@@ -672,7 +740,8 @@ async function loadUserTableData() {
             row.score = s.score || 0;
         });
 
-        userTable.setData(list);
+        hr010SourceRows = list;
+        applyHr010UserTypeFilter();
         // userTable.setData(response.res || []);
     } catch (e) {
         console.error(e);
