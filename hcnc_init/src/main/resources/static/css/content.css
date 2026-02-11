@@ -1116,10 +1116,13 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .insert .top-article,
 .update .top-article{width:100%;}
 .modal-human-area .table-area{width: 100%;}
-.modal-human-area .table-area input[type="text"]:read-only ,
-.modal-human-area .table-area :disabled{text-align:center;}
+
+.modal-human-area .table-area input[type="text"]:read-only,
+.modal-human-area .table-area :disabled{text-align:left;}
+/*
 .modal-com-area .table-area input[type="text"]:read-only ,
 .modal-com-area .table-area :disabled{text-align:left;}
+*/
 .modal-human-area .table-area table {width: 100%; height: 100%;}
 .modal-human-area .table-area tr:nth-child(1) th{border-top:1px solid #F0F1F3;}
 .modal-human-area .table-area tr:nth-child(1) td{border-top:1px solid #F0F1F3;}
@@ -1187,7 +1190,8 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 }
 
 #TABLE_HR011_A #amt,
-#TABLE_HR011_A #amt.is-readonly {
+#TABLE_HR011_A #amt.is-readonly,
+#hope_rate_amt {
     text-align: right;
 }
 
@@ -1750,8 +1754,10 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
     
 }
 
-.career-exp-cell {
-    text-align: center;
+#exp_yr_text {
+    width: 100%;
+    text-align: left;
+    padding: 0 10px;
 }
 
 .career-spin-input {
