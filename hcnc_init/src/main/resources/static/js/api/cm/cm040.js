@@ -62,6 +62,18 @@ $(document).ready(function () {
         loadMainTableData();
     });
 
+    // ESC 누르면 모달 닫힘
+    $(document).on("keydown", function (event) {
+        if (event.key === "Escape") {
+            if ($("#write-main-area").hasClass("show")) {
+                closeMainWriteModal();
+            }
+            else if ($("#write-detail-area").hasClass("show")) {
+                closeDetailWriteModal();
+            }
+        }
+    });
+
     /* MAIN 버튼 */
     $(".btn-main-add").on("click", () => openMainWriteModal("insert"));
     $(".btn-main-edit").on("click", () => openMainWriteModal("update"));

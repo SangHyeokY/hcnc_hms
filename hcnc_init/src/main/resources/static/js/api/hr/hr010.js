@@ -141,6 +141,13 @@ $(document).ready(async function () {
         }
     });
 
+    // ESC 누르면 모달 닫힘
+    $(document).on("keydown", function (event) {
+        if (event.key === "Escape") {
+            closeUserViewModal();
+        }
+    });
+
     // 조회 버튼이벤트
     $(".btn-main-view").on("click", function () {
         const rowData = btnEditView("상세정보를 조회할 ");

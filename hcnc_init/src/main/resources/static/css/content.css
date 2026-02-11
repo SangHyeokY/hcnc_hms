@@ -1072,7 +1072,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .modal-wrap .header .modal-close:before {content: "×"; line-height: 1;}
 .modal-content .title-area{padding-bottom:8px;}
 
-.modal-content {display:flex; width:100%; height: 685px; gap:20px; overflow-Y: auto; padding:15px 20px;}
+.modal-content {display:flex; width:100%; height: 685px; gap:20px; padding:15px 20px;} /* overflow-Y: auto; */ /* 임시로 빼둠 */
 .modal-content.main-lang-picker-content{flex-direction:column; height:auto;}
 .modal-content.main-lang-picker-content .tabulator .tabulator-header,
 .modal-content.main-lang-picker-content .tabulator .tabulator-footer{display:none !important;}

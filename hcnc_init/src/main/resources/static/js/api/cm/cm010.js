@@ -33,6 +33,18 @@ $(document).ready(function () {
         }
     });
 
+    // ESC 누르면 모달 닫힘
+    $(document).on("keydown", function (event) {
+        if (event.key === "Escape") {
+            if ($("#write-user-area").hasClass("show")) {
+                closeUserWriteModal();
+            }
+            else if ($("#view-user-area").hasClass("show")) {
+                closeUserViewModal();
+            }
+        }
+    });
+
     $(".btn-main-add").on("click", function () {
         openUserWriteModal("insert");
     });
