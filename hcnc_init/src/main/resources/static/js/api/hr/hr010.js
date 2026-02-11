@@ -962,6 +962,13 @@ openUserModal = async function(mode, data) {
     $(".tab-panel").hide();
     $("#tab1").show();
 
+    if(mode === "insert") {
+        const activeTabBtn = document.querySelector(".hr010-user-type-tab.active");
+        const devType = activeTabBtn?.dataset.userType === "freelancer" ? "HCNC_F" : "HCNC_S";
+        $("#dev_type").val(devType).trigger("change");
+
+    }
+    
     window.hr014TabInitialized = false;
     initMainLangTags();
 
