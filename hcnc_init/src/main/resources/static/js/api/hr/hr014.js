@@ -100,7 +100,7 @@ function buildHr014TableA() {
             changedTabs.tab4 = true;
         },
         columns: [
-            { title: "항 목", field: "cd_nm", hozAlign: "center", widthGrow: 1 },
+            { title: "항 목", field: "cd_nm", hozAlign: "center", width: 125, minWidth: 125, maxWidth: 125 },
             {
                 title: "점 수",
                 headerHozAlign: "center",

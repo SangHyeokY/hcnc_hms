@@ -656,7 +656,7 @@ button.btn.btn-add-skill {
 .tab4-content #TABLE_HR014_A .tabulator-row .tabulator-cell:first-child {
   font-size: 14px;
   font-weight: 700;
-  background-color: #E2F3FF !important;
+  background-color: #F1F4F9 !important;
 }
 .tab4-content #TABLE_HR014_A .hr014-comment-input {
   width:100%;
@@ -705,8 +705,8 @@ button.btn.btn-add-skill {
   color: #fff;
 }
 .risk-box-top .risk-detail textarea {
-  background: #f8fafc;
-  border-color: #dbe3f6;
+  background: #ffffff;
+  border-color: #D9D9D9;
 }
 .tab2-content .tab-btn,
 .tab2-content .tab-sub-btn,
@@ -1108,7 +1108,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .modal-wrap .header .modal-close:before {content: "×"; line-height: 1;}
 .modal-content .title-area{padding-bottom:8px;}
 
-.modal-content {display:flex; width:100%; height: 685px; gap:20px; padding:15px 20px; overflow-Y: auto;}
+.modal-content {display:flex; width:100%; height: 690px; gap:20px; padding:15px 20px; overflow-Y: auto;}
 .modal-content.main-lang-picker-content{flex-direction:column; height:auto;}
 .modal-content.main-lang-picker-content .tabulator .tabulator-header,
 .modal-content.main-lang-picker-content .tabulator .tabulator-footer{display:none !important;}
@@ -2229,4 +2229,252 @@ section.search-area .search-btn-area .btn-search {
   border-color: #111;
   background: #fff;
   color: #111;
+}
+
+/* HR010 modal scroll tuning */
+#view-user-area .tab3-content .content-body {
+  margin-bottom: 0;
+}
+
+/* 숙련도(B), 프로젝트(A) 그리드 셀 높이 고정 */
+#TABLE_HR012_B .tabulator-row,
+#TABLE_HR012_B .tabulator-row .tabulator-cell,
+#TABLE_HR013_A .tabulator-row:not(.stack-editing):not(.stack-multi-line),
+#TABLE_HR013_A .tabulator-row:not(.stack-editing):not(.stack-multi-line) .tabulator-cell {
+  height: 45px !important;
+  min-height: 45px !important;
+}
+
+#TABLE_HR012_B .tabulator-row .tabulator-cell,
+#TABLE_HR013_A .tabulator-row:not(.stack-editing):not(.stack-multi-line) .tabulator-cell {
+  line-height: 45px !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+/* 소속/계약정보 비고 높이 축소 */
+#TABLE_HR011_A #remark {
+  height: 72px;
+  min-height: 72px;
+  max-height: 72px;
+}
+
+/* 등록 첫 화면(탭 숨김)에서 팝업 자체 스크롤 방지 */
+#view-user-area.insert .modal-container-detail.main-human-modal {
+  max-height: 90vh;
+  overflow: hidden;
+}
+
+#view-user-area.insert .modal-content.hr010-main-pop {
+  height: calc(90vh - 130px);
+  overflow-y: hidden;
+}
+
+/* 프로젝트 기술스택이 길면 해당 행만 자동 확장 */
+#TABLE_HR013_A .tabulator-row.stack-multi-line,
+#TABLE_HR013_A .tabulator-row.stack-multi-line .tabulator-cell {
+  height: auto !important;
+  min-height: 45px !important;
+}
+
+#TABLE_HR013_A .tabulator-row.stack-multi-line .tabulator-cell {
+  line-height: 1.4 !important;
+  padding-top: 8px !important;
+  padding-bottom: 8px !important;
+  align-content: flex-start;
+}
+
+#TABLE_HR013_A .tabulator-row.stack-multi-line .hr013-stack-cell {
+  align-items: flex-start;
+}
+
+/* HR010 상세 탭(숙련도/리스크) 하단 잘림 방지 미세 조정 */
+#view-user-area .tab2-content .content-body,
+#view-user-area .tab4-content .content-body {
+  min-height: 0;
+  padding-bottom: 6px;
+}
+
+#view-user-area #TABLE_HR012_B.tabulator .tabulator-footer {
+  min-height: 44px;
+  padding: 6px 12px !important;
+}
+
+#view-user-area #TABLE_HR012_B.tabulator .tabulator-footer .tabulator-page[data-page="first"],
+#view-user-area #TABLE_HR012_B.tabulator .tabulator-footer .tabulator-page[data-page="prev"],
+#view-user-area #TABLE_HR012_B.tabulator .tabulator-footer .tabulator-page[data-page="next"],
+#view-user-area #TABLE_HR012_B.tabulator .tabulator-footer .tabulator-page[data-page="last"] {
+  width: 29px;
+  height: 29px;
+  min-width: 29px;
+  line-height: 27px;
+  font-size: 16px;
+}
+
+#view-user-area #HR014_TAB_B .content-body {
+  overflow: hidden;
+}
+
+#view-user-area #HR014_TAB_B .risk-box-top {
+  grid-template-columns: 100px 1fr;
+  gap: 10px;
+  min-height: 0;
+  height: calc(100% - 6px);
+}
+
+#view-user-area #HR014_TAB_B .risk-list-top .risk-item {
+  height: 36px;
+  padding: 5px 10px;
+}
+
+#view-user-area #HR014_TAB_B .risk-detail textarea {
+  min-height: 0;
+  height: calc(100% - 40px);
+  max-height: 100%;
+  resize: none;
+}
+
+/* HR010 탭1(소속/계약) + 경력연차 높이 재조정 */
+#view-user-area #tab1 .content-body {
+  overflow: hidden;
+}
+
+#view-user-area #TABLE_HR011_A tbody tr:not(:last-child) {
+  height: 46px;
+}
+
+#view-user-area #TABLE_HR011_A tbody tr:last-child {
+  height: 132px;
+}
+
+/* 비고 입력칸을 다시 넓히되, 팝업 전체 스크롤은 생기지 않게 균형값으로 고정 */
+#view-user-area #TABLE_HR011_A #remark {
+  height: 100px;
+  min-height: 100px;
+  max-height: 100px;
+}
+
+/* 인적사항 경력연차 행 높이 미세 축소 */
+#view-user-area #TABLE_HR010_B .career-exp-cell {
+  padding-top: 2px !important;
+  padding-bottom: 2px !important;
+}
+
+#view-user-area #TABLE_HR010_B .career-spin-wrap {
+  gap: 4px;
+}
+
+#view-user-area #TABLE_HR010_B .career-spin-input {
+  height: 32px;
+  line-height: 32px;
+}
+
+#view-user-area #TABLE_HR010_B .career-spin-btn {
+  height: 16px;
+}
+
+#view-user-area #TABLE_HR010_B #exp_yr_text {
+  padding: 1px 8px 0;
+  line-height: 20px;
+  font-size: 13px;
+}
+
+/* HR012 기술선택 팝업을 주개발언어 팝업과 동일 디자인으로 정렬 */
+.modal-container.hr012-skill-picker-container .btn-area button {
+  width: 40px;
+  height: 40px;
+}
+
+.modal-container.hr012-skill-picker-container .btn-area button img {
+  width: 100%;
+}
+
+#hr012-skill-picker-area .hr012-skill-picker-container {
+  width: 820px;
+}
+
+#hr012-skill-picker-area .hr012-skill-picker-content .tabulator .tabulator-header,
+#hr012-skill-picker-area .hr012-skill-picker-content .tabulator .tabulator-footer {
+  display: none !important;
+}
+
+#TABLE_HR012_SKILL_PICKER {
+  height: 367px !important;
+}
+
+#TABLE_HR012_SKILL_PICKER .tabulator-tableHolder {
+  overflow-x: hidden !important;
+}
+
+#TABLE_HR012_SKILL_PICKER .hr012-skill-chip.is-selected {
+  border-color: #111;
+  background: #fff;
+  color: #111;
+}
+
+/* 보유역량(A) 상세 컬럼이 우측 영역 전체를 채우도록 폭 고정 */
+#view-user-area #tab2 #TABLE_HR012_A,
+#view-user-area #tab2 #TABLE_HR012_A.tabulator {
+  width: 100% !important;
+}
+
+/* HR010 등록(insert) 모달은 내용 기준 높이로 별도 처리 */
+#view-user-area.insert .modal-content.hr010-main-pop {
+  height: auto;
+  max-height: calc(90vh - 130px);
+  overflow-y: hidden;
+}
+
+/* 숙련도 탭(TABLE_HR012_B) 세로 스크롤 방지: 헤더 높이만 미세 축소 */
+#view-user-area #TABLE_HR012_B .tabulator-header {
+  height: 48px !important;
+  min-height: 48px !important;
+}
+
+#view-user-area #TABLE_HR012_B .tabulator-header .tabulator-col {
+  height: 48px !important;
+  min-height: 48px !important;
+}
+
+#view-user-area #TABLE_HR012_B .tabulator-header .tabulator-col .tabulator-col-content {
+  height: 48px !important;
+  min-height: 48px !important;
+  padding: 0 8px !important;
+}
+
+#view-user-area #TABLE_HR012_B .tabulator-header .tabulator-col .tabulator-col-content .tabulator-col-title {
+  font-size: 15px !important;
+}
+
+
+/* HR014 관리자평가: 기본 스타일 유지 + 셀 경계선만 약하게 추가 */
+#view-user-area #TABLE_HR014_A .tabulator-header .tabulator-col {
+  border-right: 1px solid #eef1f5 !important;
+  border-bottom: 1px solid #eef1f5 !important;
+}
+
+#view-user-area #TABLE_HR014_A .tabulator-header .tabulator-col:last-child {
+  border-right: 0 !important;
+}
+
+#view-user-area #TABLE_HR014_A .tabulator-row .tabulator-cell {
+  border-right: 1px solid #eef1f5 !important;
+  border-bottom: 1px solid #eef1f5 !important;
+}
+
+#view-user-area #TABLE_HR014_A .tabulator-row .tabulator-cell:last-child {
+  border-right: 0 !important;
+}
+
+/* HR010 수정/상세 팝업은 insert와 분리해 높이를 조금 더 확보 */
+#view-user-area:not(.insert) .modal-container-detail.main-human-modal {
+  width: 82%;
+  max-width: 1320px;
+  max-height: 92vh;
+  overflow: hidden;
+}
+
+#view-user-area:not(.insert) .modal-content.hr010-main-pop {
+  height: calc(92vh - 235px);
+  overflow-y: hidden;
 }

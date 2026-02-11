@@ -50,7 +50,7 @@ window.initTab2 = function() {
 
         if (tabId === "tab2-A") {
             $("#TABLE_HR012_A").show();
-            window.hr012TableA.redraw();
+            window.hr012TableA.redraw(true);
             $("#TABLE_HR012_B").hide();
             $(".hr012-toolbar-01").show();
             $(".hr012-toolbar-02").hide();
@@ -84,7 +84,7 @@ function buildHr012TableA() {
     if (window.hr012TableA) return;
 
     window.hr012TableA = new Tabulator("#TABLE_HR012_A", {
-        layout: "fitDataStretch",
+        layout: "fitColumns",
         // 보유역량(A)은 현재 페이징 미사용. 필요 시 true/"local"로 즉시 전환 가능.
         pagination: false,
         placeholder: "데이터 없음",
@@ -156,6 +156,7 @@ function buildHr012TableB() {
         layout: "fitColumns",
         paginationSize: 8,
         placeholder: "데이터 없음",
+        height: "100%",
         cellEdited: function (cell) {
            console.log("cellEdited B !!!!");
            console.log(cell.getValue());
@@ -751,7 +752,7 @@ function buildHr012SkillPickerTable() {
 
     hr012SkillPickerTable = new Tabulator("#TABLE_HR012_SKILL_PICKER", {
         layout: "fitColumns",
-        height: "362px",
+        height: "367px",
         placeholder: "등록된 기술이 없습니다.",
         headerHozAlign: "center",
         columnDefaults: {
@@ -759,7 +760,7 @@ function buildHr012SkillPickerTable() {
             resizable: false
         },
         columns: [
-            { title: "분야", field: "groupName", width: 170, hozAlign: "left" },
+            { title: "분야", field: "groupName", width: 180, hozAlign: "left" },
             { title: "기술", field: "skills", hozAlign: "left", formatter: hr012SkillChipFormatter, widthGrow: 3 }
         ],
         data: []
