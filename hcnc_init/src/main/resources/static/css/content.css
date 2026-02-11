@@ -1965,50 +1965,13 @@ section.search-area .search-info .hr010-search-input::placeholder {
     opacity: 1;
 }
 
-/* HR010/CM010/CM040 상단 조회 버튼 스타일 */
-.contents-wrap:has(.hr010-search-input) > section.search-area form > .fl-ac.fl-sb,
-.contents-wrap:has(#TABLE_USER) > section.search-area form > .fl-ac.fl-sb,
-.contents-wrap:has(#TABLE_COMMON_MAIN) > section.search-area form > .fl-ac.fl-sb {
-  justify-content: flex-start !important;
+section.search-area .search-btn-area .btn-search {
+  width: 107px;
+  height: 43px;
+  border-radius: 48px;
+  font-size: 18px;
+  padding-left: 30px;
 }
-
-.contents-wrap:has(.hr010-search-input) > section.search-area .search-btn-area,
-.contents-wrap:has(#TABLE_USER) > section.search-area .search-btn-area,
-.contents-wrap:has(#TABLE_COMMON_MAIN) > section.search-area .search-btn-area {
-  margin-left: 30px;
-}
-
-.contents-wrap:has(.hr010-search-input) > section.search-area .search-btn-area .btn-search,
-.contents-wrap:has(#TABLE_USER) > section.search-area .search-btn-area .btn-search,
-.contents-wrap:has(#TABLE_COMMON_MAIN) > section.search-area .search-btn-area .btn-search {
-  width: 107px !important;
-  min-width: 107px !important;
-  height: 43px !important;
-  border-radius: 999px !important;
-  border: 1px solid #212E41 !important;
-  background: #212E41 !important;
-  color: #FFFFFF !important;
-  font-size: 18px !important;
-  font-weight: 600 !important;
-  line-height: 1 !important;
-  padding: 0 14px !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 15px !important;
-}
-
-.contents-wrap:has(.hr010-search-input) > section.search-area .search-btn-area .btn-search::before,
-.contents-wrap:has(#TABLE_USER) > section.search-area .search-btn-area .btn-search::before,
-.contents-wrap:has(#TABLE_COMMON_MAIN) > section.search-area .search-btn-area .btn-search::before {
-  content: "";
-  display: inline-block;
-  width: 12px;
-  height: 12px;
-  flex: 0 0 12px;
-  background: url("../icons/ico-search.png") center center / 12px 12px no-repeat;
-}
-
 
 /* HR010/CM010/CM040 화면: 검색영역 세로 스크롤 제거 */
 .contents-wrap:has(.hr010-search-input) > section.search-area,
@@ -2030,8 +1993,6 @@ section.search-area .search-info .hr010-search-input::placeholder {
 .contents-wrap:has(#TABLE_HR010_A) #hms-table-wrap {
   overflow-y: hidden !important;
 }
-
-
 
 /* Global Grid Style (all Tabulator tables) */
 .tabulator {
@@ -2080,7 +2041,7 @@ section.search-area .search-info .hr010-search-input::placeholder {
 }
 
 .tabulator .tabulator-header .tabulator-col .tabulator-col-content .tabulator-col-title {
-  font-size: 15px !important;
+  font-size: 16px !important;
   font-weight: 700 !important;
   line-height: 1.4 !important;
 }
@@ -2124,7 +2085,7 @@ section.search-area .search-info .hr010-search-input::placeholder {
 .modal-wrap .tab-area .tab-btn {
   background: #E8EBF0;
   color: #82878F;
-  font-size: 18px;
+  /*font-size: 18px;*/
   border-right: 1px solid #C3C8D2;
 }
 
