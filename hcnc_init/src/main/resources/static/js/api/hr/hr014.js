@@ -71,8 +71,12 @@ function initHr014Tabs() {
 
         if (target === "hr014-B") {
             $("#HR014_TAB_B").addClass("active");
+            $(".hr014-toolbar-01").hide();
+            $(".hr014-toolbar-02").show();
         } else {
             $("#HR014_TAB_A").addClass("active");
+            $(".hr014-toolbar-01").show();
+            $(".hr014-toolbar-02").hide();
             // 숨김 상태였다가 다시 표시되는 Tabulator는 redraw가 필요하다.
             if (window.hr014TableA) {
                 window.hr014TableA.redraw(true);

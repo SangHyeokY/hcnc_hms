@@ -10,6 +10,18 @@
                     <button type="button" class="hr014-tab-btn active" data-tab="hr014-A">관리자 평가</button>
                     <button type="button" class="hr014-tab-btn" data-tab="hr014-B">리스크 관리</button>
                 </div>
+                <div class="hr014-toolbar-01 fl-sb">
+                    <p class="tool-title">관리자 평가</p>
+                </div>
+                <div class="hr014-toolbar-02 fl-sb" style="display: none;">
+                    <p class="tool-title">리스크 관리</p>
+                    <div class="risk-extra">
+                        <label class="risk-check">
+                            <span>재투입 가능여부</span>
+                            <input type="checkbox" id="HR015_REIN_CHECK">
+                        </label>
+                    </div>
+                </div>
                 <div class="hr014-tab-panels">
                     <div class="hr014-tab-panel active" id="HR014_TAB_A">
                         <div class="content-body">
@@ -23,13 +35,6 @@
                                 <div class="risk-detail">
                                     <textarea id="HR015_RISK_TEXT" placeholder="Enter message."></textarea>
                                 </div>
-                            </div>
-
-                            <div class="risk-extra">
-                                <label class="risk-check">
-                                    <span>재투입 가능여부</span>
-                                    <input type="checkbox" id="HR015_REIN_CHECK">
-                                </label>
                             </div>
                         </div>
                     </div>

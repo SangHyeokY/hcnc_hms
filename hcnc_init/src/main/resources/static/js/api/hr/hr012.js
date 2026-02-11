@@ -53,13 +53,15 @@ window.initTab2 = function() {
             window.hr012TableA.redraw();
             $("#TABLE_HR012_B").hide();
             if (!window.hr010ReadOnly) {
-                $(".hr012-toolbar").show();
+                $(".hr012-toolbar-01").show();
+                $(".hr012-toolbar-02").hide();
             }
         } else if (tabId === "tab2-B") {
             $("#TABLE_HR012_B").show();
             window.hr012TableB.redraw();
             $("#TABLE_HR012_A").hide();
-            $(".hr012-toolbar").hide();
+            $(".hr012-toolbar-01").hide();
+            $(".hr012-toolbar-02").show();
             closeHr012SkillPicker(true);
         }
     });
@@ -88,8 +90,7 @@ function buildHr012TableA() {
         columns: [
             { title: "코드", field: "cd", visible: false },
             { title: "구분", field: "cd_nm", hozAlign: "left", width: 180, minWidth: 160 },
-            { title: "상세", field: "skl_id_lst", hozAlign: "left",widthGrow: 1, formatter: tagFormatter },
-            { title: "key", field: "key", visible: false }
+            { title: "상세", field: "skl_id_lst", hozAlign: "left",widthGrow: 1, formatter: tagFormatter }
         ],
         data: []
     });
@@ -151,6 +152,7 @@ function buildHr012TableB() {
 
     window.hr012TableB = new Tabulator("#TABLE_HR012_B", {
         layout: "fitColumns",
+        paginationSize: 8,
         placeholder: "데이터 없음",
         cellEdited: function (cell) {
            console.log("cellEdited B !!!!");

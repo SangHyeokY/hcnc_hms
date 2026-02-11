@@ -394,9 +394,9 @@ button.btn.btn-add-skill {
 ================================================================================*/
 .risk-box {
   display: grid;
-  grid-template-columns: 160px 1fr;
+  grid-template-columns: 110px 1fr;
   gap: 12px;
-  margin-bottom: 12px;
+  height: 100%;
 }
 .risk-list {
   border: 1px solid #dcdcdc;
@@ -435,7 +435,7 @@ button.btn.btn-add-skill {
   border: 1px solid #dcdcdc;
   border-radius: 6px;
   padding: 10px 12px;
-
+  height: calc(100% - 4px);
 }
 .risk-extra {
   margin: 10px 14px 12px;
@@ -543,7 +543,7 @@ button.btn.btn-add-skill {
   position: relative;
   z-index: 2;
 }
-.hr014-tab-wrap {display: flex; flex-direction:column; gap: 16px; height: 100%;}
+.hr014-tab-wrap {display: flex; flex-direction:column; gap: 10px; height: 100%;}
 .hr014-side-tabs {
   display: flex;
   width: 100%;
@@ -621,17 +621,20 @@ button.btn.btn-add-skill {
   gap: 10px;
 }
 .risk-list-top .risk-item {
-  border: 1px solid transparent;
+  border: 1px solid rgba(1, 0, 0, 0.2);
   border-radius:50px;
   padding: 6px 12px;
-  background: #e7e7e7;
+  background: #ffffff;
   font-weight: 600;
   font-size: 13px;
   color: #6b7280;
+  text-align: center;
+  align-content: center;
+  height: 40px;
 }
 
 .risk-list-top .risk-item.active {
-  background: #333;
+  background: #E52237;
   color: #fff;
 }
 .risk-box-top .risk-detail textarea {
@@ -1015,7 +1018,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .modal-wrap .header .modal-close:before {content: "×"; line-height: 1;}
 .modal-content .title-area{padding-bottom:8px;}
 
-.modal-content {display:flex; width:100%; height: 682.59px; gap:20px; overflow-Y: auto; padding:20px;}
+.modal-content {display:flex; width:100%; height: 685px; gap:20px; overflow-Y: auto; padding:15px 20px;}
 .modal-content.main-lang-picker-content{flex-direction:column; height:auto;}
 .modal-content.main-lang-picker-content .tabulator .tabulator-header,
 .modal-content.main-lang-picker-content .tabulator .tabulator-footer{display:none !important;}
@@ -1190,9 +1193,16 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
     font-weight: 500;
     position: relative;
 }
-.hr012-toolbar { display: flex; justify-content: space-between; align-items:center; margin-bottom: 8px; }
-.hr012-toolbar p.tool-title{font-weight:bold;}
-.hr012-toolbar button.btn.btn-add-skill {border: 1px solid #E50019; color: #E50019;  background: #fff;  border-radius: 8px;}
+
+.hr012-toolbar-01,
+.hr012-toolbar-02,
+.hr014-toolbar-01,
+.hr014-toolbar-02 { display: flex; justify-content: space-between; align-items:center; height: 40px }
+.hr012-toolbar-01 p.tool-title,
+.hr012-toolbar-02 p.tool-title,
+.hr014-toolbar-01 p.tool-title,
+.hr014-toolbar-02 p.tool-title{font-size: 18px; font-weight:bold;}
+.hr012-toolbar-01 button.btn.btn-add-skill {border: 1px solid #E50019; color: #E50019;  background: #fff;  border-radius: 8px;}
 
 .tab2-content #TABLE_HR012_A.is-readonly,
 .tab2-content #TABLE_HR012_B.is-readonly,
