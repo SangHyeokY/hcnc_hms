@@ -133,25 +133,6 @@ function buildHr013Table() {
                     syncRowCheckbox(row, next);
                 }
             },
-            { title: "프로젝트명", field: "prj_nm", editor: "input", editable: isHr013Editable, cellClick: startEditOnClick, width: 250 },
-            {
-                title: "시작일",
-                field: "st_dt",
-                hozAlign: "center",
-                formatter: dateDisplayFormatter,
-                editor: dateEditor,
-                editable: isHr013Editable,
-                cellClick: startEditOnClick, width: 140
-            },
-            {
-                title: "종료일",
-                field: "ed_dt",
-                hozAlign: "center",
-                formatter: dateDisplayFormatter,
-                editor: dateEditor,
-                editable: isHr013Editable,
-                cellClick: startEditOnClick, width: 140
-            },
             {
                 title: "당사 여부",
                 field: "inprj_yn",
@@ -185,7 +166,8 @@ function buildHr013Table() {
                 },
                 cellClick: startEditOnClick, width: 110
             },
-            { title: "계약단가", field: "rate_amt", hozAlign: "right", formatter: hr013AmountFormatter, editor: "input", editable: isHr013Editable, cellClick: startEditOnClick , width: 110},
+
+            { title: "프로젝트명", field: "prj_nm", editor: "input", editable: isHr013Editable, cellClick: startEditOnClick, width: 250 },
             {
                 title: "역할",
                 field: "job_cd",
@@ -202,6 +184,25 @@ function buildHr013Table() {
                 },
                 cellClick: startEditOnClick, width: 90
             },
+            {
+                title: "시작일",
+                field: "st_dt",
+                hozAlign: "center",
+                formatter: dateDisplayFormatter,
+                editor: dateEditor,
+                editable: isHr013Editable,
+                cellClick: startEditOnClick, width: 140
+            },
+            {
+                title: "종료일",
+                field: "ed_dt",
+                hozAlign: "center",
+                formatter: dateDisplayFormatter,
+                editor: dateEditor,
+                editable: isHr013Editable,
+                cellClick: startEditOnClick, width: 140
+            },
+            { title: "계약단가", field: "rate_amt", hozAlign: "right", formatter: hr013AmountFormatter, editor: "input", editable: isHr013Editable, cellClick: startEditOnClick , width: 110},
             {
                 title: "기술스택",
                 field: "skl_id_lst",
