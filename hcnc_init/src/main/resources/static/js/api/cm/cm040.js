@@ -1,21 +1,39 @@
-/********************************************************
- * 공통코드관리 - cm040.js (hcnc_hms)
- *  - tb_cd_mst 기준
- *  - 코드그룹(MAIN) / 상세코드(DETAIL) 관리
- ********************************************************/
+// 공통코드관리(cm040): tb_cd_mst 기반 MAIN/DETAIL 코드 관리 화면
 
-/* =====================================================
- * 전역 변수
- * ===================================================== */
+// ===== 전역 변수 =====
 var mainTable;
 var detailTable;
 
-var mainMode = "insert";
 var detailMode = "insert";
 
-var currentDetailGrpCd = ""; // DETAIL formatter에서 사용
-var amountSuffixGroupCds = ["job_cd"];
-var pointSuffixGroupCds  = ["rank", "grade", "grd_cd", "grade_cd"];
+// API 경로를 한곳에서 관리해 엔드포인트 변경 시 수정 범위를 줄인다.
+var API_ENDPOINTS = {
+    main: {
+        list: "/cm040/main/list",
+        delete: "/cm040/main/delete",
+        save: "/cm040/main/save"
+    },
+    detail: {
+        list: "/cm040/detail/list",
+        delete: "/cm040/detail/delete",
+        save: "/cm040/detail/save",
+        sort: "/cm040/detail/sort"
+    }
+};
+
+// 그룹코드별 숫자 접미사 규칙(원/점)
+var GROUP_SUFFIX_RULES = {
+    amount: ["job_cd"],
+    point: ["rank", "grade", "grd_cd", "grade_cd"]
+};
+
+// 모달 show/hide 전환 타이밍
+var MODAL_TIMINGS = {
+    showDelayMs: 100,
+    hideDelayMs: 250
+};
+
+var currentDetailGrpCd = ""; // DETAIL formatter/폭 계산에서 사용
 var detailBaseWidths = {
     checkBox: 50,
     cd: 90,
@@ -33,9 +51,7 @@ var detailAutoWidthColumns = [
 var detailStretchFields = ["cd_nm", "adinfo_01", "adinfo_02", "adinfo_03", "adinfo_04", "adinfo_05"];
 
 
-/* =====================================================
- * 초기화
- * ===================================================== */
+// ===== 초기화 =====
 $(document).ready(function () {
     buildTables();
     loadMainTableData();
@@ -63,11 +79,11 @@ $(document).ready(function () {
 });
 
 
-/* =====================================================
- * 테이블 생성
- * ===================================================== */
+// ===== 테이블 생성 =====
 function buildTables() {
+    // Tabulator 라이브러리가 없으면 테이블 초기화를 진행하지 않는다.
     if (!window.Tabulator) return;
+    // MAIN 컨테이너가 없는 화면에서는 공통코드 테이블 생성 로직을 생략한다.
     if (!document.getElementById("TABLE_COMMON_MAIN")) return;
 
     function toggleRowSelection(row) {
@@ -82,6 +98,7 @@ function buildTables() {
 
     function syncTableCheckboxes(table) {
         if (!table || typeof table.getRows !== "function") return;
+        // Tabulator 선택 상태와 커스텀 체크박스 표시 상태를 일치시킨다.
         table.getRows().forEach(r => syncRowCheckbox(r, r.isSelected()));
     }
 
@@ -125,10 +142,11 @@ function buildTables() {
             syncTableCheckboxes(mainTable);
 
             if (data.length) {
+                // MAIN 선택 행의 코드(cd)를 기준으로 DETAIL 목록을 조회한다.
                 loadDetailTableData(data[0].cd);
             } else {
-                currentDetailGrpCd = "";
-                if (detailTable) detailTable.clearData();
+                // MAIN 선택이 없으면 DETAIL 화면 상태를 초기화한다.
+                resetDetailTableState();
             }
         }
     });
@@ -177,39 +195,49 @@ function buildTables() {
         rowSelected: r => syncRowCheckbox(r, true),
         rowDeselected: r => syncRowCheckbox(r, false),
         rowMoved: () => {
+            // 행 이동 직후 화면상의 순서대로 sort_no를 다시 계산한다.
             detailTable.getData().forEach((d, i) => d.sort_no = i + 1);
         }
     });
 }
 
 
-/* =====================================================
- * 공통 유틸
- * ===================================================== */
+// ===== 공통 유틸 =====
+function appendGroupSuffix(text) {
+    // 그룹코드가 금액 계열이면 원 단위를 붙인다.
+    if (GROUP_SUFFIX_RULES.amount.includes(currentDetailGrpCd)) return text + "원";
+    // 그룹코드가 점수 계열이면 점 단위를 붙인다.
+    if (GROUP_SUFFIX_RULES.point.includes(currentDetailGrpCd)) return text + "점";
+    return text;
+}
+
+function formatNumericLikeValue(value, options) {
+    var opts = options || {};
+    // null/undefined를 안전하게 문자열로 변환한다.
+    var raw = String(value == null ? "" : value);
+    // 폭 계산용 호출에서는 앞뒤 공백을 제거해 길이 왜곡을 줄인다.
+    var normalized = opts.trim ? raw.trim() : raw;
+    if (normalized === "") return "";
+
+    // 사용자 입력 콤마를 제거한 뒤 숫자 유효성 검사를 수행한다.
+    var numeric = normalized.replace(/,/g, "");
+    if (!/^-?\d+(?:\.\d+)?$/.test(numeric)) {
+        // formatter에서는 원본 유지, 폭 계산에서는 정규화 문자열을 사용한다.
+        return opts.returnOriginalOnInvalid ? value : normalized;
+    }
+
+    // 숫자 포맷(천 단위 구분) + 그룹코드 단위(원/점) 규칙을 적용한다.
+    return appendGroupSuffix(Number(numeric).toLocaleString("ko-KR"));
+}
+
 function amountFormatter(cell) {
-    const v = cell.getValue();
-    if (v == null || v === "") return "";
-
-    const n = String(v).replace(/,/g, "");
-    if (!/^-?\d+(\.\d+)?$/.test(n)) return v;
-
-    const f = Number(n).toLocaleString("ko-KR");
-    if (amountSuffixGroupCds.includes(currentDetailGrpCd)) return f + "원";
-    if (pointSuffixGroupCds.includes(currentDetailGrpCd)) return f + "점";
-    return f;
+    return formatNumericLikeValue(cell.getValue(), {
+        returnOriginalOnInvalid: true
+    });
 }
 
 function formatAmountLikeValue(value) {
-    if (value == null || value === "") return "";
-    var raw = String(value).trim();
-    var numeric = raw.replace(/,/g, "");
-    if (!/^-?\d+(?:\.\d+)?$/.test(numeric)) {
-        return raw;
-    }
-    var formatted = Number(numeric).toLocaleString("ko-KR");
-    if (amountSuffixGroupCds.includes(currentDetailGrpCd)) return formatted + "원";
-    if (pointSuffixGroupCds.includes(currentDetailGrpCd)) return formatted + "점";
-    return formatted;
+    return formatNumericLikeValue(value, { trim: true });
 }
 
 function normalizeWidthText(value) {
@@ -217,6 +245,7 @@ function normalizeWidthText(value) {
 }
 
 function getTextLength(value) {
+    // 멀티바이트 문자열 길이를 안전하게 계산한다.
     return Array.from(String(value || "")).length;
 }
 
@@ -240,41 +269,28 @@ function resolveDetailWidthPolicy(cfg) {
 }
 
 function calcDetailColumnWidth(rows, cfg) {
+    // 현재 그룹코드 기준 폭 정책(min/max/charPx/pad)을 가져온다.
     var policy = resolveDetailWidthPolicy(cfg);
+    // 헤더 텍스트 길이를 기본값으로 시작한다.
     var maxLen = getTextLength(cfg.title || "");
     (rows || []).forEach(function (row) {
         var source = row ? row[cfg.field] : "";
+        // amountLike 컬럼은 실제 화면 표기(원/점 포함) 기준으로 길이를 측정한다.
         var text = cfg.amountLike ? formatAmountLikeValue(source) : source;
         var len = getTextLength(normalizeWidthText(text));
         if (len > maxLen) {
             maxLen = len;
         }
     });
+    // 글자 길이 기반 픽셀 폭을 계산하고 min/max 범위로 보정한다.
     var width = Math.ceil((maxLen * policy.charPx) + policy.pad);
     if (width < policy.min) width = policy.min;
     if (width > policy.max) width = policy.max;
     return width;
 }
 
-function calcDetailUniformWidth(rows, cfg) {
-    var maxLen = getTextLength(cfg.title || "");
-    (rows || []).forEach(function (row) {
-        (cfg.fields || []).forEach(function (field) {
-            var source = row ? row[field] : "";
-            var text = cfg.amountLike ? formatAmountLikeValue(source) : source;
-            var len = getTextLength(normalizeWidthText(text));
-            if (len > maxLen) {
-                maxLen = len;
-            }
-        });
-    });
-    var width = Math.ceil((maxLen * cfg.charPx) + cfg.pad);
-    if (width < cfg.min) width = cfg.min;
-    if (width > cfg.max) width = cfg.max;
-    return width;
-}
-
 function getDetailFieldMax(field) {
+    // 컬럼 정의에 등록된 최대폭(max)을 조회한다.
     var direct = detailAutoWidthColumns.find(function (cfg) {
         return cfg.field === field;
     });
@@ -299,10 +315,12 @@ function getDetailContainerWidth() {
     var holder = tableEl.querySelector(".tabulator-tableholder")
         || tableEl.querySelector(".tabulator-tableHolder");
     var baseWidth = holder ? holder.clientWidth : tableEl.clientWidth;
+    // 경계선/오차를 감안해 2px를 여유로 둔다.
     return Math.max(0, baseWidth - 2);
 }
 
 function sumDetailWidths(widthMap) {
+    // 고정폭 컬럼 + 자동폭 컬럼 합계를 반환한다.
     return detailBaseWidths.checkBox +
         detailBaseWidths.cd +
         detailBaseWidths.sort_no +
@@ -323,6 +341,7 @@ function distributeDetailExtraWidth(widthMap, extraWidth) {
     var remain = Math.max(0, Math.floor(extraWidth));
 
     while (remain > 0 && fields.length > 0) {
+        // 남은 가변 컬럼 수로 나눠 1회 분배량을 계산한다.
         var per = Math.max(1, Math.floor(remain / fields.length));
         var next = [];
         fields.forEach(function (field) {
@@ -335,6 +354,7 @@ function distributeDetailExtraWidth(widthMap, extraWidth) {
             if (room <= 0) {
                 return;
             }
+            // 각 컬럼의 최대폭 한도를 넘지 않도록 분배한다.
             var add = Math.min(per, room, remain);
             widthMap[field] = current + add;
             remain -= add;
@@ -363,6 +383,7 @@ function applyDetailColumnAutoWidth(rows) {
     var list = Array.isArray(rows) ? rows : [];
     var widthMap = {};
     detailAutoWidthColumns.forEach(function (cfg) {
+        // 컬럼별 데이터 길이를 계산해 목표 폭을 만든다.
         var width = calcDetailColumnWidth(list, cfg);
         widthMap[cfg.field] = width;
     });
@@ -370,6 +391,7 @@ function applyDetailColumnAutoWidth(rows) {
     var containerWidth = getDetailContainerWidth();
     var currentSum = sumDetailWidths(widthMap);
     if (containerWidth > 0 && currentSum < containerWidth) {
+        // 합계 폭이 부족하면 가변 컬럼에 남는 폭을 분배한다.
         distributeDetailExtraWidth(widthMap, (containerWidth - currentSum));
     }
 
@@ -378,13 +400,14 @@ function applyDetailColumnAutoWidth(rows) {
     if (typeof detailTable.updateColumnDefinition === "function") {
         var tasks = [];
         detailAutoWidthColumns.forEach(function (cfg) {
-        var policy = resolveDetailWidthPolicy(cfg);
-        tasks.push(detailTable.updateColumnDefinition(cfg.field, {
-            width: widthMap[cfg.field],
-            minWidth: policy.min,
-            maxWidth: policy.max
-        }));
-    });
+            var policy = resolveDetailWidthPolicy(cfg);
+            tasks.push(detailTable.updateColumnDefinition(cfg.field, {
+                width: widthMap[cfg.field],
+                minWidth: policy.min,
+                maxWidth: policy.max
+            }));
+        });
+        // 비동기 업데이트 완료를 기다리기 위해 Promise를 반환한다.
         return Promise.all(tasks).catch(function () {
             return null;
         });
@@ -401,6 +424,7 @@ function applyDetailColumnAutoWidth(rows) {
         }
 
         if (col.definition) {
+            // Tabulator 4.x 내부 컬럼 정의와 runtime 속성을 함께 갱신한다.
             var policy = resolveDetailWidthPolicy(cfg);
             col.definition.minWidth = policy.min;
             col.definition.maxWidth = policy.max;
@@ -416,6 +440,7 @@ function applyDetailColumnAutoWidth(rows) {
     });
 
     if (typeof detailTable.redraw === "function") {
+        // 강제 redraw로 헤더/셀 폭 반영 시점을 맞춘다.
         detailTable.redraw(true);
     }
 }
@@ -425,10 +450,22 @@ function getSearchUseYnValue() {
         || $("#searchUseYn").val();
 }
 
+function resetDetailTableState() {
+    // 포맷/폭 계산 기준이 되는 현재 그룹코드를 초기화한다.
+    currentDetailGrpCd = "";
+    if (!detailTable || typeof detailTable.clearData !== "function") {
+        return;
+    }
+    // DETAIL 데이터/폭/렌더를 함께 초기화해 화면 상태를 일치시킨다.
+    detailTable.clearData();
+    applyDetailColumnAutoWidth([]);
+    if (typeof detailTable.redraw === "function") {
+        detailTable.redraw(true);
+    }
+}
 
-/* =====================================================
- * MAIN (코드그룹)
- * ===================================================== */
+
+// ===== MAIN(코드그룹) =====
 function loadMainTableData() {
 	if (!mainTable || typeof mainTable.setData !== "function") {
         return;
@@ -440,22 +477,16 @@ function loadMainTableData() {
     showLoading(); // 로딩바 표시
 
     $.ajax({
-        url: "/cm040/main/list",
+        url: API_ENDPOINTS.main.list,
         type: "GET",
         data: {
             searchKeyword: keyword,
             searchUseYn: useYn
         },
         success: function (response) {
+            // MAIN 재조회 후에는 기존 DETAIL 선택 맥락이 유효하지 않으므로 초기화한다.
             mainTable.setData(response.list || []);
-            if (detailTable && typeof detailTable.clearData === "function") {
-                currentDetailGrpCd = "";
-                detailTable.clearData();
-                applyDetailColumnAutoWidth([]);
-                if (typeof detailTable.redraw === "function") {
-                    detailTable.redraw(true);
-                }
-            }
+            resetDetailTableState();
         },
         error: function () {
             showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
@@ -506,12 +537,13 @@ async function deleteMainRows() {
 
     showLoading();
 
+    // 다건 삭제 완료 시점을 맞추기 위한 카운터와 성공 여부 플래그
     var pending = selectedRows.length;
     var allSucceeded = true;
     selectedRows.forEach(function (row) {
         var rowData = row.getData();
         $.ajax({
-            url: "/cm040/main/delete",
+            url: API_ENDPOINTS.main.delete,
             type: "POST",
             data: {
                 grp_cd: rowData.grp_cd,
@@ -528,6 +560,7 @@ async function deleteMainRows() {
                 }
             },
             complete: function () {
+                // 각 요청 complete마다 카운트를 줄이고 마지막 요청에서 후처리한다.
                 pending -= 1;
                 if (pending === 0) {
                     hideLoading();
@@ -542,6 +575,7 @@ async function deleteMainRows() {
                 }
             },
             error: function () {
+                // 네트워크 오류가 1건이라도 있으면 전체 성공 상태를 false로 둔다.
                 hideLoading();
                 allSucceeded = false;
                 showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
@@ -590,7 +624,7 @@ function upsertMainBtn() {
     }
 
     $.ajax({
-        url: "/cm040/main/save",
+        url: API_ENDPOINTS.main.save,
         type: "POST",
         data: {
             grp_cd: grpCd,
@@ -624,17 +658,19 @@ function upsertMainBtn() {
         }
     });
 }
+
 function openMainWriteModal(type) {
-	mainMode = type;
     $("#main-type").text(type === "insert" ? "등록" : "수정");
 
     if (type === "insert") {
+        // 등록 모드: 입력 가능한 기본값으로 폼 초기화
         $("#write_main_grp_cd").val("").prop("disabled", false);
         $("#write_main_grp_nm").val("");
         $("#write_main_use_yn").val("Y");
         $("#write_main_parent_grp_cd").val("");
         $("#write_main_cd").val("").prop("disabled", false);
     } else {
+        // 수정 모드: 선택된 1건 데이터만 편집하도록 제한
         var selectedRows = mainTable.getSelectedRows();
         if (selectedRows.length === 0) {
             showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
@@ -657,6 +693,7 @@ function openMainWriteModal(type) {
         $("#write_main_grp_cd").val(rowData.grp_cd).prop("disabled", true);
         $("#write_main_grp_nm").val(rowData.grp_nm);
         $("#write_main_use_yn").val(rowData.use_yn);
+        // 부모코드가 없던 과거 데이터는 자기 자신으로 대체한다.
         $("#write_main_parent_grp_cd").val(rowData.parent_grp_cd || rowData.grp_cd);
         $("#write_main_cd").val(rowData.cd).prop("disabled", true);
     }
@@ -665,46 +702,42 @@ function openMainWriteModal(type) {
     $modal.show();
     setTimeout(() => {
         $("#write-main-area").addClass("show");
-    }, 100);
+    }, MODAL_TIMINGS.showDelayMs);
 }
 function closeMainWriteModal() {
 	const modal = document.getElementById("write-main-area");
     modal.classList.remove("show");
     setTimeout(() => {
         modal.style.display = "none";
-    }, 250);
+    }, MODAL_TIMINGS.hideDelayMs);
 }
 
 
-/* =====================================================
- * DETAIL (상세코드)
- * ===================================================== */
+// ===== DETAIL(상세코드) =====
 function loadDetailTableData(grpCd) {
 	if (!detailTable || typeof detailTable.setData !== "function") {
         return;
     }
 
     if (!grpCd) {
-        currentDetailGrpCd = "";
-        detailTable.clearData();
-        applyDetailColumnAutoWidth([]);
-        if (detailTable && typeof detailTable.redraw === "function") {
-            detailTable.redraw(true);
-        }
+        // 유효한 그룹코드가 없으면 DETAIL을 조회하지 않고 초기상태로 되돌린다.
+        resetDetailTableState();
         return;
     }
+    // 그룹코드 비교/규칙 적용을 위해 소문자로 정규화한다.
     currentDetailGrpCd = String(grpCd).toLowerCase();
 
      showLoading();
 
     $.ajax({
-        url: "/cm040/detail/list",
+        url: API_ENDPOINTS.detail.list,
         type: "GET",
         data: { grp_cd: grpCd },
         success: function (response) {
             var list = Array.isArray(response.list) ? response.list : [];
             var setResult = detailTable.setData(list);
             if (setResult && typeof setResult.then === "function") {
+                // Tabulator 비동기 setData인 경우 폭 계산 타이밍을 then 체인으로 맞춘다.
                 setResult
                     .then(function () {
                         return applyDetailColumnAutoWidth(list);
@@ -715,6 +748,7 @@ function loadDetailTableData(grpCd) {
                         }
                     });
             } else {
+                // 동기 setData 버전(구버전/환경)도 동일하게 폭 계산을 적용한다.
                 applyDetailColumnAutoWidth(list);
                 if (detailTable && typeof detailTable.redraw === "function") {
                     detailTable.redraw(true);
@@ -771,18 +805,20 @@ async function deleteDetailRows() {
 
     showLoading();
 
+    // 다건 삭제 complete 기준으로 후처리를 맞춘다.
     var pending = selectedRows.length;
     var grpCd = selectedRows[0].getData().grp_cd;
 
     selectedRows.forEach(function (row) {
         $.ajax({
-            url: "/cm040/detail/delete",
+            url: API_ENDPOINTS.detail.delete,
             type: "POST",
             data: {
                 grp_cd: row.getData().grp_cd,
                 cd: row.getData().cd
             },
             complete: function () {
+                // 마지막 complete 시점에만 목록 재조회/성공 알림을 실행한다.
                 pending -= 1;
                 if (pending === 0) {
                     hideLoading();
@@ -805,15 +841,17 @@ async function deleteDetailRows() {
         });
     });
 }
+
 function applyDetailSort(rows) {
 	if (!rows.length) return;
 
+    // 다건 정렬 저장 완료 타이밍 제어용 카운터
     let pending = rows.length;
     const grpCd = rows[0].grp_cd;
 
     rows.forEach(rowData => {
         $.ajax({
-            url: "/cm040/detail/sort",
+            url: API_ENDPOINTS.detail.sort,
             type: "POST",
             data: {
                 grp_cd: rowData.grp_cd,
@@ -821,6 +859,7 @@ function applyDetailSort(rows) {
                 sort_no: rowData.sort_no
             },
             complete: function () {
+                // 모든 요청이 끝났을 때만 로딩 종료/재조회/완료 알림 처리
                 pending -= 1;
                 if (pending === 0) {
                     hideLoading();
@@ -836,6 +875,7 @@ function applyDetailSort(rows) {
         });
     });
 }
+
 function upsertDetailBtn() {
 	var grpCd = $.trim($("#write_detail_grp_cd").val());
     var cd = $.trim($("#write_detail_cd").val());
@@ -852,7 +892,7 @@ function upsertDetailBtn() {
         return;
     }
 
-    if (detailMode !== "insert" && !cd) {
+    if (!cd) {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
@@ -882,12 +922,13 @@ function upsertDetailBtn() {
         return;
     }
 
+    // 수정 모드에서 기존 코드값(pre_cd)이 비어 있으면 현재 코드를 fallback으로 사용한다.
     if (detailMode === "update" && !preCd) {
         preCd = cd;
     }
 
     $.ajax({
-        url: "/cm040/detail/save",
+        url: API_ENDPOINTS.detail.save,
         type: "POST",
         data: {
             grp_cd: grpCd,
@@ -901,6 +942,7 @@ function upsertDetailBtn() {
             adinfo_04: $.trim($("#write_detail_adinfo_04").val()),
             adinfo_05: $.trim($("#write_detail_adinfo_05").val()),
             use_yn: $("#write_detail_use_yn").val(),
+            // 서버가 insert/update 분기를 할 수 있도록 mode를 함께 전송한다.
             mode: detailMode
         },
         success: function (response) {
@@ -929,6 +971,7 @@ function upsertDetailBtn() {
         }
     });
 }
+
 function openDetailWriteModal(type) {
 	detailMode = type;
     $("#detail-type").text(type === "insert" ? "등록" : "수정");
@@ -943,6 +986,7 @@ function openDetailWriteModal(type) {
     }
 
     if (type === "insert") {
+        // 등록 모드: MAIN 선택값을 부모코드로 사용한다.
         if (!mainTable || typeof mainTable.getSelectedRows !== "function") {
             showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
                 icon: 'warning',
@@ -968,6 +1012,7 @@ function openDetailWriteModal(type) {
         $("#write_detail_cd_origin").val("");
         $("#write_detail_cd_nm").val("");
 
+        // 기존 목록의 최대 정렬순서 뒤에 새 코드를 배치한다.
         var maxSort = detailTable.getData()
             .reduce(function (acc, item) { return Math.max(acc, item.sort_no || 0); }, 0);
         $("#write_detail_sort_no").val(maxSort + 1);
@@ -978,6 +1023,7 @@ function openDetailWriteModal(type) {
         $("#write_detail_adinfo_05").val("");
         $("#write_detail_use_yn").val("Y");
     } else {
+        // 수정 모드: 선택한 상세코드 1건을 폼에 바인딩한다.
         var selectedDetail = detailTable.getSelectedRows();
         if (selectedDetail.length === 0) {
             showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
@@ -1013,20 +1059,18 @@ function openDetailWriteModal(type) {
     $modal.show();
     setTimeout(() => {
         $("#write-detail-area").addClass("show");
-    }, 100);
+    }, MODAL_TIMINGS.showDelayMs);
 }
 function closeDetailWriteModal() {
 	const modal = document.getElementById("write-detail-area");
     modal.classList.remove("show");
     setTimeout(() => {
         modal.style.display = "none";
-    }, 250);
+    }, MODAL_TIMINGS.hideDelayMs);
 }
 
 
-/* =====================================================
- * DETAIL 정렬 저장 버튼
- * ===================================================== */
+// ===== DETAIL 정렬 저장 =====
 async function saveDetailSort() {
     if (!detailTable) return;
 
