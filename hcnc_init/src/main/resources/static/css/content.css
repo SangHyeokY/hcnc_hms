@@ -2113,3 +2113,35 @@ section.search-area .search-info .hr010-search-input::placeholder {
   padding-bottom: 0 !important;
   box-sizing: border-box;
 }
+
+/* Common popup tab style override */
+.modal-wrap .tab-area {
+  border: 1px solid #C3C8D2;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.modal-wrap .tab-area .tab-btn {
+  background: #E8EBF0;
+  color: #82878F;
+  font-size: 18px;
+  border-right: 1px solid #C3C8D2;
+}
+
+.modal-wrap .tab-area .tab-btn:last-child {
+  border-right: none;
+}
+
+.modal-wrap .tab-area .tab-btn.active {
+  background: #212E41;
+  color: #FFFFFF;
+  font-weight: 700;
+}
+
+/* Common popup sub-title size */
+.modal-wrap .hr012-toolbar-01 p.tool-title,
+.modal-wrap .hr012-toolbar-02 p.tool-title,
+.modal-wrap .hr014-toolbar-01 p.tool-title,
+.modal-wrap .hr014-toolbar-02 p.tool-title {
+  font-size: 20px;
+}
