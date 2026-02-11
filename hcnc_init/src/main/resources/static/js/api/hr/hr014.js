@@ -100,7 +100,7 @@ function buildHr014TableA() {
             changedTabs.tab4 = true;
         },
         columns: [
-            { title: "항 목", field: "cd_nm", hozAlign: "center", widthGrow: 2 },
+            { title: "항 목", field: "cd_nm", hozAlign: "center", widthGrow: 1 },
             {
                 title: "점 수",
                 headerHozAlign: "center",
@@ -110,7 +110,7 @@ function buildHr014TableA() {
                         title: "1",
                         field: "lv1",
                         hozAlign: "center",
-                        width: 100,
+                        width: 50,
                         formatter: scoreCheckboxFormatter,
                         cellClick: function (e, cell) {
                             setScore(cell.getRow(), 1);
@@ -122,7 +122,7 @@ function buildHr014TableA() {
                         title: "2",
                         field: "lv2",
                         hozAlign: "center",
-                        width: 100,
+                        width: 50,
                         formatter: scoreCheckboxFormatter,
                         cellClick: function (e, cell) {
                             setScore(cell.getRow(), 2);
@@ -134,7 +134,7 @@ function buildHr014TableA() {
                         title: "3",
                         field: "lv3",
                         hozAlign: "center",
-                        width: 100,
+                        width: 50,
                         formatter: scoreCheckboxFormatter,
                         cellClick: function (e, cell) {
                             setScore(cell.getRow(), 3);
@@ -146,7 +146,7 @@ function buildHr014TableA() {
                         title: "4",
                         field: "lv4",
                         hozAlign: "center",
-                        width: 100,
+                        width: 50,
                         formatter: scoreCheckboxFormatter,
                         cellClick: function (e, cell) {
                             setScore(cell.getRow(), 4);
@@ -158,7 +158,7 @@ function buildHr014TableA() {
                         title: "5",
                         field: "lv5",
                         hozAlign: "center",
-                        width: 100,
+                        width: 50,
                         formatter: scoreCheckboxFormatter,
                         cellClick: function (e, cell) {
                             setScore(cell.getRow(), 5);
@@ -171,7 +171,7 @@ function buildHr014TableA() {
             {
                 title: "평가의견",
                 field: "cmt",
-                widthGrow: 3,
+                widthGrow: 1,
                 headerSort: false,
                 editor: "input",
                 editable: function () {
