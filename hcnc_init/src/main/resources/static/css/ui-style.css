@@ -311,7 +311,7 @@ input[type="text"]:read-only ,
 :disabled {background: none; font-size: 16px; border: none;}
 
 /* select , textarea */
-select {min-width:242px; background: url(../images/common/ico-arrow-down.png) calc(100% - 10px) center no-repeat #F6F6F6; background-size:14px; border:1px solid #D9D9D9; border-radius:4px;}
+select {min-width:242px; background: url(../images/common/ico-arrow-down.png) calc(100% - 10px) center no-repeat; background-size:14px; border:1px solid #D9D9D9; border-radius:4px;}
 select:disabled {
     color: #333333 !important;
     opacity: 1 !important;

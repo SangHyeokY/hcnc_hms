@@ -1127,6 +1127,20 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .modal-content .cell-tit {font-size: 12px; font-weight: 700; padding-bottom: 6px;}
 .modal-content .cell-info input,
 .modal-content .cell-info select {width: 100%;}
+
+/* 인력관리 팝업 - 테이블 */
+.modal-content #main-modal-table th {
+    min-width: 120px !important;
+}
+.modal-content #main-modal-table th.grade-th {
+    width: 40px !important;
+    min-width: 40px !important;
+}
+.modal-content #main-modal-table tr > td,
+.modal-content #main-modal-table tr > th {
+    height: 42px;
+}
+
 .modal-btn {padding: 10px 16px;}
 .modal-btn ul {display: flex; justify-content: flex-end;}
 .modal-btn ul li {margin-right: 10px;}
@@ -1177,7 +1191,15 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 }
 
 .modal-container-detail {display: flex; flex-direction: column; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; min-width: 1240px; max-width: 1280px;background: #fff; border-radius: 12px; box-sizing: border-box;}
-.insert .modal-container-detail.main-human-modal{width:600px; min-width:auto; overflow:hidden;}
+
+/* 인적사항 모달 전체 css */
+.insert .modal-container-detail.main-human-modal{
+    width: auto;
+    min-width: 600px;
+    max-width: 90vw;
+    overflow: visible;
+}
+
 .modal-container-detail .close-btn{background:none; border:none; }
 .modal-container-detail .close-btn img{width:16px; }
 
@@ -1831,12 +1853,6 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
     margin: 0;
 }
 
-.career-exp-text {
-    display: none;
-    line-height: 32px;
-    
-}
-
 /* 경력연차 레이아웃 */
 #exp_yr_text, .tag-input {
     display: flex;
@@ -2373,11 +2389,13 @@ section.search-area .search-btn-area .btn-search {
   height: 16px;
 }
 
+/*
 #view-user-area #TABLE_HR010_B #exp_yr_text {
   padding: 1px 8px 0;
   line-height: 20px;
   font-size: 13px;
 }
+*/
 
 /* HR012 기술선택 팝업을 주개발언어 팝업과 동일 디자인으로 정렬 */
 .modal-container.hr012-skill-picker-container .btn-area button {

@@ -1147,6 +1147,12 @@ function setModalMode(mode) {
 
 
     // ================================
+    // career-exp 전용 제어
+    // ================================
+    $(".career-spin-wrap").toggle(!isView); // 조회가 아니면 모두 hide
+    $(".career-exp-text").toggle(isView);
+
+    // ================================
     // 등록 전용 처리
     // ================================
     if (isInsert) {
@@ -1905,9 +1911,9 @@ function setCareerSpinInputs(value) {
     $("#exp_yr_year").val(parsed.years);
     $("#exp_yr_month").val(parsed.months);
     normalizeCareerSpinInputs();
-    if ($("#exp_yr_text").length === 0) {
-        $(".career-spin-wrap").closest("td").append('<span id="exp_yr_text" class="career-exp-text"></span>');
-    }
+//    if ($("#exp_yr_text").length === 0) {
+//        $(".career-spin-wrap").closest("td").append('<span id="exp_yr_text" class="career-exp-text"></span>');
+//    }
     // 빈값으로 들어와도 정규화된 표시값(예: 0개월)이 유지되도록 현재 입력값 기준으로 표시
     syncCareerExpText(composeCareerExpValue());
 }
