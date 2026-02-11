@@ -87,6 +87,10 @@ $(document).ready(async function () {
     // 테이블 로딩이 끝날 때 까지 로딩바 표시
     showLoading();
     await loadUserTableData();
+
+    // 로딩 완료 후 테이블 건수 표시
+    if (window.userTable) updateTabulatorGridCount(window.userTable);
+
     hideLoading();
 
     $(".tab-panel").hide(); // Tab 숨기기
@@ -118,6 +122,7 @@ $(document).ready(async function () {
         event.preventDefault();
         showLoading();
         await loadUserTableData();
+        if (window.userTable) updateTabulatorGridCount(window.userTable);
         hideLoading();
     });
 
@@ -126,6 +131,7 @@ $(document).ready(async function () {
         if (event.key === "Enter") {
             showLoading();
             await loadUserTableData();
+            if (window.userTable) updateTabulatorGridCount(window.userTable);
             hideLoading();
         }
     });

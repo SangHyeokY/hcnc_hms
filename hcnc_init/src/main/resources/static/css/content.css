@@ -170,7 +170,7 @@ option{background:#fff; color:#333;}
   display: inline-flex;
   align-items: center;
   margin-left: 10px;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 400;
   color: #8f97a7;
   white-space: nowrap;
@@ -342,7 +342,7 @@ button.btn.btn-add-skill {
   HR015,HR014 - score tables alignment
 ================================================================================*/
 #TABLE_HR015_A .tabulator-col.tabulator-sortable,
-.tabulator-col.tabulator-sortable {
+.tabulator-col {
     align-content: center;
 }
 #TABLE_HR014_A input[type="radio"],
@@ -421,9 +421,6 @@ button.btn.btn-add-skill {
   border-bottom: 1px solid #eee;
   cursor: pointer;
   font-size: 14px;
-}
-.risk-list .risk-item:last-child {
-  border-bottom: none;
 }
 .risk-list .risk-item.active {
   background: #eaf2ff;
@@ -1091,16 +1088,17 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .modal-container-detail .close-btn{background:none; border:none; }
 .modal-container-detail .close-btn img{width:16px; }
 
-.modal-human-area {width:100%;}
+.modal-human-area {width:100%; flex:1;}
 .modal-human-area .pic-area{width: 100%; cursor:point;}
 .modal-human-area .pic-area .profile-area{position:relative; width:100%; padding-top: 100%; border:1px solid #ddd; background:url("../images/common/bg-userimg.png")center center no-repeat #ECECEE; background-size:contain; border-radius:9px; overflow:hidden;}
 .modal-human-area .pic-area .profile-area img{position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:100%; height:100%;}
-.modal-human-area .upload{width:100%; height:100%; padding-top: 15px; position:relative;}
+.modal-human-area .upload{width:100%; height:100%; padding-top: 15px; position:absolute; top:0; left:0; cursor: pointer;}
 .insert .main-human-modal .modal-human-area .upload{padding-top:15px; position:absolute; top:0; left:0; z-index:10;}
 .modal-human-area .upload .file{width:100%; height:100%; position: absolute; top:0; left:0; opacity:0; z-index:1; cursor:pointer;}
 .modal-human-area .upload .showingbtn{width:100%; height:30px; border-radius:4px; border:1px dotted #ccc; color:#333}
 
 .insert .main-human-modal .modal-human-area .upload .showingbtn{display:none;}
+.top-article{display: flex; flex-direction: column;}
 .insert .top-article,
 .update .top-article{width:100%;}
 .modal-human-area .table-area{width: 100%;}
@@ -1108,7 +1106,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .modal-human-area .table-area :disabled{text-align:center;}
 .modal-com-area .table-area input[type="text"]:read-only ,
 .modal-com-area .table-area :disabled{text-align:left;}
-.modal-human-area .table-area table {width: 100%}
+.modal-human-area .table-area table {width: 100%; height: 100%;}
 .modal-human-area .table-area tr:nth-child(1) th{border-top:1px solid #F0F1F3;}
 .modal-human-area .table-area tr:nth-child(1) td{border-top:1px solid #F0F1F3;}
 .modal-human-area .table-area tr th{padding:0 10px; background:#F1F4F9; border-bottom:1px solid #F0F1F3;}
@@ -1681,7 +1679,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 #aboutGrade .tooltip .score-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 14px;
+  font-size: 12px;
 }
 
 #aboutGrade .tooltip .score-table th,
@@ -1707,6 +1705,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 
 #aboutGrade .tooltip .score-section {
   margin-bottom: 12px;
+  display: flex;
 }
 
 #aboutGrade .tooltip .score-section strong {

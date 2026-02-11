@@ -52,10 +52,12 @@ window.initTab2 = function() {
             $("#TABLE_HR012_A").show();
             window.hr012TableA.redraw();
             $("#TABLE_HR012_B").hide();
-            if (!window.hr010ReadOnly) {
-                $(".hr012-toolbar-01").show();
-                $(".hr012-toolbar-02").hide();
-            }
+            $(".hr012-toolbar-01").show();
+            $(".hr012-toolbar-02").hide();
+            if (!window.hr010ReadOnly)
+                $(".btn-add-skill").show();
+            else
+                $(".btn-add-skill").hide();
         } else if (tabId === "tab2-B") {
             $("#TABLE_HR012_B").show();
             window.hr012TableB.redraw();
