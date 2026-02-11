@@ -94,8 +94,8 @@
                                 </tr>
                                 <tr>
                                     <th>생년월일</th>
-                                    <td colspan="2" ><input type="date" class="wp100" id="brdt"></td>
-                                    <td rowspan="4">
+                                    <td><input type="date" class="wp100" id="brdt"></td>
+                                    <td colspan="2" rowspan="4">
                                         <div class="pic-area fd-col">
                                             <div class="profile-area">
                                                 <img id="dev_img" src="" alt="profile" />
@@ -108,15 +108,15 @@
                                 </tr>
                                 <tr>
                                     <th>연락처</th>
-                                    <td colspan="2" ><input type="text" class="wp100" id="tel" disabled></td>
+                                    <td><input type="text" class="wp100" id="tel" disabled></td>
                                 </tr>
                                 <tr>
                                     <th>이메일</th>
-                                    <td colspan="2" ><input type="email" class="wp100" id="email" disabled></td>
+                                    <td><input type="email" class="wp100" id="email" disabled></td>
                                 </tr>
                                 <tr>
                                     <th>거주지역</th>
-                                    <td colspan="2" ><input type="text" class="wp100" id="region" disabled></td>
+                                    <td><input type="text" class="wp100" id="region" disabled></td>
                                 </tr>
                                 <tr>
                                     <th>
@@ -315,16 +315,23 @@
                                         <p>주개발언어</p>
                                     </th>
                                     <td colspan="3">
-                                        <div class="tag-select-row">
-                                            <button type="button" class="btn btn-add-skill btn-main-lang-picker" id="btn_main_lang_picker">기술 선택</button>
-                                            <input type="hidden" id="main_lang">
-                                            <select id="main_lang_select" style="display:none"></select>
-                                        </div>
-                                        <div class="tag-input">
-                                            <div class="tag-input-box">
-                                                <div class="tag-help"></div>
-                                                <ul class="tag-list" id="mainLangTagList"></ul>
+                                        <div class="flex">
+                                            <div class="tag-select-row">
+                                                <input type="hidden" id="main_lang">
+                                                <select id="main_lang_select" style="display:none"></select>
                                             </div>
+                                            <div class="tag-input" style="flex:1; width:0;">
+                                                <div class="tag-input-box">
+                                                    <div class="tag-help"></div>
+                                                    <ul class="tag-list" id="mainLangTagList"></ul>
+                                                </div>
+                                            </div>
+                                            <span style="width: auto;">
+                                                <button type="button" class="btn btn-add-skill btn-main-lang-picker" id="btn_main_lang_picker">
+                                                    <img src="./images/common/btn_search_outlined.png" alt="기술 선택">
+                                                    기술 선택
+                                                </button>
+                                            </span>
                                         </div>
                                     </td>
                                 </tr>
