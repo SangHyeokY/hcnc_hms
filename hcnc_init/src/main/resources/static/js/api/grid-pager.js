@@ -14,7 +14,6 @@
     var COUNTER_CLASS = "hcnc-grid-count"; 
     var FOOTER_COMPACT_CLASS = "hcnc-grid-footer-compact";  // 공통코드 > 코드그룹은 폭이 좁아 건수 텍스트를 항상 페이지 버튼 아래로 배치
     var trackedTables = [];
-    var viewTableId = null; // table의 id값을 임시 저장
     var resizeTimer = null;
     var PAGINATION_SYMBOL_LANG = {
         pagination: {
@@ -288,6 +287,7 @@
             titleNode.appendChild(counterEl);
         }
         counterEl.classList.add("hcnc-grid-count-title");
+        titleNode.classList.add("hcnc-grid-title-with-count");
     }
 
     // 카운터를 푸터 영역으로 이동
@@ -303,6 +303,11 @@
             footerEl.appendChild(counterEl);
         }
         counterEl.classList.remove("hcnc-grid-count-title");
+        var titleEl = findRelatedTitle(tableEl);
+        if (titleEl) {
+            var titleNode = titleEl.querySelector("h4") || titleEl;
+            titleNode.classList.remove("hcnc-grid-title-with-count");
+        }
         return true;
     }
 
@@ -346,13 +351,13 @@
 
     function updateGridCounter(table) { // 건수/아이콘/반응형 한번에 갱신
         var tableEl = getTableElement(table);
-        if (!tableEl || tableEl.id !== viewTableId) return; // 현재 보고 있는 id의 테이블 아니면 무시
+        if (!tableEl) return;
 
         var counterEl = ensureCounterElement(table);
         if (!counterEl) return;
 
         enforcePaginatorSymbols(table);
-        counterEl.textContent = "총 데이터 수 " + getGridCount(table) + "건";
+        counterEl.textContent = "총 " + getGridCount(table) + " 건";
 
         var titleEl = findRelatedTitle(tableEl);
         var inTitle = shouldRenderCounterInTitle(tableEl, titleEl);
@@ -457,16 +462,8 @@
     }
 
     function PatchedTabulator(element, options) {   // Tabulator 생성자 자체를 래핑
-        var tableEl = (typeof element === "string") ? document.querySelector(element) : element;
-        var tableId = tableEl ? tableEl.id : ""; // 테이블 id 저장
-
-        if (viewTableId && viewTableId !== tableId) {
-            console.log("조회 중인 테이블이 바뀌었습니다 : 기존 테이블 => " + viewTableId + ", 새 테이블 => " + tableId);
-            return new OriginalTabulator(element, withDefaultPaging(options)); // 그냥 생성만
-        }
         var instance = new OriginalTabulator(element, withDefaultPaging(options));
         trackedTables.push(instance);
-        viewTableId = tableId;
         return instance;
     }
 
