@@ -352,7 +352,11 @@
         if (!counterEl) return;
 
         enforcePaginatorSymbols(table);
-        counterEl.textContent = "총 데이터 수 " + getGridCount(table) + "건";
+        // counterEl.textContent = "총 데이터 수 " + getGridCount(table) + "건";
+        var count = getGridCount(table);
+        counterEl.innerHTML = '총 데이터 수 <span class="hcnc-grid-count-number">'
+                                + count +
+                              '</span>건';
 
         var titleEl = findRelatedTitle(tableEl);
         var inTitle = shouldRenderCounterInTitle(tableEl, titleEl);

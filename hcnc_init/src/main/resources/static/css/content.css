@@ -170,11 +170,17 @@ option{background:#fff; color:#333;}
   display: inline-flex;
   align-items: center;
   margin-left: 10px;
-  font-size: 14px;
-  font-weight: 400;
+  font-size: 16px;
+  font-weight: 500;
   color: #8f97a7;
   white-space: nowrap;
   pointer-events: none;
+}
+/* 총 데이터 수 색상 */
+.hcnc-grid-count-title .hcnc-grid-count-number {
+    color: #E50019;
+    font-weight: 500;
+    margin-left: 4px;
 }
 .tabulator .tabulator-footer.hcnc-grid-footer-compact {
   padding: 8px 12px 6px !important;
