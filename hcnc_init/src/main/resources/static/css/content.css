@@ -1965,16 +1965,22 @@ section.search-area .search-info .hr010-search-input::placeholder {
     opacity: 1;
 }
 
-/* HR010 상단 조회 버튼 스타일 */
-.contents-wrap:has(.hr010-search-input) > section.search-area form > .fl-ac.fl-sb {
+/* HR010/CM010/CM040 상단 조회 버튼 스타일 */
+.contents-wrap:has(.hr010-search-input) > section.search-area form > .fl-ac.fl-sb,
+.contents-wrap:has(#TABLE_USER) > section.search-area form > .fl-ac.fl-sb,
+.contents-wrap:has(#TABLE_COMMON_MAIN) > section.search-area form > .fl-ac.fl-sb {
   justify-content: flex-start !important;
 }
 
-.contents-wrap:has(.hr010-search-input) > section.search-area .search-btn-area {
+.contents-wrap:has(.hr010-search-input) > section.search-area .search-btn-area,
+.contents-wrap:has(#TABLE_USER) > section.search-area .search-btn-area,
+.contents-wrap:has(#TABLE_COMMON_MAIN) > section.search-area .search-btn-area {
   margin-left: 30px;
 }
 
-.contents-wrap:has(.hr010-search-input) > section.search-area .search-btn-area .btn-search {
+.contents-wrap:has(.hr010-search-input) > section.search-area .search-btn-area .btn-search,
+.contents-wrap:has(#TABLE_USER) > section.search-area .search-btn-area .btn-search,
+.contents-wrap:has(#TABLE_COMMON_MAIN) > section.search-area .search-btn-area .btn-search {
   width: 107px !important;
   min-width: 107px !important;
   height: 43px !important;
@@ -1982,7 +1988,7 @@ section.search-area .search-info .hr010-search-input::placeholder {
   border: 1px solid #212E41 !important;
   background: #212E41 !important;
   color: #FFFFFF !important;
-  font-size: 18pt !important;
+  font-size: 18px !important;
   font-weight: 600 !important;
   line-height: 1 !important;
   padding: 0 14px !important;
@@ -1992,7 +1998,9 @@ section.search-area .search-info .hr010-search-input::placeholder {
   gap: 15px !important;
 }
 
-.contents-wrap:has(.hr010-search-input) > section.search-area .search-btn-area .btn-search::before {
+.contents-wrap:has(.hr010-search-input) > section.search-area .search-btn-area .btn-search::before,
+.contents-wrap:has(#TABLE_USER) > section.search-area .search-btn-area .btn-search::before,
+.contents-wrap:has(#TABLE_COMMON_MAIN) > section.search-area .search-btn-area .btn-search::before {
   content: "";
   display: inline-block;
   width: 12px;
@@ -2002,8 +2010,10 @@ section.search-area .search-info .hr010-search-input::placeholder {
 }
 
 
-/* HR010 화면: 검색/컨텐츠 영역 세로 스크롤 제거 */
-.contents-wrap:has(.hr010-search-input) > section.search-area {
+/* HR010/CM010/CM040 화면: 검색영역 세로 스크롤 제거 */
+.contents-wrap:has(.hr010-search-input) > section.search-area,
+.contents-wrap:has(#TABLE_USER) > section.search-area,
+.contents-wrap:has(#TABLE_COMMON_MAIN) > section.search-area {
   overflow-y: hidden !important;
 }
 
@@ -2070,7 +2080,7 @@ section.search-area .search-info .hr010-search-input::placeholder {
 }
 
 .tabulator .tabulator-header .tabulator-col .tabulator-col-content .tabulator-col-title {
-  font-size: 16px !important;
+  font-size: 15px !important;
   font-weight: 700 !important;
   line-height: 1.4 !important;
 }
@@ -2098,6 +2108,7 @@ section.search-area .search-info .hr010-search-input::placeholder {
   height: 55px !important;
   min-height: 55px !important;
   line-height: 55px !important;
+  font-size: 15px !important;
   padding-top: 0 !important;
   padding-bottom: 0 !important;
   box-sizing: border-box;

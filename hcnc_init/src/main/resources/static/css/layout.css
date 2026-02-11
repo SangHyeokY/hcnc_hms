@@ -153,9 +153,9 @@ footer {width:100%; height:30px; line-height: 30px; padding:0 20px; display: fle
 .mem-area {background:#212E41; border-radius:8px; margin-bottom: 10px; padding:10px; display: flex; color: #fff; font-weight: 500;} /* align-items: center;  */
 .mem-area > div span{display:none;}
 .mem-area > div span.ico-lock{display:block;}
-.mem-area .logout-btn{border:none; background:none; color:#fff; font-weight: 500;}
+.mem-area .logout-btn{border:none; background:none; color:#fff; font-size:14px; font-weight:700;}
 .mem-area .ico-lock{display:inline-block; width:20px; height:20px; margin-right:4px; background:url('../icons/lnb-ico-logout.png')center center no-repeat; background-size:contain;}
-.mem-area .logout-btn:hover{color:#E50019; font-weight:bold;}
+.mem-area .logout-btn:hover{color:#E50019; font-weight:700;}
 
 /*=================================================================================
  * Container style
