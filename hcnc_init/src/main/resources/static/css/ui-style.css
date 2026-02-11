@@ -321,7 +321,7 @@ textarea {border: 1px solid #DEE2E7; width: 100%; min-height: 90px; border-radiu
 
 /* Input text*/
 input:focus-visible {border: 1px solid #0E3570; outline: 0;}
-input[type="number"] {min-width:160px;text-align:right;}
+input[type="number"] {text-align:right; border: 1px solid #D9D9D9;} /* min-width:160px; */
 input[type="email"] {min-width:220px;}
 input[type="password"] {min-width:220px;}
 input[type="button"], input[type="reset"], input[type="submit"] {cursor: pointer; background-color:#eaeaea; border:1px solid #ddd;}

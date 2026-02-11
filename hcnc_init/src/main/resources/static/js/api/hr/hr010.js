@@ -498,7 +498,7 @@ function buildUserTable() {
                 widthGrow:2, minWidth: 120, frozen: true,
                 formatter: function (cell) {
                     const d = cell.getRow().getData();
-                    if (!d.grade) return "-";
+                    if (!d.grade) return "";
                     return formatGradeLabel(d.grade, d.score);
                 }
             },
@@ -1056,7 +1056,7 @@ function fillUserForm(d) {
         }
     }
 
-    const rank = d.grade || "-";
+    const rank = d.grade || "";
     const score = d.score || 0;
     if (rank,score) {
         $("#grade").text(rank);
@@ -1150,8 +1150,8 @@ function setModalMode(mode) {
     // 등록 전용 처리
     // ================================
     if (isInsert) {
-        $("#grade").text("-");
-        $("#score").text("");
+        $("#grade").text("");
+        $("#score").text("-");
     }
 
     // 주 개발언어 입력창은 팝업 트리거 전용으로 항상 readonly 유지
