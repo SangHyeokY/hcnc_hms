@@ -16,6 +16,21 @@ var detailMode = "insert";
 var currentDetailGrpCd = ""; // DETAIL formatter에서 사용
 var amountSuffixGroupCds = ["job_cd"];
 var pointSuffixGroupCds  = ["rank", "grade", "grd_cd", "grade_cd"];
+var detailBaseWidths = {
+    checkBox: 50,
+    cd: 90,
+    sort_no: 90,
+    use_yn: 90
+};
+var detailAutoWidthColumns = [
+    { field: "cd_nm", title: "코드명", min: 100, max: 280, charPx: 13, pad: 36 },
+    { field: "adinfo_01", title: "부가정보1", min: 70, max: 420, charPx: 13, pad: 36, amountLike: true },
+    { field: "adinfo_02", title: "부가정보2", min: 70, max: 420, charPx: 13, pad: 36, amountLike: true },
+    { field: "adinfo_03", title: "부가정보3", min: 70, max: 420, charPx: 13, pad: 36, amountLike: true },
+    { field: "adinfo_04", title: "부가정보4", min: 70, max: 420, charPx: 13, pad: 36, amountLike: true },
+    { field: "adinfo_05", title: "부가정보5", min: 70, max: 420, charPx: 13, pad: 36, amountLike: true }
+];
+var detailStretchFields = ["cd_nm", "adinfo_01", "adinfo_02", "adinfo_03", "adinfo_04", "adinfo_05"];
 
 
 /* =====================================================
@@ -122,7 +137,10 @@ function buildTables() {
      * DETAIL TABLE (상세코드)
      * ========================= */
     detailTable = new Tabulator("#TABLE_COMMON_DETAIL", {
-        layout: "fitColumns",
+        // 폭은 코드에서 직접 계산해 적용한다.
+        // - 합계가 컨테이너보다 작으면 자동 균일 확장(빈공간 없음)
+        // - 합계가 크면 가로 스크롤 노출
+        layout: "fitData",
         placeholder: "데이터 없음",
         selectable: true,
         movableRows: true,
@@ -138,7 +156,7 @@ function buildTables() {
                 title: "",
                 formatter: c =>
                     `<input type="checkbox" class="row-check"${c.getRow().isSelected() ? " checked" : ""}>`,
-                width: 50,
+                width: detailBaseWidths.checkBox,
                 hozAlign: "center",
                 headerSort: false,
                 cellClick: (e, c) => {
@@ -146,15 +164,15 @@ function buildTables() {
                     e.preventDefault();
                 }
             },
-            { title: "코드", field: "cd", hozAlign: "center", width: 90 },
-            { title: "코드명", field: "cd_nm", width: 150 },
-            { title: "정렬순서", field: "sort_no", hozAlign: "center", width: 90 },
-            { title: "부가정보1", field: "adinfo_01", formatter: amountFormatter },
-            { title: "부가정보2", field: "adinfo_02", formatter: amountFormatter },
-            { title: "부가정보3", field: "adinfo_03", formatter: amountFormatter },
-            { title: "부가정보4", field: "adinfo_04", formatter: amountFormatter },
-            { title: "부가정보5", field: "adinfo_05", formatter: amountFormatter },
-            { title: "사용여부", field: "use_yn", hozAlign: "center" }
+            { title: "코드", field: "cd", hozAlign: "center", width: detailBaseWidths.cd },
+            { title: "코드명", field: "cd_nm", width: 140, minWidth: 120 },
+            { title: "정렬순서", field: "sort_no", hozAlign: "center", width: detailBaseWidths.sort_no },
+            { title: "부가정보1", field: "adinfo_01", formatter: amountFormatter, width: 180, minWidth: 110 },
+            { title: "부가정보2", field: "adinfo_02", formatter: amountFormatter, width: 130, minWidth: 110 },
+            { title: "부가정보3", field: "adinfo_03", formatter: amountFormatter, width: 130, minWidth: 110 },
+            { title: "부가정보4", field: "adinfo_04", formatter: amountFormatter, width: 130, minWidth: 110 },
+            { title: "부가정보5", field: "adinfo_05", formatter: amountFormatter, width: 130, minWidth: 110 },
+            { title: "사용여부", field: "use_yn", hozAlign: "center", width: detailBaseWidths.use_yn, minWidth: 80 }
         ],
         rowSelected: r => syncRowCheckbox(r, true),
         rowDeselected: r => syncRowCheckbox(r, false),
@@ -179,6 +197,227 @@ function amountFormatter(cell) {
     if (amountSuffixGroupCds.includes(currentDetailGrpCd)) return f + "원";
     if (pointSuffixGroupCds.includes(currentDetailGrpCd)) return f + "점";
     return f;
+}
+
+function formatAmountLikeValue(value) {
+    if (value == null || value === "") return "";
+    var raw = String(value).trim();
+    var numeric = raw.replace(/,/g, "");
+    if (!/^-?\d+(?:\.\d+)?$/.test(numeric)) {
+        return raw;
+    }
+    var formatted = Number(numeric).toLocaleString("ko-KR");
+    if (amountSuffixGroupCds.includes(currentDetailGrpCd)) return formatted + "원";
+    if (pointSuffixGroupCds.includes(currentDetailGrpCd)) return formatted + "점";
+    return formatted;
+}
+
+function normalizeWidthText(value) {
+    return String(value == null ? "" : value).replace(/\s+/g, " ").trim();
+}
+
+function getTextLength(value) {
+    return Array.from(String(value || "")).length;
+}
+
+function resolveDetailWidthPolicy(cfg) {
+    var policy = {
+        min: cfg.min,
+        max: cfg.max,
+        charPx: cfg.charPx,
+        pad: cfg.pad
+    };
+
+    // 직무코드(job_cd)는 금액 컬럼이 다수라 기본 계산 폭이 과하게 커질 수 있어
+    // amount 컬럼에 한해 폭 계산 계수를 보수적으로 조정한다.
+    if (cfg.amountLike && currentDetailGrpCd === "job_cd") {
+        policy.charPx = Math.min(policy.charPx, 9);
+        policy.pad = Math.min(policy.pad, 24);
+        policy.max = Math.min(policy.max, 260);
+    }
+
+    return policy;
+}
+
+function calcDetailColumnWidth(rows, cfg) {
+    var policy = resolveDetailWidthPolicy(cfg);
+    var maxLen = getTextLength(cfg.title || "");
+    (rows || []).forEach(function (row) {
+        var source = row ? row[cfg.field] : "";
+        var text = cfg.amountLike ? formatAmountLikeValue(source) : source;
+        var len = getTextLength(normalizeWidthText(text));
+        if (len > maxLen) {
+            maxLen = len;
+        }
+    });
+    var width = Math.ceil((maxLen * policy.charPx) + policy.pad);
+    if (width < policy.min) width = policy.min;
+    if (width > policy.max) width = policy.max;
+    return width;
+}
+
+function calcDetailUniformWidth(rows, cfg) {
+    var maxLen = getTextLength(cfg.title || "");
+    (rows || []).forEach(function (row) {
+        (cfg.fields || []).forEach(function (field) {
+            var source = row ? row[field] : "";
+            var text = cfg.amountLike ? formatAmountLikeValue(source) : source;
+            var len = getTextLength(normalizeWidthText(text));
+            if (len > maxLen) {
+                maxLen = len;
+            }
+        });
+    });
+    var width = Math.ceil((maxLen * cfg.charPx) + cfg.pad);
+    if (width < cfg.min) width = cfg.min;
+    if (width > cfg.max) width = cfg.max;
+    return width;
+}
+
+function getDetailFieldMax(field) {
+    var direct = detailAutoWidthColumns.find(function (cfg) {
+        return cfg.field === field;
+    });
+    if (direct) {
+        return resolveDetailWidthPolicy(direct).max || 0;
+    }
+    return 0;
+}
+
+function getDetailContainerWidth() {
+    if (!detailTable) {
+        return 0;
+    }
+    var tableEl = typeof detailTable.getElement === "function"
+        ? detailTable.getElement()
+        : document.getElementById("TABLE_COMMON_DETAIL");
+    if (!tableEl) {
+        return 0;
+    }
+    // 실제 가로 스크롤이 생기는 holder 폭 기준으로 계산해야
+    // 컬럼 합계가 미세하게 초과되어 항상 스크롤이 뜨는 현상을 줄일 수 있다.
+    var holder = tableEl.querySelector(".tabulator-tableholder")
+        || tableEl.querySelector(".tabulator-tableHolder");
+    var baseWidth = holder ? holder.clientWidth : tableEl.clientWidth;
+    return Math.max(0, baseWidth - 2);
+}
+
+function sumDetailWidths(widthMap) {
+    return detailBaseWidths.checkBox +
+        detailBaseWidths.cd +
+        detailBaseWidths.sort_no +
+        detailBaseWidths.use_yn +
+        (widthMap.cd_nm || 0) +
+        (widthMap.adinfo_01 || 0) +
+        (widthMap.adinfo_02 || 0) +
+        (widthMap.adinfo_03 || 0) +
+        (widthMap.adinfo_04 || 0) +
+        (widthMap.adinfo_05 || 0);
+}
+
+function distributeDetailExtraWidth(widthMap, extraWidth) {
+    if (extraWidth <= 0) {
+        return;
+    }
+    var fields = detailStretchFields.slice();
+    var remain = Math.max(0, Math.floor(extraWidth));
+
+    while (remain > 0 && fields.length > 0) {
+        var per = Math.max(1, Math.floor(remain / fields.length));
+        var next = [];
+        fields.forEach(function (field) {
+            if (remain <= 0) {
+                return;
+            }
+            var current = widthMap[field] || 0;
+            var max = getDetailFieldMax(field);
+            var room = max > 0 ? Math.max(0, max - current) : remain;
+            if (room <= 0) {
+                return;
+            }
+            var add = Math.min(per, room, remain);
+            widthMap[field] = current + add;
+            remain -= add;
+            if (max <= 0 || widthMap[field] < max) {
+                next.push(field);
+            }
+        });
+        if (!next.length) {
+            break;
+        }
+        fields = next;
+    }
+
+    // max에 막혀 잔여 폭이 남으면 첫번째 가변 컬럼에 배정해 빈공간을 제거한다.
+    if (remain > 0 && detailStretchFields.length > 0) {
+        var firstField = detailStretchFields[0];
+        widthMap[firstField] = (widthMap[firstField] || 0) + remain;
+    }
+}
+
+// 상세코드 컬럼 폭을 데이터 기준으로 갱신해서 텍스트 축약(...)이 나오지 않도록 한다.
+function applyDetailColumnAutoWidth(rows) {
+    if (!detailTable) {
+        return;
+    }
+    var list = Array.isArray(rows) ? rows : [];
+    var widthMap = {};
+    detailAutoWidthColumns.forEach(function (cfg) {
+        var width = calcDetailColumnWidth(list, cfg);
+        widthMap[cfg.field] = width;
+    });
+
+    var containerWidth = getDetailContainerWidth();
+    var currentSum = sumDetailWidths(widthMap);
+    if (containerWidth > 0 && currentSum < containerWidth) {
+        distributeDetailExtraWidth(widthMap, (containerWidth - currentSum));
+    }
+
+    // Tabulator 4.0.5에는 updateColumnDefinition API가 없어서
+    // 내부 컬럼 객체에 직접 폭을 반영한다.
+    if (typeof detailTable.updateColumnDefinition === "function") {
+        var tasks = [];
+        detailAutoWidthColumns.forEach(function (cfg) {
+        var policy = resolveDetailWidthPolicy(cfg);
+        tasks.push(detailTable.updateColumnDefinition(cfg.field, {
+            width: widthMap[cfg.field],
+            minWidth: policy.min,
+            maxWidth: policy.max
+        }));
+    });
+        return Promise.all(tasks).catch(function () {
+            return null;
+        });
+    }
+
+    if (!detailTable.columnManager || typeof detailTable.columnManager.findColumn !== "function") {
+        return;
+    }
+
+    detailAutoWidthColumns.forEach(function (cfg) {
+        var col = detailTable.columnManager.findColumn(cfg.field);
+        if (!col || typeof col.setWidth !== "function") {
+            return;
+        }
+
+        if (col.definition) {
+            var policy = resolveDetailWidthPolicy(cfg);
+            col.definition.minWidth = policy.min;
+            col.definition.maxWidth = policy.max;
+            col.definition.width = widthMap[cfg.field];
+            col.minWidth = policy.min;
+            col.maxWidth = policy.max;
+        } else {
+            var fallbackPolicy = resolveDetailWidthPolicy(cfg);
+            col.minWidth = fallbackPolicy.min;
+            col.maxWidth = fallbackPolicy.max;
+        }
+        col.setWidth(widthMap[cfg.field]);
+    });
+
+    if (typeof detailTable.redraw === "function") {
+        detailTable.redraw(true);
+    }
 }
 
 function getSearchUseYnValue() {
@@ -212,6 +451,10 @@ function loadMainTableData() {
             if (detailTable && typeof detailTable.clearData === "function") {
                 currentDetailGrpCd = "";
                 detailTable.clearData();
+                applyDetailColumnAutoWidth([]);
+                if (typeof detailTable.redraw === "function") {
+                    detailTable.redraw(true);
+                }
             }
         },
         error: function () {
@@ -444,6 +687,10 @@ function loadDetailTableData(grpCd) {
     if (!grpCd) {
         currentDetailGrpCd = "";
         detailTable.clearData();
+        applyDetailColumnAutoWidth([]);
+        if (detailTable && typeof detailTable.redraw === "function") {
+            detailTable.redraw(true);
+        }
         return;
     }
     currentDetailGrpCd = String(grpCd).toLowerCase();
@@ -455,7 +702,24 @@ function loadDetailTableData(grpCd) {
         type: "GET",
         data: { grp_cd: grpCd },
         success: function (response) {
-            detailTable.setData(response.list || []);
+            var list = Array.isArray(response.list) ? response.list : [];
+            var setResult = detailTable.setData(list);
+            if (setResult && typeof setResult.then === "function") {
+                setResult
+                    .then(function () {
+                        return applyDetailColumnAutoWidth(list);
+                    })
+                    .then(function () {
+                        if (detailTable && typeof detailTable.redraw === "function") {
+                            detailTable.redraw(true);
+                        }
+                    });
+            } else {
+                applyDetailColumnAutoWidth(list);
+                if (detailTable && typeof detailTable.redraw === "function") {
+                    detailTable.redraw(true);
+                }
+            }
         },
         error: function () {
             showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
