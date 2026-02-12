@@ -21,7 +21,7 @@ public class WebConfig implements WebMvcConfigurer {
     registry.addInterceptor(new LoginInterceptor())
 
       // 세션 검사 대상
-      .addPathPatterns("/cm010/**", "/cm040/**", "/hr010/**", "/hr020/**")
+      .addPathPatterns("/cm010/**", "/cm040/**", "/hr010/**", "/hr020/**","/hr014/**")
 
       // 예외 URL
       .excludePathPatterns("/login", "/logout", "/css/**", "/js/**");
