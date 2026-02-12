@@ -8,7 +8,6 @@ var currentMode = "insert";
 var currentHr010UserTypeTab = "staff";
 var hr010SourceRows = [];
 
-
 // 주 개발언어 태그 입력 공통 모듈
 var mainLangTagInput = null;
 var pendingMainLangValue = "";
@@ -694,7 +693,7 @@ async function loadUserTableData() {
     } else {
         keyword = null;
     }
-    console.log("키워드 :", keyword);
+    // console.log("키워드 :", keyword);
 
     try {
         // 리스트 불러오기

@@ -2156,14 +2156,16 @@ section.search-area .search-btn-area .btn-search {
 
 
 /* HR010 user type tabs */ /* margin-bottom: 6px; 삭제 */
-.contents-wrap:has(#TABLE_HR010_A) .hr010-user-type-tabs {
+.contents-wrap:has(#TABLE_HR010_A) .hr010-user-type-tabs,
+.contents-wrap:has(#TABLE_HR020_A) .hr020-user-type-tabs {
   display: flex;
   flex-direction: row;
   align-items: flex-end;
   gap: 6px;
 }
 
-.contents-wrap:has(#TABLE_HR010_A) .hr010-user-type-tab {
+.contents-wrap:has(#TABLE_HR010_A) .hr010-user-type-tab,
+.contents-wrap:has(#TABLE_HR020_A) .hr020-user-type-tab {
   box-sizing: border-box;
   display: flex;
   flex-direction: row;
@@ -2184,11 +2186,13 @@ section.search-area .search-btn-area .btn-search {
   flex-grow: 0;
 }
 
-.contents-wrap:has(#TABLE_HR010_A) .hr010-user-type-tab + .hr010-user-type-tab {
+.contents-wrap:has(#TABLE_HR010_A) .hr010-user-type-tab + .hr010-user-type-tab,
+.contents-wrap:has(#TABLE_HR020_A) .hr020-user-type-tab + .hr020-user-type-tab {
   margin-left: -1px;
 }
 
-.contents-wrap:has(#TABLE_HR010_A) .hr010-user-type-tab.active {
+.contents-wrap:has(#TABLE_HR010_A) .hr010-user-type-tab.active,
+.contents-wrap:has(#TABLE_HR020_A) .hr020-user-type-tab.active {
   background: #353D47;
   border-color: #353D47;
   color: #FFFFFF;

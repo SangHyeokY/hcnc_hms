@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layout/layout}">
+
+<!-- 추가 버튼 정의 -->
+<th:block layout:fragment="additionalButtons">
+    <button type="button" class="btn-excel">엑셀 다운로드</button>
+    <!-- <button type="button" class="btn-print">출력</button> -->
+    <!-- <button type="button" class="btn-approve">승인</button> -->
+</th:block>
+
+<th:block layout:fragment="searchCondition">
+    <div class="search-input">
+        <p class="fl-ac">
+            <label for="insertNM" class="">• 성명 &nbsp;</label>
+            <input type="text" class="hr020-search-input hr020-search-name-input" id="insertNM" name="insertNM" placeholder="성명을 입력하세요" />
+        </p>
+    </div>
+    <div class="search-input">
+        <p class="fl-ac">
+            <label for="searchKeyword" class="">• 검색어 &nbsp;</label>
+            <input type="text" class="hr020-search-input hr020-search-keyword-input" id="searchKeyword" name="searchKeyword" placeholder="성명/연락처/이메일/거주지역/기술 검색" />
+        </p>
+    </div>
+</th:block>
+
+<!-- 실제 컨텐츠 영역 -->
+<th:block layout:fragment="content">
+
+    <!-- ================= 메인 리스트 ================= -->
+    <div class="content-title fl-sb fl-ac">
+        <h4 class="page-sub-title">진행 프로젝트 내역</h4>
+        <div class="btn-area">
+            <button type="button" class="btn bg-primary btn-main-view">상세보기</button>
+            <button type="button" class="btn btn-main-add">
+                <img src="./images/common/btn-ico-plus.png" alt="등록">등록</button>
+            <button type="button" class="btn btn-main-edit">
+                <img src="./images/common/btn-ico-pencil.png" alt="수정">수정</button>
+            <button type="button" class="btn btn-main-del">
+                <img src="./images/common/btn-ico-trash.png" alt="삭제">삭제</button>
+        </div>
+    </div>
+    <div class="hr020-user-type-tabs" role="tablist" aria-label="인력 구분">
+        <button type="button" class="hr020-user-type-tab active" data-user-type="staff">직원</button>
+        <button type="button" class="hr020-user-type-tab" data-user-type="freelancer">프리랜서</button>
+    </div>
+
+
+    <div class="content list-area grid-pager-fixed" id="hms-table">
+        <div class="table-wrap grid-pager-fixed-wrap" id="hms-table-wrap">
+            <div id="TABLE_HR020_A"></div>
+        </div>
+        <input type="hidden" id="dev_id" name="dev_id" th:value="${dev_id}">
+    </div>
+
+    <!-- ================= 모달 ================= -->
+    <div class="modal-wrap " id="view-user-area" style="display:none">
+        <div class="modal-container-detail main-human-modal">
+
+            <!-- header -->
+            <div class="header">
+                <h4>인력 관리 <span id="modal-title">상세</span></h4>
+                <div class="btn-area">
+                    <button class="close-btn" onclick="closeUserViewModal()">
+                        <img src="./icons/Icon-close.png" alt="" />
+                    </button>
+                </div>
+            </div>
+
+            <!-- modal-content -->
+            <div class="modal-content hr020-main-pop">
+
+                <!-- ================= 상단 인적사항 ================= -->
+                <div class="top-article">
+
+                    <div class="fl-ac title-area">
+                        <h5 class="mg-r5">인적사항</h5>
+                    </div>
+
+                    <div class="modal-human-area fl-sa" id="TABLE_HR020_B">
+                        <div class="table-area">
+                            <table id="main-modal-table">
+                                <colgroup>
+                                <col style="width: 120px;">
+                                    <col style="">
+                                    <col style="width: 51px;">
+                                    <col style="width:139px">
+                                </colgroup>
+                                <tr style="display: none;">
+                                    <th>직원코드</th>
+                                    <td colspan="3"><div class="fl-ct wp100 fs16 none_editable_text" id="dev_id_input"></div></td>
+                                </tr>
+                                <tr>
+                                    <th>성명</th>
+                                    <td><input type="text" class="wp100" id="dev_nm" disabled></td>
+                                    <td colspan="2">
+                                        <!-- 추후 공통 코드에 추가바람 -->
+                                        <select id="dev_type" class="wp100 ta-c">
+                                            <option value="HCNC_S">직원</option>
+                                            <option value="HCNC_F">프리랜서</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>생년월일</th>
+                                    <td><input type="date" class="wp100" id="brdt"></td>
+                                    <td colspan="2" rowspan="4">
+                                        <div class="pic-area fd-col">
+                                            <div class="profile-area">
+                                                <img id="dev_img" src="" alt="profile" />
+                                                <div class="upload">
+                                                    <input id="fileProfile" type="file" class="file">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>연락처</th>
+                                    <td><input type="text" class="wp100" id="tel" disabled></td>
+                                </tr>
+                                <tr>
+                                    <th>이메일</th>
+                                    <td><input type="email" class="wp100" id="email" disabled></td>
+                                </tr>
+                                <tr>
+                                    <th>거주지역</th>
+                                    <td><input type="text" class="wp100" id="region" disabled></td>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        근무가능형태
+                                    </th>
+                                    <td>
+                                        <select id="select_work_md" class="wp100"></select>
+                                    </td>
+                                    <th rowspan="3">등급</th>
+                                    <td rowspan="3">
+                                        <div class="fl-ct fd-col wp100 ta-c">
+                                            <span class="fs32 fw700" id="grade"></span>
+                                            <span class="fs16" id="score"></span>
+                                            <div id="aboutGrade">
+                                                <img src="../icons/ico-support.png" alt="상세보기" />
+                                                <div class="tooltip">
+                                                    <table class="score-table">
+                                                        <thead>
+                                                        <tr>
+                                                            <th>
+                                                                보유기술
+                                                                <span class="max-score">40점</span>
+                                                            </th>
+                                                            <th>
+                                                                업무태도
+                                                                <span class="max-score">30점</span>
+                                                            </th>
+                                                            <th>
+                                                                재계약의사
+                                                                <span class="max-score">20점</span>
+                                                            </th>
+                                                            <th>
+                                                                단가경쟁력
+                                                                <span class="max-score">10점</span>
+                                                            </th>
+                                                        </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                        <tr>
+                                                            <!-- 보유기술 -->
+                                                            <td>
+                                                                <div class="score-section">
+                                                                    보유한 기술 개수에 따라 등급이 산정됩니다.
+                                                                </div>
+
+                                                                <div class="score-section">
+                                                                    <strong>S 등급</strong>
+                                                                    <ul>
+                                                                        <li>15개 이상 & 90점 이상</li>
+                                                                    </ul>
+                                                                </div>
+
+                                                                <div class="score-section">
+                                                                    <strong>A 등급</strong>
+                                                                    <ul>
+                                                                        <li>10 ~ 15개 & 60 ~ 90점</li>
+                                                                    </ul>
+                                                                </div>
+
+                                                                <div class="score-section">
+                                                                    <strong>B 등급</strong>
+                                                                    <ul>
+                                                                        <li>5 ~ 10개 & 30 ~ 60점</li>
+                                                                    </ul>
+                                                                </div>
+
+                                                                <div class="score-section">
+                                                                    <strong>C 등급</strong>
+                                                                    <ul>
+                                                                        <li>5개 미만 & 30점 미만</li>
+                                                                    </ul>
+                                                                </div>
+                                                            </td>
+
+                                                            <!-- 업무태도 -->
+                                                            <td>
+                                                                <div class="score-section">
+                                                                    평가 점수 기준으로 등급이 산정됩니다.
+                                                                </div>
+
+                                                                <div class="score-section">
+                                                                    <strong>S 등급</strong>
+                                                                    <ul>
+                                                                        <li>21점 초과</li>
+                                                                    </ul>
+                                                                </div>
+
+                                                                <div class="score-section">
+                                                                    <strong>A 등급</strong>
+                                                                    <ul>
+                                                                        <li>15 ~ 21점</li>
+                                                                    </ul>
+                                                                </div>
+
+                                                                <div class="score-section">
+                                                                    <strong>B 등급</strong>
+                                                                    <ul>
+                                                                        <li>10 ~ 15점</li>
+                                                                    </ul>
+                                                                </div>
+
+                                                                <div class="score-section">
+                                                                    <strong>C 등급</strong>
+                                                                    <ul>
+                                                                        <li>10점 미만</li>
+                                                                    </ul>
+                                                                </div>
+                                                            </td>
+
+                                                            <!-- 재계약의사 -->
+                                                            <td>
+                                                                <div class="score-section">
+                                                                    재계약 의사 있음
+                                                                </div>
+                                                            </td>
+
+                                                            <td>
+                                                                <div class="score-section">
+                                                                    직무 유형에 따라 기준 단가가 다르게 적용됩니다.<br>(PM/PL/개발자)
+                                                                </div>
+
+                                                                <div class="score-section">
+                                                                    <strong>S 등급</strong>
+                                                                    <ul>
+                                                                        <li>1,000 / 800 / 600만원 이하</li>
+                                                                    </ul>
+                                                                </div>
+
+                                                                <div class="score-section">
+                                                                    <strong>A 등급</strong>
+                                                                    <ul>
+                                                                        <li>1,000 / 800 / 600 ~ 1,200 / 900 / 700만원</li>
+                                                                    </ul>
+                                                                </div>
+
+                                                                <div class="score-section">
+                                                                    <strong>B 등급</strong>
+                                                                    <ul>
+                                                                        <li>1,200 / 900 / 700 ~ 1,300 / 1,000 / 800만원</li>
+                                                                    </ul>
+                                                                </div>
+
+                                                                <div class="score-section">
+                                                                    <strong>C 등급</strong>
+                                                                    <ul>
+                                                                        <li>1,300 / 1,000 / 800만원 초과</li>
+                                                                    </ul>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                        </tbody>
+                                                    </table>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>경력연차</th>
+                                    <td class="career-exp-cell">
+                                        <div class="career-spin-wrap">
+                                            <div class="career-spin-field">
+                                                <input type="number" class="career-spin-input" id="exp_yr_year" min="0" max="99" step="1" value="0" disabled>
+                                                <div class="career-spin-buttons">
+                                                    <button type="button" class="career-spin-btn" data-target="#exp_yr_year" data-step="1" aria-label="경력연차 년 증가">▲</button>
+                                                    <button type="button" class="career-spin-btn" data-target="#exp_yr_year" data-step="-1" aria-label="경력연차 년 감소">▼</button>
+                                                </div>
+                                            </div>
+                                            <span>년</span>
+                                            <div class="career-spin-field">
+                                                <input type="number" class="career-spin-input" id="exp_yr_month" min="0" max="99" step="1" value="0" disabled>
+                                                <div class="career-spin-buttons">
+                                                    <button type="button" class="career-spin-btn" data-target="#exp_yr_month" data-step="1" aria-label="경력연차 개월 증가">▲</button>
+                                                    <button type="button" class="career-spin-btn" data-target="#exp_yr_month" data-step="-1" aria-label="경력연차 개월 감소">▼</button>
+                                                </div>
+                                            </div>
+                                            <span>개월</span>
+                                            <input type="hidden" id="exp_yr">
+                                        </div>
+                                        <span id="exp_yr_text" class="career-exp-text"></span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>최종학력</th>
+                                    <td><input type="text" class="wp100" id="edu_last" disabled></td>
+                                </tr>
+                                <tr>
+                                    <th>보유자격증</th>
+                                    <td colspan="3"><input type="text" class="wp100" id="cert_txt" disabled></td>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        <p>주개발언어</p>
+                                    </th>
+                                    <td colspan="3">
+                                        <div class="flex">
+                                            <div class="tag-select-row">
+                                                <input type="hidden" id="main_lang">
+                                                <select id="main_lang_select" style="display:none"></select>
+                                            </div>
+                                            <div class="tag-input" style="flex:1; width:0;">
+                                                <div class="tag-input-box">
+                                                    <div class="tag-help"></div>
+                                                    <ul class="tag-list" id="mainLangTagList"></ul>
+                                                </div>
+                                            </div>
+                                            <span style="width: auto;">
+                                                <button type="button" class="btn btn-add-skill btn-main-lang-picker" id="btn_main_lang_picker">
+                                                    <img src="./images/common/btn_search_outlined.png" alt="기술 선택">
+                                                    기술 선택
+                                                </button>
+                                            </span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>단가</th>
+                                    <td colspan="3"><input type="text" class="wp100" id="hope_rate_amt" disabled></td>
+                                </tr>
+                                <tr>
+                                    <th>투입가능시점</th>
+                                    <td colspan="3"><input type="date" class="wp100" id="avail_dt"></td>
+                                </tr>
+                                <tr>
+                                    <th>계약형태</th>
+                                    <td colspan="3"><select id="select_ctrt_typ" class="wp100"></select></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ================= 탭 영역 ================= -->
+                <div class="tab-article wp50">
+                    <div class="fl-ac title-area">
+                        <h5 class="mg-r5">상세정보</h5>
+                    </div>
+                    <!-- 좌측 -->
+                    <div class="tab-area">
+                        <span class="tab-btn active" data-tab="tab1">소속 및 계약정보</span>
+                        <span class="tab-btn" data-tab="tab2">보유역량 및 숙련도</span>
+                        <span class="tab-btn" data-tab="tab3">프로젝트</span>
+                        <span class="tab-btn" data-tab="tab4">평가 및 리스크</span>
+                    </div>
+
+                    <div class="tab-content">
+<!--                        <div id="tab1" class="tab-panel active">-->
+<!--                            <div th:insert="~{views/hr/hr011 :: tab1Content}"></div>-->
+<!--                        </div>-->
+<!--                        <div id="tab2" class="tab-panel">-->
+<!--                            <div th:insert="~{views/hr/hr012 :: tab2Content}"></div>-->
+<!--                        </div>-->
+<!--                        <div id="tab3" class="tab-panel">-->
+<!--                            <div th:insert="~{views/hr/hr013 :: tab3Content}"></div>-->
+<!--                        </div>-->
+<!--                        <div id="tab4" class="tab-panel">-->
+<!--                            <div th:insert="~{views/hr/hr014 :: tab4Content}"></div>-->
+<!--                        </div>-->
+                    </div>
+                </div>
+            </div>
+            <!-- ================= 하단 버튼 ================= -->
+            <div class="modal-btn">
+                <ul>
+                    <li>
+                        <button class="btn btn-excel" id="btn-excel" onclick="location.href='/common/getExcel'">엑셀
+                            다운로드</button>
+                    </li>
+                    <li>
+                        <button class="btn btn-save" id="btn-user-save">저장</button>
+                    </li>
+                </ul>
+            </div><!-- modal-btn -->
+        </div><!-- modal-container-detail -->
+    </div><!-- modal-wrap -->
+
+    <div class="modal-wrap" id="main-lang-picker-area" style="display:none">
+        <div class="modal-container main-lang-picker-container">
+            <div class="header">
+                <h4>주 개발언어 선택</h4>
+                <div class="btn-area">
+                    <button class="close-btn" type="button" id="btn_main_lang_picker_close_x">
+                        <img src="./icons/Icon-close.png" alt="" />
+                    </button>
+                </div>
+            </div>
+            <div class="modal-content main-lang-picker-content">
+                <div class="main-lang-picker-search-row">
+                    <label for="main-lang-picker-search">기술 검색</label>
+                    <div class="main-lang-picker-search-wrap">
+                        <input type="text" id="main-lang-picker-search" class="wp100" placeholder="기술명 입력 후 선택"
+                            autocomplete="off">
+                        <ul class="main-lang-picker-suggest" id="main-lang-picker-suggest"></ul>
+                    </div>
+                    <span class="main-lang-picker-meta" id="main-lang-picker-meta"></span>
+                </div>
+                <div id="TABLE_MAIN_LANG_PICKER"></div>
+            </div>
+            <div class="modal-btn">
+                <ul>
+                    <li>
+                        <button type="button" class="btn btn-close" id="btn_main_lang_picker_apply">적용</button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- scripts -->
+    <script src="/js/api/hr/hr020.js"></script>
+    <script src="/js/api/common.js"></script>
+
+</th:block>
+
+</html>

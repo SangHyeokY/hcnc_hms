@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hcncinit.Hr020Mapper">
+
+    <!-- 진행 프로젝트 내역으로 교체 예정 !! -->
+
+    <!-- 인력관리 > 기본 인적사항 조회 -->
+    <select id="select_hr020" parameterType="map" resultType="map">
+        SELECT dev_id
+            , dev_nm -- 성명
+            , DATE_FORMAT(brdt, '%Y-%m-%d') AS brdt -- 생년월일
+            , tel -- 연락처
+            , email -- 이메일
+            , region -- 거주지역
+            , main_lang -- 주 개발언어 코드
+            , fn_get_cm_lst('skl_id', main_lang) AS main_lang_nm -- 주 개발언어 라벨
+            , exp_yr -- 경력연차
+            , edu_last -- 최종학력
+            , cert_txt -- 보유 자격증
+            , work_md -- 근무형태
+            , DATE_FORMAT(avail_dt, '%Y-%m-%d') AS avail_dt -- 투입가능시점
+            , ctrt_typ -- 계약형태
+            , hope_rate_amt -- 단가
+            , search_txt
+            , IFNULL(fn_total_score(dev_id), 0) score
+        FROM tb_dev_info
+        WHERE del_yn='N'
+        AND use_yn='Y'
+        <if test="searchKeyword != null and searchKeyword != ''">
+            AND (
+            MATCH(search_txt) AGAINST (CONCAT(#{searchKeyword}, '*') IN BOOLEAN MODE)
+            OR search_txt LIKE CONCAT('%', #{searchKeyword}, '%')
+            )
+        </if>
+        <if test="dev_nm != null and dev_nm != ''">
+            AND dev_nm LIKE CONCAT('%', #{dev_nm}, '%')
+        </if>
+        ORDER BY score DESC, dev_id
+    </select>
+
+    <!-- 인력관리 > 기본 인적사항 이미지 -->
+    <select id="select_hr020_img" parameterType="map" resultType="_byte[]">
+        SELECT dev_img
+        FROM tb_dev_info
+        WHERE del_yn='N'
+        AND use_yn='Y'
+        AND dev_id LIKE CONCAT('%', #{dev_id}, '%')
+        LIMIT 1
+    </select>
+
+    <!-- 인적사항 신규 등록/수정 -->
+    <insert id="insert_hr020" parameterType="map">
+        INSERT INTO tb_dev_info (
+            dev_id,
+            brdt,
+            avail_dt,
+            dev_img,
+            dev_nm,
+            tel,
+            email,
+            region,
+            main_lang,
+            exp_yr,
+            edu_last,
+            cert_txt,
+            work_md,
+            hope_rate_amt,
+            ctrt_typ,
+            crt_ts,
+            use_yn,
+            del_yn,
+            crt_by
+        ) VALUES (
+            #{dev_id},
+            #{brdt},
+            #{avail_dt},
+            #{dev_img, jdbcType=BLOB},
+            #{dev_nm},
+            #{tel},
+            #{email},
+            #{region},
+            #{main_lang},
+            #{exp_yr},
+            #{edu_last},
+            #{cert_txt},
+            #{work_md},
+            #{hope_rate_amt},
+            #{ctrt_typ},
+            NOW(),
+            'Y',
+            'N',
+            #{dev_id}
+        ) ON DUPLICATE KEY UPDATE
+            dev_id = #{dev_id},
+            brdt = #{brdt},
+            avail_dt = #{avail_dt},
+            dev_img = #{dev_img, jdbcType=BLOB},
+            dev_nm = #{dev_nm},
+            tel = #{tel},
+            email = #{email},
+            region = #{region},
+            main_lang = #{main_lang},
+            exp_yr = #{exp_yr},
+            edu_last = #{edu_last},
+            cert_txt = #{cert_txt},
+            work_md = #{work_md},
+            hope_rate_amt = #{hope_rate_amt},
+            ctrt_typ = #{ctrt_typ},
+            crt_ts = NOW(),
+            use_yn = 'Y',
+            del_yn = 'N',
+            crt_by = #{dev_id}
+    </insert>
+
+    <!-- dev_id 생성 시, 뒤에 숫자 붙이기 -->
+    <select id="selectDevId" parameterType="string" resultType="string">
+        SELECT
+            CONCAT(
+                #{dev_type},
+                LPAD(
+                    IFNULL(
+                        MAX(CAST(SUBSTRING(dev_id, 7) AS UNSIGNED)),
+                        0
+                    ) + 1,
+                    3,
+                    '0'
+            )
+        )
+        FROM tb_dev_info
+        WHERE dev_id LIKE CONCAT(#{dev_type}, '%')
+    </select>
+
+    <!-- 인적사항 > 데이터 삭제 -->
+    <update id="delete_hr020" parameterType="map">
+        UPDATE tb_dev_info
+        SET del_yn = 'Y',
+            del_ts = NOW(),
+            del_by = #{dev_id},
+            upd_ts = NOW(),
+            upd_by = #{dev_id}
+        WHERE dev_id = #{dev_id}
+    </update>
+
+    <!-- 인적사항 > 등급 계산 -->
+    <select id="dev_score" resultType="hashmap" parameterType="string">
+        WITH param AS
+        (
+        SELECT #{devId} AS dev_id
+        ),
+        rank AS
+        (
+        SELECT  R1.cd_nm title, R1.adinfo_01  rate, R2.rank, JSON_UNQUOTE(JSON_EXTRACT(R1.obj, CONCAT('$.', R2.rank))) AS weight, R1.sort_no  FROM (
+        SELECT   cd.cd, cd.cd_nm, adinfo_01, sort_no
+        ,   JSON_OBJECT('S', adinfo_02, 'A', adinfo_03, 'B', adinfo_04, 'C', adinfo_05) obj
+        FROM   tb_cd_mst cd
+        WHERE   cd.del_yn = 'N' AND cd.use_yn = 'Y'
+        AND cd.grp_cd = 'rank'
+        ORDER BY cd.sort_no
+        ) R1
+        JOIN JSON_TABLE(JSON_KEYS(R1.obj),'$[*]' COLUMNS ( rank VARCHAR(100) PATH '$' )) R2
+        ),
+        -- 업무태도
+        eval AS
+        (
+        SELECT   '[업무태도]' title, res.rank, res.val, rk.weight  FROM (
+        SELECT   R3.rank, R3.value, eval.val FROM (
+        SELECT   R2.rank, JSON_UNQUOTE(JSON_EXTRACT(R1.obj, CONCAT('$.', R2.rank))) AS value FROM (
+        SELECT   cd, cd_nm, adinfo_01
+        ,   JSON_OBJECT('S', adinfo_02, 'A', adinfo_03, 'B', adinfo_04, 'C', adinfo_05) obj
+        FROM      tb_cd_mst
+        WHERE   del_yn = 'N' AND use_yn = 'Y'
+        AND MATCH(adinfo_01, adinfo_02, adinfo_03, adinfo_04, adinfo_05)
+        AGAINST ('[업무태도]' IN BOOLEAN MODE)
+        ORDER BY sort_no
+        ) R1
+        JOIN JSON_TABLE(JSON_KEYS(R1.obj),'$[*]' COLUMNS ( rank VARCHAR(100) PATH '$' )) R2
+        ) R3
+        CROSS JOIN (
+        SELECT   SUM(eval.lvl) val
+        FROM   tb_dev_eval_info eval
+        CROSS JOIN    param p
+        WHERE   eval.del_yn = 'N' AND eval.use_yn = 'Y'
+        AND eval.dev_id = p.dev_id
+        ) eval
+        WHERE   R3.value &lt;= eval.val
+        ) res
+        INNER JOIN rank rk
+        ON   rk.title = '[업무태도]'
+        AND   rk.rank = res.rank
+        LIMIT 1
+        ),
+        -- 재계약의사
+        rein AS
+        (
+        SELECT   '[재계약의사]' title
+        ,   CASE WHEN rsk.re_in_yn = 'Y' THEN 'S' ELSE 'C' END rank
+        ,   CASE WHEN rsk.re_in_yn = 'Y' THEN 100 ELSE 0 END val
+        ,   CASE WHEN rsk.re_in_yn = 'Y' THEN 100 ELSE 0 END weight
+        FROM   tb_dev_rsk_info rsk
+        CROSS JOIN param p
+        WHERE   rsk.del_yn = 'N' AND rsk.use_yn = 'Y'
+        AND rsk.dev_id = p.dev_id
+        ),
+        -- 단가경쟁력 (직전)
+        rate AS
+        (
+        SELECT   '[단가경쟁력]' title, res.rank, res.val, rk.weight FROM (
+        SELECT   R3.rank, prj.val FROM (
+        SELECT   R2.rank, JSON_UNQUOTE(JSON_EXTRACT(R1.obj, CONCAT('$.', R2.rank))) + 0 AS value FROM (
+        SELECT   cd, cd_nm, adinfo_01
+        ,   JSON_OBJECT('S', adinfo_02, 'A', adinfo_03, 'B', adinfo_04, 'C', adinfo_05) obj
+        FROM      tb_cd_mst
+        CROSS JOIN    param p
+        WHERE   del_yn = 'N' AND use_yn = 'Y'
+        AND MATCH(adinfo_01, adinfo_02, adinfo_03, adinfo_04, adinfo_05)
+        AGAINST ('[단가경쟁력]' IN BOOLEAN MODE)
+        AND cd_nm = ( SELECT    fn_get_cm('job_cd', job_cd) job_nm
+        FROM      tb_dev_prj_info
+        WHERE   dev_id = 'HCNC_F002'
+        ORDER BY dev_prj_id desc LIMIT 1 )
+        ORDER BY sort_no
+        ) R1
+        JOIN JSON_TABLE(JSON_KEYS(R1.obj),'$[*]' COLUMNS ( rank VARCHAR(100) PATH '$' )) R2
+        ) R3
+        CROSS JOIN (
+        SELECT   T.cd_nm AS role_nm, T.rate_amt AS val FROM (
+        SELECT    cd.cd_nm, rate.rate_amt
+        FROM    tb_dev_prj_info prj
+        CROSS JOIN    param p
+        LEFT JOIN tb_dev_rate_info rate
+        ON    prj.dev_prj_id = rate.dev_prj_id
+        AND prj.dev_id = rate.dev_id
+        AND rate.del_yn = 'N' AND rate.use_yn = 'Y'
+        LEFT JOIN tb_cd_mst cd
+        ON   cd.grp_cd = 'job_cd'
+        AND cd.cd = prj.job_cd
+        AND cd.del_yn = 'N' AND cd.use_yn = 'Y'
+        WHERE    prj.del_yn = 'N' AND prj.use_yn = 'Y'
+        AND prj.dev_id = p.dev_id
+        ORDER BY prj.ed_dt DESC
+        ) T LIMIT 1
+        ) prj
+        WHERE   R3.value &lt;= prj.val
+        ) res
+        INNER JOIN rank rk
+        ON   rk.title = '[단가경쟁력]'
+        AND   rk.rank = res.rank
+        LIMIT 1
+        ),
+        -- 보유기술
+        skl AS
+        (
+        SELECT   '[보유기술]' title, res.rank, res.cnt, res.pct, rk.weight FROM (
+        SELECT   R4.rank, R4.cnt r_cnt, R4.pct r_pct, skl.cnt, skl.pct FROM (
+        SELECT   R3.rank, SUBSTRING_INDEX(R3.value, ',', 1) cnt, SUBSTRING_INDEX(SUBSTRING_INDEX(R3.value, ',', 2), ',', -1) pct FROM (
+        SELECT   R2.rank, JSON_UNQUOTE(JSON_EXTRACT(R1.obj, CONCAT('$.', R2.rank))) AS value FROM (
+        SELECT   cd, cd_nm, adinfo_01
+        ,   JSON_OBJECT('S', adinfo_02, 'A', adinfo_03, 'B', adinfo_04, 'C', adinfo_05) obj
+        FROM      tb_cd_mst
+        WHERE   del_yn = 'N' AND use_yn = 'Y'
+        AND MATCH(adinfo_01, adinfo_02, adinfo_03, adinfo_04, adinfo_05)
+        AGAINST ('[보유기술]' IN BOOLEAN MODE)
+        ORDER BY sort_no
+        ) R1
+        JOIN JSON_TABLE(JSON_KEYS(R1.obj),'$[*]' COLUMNS ( rank VARCHAR(100) PATH '$' )) R2
+        ) R3
+        ) R4
+        CROSS JOIN
+        (
+        SELECT  COUNT(1) cnt, SUM(skl.lvl) total, ROUND(SUM(skl.lvl) / (COUNT(1) * 5) * 100, 1) pct, fn_get_cm_lst('skl_id', GROUP_CONCAT(skl.skl_id)) skl_lst
+        FROM    tb_dev_skl_info skl
+        CROSS JOIN    param p
+        WHERE   skl.del_yn = 'N' AND skl.use_yn = 'Y'
+        AND skl.dev_id = p.dev_id
+        ) skl
+        WHERE   R4.cnt &lt;= skl.cnt
+        AND R4.pct &lt;= skl.pct
+        ) res
+        INNER JOIN rank rk
+        ON   rk.title = '[보유기술]'
+        AND   rk.rank = res.rank
+        LIMIT 1
+        )
+        SELECT   IFNULL(T.rank, 'C') rank, IFNULL(T.score, 0) score, COUNT(1) cnt
+        FROM
+        (
+        SELECT   rk.rank, rk.weight, res.score
+        FROM   rank rk
+        CROSS JOIN (
+        SELECT   SUM(res.weight * R.rate / 100) score
+        ,   R.weight FROM (
+        SELECT   title, rank, weight FROM eval
+        UNION ALL
+        SELECT   title, rank, weight FROM rein
+        UNION ALL
+        SELECT   title, rank, weight FROM rate
+        UNION ALL
+        SELECT   title, rank, weight FROM skl
+        ) res
+        LEFT JOIN rank R
+        ON   res.title = R.title
+        AND res.rank = R.rank
+        LIMIT 1
+        ) res
+        WHERE   rk.title = '[최종스코어]'
+        AND rk.weight &lt;= res.score
+        ) T
+        LIMIT 1;
+    </select>
+
+</mapper>
