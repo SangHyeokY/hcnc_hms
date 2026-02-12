@@ -350,9 +350,45 @@
         });
     }
 
+    // 공통코드관리 메인/상세 그리드는 화면 요구사항에 따라 건수(총 n건)를 표시하지 x
+    function shouldHideGridCounter(tableEl) {
+        if (!tableEl || !tableEl.id) {
+            return false;
+        }
+        return tableEl.id === "TABLE_COMMON_MAIN" || tableEl.id === "TABLE_COMMON_DETAIL";
+    }
+
+    // 이미 생성된 건수 엘리먼트가 남아 있으면 제거해 이후 렌더링에서 다시 나타나지 않게 하고, 화면에서는 제거
+    function removeGridCounterElement(table, tableEl) {
+        if (!tableEl || !tableEl.id) {
+            return;
+        }
+        var counterEl = table && table.__hcncGridCounterEl
+            ? table.__hcncGridCounterEl
+            : document.querySelector("." + COUNTER_CLASS + "[data-grid-for='" + tableEl.id + "']");
+
+        if (counterEl && counterEl.parentElement) {
+            counterEl.parentElement.removeChild(counterEl);
+        }
+
+        if (table) {
+            table.__hcncGridCounterEl = null;
+        }
+    }
+
     function updateGridCounter(table) { // 건수/아이콘/반응형 한번에 갱신
         var tableEl = getTableElement(table);
         if (!tableEl || tableEl.id !== viewTableId) return; // 현재 보고 있는 id의 테이블 아니면 무시
+
+        // 공통코드 화면(코드그룹/상세코드)은 건수 렌더링과 반응형 푸터 계산을 생략한다.
+        if (shouldHideGridCounter(tableEl)) {
+            removeGridCounterElement(table, tableEl);
+            var footerEl = tableEl.querySelector(".tabulator-footer");
+            if (footerEl) {
+                footerEl.classList.remove(FOOTER_COMPACT_CLASS);
+            }
+            return;
+        }
 
         var counterEl = ensureCounterElement(table);
         if (!counterEl) return;
