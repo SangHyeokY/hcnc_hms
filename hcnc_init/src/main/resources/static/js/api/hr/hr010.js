@@ -195,6 +195,7 @@ $(document).ready(async function () {
     // 탭 변경 이벤트
     $(".tab-btn").on("click", function () {
         const tabId = $(this).data("tab");
+        if(tabId ==  "tab4" && !canAccessHr014Tab()) return;    // hr014 권한 검증
 
         $(".tab-btn").removeClass("active");
         $(this).addClass("active");
@@ -235,6 +236,8 @@ $(document).ready(async function () {
     $(document).on("click", "#btn-user-save", async function () {
         const activeTab = $(".tab-btn.active").data("tab");
         console.log("현재 탭 :", activeTab);
+
+        if(!canAccessHr014Tab()) changedTabs.tab4 = false;  // hr014 권한 검증
 
         if (isSaving) return;
 
@@ -951,7 +954,7 @@ openUserModal = async function(mode, data) {
     if(mode === "insert") clearUserForm();
     else fillUserForm(data || userTable.getSelectedRows()[0].getData());
     setModalMode(mode);
-
+    applyHr014TabPermission(); // tab4(권한 검증후 표시) 활성화
     initAllTabs(); // 모든 tab 초기화
 
     // tab1 활성화
@@ -998,7 +1001,9 @@ function initAllTabs() {
     if (currentMode !== "insert") { // 등록 mode가 아닐 경우
         initTab2();
         initTab3();
-        initTab4();
+        if(canAccessHr014Tab()){    // 권한 검증후 표시
+            initTab4();
+        }
     }
 }
 
@@ -1998,4 +2003,38 @@ if (excelBtn) {
         location.href =
             `/common/getExcel?dev_id=${encodeURIComponent(devId)}&dev_nm=${encodeURIComponent(devNm)}`;
     });
+}
+
+
+
+// tab4(평가/리스크) 접근 허용 role
+const HR014_ALLOWED_ROLE_SET = new Set(["01", "02"]);
+
+// layout.html hidden input(#LOGIN_AUTH)에서 현재 로그인 role 코드 읽기
+function getLoginRoleCd(){
+    return String($("#LOGIN_AUTH").val() || "").trim();
+}
+
+// 현재 사용자가 tab4를 볼 수 있는지 판단
+function canAccessHr014Tab(){
+    return HR014_ALLOWED_ROLE_SET.has(getLoginRoleCd());
+}
+
+// tab4 (평가/리스크)버튼/패널 표시 제어
+function applyHr014TabPermission(){
+    const allowed = canAccessHr014Tab();
+    const $tabBtn = $(".tab-btn[data-tab='tab4']");
+    const $tabPanel = $("#tab4");
+
+    $tabBtn.toggle(allowed);    // tab4(평가/리스크) 버튼
+    $tabPanel.toggle(allowed);  // tab4(평가/리스크) 패널
+
+    // 권한 없는데 현재 tab4에 머물러 있으면 tab1로 강제 이동
+    if(!allowed){
+        changedTabs.tab4 = false;  // 저장 대상에서도 제외
+        if($(".tab-btn.active").data("tab") === "tab4"){
+            $(".tab-btn[data-tab='tab1']").trigger("click");
+        }
+    }
+
 }
