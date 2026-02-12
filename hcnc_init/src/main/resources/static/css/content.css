@@ -2000,12 +2000,14 @@ section.search-area .search-info #searchKeyword {
     line-height: 40px;
     background: #F6F6F6;
     border: 1px solid #D9D9D9;
+    border-radius: 6px;
 }
 section.search-area .search-info #insertNm,
 section.search-area .search-info #searchType {
     height: 40px;
     width: 270px !important;
     background-color: #F6F6F6;
+    border-radius: 6px;
 }
 
 section.search-area .search-info #insertNm:focus,
