@@ -29,20 +29,20 @@
 
     <!-- ================= 메인 리스트 ================= -->
     <div class="content-title fl-sb fl-ac">
-        <h4 class="page-sub-title">진행 프로젝트 내역</h4>
+        <h4 class="page-sub-title">프로젝트 리스트</h4>
         <div class="btn-area">
             <button type="button" class="btn bg-primary btn-main-view">상세보기</button>
-            <button type="button" class="btn btn-main-add">
-                <img src="./images/common/btn-ico-plus.png" alt="등록">등록</button>
-            <button type="button" class="btn btn-main-edit">
-                <img src="./images/common/btn-ico-pencil.png" alt="수정">수정</button>
-            <button type="button" class="btn btn-main-del">
-                <img src="./images/common/btn-ico-trash.png" alt="삭제">삭제</button>
+<!--            <button type="button" class="btn btn-main-add">-->
+<!--                <img src="./images/common/btn-ico-plus.png" alt="등록">등록</button>-->
+<!--            <button type="button" class="btn btn-main-edit">-->
+<!--                <img src="./images/common/btn-ico-pencil.png" alt="수정">수정</button>-->
+<!--            <button type="button" class="btn btn-main-del">-->
+<!--                <img src="./images/common/btn-ico-trash.png" alt="삭제">삭제</button>-->
         </div>
     </div>
-    <div class="hr020-user-type-tabs" role="tablist" aria-label="인력 구분">
+    <div class="hr020-user-type-tabs" role="tablist" aria-label="인력 구분"> <!-- 직원만 조회 -->
         <button type="button" class="hr020-user-type-tab active" data-user-type="staff">직원</button>
-        <button type="button" class="hr020-user-type-tab" data-user-type="freelancer">프리랜서</button>
+        <!--<button type="button" class="hr020-user-type-tab" data-user-type="freelancer">프리랜서</button>-->
     </div>
 
 
@@ -59,7 +59,7 @@
 
             <!-- header -->
             <div class="header">
-                <h4>인력 관리 <span id="modal-title">상세</span></h4>
+                <h4>프로젝트 내역 <span id="modal-title">상세</span></h4>
                 <div class="btn-area">
                     <button class="close-btn" onclick="closeUserViewModal()">
                         <img src="./icons/Icon-close.png" alt="" />
@@ -70,8 +70,8 @@
             <!-- modal-content -->
             <div class="modal-content hr020-main-pop">
 
-                <!-- ================= 상단 인적사항 ================= -->
-                <div class="top-article">
+                <!-- ================= 좌측 모달 영역 ================= -->
+                <div class="top-article wp50">
 
                     <div class="fl-ac title-area">
                         <h5 class="mg-r5">인적사항</h5>
@@ -359,12 +359,12 @@
                     </div>
                 </div>
 
-                <!-- ================= 탭 영역 ================= -->
+                <!-- ================= 우측 모달 영역 ================= -->
                 <div class="tab-article wp50">
                     <div class="fl-ac title-area">
                         <h5 class="mg-r5">상세정보</h5>
                     </div>
-                    <!-- 좌측 -->
+                    <!-- 탭 -->
                     <div class="tab-area">
                         <span class="tab-btn active" data-tab="tab1">소속 및 계약정보</span>
                         <span class="tab-btn" data-tab="tab2">보유역량 및 숙련도</span>

@@ -1112,7 +1112,10 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .modal-content.hr010-main-pop{display:grid; grid-template-columns: auto  1fr;}
 .modal-content.hr010-main-pop:has(> .tab-article[style*="display: none"]),
 .modal-content.hr010-main-pop:has(> .tab-article[style*="display:none"]) {grid-template-columns: 1fr;}
-.modal-content.hr010-main-pop .tab-article{min-width:0; width:100%; height:100%; display:grid; grid-template-rows: fit-content(100%) fit-content(100%) 1fr;}
+.modal-content.hr010-main-pop .tab-article,
+.modal-content.hr020-main-pop .tab-article {
+    min-width:0; width:100%; height:100%; display:grid; grid-template-rows: fit-content(100%) fit-content(100%) 1fr;
+}
 .modal-content h5{position:relative; padding-left:10px; font-size:16px;}
 .modal-content h5:before{content:""; position:absolute; top:50%; left:0; transform:translateY(-50%); display:block; background:#E50019; width:4px; height:16px; border-radius:6px;}
 .modal-content .title-area .type span{padding: 3px 9px; color: #E50019; border-radius:8px; border: 1px solid #E50019;}
@@ -1203,8 +1206,12 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 
 .insert .main-human-modal .modal-human-area .upload .showingbtn{display:none;}
 .top-article{display: flex; flex-direction: column;}
+
 .insert .top-article,
-.update .top-article{width:100%;}
+.update .top-article{
+    width:100%;
+}
+
 .modal-human-area .table-area{width: 100%;}
 
 .modal-human-area .table-area input[type="text"]:read-only,

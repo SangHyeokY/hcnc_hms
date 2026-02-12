@@ -63,12 +63,6 @@ public class Hr020Controller {
         // System.out.println("저장 요청 param = " + param);
         String devType = (String) param.get("dev_type");
 
-        // 신규일 때만 채번... > [진행 프로젝트 내역] > dev_id 생성
-        if (param.get("dev_id") == null || "".equals(param.get("dev_id"))) {
-            String devId = hr020Service.generateDevId(devType);
-            param.put("dev_id", devId);
-        }
-
         // 이미지가 넘어온 경우에만 BLOB로 param에 주입
         if (profileImg != null && !profileImg.isEmpty()) {
 
@@ -105,15 +99,6 @@ public class Hr020Controller {
         // System.out.println("삭제 요청 param = " + param);
         hr020Service.delete_hr020(param);
         mv.addObject("result", "success");
-        return mv;
-    }
-
-    // [진행 프로젝트 내역] > 등급 계산
-    @RequestMapping("/getScore")
-    public ModelAndView getScore (@RequestParam("dev_id") String devId) {
-        ModelAndView mv = new ModelAndView("jsonView");
-        Map<String, Object> resList = hr020Service.dev_score(devId);
-        mv.addObject("res", resList);
         return mv;
     }
 

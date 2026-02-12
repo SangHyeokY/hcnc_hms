@@ -37,21 +37,10 @@ public class Hr020Service {
         return this.sqlSession.insert("com.hcncinit.Hr020Mapper.insert_hr020", map);
     }
 
-    // [진행 프로젝트 내역] > dev_id 생성
-    @QryLog(scrnCd = "HR020", fnCd = "DEV_GEN_ID", opTyp = "SELECT", logParams = false)
-    public String generateDevId(String devType) {
-        return this.sqlSession.selectOne("com.hcncinit.Hr020Mapper.selectDevId", devType);
-    }
-
     // [진행 프로젝트 내역] > 삭제
     @QryLog(scrnCd = "HR020", fnCd = "DEV_DELETE", opTyp = "DELETE")
     public int delete_hr020(Map<String, Object> map) {
         return this.sqlSession.update("com.hcncinit.Hr020Mapper.delete_hr020", map);
     }
 
-    // [진행 프로젝트 내역] > 등급 계산
-    @QryLog(scrnCd = "HR020", fnCd = "DEV_SCORE", opTyp = "SELECT")
-    public Map<String, Object> dev_score(String devId) {
-        return this.sqlSession.selectOne("com.hcncinit.Hr020Mapper.dev_score", devId);
-    }
 }
