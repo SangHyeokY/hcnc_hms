@@ -102,64 +102,64 @@ function buildHr014TableA() {
         columns: [
             { title: "항 목", field: "cd_nm", hozAlign: "center", width: 125, minWidth: 125, maxWidth: 125 },
             {
-                        title: "1",
-                        field: "lv1",
-                        hozAlign: "center",
-                        width: 50,
-                        formatter: scoreCheckboxFormatter,
-                        cellClick: function (e, cell) {
-                            setScore(cell.getRow(), 1);
-                        },
-                        headerVertical: "middle",
-                        headerSort: false
-                    },
-                    {
-                        title: "2",
-                        field: "lv2",
-                        hozAlign: "center",
-                        width: 50,
-                        formatter: scoreCheckboxFormatter,
-                        cellClick: function (e, cell) {
-                            setScore(cell.getRow(), 2);
-                        },
-                        headerVertical: "middle",
-                        headerSort: false
-                    },
-                    {
-                        title: "3",
-                        field: "lv3",
-                        hozAlign: "center",
-                        width: 50,
-                        formatter: scoreCheckboxFormatter,
-                        cellClick: function (e, cell) {
-                            setScore(cell.getRow(), 3);
-                        },
-                        headerVertical: "middle",
-                        headerSort: false
-                    },
-                    {
-                        title: "4",
-                        field: "lv4",
-                        hozAlign: "center",
-                        width: 50,
-                        formatter: scoreCheckboxFormatter,
-                        cellClick: function (e, cell) {
-                            setScore(cell.getRow(), 4);
-                        },
-                        headerVertical: "middle",
-                        headerSort: false
-                    },
-                    {
-                        title: "5",
-                        field: "lv5",
-                        hozAlign: "center",
-                        width: 50,
-                        formatter: scoreCheckboxFormatter,
-                        cellClick: function (e, cell) {
-                            setScore(cell.getRow(), 5);
-                        },
-                        headerVertical: "middle",
-                        headerSort: false
+                title: "1점",
+                field: "lv1",
+                hozAlign: "center",
+                width: 50,
+                formatter: scoreCheckboxFormatter,
+                cellClick: function (e, cell) {
+                    setScore(cell.getRow(), 1);
+                },
+                headerVertical: "middle",
+                headerSort: false
+            },
+            {
+                title: "2점",
+                field: "lv2",
+                hozAlign: "center",
+                width: 50,
+                formatter: scoreCheckboxFormatter,
+                cellClick: function (e, cell) {
+                    setScore(cell.getRow(), 2);
+                },
+                headerVertical: "middle",
+                headerSort: false
+            },
+            {
+                title: "3점",
+                field: "lv3",
+                hozAlign: "center",
+                width: 50,
+                formatter: scoreCheckboxFormatter,
+                cellClick: function (e, cell) {
+                    setScore(cell.getRow(), 3);
+                },
+                headerVertical: "middle",
+                headerSort: false
+            },
+            {
+                title: "4점",
+                field: "lv4",
+                hozAlign: "center",
+                width: 50,
+                formatter: scoreCheckboxFormatter,
+                cellClick: function (e, cell) {
+                    setScore(cell.getRow(), 4);
+                },
+                headerVertical: "middle",
+                headerSort: false
+            },
+            {
+                title: "5점",
+                field: "lv5",
+                hozAlign: "center",
+                width: 50,
+                formatter: scoreCheckboxFormatter,
+                cellClick: function (e, cell) {
+                    setScore(cell.getRow(), 5);
+                },
+                headerVertical: "middle",
+                headerSort: false
             },
             {
                 title: "평가의견",
