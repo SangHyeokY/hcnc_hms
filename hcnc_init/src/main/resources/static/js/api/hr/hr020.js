@@ -1,5 +1,7 @@
 // 사용자 관리 - hr020.js (hcnc_hms)
 
+// '진행 프로젝트 내역'으로 변경하기!!!!
+
 // 인적사항 리스트 테이블
 var userTable;
 
@@ -701,7 +703,7 @@ async function loadUserTableData() {
             url: "/hr020/list",
             type: "GET",
             data: {
-                dev_nm: $("#insertNM").val(),
+                dev_nm: $("#insertNm").val(),
                 searchKeyword: keyword
             }
         });

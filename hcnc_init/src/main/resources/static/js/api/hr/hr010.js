@@ -701,7 +701,7 @@ async function loadUserTableData() {
             url: "/hr010/list",
             type: "GET",
             data: {
-                dev_nm: $("#insertNM").val(),
+                dev_nm: $("#insertNm").val(),
                 searchKeyword: keyword
             }
         });
