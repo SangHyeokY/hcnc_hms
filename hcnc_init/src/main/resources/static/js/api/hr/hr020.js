@@ -84,31 +84,31 @@ $(document).ready(async function () {
     });
 
     // 근무형태 셀렉트 공통콤보
-    setComCode("select_work_md", "WORK_MD", "", "cd", "cd_nm", function () {
-        workMdOptions = $("#select_work_md option").map(function () {
-            return { cd: this.value, cd_nm: $(this).text() };
-        }).get();
-        initSelectDefault("select_work_md", "상주/재택/혼합");
-        if (window.prjTable) {
-            window.prjTable.redraw(true);
-        }
-        workMdMap = getWorkMdMap();
-    });
+//    setComCode("select_work_md", "WORK_MD", "", "cd", "cd_nm", function () {
+//        workMdOptions = $("#select_work_md option").map(function () {
+//            return { cd: this.value, cd_nm: $(this).text() };
+//        }).get();
+//        initSelectDefault("select_work_md", "상주/재택/혼합");
+//        if (window.prjTable) {
+//            window.prjTable.redraw(true);
+//        }
+//        workMdMap = getWorkMdMap();
+//    });
 
     // 개인, 법인 셀렉트 공통콤보
-    setComCode("select_ctrt_typ", "CTRT_TYP", "", "cd", "cd_nm", function () {
-        ctrtTypOptions = $("#select_ctrt_typ option").map(function () {
-            return { cd: this.value, cd_nm: $(this).text() };
-        }).get();
-        initSelectDefault("select_ctrt_typ", "개인/법인");
-        ctrtTypMap = getCtrtTypMap();
-        if (window.prjTable) {
-            const col = window.prjTable.getColumn("ctrt_typ");
-            if (col) {
-                col.getCells().forEach(cell => cell.reformat());
-            }
-        }
-    });
+//    setComCode("select_ctrt_typ", "CTRT_TYP", "", "cd", "cd_nm", function () {
+//        ctrtTypOptions = $("#select_ctrt_typ option").map(function () {
+//            return { cd: this.value, cd_nm: $(this).text() };
+//        }).get();
+//        initSelectDefault("select_ctrt_typ", "개인/법인");
+//        ctrtTypMap = getCtrtTypMap();
+//        if (window.prjTable) {
+//            const col = window.prjTable.getColumn("ctrt_typ");
+//            if (col) {
+//                col.getCells().forEach(cell => cell.reformat());
+//            }
+//        }
+//    });
 
     // 테이블 로딩이 끝날 때 까지 로딩바 표시
     showLoading();
@@ -173,7 +173,6 @@ $(document).ready(async function () {
     $(".btn-main-view").on("click", function () {
         const rowData = btnEditView("상세정보를 조회할 ");
         if (!rowData) return;
-        loadprjTableImgDataAsync(rowData);
         openUserModal("view", rowData);
     });
 
@@ -186,7 +185,6 @@ $(document).ready(async function () {
     $(".btn-main-edit").on("click", function () {
         const rowData = btnEditView("수정할 ");
         if (!rowData) return;
-        loadprjTableImgDataAsync(rowData);
         openUserModal("update", rowData);
     });
 
@@ -493,56 +491,6 @@ function buildprjTable() {
                 download: false
             },
             { title: "성명", field: "dev_nm", hozAlign: "center", headerSort: true , widthGrow:1, minWidth: 100, frozen: true},
-            {
-                title: "평가 등급",
-                field: "grade",
-                hozAlign: "center",
-                widthGrow:2, minWidth: 120, frozen: true,
-                formatter: function (cell) {
-                    const d = cell.getRow().getData();
-                    if (!d.grade) return "";
-                    return formatGradeLabel(d.grade, d.score);
-                }
-            },
-            {   title: "주 개발언어",
-                field: "main_lang_nm",
-                widthGrow: 4, minWidth: 180, frozen: true,
-                formatter: function (cell) {
-                    const value = cell.getValue();
-                    if (!value) return "";
-                    return `<div style="
-                        white-space: nowrap;
-                        overflow: hidden;
-                        text-overflow: ellipsis;">
-                        ${value.split(",").map(v => v.trim()).join(", ")}
-                    </div>`;
-                }
-            },
-            {   title: "희망단가",
-                field: "hope_rate_amt",
-                widthGrow: 3, minWidth: 150, frozen: true,
-                formatter: function(cell){
-                    const value = cell.getValue();
-                    return `<div style="text-align:right;">${amountFormatter(value)}</div>`;
-                }
-            },
-            { title: "dev_id", field: "dev_id", visible: false },
-            { title: "생년월일", field: "brdt", hozAlign: "center", headerSort: true, widthGrow: 2, minWidth: 120 },
-            { title: "연락처", field: "tel", hozAlign: "center", widthGrow: 3, minWidth: 150, headerSort: false },
-            {   title: "이메일",
-                field: "email", widthGrow:4, minWidth: 180, headerSort: false,
-                formatter: function (cell) {
-                    const value = cell.getValue();
-                    if (!value) return "";
-                    return `<div style="
-                        text-align:left;
-                        white-space: nowrap;
-                        overflow: hidden;
-                        text-overflow: ellipsis;">
-                        ${value}
-                    </div>`;
-                }
-            },
             {   title: "거주지역",
                 field: "region",
                 widthGrow:1, minWidth: 100,
@@ -567,45 +515,25 @@ function buildprjTable() {
                     return `<div style="text-align:right;">${formatCareerYearMonth(cell.getValue())}</div>`;
                 }
             },
-            {   title: "최종학력",
-                field: "edu_last",
-                widthGrow:4, minWidth: 180, headerSort: false,
-                formatter: function (cell) {
-                    const value = cell.getValue();
-                    if (!value) return "";
-                    return `<div style="
-                        text-align:left;
-                        white-space: nowrap;
-                        overflow: hidden;
-                        text-overflow: ellipsis;">
-                        ${value}
-                    </div>`;
-                }
-            },
-            {   title: "보유 자격증",
-                field: "cert_txt" ,
-                widthGrow:4, minWidth: 180, headerSort: false,
-                formatter: function (cell) {
-                    const value = cell.getValue();
-                    if (!value) return "";
-                    return `<div style="
-                        text-align:left;
-                        white-space: nowrap;
-                        overflow: hidden;
-                        text-overflow: ellipsis;">
-                        ${value}
-                    </div>`;
-                }
-            },
-            { title: "투입 가능 시점", field: "avail_dt", hozAlign: "center", widthGrow:2, minWidth: 120 },
-            {   title: "계약 형태",
-                field: "ctrt_typ",
+            { title: "고객사", field: "cust_nm", hozAlign: "center", headerSort: true , widthGrow:1, minWidth: 100, frozen: true},
+            { title: "프로젝트명", field: "prj_nm", hozAlign: "center", headerSort: true , widthGrow:1, minWidth: 100, frozen: true},
+            {
+                title: "역할",
+                field: "job_cd",
                 hozAlign: "center",
-                formatter: function (cell) {
-                    const val = cell.getValue();
-                    return (ctrtTypMap && ctrtTypMap[val]) ? ctrtTypMap[val] : val;
-                }, editor: false, editable: false, widthGrow: 1, minWidth: 100
+                width: 90
+                /* 여기 공통코드 넣어서 수정하기 */
             },
+            {   title: "계약단가",
+                field: "rate_amt",
+                widthGrow: 3, minWidth: 150, frozen: true,
+                formatter: function(cell){
+                    const value = cell.getValue();
+                    return `<div style="text-align:right;">${amountFormatter(value)}</div>`;
+                }
+            },
+            { title: "비고", field: "remark", hozAlign: "center", headerSort: true, widthGrow: 2, minWidth: 120 },
+            { title: "dev_id", field: "dev_id", visible: false }
         ],
         data: [],
         // 행 클릭
@@ -623,7 +551,6 @@ function buildprjTable() {
         // 행 더블 클릭
         rowDblClick: function (e, row) {
             var rowData = row.getData();
-            loadprjTableImgDataAsync(rowData);
             openUserModal("view", rowData);
         }
     });
@@ -686,16 +613,16 @@ async function loadprjTableData() {
     }
 
     // 키워드 검색
-    let keyword = $("#searchKeyword").val().trim();
-    if (keyword) {
-        keyword = keyword
-            .split(/[\s,]+/)
-            .filter(w => w)
-            .map(w => "+" + w)
-            .join(" ");
-    } else {
-        keyword = null;
-    }
+//    let keyword = $("#searchKeyword").val().trim();
+//    if (keyword) {
+//        keyword = keyword
+//            .split(/[\s,]+/)
+//            .filter(w => w)
+//            .map(w => "+" + w)
+//            .join(" ");
+//    } else {
+//        keyword = null;
+//    }
     // console.log("키워드 :", keyword);
 
     try {
@@ -705,7 +632,7 @@ async function loadprjTableData() {
             type: "GET",
             data: {
                 dev_nm: $("#insertNm").val(),
-                searchKeyword: keyword
+                // searchKeyword: keyword
             }
         });
 
@@ -717,29 +644,29 @@ async function loadprjTableData() {
         }
 
         // 점수 불러오기
-        const scorePromises = list.map(row =>
-            fetchUserScore(row.dev_id)
-                .then(res => ({
-                    dev_id: row.dev_id,
-                    ...(res.res || {})
-                }))
-                .catch(() => ({
-                    dev_id: row.dev_id
-                }))
-        );
-
-        const scores = await Promise.all(scorePromises);
-
-        const scoreMap = {};
-        scores.forEach(s => {
-            scoreMap[s.dev_id] = s;
-        });
-
-        list.forEach(row => {
-            const s = scoreMap[row.dev_id] || {};
-            row.grade = s.rank || "";
-            row.score = s.score || 0;
-        });
+//        const scorePromises = list.map(row =>
+//            fetchUserScore(row.dev_id)
+//                .then(res => ({
+//                    dev_id: row.dev_id,
+//                    ...(res.res || {})
+//                }))
+//                .catch(() => ({
+//                    dev_id: row.dev_id
+//                }))
+//        );
+//
+//        const scores = await Promise.all(scorePromises);
+//
+//        const scoreMap = {};
+//        scores.forEach(s => {
+//            scoreMap[s.dev_id] = s;
+//        });
+//
+//        list.forEach(row => {
+//            const s = scoreMap[row.dev_id] || {};
+//            row.grade = s.rank || "";
+//            row.score = s.score || 0;
+//        });
 
         hr020SourceRows = list;
         applyHr020UserTypeFilter();
@@ -752,44 +679,6 @@ async function loadprjTableData() {
             text: '사용자 데이터를 불러오는 중 오류가 발생했습니다.',
         });
     }
-}
-
-// db로부터 프로필 이미지 가져오기
-function loadprjTableImgDataAsync(data) {
-    return new Promise((resolve, reject) => {
-        if (!prjTable || typeof prjTable.setData !== "function") {
-            resolve(); // 테이블 없으면 그냥 resolve
-            return;
-        }
-
-        $.ajax({
-            url: "/hr020/list/img",
-            type: "GET",
-            xhrFields: { responseType: "arraybuffer" },
-            data: data,
-            success: function (response) {
-                const blob = new Blob([response], { type: "image/jpeg" });
-                const imgUrl = URL.createObjectURL(blob);
-
-                if (response.byteLength > 0)
-                    $("#dev_img").show();
-                else
-                    $("#dev_img").hide();
-
-                $("#dev_img")[0].src = imgUrl;
-                resolve(); // 완료 시 resolve
-            },
-            error: function (e) {
-                console.error(e);
-                 showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
-                    icon: 'error',
-                    title: '오류',
-                    text: '사용자 데이터를 불러오는 중 오류가 발생했습니다.',
-                 });
-                 resolve(); // 에러여도 UI는 표시 가능하도록 resolve
-            }
-        });
-    });
 }
 
 // ============================================================================== //
@@ -809,7 +698,7 @@ function upsertUserBtn() {
             exp_yr: composeCareerExpValue(),
             edu_last: $("#edu_last").val(),
             cert_txt: $("#cert_txt").val(),
-            hope_rate_amt: normalizeAmountValue($("#hope_rate_amt").val()),
+            rate_amt: normalizeAmountValue($("#rate_amt").val()),
             avail_dt: $("#avail_dt").val(),
             ctrt_typ: $("#select_ctrt_typ").val(),
             work_md: $("#select_work_md").val(),
@@ -979,12 +868,6 @@ openUserModal = async function(mode, data) {
         // console.log("Promise로 팝업에 띄울 데이터 호출 중...");
         updateTabActions("tab1");
         refreshTabLayout("tab1");
-        // 모두 Promise로 변경
-        await Promise.all([
-            // loadUserScoreAsync(data.dev_id),
-            loadprjTableImgDataAsync(data)
-        ]);
-        // console.log("Tab1 새로고침 완료");
     }
 
     // 팝업 표시 완료 + 로딩 종료
@@ -1027,8 +910,8 @@ function fillUserForm(d) {
     $("#avail_dt").val(d.avail_dt || "");
     // $("#dev_id_input").text(d.dev_id || "");
 
-    $("#hope_rate_amt").val(
-        formatAmount(d.hope_rate_amt)
+    $("#rate_amt").val(
+        formatAmount(d.rate_amt)
     );
 
     $("#dev_type").val(d.dev_type || "");
@@ -1092,7 +975,7 @@ function clearUserForm() {
     $("#edu_last").val("");
     $("#cert_txt").val("");
     $("#avail_dt").val("");
-    $("#hope_rate_amt").val("");
+    $("#rate_amt").val("");
     $("#dev_type").val("");
     $("#select_work_md").val("");
     $("#select_ctrt_typ").val("");
@@ -1272,7 +1155,7 @@ function validateUserForm() {
     const devType = ($("#dev_type").val() || "").trim();         // 소속 구분 (dev_id에서 S: 직원, F: 프리랜서)
     const workMd = ($("#select_work_md").val() || "").trim();    // 근무 가능형태 (01: 상주, 02: 재택, 03: 혼합)
     // ==
-    const hopeRaw = normalizeAmountValue($("#hope_rate_amt").val()); // 희망단가 금액
+    const hopeRaw = normalizeAmountValue($("#rate_amt").val()); // 계약단가 금액
     const availDt = ($("#avail_dt").val() || "").trim();         // 투입 가능일
     const ctrtTyp = ($("#select_ctrt_typ").val() || "").trim();  // 계약 형태 (01: 개인, 02: 법인)
 
@@ -1420,23 +1303,23 @@ function validateUserForm() {
         return false;
     }
 
-    // 희망단가
+    // 계약단가
     if (!hopeRaw) {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            text: `'희망단가'를 입력해주세요.`
+            text: `'계약단가'를 입력해주세요.`
         });
-        $("#hope_rate_amt").focus();
+        $("#rate_amt").focus();
         return false;
     }
     if (Number(hopeRaw) > MAX_AMT) {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            text: `'희망단가'는 최대 999,999,999원까지 입력 가능합니다.`
+            text: `'계약단가'는 최대 999,999,999원까지 입력 가능합니다.`
         });
-        $("#hope_rate_amt").focus();
+        $("#rate_amt").focus();
         return false;
     }
 
@@ -1666,8 +1549,8 @@ $(document).on("click", ".career-spin-btn", function () {
     normalizeCareerSpinInputs();
 });
 
-// 희망단가 입력: 숫자만 허용하고 "원" 접미사 앞에서만 커서가 움직이도록 제어한다.
-$("#hope_rate_amt")
+// 계약단가 입력: 숫자만 허용하고 "원" 접미사 앞에서만 커서가 움직이도록 제어한다.
+$("#rate_amt")
     .on("input", function () {
         var raw = this.value || "";
         var caret = Number.isFinite(this.selectionStart) ? this.selectionStart : raw.length;
