@@ -69,7 +69,7 @@ const Layout = {
 
   applySidebarState(containerWrap, toggleIcon, isExpanded) {
     containerWrap.classList.toggle("is-collapsed", !isExpanded);
-    toggleIcon.textContent = isExpanded ? "◀" : "▶";
+    toggleIcon.dataset.state = isExpanded ? "expanded" : "collapsed";
     this.refreshResponsiveLayout();
   },
 
