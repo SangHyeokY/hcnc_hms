@@ -1065,6 +1065,11 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .common-code-section .content-body {height: 0; flex: 1} /* overflow-x: hidden */
 .common-code-section .tabulator {width: 100%; display: flex; flex-direction: column;}
 .common-code-section .tabulator-tableHolder {height: auto; flex: 1;}
+#TABLE_COMMON_MAIN .tabulator-tableHolder,
+#TABLE_COMMON_MAIN .tabulator-tableholder {
+  min-height: calc(100% - 102px) !important;
+  max-height: none !important;
+}
 .common-code-section:first-child {width: 100%; display: flex;flex-direction: column;}
 .common-code-section:last-child {width: 100%; display: flex;flex-direction: column;}
 #TABLE_COMMON_DETAIL .tabulator-cell,
