@@ -371,7 +371,7 @@ function saveTableB(alertFlag) {
 // 리스크 항목 리스트 렌더링
 function buildRiskList() {
     var $list = $("#HR015_RISK_LIST");
-    var placeholder = window.hr010ReadOnly ? "" : "Enter message.";
+    var placeholder = window.hr010ReadOnly ? "" : "관련 내용을 구체적으로 입력하세요.";
 
     if ($list.length === 0) {
         return;
