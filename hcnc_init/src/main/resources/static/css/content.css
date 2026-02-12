@@ -76,9 +76,6 @@ option{background:#fff; color:#333;}
     border-radius: 8px !important;
 }
 
-#searchType {
-    background-color: #F6F6F6;
-}
 /*=================================================================================
  * Grid Table style
 =================================================================================*/
@@ -1996,31 +1993,25 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 }
 
 /* HR010 인적사항 검색 입력 스타일 */ /* HR020 진행 프로젝트 내역검색 입력 스타일 */
-section.search-area .search-info .hr010-search-input,
-section.search-area .search-info .hr020-search-input {
+section.search-area .search-info #searchKeyword {
+    min-width: 600px !important;
     width: auto;
     height: 40px;
     line-height: 40px;
     background: #F6F6F6;
     border: 1px solid #D9D9D9;
 }
-
-section.search-area .search-info .hr010-search-name-input,
-section.search-area .search-info .hr020-search-name-input {
+section.search-area .search-info #insertNm,
+section.search-area .search-info #searchType {
+    height: 40px;
     width: 270px !important;
+    background-color: #F6F6F6;
 }
 
-section.search-area .search-info .hr010-search-keyword-input,
-section.search-area .search-info .hr020-search-keyword-input {
-    min-width: 600px !important;
-}
-
-section.search-area .search-info .hr010-search-input::placeholder,
-section.search-area .search-info .hr020-search-input::placeholder {
-    font-size: 16px;
-    font-weight: 500;
-    color: #838C96;
-    opacity: 1;
+section.search-area .search-info #insertNm:focus,
+section.search-area .search-info #searchType:focus {
+    outline: none;
+    border: 1px solid #D9D9D9;
 }
 
 section.search-area .search-btn-area .btn-search {
@@ -2036,7 +2027,8 @@ section.search-area .search-btn-area .btn-search {
 .contents-wrap:has(.hr020-search-input) > section.search-area,
 .contents-wrap:has(#TABLE_USER) > section.search-area,
 .contents-wrap:has(#TABLE_COMMON_MAIN) > section.search-area {
-  overflow-y: hidden !important;
+  /*overflow-y: hidden !important;*/
+  min-height: 75px;
 }
 
 .contents-wrap:has(#TABLE_HR010_A) > section.white-full {
