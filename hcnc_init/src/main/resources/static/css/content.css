@@ -2005,6 +2005,11 @@ section.search-area .search-info .hr020-search-input {
     border: 1px solid #D9D9D9;
 }
 
+/* 검색영역 input 공통 라운드 */
+section.search-area .search-info .search-input input[type="text"] {
+  border-radius: 6px !important;
+}
+
 section.search-area .search-info .hr010-search-name-input,
 section.search-area .search-info .hr020-search-name-input {
     width: 270px !important;
@@ -2064,8 +2069,8 @@ section.search-area .search-btn-area .btn-search {
 }
 
 .tabulator .tabulator-header {
-  height: 55px !important;
-  min-height: 55px !important;
+  height: 48px !important;
+  min-height: 48px !important;
   border-left: 0 !important;
   border-right: 0 !important;
   border-top-left-radius: 8px !important;
@@ -2074,8 +2079,8 @@ section.search-area .search-btn-area .btn-search {
 }
 
 .tabulator .tabulator-header .tabulator-col {
-  height: 55px !important;
-  min-height: 55px !important;
+  height: 48px !important;
+  min-height: 48px !important;
   border-left: 0 !important;
   border-right: 0 !important;
   border-bottom: 1px solid #E8EAEE !important;
@@ -2091,8 +2096,8 @@ section.search-area .search-btn-area .btn-search {
 }
 
 .tabulator .tabulator-header .tabulator-col .tabulator-col-content {
-  height: 55px !important;
-  min-height: 55px !important;
+  height: 48px !important;
+  min-height: 48px !important;
   padding: 0 10px !important;
   display: flex;
   align-items: center;
@@ -2118,16 +2123,16 @@ section.search-area .search-btn-area .btn-search {
   border-right: 0 !important;
 }
 
-/* 모든 행 높이 55px 고정 */
+/* 공통 행 높이 46px */
 .tabulator .tabulator-row {
-  height: 55px !important;
-  min-height: 55px !important;
+  height: 46px !important;
+  min-height: 46px !important;
 }
 
 .tabulator .tabulator-row .tabulator-cell {
-  height: 55px !important;
-  min-height: 55px !important;
-  line-height: 55px !important;
+  height: 46px !important;
+  min-height: 46px !important;
+  line-height: 46px !important;
   font-size: 15px !important;
   padding-top: 0 !important;
   padding-bottom: 0 !important;
