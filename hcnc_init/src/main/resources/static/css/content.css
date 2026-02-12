@@ -77,7 +77,7 @@ option{background:#fff; color:#333;}
 }
 
 #searchType {
-    background: #F6F6F6;
+    background-color: #F6F6F6;
 }
 /*=================================================================================
  * Grid Table style
@@ -837,10 +837,10 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
   line-height: 1.5;
   border:none;
 }
-.tag-input-box.is-readonly .tag-item::after {
+.tag-input-box.is-readonly .tag-item::before {
   content: ", ";
 }
-.tag-input-box.is-readonly .tag-item:last-child::after {
+.tag-input-box.is-readonly .tag-item:first-child::before {
   content: "";
 }
 
