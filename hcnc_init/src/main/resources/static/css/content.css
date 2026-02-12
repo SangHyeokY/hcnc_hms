@@ -2491,11 +2491,7 @@ section.search-area .search-btn-area .btn-search {
 /* HR010 등록 모달: 직원/프리랜서 select 폭 국소 조정 */
 #view-user-area.insert #dev_type {
   min-width: 173px !important;
-  width: 100%;
-}
-
-#dev_type {
-  min-width: 150px;
+  cursor: pointer;
 }
 
 .white-full > .content-body {

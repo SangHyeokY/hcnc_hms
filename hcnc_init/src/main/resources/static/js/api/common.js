@@ -13,7 +13,11 @@ function getComCode(strGrpCd, strTag, func) {
             func(data.res);
         },
         error: function () {
-            alert("콤보박스 데이터를 불러오는 중 오류가 발생했습니다.");
+            showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+                icon: 'error',
+                title: '오류',
+                text: `'콤보박스' 데이터를 불러오는 중 오류가 발생했습니다.`
+            });
             return null;
         }
     });
@@ -40,7 +44,11 @@ function setComCode(strId, strGrpCd, strTag, id = "cd", name = "cd_nm", done, bT
             }
         },
         error: function () {
-            alert("콤보박스 데이터를 불러오는 중 오류가 발생했습니다."); // 내일 고치기
+            showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+                icon: 'error',
+                title: '오류',
+                text: `'콤보박스' 데이터를 불러오는 중 오류가 발생했습니다.`
+            });
         }
     });
 }

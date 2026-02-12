@@ -219,7 +219,7 @@ function commentInputFormatter(cell, formatterParams, onRendered) {
     var value = cell.getValue();
     var safeValue = escapeHtml(value == null ? "" : String(value));
     var disabled = window.hr010ReadOnly ? "disabled" : "";
-    var placeholder = window.hr010ReadOnly ? "" : "Enter message.";
+    var placeholder = window.hr010ReadOnly ? "" : "관련 내용을 구체적으로 입력하세요.";
 
     onRendered(function () {
         var input = cell.getElement().querySelector(".hr014-comment-input");
