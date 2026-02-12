@@ -1,9 +1,10 @@
 // 사용자 관리 - hr020.js (hcnc_hms)
 
 // '진행 프로젝트 내역'으로 변경하기!!!!
+// 기능 구현 이후, 불필요한 부분 덜어내기
 
 // 인적사항 리스트 테이블
-var userTable;
+var prjTable;
 
 // 모드(insert: 등록 / update: 수정 / view: 상세조회)
 var currentMode = "insert";
@@ -59,7 +60,7 @@ const tabNameMap = {
 
 // 문서 첫 생성 시 실행
 $(document).ready(async function () {
-    buildUserTable();
+    buildprjTable();
 
     // console.log(Swal); // swal 오류 확인용
 
@@ -77,8 +78,8 @@ $(document).ready(async function () {
         $(this).addClass("active");
 
         applyHr020UserTypeFilter();
-        if (window.userTable) {
-            updateTabulatorGridCount(window.userTable);
+        if (window.prjTable) {
+            updateTabulatorGridCount(window.prjTable);
         }
     });
 
@@ -88,8 +89,8 @@ $(document).ready(async function () {
             return { cd: this.value, cd_nm: $(this).text() };
         }).get();
         initSelectDefault("select_work_md", "상주/재택/혼합");
-        if (window.userTable) {
-            window.userTable.redraw(true);
+        if (window.prjTable) {
+            window.prjTable.redraw(true);
         }
         workMdMap = getWorkMdMap();
     });
@@ -101,8 +102,8 @@ $(document).ready(async function () {
         }).get();
         initSelectDefault("select_ctrt_typ", "개인/법인");
         ctrtTypMap = getCtrtTypMap();
-        if (window.userTable) {
-            const col = window.userTable.getColumn("ctrt_typ");
+        if (window.prjTable) {
+            const col = window.prjTable.getColumn("ctrt_typ");
             if (col) {
                 col.getCells().forEach(cell => cell.reformat());
             }
@@ -111,10 +112,10 @@ $(document).ready(async function () {
 
     // 테이블 로딩이 끝날 때 까지 로딩바 표시
     showLoading();
-    await loadUserTableData();
+    await loadprjTableData();
 
     // 로딩 완료 후 테이블 건수 표시
-    if (window.userTable) updateTabulatorGridCount(window.userTable);
+    if (window.prjTable) updateTabulatorGridCount(window.prjTable);
 
     hideLoading();
 
@@ -146,8 +147,8 @@ $(document).ready(async function () {
     $(".btn-search").on("click", async function (event) {
         event.preventDefault();
         showLoading();
-        await loadUserTableData();
-        if (window.userTable) updateTabulatorGridCount(window.userTable);
+        await loadprjTableData();
+        if (window.prjTable) updateTabulatorGridCount(window.prjTable);
         hideLoading();
     });
 
@@ -155,8 +156,8 @@ $(document).ready(async function () {
     $("#searchKeyword").on("keyup", async function (event) {
         if (event.key === "Enter") {
             showLoading();
-            await loadUserTableData();
-            if (window.userTable) updateTabulatorGridCount(window.userTable);
+            await loadprjTableData();
+            if (window.prjTable) updateTabulatorGridCount(window.prjTable);
             hideLoading();
         }
     });
@@ -172,7 +173,7 @@ $(document).ready(async function () {
     $(".btn-main-view").on("click", function () {
         const rowData = btnEditView("상세정보를 조회할 ");
         if (!rowData) return;
-        loadUserTableImgDataAsync(rowData);
+        loadprjTableImgDataAsync(rowData);
         openUserModal("view", rowData);
     });
 
@@ -185,7 +186,7 @@ $(document).ready(async function () {
     $(".btn-main-edit").on("click", function () {
         const rowData = btnEditView("수정할 ");
         if (!rowData) return;
-        loadUserTableImgDataAsync(rowData);
+        loadprjTableImgDataAsync(rowData);
         openUserModal("update", rowData);
     });
 
@@ -332,8 +333,8 @@ $(document).ready(async function () {
 
             // 저장에 성공했다면...
             if (isSuccess) {
-                userTable.clearData();
-                await loadUserTableData();
+                prjTable.clearData();
+                await loadprjTableData();
             }
             console.log("저장 작업 종료, 로딩 상태 :", isSaving); // false여야 정상
         }
@@ -422,7 +423,7 @@ function normalizeJobValue(value) {
 // ============================================================================== //
 
 // 인적사항 리스트 테이블 생성 정의
-function buildUserTable() {
+function buildprjTable() {
     if (!window.Tabulator) {
         console.error("Tabulator가 로드되지 않았습니다.");
         return;
@@ -459,7 +460,7 @@ function buildUserTable() {
     }
 
     // 테이블 정의
-    userTable = new Tabulator("#TABLE_HR020_A", {
+    prjTable = new Tabulator("#TABLE_HR020_A", {
         layout: "fitColumns",
         height: "100%",
         headerSort: true,
@@ -617,12 +618,12 @@ function buildUserTable() {
         },
         // 체크박스 선택
         rowSelectionChanged: function () {
-            syncTableCheckboxes(userTable);
+            syncTableCheckboxes(prjTable);
         },
         // 행 더블 클릭
         rowDblClick: function (e, row) {
             var rowData = row.getData();
-            loadUserTableImgDataAsync(rowData);
+            loadprjTableImgDataAsync(rowData);
             openUserModal("view", rowData);
         }
     });
@@ -671,16 +672,16 @@ function filterHr020RowsByType(list) {
 }
 
 function applyHr020UserTypeFilter() {
-    if (!userTable || typeof userTable.setData !== "function") {
+    if (!prjTable || typeof prjTable.setData !== "function") {
         return;
     }
 
-    userTable.setData(filterHr020RowsByType(hr020SourceRows));
+    prjTable.setData(filterHr020RowsByType(hr020SourceRows));
 }
 
 // db로부터 리스트 불러와서 인적사항 테이블에 넣기
-async function loadUserTableData() {
-    if (!userTable || typeof userTable.setData !== "function") {
+async function loadprjTableData() {
+    if (!prjTable || typeof prjTable.setData !== "function") {
         return;
     }
 
@@ -742,7 +743,7 @@ async function loadUserTableData() {
 
         hr020SourceRows = list;
         applyHr020UserTypeFilter();
-        // userTable.setData(response.res || []);
+        // prjTable.setData(response.res || []);
     } catch (e) {
         console.error(e);
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
@@ -754,9 +755,9 @@ async function loadUserTableData() {
 }
 
 // db로부터 프로필 이미지 가져오기
-function loadUserTableImgDataAsync(data) {
+function loadprjTableImgDataAsync(data) {
     return new Promise((resolve, reject) => {
-        if (!userTable || typeof userTable.setData !== "function") {
+        if (!prjTable || typeof prjTable.setData !== "function") {
             resolve(); // 테이블 없으면 그냥 resolve
             return;
         }
@@ -872,7 +873,7 @@ function upsertUserBtn() {
 
 // 데이터 삭제 요청 - toast 방식  추가해야될 사항(현재 삭제하겠냐는 문구에 잡힌 파라미터 수정 필요)
 async function deleteUserRows() {
-    var selectedRows = userTable.getSelectedRows();
+    var selectedRows = prjTable.getSelectedRows();
 
     // 선택 없음
     if (selectedRows.length === 0) {
@@ -919,7 +920,7 @@ async function deleteUserRows() {
             success: function () {
                 pending -= 1;
                 if (pending === 0) {
-                    loadUserTableData();
+                    loadprjTableData();
                     showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
                         icon: 'success',
                         title: '완료',
@@ -951,7 +952,7 @@ openUserModal = async function(mode, data) {
     $modal.show();
 
     if(mode === "insert") clearUserForm();
-    else fillUserForm(data || userTable.getSelectedRows()[0].getData());
+    else fillUserForm(data || prjTable.getSelectedRows()[0].getData());
     setModalMode(mode);
 
     // initAllTabs(); // 모든 tab 초기화
@@ -981,7 +982,7 @@ openUserModal = async function(mode, data) {
         // 모두 Promise로 변경
         await Promise.all([
             // loadUserScoreAsync(data.dev_id),
-            loadUserTableImgDataAsync(data)
+            loadprjTableImgDataAsync(data)
         ]);
         // console.log("Tab1 새로고침 완료");
     }
@@ -1729,8 +1730,8 @@ function fetchUserScore(devId) {
 
 // alert 문자 가공
 function btnEditView(alertPrefix = "") {
-    if (!userTable) return null;
-    const rows = userTable.getSelectedRows();
+    if (!prjTable) return null;
+    const rows = prjTable.getSelectedRows();
     const prefix = alertPrefix || "";
     if (rows.length !== 1) {
             showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)

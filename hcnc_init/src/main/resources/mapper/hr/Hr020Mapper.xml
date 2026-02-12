@@ -2,125 +2,35 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.hcncinit.Hr020Mapper">
 
-    <!-- 진행 프로젝트 내역으로 교체 예정 !! -->
-
-    <!-- 인력관리 > 프로젝트 내역 조회 -->
+    <!-- 인력관리 > 진행 프로젝트 조회 -->
     <select id="select_hr020" parameterType="map" resultType="map">
-        SELECT dev_id
-            , dev_nm -- 성명
-            , DATE_FORMAT(brdt, '%Y-%m-%d') AS brdt -- 생년월일
-            , tel -- 연락처
-            , email -- 이메일
-            , region -- 거주지역
-            , main_lang -- 주 개발언어 코드
-            , fn_get_cm_lst('skl_id', main_lang) AS main_lang_nm -- 주 개발언어 라벨
-            , exp_yr -- 경력연차
-            , edu_last -- 최종학력
-            , cert_txt -- 보유 자격증
-            , work_md -- 근무형태
-            , DATE_FORMAT(avail_dt, '%Y-%m-%d') AS avail_dt -- 투입가능시점
-            , ctrt_typ -- 계약형태
-            , hope_rate_amt -- 단가
-            , search_txt
-            , IFNULL(fn_total_score(dev_id), 0) score
-        FROM tb_dev_info
-        WHERE del_yn='N'
-        AND use_yn='Y'
-        <if test="searchKeyword != null and searchKeyword != ''">
-            AND (
-            MATCH(search_txt) AGAINST (CONCAT(#{searchKeyword}, '*') IN BOOLEAN MODE)
-            OR search_txt LIKE CONCAT('%', #{searchKeyword}, '%')
-            )
-        </if>
+        SELECT dev.dev_id
+            , dev.dev_nm -- 성명
+            , dev.region -- 거주지역
+            , dev.exp_yr -- 경력연차
+            , prj.cust_nm -- 고객사
+            , prj.prj_nm -- 프로젝트명
+            , prj.job_cd -- 역할
+            , rate.rate_amt -- 비고
+            , prj.remark -- 비고
+        FROM tb_dev_info dev
+        LEFT JOIN tb_dev_prj_info prj
+        ON dev.dev_id = prj.dev_id
+        AND prj.use_yn = 'Y'
+        AND prj.del_yn = 'N'
+        LEFT JOIN tb_dev_rate_info rate
+        ON dev.dev_id = rate.dev_id
+        AND prj.dev_prj_id = rate.dev_prj_id
+        AND rate.use_yn = 'Y'
+        AND rate.del_yn = 'N'
+        WHERE dev.use_yn = 'Y'
+        AND dev.del_yn = 'N'
         <if test="dev_nm != null and dev_nm != ''">
-            AND dev_nm LIKE CONCAT('%', #{dev_nm}, '%')
+            AND dev.dev_nm LIKE CONCAT('%', #{dev_nm}, '%')
         </if>
-        ORDER BY score DESC, dev_id
+        AND (prj.ed_dt IS NULL OR NOW() &lt; prj.ed_dt)
+        GROUP BY dev.dev_id, prj.dev_prj_id
+        ORDER BY prj.st_dt DESC
     </select>
-
-    <!-- 인력관리 > 프로젝트 내역 이미지 -->
-    <select id="select_hr020_img" parameterType="map" resultType="_byte[]">
-        SELECT dev_img
-        FROM tb_dev_info
-        WHERE del_yn='N'
-        AND use_yn='Y'
-        AND dev_id LIKE CONCAT('%', #{dev_id}, '%')
-        LIMIT 1
-    </select>
-
-    <!-- 프로젝트 내역 신규 등록/수정 -->
-    <insert id="insert_hr020" parameterType="map">
-        INSERT INTO tb_dev_info (
-            dev_id,
-            brdt,
-            avail_dt,
-            dev_img,
-            dev_nm,
-            tel,
-            email,
-            region,
-            main_lang,
-            exp_yr,
-            edu_last,
-            cert_txt,
-            work_md,
-            hope_rate_amt,
-            ctrt_typ,
-            crt_ts,
-            use_yn,
-            del_yn,
-            crt_by
-        ) VALUES (
-            #{dev_id},
-            #{brdt},
-            #{avail_dt},
-            #{dev_img, jdbcType=BLOB},
-            #{dev_nm},
-            #{tel},
-            #{email},
-            #{region},
-            #{main_lang},
-            #{exp_yr},
-            #{edu_last},
-            #{cert_txt},
-            #{work_md},
-            #{hope_rate_amt},
-            #{ctrt_typ},
-            NOW(),
-            'Y',
-            'N',
-            #{dev_id}
-        ) ON DUPLICATE KEY UPDATE
-            dev_id = #{dev_id},
-            brdt = #{brdt},
-            avail_dt = #{avail_dt},
-            dev_img = #{dev_img, jdbcType=BLOB},
-            dev_nm = #{dev_nm},
-            tel = #{tel},
-            email = #{email},
-            region = #{region},
-            main_lang = #{main_lang},
-            exp_yr = #{exp_yr},
-            edu_last = #{edu_last},
-            cert_txt = #{cert_txt},
-            work_md = #{work_md},
-            hope_rate_amt = #{hope_rate_amt},
-            ctrt_typ = #{ctrt_typ},
-            crt_ts = NOW(),
-            use_yn = 'Y',
-            del_yn = 'N',
-            crt_by = #{dev_id}
-    </insert>
-
-    <!-- 인적사항 > 프로젝트 내역 삭제 -->
-    <update id="delete_hr020" parameterType="map">
-        UPDATE tb_dev_info
-        SET del_yn = 'Y',
-            del_ts = NOW(),
-            del_by = #{dev_id},
-            upd_ts = NOW(),
-            upd_by = #{dev_id}
-        WHERE dev_id = #{dev_id}
-    </update>
 
 </mapper>
