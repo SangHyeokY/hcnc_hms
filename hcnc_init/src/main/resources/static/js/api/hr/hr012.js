@@ -166,7 +166,7 @@ function buildHr012TableB() {
             { title: "skl_id", field: "skl_id", visible:false },
             { title: "기술", field: "cd_nm", hozAlign: "left", widthGrow: 2 },
             ...[1,2,3,4,5].map(i => ({
-                title: i.toString(),
+                title: i.toString() + "점",
                 field: "lv" + i,
                 hozAlign: "center",
                 formatter: radioFormatter,

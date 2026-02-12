@@ -17,10 +17,10 @@
 /* 좌측 lnb 토글 버튼 */
 .lnb-toggle-handle {
   position: absolute;
-  top: 13%;
+  top: 17%;
   left: 248px;
   width: 16px;
-  height: 90px;
+  height: 75px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -34,6 +34,22 @@
   cursor: pointer;
   transform: translateY(-50%);
   z-index: 250;
+}
+
+.lnb-toggle-icon {
+  display: block;
+  width: 10px;
+  height: 10px;
+  background: url("../images/common/ico-arrow-down.png") no-repeat center;
+  background-size: contain;
+  filter: brightness(0) invert(1);
+  transition: transform 0.2s ease;
+  transform: rotate(90deg);
+  font-size: 0;
+}
+
+.lnb-toggle-icon[data-state="collapsed"] {
+  transform: rotate(-90deg);
 }
 
 .container-wrap.is-collapsed .lnb-toggle-handle {
