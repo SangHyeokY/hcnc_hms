@@ -372,6 +372,17 @@ option{background:#fff; color:#333;}
   font-size: 12px;
 }
 
+
+/* 아이콘 크기 강제 통일 */
+.hr013-toolbar .btn-area button img{
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
+  min-height: 16px;
+  display: block;
+  object-fit: contain;
+}
+
 .tabulator-row .tabulator-cell .tabulator-data-tree-control {width: 16px !important; height: 16px !important; background-color: #ED242C !important; border: none !important;}
 .tabulator-row .tabulator-cell .tabulator-data-tree-control .tabulator-data-tree-control-expand {background: #fff !important;}
 .tabulator-row .tabulator-cell .tabulator-data-tree-control .tabulator-data-tree-control-collapse:after,.tabulator-row .tabulator-cell .tabulator-data-tree-control .tabulator-data-tree-control-expand:after {background: #fff !important; color: #fff !important;}
@@ -1148,7 +1159,16 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .modal-wrap #view-user-area .modal-btn ul li:last-child {
   margin-left: 0;
 }
-
+.modal-btn #btn-excel{
+  background: #fff url("/icons/btn-ico-excel-download.png") no-repeat 16px ;
+  background-size:18px 18px;
+  padding-left: 40px;
+  border-radius:8px;
+  color:#000000 ;
+  font-weight: 700;
+  font-size: 18px;
+  border: 1px solid #C5CCD5;
+}
 /* 사용자관리 수정 모달: 비고 입력칸 포함 모든 입력영역이 잘리지 않도록 폭 고정 */
 #write-user-area .modal-content {
   grid-template-columns: 1fr;
