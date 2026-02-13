@@ -59,7 +59,6 @@ const tabNameMap = {
 $(document).ready(async function () {
     buildUserTable();
 
-
     // console.log(Swal); // swal 오류 확인용
 
     // 탭별 이벤트 정의
