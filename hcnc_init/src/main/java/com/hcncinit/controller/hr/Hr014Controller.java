@@ -31,6 +31,7 @@ public class Hr014Controller {
     public ModelAndView listA(@RequestParam(required = false) Map<String, Object> map, HttpSession session) {
         if(!canAccessHr014(session)) return forbiddenJson();
         applyDefaults(map);
+        map.put("login_role_cd", getLoginRoleCd(session));
         ModelAndView mv = new ModelAndView("jsonView");
         List<Map<String, Object>> list = hr014Service.listA(map);
         mv.addObject("success", true);
@@ -46,6 +47,7 @@ public class Hr014Controller {
         ModelAndView mv = new ModelAndView("jsonView");
         applyLoginUser(map, session);
         applyDefaults(map);
+        map.put("login_role_cd", getLoginRoleCd(session));
         List<Map<String, Object>> rows = parseRows(map.get("rows"));
         map.put("rows", rows);
         int res = hr014Service.saveA(map);
@@ -59,6 +61,7 @@ public class Hr014Controller {
         
         if(!canAccessHr014(session)) return forbiddenJson();
         applyDefaults(map);
+        map.put("login_role_cd", getLoginRoleCd(session));
         ModelAndView mv = new ModelAndView("jsonView");
         List<Map<String, Object>> list = hr014Service.listB(map);
         mv.addObject("success", true);
@@ -74,6 +77,7 @@ public class Hr014Controller {
         ModelAndView mv = new ModelAndView("jsonView");
         applyLoginUser(map, session);
         applyDefaults(map);
+        map.put("login_role_cd", getLoginRoleCd(session));
         int res = hr014Service.saveB(map);
         mv.addObject("success", res > 0);
         return mv;
@@ -135,23 +139,28 @@ public class Hr014Controller {
     }
 
     // =============================================================================== //
-    private static final Set<String> HR014_ALLOWED_ROLE_SET = Set.of("01", "02");
+    private static final Set<String> HR014_ALLOWED_ROLE_SET = Set.of("01", "02");   // 전체허용권한
 
     private boolean canAccessHr014(HttpSession session) {
+        return HR014_ALLOWED_ROLE_SET.contains(getLoginRoleCd(session));
+    }
+
+    private String getLoginRoleCd(HttpSession session) {
         if (session == null) {
-            return false;
+            return "";
         }
         Object role = session.getAttribute("LOGIN_AUTH");
         if (role == null) {
-            return false;
+            return "";
         }
-        return HR014_ALLOWED_ROLE_SET.contains(String.valueOf(role).trim());
+        return String.valueOf(role).trim();
     }
+
 
     private ModelAndView forbiddenJson(){
         ModelAndView mv = new ModelAndView("jsonView");
         mv.addObject("success", false);
-        mv.addObject("message", "평가 및 리스크 탭 접근 권한이 없습니다.");
+        mv.addObject("message", "접근 권한이 없습니다.");
         mv.addObject("list", List.of());    // list API 응답 호환
         return mv;
     }
