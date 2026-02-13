@@ -32,11 +32,11 @@
         <h4 class="page-sub-title">인적사항 리스트</h4>
         <div class="btn-area">
             <button type="button" class="btn bg-primary btn-main-view">상세보기</button>
-            <button type="button" class="btn btn-main-add">
+            <button type="button" class="btn btn-main-add" th:if="${LOGIN_AUTH == '01' or LOGIN_AUTH == '02' or LOGIN_AUTH == '03'}">
                 <img src="./images/common/btn-ico-plus.png" alt="등록">등록</button>
-            <button type="button" class="btn btn-main-edit">
+            <button type="button" class="btn btn-main-edit" th:if="${LOGIN_AUTH == '01' or LOGIN_AUTH == '02' or LOGIN_AUTH == '03'}">
                 <img src="./images/common/btn-ico-pencil.png" alt="수정">수정</button>
-            <button type="button" class="btn btn-main-del">
+            <button type="button" class="btn btn-main-del" th:if="${LOGIN_AUTH == '01' or LOGIN_AUTH == '02' or LOGIN_AUTH == '03'}">
                 <img src="./images/common/btn-ico-trash.png" alt="삭제">삭제</button>
         </div>
     </div>
