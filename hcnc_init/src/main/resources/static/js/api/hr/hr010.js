@@ -85,11 +85,11 @@ $(document).ready(async function () {
     });
 
     // 소속 구분 공통콤보
-    setComCode("select_dev_type", "DEV_TYPE", "", "cd", "cd_nm", function () {
-        devTypOptions = $("#select_dev_type option").map(function () {
+    setComCode("select_dev_typ", "DEV_TYP", "", "cd", "cd_nm", function () {
+        devTypOptions = $("#select_dev_typ option").map(function () {
             return { cd: this.value, cd_nm: $(this).text() };
         }).get();
-        initSelectDefault("select_dev_type", "직원/프리랜서");
+        initSelectDefault("select_dev_typ", "직원/프리랜서");
         devTypMap = getDevTypMap();
     });
 
@@ -383,7 +383,7 @@ function getDevTypMap() {
         });
         return map;
     }
-    $("#select_dev_type option").each(function () {
+    $("#select_dev_typ option").each(function () {
         var val = this.value;
         if (val) {
             map[val] = $(this).text();
@@ -694,12 +694,12 @@ function resolveHr010UserType(row) {
         return "staff";
     }
 
-    var devType = String(row.select_dev_type || "").toUpperCase();
+    var devTyp = String(row.select_dev_typ || "").toUpperCase();
 
-    if (devType === "HCNC_F" || devType === "F") {
+    if (devTyp === "HCNC_F" || devTyp === "F") {
         return "freelancer";
     }
-    if (devType === "HCNC_S" || devType === "S") {
+    if (devTyp === "HCNC_S" || devTyp === "S") {
         return "staff";
     }
 
@@ -872,7 +872,7 @@ function upsertUserBtn() {
             avail_dt: $("#avail_dt").val(),
             ctrt_typ: $("#select_ctrt_typ").val(),
             work_md: $("#select_work_md").val(),
-            dev_type: $("#select_dev_type").val(),
+            dev_typ: $("#select_dev_typ").val(),
             crt_by: ""
         };
 
@@ -1027,8 +1027,8 @@ openUserModal = async function (mode, data) {
     // 인력 관리 등록 시, 정해진 탭에 따라 자동으로 선택
     if (mode === "insert") {
         const activeTabBtn = document.querySelector(".hr010-user-type-tab.active");
-        const devType = activeTabBtn?.dataset.userType === "freelancer" ? "HCNC_F" : "HCNC_S";
-        $("#select_dev_type").val(devType).trigger("change");
+        const devTyp = activeTabBtn?.dataset.userType === "freelancer" ? "HCNC_F" : "HCNC_S";
+        $("#select_dev_typ").val(devTyp).trigger("change");
     }
 
     window.hr014TabInitialized = false;
@@ -1093,7 +1093,7 @@ function fillUserForm(d) {
         formatAmount(d.hope_rate_amt)
     );
 
-    $("#select_dev_type").val(d.select_dev_type || "");
+    $("#select_dev_typ").val(d.select_dev_typ || "");
 
     // 셀렉트 work_md
     if (d.work_md && workMdMap[d.work_md]) {
@@ -1109,14 +1109,14 @@ function fillUserForm(d) {
         $("#select_ctrt_typ").val("");
     }
 
-    $("#select_dev_type").val(""); // 기본값 초기화
+    $("#select_dev_typ").val(""); // 기본값 초기화
 
     // '소속 구분' 값 재할당
     if (d.dev_id) {
         if (d.dev_id.startsWith("HCNC_F")) {
-            $("#select_dev_type").val("HCNC_F");
+            $("#select_dev_typ").val("HCNC_F");
         } else if (d.dev_id.startsWith("HCNC_S")) {
-            $("#select_dev_type").val("HCNC_S");
+            $("#select_dev_typ").val("HCNC_S");
         }
     }
 
@@ -1155,7 +1155,7 @@ function clearUserForm() {
     $("#cert_txt").val("");
     $("#avail_dt").val("");
     $("#hope_rate_amt").val("");
-    $("#select_dev_type").val("");
+    $("#select_dev_typ").val("");
     $("#select_work_md").val("");
     $("#select_ctrt_typ").val("");
     $("#grade").text("");
@@ -1198,15 +1198,15 @@ function setModalMode(mode) {
         .prop("disabled", isReadOnly);
 
     $modal.find("select")
-        .not("#select_dev_type")
+        .not("#select_dev_typ")
         .prop("disabled", isReadOnly);
 
 
     // ================================
-    // select_dev_type 전용 제어
+    // select_dev_typ 전용 제어
     // ================================
-    $modal.find("#select_dev_type")
-        .toggleClass("selectedDevType", isInsert) // 등록만 셀렉트 추가
+    $modal.find("#select_dev_typ")
+        .toggleClass("selectedDevTyp", isInsert) // 등록만 셀렉트 추가
         .prop("disabled", !isInsert); // 등록이 아니면 모두 disabled
 
 
@@ -1331,7 +1331,7 @@ function validateUserForm() {
     const expYrMonth = ($("#exp_yr_month").val() || "").trim();  // 경력연차(개월)
     const eduLast = ($("#edu_last").val() || "").trim();         // 최종학력
     // ==
-    const devType = ($("#select_dev_type").val() || "").trim();         // 소속 구분 (dev_id에서 S: 직원, F: 프리랜서)
+    const devTyp = ($("#select_dev_typ").val() || "").trim();         // 소속 구분 (dev_id에서 S: 직원, F: 프리랜서)
     const workMd = ($("#select_work_md").val() || "").trim();    // 근무 가능형태 (01: 상주, 02: 재택, 03: 혼합)
     // ==
     const hopeRaw = normalizeAmountValue($("#hope_rate_amt").val()); // 희망단가 금액
@@ -1461,13 +1461,13 @@ function validateUserForm() {
     }
 
     // 소속 구분
-    if (!devType || devType == "") {
+    if (!devTyp || devTyp == "") {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
             html: `<strong>소속 구분</strong>을 선택해주세요.`
         });
-        $("#select_dev_type").focus();
+        $("#select_dev_typ").focus();
         return false;
     }
 
