@@ -265,6 +265,8 @@ function buildHr013Table() {
 
                     const rowData = cell.getRow().getData();
 
+                    if (currentMode === "view")
+                        return false;
                     // ※ 20260220 임시 주석 - 당사여부 체크된 경우 → 수정 불가
                     // if(rowData.inprj_yn === 'Y'){   // 또는 'Y'
                     //     return false;
