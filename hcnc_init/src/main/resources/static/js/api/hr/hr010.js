@@ -1201,6 +1201,8 @@ function setModalMode(mode) {
         .not("#select_dev_typ")
         .prop("disabled", isReadOnly);
 
+    $modal.find(".modal-human-area .pic-area .profile-area")
+         .toggleClass("view", isView);
 
     // ================================
     // select_dev_typ 전용 제어
