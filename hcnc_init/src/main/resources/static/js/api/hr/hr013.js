@@ -12,6 +12,12 @@ var hr013SkillPicker = null;
 // 프로젝트 탭 초기화 (버튼/콤보/태그/테이블)
 window.initTab3 = function () {
     if (!window.hr013Table) buildHr013Table();
+
+    if (currentMode === "view")
+        window.hr013Table.getColumn("_checked").hide();
+    else
+        window.hr013Table.getColumn("_checked").show();
+
     // 프로젝트 제목 옆 건수 표기 초기화
     updateHr013TitleCount();
     loadHr013TableData();
