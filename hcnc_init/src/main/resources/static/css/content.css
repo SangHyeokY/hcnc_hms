@@ -973,14 +973,14 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 }
 
 /* 소속 구분 (직원, 프리랜서) */
-#dev_type {
+#select_dev_type {
     background: #ED24551F;
     border-radius: 4px;
     border: 1px solid #ED24551F;
     -webkit-text-fill-color: #ED2455;
     font-weight: 500;
 }
-.select-dev-type {
+.selectedDevType {
     background: url(../images/common/ico-arrow-down.png) calc(100% - 10px) center no-repeat #ED24551F !important;
     background-size: 14px !important;
 }
@@ -2519,7 +2519,7 @@ section.search-area .search-btn-area .btn-search {
 }
 
 /* HR010 등록 모달: 직원/프리랜서 select 폭 국소 조정 */
-#view-user-area.insert #dev_type {
+#view-user-area.insert #select_dev_type {
   min-width: 173px !important;
   cursor: pointer;
 }
