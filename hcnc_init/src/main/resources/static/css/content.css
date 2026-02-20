@@ -494,7 +494,7 @@ button.btn.btn-add-skill {
 }
 .risk-list .risk-item.active {
   background: #eaf2ff;
-  font-weight: 700;
+  font-weight: 500;
 }
 .risk-detail textarea {
   width: 100%;
@@ -514,9 +514,7 @@ button.btn.btn-add-skill {
   gap: 6px;
   font-size: 14px;
 }
-.risk-check span {
-  order: 0;
-}
+.risk-check span {order: 0;font-weight: 700;font-size: 16px;margin-right: 10px;}
 .risk-check input[type="checkbox"] {
   order: 1;
 }
@@ -692,9 +690,9 @@ button.btn.btn-add-skill {
   border-radius:50px;
   padding: 6px 12px;
   background: #ffffff;
-  font-weight: 600;
-  font-size: 13px;
-  color: #6b7280;
+  font-weight: 400;
+  font-size: 15px;
+  color: #1D232D;
   text-align: center;
   align-content: center;
   height: 40px;
@@ -989,9 +987,11 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
   vertical-align: top;
 }
 #TABLE_MAIN_LANG_PICKER .main-lang-skill-chip-wrap {
-  display: flex;
   flex-wrap: wrap;
   gap: 6px;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: max-content;
 }
 #TABLE_MAIN_LANG_PICKER .main-lang-skill-chip {
   border: 1px solid #d8e1ef;
@@ -1078,7 +1078,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
   word-break: keep-all !important;
   overflow-wrap: normal !important;
 }
-.detail-sort-hint {color: #7b8794; margin-left: auto; margin-right: 10px;} /*font-size: 12px; */
+.detail-sort-hint {color: #7b8794; margin-left: auto; margin-right: 10px; font-weight: 500; font-size: 15px;} /*font-size: 12px; */
 /* Hide layout-level buttons on common code page */
 .contents-wrap:has(.common-code-page) > section.white-full > .content-title .btn-area {display: none;}
 
@@ -1252,16 +1252,19 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
     color : #61646D;
 }*/
 
+#TABLE_HR012_SKILL_PICKER > .tabulator-header,
 #TABLE_MAIN_LANG_PICKER > .tabulator-header,
 #TABLE_HR012_A > .tabulator-header {
     display: none;
 }
 
 #TABLE_MAIN_LANG_PICKER .tabulator-table > .tabulator-row > .tabulator-cell:nth-child(2),
+#TABLE_HR012_SKILL_PICKER .tabulator-table > .tabulator-row > .tabulator-cell:nth-child(2),
 #TABLE_HR012_A .tabulator-table > .tabulator-row > .tabulator-cell:nth-child(2) {
     background-color: #fff !important;
     font-size: 14px;
     font-weight: bold;
+    overflow-x: auto;
 }
 
 /* 탭 영역  */
@@ -1489,9 +1492,11 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
     vertical-align: top;
 }
 #TABLE_HR012_SKILL_PICKER .hr012-skill-chip-wrap {
-    display: flex;
     flex-wrap: wrap;
     gap: 6px;
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: max-content;
 }
 #TABLE_HR012_SKILL_PICKER .hr012-skill-chip {
     border: 1px solid #d8e1ef;
@@ -2317,14 +2322,14 @@ section.search-area .search-btn-area .btn-search {
 }
 
 #view-user-area #HR014_TAB_B .risk-box-top {
-  grid-template-columns: 100px 1fr;
+  grid-template-columns: 110px 1fr;
   gap: 10px;
   min-height: 0;
   height: calc(100% - 6px);
 }
 
 #view-user-area #HR014_TAB_B .risk-list-top .risk-item {
-  height: 36px;
+  height: 40px;
   padding: 5px 10px;
 }
 
@@ -2497,4 +2502,54 @@ section.search-area .search-btn-area .btn-search {
 .white-full > .content-body {
   display: flex;
   flex-direction: column;
+}
+
+.btn-area button, .btn-area .btn {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.hr014-title {
+  font-size: 16px;padding-left: 5px;
+}
+
+.btn-prj-edit {
+  background-color: #1D232D;
+  color: #fff;
+  border-radius: 8px;
+  border: none;
+  padding: 6px 8px;
+  font-size: 13px;
+  font-weight: 500;
+  height: 100%;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+.btn-prj-eval {
+  border: 1px solid #E50019;
+  color: #E50019;
+  background: #fff;
+  border-radius: 8px;
+  padding: 5px 6px;
+  font-size: 13px;
+  font-weight: 500;
+  height: 100%;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+.prj-cell {
+  display: flex;
+  align-items: center;
+  height: 38px;
+  gap: 5px;
+}
+.prj-text {
+  flex: 1;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }

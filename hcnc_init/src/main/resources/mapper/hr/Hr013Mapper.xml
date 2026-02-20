@@ -77,8 +77,8 @@
             upd_by
         ) VALUES (
             #{dev_id},
-            #{st_dt},
-            #{ed_dt},
+            NULLIF(#{st_dt}, ''),
+            NULLIF(#{ed_dt}, ''),
             #{cust_nm},
             #{prj_nm},
             #{job_cd},

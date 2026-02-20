@@ -198,6 +198,7 @@ function buildHr013Table() {
                     }
                     toggleInprjValue(resolved);
                     changedTabs.tab3 = true;
+                    window.hr013Table.redraw(true);
                 }, width: 90
             },
             {
@@ -216,8 +217,96 @@ function buildHr013Table() {
                 },
                 cellClick: startEditOnClick, width: 110
             },
+            {
+                title: "프로젝트명",
+                field: "prj_nm",
+                editor: "input",
+                formatter: function(cell){
+                    const v = cell.getValue() ?? "";
+                    const d = cell.getRow().getData();
+                    const showBtn = String(d.inprj_yn).toUpperCase() === "Y";
+                    const isNew = d._isNew === true;
 
-            { title: "프로젝트명", field: "prj_nm", editor: "input", editable: isHr013Editable, cellClick: startEditOnClick, width: 250 },
+                    return `
+                      <div class="prj-cell">
+                        ${showBtn && !isNew ? `<div><button type="button" class="btn-prj-eval">평가</button></div>` : ""}
+                        <span class="prj-text">${v}</span>
+                        <!-- ※ 20260220 임시 주석 ${showBtn && currentMode !== "view" ? `<div><button type="button" class="btn-prj-edit">등록</button></div>` : ""} -->
+                      </div>
+                    `;
+                },
+                editable: function (cell) {
+
+                    const rowData = cell.getRow().getData();
+
+                    // ※ 20260220 임시 주석 - 당사여부 체크된 경우 → 수정 불가
+                    // if(rowData.inprj_yn === 'Y'){   // 또는 'Y'
+                    //     return false;
+                    // }
+
+                    return true;
+                },
+                cellClick: function(a, b){
+                    // (e, cell) 또는 (cell) 또는 (e) 등 어떤 형태로 와도 견딤
+                    let e = null;
+                    let cell = null;
+
+                    // 케이스1: (e, cell)
+                    if (b && typeof b.edit === "function") {
+                        e = a;
+                        cell = b;
+                    }
+                    // 케이스2: (cell)
+                    else if (a && typeof a.edit === "function") {
+                        cell = a;
+                    }
+                    // 케이스3: cell을 못 받는 이벤트로 호출됨 → 여기서 끝내야 함
+                    else {
+                        return; // ★ 여기서 cell.edit() 하면 100% 터짐
+                    }
+
+                    // 버튼 클릭이면 평가만
+                    const btn = e?.target?.closest?.(".btn-prj-eval");
+                    if (btn) {
+                        e.preventDefault?.();
+                        e.stopPropagation?.();
+                        e.stopImmediatePropagation?.();
+
+                        const rowData = cell.getRow().getData();
+                        console.log("평가:", rowData.prj_nm, rowData);
+
+                        showLoading(); // 로딩바 표시
+
+                        editRisk(rowData)
+                            .then(() => {
+                                $(".tab-btn").last().click();
+                                $(".hr014-title").text(window.hr013_prj_nm);
+
+                                // 탭 클릭 직후 레이아웃 재계산이 필요한 경우가 있어 0ms로 한번 더
+                                setTimeout(() => {
+                                    if (window.hr014TableA) window.hr014TableA.redraw(true);
+                                    if (window.hr014TableB) window.hr014TableB.redraw(true);
+                                }, 0);
+                            })
+                            .catch((e) => {
+                                console.error(e);
+                                alert("데이터 로드 중 오류가 발생했습니다.");
+                            })
+                            .finally(() => {
+                                $(".tab-btn").last().click();
+                                $(".hr014-title").text(window.hr013_prj_nm);
+                                hideLoading();
+                            });
+                    }
+                },
+                cellEditCancelled: function(cell){
+                    requestAnimationFrame(() => cell.getRow().reformat());
+                },
+                cellEdited: function(cell){
+                    requestAnimationFrame(() => cell.getRow().reformat());
+                },
+                width: 250
+            },
             {
                 title: "역할",
                 field: "job_cd",
@@ -974,7 +1063,7 @@ function saveHr013InlineRows() {
 
     rows.forEach(function (row) {
         // 필수 키가 비어 있는 임시 행은 저장 요청에서 제외한다.
-        if (!row.inprj_yn || !row.st_dt || !row.ed_dt) {
+        if (!row.inprj_yn || !row.st_dt) {
             return;
         }
         var stackCsv = getHr013SkillCsvForSave(row.skl_id_lst, row.stack_txt);
@@ -1048,7 +1137,8 @@ function addHr013Row() {
         skl_id_lst: [],
         stack_txt: "",
         alloc_pct: "",
-        remark: ""
+        remark: "",
+        _isNew: true
     }, true);
 
     changedTabs.tab3 = true;
@@ -1653,6 +1743,36 @@ function formatPercentInput(value) {
     var raw = String(value).replace(/[^\d]/g, "");
     if (raw === "") return "";
     return raw + "%";
+}
+
+function editRisk(rowData) {
+    window.hr013_prj_nm = rowData.dev_prj_id;
+
+    // A: 테이블 데이터
+    var eval = evalData.get(window.hr013_prj_nm);
+    const pA = (eval === null || eval === undefined)
+        ? loadHr014TableDataA()
+        : Promise.resolve(window.hr014TableA.setData(eval));
+
+    // B: 위험정보 상태
+    var risk = riskData.get(window.hr013_prj_nm);
+    const pB = (risk === null || risk === undefined)
+        ? loadHr014TableDataB()
+        : Promise.resolve((function () {
+            riskState.leave_txt = risk.leave_txt || "";
+            riskState.claim_txt = risk.claim_txt || "";
+            riskState.sec_txt   = risk.sec_txt   || "";
+            riskState.re_in_yn  = risk.re_in_yn  || "N";
+            riskState.memo      = risk.memo      || "";
+            $("#HR015_REIN_CHECK").prop("checked", riskState.re_in_yn === "Y");
+            setRiskActive(riskActiveKey);
+        })());
+
+    return Promise.all([pA, pB]).then(() => {
+        // 탭이 숨겨져 있다가 열리는 구조면 redraw가 필요할 수 있어 안전장치
+        if (window.hr014TableA) window.hr014TableA.redraw(true);
+        if (window.hr014TableB) window.hr014TableB.redraw(true);
+    });
 }
 
 $('#btnUpload').on('click', function() {

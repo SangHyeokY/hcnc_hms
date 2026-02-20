@@ -41,7 +41,7 @@ function upsertPwChangeBtn() {
     if (!userId) {
         // Swal로 알림
         Swal.fire({
-            icon: 'success',
+            icon: 'warning',
             title: '경고',
             text: '아이디를 입력해주세요.',
             showClass: { popup: '', backdrop: '' },

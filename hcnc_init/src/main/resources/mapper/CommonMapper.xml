@@ -176,16 +176,16 @@
     <select id="get_in_evel_info_excel_02" resultType="hashmap" parameterType="map">
         WITH tmp AS
         (
-             SELECT	rsk.rsk_id
-                  , 	rsk.dev_id
-                  , 	rsk.rsk_dt
-                  , 	JSON_OBJECT(
+             SELECT	rsk.dev_id
+                  , rsk.dev_prj_id
+                  , rsk.rsk_dt
+                  , JSON_OBJECT(
                      '이탈이력', rsk.leave_txt,
                      '클레임', rsk.claim_txt,
                      '보안이슈', rsk.sec_txt,
                      '재투입 가능 여부', rsk.re_in_yn,
                      '관리메모', rsk.memo
-                       ) AS yn_obj
+                   ) AS yn_obj
              FROM 	tb_dev_rsk_info rsk
              WHERE 	rsk.del_yn = 'N'
                AND rsk.use_yn = 'Y'
@@ -242,7 +242,7 @@
 
     <insert id="add_log_data" parameterType="map">
         <if test="call_id == null or call_id == ''">
-        INSERT INTO hcnc_hms.tb_qry_call_hist
+        INSERT INTO tb_qry_call_hist
         (
               req_id
             , user_id
@@ -292,7 +292,7 @@
         )
         </if>
         <if test="call_id != null and call_id != ''">
-            UPDATE  hcnc_hms.tb_qry_call_hist
+            UPDATE  tb_qry_call_hist
                 SET req_id      = NULL
                   , user_id     = NULL
                   , sess_id     = NULL

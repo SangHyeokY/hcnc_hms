@@ -1,7 +1,7 @@
 export const menuData = [
 
   {
-    title: "인력관리",
+    title: "인적 자원",
     visible: true,
     children: [
       {

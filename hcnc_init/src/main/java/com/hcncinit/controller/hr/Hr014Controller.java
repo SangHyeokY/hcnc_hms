@@ -68,6 +68,8 @@ public class Hr014Controller {
         ModelAndView mv = new ModelAndView("jsonView");
         applyLoginUser(map, session);
         applyDefaults(map);
+        List<Map<String, Object>> rows = parseRows(map.get("rows"));
+        map.put("rows", rows);
         int res = hr014Service.saveB(map);
         mv.addObject("success", res > 0);
         return mv;
