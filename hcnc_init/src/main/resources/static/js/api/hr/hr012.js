@@ -40,6 +40,11 @@ window.initTab2 = function() {
     // A/B 테이블 보여주기/숨기기
     $("#TABLE_HR012_A").show();
     $("#TABLE_HR012_B").hide();
+    // tab2 기본 진입은 보유역량(A)이므로 제목 툴바도 A 상태로 강제 초기화
+    $(".hr012-toolbar-01").show();
+    $(".hr012-toolbar-02").hide();
+    // 숙련도 제목 옆 건수 표기 초기화
+    updateHr012BTitleCount();
 
     // 탭 클릭 이벤트
     $(".hr012-tab-btn").off("click").on("click", function() {
@@ -78,6 +83,17 @@ function applyTab2Readonly(isReadOnly) {
     if (isReadOnly) {
         closeHr012SkillPicker(true);
     }
+}
+
+// 숙련도(B) 제목 옆 건수(span.hcnc-grid-count-number) 업데이트
+function updateHr012BTitleCount() {
+    let count = 0;
+    if (window.hr012TableB && typeof window.hr012TableB.getDataCount === "function") {
+        count = window.hr012TableB.getDataCount("active");
+    } else if (window.hr012TableB && typeof window.hr012TableB.getData === "function") {
+        count = window.hr012TableB.getData().length;
+    }
+    $("#hr012b-count .hcnc-grid-count-number").text(count);
 }
 
 function buildHr012TableA() {
@@ -157,6 +173,14 @@ function buildHr012TableB() {
         paginationSize: 8,
         placeholder: "데이터 없음",
         height: "100%",
+        // 숙련도 테이블 데이터 로드 시 건수 반영
+        dataLoaded: function () {
+            updateHr012BTitleCount();
+        },
+        // 숙련도 테이블 데이터 변경 시 건수 반영
+        dataChanged: function () {
+            updateHr012BTitleCount();
+        },
         cellEdited: function (cell) {
            console.log("cellEdited B !!!!");
            console.log(cell.getValue());
@@ -219,6 +243,8 @@ function loadHr012TableDataB() {
             }));
 
             window.hr012TableB.setData(tableData);
+            // 조회 직후 제목 건수 즉시 갱신
+            updateHr012BTitleCount();
             // 초기 로드에서는 숙련도 목록을 건드리지 않음
         },
         error: function() {
@@ -538,6 +564,8 @@ function syncHr012TableBFromA() {
     });
 
     window.hr012TableB.setData(merged);
+    // 보유역량 변경으로 숙련도 목록 재생성 후 건수 갱신
+    updateHr012BTitleCount();
 }
 
 function bindHr012SkillPickerEvents() {

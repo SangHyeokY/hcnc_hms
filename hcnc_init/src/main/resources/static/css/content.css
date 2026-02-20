@@ -1340,6 +1340,20 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .hr012-toolbar-02 p.tool-title,
 .hr014-toolbar-01 p.tool-title,
 .hr014-toolbar-02 p.tool-title{font-size: 18px; font-weight:bold;}
+.hr012-toolbar-02 p.tool-title .hcnc-grid-count-title,
+.hr013-toolbar p.tool-title .hcnc-grid-count-title {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 12px;
+  font-family: "Inter", sans-serif;
+  font-style: normal;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 140%;
+  letter-spacing: 0;
+  color: #1D232D;
+  white-space: nowrap;
+}
 .hr012-toolbar-01 button.btn.btn-add-skill {border: 1px solid #E50019; color: #E50019;  background: #fff;  border-radius: 8px;}
 
 .tab2-content #TABLE_HR012_A.is-readonly,
