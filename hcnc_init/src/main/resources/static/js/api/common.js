@@ -1251,6 +1251,7 @@ function showAlert({
     icon = 'info',
     title = '',
     text = '',
+    html = '',
     confirmText = '확인',
     showCancelButton = false,
     cancelText = '취소',
@@ -1260,6 +1261,7 @@ function showAlert({
         icon,
         title,
         text,
+        html,
 
         // showClass: { popup: '', backdrop: '' },
         // hideClass: { popup: '', backdrop: '' },

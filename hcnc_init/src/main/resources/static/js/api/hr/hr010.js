@@ -143,7 +143,7 @@ $(document).ready(async function () {
             showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
                 icon: 'info',
                 title: '알림',
-                text: '이미지 파일만 선택 가능합니다.'
+                html: `<strong>이미지 파일</strong>만 선택 가능합니다.`,
             });
             return;
         }
@@ -218,7 +218,8 @@ $(document).ready(async function () {
                 showAlert({
                     icon: 'warning',
                     title: '경고',
-                    text: '해당 탭은 "프로젝트" 탭에서 "당사" 프로젝트에 대해 "평가" 버튼을 클릭해야 접근 가능합니다.'
+                    html: `해당 탭은<strong>&nbsp;프로젝트</strong>탭에서<strong>&nbsp;당사&nbsp;</strong>프로젝트의
+                           <strong>&nbsp;평가&nbsp;</strong>버튼을 클릭해야 접근 가능합니다.`
                 });
                 return;
             }
@@ -326,14 +327,16 @@ $(document).ready(async function () {
             isSuccess = true;
 
             // 저장한 탭의 이름 저장
-            const savedTabNames = savedTabs.map(n => `'${n}'`);
+            const savedTabNames = savedTabs.map(n => `${n}`);
 
             showAlert({
                 icon: 'success',
                 title: currentMode === "insert" ? "등록 완료" : "저장 완료",
-                text: savedTabs.length
-                    ? `${savedTabNames.join(", ")} 저장이 완료되었습니다.`
-                    : `'인적사항' 정보가 저장되었습니다.`
+                html: savedTabs.length
+                    ? `${savedTabNames
+                            .map(name => `<strong>${name}</strong>`)
+                            .join(",&nbsp;")}저장이 완료되었습니다.`
+                    : `<strong>인적사항&nbsp;</strong>정보가 저장되었습니다.`
             });
 
             // 탭 상태 초기화
@@ -947,7 +950,7 @@ async function deleteUserRows() {
     // 1단계 확인 모달
     const firstResult = await showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
         title: '경고',
-        text: `'${firstRowData.dev_nm}' 사용자 정보를 삭제하시겠습니까?`,
+        text: `"${firstRowData.dev_nm}" 사용자 정보를 삭제하시겠습니까?`,
         icon: 'warning',
         showCancelButton: true,
         cancelButtonText: '취소',
@@ -957,7 +960,7 @@ async function deleteUserRows() {
 
     const secondResult = await showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
         title: '경고',
-        text: `다시 확인 버튼을 누르시면 '${firstRowData.dev_nm}' 사용자의 데이터가 삭제되며, 되돌릴 수 없습니다.`,
+        text: `다시 확인 버튼을 누르시면 "${firstRowData.dev_nm}" 사용자의 데이터가 삭제되며, 되돌릴 수 없습니다.`,
         icon: 'warning',
         showCancelButton: true,
         cancelButtonText: '취소',
@@ -980,7 +983,7 @@ async function deleteUserRows() {
                     showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
                         icon: 'success',
                         title: '완료',
-                        text: `'${firstRowData.dev_nm}' 사용자의 데이터가 삭제되었습니다.`
+                        text: `"${firstRowData.dev_nm}" 사용자의 데이터가 삭제되었습니다.`
                     });
                 }
             },
@@ -1345,7 +1348,7 @@ function validateUserForm() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            text: `'성명'을 입력하세요.`
+            text: `"성명"을 입력하세요.`
         });
         $("#dev_nm").focus();
         return false;
@@ -1356,7 +1359,7 @@ function validateUserForm() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            text: `'생년월일'을 입력하세요.`
+            text: `"생년월일"을 입력하세요.`
         });
         $("#brdt").focus();
         return false;
@@ -1367,7 +1370,7 @@ function validateUserForm() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            text: `'연락처'를 입력하세요.`
+            text: `"연락처"를 입력하세요.`
         });
         $("#tel").focus();
         return false;
@@ -1378,7 +1381,7 @@ function validateUserForm() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            text: `'연락처' 형식이 올바르지 않습니다.`
+            text: `"연락처" 형식이 올바르지 않습니다.`
         });
         $("#tel").focus();
         return false;
@@ -1389,7 +1392,7 @@ function validateUserForm() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            text: `'이메일'을 입력하세요.`
+            text: `"이메일"을 입력하세요.`
         });
         $("#email").focus();
         return false;
@@ -1402,7 +1405,7 @@ function validateUserForm() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            text: `'이메일' 형식이 올바르지 않습니다.`
+            text: `"이메일" 형식이 올바르지 않습니다.`
         });
         $("#email").focus();
         return false;
@@ -1413,7 +1416,7 @@ function validateUserForm() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            text: `'경력연차(년/개월)'를 입력하세요.`
+            text: `"경력연차(년/개월)"을 입력하세요.`
         });
         if (expYrYear === "") {
             $("#exp_yr_year").focus();
@@ -1426,7 +1429,7 @@ function validateUserForm() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            text: `'경력연차(년/개월)'를 입력하세요.`
+            text: `"경력연차(년/개월)"을 입력하세요.`
         });
         $("#exp_yr_year").focus();
         return false;
@@ -1438,7 +1441,7 @@ function validateUserForm() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            text: `'경력연차'는 년(0~99), 개월(0~12) 범위 내에서 입력해주세요.`
+            text: `"경력연차"는 년(0~99), 개월(0~12) 범위 내에서 입력해주세요.`
         });
         $("#exp_yr_year").focus();
         return false;
@@ -1451,7 +1454,7 @@ function validateUserForm() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            text: `'최종학력'을 입력하세요.`
+            text: `"최종학력"을 입력하세요.`
         });
         $("#edu_last").focus();
         return false;
@@ -1462,7 +1465,7 @@ function validateUserForm() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            text: `'소속 구분'을 선택해주세요.`
+            text: `"소속 구분"을 선택해주세요.`
         });
         $("#select_dev_type").focus();
         return false;
@@ -1473,7 +1476,7 @@ function validateUserForm() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            text: `'근무 가능 형태'를 선택해주세요.`
+            text: `"근무 가능 형태"를 선택해주세요.`
         });
         $("#select_work_md").focus();
         return false;
@@ -1484,7 +1487,7 @@ function validateUserForm() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            text: `'희망단가'를 입력해주세요.`
+            text: `"희망단가"를 입력해주세요.`
         });
         $("#hope_rate_amt").focus();
         return false;
@@ -1493,7 +1496,7 @@ function validateUserForm() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            text: `'희망단가'는 최대 999,999,999원까지 입력 가능합니다.`
+            text: `"희망단가"는 최대 999,999,999원까지 입력 가능합니다.`
         });
         $("#hope_rate_amt").focus();
         return false;
@@ -1504,7 +1507,7 @@ function validateUserForm() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            text: `'투입 가능 시점'을 입력하세요.`
+            text: `"투입 가능 시점"을 입력하세요.`
         });
         $("#avail_dt").focus();
         return false;
@@ -1515,7 +1518,7 @@ function validateUserForm() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            text: `'계약 형태'를 선택해주세요.`
+            text: `"계약 형태"를 선택해주세요.`
         });
         $("#select_ctrt_typ").focus();
         return false;
@@ -2053,7 +2056,7 @@ if (excelBtn) {
             showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
                 icon: 'error',
                 title: '오류',
-                text: `'개발자ID'가 없습니다.`
+                text: `"개발자ID"가 없습니다.`
             });
             return;
         }

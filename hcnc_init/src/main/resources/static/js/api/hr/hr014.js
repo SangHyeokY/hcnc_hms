@@ -375,10 +375,10 @@ function saveTableA(alertFlag) {
             if (response.success) {
                 loadHr014TableDataA();
                 if (alertFlag) {
-                    alert("저장되었습니다.");
+                    console.log("Tab4-a 저장되었습니다.");
                 }
             } else {
-                alert("저장에 실패했습니다.");
+                console.log("Tab4-a 저장 오류");
             }
         },
         error: function () {
@@ -418,13 +418,14 @@ function saveTableB(alertFlag) {
             // memo: riskState.memo
         },
         success: function (response) {
-            if (response.success) {
+            console.log("응답:", response);
+            if (response && response.success === true) {
                 loadHr014TableDataB();
                 if (alertFlag) {
-                    alert("저장되었습니다.");
+                    console.log("Tab4-b 저장되었습니다.");
                 }
             } else {
-                alert("저장에 실패했습니다.");
+                console.log("Tab4-b 저장 오류", response);
             }
         },
         error: function () {

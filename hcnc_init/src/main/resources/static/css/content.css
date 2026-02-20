@@ -66,6 +66,8 @@ option{background:#fff; color:#333;}
 .swal2-html-container {
     color: #333333;
     font-size: 20px;
+    display: flex !important;
+    flex-wrap: wrap;
 }
 
 .swal2-radius {
