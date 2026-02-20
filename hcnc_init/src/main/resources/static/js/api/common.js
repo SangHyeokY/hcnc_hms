@@ -641,54 +641,52 @@ function createGroupedSkillPicker(config) {
     // - getSelectedCodes(context): 현재 원본 선택값(Set/Array/CSV) 반환
     // - getContextFromOpenEvent(e, el): openTrigger 클릭 시 context 구성
     // - onApply({codes,csv,context}): "적용" 클릭 시 최종 반영 처리
-    var cfg = Object.assign({
-        namespace: "default",
-        pickerAreaSelector: "",
-        openTriggerSelector: "",
-        applyTriggerSelector: "",
-        closeTriggerSelector: "",
-        tableSelector: "",
-        searchInputSelector: "",
-        searchWrapSelector: "",
-        suggestListSelector: "",
-        metaSelector: "",
-        chipClass: "hcnc-skill-chip",
-        chipWrapClass: "hcnc-skill-chip-wrap",
-        flashClass: "is-flash",
-        suggestItemClass: "hcnc-skill-suggest-item",
-        tableHeight: "360px",
-        groupColumnTitle: "분야",
-        skillColumnTitle: "기술",
-        groupColumnWidth: 170,
-        skillColumnWidthGrow: 3,
-        emptyText: "등록된 기술이 없습니다.",
-        getSkillOptions: function () { return []; },
-        getGroupOptions: function () { return []; },
-        getSelectedCodes: function () { return []; },
-        getGroupCode: function (skillCode) {
+    var cfg = Object.assign({   // 기본 설정 + 외부 설정 병합
+        namespace: "default", // 이벤트 네임스페이스 suffix (중복 바인딩 분리용)
+        pickerAreaSelector: "", // 팝업 루트 엘리먼트 selector
+        openTriggerSelector: "", // 팝업 열기 트리거 selector
+        applyTriggerSelector: "", // 적용 버튼 selector
+        closeTriggerSelector: "", // 닫기 버튼 selector
+        tableSelector: "", // Tabulator를 붙일 selector
+        searchInputSelector: "", // 검색 input selector
+        searchWrapSelector: "", // 검색영역 wrapper selector (외부 클릭 판별용)
+        suggestListSelector: "", // 자동완성 목록 ul selector
+        metaSelector: "", // "전체/선택 개수" 출력 selector
+        chipClass: "hcnc-skill-chip", // 기술 칩 버튼 class
+        chipWrapClass: "hcnc-skill-chip-wrap", // 칩 목록 wrapper class
+        flashClass: "is-flash", // 선택된 칩 강조 애니메이션 class
+        suggestItemClass: "hcnc-skill-suggest-item", // 자동완성 item class
+        tableHeight: "360px", // 기술 테이블 높이
+        groupColumnTitle: "분야", // 좌측 그룹 컬럼 title
+        skillColumnTitle: "기술", // 우측 기술 컬럼 title
+        groupColumnWidth: 170, // 그룹 컬럼 고정 폭
+        skillColumnWidthGrow: 3, // 기술 컬럼 widthGrow
+        emptyText: "등록된 기술이 없습니다.", // 테이블 빈 상태 문구
+        getSkillOptions: function () { return []; }, // 기술 목록 공급자
+        getGroupOptions: function () { return []; }, // 그룹 목록 공급자
+        getSelectedCodes: function () { return []; }, // 현재 선택 코드 공급자
+        getGroupCode: function (skillCode) {    // 기술코드 -> 그룹코드 변환
             var code = String(skillCode || "").trim();
-            return code ? code.substring(0, 2).toUpperCase() : "";
+            return code ? code.substring(0, 2).toUpperCase() : "";  // 앞 2자가 그룹코드
         },
-        isReadonly: function () { return false; },
-        getContextFromOpenEvent: null,
-        metaTextBuilder: null,
-        onApply: null
-    }, config || {});
+        isReadonly: function () { return false; }, // readonly 여부 판단자
+        getContextFromOpenEvent: null, // 트리거 클릭 시 context 생성 콜백
+        metaTextBuilder: null, // 메타 문구 커스텀 콜백
+        onApply: null // 적용 버튼 클릭 시 최종 반영 핸들러
+    }, config || {});   // 외부 전달 config로 기본값 덮어쓰기
 
-    var ns = ".hcncSkillPicker_" + cfg.namespace;
-    var state = {
-        table: null,
-        tableReady: false,
-        // draftSet: 팝업 내부 임시 상태(취소/닫기 시 폐기, 적용 시에만 원본 반영)
-        draftSet: null,
-        // 검색 추천 목록에서 현재 키보드 선택된 항목 index
-        suggestActiveIndex: -1,
-        eventBound: false,
-        // context: 어떤 소스(modal/grid row)에서 열렸는지 식별하기 위한 실행 컨텍스트
-        context: null
+    var ns = ".hcncSkillPicker_" + cfg.namespace; // 모든 문서 이벤트에 붙일 namespace
+    var state = {   // 내부 상태 저장소
+        table: null, // Tabulator 인스턴스 (최초 1회 생성)
+        tableReady: false, // setData + 렌더 완료 여부
+        draftSet: null, //  팝업 내부 임시 상태(취소/닫기 시 폐기, 적용 시에만 원본 반영)
+        suggestActiveIndex: -1, // 검색 추천 목록에서 현재 키보드 선택된 항목 index
+        eventBound: false, // 이벤트 바인딩 완료 여부
+        context: null // context: 어떤 소스(modal/grid row)에서 열렸는지 식별하기 위한 실행 컨텍스트
     };
 
     function escapeHtml(value) {
+        // HTML 문자열 출력 전 escape 해서 XSS/마크업 깨짐 방지
         return String(value || "")
             .replace(/&/g, "&amp;")
             .replace(/</g, "&lt;")
@@ -697,23 +695,33 @@ function createGroupedSkillPicker(config) {
             .replace(/'/g, "&#39;");
     }
 
-    function getSkillOptions() {
+    function getSkillOptions() {    // 기술 옵션 조회 래퍼
+        // 화면별 콜백이 무엇을 반환하든 최종적으로는 배열만 보장
         var list = cfg.getSkillOptions ? cfg.getSkillOptions() : [];
         return Array.isArray(list) ? list : [];
     }
 
-    function getGroupOptions() {
+    function getGroupOptions() {    // 그룹 옵션 조회 래퍼
+        // 그룹 목록도 동일하게 배열 형태로 정규화
         var list = cfg.getGroupOptions ? cfg.getGroupOptions() : [];
         return Array.isArray(list) ? list : [];
     }
 
-    function normalizeSet(value) {
-        // 화면별로 값 형식이 달라도(Set/Array/CSV) 내부 처리는 Set 하나로 통일
+    function normalizeSet(value) {  // 화면별로 값 형식이 달라도(Set/Array/CSV) 내부 처리는 Set 하나로 통일
         var set = new Set();
         if (!value) {
             return set;
         }
-        if (value instanceof Set) {
+        if (value instanceof Set) { // 이미  Set이면
+            value.forEach(function (v) {
+                var code = String(v || "").trim();
+                if (code) { // 빈값 제외
+                    set.add(code);  // Set에 추가
+                }
+            });
+            return set;
+        }
+        if (Array.isArray(value)) { // 배열이면
             value.forEach(function (v) {
                 var code = String(v || "").trim();
                 if (code) {
@@ -722,16 +730,7 @@ function createGroupedSkillPicker(config) {
             });
             return set;
         }
-        if (Array.isArray(value)) {
-            value.forEach(function (v) {
-                var code = String(v || "").trim();
-                if (code) {
-                    set.add(code);
-                }
-            });
-            return set;
-        }
-        if (typeof value === "string") {
+        if (typeof value === "string") {    // 문자열(csv)이면
             value.split(",").forEach(function (v) {
                 var code = String(v || "").trim();
                 if (code) {
@@ -742,7 +741,8 @@ function createGroupedSkillPicker(config) {
         return set;
     }
 
-    function getSelectedSet() {
+    function getSelectedSet() { // 현재 선택 Set 가져오기
+        // 팝업이 열려 draft 편집 중이면 draft 우선 사용
         if (state.draftSet instanceof Set) {
             return state.draftSet;
         }
@@ -750,7 +750,8 @@ function createGroupedSkillPicker(config) {
         return normalizeSet(cfg.getSelectedCodes ? cfg.getSelectedCodes(state.context) : []);
     }
 
-    function ensureCounterMeta() {
+    function ensureCounterMeta() {  // 메타 텍스트 (전체/선택 개수) 갱신
+        // metaSelector가 없으면 카운트 텍스트 출력 기능은 스킵
         if (!cfg.metaSelector) {
             return;
         }
@@ -762,7 +763,8 @@ function createGroupedSkillPicker(config) {
         $(cfg.metaSelector).text(text);
     }
 
-    function buildGroupNameMap() {
+    function buildGroupNameMap() {  // 그룹코드 -> 그룹명 맵 생성
+        // 자동완성 표시에서 그룹명을 빠르게 찾기 위한 lookup map 생성
         var groupNameMap = {};
         getGroupOptions().forEach(function (group) {
             var groupCode = String(group.cd || "").toUpperCase();
@@ -774,7 +776,7 @@ function createGroupedSkillPicker(config) {
         return groupNameMap;
     }
 
-    function buildRows() {
+    function buildRows() {  // Tabulator 행 데이터 생성
         // 그리드 데이터는 "분야 1행 + 분야별 기술칩 묶음" 구조로 생성한다.
         var groupRows = [];
         var groupMap = {};
@@ -799,7 +801,7 @@ function createGroupedSkillPicker(config) {
             if (!code) {
                 return;
             }
-            var groupCode = cfg.getGroupCode(code);
+            var groupCode = cfg.getGroupCode(code); // 기술코드에서 그룹코드 추출
             if (!groupMap[groupCode]) {
                 groupMap[groupCode] = {
                     groupCode: groupCode,
@@ -809,29 +811,30 @@ function createGroupedSkillPicker(config) {
                 };
                 groupRows.push(groupMap[groupCode]);
             }
-            groupMap[groupCode].skills.push({
+            groupMap[groupCode].skills.push({   // 해당 그룹에 기술 추가
                 code: code,
                 label: String(skill.cd_nm || code)
             });
         });
 
-        groupRows.forEach(function (row) {
+        groupRows.forEach(function (row) {  // 각 그룹의 기술 목록 정렬
             row.skills.sort(function (a, b) {
                 return a.label.localeCompare(b.label, "ko");
             });
         });
 
         return groupRows
-            .filter(function (row) { return row.skills.length > 0; })
+            .filter(function (row) { return row.skills.length > 0; })   // 기술 없는 그룹 제외
             .sort(function (a, b) {
-                if (a.sortOrder !== b.sortOrder) {
-                    return a.sortOrder - b.sortOrder;
+                if (a.sortOrder !== b.sortOrder) {  // sortOrder 다르면
+                    return a.sortOrder - b.sortOrder;   // sortOrder 우선
                 }
-                return a.groupName.localeCompare(b.groupName, "ko");
+                return a.groupName.localeCompare(b.groupName, "ko");    // 이름으로 2차 정렬
             });
     }
 
-    function skillFormatter(cell) {
+    function skillFormatter(cell) { // 기술 칩 컬럼 formatter
+        // 각 그룹 행의 기술 목록을 "칩 버튼 묶음" HTML로 렌더링
         var skills = cell.getValue() || [];
         if (!skills.length) {
             return "";
@@ -867,10 +870,11 @@ function createGroupedSkillPicker(config) {
             ],
             data: []
         });
-        state.tableReady = false;
+        state.tableReady = false;   // 아직 데이터 sync 전 상태
     }
 
     function syncChipState() {
+        // 재렌더 없이 현재 DOM 칩의 선택 class만 빠르게 동기화
         var selected = getSelectedSet();
         $(cfg.tableSelector + " ." + cfg.chipClass).each(function () {
             var code = String($(this).data("code") || "");
@@ -881,22 +885,22 @@ function createGroupedSkillPicker(config) {
     function sync(forceRebuild) {
         // sync(false): 칩 선택상태만 빠르게 반영
         // sync(true): 행 데이터(setData)까지 재구성
-        ensureCounterMeta();
+        ensureCounterMeta(); // 메타 텍스트 (전체/선택 개수) 갱신
         if (!state.table) {
             return;
         }
-        if (!forceRebuild && state.tableReady) {
-            syncChipState();
+        if (!forceRebuild && state.tableReady) {    // 재빌드 불필요 + 준비완료면
+            syncChipState();    // 칩 class만 빠르게 갱신
             return;
         }
 
         var tableEl = state.table.getElement ? state.table.getElement() : null;
         var holder = tableEl ? tableEl.querySelector(".tabulator-tableHolder") : null;
-        var prevTop = holder ? holder.scrollTop : 0;
-        var prevLeft = holder ? holder.scrollLeft : 0;
+        var prevTop = holder ? holder.scrollTop : 0;    // 기존 세로 스크롤
+        var prevLeft = holder ? holder.scrollLeft : 0;  // 기존 가로 스크롤
 
         // setData 이후에도 스크롤이 튀지 않도록 이전 위치를 복원한다.
-        var afterRender = function () {
+        var afterRender = function () { // setData 이후 즉시 처리
             state.tableReady = true;
             syncChipState();
             var currentEl = state.table.getElement ? state.table.getElement() : null;
@@ -907,32 +911,32 @@ function createGroupedSkillPicker(config) {
             }
         };
 
-        var setResult = state.table.setData(buildRows());
-        if (setResult && typeof setResult.then === "function") {
-            setResult.then(afterRender);
+        var setResult = state.table.setData(buildRows()); // 그룹/기술 행 데이터 교체
+        if (setResult && typeof setResult.then === "function") {    // Promise 반환이면
+            setResult.then(afterRender);    // 비동기 완료 후 후처리
         } else {
-            setTimeout(afterRender, 0);
+            setTimeout(afterRender, 0); // 다음 tick에서 후처리
         }
     }
 
-    function close(immediate) {
+    function close(immediate) { // immediate=false: 애니메이션 이용
         // immediate=true: 애니메이션 없이 즉시 종료(모달 닫힘/초기화 시 사용)
-        var $picker = $(cfg.pickerAreaSelector);
+        var $picker = $(cfg.pickerAreaSelector);    // 팝업 jQuery 객체
         if (!$picker.length) {
             state.draftSet = null;
             state.context = null;
             return;
         }
-        $picker.removeClass("show");
-        $(cfg.suggestListSelector).hide().empty();
-        state.suggestActiveIndex = -1;
-        if (immediate) {
+        $picker.removeClass("show");    // 표시 class 제거(애니 시작)
+        $(cfg.suggestListSelector).hide().empty();  // 자동완성 목록 숨김/비움
+        state.suggestActiveIndex = -1;  // 자동완성 인덱스 초기화
+        if (immediate) {    // 즉시 종료 옵션이면
             state.draftSet = null;
             state.context = null;
             $picker.hide();
             return;
         }
-        setTimeout(function () {
+        setTimeout(function () {    // 애니메이션 후 hide
             if (!$picker.hasClass("show")) {
                 $picker.hide();
             }
@@ -944,37 +948,37 @@ function createGroupedSkillPicker(config) {
     function open(context) {
         // open 시점에 항상 원본 -> draft 복사본을 만든다.
         // 이후 편집은 draft에서만 진행되므로 취소가 안전하다.
-        if (cfg.isReadonly && cfg.isReadonly(context)) {
+        if (cfg.isReadonly && cfg.isReadonly(context)) {    // readonly 모드인 경우 열지 않음
             return;
         }
-        state.context = context || null;
-        buildTableIfNeeded();
-        state.draftSet = normalizeSet(cfg.getSelectedCodes ? cfg.getSelectedCodes(state.context) : []);
+        state.context = context || null;    // context 저장
+        buildTableIfNeeded();   // 테이블 생성
+        state.draftSet = normalizeSet(cfg.getSelectedCodes ? cfg.getSelectedCodes(state.context) : []); // draft Set 생성(원본 생성값을 복사)
         sync(true);
 
-        var $picker = $(cfg.pickerAreaSelector);
-        $picker.show();
+        var $picker = $(cfg.pickerAreaSelector);    // 팝업 객체
+        $picker.show(); // 먼저 display:block
         setTimeout(function () {
             $picker.addClass("show");
         }, 0);
 
-        $(cfg.searchInputSelector).val("");
-        renderSuggestions("");
+        $(cfg.searchInputSelector).val(""); // 검색창 초기화
+        renderSuggestions("");  // 추천 목록 초기화
         setTimeout(function () {
-            $(cfg.searchInputSelector).trigger("focus");
+            $(cfg.searchInputSelector).trigger("focus");    // 검색창 포커스
         }, 40);
     }
 
-    function applySelection() {
+    function applySelection() { // 적용버튼 처리 
         // 적용 시점에만 최종 CSV를 만들고 화면별 저장 책임은 onApply 콜백으로 위임
-        if (!(state.draftSet instanceof Set)) {
+        if (!(state.draftSet instanceof Set)) { // draft 없으면 닫기
             close();
             return;
         }
-        var codes = Array.from(state.draftSet);
-        var csv = codes.join(",");
-        if (typeof cfg.onApply === "function") {
-            cfg.onApply({
+        var codes = Array.from(state.draftSet); // Set -> Array
+        var csv = codes.join(",");  // CSV 만들기
+        if (typeof cfg.onApply === "function") {    // 콜백 있으면
+            cfg.onApply({   // 화면별 반영 책임 위임
                 codes: codes,
                 csv: csv,
                 context: state.context
@@ -984,9 +988,10 @@ function createGroupedSkillPicker(config) {
     }
 
     function focusSkill(code) {
+        // 선택 직후 칩을 짧게 강조해 사용자 시선 유도
         setTimeout(function () {
-            var $chip = $(cfg.tableSelector + " ." + cfg.chipClass).filter(function () {
-                return String($(this).data("code") || "") === String(code || "");
+            var $chip = $(cfg.tableSelector + " ." + cfg.chipClass).filter(function () {   // 해당 코드칩 찾기
+                return String($(this).data("code") || "") === String(code || "");   // 코드 일치 비교
             }).first();
             if (!$chip.length) {
                 return;
@@ -998,16 +1003,16 @@ function createGroupedSkillPicker(config) {
         }, 30);
     }
 
-    function selectSkill(code, fromSearch) {
+    function selectSkill(code, fromSearch) {    // 기술 강제 선택(추가)
         // 검색 추천에서 선택한 경우(fromSearch=true) 입력/추천 상태를 초기화
         var normalized = String(code || "").trim();
         if (!normalized) {
             return;
         }
-        if (!(state.draftSet instanceof Set)) {
-            state.draftSet = normalizeSet(cfg.getSelectedCodes ? cfg.getSelectedCodes(state.context) : []);
+        if (!(state.draftSet instanceof Set)) { // draft 비어있으면
+            state.draftSet = normalizeSet(cfg.getSelectedCodes ? cfg.getSelectedCodes(state.context) : []); // 원본으로 draft 생성
         }
-        state.draftSet.add(normalized);
+        state.draftSet.add(normalized); // 선택 Set에 추가
         sync();
         focusSkill(normalized);
         if (fromSearch) {
@@ -1017,7 +1022,8 @@ function createGroupedSkillPicker(config) {
         }
     }
 
-    function toggleSkill(code) {
+    function toggleSkill(code) {    // 기술 선택 토글
+        // 칩 클릭 시 선택/해제를 토글 (draftSet만 변경)
         var normalized = String(code || "").trim();
         if (!normalized) {
             return;
@@ -1034,7 +1040,7 @@ function createGroupedSkillPicker(config) {
         focusSkill(normalized);
     }
 
-    function findMatches(keyword, limit) {
+    function findMatches(keyword, limit) {  // 검색어 매칭 목록 생성
         // 검색 대상: 기술코드(cd) + 기술명(cd_nm)
         var query = String(keyword || "").trim().toLowerCase();
         if (!query) {
@@ -1063,7 +1069,8 @@ function createGroupedSkillPicker(config) {
             .slice(0, max);
     }
 
-    function renderSuggestions(keyword) {
+    function renderSuggestions(keyword) {   // 자동완성 목록 렌더
+        // 검색어가 있으면 자동완성 목록 생성/표시, 없으면 숨김
         var $suggest = $(cfg.suggestListSelector);
         var query = String(keyword || "").trim();
         if (!query) {
@@ -1090,13 +1097,13 @@ function createGroupedSkillPicker(config) {
 
     function moveSuggestionSelection(step) {
         // 방향키 이동은 리스트 범위를 벗어나지 않도록 clamp 처리
-        var $items = $(cfg.suggestListSelector + " ." + cfg.suggestItemClass);
-        if (!$items.length || !$(cfg.suggestListSelector).is(":visible")) {
+        var $items = $(cfg.suggestListSelector + " ." + cfg.suggestItemClass);  // 목록 아이템
+        if (!$items.length || !$(cfg.suggestListSelector).is(":visible")) { // 목록 없거나 숨김이면 종료
             return;
         }
-        var max = $items.length - 1;
+        var max = $items.length - 1;    // 최대 인덱스
         if (state.suggestActiveIndex < 0) {
-            state.suggestActiveIndex = step > 0 ? 0 : max;
+            state.suggestActiveIndex = step > 0 ? 0 : max;  // 방향에 따라 처음 / 끝
         } else {
             state.suggestActiveIndex += step;
             if (state.suggestActiveIndex < 0) {
@@ -1110,6 +1117,7 @@ function createGroupedSkillPicker(config) {
     }
 
     function syncSuggestionActive() {
+        // suggestActiveIndex 기준으로 is-active 클래스를 1개만 유지
         var $items = $(cfg.suggestListSelector + " ." + cfg.suggestItemClass);
         $items.removeClass("is-active");
         if (!$items.length || state.suggestActiveIndex < 0) {
@@ -1125,6 +1133,7 @@ function createGroupedSkillPicker(config) {
     }
 
     function getActiveSuggestItem() {
+        // Enter 처리용: 현재 키보드로 활성화된 자동완성 항목 반환
         var $items = $(cfg.suggestListSelector + " ." + cfg.suggestItemClass);
         if (!$items.length || state.suggestActiveIndex < 0) {
             return $();
@@ -1153,6 +1162,7 @@ function createGroupedSkillPicker(config) {
         }
 
         if (cfg.applyTriggerSelector) {
+            // "적용" 클릭 시 draftSet을 onApply로 넘기고 닫기
             $(document).on("click" + ns, cfg.applyTriggerSelector, function (e) {
                 e.preventDefault();
                 applySelection();
@@ -1160,6 +1170,7 @@ function createGroupedSkillPicker(config) {
         }
 
         if (cfg.closeTriggerSelector) {
+            // "닫기" 클릭 시 draft 폐기하고 팝업 종료
             $(document).on("click" + ns, cfg.closeTriggerSelector, function (e) {
                 e.preventDefault();
                 close();
@@ -1167,12 +1178,14 @@ function createGroupedSkillPicker(config) {
         }
 
         $(document).on("click" + ns, cfg.pickerAreaSelector, function (e) {
+            // 팝업 내부가 아닌 배경 클릭 시 닫기
             if (e.target === this) {
                 close();
             }
         });
 
         $(document).on("click" + ns, cfg.tableSelector + " ." + cfg.chipClass, function (e) {
+            // 기술 칩 클릭 시 선택 토글
             e.preventDefault();
             var code = String($(this).data("code") || "");
             if (!code) {
@@ -1182,18 +1195,19 @@ function createGroupedSkillPicker(config) {
         });
 
         $(document).on("input" + ns, cfg.searchInputSelector, function () {
+            // 검색어 입력마다 자동완성 목록 재생성
             renderSuggestions($(this).val());
         });
 
         $(document).on("keydown" + ns, cfg.searchInputSelector, function (e) {
             // 검색 input 키보드 UX:
             // ArrowUp/Down 이동, Enter 선택, Escape 닫기
-            if (e.key === "ArrowDown") {
+            if (e.key === "ArrowDown") {    // 아래 화살표
                 e.preventDefault();
-                moveSuggestionSelection(1);
+                moveSuggestionSelection(1); // 다음 항목 이동
             } else if (e.key === "ArrowUp") {
                 e.preventDefault();
-                moveSuggestionSelection(-1);
+                moveSuggestionSelection(-1);    // 이전 항목 이동
             } else if (e.key === "Enter") {
                 e.preventDefault();
                 var $active = getActiveSuggestItem();
@@ -1212,6 +1226,7 @@ function createGroupedSkillPicker(config) {
         });
 
         $(document).on("click" + ns, cfg.suggestListSelector + " ." + cfg.suggestItemClass, function (e) {
+            // 자동완성 클릭 선택
             e.preventDefault();
             var code = String($(this).data("code") || "");
             if (!code) {
@@ -1221,26 +1236,28 @@ function createGroupedSkillPicker(config) {
         });
 
         $(document).on("mouseenter" + ns, cfg.suggestListSelector + " ." + cfg.suggestItemClass, function () {
+            // 마우스 hover 시 키보드 활성 인덱스도 동기화
             var $items = $(cfg.suggestListSelector + " ." + cfg.suggestItemClass);
             state.suggestActiveIndex = $items.index(this);
             syncSuggestionActive();
         });
 
-        $(document).on("mousedown" + ns, function (e) {
+        $(document).on("mousedown" + ns, function (e) { // 문서 전체 mousedown
+            // 검색 영역 밖 클릭 시 자동완성 목록만 닫기
             if (!cfg.searchWrapSelector || !$(e.target).closest(cfg.searchWrapSelector).length) {
                 $(cfg.suggestListSelector).hide();
             }
         });
     }
 
-    return {
-        bindEvents: bindEvents,
-        open: open,
-        close: close,
-        apply: applySelection,
-        sync: sync,
-        getSelectedSet: getSelectedSet,
-        escapeHtml: escapeHtml
+    return {    // 외부에 노출할 api
+        bindEvents: bindEvents, // 문서 이벤트 1회 바인딩
+        open: open, // 팝업 열기 (원본 -> draft 복사)
+        close: close, // 팝업 닫기 (draft 폐기)
+        apply: applySelection, // draft를 onApply로 반영
+        sync: sync, // 테이블/칩/메타 상태 동기화
+        getSelectedSet: getSelectedSet, // 현재 선택 Set 조회
+        escapeHtml: escapeHtml // 외부 재사용 가능한 escape 유틸
     };
 }
 
