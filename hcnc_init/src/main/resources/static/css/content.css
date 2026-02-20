@@ -76,9 +76,6 @@ option{background:#fff; color:#333;}
     border-radius: 8px !important;
 }
 
-#searchType {
-    background-color: #F6F6F6;
-}
 /*=================================================================================
  * Grid Table style
 =================================================================================*/
@@ -373,6 +370,17 @@ option{background:#fff; color:#333;}
   min-width: 72px;
   padding: 4px 8px;
   font-size: 12px;
+}
+
+
+/* 아이콘 크기 강제 통일 */
+.hr013-toolbar .btn-area button img{
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
+  min-height: 16px;
+  display: block;
+  object-fit: contain;
 }
 
 .tabulator-row .tabulator-cell .tabulator-data-tree-control {width: 16px !important; height: 16px !important; background-color: #ED242C !important; border: none !important;}
@@ -963,14 +971,14 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 }
 
 /* 소속 구분 (직원, 프리랜서) */
-#dev_type {
+#select_dev_type {
     background: #ED24551F;
     border-radius: 4px;
     border: 1px solid #ED24551F;
     -webkit-text-fill-color: #ED2455;
     font-weight: 500;
 }
-.select-dev-type {
+.selectedDevType {
     background: url(../images/common/ico-arrow-down.png) calc(100% - 10px) center no-repeat #ED24551F !important;
     background-size: 14px !important;
 }
@@ -1112,7 +1120,10 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .modal-content.hr010-main-pop{display:grid; grid-template-columns: auto  1fr;}
 .modal-content.hr010-main-pop:has(> .tab-article[style*="display: none"]),
 .modal-content.hr010-main-pop:has(> .tab-article[style*="display:none"]) {grid-template-columns: 1fr;}
-.modal-content.hr010-main-pop .tab-article{min-width:0; width:100%; height:100%; display:grid; grid-template-rows: fit-content(100%) fit-content(100%) 1fr;}
+.modal-content.hr010-main-pop .tab-article,
+.modal-content.hr020-main-pop .tab-article {
+    min-width:0; width:100%; height:100%; display:grid; grid-template-rows: fit-content(100%) fit-content(100%) 1fr;
+}
 .modal-content h5{position:relative; padding-left:10px; font-size:16px;}
 .modal-content h5:before{content:""; position:absolute; top:50%; left:0; transform:translateY(-50%); display:block; background:#E50019; width:4px; height:16px; border-radius:6px;}
 .modal-content .title-area .type span{padding: 3px 9px; color: #E50019; border-radius:8px; border: 1px solid #E50019;}
@@ -1148,7 +1159,16 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .modal-wrap #view-user-area .modal-btn ul li:last-child {
   margin-left: 0;
 }
-
+.modal-btn #btn-excel{
+  background: #fff url("/icons/btn-ico-excel-download.png") no-repeat 16px ;
+  background-size:18px 18px;
+  padding-left: 40px;
+  border-radius:8px;
+  color:#000000 ;
+  font-weight: 700;
+  font-size: 18px;
+  border: 1px solid #C5CCD5;
+}
 /* 사용자관리 수정 모달: 비고 입력칸 포함 모든 입력영역이 잘리지 않도록 폭 고정 */
 #write-user-area .modal-content {
   grid-template-columns: 1fr;
@@ -1203,8 +1223,12 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 
 .insert .main-human-modal .modal-human-area .upload .showingbtn{display:none;}
 .top-article{display: flex; flex-direction: column;}
+
 .insert .top-article,
-.update .top-article{width:100%;}
+.update .top-article{
+    width:100%;
+}
+
 .modal-human-area .table-area{width: 100%;}
 
 .modal-human-area .table-area input[type="text"]:read-only,
@@ -1221,12 +1245,13 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 
 .tab-area {position:relative; display: flex; width: 100%; margin-bottom:20px; gap: 0px; box-sizing: border-box; border-radius:8px; overflow:hidden;}
 /*.tab-area:before {content:""; position:absolute; left:0; bottom:1px; height:1px; width:100%; background:#ddd; z-index:-1;}*/
-.tab-btn, .tab-sub-btn {display:block; border-right:1px solid #ccc; flex:1; text-align: center; padding: 12px 10px; font-weight: 500; color: #555;background:#212E4114;cursor: pointer;}
+.tab-btn, .tab-sub-btn {display:block; border-right:1px solid #ccc; flex:1; min-width:0; text-align: center; padding: 12px 10px; font-weight: 500; color: #555;background:#212E4114;cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
 .tab-btn:last-child, .tab-sub-btn:last-child{border-right:none;}
 .sub-tab-area{ display: flex; flex-direction: column; min-width: fit-content;}
 .sub-tab-area .tab-sub-btn{text-align:left;}
 .sub-tab-area .tab-sub-btn.active{font-weight:700; color: #111;}
 .tab-btn.active {background: #212E41; color: #fff; font-weight:700;}
+.modal-wrap .tab-area .tab-btn.is-visible-last {border-right:none;}
 
 /* .tab2-content{gap:16px;}*/
 /* .tab-area .tab-content .content-body{overflow-y: auto;} */
@@ -1318,6 +1343,20 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .hr012-toolbar-02 p.tool-title,
 .hr014-toolbar-01 p.tool-title,
 .hr014-toolbar-02 p.tool-title{font-size: 18px; font-weight:bold;}
+.hr012-toolbar-02 p.tool-title .hcnc-grid-count-title,
+.hr013-toolbar p.tool-title .hcnc-grid-count-title {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 12px;
+  font-family: "Inter", sans-serif;
+  font-style: normal;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 140%;
+  letter-spacing: 0;
+  color: #1D232D;
+  white-space: nowrap;
+}
 .hr012-toolbar-01 button.btn.btn-add-skill {border: 1px solid #E50019; color: #E50019;  background: #fff;  border-radius: 8px;}
 
 .tab2-content #TABLE_HR012_A.is-readonly,
@@ -1993,28 +2032,28 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
     }
 }
 
-/* HR010 인적사항 검색 입력 스타일 */
-section.search-area .search-info .hr010-search-input {
+/* HR010 인적사항 검색 입력 스타일 */ /* HR020 진행 프로젝트 내역검색 입력 스타일 */
+section.search-area .search-info #searchKeyword {
+    min-width: 600px !important;
     width: auto;
     height: 40px;
     line-height: 40px;
     background: #F6F6F6;
     border: 1px solid #D9D9D9;
+    border-radius: 6px;
 }
-
-section.search-area .search-info .hr010-search-name-input {
+section.search-area .search-info #insertNm,
+section.search-area .search-info #searchType {
+    height: 40px;
     width: 270px !important;
+    background-color: #F6F6F6;
+    border-radius: 6px;
 }
 
-section.search-area .search-info .hr010-search-keyword-input {
-    min-width: 600px !important;
-}
-
-section.search-area .search-info .hr010-search-input::placeholder {
-    font-size: 16px;
-    font-weight: 500;
-    color: #838C96;
-    opacity: 1;
+section.search-area .search-info #insertNm:focus,
+section.search-area .search-info #searchType:focus {
+    outline: none;
+    border: 1px solid #D9D9D9;
 }
 
 section.search-area .search-btn-area .btn-search {
@@ -2025,11 +2064,13 @@ section.search-area .search-btn-area .btn-search {
   padding-left: 30px;
 }
 
-/* HR010/CM010/CM040 화면: 검색영역 세로 스크롤 제거 */
+/* HR010/HR020/CM010/CM040 화면: 검색영역 세로 스크롤 제거 */
 .contents-wrap:has(.hr010-search-input) > section.search-area,
+.contents-wrap:has(.hr020-search-input) > section.search-area,
 .contents-wrap:has(#TABLE_USER) > section.search-area,
 .contents-wrap:has(#TABLE_COMMON_MAIN) > section.search-area {
-  overflow-y: hidden !important;
+  /*overflow-y: hidden !important;*/
+  min-height: 75px;
 }
 
 .contents-wrap:has(#TABLE_HR010_A) > section.white-full {
@@ -2057,8 +2098,8 @@ section.search-area .search-btn-area .btn-search {
 }
 
 .tabulator .tabulator-header {
-  height: 55px !important;
-  min-height: 55px !important;
+  height: 48px !important;
+  min-height: 48px !important;
   border-left: 0 !important;
   border-right: 0 !important;
   border-top-left-radius: 8px !important;
@@ -2067,8 +2108,8 @@ section.search-area .search-btn-area .btn-search {
 }
 
 .tabulator .tabulator-header .tabulator-col {
-  height: 55px !important;
-  min-height: 55px !important;
+  height: 48px !important;
+  min-height: 48px !important;
   border-left: 0 !important;
   border-right: 0 !important;
   border-bottom: 1px solid #E8EAEE !important;
@@ -2084,8 +2125,8 @@ section.search-area .search-btn-area .btn-search {
 }
 
 .tabulator .tabulator-header .tabulator-col .tabulator-col-content {
-  height: 55px !important;
-  min-height: 55px !important;
+  height: 48px !important;
+  min-height: 48px !important;
   padding: 0 10px !important;
   display: flex;
   align-items: center;
@@ -2111,16 +2152,16 @@ section.search-area .search-btn-area .btn-search {
   border-right: 0 !important;
 }
 
-/* 모든 행 높이 55px 고정 */
+/* 공통 행 높이 46px */
 .tabulator .tabulator-row {
-  height: 55px !important;
-  min-height: 55px !important;
+  height: 46px !important;
+  min-height: 46px !important;
 }
 
 .tabulator .tabulator-row .tabulator-cell {
-  height: 55px !important;
-  min-height: 55px !important;
-  line-height: 55px !important;
+  height: 46px !important;
+  min-height: 46px !important;
+  line-height: 46px !important;
   font-size: 15px !important;
   padding-top: 0 !important;
   padding-bottom: 0 !important;
@@ -2161,14 +2202,16 @@ section.search-area .search-btn-area .btn-search {
 
 
 /* HR010 user type tabs */ /* margin-bottom: 6px; 삭제 */
-.contents-wrap:has(#TABLE_HR010_A) .hr010-user-type-tabs {
+.contents-wrap:has(#TABLE_HR010_A) .hr010-user-type-tabs,
+.contents-wrap:has(#TABLE_HR020_A) .hr020-user-type-tabs {
   display: flex;
   flex-direction: row;
   align-items: flex-end;
   gap: 6px;
 }
 
-.contents-wrap:has(#TABLE_HR010_A) .hr010-user-type-tab {
+.contents-wrap:has(#TABLE_HR010_A) .hr010-user-type-tab,
+.contents-wrap:has(#TABLE_HR020_A) .hr020-user-type-tab {
   box-sizing: border-box;
   display: flex;
   flex-direction: row;
@@ -2189,11 +2232,13 @@ section.search-area .search-btn-area .btn-search {
   flex-grow: 0;
 }
 
-.contents-wrap:has(#TABLE_HR010_A) .hr010-user-type-tab + .hr010-user-type-tab {
+.contents-wrap:has(#TABLE_HR010_A) .hr010-user-type-tab + .hr010-user-type-tab,
+.contents-wrap:has(#TABLE_HR020_A) .hr020-user-type-tab + .hr020-user-type-tab {
   margin-left: -1px;
 }
 
-.contents-wrap:has(#TABLE_HR010_A) .hr010-user-type-tab.active {
+.contents-wrap:has(#TABLE_HR010_A) .hr010-user-type-tab.active,
+.contents-wrap:has(#TABLE_HR020_A) .hr020-user-type-tab.active {
   background: #353D47;
   border-color: #353D47;
   color: #FFFFFF;
@@ -2494,7 +2539,7 @@ section.search-area .search-btn-area .btn-search {
 }
 
 /* HR010 등록 모달: 직원/프리랜서 select 폭 국소 조정 */
-#view-user-area.insert #dev_type {
+#view-user-area.insert #select_dev_type {
   min-width: 173px !important;
   cursor: pointer;
 }

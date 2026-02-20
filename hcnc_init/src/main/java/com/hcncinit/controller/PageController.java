@@ -86,17 +86,18 @@ public class PageController {
         return mv;
     }
 
-//    @GetMapping("/hr015")
-//    public ModelAndView useDetail() {
-//        ModelAndView mv = new ModelAndView();
-//        mv.setViewName("views/hr011/hr015");
-//        return mv;
-//    }
+    @GetMapping("/hr020")
+    public ModelAndView hr020(HttpSession session, Model model) {
+        ModelAndView mv = new ModelAndView();
+        mv.setViewName("views/hr/hr020");
 
-//    @GetMapping("/hr014")
-//    public ModelAndView devRateHistory() {
-//        ModelAndView mv = new ModelAndView();
-//        mv.setViewName("views/hr011/hr014");
-//        return mv;
-//    }
+        String auth = (String) session.getAttribute("LOGIN_AUTH");
+        String lock = (String) session.getAttribute("LOGIN_LOCK");
+        String pwchg = (String) session.getAttribute("LOGIN_PW_CHG");
+        model.addAttribute("LOGIN_AUTH", auth);
+        model.addAttribute("LOGIN_LOCK", lock);
+        model.addAttribute("LOGIN_PW_CHG", pwchg);
+        return mv;
+    }
+
 }

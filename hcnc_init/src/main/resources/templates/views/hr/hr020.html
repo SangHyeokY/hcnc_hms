@@ -13,15 +13,15 @@
     <div class="search-input">
         <p class="fl-ac">
             <label for="insertNm" class="">• 성명 &nbsp;</label>
-            <input type="text" class="hr010-search-input hr010-search-name-input" id="insertNm" name="insertNm" placeholder="성명을 입력하세요" />
+            <input type="text" class="hr020-search-input hr020-search-name-input" id="insertNm" name="insertNm" placeholder="성명을 입력하세요" />
         </p>
     </div>
-    <div class="search-input">
-        <p class="fl-ac">
-            <label for="searchKeyword" class="">• 검색어 &nbsp;</label>
-            <input type="text" class="hr010-search-input hr010-search-keyword-input" id="searchKeyword" name="searchKeyword" placeholder="성명/연락처/이메일/거주지역/기술 검색" />
-        </p>
-    </div>
+<!--    <div class="search-input">-->
+<!--        <p class="fl-ac">-->
+<!--            <label for="searchKeyword" class="">• 검색어 &nbsp;</label>-->
+<!--            <input type="text" class="hr020-search-input hr020-search-keyword-input" id="searchKeyword" name="searchKeyword" placeholder="성명/연락처/이메일/거주지역/기술 검색" />-->
+<!--        </p>-->
+<!--    </div>-->
 </th:block>
 
 <!-- 실제 컨텐츠 영역 -->
@@ -29,26 +29,26 @@
 
     <!-- ================= 메인 리스트 ================= -->
     <div class="content-title fl-sb fl-ac">
-        <h4 class="page-sub-title">인적사항 리스트</h4>
+        <h4 class="page-sub-title">진행 프로젝트 현황</h4>
         <div class="btn-area">
             <button type="button" class="btn bg-primary btn-main-view">상세보기</button>
-            <button type="button" class="btn btn-main-add" th:if="${LOGIN_AUTH == '01' or LOGIN_AUTH == '02' or LOGIN_AUTH == '03'}">
-                <img src="./images/common/btn-ico-plus.png" alt="등록">등록</button>
-            <button type="button" class="btn btn-main-edit" th:if="${LOGIN_AUTH == '01' or LOGIN_AUTH == '02' or LOGIN_AUTH == '03'}">
-                <img src="./images/common/btn-ico-pencil.png" alt="수정">수정</button>
-            <button type="button" class="btn btn-main-del" th:if="${LOGIN_AUTH == '01' or LOGIN_AUTH == '02' or LOGIN_AUTH == '03'}">
-                <img src="./images/common/btn-ico-trash.png" alt="삭제">삭제</button>
+<!--            <button type="button" class="btn btn-main-add">-->
+<!--                <img src="./images/common/btn-ico-plus.png" alt="등록">등록</button>-->
+<!--            <button type="button" class="btn btn-main-edit">-->
+<!--                <img src="./images/common/btn-ico-pencil.png" alt="수정">수정</button>-->
+<!--            <button type="button" class="btn btn-main-del">-->
+<!--                <img src="./images/common/btn-ico-trash.png" alt="삭제">삭제</button>-->
         </div>
     </div>
-    <div class="hr010-user-type-tabs" role="tablist" aria-label="인력 구분">
-        <button type="button" class="hr010-user-type-tab active" data-user-type="staff">직원</button>
-        <button type="button" class="hr010-user-type-tab" data-user-type="freelancer">프리랜서</button>
+    <div class="hr020-user-type-tabs" role="tablist" aria-label="인력 구분"> <!-- 직원만 조회 -->
+        <button type="button" class="hr020-user-type-tab active" data-user-type="staff">직원</button>
+        <!--<button type="button" class="hr020-user-type-tab" data-user-type="freelancer">프리랜서</button>-->
     </div>
 
 
     <div class="content list-area grid-pager-fixed" id="hms-table">
         <div class="table-wrap grid-pager-fixed-wrap" id="hms-table-wrap">
-            <div id="TABLE_HR010_A"></div>
+            <div id="TABLE_HR020_A"></div>
         </div>
         <input type="hidden" id="dev_id" name="dev_id" th:value="${dev_id}">
     </div>
@@ -59,7 +59,7 @@
 
             <!-- header -->
             <div class="header">
-                <h4>인력 관리 <span id="modal-title">상세</span></h4>
+                <h4>프로젝트 내역 <span id="modal-title">상세</span></h4>
                 <div class="btn-area">
                     <button class="close-btn" onclick="closeUserViewModal()">
                         <img src="./icons/Icon-close.png" alt="" />
@@ -68,16 +68,16 @@
             </div>
 
             <!-- modal-content -->
-            <div class="modal-content hr010-main-pop">
+            <div class="modal-content hr020-main-pop">
 
-                <!-- ================= 상단 인적사항(좌측) ================= -->
-                <div class="top-article">
+                <!-- ================= 좌측 모달 영역 ================= -->
+                <div class="top-article wp50">
 
                     <div class="fl-ac title-area">
                         <h5 class="mg-r5">인적사항</h5>
                     </div>
 
-                    <div class="modal-human-area fl-sa" id="TABLE_HR010_B">
+                    <div class="modal-human-area fl-sa" id="TABLE_HR020_B">
                         <div class="table-area">
                             <table id="main-modal-table">
                                 <colgroup>
@@ -93,7 +93,12 @@
                                 <tr>
                                     <th>성명</th>
                                     <td><input type="text" class="wp100" id="dev_nm" disabled></td>
-                                    <td colspan="2"><select id="select_dev_type" class="wp100 ta-c"></select>
+                                    <td colspan="2">
+                                        <!-- 추후 공통 코드에 추가바람 -->
+                                        <select id="dev_type" class="wp100 ta-c">
+                                            <option value="HCNC_S">직원</option>
+                                            <option value="HCNC_F">프리랜서</option>
+                                        </select>
                                     </td>
                                 </tr>
                                 <tr>
@@ -354,8 +359,8 @@
                     </div>
                 </div>
 
-                <!-- ================= 탭 영역(우측) ================= -->
-                <div class="tab-article">
+                <!-- ================= 우측 모달 영역 ================= -->
+                <div class="tab-article wp50">
                     <div class="fl-ac title-area">
                         <h5 class="mg-r5">상세정보</h5>
                     </div>
@@ -368,18 +373,18 @@
                     </div>
 
                     <div class="tab-content">
-                        <div id="tab1" class="tab-panel active">
-                            <div th:insert="~{views/hr/hr011 :: tab1Content}"></div>
-                        </div>
-                        <div id="tab2" class="tab-panel">
-                            <div th:insert="~{views/hr/hr012 :: tab2Content}"></div>
-                        </div>
-                        <div id="tab3" class="tab-panel">
-                            <div th:insert="~{views/hr/hr013 :: tab3Content}"></div>
-                        </div>
-                        <div id="tab4" class="tab-panel">
-                            <div th:insert="~{views/hr/hr014 :: tab4Content}"></div>
-                        </div>
+<!--                        <div id="tab1" class="tab-panel active">-->
+<!--                            <div th:insert="~{views/hr/hr011 :: tab1Content}"></div>-->
+<!--                        </div>-->
+<!--                        <div id="tab2" class="tab-panel">-->
+<!--                            <div th:insert="~{views/hr/hr012 :: tab2Content}"></div>-->
+<!--                        </div>-->
+<!--                        <div id="tab3" class="tab-panel">-->
+<!--                            <div th:insert="~{views/hr/hr013 :: tab3Content}"></div>-->
+<!--                        </div>-->
+<!--                        <div id="tab4" class="tab-panel">-->
+<!--                            <div th:insert="~{views/hr/hr014 :: tab4Content}"></div>-->
+<!--                        </div>-->
                     </div>
                 </div>
             </div>
@@ -431,11 +436,7 @@
     </div>
 
     <!-- scripts -->
-    <script src="/js/api/hr/hr011.js"></script>
-    <script src="/js/api/hr/hr012.js"></script>
-    <script src="/js/api/hr/hr013.js"></script>
-    <script src="/js/api/hr/hr014.js"></script>
-    <script src="/js/api/hr/hr010.js"></script>
+    <script src="/js/api/hr/hr020.js"></script>
     <script src="/js/api/common.js"></script>
 
 </th:block>

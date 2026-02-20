@@ -11,10 +11,10 @@ export const menuData = [
         visible: true,
       },
       {
-        title: "인적사항 (상세기능) - 프로젝트",
-        path: "/hr014",
+        title: "진행 프로젝트 내역",
+        path: "/hr020",
         type: "A",
-        visible: false,
+        visible: true,
       },
       {
         title: "인적사항 (상세기능) - 평가 및 리스크 탭",

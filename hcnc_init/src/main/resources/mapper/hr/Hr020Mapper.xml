@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hcncinit.Hr020Mapper">
+
+    <!-- 인력관리 > 진행 프로젝트 조회 -->
+    <select id="select_hr020" parameterType="map" resultType="map">
+        SELECT dev.dev_id
+            , dev.dev_nm -- 성명
+            , dev.region -- 거주지역
+            , dev.exp_yr -- 경력연차
+            , prj.cust_nm -- 고객사
+            , prj.prj_nm -- 프로젝트명
+            , prj.job_cd -- 역할
+            , rate.rate_amt -- 비고
+            , prj.remark -- 비고
+        FROM tb_dev_info dev
+        LEFT JOIN tb_dev_prj_info prj
+        ON dev.dev_id = prj.dev_id
+        AND prj.use_yn = 'Y'
+        AND prj.del_yn = 'N'
+        LEFT JOIN tb_dev_rate_info rate
+        ON dev.dev_id = rate.dev_id
+        AND prj.dev_prj_id = rate.dev_prj_id
+        AND rate.use_yn = 'Y'
+        AND rate.del_yn = 'N'
+        WHERE dev.use_yn = 'Y'
+        AND dev.del_yn = 'N'
+        <if test="dev_nm != null and dev_nm != ''">
+            AND dev.dev_nm LIKE CONCAT('%', #{dev_nm}, '%')
+        </if>
+        AND (prj.ed_dt IS NULL OR NOW() &lt; prj.ed_dt)
+        GROUP BY dev.dev_id, prj.dev_prj_id
+        ORDER BY prj.st_dt DESC
+    </select>
+
+</mapper>

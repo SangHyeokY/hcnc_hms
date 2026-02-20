@@ -12,6 +12,8 @@ var hr013SkillPicker = null;
 // 프로젝트 탭 초기화 (버튼/콤보/태그/테이블)
 window.initTab3 = function () {
     if (!window.hr013Table) buildHr013Table();
+    // 프로젝트 제목 옆 건수 표기 초기화
+    updateHr013TitleCount();
     loadHr013TableData();
     // 상위 모달의 view/update 상태를 탭3 테이블 readonly 스타일과 동기화한다.
     $(document).off("tab:readonly.hr013").on("tab:readonly.hr013", function (_, isReadOnly) {
@@ -97,6 +99,17 @@ window.initTab3 = function () {
     });
 };
 
+// 프로젝트 제목 옆 건수(span.hcnc-grid-count-number) 업데이트
+function updateHr013TitleCount() {
+    let count = 0;
+    if (window.hr013Table && typeof window.hr013Table.getDataCount === "function") {
+        count = window.hr013Table.getDataCount("active");
+    } else if (window.hr013Table && typeof window.hr013Table.getData === "function") {
+        count = window.hr013Table.getData().length;
+    }
+    $("#hr013-count .hcnc-grid-count-number").text(count);
+}
+
 let jobMap = [];
 
 function updateHr013StackRowState(row) {
@@ -152,6 +165,14 @@ function buildHr013Table() {
         placeholder: "데이터 없음",
         height: "100%",
         selectable: false,
+        // 프로젝트 테이블 데이터 로드 시 건수 반영
+        dataLoaded: function () {
+            updateHr013TitleCount();
+        },
+        // 프로젝트 테이블 데이터 변경 시 건수 반영
+        dataChanged: function () {
+            updateHr013TitleCount();
+        },
         cellEdited: function () {
            changedTabs.tab3 = true;
         },
@@ -794,6 +815,8 @@ function loadHr013TableData() {
                 return row;
             });
             window.hr013Table.setData(normalized);
+            // 조회 직후 제목 건수 즉시 갱신
+            updateHr013TitleCount();
             normalizeJobCodes();
             syncStackLabelsFromCodes();
             window.hr013Table.redraw();
@@ -1042,6 +1065,8 @@ async function removeHr013SelectedRows() {
     });
 
     changedTabs.tab3 = true;
+    // 행 삭제 후 제목 건수 갱신
+    updateHr013TitleCount();
 }
 
 // 프로젝트 탭 통합 저장용
@@ -1142,6 +1167,8 @@ function addHr013Row() {
     }, true);
 
     changedTabs.tab3 = true;
+    // 행 추가 후 제목 건수 갱신
+    updateHr013TitleCount();
 }
 
 function toggleInprjValue(cell) {
@@ -1841,6 +1868,8 @@ $('#excelFile').on('change', function(e) {
 
             window.hr013Table.setData(data);
             changedTabs.tab3 = true;
+            // 엑셀 업로드 반영 후 제목 건수 갱신
+            updateHr013TitleCount();
         },
         error: function (xhr) {
             // 서버 에러도 모달로 표시
