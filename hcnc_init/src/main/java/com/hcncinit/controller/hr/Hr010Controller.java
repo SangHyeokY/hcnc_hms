@@ -69,7 +69,7 @@ public class Hr010Controller {
         param.put("login_role_cd", getLoginRoleCd(session));
 
         // System.out.println("저장 요청 param = " + param);
-        String devType = (String) param.get("dev_type");
+        String devType = (String) param.get("dev_typ");
 
         // 신규일 때만 채번... > [기본 인적사항] > dev_id 생성
         if (param.get("dev_id") == null || "".equals(param.get("dev_id"))) {
