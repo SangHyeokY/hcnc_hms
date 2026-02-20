@@ -63,11 +63,13 @@ option{background:#fff; color:#333;}
 .swal2-container {
     background-color: rgba(0, 0, 0, 0.45) !important; /* 어둡게 */
 }
-.swal2-html-container {
+
+.swal2-popup .swal2-html-container {
     color: #333333;
     font-size: 20px;
     display: flex !important;
     flex-wrap: wrap;
+    align-items: baseline;
 }
 
 .swal2-radius {

@@ -81,7 +81,8 @@ public class Hr014Controller {
         map.put("rows", rows);
         map.put("login_role_cd", getLoginRoleCd(session));
         int res = hr014Service.saveB(map);
-        mv.addObject("success", res > 0);
+        mv.addObject("success", true);  // 저장 시도 성공
+        mv.addObject("res", res);  // 실제 영향 row 수
         return mv;
     }
 

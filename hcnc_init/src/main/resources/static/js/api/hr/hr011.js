@@ -135,7 +135,7 @@ function openHr011(mode) {
             showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
                 icon: 'error',
                 title: '오류',
-                text: `"소속 및 계약정보" 데이터가 존재하지 않습니다.`
+                html: `<strong>소속 및 계약정보</strong>&nbsp;데이터가 존재하지 않습니다.`
             });
             return;
         }
@@ -228,7 +228,7 @@ function saveHr011TableData() {
         error: () => showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
                          icon: 'error',
                          title: '오류',
-                         text: `"소속 및 계약정보" 저장 중 오류가 발생했습니다.`
+                         html: `<strong>소속 및 계약정보</strong>&nbsp;저장 중 오류가 발생했습니다.`
                      })
     });
 }
@@ -239,7 +239,7 @@ async function deleteHr011() {
         await showAlert({
             icon: 'error',
             title: '오류',
-            text: `"소속 및 계약정보" 데이터가 존재하지 않습니다.`
+            html: `<strong>소속 및 계약정보</strong>&nbsp;데이터가 존재하지 않습니다.`
         });
         return;
     }
@@ -267,14 +267,14 @@ async function deleteHr011() {
             showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
                 icon: 'success',
                 title: '완료',
-                text: `"소속 및 계약정보" 데이터가 삭제되었습니다.`
+                html: `<strong>소속 및 계약정보</strong>&nbsp;데이터가 삭제되었습니다.`
             });
             loadHr011TableData(window.currentDevId);
         },
         error: () => showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
                                  icon: 'error',
                                  title: '오류',
-                                 text: `"소속 및 계약정보" 데이터를 삭제하는 중 오류가 발생했습니다.`
+                                 html: `<strong>소속 및 계약정보</strong>&nbsp;데이터를 삭제하는 중 오류가 발생했습니다.`
                              })
     });
 }
@@ -298,7 +298,7 @@ function validateHr011Form() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            text: `"소속사"를 입력해주세요.`
+            html: `<strong>소속사<strong>를 입력해주세요.`
         });
         $("#org_nm").focus();
         return false;
@@ -308,7 +308,7 @@ function validateHr011Form() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            text: `"계약 시작일"을 입력해주세요.`
+            html: `<strong>계약 시작일</strong>을 입력해주세요.`
         });
         $("#st_dt").focus();
         return false;
@@ -318,7 +318,7 @@ function validateHr011Form() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            text: `"계약 종료일"을 입력해주세요.`
+            html: `<strong>계약 종료일</strong>을 입력해주세요.`
         });
         $("#ed_dt").focus();
         return false;
@@ -328,7 +328,7 @@ function validateHr011Form() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            text: `"계약 종료일"은 "계약 시작일" 이후여야 합니다.`
+            html: `<strong>계약 종료일</strong>은&nbsp;<strong>계약 시작일</strong>&nbsp;이후여야 합니다.`
         });
         $("#ed_dt").focus();
         return false;
@@ -338,7 +338,7 @@ function validateHr011Form() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            text: `"사업자 유형"을 선택해주세요.`
+            html: `<strong>사업자 유형<strong>을 선택해주세요.`
         });
         $("#select_biz_typ").focus();
         return false;
@@ -348,7 +348,7 @@ function validateHr011Form() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            text: `"계약 금액"을 입력해주세요.`
+            html: `<strong>계약 금액</strong>을 입력해주세요.`
         });
         $("#amt").focus();
         return false;
@@ -358,7 +358,7 @@ function validateHr011Form() {
          showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            text: `"계약 금액"은 0보다 큰 숫자여야 합니다.`
+            html: `<strong>계약 금액</strong>은 0보다 큰 숫자여야 합니다.`
         });
         $("#amt").focus();
         return false;
@@ -368,7 +368,7 @@ function validateHr011Form() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            text: `"계약 금액"은 최대 999,999,999원까지 입력 가능합니다.`
+            html: `<strong>계약 금액</strong>은 최대 999,999,999원까지 입력 가능합니다.`
         });
         $("#amt").focus();
         return false;

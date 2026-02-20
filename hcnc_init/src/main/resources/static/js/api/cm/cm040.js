@@ -50,6 +50,9 @@ var detailAutoWidthColumns = [
 ];
 var detailStretchFields = ["cd_nm", "adinfo_01", "adinfo_02", "adinfo_03", "adinfo_04", "adinfo_05"];
 
+// 코드그룹 공통코드
+var grpCdMap = [];
+var grpCdOptions = [];
 
 // ===== 초기화 =====
 $(document).ready(function () {
@@ -57,17 +60,10 @@ $(document).ready(function () {
     loadMainTableData();
 
     setComCode("write_main_grp_cd", "grp_cd", "", "cd", "cd_nm", function () {
-        hr013JobOptions = $("#write_hr013_job_cd option").map(function () {
+        hr013JobOptions = $("#write_main_grp_cd option").map(function () {
             return { cd: this.value, cd_nm: $(this).text() };
         }).get();
-        initSelectDefault("write_hr013_job_cd", "선택");
-        if (window.hr013Table) {
-            normalizeJobCodes();
-            normalizeJobRows();
-            window.hr013Table.redraw(true);
-        }
-
-        jobMap = getJobCodeMap();
+        grpCdMap = getGrpCdMap();
     });
 
     /* 검색 */
@@ -112,6 +108,7 @@ function buildTables() {
     // MAIN 컨테이너가 없는 화면에서는 공통코드 테이블 생성 로직을 생략한다.
     if (!document.getElementById("TABLE_COMMON_MAIN")) return;
 
+    // 체크박스 싱크 및 정의
     function toggleRowSelection(row) {
         row.isSelected() ? row.deselect() : row.select();
     }
@@ -145,17 +142,28 @@ function buildTables() {
         columns: [
             {
                 title: "",
-                formatter: c =>
-                    `<input type="checkbox" class="row-check"${c.getRow().isSelected() ? " checked" : ""}>`,
-                width: 50,
-                hozAlign: "center",
-                headerSort: false,
-                cellClick: (e, c) => {
-                    toggleRowSelection(c.getRow());
+                field: "checkBox",
+                formatter: function (cell) {
+                    var checked = cell.getRow().isSelected() ? " checked" : "";
+                    return "<input type='checkbox' class='row-check'" + checked + " />";
+                },
+                cellClick: function (e, cell) {
+                    toggleRowSelection(cell.getRow());
+                    e.stopPropagation();
                     e.preventDefault();
-                }
+                },
+                frozen: true,
+                width: 50,
+                headerSort: false,
+                download: false
             },
-            { title: "코드그룹", field: "grp_cd_nm", hozAlign: "center" },
+            {   title: "코드그룹",
+                field: "grp_cd",
+                hozAlign: "center",
+                formatter: function (cell) {
+                     const val = cell.getValue();
+                     return (grpCdMap && grpCdMap[val]) ? grpCdMap[val] : val;
+                }, editor: false, editable: false},
             { title: "코드", field: "cd", hozAlign: "center" },
             { title: "코드그룹명", field: "grp_nm" },
             { title: "사용여부", field: "use_yn", hozAlign: "center", width: 90 }
@@ -186,7 +194,8 @@ function buildTables() {
         // - 합계가 크면 가로 스크롤 노출
         layout: "fitData",
         placeholder: "데이터 없음",
-        selectable: true,
+//        selectable: true,
+        selectable: 1,
         movableRows: true,
         columnDefaults: {
             resizable: true,
@@ -198,15 +207,20 @@ function buildTables() {
         columns: [
             {
                 title: "",
-                formatter: c =>
-                    `<input type="checkbox" class="row-check"${c.getRow().isSelected() ? " checked" : ""}>`,
-                width: detailBaseWidths.checkBox,
-                hozAlign: "center",
-                headerSort: false,
-                cellClick: (e, c) => {
-                    toggleRowSelection(c.getRow());
+                field: "checkBox",
+                formatter: function (cell) {
+                    var checked = cell.getRow().isSelected() ? " checked" : "";
+                    return "<input type='checkbox' class='row-check'" + checked + " />";
+                },
+                cellClick: function (e, cell) {
+                    toggleRowSelection(cell.getRow());
+                    e.stopPropagation();
                     e.preventDefault();
-                }
+                },
+                frozen: true,
+                width: 50,
+                headerSort: false,
+                download: false
             },
             { title: "코드", field: "cd", hozAlign: "center", width: detailBaseWidths.cd },
             { title: "코드명", field: "cd_nm", width: 140, minWidth: 120 },
@@ -229,6 +243,25 @@ function buildTables() {
 
 
 // ===== 공통 유틸 =====
+function getGrpCdMap() {
+    var map = {};
+    if (grpCdOptions && grpCdOptions.length) {
+        grpCdOptions.forEach(function (item) {
+            if (item.cd) {
+                map[item.cd] = item.cd_nm || item.cd;
+            }
+        });
+        return map;
+    }
+    $("#write_main_grp_cd option").each(function () {
+        var val = this.value;
+        if (val) {
+            map[val] = $(this).text();
+        }
+    });
+    return map;
+}
+
 function appendGroupSuffix(text) {
     // 그룹코드가 금액 계열이면 원 단위를 붙인다.
     if (GROUP_SUFFIX_RULES.amount.includes(currentDetailGrpCd)) return text + "원";
@@ -518,7 +551,7 @@ function loadMainTableData() {
             showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
                 icon: 'error',
                 title: '오류',
-                text: `'코드그룹' 데이터를 불러오는 중 오류가 발생했습니다.`
+                html: `<strong>코드그룹</strong>&nbsp;데이터를 불러오는 중 오류가 발생했습니다.`
             });
         },
         complete: function () {
@@ -533,7 +566,7 @@ async function deleteMainRows() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'info',
             title: '알림',
-            text: `삭제할 '코드그룹'을 선택해주세요.`
+            html: `삭제할&nbsp;<strong>코드그룹</strong>을 선택해주세요.`
         });
         return;
     }
@@ -544,7 +577,7 @@ async function deleteMainRows() {
     const firstResult = await showAlert({  // 알림(info), 경고(warning), 오류(error), 완료(success)
         icon: 'warning',
         title: '경고',
-        text: `선택한 '${firstRowData.grp_cd} (${firstRowData.grp_nm})' 코드그룹을 삭제하시겠습니까?`,
+        html: `선택한&nbsp;<strong>${firstRowData.cd} (${firstRowData.grp_nm})</strong>&nbsp;코드그룹을 삭제하시겠습니까?`,
         showCancelButton: true,
         cancelButtonText: '취소',
         cancelButtonColor: '#212E41'
@@ -554,7 +587,7 @@ async function deleteMainRows() {
     const secondResult = await showAlert({
         icon: 'warning',
         title: '경고',
-        text: `다시 확인 버튼을 누르시면 '${firstRowData.grp_cd} (${firstRowData.grp_nm})'의 데이터가 삭제되며, 되돌릴 수 없습니다.`,
+        html: `다시 확인 버튼을 누르시면&nbsp;<strong>${firstRowData.cd} (${firstRowData.grp_nm})</strong>의 데이터가 삭제되며, 되돌릴 수 없습니다.`,
         showCancelButton: true,
         cancelButtonText: '취소',
         cancelButtonColor: '#212E41'
@@ -607,7 +640,7 @@ async function deleteMainRows() {
                 showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
                     icon: 'error',
                     title: '오류',
-                    text: `'코드그룹' 삭제 중 오류가 발생했습니다.`
+                    html: `<strong>코드그룹</strong>&nbsp;삭제 중 오류가 발생했습니다.`
                 });
             }
         });
@@ -623,7 +656,7 @@ function upsertMainBtn() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            text: `'코드그룹'을 입력해주세요.`
+            html: `<strong>코드그룹</strong>을 입력해주세요.`
         });
         $("#write_main_grp_cd").focus();
         return;
@@ -633,7 +666,7 @@ function upsertMainBtn() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            text: `'코드'를 입력해주세요.`
+            html: `<strong>코드</strong>를 입력해주세요.`
         });
         $("#write_main_cd").focus();
         return;
@@ -643,7 +676,7 @@ function upsertMainBtn() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            text: `'코드그룹명'을 입력해주세요.`
+            html: `<strong>코드그룹명</strong>을 입력해주세요.`
         });
         $("#write_main_grp_nm").focus();
         return;
@@ -703,7 +736,7 @@ function openMainWriteModal(type) {
             showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
                 icon: 'info',
                 title: '알림',
-                text: `수정할 '코드그룹'을 선택해주세요.`
+                html: `수정할&nbsp;<strong>코드그룹</strong>을 선택해주세요.`
             });
             return;
         }
@@ -786,7 +819,7 @@ function loadDetailTableData(grpCd) {
             showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
                 icon: 'error',
                 title: '오류',
-                text: `'상세코드' 데이터를 불러오는 중 오류가 발생했습니다.`
+                html: `<strong>상세코드</strong>&nbsp;데이터를 불러오는 중 오류가 발생했습니다.`
             });
         },
         complete: function () {
@@ -801,7 +834,7 @@ async function deleteDetailRows() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'info',
             title: '알림',
-            text: `삭제할 '상세코드'를 선택해주세요.`
+            html: `삭제할&nbsp;<strong>상세코드</strong>를 선택해주세요.`
         });
         return;
     }
@@ -811,7 +844,7 @@ async function deleteDetailRows() {
      const firstResult = await showAlert({
         icon: 'warning',
         title: '경고',
-        text: `선택한 '${firstRow.cd} (${firstRow.cd_nm})' 상세코드를 삭제하시겠습니까?`,
+        html: `선택한&nbsp;<strong>${firstRow.cd} (${firstRow.cd_nm})</strong>&nbsp;상세코드를 삭제하시겠습니까?`,
         showCancelButton: true,
         confirmText: '삭제',
         cancelText: '취소'
@@ -822,7 +855,7 @@ async function deleteDetailRows() {
     const secondResult = await showAlert({
         icon: 'warning',
         title: '경고',
-        text: `다시 확인 버튼을 누르시면 '${firstRow.cd} (${firstRow.cd_nm})'의 데이터가 삭제되며, 되돌릴 수 없습니다.`,
+        html: `다시 확인 버튼을 누르시면&nbsp;<strong>${firstRow.cd} (${firstRow.cd_nm})</strong>의 데이터가 삭제되며, 되돌릴 수 없습니다.`,
         showCancelButton: true,
         confirmText: '삭제',
         cancelText: '취소'
@@ -862,7 +895,7 @@ async function deleteDetailRows() {
                 showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
                     icon: 'error',
                     title: '오류',
-                    text: `'상세코드' 삭제 중 오류가 발생했습니다.`
+                    html: `<strong>상세코드</strong>&nbsp;삭제 중 오류가 발생했습니다.`
                 });
             }
         });
@@ -914,7 +947,7 @@ function upsertDetailBtn() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            text: `'코드그룹'을 선택해주세요.`
+            html: `<strong>코드그룹</strong>을 선택해주세요.`
         });
         return;
     }
@@ -923,7 +956,7 @@ function upsertDetailBtn() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            text: `'코드'를 입력해주세요.`
+            html: `<strong>코드</strong>를 입력해주세요.`
         });
         $("#write_detail_cd").focus();
         return;
@@ -933,7 +966,7 @@ function upsertDetailBtn() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            text: `'코드명'을 입력해주세요.`
+            html: `<strong>코드명</strong>을 입력해주세요.`
         });
         $("#write_detail_cd_nm").focus();
         return;
@@ -943,7 +976,7 @@ function upsertDetailBtn() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            text: `'정렬순서'를 입력해주세요.`
+            html: `<strong>정렬순서</strong>를 입력해주세요.`
         });
         $("#write_detail_sort_no").focus();
         return;
@@ -1007,7 +1040,7 @@ function openDetailWriteModal(type) {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            text: `'상세 테이블'이 초기화되지 않았습니다.`
+            html: `<strong>상세 테이블</strong>이 초기화되지 않았습니다.`
         });
         return;
     }
@@ -1018,7 +1051,7 @@ function openDetailWriteModal(type) {
             showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
                 icon: 'warning',
                 title: '경고',
-                text: `'코드그룹 테이블'이 초기화되지 않았습니다.`
+                html: `<strong>코드그룹 테이블</strong>이 초기화되지 않았습니다.`
             });
             return;
         }
@@ -1028,7 +1061,7 @@ function openDetailWriteModal(type) {
             showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
                 icon: 'warning',
                 title: '경고',
-                text: `'코드그룹'을 먼저 선택해주세요.`
+                html: `<strong>코드그룹</strong>을 먼저 선택해주세요.`
             });
             return;
         }
@@ -1056,7 +1089,7 @@ function openDetailWriteModal(type) {
             showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
                 icon: 'info',
                 title: '알림',
-                text: `수정할 '상세코드'를 선택해주세요.`
+                html: `수정할&nbsp;<strong>상세코드</strong>를 선택해주세요.`
             });
             return;
         }

@@ -418,14 +418,14 @@ function saveTableB(alertFlag) {
             // memo: riskState.memo
         },
         success: function (response) {
-            console.log("응답:", response);
-            if (response && response.success === true) {
+            if (response.success) {
                 loadHr014TableDataB();
-                if (alertFlag) {
-                    console.log("Tab4-b 저장되었습니다.");
-                }
+//                if (alertFlag) {
+//                    console.log("Tab4-b 저장되었습니다." + response.res);
+//                }
+                console.log("Tab4-b 저장되었습니다.");
             } else {
-                console.log("Tab4-b 저장 오류", response);
+                // console.log("Tab4-b 저장 오류", response);
             }
         },
         error: function () {
