@@ -402,7 +402,7 @@ function saveTableB(alertFlag) {
         });
     });
 
-    riskState.re_in_yn = $("#HR015_REIN_CHECK").is(":checked") ? "Y" : "N";
+    // riskState.re_in_yn = $("#HR015_REIN_CHECK").is(":checked") ? "Y" : "N";
 
     $.ajax({
         url: "/hr014/b/save",
@@ -472,6 +472,7 @@ function buildRiskList() {
             return;
         }
         riskState.re_in_yn = $(this).is(":checked") ? "Y" : "N";
+        riskData.set(window.hr013_prj_nm, {...riskState});
     });
 }
 
