@@ -2572,6 +2572,7 @@ section.search-area .search-btn-area .btn-search {
   gap: 6px;
   cursor: pointer;
 }
+.btn-prj-skl,
 .btn-prj-eval {
   border: 1px solid #E50019;
   color: #E50019;
@@ -2585,6 +2586,7 @@ section.search-area .search-btn-area .btn-search {
   align-items: center;
   gap: 6px;
   cursor: pointer;
+  min-width: fit-content;
 }
 .prj-cell {
   display: flex;
