@@ -1224,7 +1224,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .insert .main-human-modal .modal-human-area .upload{padding-top:15px; position:absolute; top:0; left:0; z-index:10;}
 .modal-human-area .upload .file{width:100%; height:100%; position: absolute; top:0; left:0; opacity:0; z-index:1; cursor:pointer;}
 .modal-human-area .upload .file:disabled {cursor: default !important;}
-
+.modal-human-area .pic-area .profile-area.view {background: url(../images/common/bg-userimg-none.png) center center no-repeat #ECECEE; background-size: contain;}
 .modal-human-area .upload .showingbtn{width:100%; height:30px; border-radius:4px; border:1px dotted #ccc; color:#333}
 .insert .main-human-modal .modal-human-area .upload .showingbtn{display:none;}
 .top-article{display: flex; flex-direction: column;}
