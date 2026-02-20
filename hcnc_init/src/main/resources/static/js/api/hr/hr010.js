@@ -2077,6 +2077,7 @@ function applyHr014TabPermission() {
 
     $tabBtn.toggle(allowed);    // tab4(평가/리스크) 버튼
     $tabPanel.toggle(allowed);  // tab4(평가/리스크) 패널
+    updateVisibleMainTabEdge();
 
     // 권한 없는데 현재 tab4에 머물러 있으면 tab1로 강제 이동
     if (!allowed) {
@@ -2086,6 +2087,14 @@ function applyHr014TabPermission() {
         }
     }
 
+}
+
+// 메인 탭에서 마지막으로 보이는 탭의 우측 경계를 정리해 끝부분이 자연스럽게 보이도록 처리
+function updateVisibleMainTabEdge() {
+    const $tabArea = $(".tab-article > .tab-area").first();
+    const $tabBtns = $tabArea.find(".tab-btn");
+    $tabBtns.removeClass("is-visible-last");
+    $tabBtns.filter(":visible").last().addClass("is-visible-last");
 }
 
 // hr010 등록/수정 버튼/패널 표시 제어

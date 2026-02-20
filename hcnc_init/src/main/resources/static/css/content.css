@@ -1245,12 +1245,13 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 
 .tab-area {position:relative; display: flex; width: 100%; margin-bottom:20px; gap: 0px; box-sizing: border-box; border-radius:8px; overflow:hidden;}
 /*.tab-area:before {content:""; position:absolute; left:0; bottom:1px; height:1px; width:100%; background:#ddd; z-index:-1;}*/
-.tab-btn, .tab-sub-btn {display:block; border-right:1px solid #ccc; flex:1; text-align: center; padding: 12px 10px; font-weight: 500; color: #555;background:#212E4114;cursor: pointer;}
+.tab-btn, .tab-sub-btn {display:block; border-right:1px solid #ccc; flex:1; min-width:0; text-align: center; padding: 12px 10px; font-weight: 500; color: #555;background:#212E4114;cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
 .tab-btn:last-child, .tab-sub-btn:last-child{border-right:none;}
 .sub-tab-area{ display: flex; flex-direction: column; min-width: fit-content;}
 .sub-tab-area .tab-sub-btn{text-align:left;}
 .sub-tab-area .tab-sub-btn.active{font-weight:700; color: #111;}
 .tab-btn.active {background: #212E41; color: #fff; font-weight:700;}
+.modal-wrap .tab-area .tab-btn.is-visible-last {border-right:none;}
 
 /* .tab2-content{gap:16px;}*/
 /* .tab-area .tab-content .content-body{overflow-y: auto;} */
