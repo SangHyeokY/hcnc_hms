@@ -55,11 +55,21 @@ public class Hr014Service {
     public int saveB(Map<String, Object> map) {
         requireHr014Access(map);
         // 탭2 리스크 저장
-        int updated = this.sqlSession.update("com.hcncinit.Hr014Mapper.updateLatestRiskByDev", map);
-        if (updated > 0) {
-            return updated;
+//        int updated = this.sqlSession.update("com.hcncinit.Hr014Mapper.updateLatestRiskByDev", map);
+//        if (updated > 0) {
+//            return updated;
+//        }
+//        return this.sqlSession.insert("com.hcncinit.Hr014Mapper.insertRisk", map);
+
+        // 탭1 평가 저장
+        Object rowsObj = map.get("rows");
+        if (rowsObj instanceof List<?> rowsList && !rowsList.isEmpty()) {
+            // rows가 존재하면 insert 실행
+            return this.sqlSession.insert("com.hcncinit.Hr014Mapper.insertRisk", map);
+        } else {
+            // rows가 없으면 아무 작업을 안하고 0 반환
+            return 0;
         }
-        return this.sqlSession.insert("com.hcncinit.Hr014Mapper.insertRisk", map);
     }
 
     private void requireHr014Access(Map<String, Object> map) {

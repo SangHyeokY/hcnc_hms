@@ -17,6 +17,7 @@
         LEFT JOIN tb_dev_eval_info eval
           ON cd.cd = eval.eval_id
          AND eval.dev_id = #{dev_id}
+         AND eval.dev_prj_id = #{dev_prj_id}
          AND eval.del_yn = 'N'
         WHERE cd.grp_cd =
         <choose>
@@ -36,20 +37,22 @@
     <insert id="saveA" parameterType="map">
         <if test="rows != null and rows.size() > 0">
             INSERT INTO tb_dev_eval_info (
-            dev_id,
-            eval_id,
-            lvl,
-            cmt,
-            use_yn,
-            del_yn,
-            crt_ts,
-            crt_by,
-            upd_ts,
-            upd_by
+                dev_id,
+                dev_prj_id,
+                eval_id,
+                lvl,
+                cmt,
+                use_yn,
+                del_yn,
+                crt_ts,
+                crt_by,
+                upd_ts,
+                upd_by
             ) VALUES
             <foreach collection="rows" item="row" separator=",">
-                (
+            (
                 #{dev_id},
+                #{row.dev_prj_id},
                 #{row.eval_id},
                 #{row.lvl},
                 #{row.cmt},
@@ -59,7 +62,7 @@
                 #{userId},
                 NOW(),
                 #{userId}
-                )
+            )
             </foreach>
             ON DUPLICATE KEY UPDATE
             lvl = VALUES(lvl),
@@ -81,37 +84,18 @@
             , memo
         FROM tb_dev_rsk_info
         WHERE dev_id = #{dev_id}
+          AND dev_prj_id = #{dev_prj_id}
           AND del_yn = 'N'
-        ORDER BY rsk_dt DESC, rsk_id DESC
+        ORDER BY rsk_dt DESC
         LIMIT 1
     </select>
 
-    <!-- [Tab4] 리스크 관리 > 최신 데이터 저장 -->
-    <update id="updateLatestRiskByDev" parameterType="map">
-        UPDATE tb_dev_rsk_info
-           SET leave_txt = #{leave_txt},
-               claim_txt = #{claim_txt},
-               sec_txt = #{sec_txt},
-               re_in_yn = #{re_in_yn},
-               memo = #{memo},
-               use_yn = 'Y',
-               del_yn = 'N',
-               upd_ts = NOW(),
-               upd_by = #{userId}
-         WHERE rsk_id = (
-            SELECT rsk_id
-              FROM tb_dev_rsk_info
-             WHERE dev_id = #{dev_id}
-               AND del_yn = 'N'
-             ORDER BY rsk_dt DESC, rsk_id DESC
-             LIMIT 1
-         )
-    </update>
-
-    <!-- [Tab4] 리스크 관리 > 신규 저장 -->
+    <!-- [Tab4] 리스크 관리 > 저장 -->
     <insert id="insertRisk" parameterType="map">
-        INSERT INTO tb_dev_rsk_info (
+        <if test="rows != null and rows.size() > 0">
+            INSERT INTO tb_dev_rsk_info (
             dev_id,
+            dev_prj_id,
             rsk_dt,
             leave_txt,
             claim_txt,
@@ -121,24 +105,36 @@
             use_yn,
             del_yn,
             crt_ts,
-            crt_by,
-            upd_ts,
-            upd_by
-        ) VALUES (
-            #{dev_id},
-            CURDATE(),
-            #{leave_txt},
-            #{claim_txt},
-            #{sec_txt},
-            #{re_in_yn},
-            #{memo},
-            'Y',
-            'N',
-            NOW(),
-            #{userId},
-            NOW(),
-            #{userId}
-        )
+            crt_by
+            ) VALUES
+            <foreach collection="rows" item="row" separator=",">
+                (
+                #{dev_id},
+                #{row.dev_prj_id},
+                CURDATE(),
+                #{row.leave_txt},
+                #{row.claim_txt},
+                #{row.sec_txt},
+                #{row.re_in_yn},
+                #{row.memo},
+                'Y',
+                'N',
+                NOW(),
+                #{userId}
+                )
+            </foreach>
+            ON DUPLICATE KEY UPDATE
+            rsk_dt = CURDATE(),
+            leave_txt = VALUES(leave_txt),
+            claim_txt = VALUES(claim_txt),
+            sec_txt = VALUES(sec_txt),
+            re_in_yn = VALUES(re_in_yn),
+            memo = VALUES(memo),
+            use_yn = 'Y',
+            del_yn = 'N',
+            upd_ts = NOW(),
+            upd_by = #{userId}
+        </if>
     </insert>
 
 </mapper>

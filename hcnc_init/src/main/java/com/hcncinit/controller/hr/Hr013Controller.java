@@ -39,6 +39,7 @@ public class Hr013Controller {
         applyLoginUser(map, session);
         applyDefaults(map);
         normalizeNumbers(map);
+        map.put("ed_dt", "".equals(map.get("ed_dt")) ? null : map.get("ed_dt"));
         int res = hr013Service.save(map);
         mv.addObject("success", res > 0);
         return mv;

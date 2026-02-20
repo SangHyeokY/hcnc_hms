@@ -58,7 +58,7 @@ public class Hr014Controller {
     // [Tab4_B][리스크 관리] > 조회
     @RequestMapping("/b/list")
     public ModelAndView listB(@RequestParam(required = false) Map<String, Object> map, HttpSession session) {
-        
+
         if(!canAccessHr014(session)) return forbiddenJson();
         applyDefaults(map);
         map.put("login_role_cd", getLoginRoleCd(session));
@@ -77,6 +77,8 @@ public class Hr014Controller {
         ModelAndView mv = new ModelAndView("jsonView");
         applyLoginUser(map, session);
         applyDefaults(map);
+        List<Map<String, Object>> rows = parseRows(map.get("rows"));
+        map.put("rows", rows);
         map.put("login_role_cd", getLoginRoleCd(session));
         int res = hr014Service.saveB(map);
         mv.addObject("success", res > 0);
@@ -130,7 +132,7 @@ public class Hr014Controller {
             }
             try {
                 return objectMapper.readValue(rowsJson, new TypeReference<List<Map<String, Object>>>() {
-                });
+            });
             } catch (Exception e) {
                 return List.of();
             }

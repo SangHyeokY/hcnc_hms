@@ -1,5 +1,8 @@
 // hr014.js
 // 리스크 탭(B) 임시 상태. 저장 전까지 화면 입력값을 여기에 유지한다.
+const evalData = new Map(); // 평가 데이터 (프로젝트별)
+const riskData = new Map(); // 리스크 데이터 (프로젝트별)
+
 var riskState = {
     leave_txt: "",
     claim_txt: "",
@@ -31,10 +34,26 @@ window.initTab4 = function() {
     // if (!window.hr014TableB) buildHr014TableB();
 
     // 초기 데이터 로드 (한 번만)
-    if (!window.hr014TabInitialized) {
-        loadHr014TableDataA();
-        loadHr014TableDataB();
-    }
+    // if (!window.hr014TabInitialized) {
+    // var eval = evalData.get(window.hr013_prj_nm);
+    // if (eval !== null || eval !== undefined)
+    //     loadHr014TableDataA();
+    // else
+    //     window.hr014TableA.setData(eval);
+    //
+    // var risk = riskData.get(window.hr013_prj_nm);
+    // if (risk !== null || risk !== undefined)
+    //     loadHr014TableDataB();
+    // else {
+    //     riskState.leave_txt = risk.leave_txt || "";
+    //     riskState.claim_txt = risk.claim_txt || "";
+    //     riskState.sec_txt = risk.sec_txt || "";
+    //     riskState.re_in_yn = risk.re_in_yn || "N";
+    //     riskState.memo = risk.memo || "";
+    //     $("#HR015_REIN_CHECK").prop("checked", riskState.re_in_yn === "Y");
+    //     setRiskActive(riskActiveKey);
+    // }
+    // }
 
     // A/B 테이블 보여주기/숨기기
     $tab4.find("#TABLE_HR014_A").show();
@@ -98,6 +117,7 @@ function buildHr014TableA() {
         // 평가의견 입력이 변경되면 탭 저장 대상에 포함
         cellEdited: function () {
             changedTabs.tab4 = true;
+            evalData.set(window.hr013_prj_nm, window.hr014TableA.getData());
         },
         columns: [
             { title: "항 목", field: "cd_nm", hozAlign: "center", width: 125, minWidth: 125, maxWidth: 125 },
@@ -185,22 +205,35 @@ function buildHr014TableA() {
 
 function loadHr014TableDataA() {
     const devId = window.currentDevId || $("#dev_id").val();
-    if (!window.hr014TableA) return;
+    if (!window.hr014TableA) return Promise.resolve(); // 기존 return 대신 완료로 처리
 
-    $.ajax({
-        url: "/hr014/a/list",
-        type: "GET",
-        data: { dev_id: devId },
-        success: function(response) {
-            const dataArray = Array.isArray(response.list)
-                ? response.list
-                : [];
-            window.hr014TableA.setData(dataArray);
-            // console.log(dataArray)
-        },
-        error: function() {
-            console.log("tab4A 데이터 로드 실패");
-        }
+    return new Promise((resolve, reject) => {
+        $.ajax({
+            url: "/hr014/a/list",
+            type: "GET",
+            data: {
+                dev_id: devId,
+                dev_prj_id: window.hr013_prj_nm
+            },
+            success: function (response) {
+                const dataArray = Array.isArray(response.list) ? response.list : [];
+                window.hr014TableA.setData(dataArray);
+
+                // setData 이후 렌더까지 체감상 보장하려면(선택)
+                // renderComplete 이벤트 1회 대기
+                if (window.hr014TableA && window.hr014TableA.once) {
+                    window.hr014TableA.once("renderComplete", function () {
+                        resolve(dataArray);
+                    });
+                } else {
+                    resolve(dataArray);
+                }
+            },
+            error: function (xhr, status, err) {
+                console.log("tab4A 데이터 로드 실패");
+                reject(err || new Error("tab4A load failed"));
+            }
+        });
     });
 }
 
@@ -256,6 +289,7 @@ function setScore(row, level) {
         row.update(data);
 
         changedTabs.tab4 = true;
+        evalData.set(window.hr013_prj_nm, window.hr014TableA.getData());
     }
 
 //function buildHr014TableB() {
@@ -278,26 +312,33 @@ function setScore(row, level) {
 
 function loadHr014TableDataB() {
     const devId = window.currentDevId || $("#dev_id").val();
-    // if (!window.hr014TableB) return;
 
-    $.ajax({
-        url: "/hr014/b/list",
-        type: "GET",
-        data: { dev_id: devId },
-        success: function(response) {
-            var risk = (response.list && response.list[0]) ? response.list[0] : {};
-            riskState.leave_txt = risk.leave_txt || "";
-            riskState.claim_txt = risk.claim_txt || "";
-            riskState.sec_txt = risk.sec_txt || "";
-            riskState.re_in_yn = risk.re_in_yn || "N";
-            riskState.memo = risk.memo || "";
+    return new Promise((resolve, reject) => {
+        $.ajax({
+            url: "/hr014/b/list",
+            type: "GET",
+            data: {
+                dev_id: devId,
+                dev_prj_id: window.hr013_prj_nm
+            },
+            success: function (response) {
+                var risk = (response.list && response.list[0]) ? response.list[0] : {};
+                riskState.leave_txt = risk.leave_txt || "";
+                riskState.claim_txt = risk.claim_txt || "";
+                riskState.sec_txt   = risk.sec_txt   || "";
+                riskState.re_in_yn  = risk.re_in_yn  || "N";
+                riskState.memo      = risk.memo      || "";
 
-            $("#HR015_REIN_CHECK").prop("checked", riskState.re_in_yn === "Y");
-            setRiskActive(riskActiveKey);
-        },
-        error: function() {
-            console.log("tab4B 데이터 로드 실패");
-        }
+                $("#HR015_REIN_CHECK").prop("checked", riskState.re_in_yn === "Y");
+                setRiskActive(riskActiveKey);
+
+                resolve(risk);
+            },
+            error: function (xhr, status, err) {
+                console.log("tab4B 데이터 로드 실패");
+                reject(err || new Error("tab4B load failed"));
+            }
+        });
     });
 }
 
@@ -311,12 +352,24 @@ function saveTableA(alertFlag) {
     if (!window.hr014TableA) {
         return;
     }
+
+    const eval = [];
+
+    evalData.forEach((valueArray, key) => {
+        valueArray.forEach(item => {
+            eval.push({
+                ...item,
+                dev_prj_id: String(key)
+            });
+        });
+    });
+
     $.ajax({
         url: "/hr014/a/save",
         type: "POST",
         data: {
             dev_id: window.currentDevId || $("#dev_id").val(),
-            rows: JSON.stringify(buildSaveRows(window.hr014TableA.getData()))
+            rows: JSON.stringify(buildSaveEvalRows(eval))
         },
         success: function (response) {
             if (response.success) {
@@ -339,18 +392,30 @@ function saveTableB(alertFlag) {
     if (alertFlag === undefined) {
         alertFlag = true;
     }
-    riskState.re_in_yn = $("#HR015_REIN_CHECK").is(":checked") ? "Y" : "N";
+
+    const risk = [];
+
+    riskData.forEach((valueArray, key) => {
+        risk.push({
+            ...valueArray,
+            dev_prj_id: String(key)
+        });
+    });
+
+    // riskState.re_in_yn = $("#HR015_REIN_CHECK").is(":checked") ? "Y" : "N";
 
     $.ajax({
         url: "/hr014/b/save",
         type: "POST",
         data: {
             dev_id: window.currentDevId || $("#dev_id").val(),
-            leave_txt: riskState.leave_txt,
-            claim_txt: riskState.claim_txt,
-            sec_txt: riskState.sec_txt,
-            re_in_yn: riskState.re_in_yn,
-            memo: riskState.memo
+            rows: JSON.stringify(risk)
+            // dev_id: window.currentDevId || $("#dev_id").val(),
+            // leave_txt: riskState.leave_txt,
+            // claim_txt: riskState.claim_txt,
+            // sec_txt: riskState.sec_txt,
+            // re_in_yn: riskState.re_in_yn,
+            // memo: riskState.memo
         },
         success: function (response) {
             if (response.success) {
@@ -407,6 +472,7 @@ function buildRiskList() {
             return;
         }
         riskState.re_in_yn = $(this).is(":checked") ? "Y" : "N";
+        riskData.set(window.hr013_prj_nm, {...riskState});
     });
 }
 
@@ -424,7 +490,7 @@ function setRiskActive(key) {
 }
 
 // 탭1 저장용 payload 구성
-function buildSaveRows(rows) {
+function buildSaveEvalRows(rows) {
     if (!Array.isArray(rows)) {
         return [];
     }
@@ -446,6 +512,7 @@ function buildSaveRows(rows) {
 
         return {
             eval_id: evalId,
+            dev_prj_id: row.dev_prj_id,
             lvl: lvl,
             cmt: row.cmt || ""
         };
@@ -482,5 +549,7 @@ function applyTab4Readonly(isReadOnly) {
 
 window.applyTab4Readonly = applyTab4Readonly;
 
-
-
+$("#HR015_RISK_TEXT").on("change", function () {
+    // 텍스트 영역은 항상 현재 선택된 항목(riskActiveKey)과 동기화된다.
+    riskData.set(window.hr013_prj_nm, {...riskState});
+});

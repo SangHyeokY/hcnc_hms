@@ -207,8 +207,22 @@ $(document).ready(async function () {
 
     // 탭 변경 이벤트
     $(".tab-btn").on("click", function () {
+
         const tabId = $(this).data("tab");
-        if (tabId == "tab4" && !canAccessHr014Tab()) return;    // hr014 권한 검증
+        if (tabId == "tab4") {
+            if (!canAccessHr014Tab())
+                return; // hr014 권한 검증
+
+            if ((window.hr013_prj_nm === undefined || window.hr013_prj_nm === null))
+            {
+                showAlert({
+                    icon: 'warning',
+                    title: '경고',
+                    text: '해당 탭은 "프로젝트" 탭에서 "당사" 프로젝트에 대해 "평가" 버튼을 클릭해야 접근 가능합니다.'
+                });
+                return;
+            }
+        }
 
         $(".tab-btn").removeClass("active");
         $(this).addClass("active");
@@ -985,6 +999,8 @@ async function deleteUserRows() {
 
 // 모달(팝업) 열리는 이벤트 처리
 openUserModal = async function (mode, data) {
+    window.hr013_prj_nm = null;
+
     currentMode = mode;
     initTabs = true;
     const $modal = $("#view-user-area");
@@ -2103,7 +2119,7 @@ function applyHr010EditorPermission() {
     const $btnAdd = $(".btn-main-add");
     const $btnEdit = $(".btn-main-edit");
     const $btnDel = $(".btn-main-del");    // hr010 등록/수정 버튼/패널 표시 제어
-    $btnAdd.toggle(editAllowed); 
+    $btnAdd.toggle(editAllowed);
     $btnEdit.toggle(editAllowed);
     $btnDel.toggle(editAllowed);
 }
