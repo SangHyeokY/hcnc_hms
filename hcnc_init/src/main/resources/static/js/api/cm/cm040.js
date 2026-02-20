@@ -56,6 +56,20 @@ $(document).ready(function () {
     buildTables();
     loadMainTableData();
 
+    setComCode("write_main_grp_cd", "grp_cd", "", "cd", "cd_nm", function () {
+        hr013JobOptions = $("#write_hr013_job_cd option").map(function () {
+            return { cd: this.value, cd_nm: $(this).text() };
+        }).get();
+        initSelectDefault("write_hr013_job_cd", "선택");
+        if (window.hr013Table) {
+            normalizeJobCodes();
+            normalizeJobRows();
+            window.hr013Table.redraw(true);
+        }
+
+        jobMap = getJobCodeMap();
+    });
+
     /* 검색 */
     $(".btn-search").on("click", function (e) {
         e.preventDefault();
@@ -141,7 +155,7 @@ function buildTables() {
                     e.preventDefault();
                 }
             },
-            { title: "코드그룹", field: "grp_cd", hozAlign: "center" },
+            { title: "코드그룹", field: "grp_cd_nm", hozAlign: "center" },
             { title: "코드", field: "cd", hozAlign: "center" },
             { title: "코드그룹명", field: "grp_nm" },
             { title: "사용여부", field: "use_yn", hozAlign: "center", width: 90 }
@@ -678,6 +692,7 @@ function openMainWriteModal(type) {
         // 등록 모드: 입력 가능한 기본값으로 폼 초기화
         $("#write_main_grp_cd").val("").prop("disabled", false);
         $("#write_main_grp_nm").val("");
+        $("#write_main_grp_cd").val("02");
         $("#write_main_use_yn").val("Y");
         $("#write_main_parent_grp_cd").val("");
         $("#write_main_cd").val("").prop("disabled", false);

@@ -15,6 +15,7 @@
         FROM tb_cd_mst
         WHERE del_yn = 'N'
           AND sort_no = 0
+          AND grp_yn = 'y'
         <if test="searchUseYn != null and searchUseYn != ''">
             AND use_yn = #{searchUseYn}
         </if>
@@ -41,6 +42,7 @@
         FROM tb_cd_mst
         WHERE del_yn = 'N'
           AND grp_cd = #{parent_grp_cd}
+          AND grp_yn = 'N'
           AND sort_no &gt; 0
         ORDER BY sort_no ASC, cd ASC
     </select>
@@ -59,6 +61,7 @@
                        #{grp_cd}
                    </otherwise>
                </choose>
+           AND grp_yn = 'N'
            AND sort_no &gt; 0
     </select>
 
@@ -68,6 +71,7 @@
           FROM tb_cd_mst
          WHERE del_yn = 'N'
            AND grp_cd = #{parent_grp_cd}
+           AND grp_yn = 'N'
            AND cd REGEXP '^[0-9]+$'
            AND sort_no &gt; 0
     </select>
@@ -78,6 +82,7 @@
           FROM tb_cd_mst
          WHERE del_yn = 'N'
            AND grp_cd = #{parent_grp_cd}
+           AND grp_yn = 'N'
            AND sort_no &gt; 0
     </select>
 
@@ -91,6 +96,7 @@
         <if test="pre_cd != null and pre_cd != ''">
             AND cd != #{pre_cd}
         </if>
+            AND grp_yn = 'N'
         LIMIT 1
     </select>
 
@@ -100,6 +106,7 @@
             grp_cd,
             cd,
             cd_nm,
+            grp_yn,
             sort_no,
             use_yn,
             del_yn,
@@ -111,6 +118,7 @@
             #{grp_cd},
             #{cd},
             #{cd_nm},
+            'Y',
             0,
             #{use_yn},
             'N',
@@ -133,6 +141,7 @@
             grp_cd,
             cd,
             cd_nm,
+            grp_yn,
             sort_no,
             adinfo_01,
             adinfo_02,
@@ -149,6 +158,7 @@
             #{parent_grp_cd},
             #{cd},
             #{cd_nm},
+            'N',
             #{sort_no},
             #{adinfo_01},
             #{adinfo_02},

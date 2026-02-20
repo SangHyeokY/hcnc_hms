@@ -125,11 +125,11 @@
             </foreach>
             ON DUPLICATE KEY UPDATE
             rsk_dt = CURDATE(),
-            leave_txt = #{row.leave_txt},
-            claim_txt = #{row.claim_txt},
-            sec_txt = #{row.sec_txt},
-            re_in_yn = #{row.re_in_yn},
-            memo = #{row.memo},
+            leave_txt = VALUES(leave_txt),
+            claim_txt = VALUES(claim_txt),
+            sec_txt = VALUES(sec_txt),
+            re_in_yn = VALUES(re_in_yn),
+            memo = VALUES(memo),
             use_yn = 'Y',
             del_yn = 'N',
             upd_ts = NOW(),

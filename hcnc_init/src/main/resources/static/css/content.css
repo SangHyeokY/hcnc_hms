@@ -2557,7 +2557,7 @@ section.search-area .search-btn-area .btn-search {
 }
 
 .hr014-title {
-  font-size: 16px;padding-left: 5px;
+  font-size: 16px; padding-left: 5px; color: #7b8794; font-weight: 400;
 }
 
 .btn-prj-edit {
@@ -2574,6 +2574,7 @@ section.search-area .search-btn-area .btn-search {
   gap: 6px;
   cursor: pointer;
 }
+.btn-prj-skl,
 .btn-prj-eval {
   border: 1px solid #E50019;
   color: #E50019;
@@ -2587,6 +2588,7 @@ section.search-area .search-btn-area .btn-search {
   align-items: center;
   gap: 6px;
   cursor: pointer;
+  min-width: fit-content;
 }
 .prj-cell {
   display: flex;

@@ -12,6 +12,12 @@ var hr013SkillPicker = null;
 // 프로젝트 탭 초기화 (버튼/콤보/태그/테이블)
 window.initTab3 = function () {
     if (!window.hr013Table) buildHr013Table();
+
+    if (currentMode === "view")
+        window.hr013Table.getColumn("_checked").hide();
+    else
+        window.hr013Table.getColumn("_checked").show();
+
     // 프로젝트 제목 옆 건수 표기 초기화
     updateHr013TitleCount();
     loadHr013TableData();
@@ -161,7 +167,6 @@ function buildHr013Table() {
 
     window.hr013Table = new Tabulator("#TABLE_HR013_A", {
         layout: "fitColumns",
-        paginationSize: 8,
         placeholder: "데이터 없음",
         height: "100%",
         selectable: false,
@@ -260,6 +265,8 @@ function buildHr013Table() {
 
                     const rowData = cell.getRow().getData();
 
+                    if (currentMode === "view")
+                        return false;
                     // ※ 20260220 임시 주석 - 당사여부 체크된 경우 → 수정 불가
                     // if(rowData.inprj_yn === 'Y'){   // 또는 'Y'
                     //     return false;
@@ -301,7 +308,7 @@ function buildHr013Table() {
                         editRisk(rowData)
                             .then(() => {
                                 $(".tab-btn").last().click();
-                                $(".hr014-title").text(window.hr013_prj_nm);
+                                $(".hr014-title").text(rowData.prj_nm);
 
                                 // 탭 클릭 직후 레이아웃 재계산이 필요한 경우가 있어 0ms로 한번 더
                                 setTimeout(() => {
@@ -315,7 +322,7 @@ function buildHr013Table() {
                             })
                             .finally(() => {
                                 $(".tab-btn").last().click();
-                                $(".hr014-title").text(window.hr013_prj_nm);
+                                $(".hr014-title").text(rowData.prj_nm);
                                 hideLoading();
                             });
                     }
@@ -1348,7 +1355,7 @@ function hr013TableSkillFormatter(cell) {
     }
     return "<div class='hr013-stack-cell'>" +
         "<span class='hr013-stack-text'>" + textHtml + "</span>" +
-        "<button type='button' class='btn btn-add-skill btn-hr013-cell-skill-picker'>기술 선택</button>" +
+        "<button type='button' class='btn-prj-skl'>기술 선택</button>" +
         "</div>";
 }
 
@@ -1357,7 +1364,7 @@ function hr013TableSkillCellClick(e, cell) {
         return;
     }
     var target = e && e.target ? e.target : null;
-    if (!target || !$(target).closest(".btn-hr013-cell-skill-picker").length) {
+    if (!target || !$(target).closest(".btn-prj-skl").length) {
         return;
     }
     openHr013SkillPicker("grid", cell.getRow());

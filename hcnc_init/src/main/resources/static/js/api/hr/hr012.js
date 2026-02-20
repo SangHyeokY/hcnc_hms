@@ -170,7 +170,6 @@ function buildHr012TableB() {
 
     window.hr012TableB = new Tabulator("#TABLE_HR012_B", {
         layout: "fitColumns",
-        paginationSize: 8,
         placeholder: "데이터 없음",
         height: "100%",
         // 숙련도 테이블 데이터 로드 시 건수 반영
