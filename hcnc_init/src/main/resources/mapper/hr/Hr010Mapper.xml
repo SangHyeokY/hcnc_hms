@@ -21,6 +21,9 @@
             , hope_rate_amt -- 단가
             , search_txt
             , IFNULL(fn_total_score(dev_id), 0) score
+            , kosa_grd_cd
+            , main_fld_cd
+            , main_cust_cd
         FROM tb_dev_info
         WHERE del_yn='N'
         AND use_yn='Y'
@@ -67,7 +70,10 @@
             crt_ts,
             use_yn,
             del_yn,
-            crt_by
+            crt_by,
+            kosa_grd_cd,
+            main_fld_cd,
+            main_cust_cd
         ) VALUES (
             #{dev_id},
             #{brdt},
@@ -87,12 +93,18 @@
             NOW(),
             'Y',
             'N',
-            #{dev_id}
+            #{dev_id},
+            #{kosa_grd_cd},
+            #{main_fld_cd},
+            #{main_cust_cd}
         ) ON DUPLICATE KEY UPDATE
+        <trim suffixOverrides=",">
             dev_id = #{dev_id},
             brdt = #{brdt},
             avail_dt = #{avail_dt},
-            dev_img = #{dev_img, jdbcType=BLOB},
+            <if test="dev_img != null">
+                dev_img = #{dev_img, jdbcType=BLOB},
+            </if>
             dev_nm = #{dev_nm},
             tel = #{tel},
             email = #{email},
@@ -107,7 +119,11 @@
             crt_ts = NOW(),
             use_yn = 'Y',
             del_yn = 'N',
-            crt_by = #{dev_id}
+            crt_by = #{dev_id},
+            kosa_grd_cd = #{kosa_grd_cd},
+            main_fld_cd = #{main_fld_cd},
+            main_cust_cd = #{main_cust_cd},
+        </trim>
     </insert>
 
     <!-- dev_id 생성 시, 뒤에 숫자 붙이기 -->

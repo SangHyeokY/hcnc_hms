@@ -29,7 +29,7 @@
 
     <!-- ================= 메인 리스트 ================= -->
     <div class="content-title fl-sb fl-ac">
-        <h4 class="page-sub-title">인적사항 리스트</h4>
+        <h4 class="page-sub-title">인적사항 목록</h4>
         <div class="btn-area">
             <button type="button" class="btn bg-primary btn-main-view">상세보기</button>
             <button type="button" class="btn btn-main-add" th:if="${LOGIN_AUTH == '01' or LOGIN_AUTH == '02' or LOGIN_AUTH == '03'}">
@@ -81,10 +81,10 @@
                         <div class="table-area">
                             <table id="main-modal-table">
                                 <colgroup>
-                                <col style="width: 120px;">
-                                    <col style="">
-                                    <col style="width: 70px;">
-                                    <col style="width:180px">
+                                    <col style="width: 120px;">
+                                    <col style="width: auto;">
+                                    <col style="width: 80px;">
+                                    <col style="width: 200px;">
                                 </colgroup>
                                 <tr style="display: none;">
                                     <th>직원코드</th>
@@ -99,7 +99,7 @@
                                 <tr>
                                     <th>생년월일</th>
                                     <td><input type="date" class="wp100" id="brdt"></td>
-                                    <td colspan="2" rowspan="4">
+                                    <td colspan="2" rowspan="4" class="photo-cell">
                                         <div class="pic-area fd-col">
                                             <div class="profile-area">
                                                 <img id="dev_img" src="" alt="profile" />
@@ -123,14 +123,10 @@
                                     <td><input type="text" class="wp100" id="region" disabled></td>
                                 </tr>
                                 <tr>
-                                    <th>
-                                        근무가능형태
-                                    </th>
-                                    <td>
-                                        <select id="select_work_md" class="wp100"></select>
-                                    </td>
-                                    <th rowspan="3">등급</th>
-                                    <td rowspan="3">
+                                    <th>근무가능형태</th>
+                                    <td><select id="select_work_md" class="wp100"></select></td>
+                                    <th rowspan="2">등급</th>
+                                    <td rowspan="2">
                                         <div class="fl-ct fd-col wp100 ta-c">
                                             <span class="fs32 fw700" id="grade"></span>
                                             <span class="fs16" id="score"></span>
@@ -280,6 +276,22 @@
                                     </td>
                                 </tr>
                                 <tr>
+                                    <th>투입가능시점</th>
+                                    <td><input type="date" class="wp100" id="avail_dt"></td>
+                                </tr>
+                                <tr>
+                                    <th>최종학력</th>
+                                    <td><input type="text" class="wp100" id="edu_last" disabled></td>
+                                    <th rowspan="2">KOSA<br>등급</th>
+                                    <td rowspan="2">
+                                        <select id="select_kosa_grd_cd" class="wp100"></select>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>단가</th>
+                                    <td><input type="text" class="wp100" id="hope_rate_amt" disabled></td>
+                                </tr>
+                                <tr>
                                     <th>경력연차</th>
                                     <td class="career-exp-cell">
                                         <div class="career-spin-wrap">
@@ -303,14 +315,18 @@
                                         </div>
                                         <span id="exp_yr_text" class="career-exp-text"></span>
                                     </td>
+                                    <th>주요분야</th>
+                                    <td>
+                                        <select id="select_main_fld_cd" class="wp100"></select>
+                                    </td>
                                 </tr>
                                 <tr>
-                                    <th>최종학력</th>
-                                    <td><input type="text" class="wp100" id="edu_last" disabled></td>
-                                </tr>
-                                <tr>
-                                    <th>보유자격증</th>
-                                    <td colspan="3"><input type="text" class="wp100" id="cert_txt" disabled></td>
+                                    <th>계약형태</th>
+                                    <td><select id="select_ctrt_typ" class="wp100"></select></td>
+                                    <th>주요<br>고객사</th>
+                                    <td>
+                                        <input type="text" class="wp100" id="main_cust_cd" disabled>
+                                    </td>
                                 </tr>
                                 <tr>
                                     <th>
@@ -338,16 +354,8 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <th>단가</th>
-                                    <td colspan="3"><input type="text" class="wp100" id="hope_rate_amt" disabled></td>
-                                </tr>
-                                <tr>
-                                    <th>투입가능시점</th>
-                                    <td colspan="3"><input type="date" class="wp100" id="avail_dt"></td>
-                                </tr>
-                                <tr>
-                                    <th>계약형태</th>
-                                    <td colspan="3"><select id="select_ctrt_typ" class="wp100"></select></td>
+                                    <th>보유자격증</th>
+                                    <td colspan="3"><input type="text" class="wp100" id="cert_txt" disabled></td>
                                 </tr>
                             </table>
                         </div>

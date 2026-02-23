@@ -420,6 +420,9 @@ button.btn.btn-add-skill {
     cursor: pointer;
 }
 
+button.btn.btn-add-skill:hover {
+    background-color: #2A3240;
+}
 /*===============================================================================
   HR015,HR014 - score tables alignment
 ================================================================================*/
@@ -981,6 +984,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
     border: 1px solid #ED24551F;
     -webkit-text-fill-color: #ED2455;
     font-weight: 500;
+    height: 40px;
 }
 .selectedDevTyp {
     background: url(../images/common/ico-arrow-down.png) calc(100% - 10px) center no-repeat #ED24551F !important;
@@ -1109,7 +1113,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 
 .modal-wrap .header {display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; border-bottom: 1px solid #eee;}
 .modal-wrap .header h4 {font-size: 18px; color: #000; font-weight: 700;}
-.modal-wrap .header h4 span {font-size: 13px;}
+.modal-wrap .header h4 span {font-size: 14px;}
 .modal-container.main-lang-picker-container .btn-area button{width:40px; height:40px;}
 .modal-container.main-lang-picker-container .btn-area button img{width:100%;}
 .modal-wrap .header .modal-close {background: #d7dde8; border-radius: 50%; width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; font-size: 16px; color: #2f3a4a;}
@@ -1135,21 +1139,18 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .modal-content ul {list-style: none; margin: 0; padding: 0;}
 .modal-content li.table-col {width: 100%; padding: 25px 0; gap: 20px;}
 .modal-content li.table-col .table-cell {width: 100%;}
-.modal-content .cell-tit {font-size: 12px; font-weight: 700; padding-bottom: 6px;}
+.modal-content .cell-tit {font-size: 15px; font-weight: 700; padding-bottom: 6px;}
 .modal-content .cell-info input,
 .modal-content .cell-info select {width: 100%;}
 
 /* 인력관리 팝업 - 테이블 */
-.modal-content #main-modal-table tr > td,
-.modal-content #main-modal-table tr > th {
-    height: 42px;
-}
+.modal-content #main-modal-table tr {height: 50px;}
 
 .modal-btn {padding: 10px 16px;}
 .modal-btn ul {display: flex; justify-content: flex-end;}
 .modal-btn ul li {margin-right: 10px;}
 .modal-btn ul li:last-child {margin-right: 0;}
-.modal-btn .btn {padding: 8px 20px; border-radius: 8px; background-color: #fff; border: 1px solid #E50019; color: #E50019; font-size: 14px; font-weight: 500;}
+.modal-btn .btn {padding: 8px 20px; border-radius: 8px; background-color: #fff; border: 1px solid #E50019; color: #E50019; font-weight: 500;} /*font-size: 14px;*/
 /* .modal-btn .btn.btn-save {background: #5A8DFF; border-color: #5A8DFF; color: #fff;} */
 .modal-btn #btn-user-save {background: #E50019; border-color: #E50019; color: #fff;}
 .modal-btn #btn-user-save:hover {background: #C40016; border-color: #C40016;}
@@ -1167,11 +1168,6 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
   background: #fff url("/icons/btn-ico-excel-download.png") no-repeat 16px ;
   background-size:18px 18px;
   padding-left: 40px;
-  border-radius:8px;
-  color:#000000 ;
-  font-weight: 700;
-  font-size: 16px;
-  border: 1px solid #C5CCD5;
 }
 /* 사용자관리 수정 모달: 비고 입력칸 포함 모든 입력영역이 잘리지 않도록 폭 고정 */
 #write-user-area .modal-content {
@@ -1218,13 +1214,36 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 
 .modal-human-area {flex:1;}
 .modal-human-area .pic-area{width: 100%; cursor:point;}
-.modal-human-area .pic-area .profile-area{position:relative; width:100%; padding-top: 100%; border:1px solid #ddd; background:url("../images/common/bg-userimg.png")center center no-repeat #ECECEE; background-size:contain; border-radius:9px; overflow:hidden;}
-.modal-human-area .pic-area .profile-area img{position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:100%; height:100%;}
+.modal-human-area .pic-area .profile-area{
+    position:relative;
+    height: 270px;
+    width:100%;
+    border:1px solid #ddd;
+    border-radius:9px;
+    background:url("../images/common/bg-userimg.png")center center no-repeat #ECECEE;
+    background-size:contain;
+    overflow:hidden;
+} /* padding-top: 100%; */
+.modal-human-area .pic-area .profile-area img{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+/*좌우 여백 남기면서 세로 기준 보이기
+height: 100%;
+width: auto;
+display: block;
+margin: 0 auto;*/
+
+/*#main-modal-table .photo-cell {
+    padding-top: 5px;
+    vertical-align: top;
+}*/
 .modal-human-area .upload{width:100%; height:100%; padding-top: 15px; position:absolute; top:0; left:0; cursor: pointer;}
 .insert .main-human-modal .modal-human-area .upload{padding-top:15px; position:absolute; top:0; left:0; z-index:10;}
 .modal-human-area .upload .file{width:100%; height:100%; position: absolute; top:0; left:0; opacity:0; z-index:1; cursor:pointer;}
 .modal-human-area .upload .file:disabled {cursor: default !important;}
-.modal-human-area .pic-area .profile-area.view {background: url(../images/common/bg-userimg-none.png) center center no-repeat #ECECEE; background-size: contain;}
+.modal-human-area .pic-area .profile-area.view {background: url("../images/common/bg-userimg-none.png") center center no-repeat #ECECEE; background-size: contain;}
 .modal-human-area .upload .showingbtn{width:100%; height:30px; border-radius:4px; border:1px dotted #ccc; color:#333}
 .insert .main-human-modal .modal-human-area .upload .showingbtn{display:none;}
 .top-article{display: flex; flex-direction: column;}
@@ -1885,7 +1904,6 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
   margin-bottom: 4px;
 }
 
-
 .career-spin-wrap {
     display: inline-flex;
     align-items: center;
@@ -1894,10 +1912,17 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 }
 
 /* 경력연차 레이아웃 */
-#exp_yr_text, .tag-input {
+#exp_yr_text {
     display: flex;
     width: 100%;
-    padding: 0 10px;
+    padding: 0px 10px;
+    justify-content: flex-start;
+}
+
+.tag-input {
+    display: flex;
+    width: 100%;
+    padding: 0px 5px;
     justify-content: flex-start;
 }
 
@@ -2187,6 +2212,11 @@ section.search-area .search-btn-area .btn-search {
   border-right: 1px solid #C3C8D2;
 }
 
+.modal-wrap .tab-area .tab-btn:hover {
+    background: #D8DDE6;
+    color: #4A4F57;
+}
+
 .modal-wrap .tab-area .tab-btn:last-child {
   border-right: none;
 }
@@ -2195,6 +2225,10 @@ section.search-area .search-btn-area .btn-search {
   background: #212E41;
   color: #FFFFFF;
   font-weight: 700;
+}
+
+.modal-wrap .tab-area .tab-btn.active:hover {
+    background: #2A3A52;
 }
 
 /* Common popup sub-title size */
@@ -2507,9 +2541,9 @@ section.search-area .search-btn-area .btn-search {
 
 /* HR010 수정/상세 팝업은 insert와 분리해 높이를 조금 더 확보 */
 #view-user-area:not(.insert) .modal-container-detail.main-human-modal {
-  width: 82%;
-  max-width: 1320px;
-  max-height: 92vh;
+  width: 87%;
+  max-width: 1440px;
+  max-height: 93vh;
   overflow: hidden;
 }
 
@@ -2555,7 +2589,7 @@ section.search-area .search-btn-area .btn-search {
 }
 
 .btn-area button, .btn-area .btn {
-  font-size: 14px;
+  /*font-size: 14px;*/
   font-weight: 700;
 }
 
