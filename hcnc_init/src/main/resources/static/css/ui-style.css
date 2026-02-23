@@ -75,7 +75,10 @@
  }
  .modal-btn .btn:hover,
  .btn-area button:hover,
- .btn-area .btn:hover{background:#eef3fb;}
+ .btn-area .btn:hover,
+ .modal-btn #btn-excel:hover {
+    background-color:#eef3fb;
+ }
  .btn-area button:disabled,
  .btn-area .btn:disabled{opacity:0.5; cursor:not-allowed;}
  .btn-area .btn.bg-bk{background:#000; color:#fff; border-color:#000;}
@@ -307,8 +310,26 @@ input, select, textarea {
     color:#333333;
     background:#fff;
 }
-input[type="text"]:read-only ,
-:disabled {background: none; font-size: 16px; border: none;}
+
+input::placeholder, select::placeholder, textarea::placeholder {
+    color:#333333;
+    opacity: 1;
+}
+
+.main-human-modal input:is(:read-only, :disabled),
+.main-human-modal select:disabled,
+#TABLE_HR011_A textarea:is(:read-only, :disabled) {
+    background: none;
+    border: none;
+}
+
+.cell-info input:is(:read-only, :disabled),
+.cell-info select:disabled,
+.cell-info textarea:is(:read-only, :disabled) {
+    background: #F1F4F9;
+    border: 1px solid #E5EAF0;
+    cursor: not-allowed;
+}
 
 /* select , textarea */
 select {min-width:242px; background: url(../images/common/ico-arrow-down.png) calc(100% - 10px) center no-repeat; background-size:14px; border:1px solid #D9D9D9; border-radius:4px;}

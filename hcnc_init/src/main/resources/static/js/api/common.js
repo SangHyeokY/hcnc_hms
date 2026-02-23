@@ -1274,6 +1274,9 @@ function showAlert({
     cancelText = '취소',
     cancelButtonColor = '#212E41'
 } = {}) {
+    if (document.activeElement instanceof HTMLElement) {
+        document.activeElement.blur();
+    }
     return Swal.fire({
         icon,
         title,

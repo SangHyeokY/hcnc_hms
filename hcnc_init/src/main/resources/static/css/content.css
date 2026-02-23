@@ -1170,7 +1170,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
   border-radius:8px;
   color:#000000 ;
   font-weight: 700;
-  font-size: 18px;
+  font-size: 16px;
   border: 1px solid #C5CCD5;
 }
 /* 사용자관리 수정 모달: 비고 입력칸 포함 모든 입력영역이 잘리지 않도록 폭 고정 */
@@ -1906,7 +1906,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
     padding: 0 6px !important;
     height: 34px;
     line-height: 34px;
-    border: 1px solid #dee2e7 !important;
+    border: 1px solid #DEE2E7 !important;
     border-right: 0 !important;
     border-radius: 4px 0 0 4px !important;
     background: #fff !important;
