@@ -1301,14 +1301,25 @@ function setModalMode(mode) {
     $modal.find("#select_dev_typ")
         .toggleClass("selectedDevTyp", isInsert) // 등록만 셀렉트 추가
         .prop("disabled", !isInsert); // 등록이 아니면 모두 disabled
-
-
     // ================================
     // career-exp 전용 제어
     // ================================
     $(".career-spin-wrap").toggle(!isView); // 조회가 아니면 모두 hide
     $(".career-exp-text").toggle(isView);
+    // ================================
+    // select_kosa_grd_cd 전용 제어
+    // ================================
+    var $select = $modal.find("#select_kosa_grd_cd");
+    var $text = $modal.find("#kosa_grd_cd_text");
 
+    if (isView) {
+        var selectedText = $select.find("option:selected").text();
+        $text.text(selectedText).show();   // 텍스트 표시
+        $select.hide();                    // select 숨김
+    } else {
+        $text.hide();
+        $select.show();
+    }
     // ================================
     // 등록 전용 처리
     // ================================
@@ -1637,15 +1648,15 @@ function validateUserForm() {
     }
 
     // 주요고객사
-    if (!mainCust || mainCust == "") {
-        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
-            icon: 'warning',
-            title: '경고',
-            html: `<strong>주요고객사</strong>를 선택해주세요.`
-        });
-        $("#select_main_cust_cd").focus();
-        return false;
-    }
+//    if (!mainCust || mainCust == "") {
+//        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+//            icon: 'warning',
+//            title: '경고',
+//            html: `<strong>주요고객사</strong>를 선택해주세요.`
+//        });
+//        $("#select_main_cust_cd").focus();
+//        return false;
+//    }
 
     return true;
 }
@@ -1925,7 +1936,7 @@ function btnEditView(alertPrefix = "") {
             text:
                 prefix +
                 (rows.length === 0
-                    ? '대상을 선택하세요.'
+                    ? '대상을 목록에서 선택하세요.'
                     : '한 명만 선택해주세요.')
         });
         return null;

@@ -105,6 +105,8 @@ function buildHr012TableA() {
         pagination: false,
         placeholder: "데이터 없음",
         height: "100%",
+        selectable: false,     // 행 선택 비활성화
+        selectableRange: false, // v5 이상이면 안전하게 추가
         columns: [
             { title: "코드", field: "cd", visible: false },
             { title: "구분", field: "cd_nm", hozAlign: "left", width: 180, minWidth: 160 },

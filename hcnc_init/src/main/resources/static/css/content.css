@@ -405,7 +405,7 @@ option{background:#fff; color:#333;}
   HR014
 ================================================================================*/
 button.btn.btn-add-skill {
-    background-color: #1D232D;
+    background-color: #212E41;
     color: #fff;
     border-radius: 8px;
     border: none;
@@ -510,6 +510,9 @@ button.btn.btn-add-skill:hover {
 .risk-list .risk-item.active {
   background: #eaf2ff;
   font-weight: 500;
+}
+.risk-detail, .risk-list-top {
+  margin: 4px;
 }
 .risk-detail textarea {
   width: 100%;
@@ -1116,10 +1119,11 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .modal-wrap .header h4 span {font-size: 14px;}
 .modal-container.main-lang-picker-container .btn-area button{width:40px; height:40px;}
 .modal-container.main-lang-picker-container .btn-area button img{width:100%;}
+/*
 .modal-wrap .header .modal-close {background: #d7dde8; border-radius: 50%; width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; font-size: 16px; color: #2f3a4a;}
 .modal-wrap .header .modal-close:before {content: "×"; line-height: 1;}
+*/
 .modal-content .title-area{padding-bottom:8px;}
-
 .modal-content {display:flex; width:100%; height: 690px; gap:20px; padding:15px 20px; overflow-Y: auto;}
 .modal-content.main-lang-picker-content{flex-direction:column; height:auto;}
 .modal-content.main-lang-picker-content .tabulator .tabulator-header,
@@ -1152,8 +1156,20 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .modal-btn ul li:last-child {margin-right: 0;}
 .modal-btn .btn {padding: 8px 20px; border-radius: 8px; background-color: #fff; border: 1px solid #E50019; color: #E50019; font-weight: 500;} /*font-size: 14px;*/
 /* .modal-btn .btn.btn-save {background: #5A8DFF; border-color: #5A8DFF; color: #fff;} */
-.modal-btn #btn-user-save {background: #E50019; border-color: #E50019; color: #fff;}
-.modal-btn #btn-user-save:hover {background: #C40016; border-color: #C40016;}
+.modal-btn #btn-user-save,
+.modal-btn #btn-main-save,
+.modal-btn #btn-detail-save,
+.modal-btn #btn_main_lang_picker_apply,
+.modal-btn #btn_hr012_skill_picker_apply {
+    background: #E50019; border-color: #E50019; color: #fff;
+}
+.modal-btn #btn-user-save:hover,
+.modal-btn #btn-main-save:hover,
+.modal-btn #btn-detail-save:hover,
+.modal-btn #btn_main_lang_picker_apply:hover,
+.modal-btn #btn_hr012_skill_picker_apply:hover {
+    background: #C40016; border-color: #C40016;
+}
 .modal-wrap #view-user-area .modal-btn ul {
   flex-direction: row-reverse;
 }
@@ -1209,8 +1225,8 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
     overflow: visible;
 }
 
-.modal-container-detail .close-btn{background:none; border:none; }
-.modal-container-detail .close-btn img{width:16px; }
+.modal-wrap .close-btn{background:none; border:none; }
+.modal-wrap .close-btn img{width:16px; }
 
 .modal-human-area {flex:1;}
 .modal-human-area .pic-area{width: 100%; cursor:point;}
@@ -1381,7 +1397,9 @@ margin: 0 auto;*/
   color: #1D232D;
   white-space: nowrap;
 }
+
 .hr012-toolbar-01 button.btn.btn-add-skill {border: 1px solid #E50019; color: #E50019;  background: #fff;  border-radius: 8px;}
+.hr012-toolbar-01 button.btn.btn-add-skill:hover {background: #ED242C; border-color: #ED242C; color: #ffffff;}
 
 .tab2-content #TABLE_HR012_A.is-readonly,
 .tab2-content #TABLE_HR012_B.is-readonly,
@@ -1549,11 +1567,11 @@ margin: 0 auto;*/
 #TABLE_HR012_SKILL_PICKER .tabulator-tableHolder {
     overflow-x: auto !important;
 }
-#TABLE_HR012_SKILL_PICKER .tabulator-row .tabulator-cell {
+/*#TABLE_HR012_SKILL_PICKER .tabulator-row .tabulator-cell {
     padding-top: 8px !important;
     padding-bottom: 8px !important;
     vertical-align: top;
-}
+}*/
 #TABLE_HR012_SKILL_PICKER .hr012-skill-chip-wrap {
     flex-wrap: wrap;
     gap: 6px;
@@ -1566,11 +1584,12 @@ margin: 0 auto;*/
     border-radius: 999px;
     background: #fff;
     color: #324255;
-    font-size: 12px;
-    font-weight: 500;
+    font-size: 13px;
+    font-weight: 600;
     line-height: 1;
-    padding: 6px 10px;
+    padding: 4px 8px;
     cursor: pointer;
+    height: 32px;
 }
 #TABLE_HR012_SKILL_PICKER .hr012-skill-chip:hover {
     border-color: #84aaf0;
@@ -2080,11 +2099,13 @@ section.search-area .search-info #searchType {
     border-radius: 6px;
 }
 
+/*
 section.search-area .search-info #insertNm:focus,
 section.search-area .search-info #searchType:focus {
     outline: none;
     border: 1px solid #D9D9D9;
 }
+*/
 
 section.search-area .search-btn-area .btn-search {
   width: 107px;
@@ -2212,11 +2233,6 @@ section.search-area .search-btn-area .btn-search {
   border-right: 1px solid #C3C8D2;
 }
 
-.modal-wrap .tab-area .tab-btn:hover {
-    background: #D8DDE6;
-    color: #4A4F57;
-}
-
 .modal-wrap .tab-area .tab-btn:last-child {
   border-right: none;
 }
@@ -2224,11 +2240,21 @@ section.search-area .search-btn-area .btn-search {
 .modal-wrap .tab-area .tab-btn.active {
   background: #212E41;
   color: #FFFFFF;
-  font-weight: 700;
+  font-weight: 600;
 }
 
-.modal-wrap .tab-area .tab-btn.active:hover {
+.modal-wrap .tab-area .tab-btn:hover,
+.contents-wrap:has(#TABLE_HR010_A) .hr010-user-type-tab:hover,
+.contents-wrap:has(#TABLE_HR020_A) .hr020-user-type-tab:hover {
+    background: #D8DDE6;
+    color: #4A4F57;
+}
+
+.modal-wrap .tab-area .tab-btn.active:hover,
+.contents-wrap:has(#TABLE_HR010_A) .hr010-user-type-tab.active:hover,
+.contents-wrap:has(#TABLE_HR020_A) .hr020-user-type-tab.active:hover {
     background: #2A3A52;
+    color: #FFFFFF;
 }
 
 /* Common popup sub-title size */
@@ -2278,8 +2304,8 @@ section.search-area .search-btn-area .btn-search {
 
 .contents-wrap:has(#TABLE_HR010_A) .hr010-user-type-tab.active,
 .contents-wrap:has(#TABLE_HR020_A) .hr020-user-type-tab.active {
-  background: #353D47;
-  border-color: #353D47;
+  background: #212E41;
+  border-color: #212E41;
   color: #FFFFFF;
   font-weight: 600;
 }
@@ -2638,4 +2664,11 @@ section.search-area .search-btn-area .btn-search {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+}
+#kosa_grd_cd_text {
+  font-weight: 700;
+  font-size: 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }

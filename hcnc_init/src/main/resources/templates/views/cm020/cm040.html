@@ -74,12 +74,18 @@
             <!-- 코드그룹 모달 -->
             <div class="modal-wrap" id="write-main-area" style="display: none">
                 <div class="modal-container">
+
                     <div class="header">
                         <h4>코드그룹 <span id="main-type">등록</span></h4>
-                        <span class="modal-close" onclick="closeMainWriteModal()"></span>
+                        <div class="btn-area">
+                            <button class="close-btn" onclick="closeMainWriteModal()">
+                                <img src="./icons/Icon-close.png" alt="" />
+                            </button>
+                        </div>
                     </div>
+
                     <div class="modal-content">
-                        <article>
+                        <article class="wp100">
                             <div class="div-table">
                                 <ul>
                                     <li class="table-col fl-ac">
@@ -126,7 +132,7 @@
                     <div class="modal-btn">
                         <ul>
                             <li><button class="btn btn-close" onclick="closeMainWriteModal()">닫기</button></li>
-                            <li><button class="btn btn-save btn-main-save">저장</button></li>
+                            <li><button class="btn btn-save" id="btn-main-save">저장</button></li>
                         </ul>
                     </div>
                 </div>
@@ -135,12 +141,18 @@
             <!-- 상세코드 모달 -->
             <div class="modal-wrap" id="write-detail-area" style="display: none">
                 <div class="modal-container">
+
                     <div class="header">
                         <h4>상세코드 <span id="detail-type">등록</span></h4>
-                        <span class="modal-close" onclick="closeDetailWriteModal()"></span>
+                        <div class="btn-area">
+                            <button class="close-btn" onclick="closeDetailWriteModal()">
+                                <img src="./icons/Icon-close.png" alt="" />
+                            </button>
+                        </div>
                     </div>
+
                     <div class="modal-content">
-                        <article>
+                        <article class="wp100">
                             <div class="div-table">
                                 <ul>
                                     <li class="table-col fl-ac">
@@ -230,7 +242,7 @@
                     <div class="modal-btn">
                         <ul>
                             <li><button class="btn btn-close" onclick="closeDetailWriteModal()">닫기</button></li>
-                            <li><button class="btn btn-save btn-detail-save">저장</button></li>
+                            <li><button class="btn btn-save" id="btn-detail-save">저장</button></li>
                         </ul>
                     </div>
                 </div>

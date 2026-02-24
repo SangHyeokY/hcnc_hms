@@ -88,13 +88,13 @@ $(document).ready(function () {
     $(".btn-main-add").on("click", () => openMainWriteModal("insert"));
     $(".btn-main-edit").on("click", () => openMainWriteModal("update"));
     $(".btn-main-del").on("click", deleteMainRows);
-    $(".btn-main-save").on("click", upsertMainBtn);
+    $("#btn-main-save").on("click", upsertMainBtn);
 
     /* DETAIL 버튼 */
     $(".btn-detail-add").on("click", () => openDetailWriteModal("insert"));
     $(".btn-detail-edit").on("click", () => openDetailWriteModal("update"));
     $(".btn-detail-del").on("click", deleteDetailRows);
-    $(".btn-detail-save").on("click", upsertDetailBtn);
+    $("#btn-detail-save").on("click", upsertDetailBtn);
 
     /* DETAIL 정렬 저장 */
     $(".btn-detail-sort-save").on("click", saveDetailSort);
