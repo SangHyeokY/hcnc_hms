@@ -143,6 +143,25 @@ const Layout = {
 // 로드할때 init하기
 document.addEventListener("DOMContentLoaded", () => {
   Layout.init();
+
+  const logoutBtn = document.querySelector(".logout-btn");
+      if(logoutBtn){
+          logoutBtn.addEventListener("click", (e) => {
+              showAlert({
+                  icon: 'info',
+                  title: '알림',
+                  html: `<strong>로그아웃</strong>하시겠습니까?`,
+                  showCancelButton: true,       // 취소 버튼 추가
+                  confirmButtonText: '확인',
+                  cancelButtonText: '취소',
+              }).then((result) => {
+                  if(result.isConfirmed){
+                      // 확인 클릭 시 로그아웃
+                      location.href = '/logout';
+                  }
+              });
+          });
+      }
 });
 
 // 전체 뿌리기

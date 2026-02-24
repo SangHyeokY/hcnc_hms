@@ -35,6 +35,10 @@ var kosaGrdOptions = [];
 var mainFldMap = [];
 var mainFldOptions = [];
 
+// 주요고객사 공통코드
+var mainCustMap = [];
+var mainCustOptions = [];
+
 // 저장된 탭 alert 표시하기 위한 리스트
 var savedTabs = [];
 
@@ -144,6 +148,15 @@ $(document).ready(async function () {
         }).get();
         initSelectDefault("select_main_fld_cd", "주요분야");
         mainFldMap = getMainFldMap();
+    });
+
+    // 주요고객사 셀렉트 공통콤보
+    setComCode("select_main_cust_cd", "MAIN_CUST_CD", "", "cd", "cd_nm", function () {
+        mainCustOptions = $("#select_main_cust_cd option").map(function () {
+            return { cd: this.value, cd_nm: $(this).text() };
+        }).get();
+        initSelectDefault("select_main_cust_cd", "주요고객사");
+        mainCustMap = getMainCustMap();
     });
 
     // 테이블 로딩이 끝날 때 까지 로딩바 표시
@@ -489,7 +502,27 @@ function getMainFldMap() {
         });
         return map;
     }
-    $("#select_kosa_grd_cd option").each(function () {
+    $("#select_main_fld_cd option").each(function () {
+        var val = this.value;
+        if (val) {
+            map[val] = $(this).text();
+        }
+    });
+    return map;
+}
+
+// 역할 코드 -> 라벨 맵 생성 (주요고객사)
+function getMainCustMap() {
+    var map = {};
+    if (mainCustOptions && mainCustOptions.length) {
+        mainCustOptions.forEach(function (item) {
+            if (item.cd) {
+                map[item.cd] = item.cd_nm || item.cd;
+            }
+        });
+        return map;
+    }
+    $("#select_main_cust_cd option").each(function () {
         var val = this.value;
         if (val) {
             map[val] = $(this).text();
@@ -945,7 +978,7 @@ function upsertUserBtn() {
             crt_by: "",
             kosa_grd_cd: $("#select_kosa_grd_cd").val(),
             main_fld_cd: $("#select_main_fld_cd").val(),
-            main_cust_cd: $("#main_cust_cd").val()
+            main_cust_cd: $("#select_main_cust_cd").val()
         };
 
         const activeTab = $(".tab-btn.active").data("tab");
@@ -1167,8 +1200,6 @@ function fillUserForm(d) {
 
     $("#select_dev_typ").val(d.select_dev_typ || "");
 
-    $("#main_cust_cd").val(d.main_cust_cd || "");
-
     // 셀렉트 work_md
     if (d.work_md && workMdMap[d.work_md]) {
         $("#select_work_md").val(d.work_md);
@@ -1195,6 +1226,13 @@ function fillUserForm(d) {
         $("#select_main_fld_cd").val(d.main_fld_cd);
     } else {
         $("#select_main_fld_cd").val("");
+    }
+
+    // 셀렉트 main_cust_cd
+    if (d.main_cust_cd && mainCustMap[d.main_cust_cd]) {
+        $("#select_main_cust_cd").val(d.main_cust_cd);
+    } else {
+        $("#select_main_cust_cd").val("");
     }
 
     $("#select_dev_typ").val(""); // 기본값 초기화
@@ -1251,7 +1289,7 @@ function clearUserForm() {
     $("#aboutGrade").hide();
     $("#select_kosa_grd_cd").val("");
     $("#select_main_fld_cd").val("");
-    $("#main_cust_cd").text("");
+    $("#select_main_cust_cd").val("");
 }
 
 // ============================================================================== //
@@ -1439,7 +1477,7 @@ function validateUserForm() {
     const expYrMonth = ($("#exp_yr_month").val() || "").trim();  // 경력연차(개월)
     const mainFld = ($("#select_main_fld_cd").val() || "").trim() // 주요분야 (01: 공공, 02: 공공/금융, 03: 제조, 04: 공공/제조)
     const ctrtTyp = ($("#select_ctrt_typ").val() || "").trim();  // 계약 형태 (01: 개인, 02: 법인)
-    const mainCust = ($("#main_cust_cd").val() || "").trim();     // 주요고객사
+    const mainCust = ($("#select_main_cust_cd").val() || "").trim();     // 주요고객사
 
     // 최대 입력 가능 숫자
     const MAX_AMT = 999999999;
@@ -1648,15 +1686,15 @@ function validateUserForm() {
     }
 
     // 주요고객사
-//    if (!mainCust || mainCust == "") {
-//        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
-//            icon: 'warning',
-//            title: '경고',
-//            html: `<strong>주요고객사</strong>를 선택해주세요.`
-//        });
-//        $("#select_main_cust_cd").focus();
-//        return false;
-//    }
+    if (!mainCust || mainCust == "") {
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'warning',
+            title: '경고',
+            html: `<strong>주요고객사</strong>를 선택해주세요.`
+        });
+        $("#select_main_cust_cd").focus();
+        return false;
+    }
 
     return true;
 }
