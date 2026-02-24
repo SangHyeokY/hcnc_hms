@@ -28,26 +28,23 @@
     <div class="header-btn-wrap">
 
       <div class="mem-area">
-        <div>
           <span class="ico-lock"></span>
           <span th:text="${session.LOGIN_USER_ID} + ' 님'"></span>
-        </div>
-        <button onclick="location.href='/logout'" type="button" class="logout-btn">
-          <span class="">로그아웃</span>
-        </button>
+          <button onclick="location.href='/logout'" type="button" class="logout-btn">
+            <span class="">로그아웃</span>
+          </button>
       </div>
-
-      <div class="profile-area fl-fs fl-ac">
-        <div class="profile fl-fs fl-ac">
-          <div class="profile-img">
-            <img src="/images/common/img-profile.png" alt="프로필사진" />
-          </div>
-          <div class="h3">(주)에이치씨엔씨</div>
-        </div>
-        <!-- <div class="alarm">
-          <button class="bell-btn"><span class="ico-bell"></span></button>
-        </div> -->
-      </div>
+<!--      <div class="profile-area fl-fs fl-ac">-->
+<!--        <div class="profile fl-fs fl-ac">-->
+<!--          <div class="profile-img">-->
+<!--            <img src="/images/common/img-profile.png" alt="프로필사진" />-->
+<!--          </div>-->
+<!--          <div class="h3">(주)에이치씨엔씨</div>-->
+<!--        </div>-->
+<!--        &lt;!&ndash; <div class="alarm">-->
+<!--          <button class="bell-btn"><span class="ico-bell"></span></button>-->
+<!--        </div> &ndash;&gt;-->
+<!--      </div>-->
     </div>
   </div>
 </header>

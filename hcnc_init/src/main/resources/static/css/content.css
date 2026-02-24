@@ -1000,11 +1000,11 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
   overflow: hidden;
   height:367px !important;
 }
-#TABLE_MAIN_LANG_PICKER .tabulator-row .tabulator-cell {
+/*#TABLE_MAIN_LANG_PICKER .tabulator-row .tabulator-cell {
   padding-top: 8px !important;
   padding-bottom: 8px !important;
   vertical-align: top;
-}
+}*/
 #TABLE_MAIN_LANG_PICKER .main-lang-skill-chip-wrap {
   flex-wrap: wrap;
   gap: 6px;
