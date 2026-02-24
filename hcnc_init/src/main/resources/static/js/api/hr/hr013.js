@@ -257,7 +257,7 @@ function buildHr013Table() {
                       <div class="prj-cell">
                         ${showBtn && !isNew ? `<div><button type="button" class="btn-prj-eval">평가</button></div>` : ""}
                         <span class="prj-text">${v}</span>
-                        <!-- ※ 20260220 임시 주석 ${showBtn && currentMode !== "view" ? `<div><button type="button" class="btn-prj-edit">등록</button></div>` : ""} -->
+                        ${showBtn && currentMode !== "view" ? `<div><button type="button" class="btn-prj-edit">등록</button></div>` : ""}
                       </div>
                     `;
                 },
@@ -267,10 +267,10 @@ function buildHr013Table() {
 
                     if (currentMode === "view")
                         return false;
-                    // ※ 20260220 임시 주석 - 당사여부 체크된 경우 → 수정 불가
-                    // if(rowData.inprj_yn === 'Y'){   // 또는 'Y'
-                    //     return false;
-                    // }
+                    // 당사여부 체크된 경우 → 수정 불가
+                    if(rowData.inprj_yn === 'Y'){   // 또는 'Y'
+                        return false;
+                    }
 
                     return true;
                 },
