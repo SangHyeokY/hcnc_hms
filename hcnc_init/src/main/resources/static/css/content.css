@@ -1439,7 +1439,8 @@ margin: 0 auto;*/
 }
 #TABLE_HR012_A.is-readonly .tabulator-cell[data-field="skl_id_lst"] .tag-item::after,
 #TABLE_HR012_A.is-readonly .tabulator-cell[tabulator-field="skl_id_lst"] .tag-item::after {
-    content: ", ";
+    content: ",";
+    padding-right: 6px;
 }
 #TABLE_HR012_A.is-readonly .tabulator-cell[data-field="skl_id_lst"] .tag-item:last-child::after,
 #TABLE_HR012_A.is-readonly .tabulator-cell[tabulator-field="skl_id_lst"] .tag-item:last-child::after {
@@ -1451,6 +1452,7 @@ margin: 0 auto;*/
     border-radius: 0 !important;
     padding: 0 !important;
     height: auto !important;
+    gap: 0;
 }
 /* 상세보기 모달에서는 is-readonly 클래스 유무와 관계없이 텍스트 전용 표시 */
 #view-user-area.is-view-mode #TABLE_HR012_A .tabulator-cell[data-field="skl_id_lst"] .tag-item,
@@ -1460,7 +1462,7 @@ margin: 0 auto;*/
     border-radius: 0 !important;
     padding: 0 !important;
     height: auto !important;
-    font-size: 14px !important;
+    font-size: 16px !important;
     font-weight: 400 !important;
     line-height: 1.5 !important;
     border:none;
@@ -2213,7 +2215,7 @@ section.search-area .search-btn-area .btn-search {
   height: 46px !important;
   min-height: 46px !important;
   line-height: 46px !important;
-  font-size: 15px !important;
+  font-size: 16px !important;
   padding-top: 0 !important;
   padding-bottom: 0 !important;
   box-sizing: border-box;
