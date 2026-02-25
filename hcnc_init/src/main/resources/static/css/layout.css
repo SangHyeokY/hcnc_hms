@@ -6,19 +6,20 @@
 .main-container-wrap {width:100%; min-width: 1200px; position: relative; background-color:#EFF1F6; min-width:1200px; min-height:calc(100vh - 90px)}
 .main-container-wrap header .header {width:100%; max-width:1300px; margin:0 auto; height:50px;}
 
-.container-wrap {display: grid; min-height:calc(100vh - 80px); grid-template-columns: 248px 1fr;  grid-template-rows: 100vh; background:#EDEFF5; position: relative;}
+.container-wrap {display: grid; min-height:calc(100vh - 80px); grid-template-columns: 248px 1fr;  grid-template-rows: 100vh; background:#EDEFF5; position: relative; transition: grid-template-columns 0.28s cubic-bezier(0.22,1,0.36,1);}
 .container-wrap .lnb-wrap {height: calc(100vh - 80px); background-color:#fff; position: relative; box-shadow: 0px 3px 6px 0px rgba(0,0,0,0.13);}
 .container-wrap .container .contents-wrap {padding:20px 20px; height: 100vh; display:grid; gap:20px; grid-auto-rows: 36px auto;}
 .container-wrap .container .contents-wrap:has(.search-area){ grid-auto-rows: 36px 70px auto;}
-.container-wrap > header {min-width: 0; overflow: hidden;}
+.container-wrap > header {min-width: 0; overflow: hidden; contain: layout paint; transition: width 0.28s ease, padding 0.28s ease, box-shadow 0.28s ease;}
+.container-wrap > header > .lnb {width: 218px; min-width: 218px;} /* 248px(사이드바 폭) - 30px(header 좌우 패딩) */
 .container-wrap.is-collapsed {grid-template-columns: 0 1fr;}
 .container-wrap.is-collapsed > header {width: 0; padding: 0; box-shadow: none;}
 
 /* 좌측 lnb 토글 버튼 */
 .lnb-toggle-handle {
-  position: absolute;
   top: 17%;
-  left: 248px;
+  position: absolute; 
+  left: 0; /* 좌표 기준은 항상 0으로 두고 transform으로 이동 */
   width: 16px;
   height: 75px;
   display: flex;
@@ -32,7 +33,9 @@
   font-size: 12px;
   font-weight: 700;
   cursor: pointer;
-  transform: translateY(-50%);
+  transform: translate(248px, -50%);
+  transition: transform 0.28s cubic-bezier(0.22,1,0.36,1), background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  will-change: transform;
   z-index: 250;
 }
 
@@ -41,9 +44,9 @@
   width: 10px;
   height: 10px;
   background: url("../images/common/ico-arrow-down.png") no-repeat center;
-  background-size: contain;
-  filter: brightness(0) invert(1);
-  transition: transform 0.2s ease;
+  background-size: contain; 
+  filter: brightness(0) invert(1); 
+  transition: transform 0.28s ease;
   transform: rotate(90deg);
   font-size: 0;
 }
@@ -53,7 +56,7 @@
 }
 
 .container-wrap.is-collapsed .lnb-toggle-handle {
-  left: 0;
+  transform: translate(0, -50%); /* 접힘 상태에서는 X 이동값을 0으로 만들어 좌측으로 부드럽게 이동 */
 }
 .contents-wrap .page-contents {height: calc(100vh - 241px); position: relative; overflow: hidden;}
 .contents-wrap .page-contents .section-wrap {width:100%; height: calc(100% - 85px);}
@@ -103,13 +106,15 @@ footer {width:100%; height:30px; line-height: 30px; padding:0 20px; display: fle
 
 .left-menu {width:100%; padding: 20px 0;}
 .left-menu .nav {height:100%;overflow:auto;}
+.app-sidebar.left-menu .app-nav.nav {opacity: 1; transform: translateX(0); transition: opacity 0.24s ease, transform 0.28s cubic-bezier(0.22,1,0.36,1);}
+.container-wrap.is-collapsed .app-sidebar.left-menu .app-nav.nav {opacity: 0; transform: translateX(-10px); pointer-events: none;}
 .left-menu .nav::-webkit-scrollbar {width:7px; height: 10px; border-radius: 10px;}
 .left-menu .nav::-webkit-scrollbar-track {background-color: #f1f1f1;}
 .left-menu .nav::-webkit-scrollbar-thumb {background-color: #b3b6bf; border-radius: 10px;}
 .left-menu .nav .lnb-menu ul .on {display: block;}
 .left-menu .nav .lnb-menu .dep1.no-bg a {background:none;}
 .left-menu .nav .lnb-menu .dep1 > li{position:relative; margin-bottom: 15px;}
-.left-menu .nav .lnb-menu .dep1 > li > a {display: flex; align-items: center; padding: 12px 28px 12px 36px; font-weight: 600; color:#202224; } /* font-size: 14px; */
+.left-menu .nav .lnb-menu .dep1 > li > a {display: flex; align-items: center; padding: 12px 28px 12px 36px; font-weight: 600; color:#202224; transition: background-color 0.24s ease, color 0.24s ease; } /* font-size: 14px; */
 .left-menu .nav .lnb-menu .dep1 > li > a:hover {background-color: #EDEFF5 !important; border-radius: 8px;}
 .left-menu .nav .lnb-menu .dep1 > li:nth-child(1) > a{background: url('../images/common/lnb-one.png') 10px center no-repeat; background-size: 18px;  }
 .left-menu .nav .lnb-menu .dep1 > li:nth-child(2) > a{background: url('../images/common/lnb-two.png') 10px center no-repeat; background-size: 20px; }
@@ -125,8 +130,17 @@ footer {width:100%; height:30px; line-height: 30px; padding:0 20px; display: fle
 .left-menu .nav .lnb-menu .dep1 > li.on:nth-child(5) > a{background: url('../images/common/lnb-five-w.png') 10px center no-repeat; background-size: 22px; }
 .left-menu .nav .lnb-menu .dep1 > li.has-children > a:before {content: ""; display: inline-block; background: url('../images/common/Ico-arrow-down.png') no-repeat center; background-size:contain; position: absolute; right: 18px; z-index: 10; width: 10px; height: 10px;}
 .left-menu .nav .lnb-menu .dep1 > li.on > a:before {background: url('../images/common/Ico-arrow-up-w.png') no-repeat center; background-size:contain; }
+.left-menu .nav .lnb-menu .dep2,
+.left-menu .nav .lnb-menu .dep3,
+.left-menu .nav .lnb-menu .dep4 {
+  display: none; /* 기본은 닫힘 상태 */
+  max-height: 0; /* 닫힘 높이 */
+  opacity: 0; /* 닫힘 투명도 */
+  transform: translateY(-4px); /* 닫힘 시 살짝 위로 */
+  overflow: hidden; /* 닫힘 시 내용 클리핑 */
+  transition: max-height 0.24s ease, opacity 0.18s ease, transform 0.24s ease; /* 열고닫기 전환 */
+}
 .left-menu .nav .lnb-menu .dep2 {
-  display: none;
   padding: 0;
   background:#f5f5f5;
   border-radius: 8px;

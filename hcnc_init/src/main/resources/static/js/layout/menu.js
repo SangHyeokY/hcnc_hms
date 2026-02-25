@@ -25,30 +25,145 @@ const Menu = {
     }
     navWrap.innerHTML = this.createMenu(menuData);
     this.toggleMenu();
+    this.restoreExpandedMenus();
     this.activeMenu();
+    this.saveExpandedMenus();
   },
 
-  createMenu(menuDataList, depth = 1) {
+  getExpandedMenuStorageKey() {
+    const basePath = CONTEXT_PATH || "/";
+    return `hcnc:lnb:expanded:${basePath}`;
+  },
+
+  getMenuItemKey(menuLi) {
+    if (!menuLi) return "";
+    return menuLi.dataset.menuKey || "";
+  },
+
+  saveExpandedMenus() {
+    const expandedKeys = Array.from(
+      document.querySelectorAll(".lnb-menu li.has-children.on")
+    )
+      .map((item) => this.getMenuItemKey(item))
+      .filter(Boolean);
+
+    try {
+      sessionStorage.setItem(
+        this.getExpandedMenuStorageKey(),
+        JSON.stringify(expandedKeys)
+      );
+    } catch (err) {
+      console.warn("메뉴 열린 상태 저장 실패", err);
+    }
+  },
+
+  restoreExpandedMenus() {
+    let expandedKeys = [];
+    try {
+      const saved = sessionStorage.getItem(this.getExpandedMenuStorageKey());
+      expandedKeys = saved ? JSON.parse(saved) : [];
+    } catch (err) {
+      console.warn("메뉴 열린 상태 복원 실패", err);
+      expandedKeys = [];
+    }
+
+    if (!Array.isArray(expandedKeys) || expandedKeys.length === 0) return;
+    const expandedKeySet = new Set(expandedKeys.filter(Boolean));
+
+    document.querySelectorAll(".lnb-menu li.has-children").forEach((item) => {
+      const itemKey = this.getMenuItemKey(item);
+      if (!itemKey || !expandedKeySet.has(itemKey)) return;
+
+      item.classList.add("on");
+      const itemLink = item.querySelector(":scope > a");
+      if (itemLink) itemLink.classList.add("on");
+
+      const submenu = item.querySelector(":scope > ul");
+      if (submenu) this.showSubMenuInstant(submenu);
+    });
+  },
+
+  openSubMenu(submenu) {
+    if (!submenu) return;
+
+    submenu.style.display = "block";
+    submenu.style.overflow = "hidden";
+    submenu.style.maxHeight = "0px";
+    submenu.style.opacity = "0";
+    submenu.style.transform = "translateY(-4px)";
+
+    // reflow를 강제해서 transition 시작점을 확정
+    void submenu.offsetHeight;
+
+    submenu.style.maxHeight = `${submenu.scrollHeight}px`;
+    submenu.style.opacity = "1";
+    submenu.style.transform = "translateY(0)";
+
+    const onEnd = (e) => {
+      if (e.propertyName !== "max-height") return;
+      submenu.removeEventListener("transitionend", onEnd);
+      // 열린 상태에서는 내부 콘텐츠 높이 변화가 자연스럽게 반영되도록 제한 해제
+      submenu.style.maxHeight = "none";
+    };
+    submenu.addEventListener("transitionend", onEnd);
+  },
+
+  closeSubMenu(submenu) {
+    if (!submenu) return;
+    if (window.getComputedStyle(submenu).display === "none") return;
+
+    // 열린 상태(maxHeight:none)인 경우 현재 높이를 px로 고정 후 닫기
+    submenu.style.maxHeight = `${submenu.scrollHeight}px`;
+    submenu.style.opacity = "1";
+    submenu.style.transform = "translateY(0)";
+    submenu.style.overflow = "hidden";
+
+    // reflow를 강제해서 transition 시작점을 확정
+    void submenu.offsetHeight;
+
+    submenu.style.maxHeight = "0px";
+    submenu.style.opacity = "0";
+    submenu.style.transform = "translateY(-4px)";
+
+    const onEnd = (e) => {
+      if (e.propertyName !== "max-height") return;
+      submenu.removeEventListener("transitionend", onEnd);
+      submenu.style.display = "none";
+    };
+    submenu.addEventListener("transitionend", onEnd);
+  },
+
+  showSubMenuInstant(submenu) {
+    if (!submenu) return;
+    submenu.style.display = "block";
+    submenu.style.maxHeight = "none";
+    submenu.style.opacity = "1";
+    submenu.style.transform = "translateY(0)";
+    submenu.style.overflow = "visible";
+  },
+
+  createMenu(menuDataList, depth = 1, parentKey = "") {
     let html = "";
-    menuDataList.forEach((menu) => {
+    menuDataList.forEach((menu, idx) => {
       if (menu.title === "시스템" && LOGIN_AUTH.value !== "01") return;
 
       if (menu.visible === false) return;
       const hasChildren =
         menu.children && menu.children.some((chi) => chi.visible !== false);
       const itemClass = hasChildren ? "has-children" : "no-children";
+      const menuKey = parentKey ? `${parentKey}.${idx}` : `${idx}`;
       const href = menu.path
         ? appendBasePath(menu.path)
         : "javascript:void(0);";
       html += `
-            <li class="${itemClass}" data-name="${menu.name}">
+            <li class="${itemClass}" data-menu-key="${menuKey}">
                 <a href="${href}">
                     <span class="menu-title">${menu.title}</span>
                 </a>
             `;
       if (hasChildren) {
         html += `<ul class="dep${depth + 1}">`;
-        html += this.createMenu(menu.children, depth + 1);
+        html += this.createMenu(menu.children, depth + 1, menuKey);
         html += `</ul>`;
       }
       html += `</li>`;
@@ -59,66 +174,41 @@ const Menu = {
     return html;
   },
 
+  toggleMenuItem(parentLi, submenu, shouldOpen, toggleLinkOn = false) {
+    parentLi.classList.toggle("on", shouldOpen);
+    if (shouldOpen) {
+      this.openSubMenu(submenu);
+    } else {
+      this.closeSubMenu(submenu);
+    }
+
+    if (toggleLinkOn) {
+      const link = parentLi.querySelector(":scope > a");
+      if (link) link.classList.toggle("on", shouldOpen);
+    }
+  },
+
+  bindSubmenuToggle(linkSelector, submenuSelector, toggleLinkOn = false) {
+    const links = document.querySelectorAll(linkSelector);
+    links.forEach((link) => {
+      link.addEventListener("click", (e) => {
+        const parentLi = e.currentTarget.parentElement;
+        if (!parentLi) return;
+        const submenu = parentLi.querySelector(submenuSelector);
+        if (!submenu) return;
+
+        e.preventDefault();
+        const shouldOpen = !parentLi.classList.contains("on");
+        this.toggleMenuItem(parentLi, submenu, shouldOpen, toggleLinkOn);
+        this.saveExpandedMenus();
+      });
+    });
+  },
+
   toggleMenu() {
-    const dep1Paths = document.querySelectorAll(".dep1 > li > a");
-    dep1Paths.forEach((path) => {
-      path.addEventListener("click", (e) => {
-        const parentLi = e.currentTarget.parentElement;
-        const dep2 = parentLi.querySelector(".dep2");
-        if (dep2) {
-          e.preventDefault();
-          document.querySelectorAll(".dep1 > li").forEach((li) => {
-            if (li !== parentLi) {
-              li.classList.remove("on");
-              const otherDep2 = li.querySelector(".dep2");
-              if (otherDep2) otherDep2.style.display = "none";
-            }
-          });
-          parentLi.classList.toggle("on");
-          dep2.style.display = parentLi.classList.contains("on")
-            ? "block"
-            : "none";
-        }
-      });
-    });
-
-    const dep2Paths = document.querySelectorAll(".dep2 > li > a");
-    dep2Paths.forEach((path) => {
-      path.addEventListener("click", (e) => {
-        const parentLi = e.currentTarget.parentElement;
-        const dep3 = parentLi.querySelector(".dep3");
-        if (dep3) {
-          e.preventDefault();
-          document.querySelectorAll(".dep2 > li").forEach((li) => {
-            if (li !== parentLi) {
-              li.classList.remove("on");
-              const otherDep3 = li.querySelector(".dep3");
-              if (otherDep3) otherDep3.style.display = "none";
-            }
-          });
-          parentLi.classList.toggle("on");
-          dep3.style.display = parentLi.classList.contains("on")
-            ? "block"
-            : "none";
-        }
-      });
-    });
-
-    const dep3Paths = document.querySelectorAll(".dep3 > li > a");
-    dep3Paths.forEach((path) => {
-      path.addEventListener("click", (e) => {
-        const parentLi = e.currentTarget.parentElement;
-        const dep4 = parentLi.querySelector(".dep4");
-        if (dep4) {
-          e.preventDefault();
-          parentLi.classList.toggle("on");
-          dep4.style.display = parentLi.classList.contains("on")
-            ? "block"
-            : "none";
-          e.currentTarget.classList.toggle("on");
-        }
-      });
-    });
+    this.bindSubmenuToggle(".dep1 > li > a", ":scope > .dep2");
+    this.bindSubmenuToggle(".dep2 > li > a", ":scope > .dep3");
+    this.bindSubmenuToggle(".dep3 > li > a", ":scope > .dep4", true);
   },
 
   activeMenu() {
@@ -144,6 +234,7 @@ const Menu = {
     this.activateMenuItem(activeLink);
     this.activateParentFromData(currentPath, allMenuLinks);
     this.openParentMenus(activeLink);
+    this.saveExpandedMenus();
   },
 
   findActiveLink(links, currentPath) {
@@ -216,7 +307,7 @@ const Menu = {
 
     while (parent && !parent.classList.contains("lnb-menu")) {
       if (parent.tagName === "UL" && !parent.classList.contains("dep1")) {
-        parent.style.display = "block";
+        this.showSubMenuInstant(parent);
 
         const parentLi = parent.closest("li");
         if (parentLi) {

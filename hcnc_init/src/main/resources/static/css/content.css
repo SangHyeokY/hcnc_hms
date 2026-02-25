@@ -2123,7 +2123,7 @@ section.search-area .search-btn-area .btn-search {
 .contents-wrap:has(#TABLE_USER) > section.search-area,
 .contents-wrap:has(#TABLE_COMMON_MAIN) > section.search-area {
   /*overflow-y: hidden !important;*/
-  min-height: 75px;
+  min-height: 76px;
 }
 
 .contents-wrap:has(#TABLE_HR010_A) > section.white-full {
