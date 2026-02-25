@@ -213,7 +213,7 @@ $(document).ready(async function () {
     });
 
     // 검색어 이벤트 (Enter 입력)
-    $("#searchConditionKeyword", "#searchKeyword").on("keyup", async function (event) {
+    $("#searchConditionKeyword, #searchKeyword").on("keyup", async function (event) {
         if (event.key === "Enter") {
             showLoading();
             await loadUserTableData();
@@ -642,7 +642,8 @@ function buildUserTable() {
         },
         columns: [
             {
-                title: "",
+                title: "선택",
+                hozAlign: "center",
                 field: "checkBox",
                 formatter: function (cell) {
                     var checked = cell.getRow().isSelected() ? " checked" : "";
@@ -867,11 +868,10 @@ async function loadUserTableData() {
     const conditionKeyword = $.trim($("#searchConditionKeyword").val()); // 새 '검색어' 입력값
     let tagKeyword = $.trim($("#searchKeyword").val()); // 기존 검색어(현재 Tag 검색) 입력값
 
-    if (tagKeyword) { // Tag 검색은 기존 서버 fulltext 규칙 유지
+    if (tagKeyword) { // Tag 검색: 다중 입력 시 OR 검색되도록 공백 토큰으로 전달
         tagKeyword = tagKeyword
             .split(/[\s,]+/)
             .filter(w => w)
-            .map(w => "+" + w)
             .join(" ");
     } else {
         tagKeyword = null;

@@ -141,7 +141,8 @@ function buildTables() {
         },
         columns: [
             {
-                title: "",
+                title: "선택",
+                hozAlign: "center",
                 field: "checkBox",
                 formatter: function (cell) {
                     var checked = cell.getRow().isSelected() ? " checked" : "";
@@ -157,13 +158,15 @@ function buildTables() {
                 headerSort: false,
                 download: false
             },
-            {   title: "코드그룹",
+            {
+                title: "코드그룹",
                 field: "grp_cd",
                 hozAlign: "center",
                 formatter: function (cell) {
-                     const val = cell.getValue();
-                     return (grpCdMap && grpCdMap[val]) ? grpCdMap[val] : val;
-                }, editor: false, editable: false},
+                    const val = cell.getValue();
+                    return (grpCdMap && grpCdMap[val]) ? grpCdMap[val] : val;
+                }, editor: false, editable: false
+            },
             { title: "코드", field: "cd", hozAlign: "center" },
             { title: "코드그룹명", field: "grp_nm" },
             { title: "사용여부", field: "use_yn", hozAlign: "center", width: 90 }
@@ -194,7 +197,7 @@ function buildTables() {
         // - 합계가 크면 가로 스크롤 노출
         layout: "fitData",
         placeholder: "데이터 없음",
-//        selectable: true,
+        //        selectable: true,
         selectable: 1,
         movableRows: true,
         columnDefaults: {
@@ -206,7 +209,8 @@ function buildTables() {
         },
         columns: [
             {
-                title: "",
+                title: "선택",
+                hozAlign: "center",
                 field: "checkBox",
                 formatter: function (cell) {
                     var checked = cell.getRow().isSelected() ? " checked" : "";
@@ -526,7 +530,7 @@ function resetDetailTableState() {
 
 // ===== MAIN(코드그룹) =====
 function loadMainTableData() {
-	if (!mainTable || typeof mainTable.setData !== "function") {
+    if (!mainTable || typeof mainTable.setData !== "function") {
         return;
     }
 
@@ -560,7 +564,7 @@ function loadMainTableData() {
     });
 }
 async function deleteMainRows() {
-	const selectedRows = mainTable.getSelectedRows();
+    const selectedRows = mainTable.getSelectedRows();
 
     if (selectedRows.length === 0) {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
@@ -647,7 +651,7 @@ async function deleteMainRows() {
     });
 }
 function upsertMainBtn() {
-	var grpCd = $.trim($("#write_main_grp_cd").val());
+    var grpCd = $.trim($("#write_main_grp_cd").val());
     var grpNm = $.trim($("#write_main_grp_nm").val());
     var useYn = $("#write_main_use_yn").val();
     var code = $.trim($("#write_main_cd").val());
@@ -663,14 +667,14 @@ function upsertMainBtn() {
     }
 
     if (!grpNm) {
-            showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
-                icon: 'warning',
-                title: '경고',
-                html: `<strong>코드그룹명</strong>을 입력해주세요.`
-            });
-            $("#write_main_grp_nm").focus();
-            return;
-        }
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'warning',
+            title: '경고',
+            html: `<strong>코드그룹명</strong>을 입력해주세요.`
+        });
+        $("#write_main_grp_nm").focus();
+        return;
+    }
 
     if (!code) {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
@@ -765,7 +769,7 @@ function openMainWriteModal(type) {
     }, MODAL_TIMINGS.showDelayMs);
 }
 function closeMainWriteModal() {
-	const modal = document.getElementById("write-main-area");
+    const modal = document.getElementById("write-main-area");
     modal.classList.remove("show");
     setTimeout(() => {
         modal.style.display = "none";
@@ -775,7 +779,7 @@ function closeMainWriteModal() {
 
 // ===== DETAIL(상세코드) =====
 function loadDetailTableData(grpCd) {
-	if (!detailTable || typeof detailTable.setData !== "function") {
+    if (!detailTable || typeof detailTable.setData !== "function") {
         return;
     }
 
@@ -787,7 +791,7 @@ function loadDetailTableData(grpCd) {
     // 그룹코드 비교/규칙 적용을 위해 소문자로 정규화한다.
     currentDetailGrpCd = String(grpCd).toLowerCase();
 
-     showLoading();
+    showLoading();
 
     $.ajax({
         url: API_ENDPOINTS.detail.list,
@@ -828,7 +832,7 @@ function loadDetailTableData(grpCd) {
     });
 }
 async function deleteDetailRows() {
-	const selectedRows = detailTable.getSelectedRows();
+    const selectedRows = detailTable.getSelectedRows();
 
     if (selectedRows.length === 0) {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
@@ -841,14 +845,14 @@ async function deleteDetailRows() {
 
     const firstRow = selectedRows[0].getData();
 
-     const firstResult = await showAlert({
+    const firstResult = await showAlert({
         icon: 'warning',
         title: '경고',
         html: `선택한&nbsp;<strong>${firstRow.cd} (${firstRow.cd_nm})</strong>&nbsp;상세코드를 삭제하시겠습니까?`,
         showCancelButton: true,
         confirmText: '삭제',
         cancelText: '취소'
-     });
+    });
 
     if (!firstResult.isConfirmed) return;
 
@@ -903,7 +907,7 @@ async function deleteDetailRows() {
 }
 
 function applyDetailSort(rows) {
-	if (!rows.length) return;
+    if (!rows.length) return;
 
     // 다건 정렬 저장 완료 타이밍 제어용 카운터
     let pending = rows.length;
@@ -937,7 +941,7 @@ function applyDetailSort(rows) {
 }
 
 function upsertDetailBtn() {
-	var grpCd = $.trim($("#write_detail_grp_cd").val());
+    var grpCd = $.trim($("#write_detail_grp_cd").val());
     var cd = $.trim($("#write_detail_cd").val());
     var preCd = $.trim($("#write_detail_cd_origin").val());
     var cdNm = $.trim($("#write_detail_cd_nm").val());
@@ -1033,7 +1037,7 @@ function upsertDetailBtn() {
 }
 
 function openDetailWriteModal(type) {
-	detailMode = type;
+    detailMode = type;
     $("#detail-type").text(type === "insert" ? "등록" : "수정");
 
     if (!detailTable || typeof detailTable.getData !== "function") {
@@ -1122,7 +1126,7 @@ function openDetailWriteModal(type) {
     }, MODAL_TIMINGS.showDelayMs);
 }
 function closeDetailWriteModal() {
-	const modal = document.getElementById("write-detail-area");
+    const modal = document.getElementById("write-detail-area");
     modal.classList.remove("show");
     setTimeout(() => {
         modal.style.display = "none";
