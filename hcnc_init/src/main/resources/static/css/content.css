@@ -1107,6 +1107,23 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
     align-items: center;
 }
 
+/* 상단 타이틀 타원형 디자인 */
+.pill-title{
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 20px;
+  border-radius: 999px;
+  background:#FFD7DB;
+  color: #E50019;
+  line-height: nowrap;
+}
+
+.pill-title--page{
+  font-size: 20px;
+  font-weight: 700;
+}
+
+
 /*===============================================================================
   Modal
 ================================================================================*/
