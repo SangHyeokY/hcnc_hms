@@ -1122,20 +1122,14 @@ openUserModal = async function (mode, data) {
     const $modal = $("#view-user-area");
 
     showLoading(); // 로딩바 표시
-    $modal.removeClass("show");
-    $modal.show();
+    $modal.removeClass("show").hide();
 
     if (mode === "insert") clearUserForm();
     else fillUserForm(data || userTable.getSelectedRows()[0].getData());
-    setModalMode(mode);
-    applyHr014TabPermission(); // tab4(권한 검증후 표시) 활성화
-    initAllTabs(); // 모든 tab 초기화
 
-    // tab1 활성화
-    $(".tab-btn").removeClass("active");
-    $(".tab-btn[data-tab='tab1']").addClass("active");
-    $(".tab-panel").hide();
-    $("#tab1").show();
+    setModalMode(mode);
+    await initAllTabs(); // 모든 tab 초기화
+    applyHr014TabPermission(); // tab4(권한 검증후 표시) 활성화
 
     // 인력 관리 등록 시, 정해진 탭에 따라 자동으로 선택
     if (mode === "insert") {
@@ -1147,7 +1141,7 @@ openUserModal = async function (mode, data) {
     window.hr014TabInitialized = false;
     initMainLangTags();
 
-    // 조회, 수정할 때
+    // 조회, 수정할 때, 여기서 모든 비동기 작업 대기
     if (mode !== "insert" && data?.dev_id) {
         // console.log("Promise로 팝업에 띄울 데이터 호출 중...");
         updateTabActions("tab1");
@@ -1160,21 +1154,28 @@ openUserModal = async function (mode, data) {
         // console.log("Tab1 새로고침 완료");
     }
 
+    // tab1 활성화
+    $(".tab-btn").removeClass("active");
+    $(".tab-btn[data-tab='tab1']").addClass("active");
+    $(".tab-panel").hide();
+    $("#tab1").show();
+
     // 팝업 표시 완료 + 로딩 종료
     setTimeout(() => {
+        $modal.show().addClass("show");
         initTabs = false;
-        $modal.addClass("show");
         hideLoading(); // 로딩바 숨김
     }, 100);
 };
 
 // 모든 tab 초기화
-function initAllTabs() {
-    initTab1();
-    if (currentMode !== "insert") { // 등록 mode가 아닐 경우
-        initTab2();
+async function initAllTabs() {
+    // 처음에 보여질 Tab1만 await
+    await initTab1();
+    if (currentMode !== "insert") {
+        initTab2();   // 기다릴 필요 없음
         initTab3();
-        if (canAccessHr014Tab()) {    // 권한 검증후 표시
+        if (canAccessHr014Tab()) {
             initTab4();
         }
     }
@@ -1205,8 +1206,6 @@ function fillUserForm(d) {
     $("#hope_rate_amt").val(
         formatAmount(d.hope_rate_amt)
     );
-
-    $("#select_dev_typ").val(d.select_dev_typ || "");
 
     // 셀렉트 work_md
     if (d.work_md && workMdMap[d.work_md]) {
@@ -1243,20 +1242,22 @@ function fillUserForm(d) {
         $("#select_main_cust_cd").val("");
     }
 
-    $("#select_dev_typ").val(""); // 기본값 초기화
-
-    // '소속 구분' 값 재할당
+    // 소속 구분 결정 로직 통합
+    let devTypValue = "";
     if (d.dev_id) {
         if (d.dev_id.startsWith("HCNC_F")) {
-            $("#select_dev_typ").val("HCNC_F");
+            devTypValue = "HCNC_F";
         } else if (d.dev_id.startsWith("HCNC_S")) {
-            $("#select_dev_typ").val("HCNC_S");
+            devTypValue = "HCNC_S";
         }
+    } else if (d.select_dev_typ) {
+        devTypValue = d.select_dev_typ;
     }
+    $("#select_dev_typ").val(devTypValue);
 
     const rank = d.grade || "";
     const score = d.score || 0;
-    if (rank, score) {
+    if (rank) {
         $("#grade").text(rank);
         $("#score").text(score + "점");
     } else {

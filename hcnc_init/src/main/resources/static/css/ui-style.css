@@ -260,11 +260,6 @@
     margin-right: 0;
 }
 
-.tabulator-table {
-    user-select: none;
-    /* 텍스트 선택 금지 */
-}
-
 .remove-sanctn {
     background: url(../images/common/btn-close.png)#bfbfbf no-repeat center;
     background-size: 10px 10px;
@@ -282,11 +277,6 @@
     height: 80px;
     border: 1px solid black;
 }
-
-.tabulator-row.tabulator-moving {
-    z-index: 9999 !important;
-}
-
 
 /*=================================================================================
  * UI Style

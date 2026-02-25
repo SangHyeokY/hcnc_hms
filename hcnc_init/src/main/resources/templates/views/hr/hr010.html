@@ -86,10 +86,6 @@
                                     <col style="width: 80px;">
                                     <col style="width: 160px;">
                                 </colgroup>
-                                <tr style="display: none;">
-                                    <th>직원코드</th>
-                                    <td colspan="3"><div class="fl-ct wp100 fs16 none_editable_text" id="dev_id_input"></div></td>
-                                </tr>
                                 <tr>
                                     <th>성명</th>
                                     <td><input type="text" class="wp100" id="dev_nm" disabled></td>
@@ -128,8 +124,6 @@
                                     <th rowspan="2">등급</th>
                                     <td rowspan="2">
                                         <div class="fl-ct fd-col wp100 ta-c">
-                                            <span class="fs32 fw700" id="grade"></span>
-                                            <span class="fs16" id="score"></span>
                                             <div id="aboutGrade">
                                                 <img src="../icons/ico-support.png" alt="상세보기" />
                                                 <div class="tooltip">
@@ -272,6 +266,8 @@
 
                                                 </div>
                                             </div>
+                                            <span class="fs32 fw700" id="grade"></span>
+                                            <span class="fs16" id="score"></span>
                                         </div>
                                     </td>
                                 </tr>
@@ -354,6 +350,11 @@
                                 <tr>
                                     <th>보유자격증</th>
                                     <td colspan="3"><input type="text" class="wp100" id="cert_txt" disabled></td>
+                                </tr>
+                                <!-- 직원코드 저장용 -->
+                                <tr style="display: none;">
+                                    <th>직원코드</th>
+                                    <td colspan="3"><div class="fl-ct wp100 fs16 none_editable_text" id="dev_id_input"></div></td>
                                 </tr>
                             </table>
                         </div>
