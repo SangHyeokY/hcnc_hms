@@ -66,11 +66,17 @@ table a.btn {padding:3px 10px;}
 .paging-box ul li a:hover {background-color:#f4f8fb;}
 .paging-box ul li a.on {background-color: #018ace; color: #fff; border: none;}
 
-/* Tabulate */
+/* Tabulator */
 .tabulator-row.tabulator-selectable:hover .tabulator-cell {background-color: #f8f8f8 !important; color: #333;}
 .tabulator-row.tabulator-selected div.tabulator-cell {color: #E50019 !important; font-weight: 500 !important; background-color: #FFF8F8 !important}
 .tabulator .tabulator-header {width: auto;}
 .tabulator-row .tabulator-cell.tabulator-editing > * {font-size: 15px !important;}
+
+/* 모든 tabulator 테이블 css */
+.tabulator-table {
+    user-select: none;
+    /* 텍스트 선택 금지 */
+}
 
 /* Treemenu */
 .tree-menu-wrap .tabulator-row.tabulator-tree-level-0 > div {font-weight: 700; color: #ED242C;}
@@ -87,6 +93,9 @@ table a.btn {padding:3px 10px;}
 /* Active */
 .tabulator-row.click-on {}
 .tabulator-row.click-on > div.tabulator-cell {color: #ff8000 !important; font-weight: 600 !important; background-color: #fff9da !important}
+.tabulator-row.tabulator-moving {
+    z-index: 9999 !important;
+}
 
 /* 합계 테이블 */
 .totalgrid .tabulator-row:nth-child(2n) .tabulator-cell{background-color: rgb(255, 252, 229) !important; color: #000;}

@@ -19,17 +19,25 @@ var bizTypOptions = [];
 
 // Tab1 초기값 설정
 window.initTab1 = function () {
-    // 개인, 법인 셀렉트 공통콤보
-    setComCode("select_biz_typ", "BIZ_TYP", "", "cd", "cd_nm", function () {
-        bizTypOptions = $("#select_biz_typ option").map(function () {
-            return { cd: this.value, cd_nm: $(this).text() };
-        }).get();
-        initSelectDefault("select_biz_typ", "개인/개인사업자/법인");
-        bizTypMap = getBizTypMap();
+  return new Promise((resolve) => {
 
-        // 지금 데이터 로드
-        loadHr011TableData(window.currentDevId);
-    });
+      setComCode("select_biz_typ", "BIZ_TYP", "", "cd", "cd_nm", function () {
+
+          bizTypOptions = $("#select_biz_typ option").map(function () {
+              return { cd: this.value, cd_nm: $(this).text() };
+          }).get();
+
+          initSelectDefault("select_biz_typ", "개인/개인사업자/법인");
+          bizTypMap = getBizTypMap();
+
+          // 테이블 데이터 로드도 async라면 Promise로 처리
+          Promise.resolve(loadHr011TableData(window.currentDevId))
+              .then(() => {
+                  resolve(); // 여기서 완료 신호
+              });
+      });
+
+  });
 };
 
 // 역할 코드 -> 라벨 맵 생성 (사업자 유형 : 개인/개인사업자/법인)
