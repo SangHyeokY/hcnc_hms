@@ -56,6 +56,7 @@ window.currentDevId = null;
 
 // 탭 개별 입력/수정 여부 판단
 const changedTabs = {
+    mainArea: false, // 좌측 영역
     tab1: false, // 1번째 Tab
     tab2: false, // 2번재 Tab
     tab3: false, // 3번째 Tab
@@ -63,6 +64,7 @@ const changedTabs = {
 };
 
 const tabNameMap = {
+    mainArea: "인적사항",
     tab1: "소속 및 계약정보",
     tab2: "보유역량 및 숙련도",
     tab3: "프로젝트",
@@ -273,6 +275,13 @@ $(document).ready(async function () {
         refreshTabLayout(tabId);
     });
 
+    // 메인 영역 변경 이벤트
+    $(document).on("change input", "#main-modal-table input, #main-modal-table select, #main-modal-table textarea", function () {
+        if (initTabs) return;
+        changedTabs.mainArea = true;
+        // console.log("mainArea 변경됨");
+    });
+
     // Tab1 변경 이벤트
     $("#tab1").on("change input", "input, select, textarea", function () {
         if (initTabs) return;
@@ -340,6 +349,7 @@ $(document).ready(async function () {
             if (!success) {
                 throw new Error("인적사항 저장 실패");
             }
+            savedTabs.push("인적사항");
 
             // 세부정보 저장
             if (currentMode != "insert") {
@@ -366,16 +376,14 @@ $(document).ready(async function () {
             isSuccess = true;
 
             // 저장한 탭의 이름 저장
-            const savedTabNames = savedTabs.map(n => `${n}`);
+            const savedTabNames = savedTabs.length
+                ? savedTabs.map(n => `<strong>${n}</strong>`).join(", ")
+                : "<strong>인적사항</strong>";  // 혹시 savedTabs가 비어있다면 인적사항 표시
 
             showAlert({
                 icon: 'success',
                 title: currentMode === "insert" ? "등록 완료" : "저장 완료",
-                html: savedTabs.length
-                    ? `${savedTabNames
-                            .map(name => `<strong>${name}</strong>`)
-                            .join(",&nbsp;")}&nbsp;저장이 완료되었습니다.`
-                    : `<strong>인적사항&nbsp;</strong>정보가 저장되었습니다.`
+                html: `${savedTabNames} 정보가 저장되었습니다.`
             });
 
             // 탭 상태 초기화
@@ -1405,25 +1413,61 @@ function broadcastTabReadonly(isReadOnly) {
 
 // ============================================================================== //
 
-// 모달 닫히면 영역 사라지게 하기
-function closeUserViewModal() {
-    // document.getElementById("view-user-area").style.display = "none";
+async function closeUserViewModal() {
+    // 수정된 탭 목록 구하기
+    const modifiedTabs = Object.keys(changedTabs).filter(tab => changedTabs[tab]);
+
+    if (modifiedTabs.length > 0) {
+        const devNmInput = document.getElementById("dev_nm");
+        const devNm = devNmInput ? devNmInput.value : "";
+
+        // 탭 이름을 읽기 쉽게 변환
+        const tabNamesHtml = modifiedTabs
+            .map((tab, i) => {
+                const nameHtml = `<span><strong>${tabNameMap[tab]}</strong></span>`;
+                return i < modifiedTabs.length - 1 ? `${nameHtml}<span>&nbsp;,&nbsp;</span>` : nameHtml;
+            }).join('');
+
+        const modeText = currentMode === "insert" ? "등록"
+                       : currentMode === "update" ? "수정"
+                       : currentMode === "view" ? "조회"
+                       : currentMode; // 알 수 없는 경우 그대로
+
+        // 신규 등록이면 이름 제외, 탭과 모드 안내만 표시
+        const htmlContent = currentMode === "insert"
+            ? `<span>${tabNamesHtml} 항목을 ${modeText}하고 있습니다.</span>
+               <span>${modeText} 작업을 취소하고 닫으시겠습니까?</span>`
+            : `<span><strong>${devNm}</strong>님의 기본 인적사항 정보 중</span>
+               <span>${tabNamesHtml}</span>
+               <span>항목이 ${modeText}되었습니다.</span>
+               <span>${modeText} 작업을 취소하고 닫으시겠습니까?</span>`;
+
+        const result = await showAlert({
+            title: '경고',
+            html: htmlContent,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: '예',
+            cancelButtonText: '취소',
+            cancelButtonColor: '#212E41'
+        });
+
+        // 사용자가 취소했으면 모달 닫기 중단
+        if (!result.isConfirmed) return;
+    }
+
+    // 모달 닫기
     const $modal = $("#view-user-area");
     closeMainLangPicker(true);
-    if (typeof closeHr012SkillPicker === "function") {
-        closeHr012SkillPicker(true);
-    }
-    if (typeof closeHr013SkillPicker === "function") {
-        closeHr013SkillPicker(true);
-    }
+    if (typeof closeHr012SkillPicker === "function") closeHr012SkillPicker(true);
+    if (typeof closeHr013SkillPicker === "function") closeHr013SkillPicker(true);
     $modal.removeClass("show");
-
-    // 초기화
-    savedTabs = [];
 
     setTimeout(() => {
         $modal.hide();
         clearUserForm();
+        savedTabs = [];
+        Object.keys(changedTabs).forEach(k => changedTabs[k] = false);
     }, 250);
 }
 

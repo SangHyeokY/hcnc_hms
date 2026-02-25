@@ -338,7 +338,7 @@ function validateHr011Form() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            html: `<strong>사업자 유형<strong>을 선택해주세요.`
+            html: `<strong>사업자 유형</strong>을 선택해주세요.`
         });
         $("#select_biz_typ").focus();
         return false;
