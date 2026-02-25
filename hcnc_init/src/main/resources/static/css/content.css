@@ -1150,7 +1150,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 /* 인력관리 팝업 - 테이블 */
 .modal-content #main-modal-table tr {height: 50px;}
 
-.modal-btn {padding: 10px 16px;}
+.modal-btn {padding: 20px 16px;}
 .modal-btn ul {display: flex; justify-content: flex-end;}
 .modal-btn ul li {margin-right: 10px;}
 .modal-btn ul li:last-child {margin-right: 0;}

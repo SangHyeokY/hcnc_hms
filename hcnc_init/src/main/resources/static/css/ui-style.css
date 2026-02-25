@@ -78,7 +78,8 @@
  .btn-area button:hover,
  .btn-area .btn:hover,
  .modal-btn #btn-excel:hover,
- .btn-prj-eval:hover {
+ .btn-prj-eval:hover,
+ .btn-prj-skl:hover {
     background-color:#eef3fb;
  }
  .btn-area button:disabled,

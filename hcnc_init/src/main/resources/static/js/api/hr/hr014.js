@@ -26,12 +26,20 @@ window.initTab4 = function() {
     // 서브 탭 초기 상태 설정
     var $tab4 = $("#tab4");
     var $subBtns = $tab4.find(".tab-sub-btn");
+
+    // 초기 탭 상태
     $subBtns.removeClass("active");
     $subBtns.filter("[data-tab='tab4-A']").addClass("active");
 
     // 테이블 초기화 (한 번만 수행)
     if (!window.hr014TableA) buildHr014TableA();
     // if (!window.hr014TableB) buildHr014TableB();
+
+    // 서버에서 항상 조회
+    loadHr014TableDataA().then(data => {
+        window.hr014TableA.setData(data);  // 초기 데이터로 덮어쓰기
+        window.hr014TableA.redraw(true);
+    });
 
     // 초기 데이터 로드 (한 번만)
     // if (!window.hr014TabInitialized) {
@@ -58,9 +66,10 @@ window.initTab4 = function() {
     // A/B 테이블 보여주기/숨기기
     $tab4.find("#TABLE_HR014_A").show();
     $tab4.find("#TABLE_HR014_B").hide();
-    if (window.hr014TableA) {
-        window.hr014TableA.redraw(true);
-    }
+
+//    if (window.hr014TableA) {
+//        window.hr014TableA.redraw(true);
+//    }
 
     initHr014Tabs();
     buildRiskList();
@@ -247,6 +256,23 @@ function scoreCheckboxFormatter(cell, formatterParams, onRendered) {
     return `<input type="radio" ${checked} ${disabled} />`;
 }
 
+function setScore(row, level) {
+    if (window.hr010ReadOnly) {
+        return;
+    }
+    // 한 행에서 점수는 단일 선택이므로 먼저 전체 N으로 초기화한 뒤 선택 점수를 Y로 둔다.
+    var data = row.getData();
+    data.lv1 = "N";
+    data.lv2 = "N";
+    data.lv3 = "N";
+    data.lv4 = "N";
+    data.lv5 = "N";
+    data["lv" + level] = "Y";
+    row.update(data);
+
+    changedTabs.tab4 = true;
+    evalData.set(window.hr013_prj_nm, window.hr014TableA.getData());
+}
 
 function commentInputFormatter(cell, formatterParams, onRendered) {
     var value = cell.getValue();
@@ -273,24 +299,6 @@ function escapeHtml(value) {
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#39;");
 }
-
-function setScore(row, level) {
-        if (window.hr010ReadOnly) {
-            return;
-        }
-        // 한 행에서 점수는 단일 선택이므로 먼저 전체 N으로 초기화한 뒤 선택 점수를 Y로 둔다.
-        var data = row.getData();
-        data.lv1 = "N";
-        data.lv2 = "N";
-        data.lv3 = "N";
-        data.lv4 = "N";
-        data.lv5 = "N";
-        data["lv" + level] = "Y";
-        row.update(data);
-
-        changedTabs.tab4 = true;
-        evalData.set(window.hr013_prj_nm, window.hr014TableA.getData());
-    }
 
 //function buildHr014TableB() {
 //    if (window.hr014TableB) return;
@@ -332,6 +340,7 @@ function loadHr014TableDataB() {
                 $("#HR015_REIN_CHECK").prop("checked", riskState.re_in_yn === "Y");
                 setRiskActive(riskActiveKey);
 
+                riskData.set(window.hr013_prj_nm, {...riskState});
                 resolve(risk);
             },
             error: function (xhr, status, err) {
@@ -437,11 +446,10 @@ function saveTableB(alertFlag) {
 // 리스크 항목 리스트 렌더링
 function buildRiskList() {
     var $list = $("#HR015_RISK_LIST");
-    var placeholder = window.hr010ReadOnly ? "" : "관련 내용을 구체적으로 입력하세요.";
-
     if ($list.length === 0) {
         return;
     }
+    var placeholder = window.hr010ReadOnly ? "" : "관련 내용을 구체적으로 입력하세요.";
     $list.empty();
     riskKeys.forEach(function (item) {
         var $btn = $("<div class='risk-item'></div>");
@@ -454,24 +462,17 @@ function buildRiskList() {
         $list.append($btn);
     });
 
-    $("#HR015_RISK_TEXT").on("input", function () {
-        if (window.hr010ReadOnly) {
-            return;
-        }
-        var value = $(this).val();
-        if (riskActiveKey === "memo_txt") {
-            riskState.memo = value;
-        } else {
-            riskState[riskActiveKey] = value;
-        }
-    });
+    $("#HR015_RISK_TEXT").prop("placeholder", placeholder)
+        .off("input").on("input", function () {
+            if (window.hr010ReadOnly) return;
+            var value = $(this).val();
+            if (riskActiveKey === "memo_txt") riskState.memo = value;
+            else riskState[riskActiveKey] = value;
+            riskData.set(window.hr013_prj_nm, {...riskState});
+        });
 
-    $("#HR015_RISK_TEXT").prop("placeholder", placeholder);
-
-    $("#HR015_REIN_CHECK").on("change", function () {
-        if (window.hr010ReadOnly) {
-            return;
-        }
+    $("#HR015_REIN_CHECK").off("change").on("change", function () {
+        if (window.hr010ReadOnly) return;
         riskState.re_in_yn = $(this).is(":checked") ? "Y" : "N";
         riskData.set(window.hr013_prj_nm, {...riskState});
     });
@@ -553,4 +554,32 @@ window.applyTab4Readonly = applyTab4Readonly;
 $("#HR015_RISK_TEXT").on("change", function () {
     // 텍스트 영역은 항상 현재 선택된 항목(riskActiveKey)과 동기화된다.
     riskData.set(window.hr013_prj_nm, {...riskState});
+});
+
+// 팝업이 닫힐 때 데이터 초기화
+function closeTab4Popup() {
+    // 테이블 초기화
+    if (window.hr014TableA) window.hr014TableA.clearData();
+
+    // 전역 데이터 초기화
+    evalData.delete(window.hr013_prj_nm);
+    riskData.delete(window.hr013_prj_nm);
+    riskState = { leave_txt: "", claim_txt: "", sec_txt: "", re_in_yn: "N", memo: "" };
+
+    // UI 초기화
+    $("#HR015_RISK_TEXT").val("");
+    $("#HR015_REIN_CHECK").prop("checked", false);
+    $("#HR015_RISK_LIST .risk-item").removeClass("active");
+
+    // Active Key 초기화
+    riskActiveKey = "leave_txt";
+}
+
+// 인적사항 팝업 닫혔을 때
+$(".close-btn").on("click", closeTab4Popup);
+
+$(document).on("keydown", function(e) {
+    if (e.key === "Escape") {
+       closeTab4Popup();
+    }
 });
