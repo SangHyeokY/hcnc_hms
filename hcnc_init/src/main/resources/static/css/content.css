@@ -1109,19 +1109,17 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 
 /* 상단 타이틀 타원형 디자인 */
 .pill-title{
-  display: inline-flex;
-  align-items: center;
+  display: inline-flex; align-items: center;
   padding: 5px 20px;
   border-radius: 999px;
-  background:#FFD7DB;
-  color: #E50019;
+  background:#FFD7DB; color: #E50019;
   line-height: nowrap;
 }
-
 .pill-title--page{
-  font-size: 20px;
-  font-weight: 700;
+  font-size: 20px; font-weight: 700;
 }
+
+
 
 
 /*===============================================================================
@@ -1131,9 +1129,16 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .modal-wrap.show {opacity: 1; transform: translateY(0); pointer-events: auto;}
 .modal-container {display: flex; flex-direction: column; max-height: 90vh; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); min-width: 560px; max-width: calc(100% - 32px); background: #fff; border-radius: 12px; box-sizing: border-box;}
 
+/* 모달 타이틀 */
+.pill-title--modal{
+  font-size: 24px; font-weight: 700; color: #E50019;
+  margin: 0;
+}
+/* 모달 (상세/등록/수정 텍스트) */
+.pill-title--modal span{
+  font-size: 18px; font-weight: 500; padding: 2px 0px 0px 10px;
+}
 .modal-wrap .header {display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; border-bottom: 1px solid #eee;}
-.modal-wrap .header h4 {font-size: 18px; color: #000; font-weight: 700;}
-.modal-wrap .header h4 span {font-size: 14px;}
 .modal-container.main-lang-picker-container .btn-area button{width:40px; height:40px;}
 .modal-container.main-lang-picker-container .btn-area button img{width:100%;}
 /*
@@ -1153,8 +1158,8 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .modal-content.hr020-main-pop .tab-article {
     min-width:0; width:100%; height:100%; display:grid; grid-template-rows: fit-content(100%) fit-content(100%) 1fr;
 }
-.modal-content h5{position:relative; padding-left:10px; font-size:16px;}
-.modal-content h5:before{content:""; position:absolute; top:50%; left:0; transform:translateY(-50%); display:block; background:#E50019; width:4px; height:16px; border-radius:6px;}
+.modal-content h5{position:relative; padding-left:10px; font-size:22px; font-weight: 700;}
+.modal-content h5:before{content:""; position:absolute; top:50%; left:0; transform:translateY(-50%); display:block; background:#E50019; width:6px; height:20px; border-radius:6px;}
 .modal-content .title-area .type span{padding: 3px 9px; color: #E50019; border-radius:8px; border: 1px solid #E50019;}
 .modal-content top-article{padding-bottom:10px;}
 .modal-content ul {list-style: none; margin: 0; padding: 0;}
