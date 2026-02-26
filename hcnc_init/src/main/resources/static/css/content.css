@@ -1257,7 +1257,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
   min-width: 0;
 }
 
-.modal-container-detail {display: flex; flex-direction: column; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; min-width: 1240px; max-width: 1280px;background: #fff; border-radius: 12px; box-sizing: border-box;}
+.modal-container-detail {display: flex; flex-direction: column; position: absolute; top: 50%; left: 52%; transform: translate(-50%, -50%); width: 80%; min-width: 1240px; max-width: 1280px;background: #fff; border-radius: 12px; box-sizing: border-box;}
 
 /* 인적사항 모달 전체 css */
 .insert .modal-container-detail.main-human-modal{
@@ -2633,8 +2633,8 @@ section.search-area .search-btn-area .btn-search {
 
 /* HR010 수정/상세 팝업은 insert와 분리해 높이를 조금 더 확보 */
 #view-user-area:not(.insert) .modal-container-detail.main-human-modal {
-  width: 87%;
-  max-width: 1440px;
+  width: 92%;
+  max-width: 1640px;
   max-height: 93vh;
   overflow: hidden;
 }

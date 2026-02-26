@@ -189,12 +189,12 @@ function buildHr013Table() {
         },
         columns: [
             {
-                title: "선택",
+                title: "",
                 field: "_checked",
                 formatter: rowSelectFormatter,
                 hozAlign: "center",
                 headerSort: false,
-                width: 50,
+                width: 20,
                 cellClick: function (e, cell) {
                     if (window.hr010ReadOnly) {
                         return;
@@ -225,7 +225,7 @@ function buildHr013Table() {
                     toggleInprjValue(resolved);
                     changedTabs.tab3 = true;
                     window.hr013Table.redraw(true);
-                }, width: 90
+                }, width: 84
             },
             {
                 title: "고객사",
@@ -241,7 +241,7 @@ function buildHr013Table() {
                         row.update({ _prev_cust_nm: cell.getValue() || "" });
                     }
                 },
-                cellClick: startEditOnClick, width: 110
+                cellClick: startEditOnClick, width: 70
             },
             {
                 title: "프로젝트명",
@@ -333,7 +333,7 @@ function buildHr013Table() {
                 cellEdited: function(cell){
                     requestAnimationFrame(() => cell.getRow().reformat());
                 },
-                width: 250
+                width: 140
             },
             {
                 title: "역할",
@@ -349,7 +349,7 @@ function buildHr013Table() {
                         cell.setValue(value, true);
                     }
                 },
-                cellClick: startEditOnClick, width: 90
+                cellClick: startEditOnClick, width: 56
             },
             {
                 title: "시작일",
@@ -358,7 +358,7 @@ function buildHr013Table() {
                 formatter: dateDisplayFormatter,
                 editor: dateEditor,
                 editable: isHr013Editable,
-                cellClick: startEditOnClick, width: 140
+                cellClick: startEditOnClick, width: 114
             },
             {
                 title: "종료일",
@@ -367,21 +367,21 @@ function buildHr013Table() {
                 formatter: dateDisplayFormatter,
                 editor: dateEditor,
                 editable: isHr013Editable,
-                cellClick: startEditOnClick, width: 140
+                cellClick: startEditOnClick, width: 114
             },
-            { title: "계약단가", field: "rate_amt", hozAlign: "right", formatter: hr013AmountFormatter, editor: "input", editable: isHr013Editable, cellClick: startEditOnClick , width: 110},
+            { title: "계약단가", field: "rate_amt", hozAlign: "right", formatter: hr013AmountFormatter, editor: "input", editable: isHr013Editable, cellClick: startEditOnClick , width: 120},
             {
                 title: "기술스택",
                 field: "skl_id_lst",
                 hozAlign: "left",
                 formatter: hr013TableSkillFormatter,
                 editable: false,
-                width: 280,
+                width: 98,
                 cellClick: hr013TableSkillCellClick
             },
             // { title: "기술스택", field: "stack_txt", formatter: skillDisplayFormatter, editor: stackTagEditor, editable: isHr013Editable, cellClick: startEditOnClick },
-            { title: "투입률", field: "alloc_pct", hozAlign: "center", formatter: percentageFormatter, width: 90, editor: "input", editable: isHr013Editable, cellClick: startEditOnClick },
-            { title: "비고", field: "remark", editor: "input", editable: isHr013Editable, cellClick: startEditOnClick , width: 200}
+            { title: "투입률", field: "alloc_pct", hozAlign: "center", formatter: percentageFormatter, width: 67, editor: "input", editable: isHr013Editable, cellClick: startEditOnClick },
+            { title: "비고", field: "remark", editor: "input", editable: isHr013Editable, cellClick: startEditOnClick , widtgrow:1}
         ],
         data: []
     });
