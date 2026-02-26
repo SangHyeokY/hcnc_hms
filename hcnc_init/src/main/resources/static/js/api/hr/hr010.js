@@ -42,6 +42,11 @@ var mainCustOptions = [];
 // 저장된 탭 alert 표시하기 위한 리스트
 var savedTabs = [];
 
+// 조회조건 콤보에 들어갈 검색가능한 field 목록
+var hr010SearchableFields = [];
+// 검색 대상에서 제외할 컬럼
+var HR010_SEARCH_EXCLUDE_FIELDS = new Set(["checkBox", "kosa_grd_cd", "main_fld_cd", "main_cust_cd"]);
+
 // 탭 전체 입력/수정 여부 판단 => 전역 플래그
 let initTabs = false;
 
@@ -50,6 +55,8 @@ let isSaving = false;
 
 // 저장 성공 여부 플래그
 let isSuccess = false;
+
+
 
 // 개발자ID
 window.currentDevId = null;
@@ -76,6 +83,8 @@ const tabNameMap = {
 // 문서 첫 생성 시 실행
 $(document).ready(async function () {
     buildUserTable();
+
+    initHr010SearchTypeOptions(); // 검색조건 콤보
 
     // console.log(Swal); // swal 오류 확인용
 
@@ -198,13 +207,13 @@ $(document).ready(async function () {
     $(".btn-search").on("click", async function (event) {
         event.preventDefault();
         showLoading();
-        await loadUserTableData();
+        await reloadHr010List();
         if (window.userTable) updateTabulatorGridCount(window.userTable);
         hideLoading();
     });
 
     // 검색어 이벤트 (Enter 입력)
-    $("#searchKeyword").on("keyup", async function (event) {
+    $("#searchConditionKeyword, #searchKeyword").on("keyup", async function (event) {
         if (event.key === "Enter") {
             showLoading();
             await loadUserTableData();
@@ -254,8 +263,7 @@ $(document).ready(async function () {
             if (!canAccessHr014Tab())
                 return; // hr014 권한 검증
 
-            if ((window.hr013_prj_nm === undefined || window.hr013_prj_nm === null))
-            {
+            if ((window.hr013_prj_nm === undefined || window.hr013_prj_nm === null)) {
                 showAlert({
                     icon: 'warning',
                     title: '경고',
@@ -634,7 +642,8 @@ function buildUserTable() {
         },
         columns: [
             {
-                title: "",
+                title: "선택",
+                hozAlign: "center",
                 field: "checkBox",
                 formatter: function (cell) {
                     var checked = cell.getRow().isSelected() ? " checked" : "";
@@ -855,16 +864,19 @@ async function loadUserTableData() {
     }
 
     // 키워드 검색
-    let keyword = $("#searchKeyword").val().trim();
-    if (keyword) {
-        keyword = keyword
+    const searchType = String($("#searchType").val() || ""); // 조회조건 선택값
+    const conditionKeyword = $.trim($("#searchConditionKeyword").val()); // 새 '검색어' 입력값
+    let tagKeyword = $.trim($("#searchKeyword").val()); // 기존 검색어(현재 Tag 검색) 입력값
+
+    if (tagKeyword) { // Tag 검색: 다중 입력 시 OR 검색되도록 공백 토큰으로 전달
+        tagKeyword = tagKeyword
             .split(/[\s,]+/)
             .filter(w => w)
-            .map(w => "+" + w)
             .join(" ");
     } else {
-        keyword = null;
+        tagKeyword = null;
     }
+
     // console.log("키워드 :", keyword);
 
     try {
@@ -873,8 +885,8 @@ async function loadUserTableData() {
             url: "/hr010/list",
             type: "GET",
             data: {
-                dev_nm: $("#insertNm").val(),
-                searchKeyword: keyword
+                dev_nm: "",
+                searchKeyword: tagKeyword // Tag 검색은 서버 조회 파라미터 전달
             }
         });
 
@@ -910,8 +922,10 @@ async function loadUserTableData() {
             row.score = s.score || 0;
         });
 
-        hr010SourceRows = list;
-        applyHr010UserTypeFilter();
+        const filteredList = applyHr010ConditionFilter(list, searchType, conditionKeyword); // 조회조건 필터 적용
+        hr010SourceRows = filteredList; // 필터 결과를 그리드 소스로 반영
+        applyHr010UserTypeFilter(); // 직원/프리랜서 탭 필터 적용
+
         // userTable.setData(response.res || []);
     } catch (e) {
         console.error(e);
@@ -1110,6 +1124,16 @@ async function deleteUserRows() {
         });
     });
 }
+
+// ============================================================================== //
+
+async function reloadHr010List() {
+    showLoading(); // 로딩바 표시
+    await loadUserTableData();
+    if (window.userTable) updateTabulatorGridCount(window.userTable);
+    hideLoading();
+}
+
 
 // ============================================================================== //
 
@@ -1340,7 +1364,7 @@ function setModalMode(mode) {
         .prop("disabled", isReadOnly);
 
     $modal.find(".modal-human-area .pic-area .profile-area")
-         .toggleClass("view", isView);
+        .toggleClass("view", isView);
 
     // ================================
     // select_dev_typ 전용 제어
@@ -1430,9 +1454,9 @@ async function closeUserViewModal() {
             }).join('');
 
         const modeText = currentMode === "insert" ? "등록"
-                       : currentMode === "update" ? "수정"
-                       : currentMode === "view" ? "조회"
-                       : currentMode; // 알 수 없는 경우 그대로
+            : currentMode === "update" ? "수정"
+                : currentMode === "view" ? "조회"
+                    : currentMode; // 알 수 없는 경우 그대로
 
         // 신규 등록이면 이름 제외, 탭과 모드 안내만 표시
         const htmlContent = currentMode === "insert"
@@ -2342,4 +2366,76 @@ function applyHr010EditorPermission() {
     $btnAdd.toggle(editAllowed);
     $btnEdit.toggle(editAllowed);
     $btnDel.toggle(editAllowed);
+}
+
+// 조회조건 콤보 동적 구성
+function initHr010SearchTypeOptions() {
+    const $searchType = $("#searchType"); // 콤보 엘리먼트
+    if (!$searchType.length) return; // 화면에 없으면 종료
+    if (!userTable || typeof userTable.getColumns !== "function") return; // 테이블 준비 안됐으면 종료
+
+    const columnDefs = userTable.getColumns() // 테이블 컬럼 객체 목록
+        .map(function (col) { return col.getDefinition(); }) // 정의 객체 추출
+        .filter(function (def) { // 검색 가능한 컬럼만 남김
+            if (!def || !def.field || !def.title) return false; // 필수 정보 없으면 제외
+            if (def.visible === false) return false; // 숨김 컬럼 제외
+            if (HR010_SEARCH_EXCLUDE_FIELDS.has(def.field)) return false; // 제외 대상 컬럼 제외
+            return true; // 통과
+        });
+
+    hr010SearchableFields = columnDefs.map(function (def) { return def.field; }); // field 캐시
+
+    $searchType.empty(); // 기존 옵션 제거
+    $searchType.append($("<option>", { value: "", text: "전체" })); // 기본 '전체' 옵션
+
+    columnDefs.forEach(function (def) { // 컬럼별 옵션 생성
+        $searchType.append($("<option>", { value: def.field, text: def.title })); // value=field, text=컬럼명
+    });
+}
+
+// 조건검색용 텍스트 변환/필터 함수 추가
+function getHr010SearchTextByField(row, field) { // field별 검색 텍스트 표준화
+    if (!row || !field) return "";
+    if (field === "ctrt_typ") return String((ctrtTypMap && ctrtTypMap[row.ctrt_typ]) || row.ctrt_typ || ""); // 코드->라벨 변환
+    if (field === "exp_yr") return String(formatCareerYearMonth(row.exp_yr) || ""); // 경력연차 포맷 반영
+    if (field === "hope_rate_amt") return String(amountFormatter(row.hope_rate_amt) || ""); // 금액 포맷 반영
+    return String(row[field] == null ? "" : row[field]); // 일반 필드 문자열화
+}
+
+function normalizeHr010Digits(value) { // 숫자 검색 보조: 콤마/원/공백 제거
+    return String(value == null ? "" : value).replace(/\D/g, "");
+}
+
+function matchHr010FieldKeyword(row, field, keyword, keywordDigits) { // 필드별 검색 일치 여부
+    const text = getHr010SearchTextByField(row, field);
+    if (text.toLowerCase().includes(keyword)) {
+        return true;
+    }
+
+    // 희망단가는 숫자만 입력해도 매칭되도록 추가 비교
+    if (field === "hope_rate_amt" && keywordDigits) {
+        return normalizeHr010Digits(text).includes(keywordDigits);
+    }
+
+    return false;
+}
+
+// 조회조건+검색어 필터
+function applyHr010ConditionFilter(list, searchType, rawKeyword) {
+    if (!Array.isArray(list)) return []; // 안전가드
+    if (!rawKeyword) return list; // 검색어 없으면 원본 반환
+    const keyword = String(rawKeyword).toLowerCase(); // 대소문자 무시
+    const keywordDigits = normalizeHr010Digits(rawKeyword);
+
+    if (!searchType) { // '전체' 선택 시 전체 검색 가능 필드 대상
+        return list.filter(function (row) {
+            return hr010SearchableFields.some(function (field) {
+                return matchHr010FieldKeyword(row, field, keyword, keywordDigits); // 어느 한 필드라도 포함되면 통과
+            });
+        });
+    }
+
+    return list.filter(function (row) { // 특정 필드 선택 시 해당 필드만 검색
+        return matchHr010FieldKeyword(row, searchType, keyword, keywordDigits); // 부분일치
+    });
 }

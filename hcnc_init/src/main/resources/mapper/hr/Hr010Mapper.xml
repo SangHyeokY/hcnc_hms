@@ -27,10 +27,17 @@
         FROM tb_dev_info
         WHERE del_yn='N'
         AND use_yn='Y'
-        <if test="searchKeyword != null and searchKeyword != ''">
+        <if test="searchKeyword != null and searchKeyword.trim() != ''">
+            <bind name="searchKeywordTokens" value="searchKeyword.trim().split(' ')" />
             AND (
-            MATCH(search_txt) AGAINST (CONCAT(#{searchKeyword}, '*') IN BOOLEAN MODE)
-            OR search_txt LIKE CONCAT('%', #{searchKeyword}, '%')
+            <foreach collection="searchKeywordTokens" item="token" separator=" OR ">
+                <if test="token != null and token.trim() != ''">
+                    (
+                    MATCH(search_txt) AGAINST (CONCAT(#{token}, '*') IN BOOLEAN MODE)
+                    OR search_txt LIKE CONCAT('%', #{token}, '%')
+                    )
+                </if>
+            </foreach>
             )
         </if>
         <if test="dev_nm != null and dev_nm != ''">

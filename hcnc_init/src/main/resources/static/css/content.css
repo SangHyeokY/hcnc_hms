@@ -32,6 +32,7 @@ option{background:#fff; color:#333;}
 .content-body .content-title h4 {
   position: relative;
   padding-left: 15px;
+  font-size: 24px; font-weight: 700; color: #000000;
 }
 
 .content-body .content-title h4:before {
@@ -47,6 +48,7 @@ option{background:#fff; color:#333;}
 
 .content-body .content-title h4.hcnc-grid-title-with-count {
   padding-left: 0;
+
 }
 
 .content-body .content-title h4.hcnc-grid-title-with-count:before {
@@ -1833,14 +1835,30 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 }
 
 .tabulator-row.tabulator-selected {
-  color: #E50019 !important;
+  color: #ED2455 !important;
   font-weight: 500 !important;
   background-color: #F4F7FF !important;
+}
+.tabulator-row.tabulator-selected .tabulator-cell {
+  color: #ED2455 !important;
+}
+.tabulator-row.tabulator-selected.tabulator-selectable:hover .tabulator-cell {
+  color: #ED2455 !important;
 }
 
 .tabulator-row.tabulator-selectable:hover {
   background-color: #f8f8f8 !important;
   color: #333;
+}
+
+/* Tabulator 체크박스 선택 색상 */
+.tabulator input[type="checkbox"] {
+  accent-color: #ED2455;
+  border-radius: 16px;
+}
+.tabulator input[type="checkbox"]:checked:before {
+  border-color: #ED2455 !important;
+  background: #ED2455 !important;
 }
 
 /* ============================= 유틸 css ============================= */
@@ -2146,21 +2164,41 @@ section.search-area .search-info #searchKeyword {
     border: 1px solid #D9D9D9;
     border-radius: 6px;
 }
-section.search-area .search-info #insertNm,
-section.search-area .search-info #searchType {
-    height: 40px;
-    width: 270px !important;
-    background-color: #F6F6F6;
-    border-radius: 6px;
+.contents-wrap:has(#TABLE_HR010_A) section.search-area .search-info { /* HR010 검색영역 전용 */
+  display: flex; /* 한 줄 배치 */
+  align-items: center; /* 수직 중앙 정렬 */
+  gap: 14px; /* 요소 간 간격 */
+  flex-wrap: nowrap; /* 태그 검색이 다음 줄로 내려가지 않도록 한 줄 유지 */
 }
 
-/*
-section.search-area .search-info #insertNm:focus,
-section.search-area .search-info #searchType:focus {
-    outline: none;
-    border: 1px solid #D9D9D9;
+.contents-wrap:has(#TABLE_HR010_A) .hr010-search-tag-wrap { /* Tag 검색을 오른쪽으로 밀기 */
+  margin-left: auto; /* 좌측 요소들과 분리해 우측 배치 */
+  padding-right: 20px;
 }
-*/
+
+.contents-wrap:has(#TABLE_HR010_A) section.search-area .search-info .search-select,
+.contents-wrap:has(#TABLE_HR010_A) section.search-area .search-info .search-input {
+  flex: 0 0 auto; /* 검색영역 항목 자동 줄바꿈 방지 */
+}
+
+.contents-wrap:has(#TABLE_HR010_A) section.search-area .search-info .fl-ac {
+  white-space: nowrap; /* 라벨 텍스트 줄바꿈 방지 */
+}
+
+section.search-area .search-info #searchType {
+    width: 200px;
+    background-color: #F6F6F6; border: 1px solid #D9D9D9;
+}
+
+section.search-area .search-info #searchConditionKeyword { /* 새 검색어 입력폭 */
+  width: 400px !important; /* 조건검색 입력폭 */
+  background-color: #F6F6F6; border: 1px solid #D9D9D9;
+}
+
+.contents-wrap:has(#TABLE_HR010_A) section.search-area .search-info #searchKeyword {
+  min-width: 500px !important; /* 기존 600px보다 작게 오버라이드 */
+  width: 260px !important; /* Tag 검색창 고정폭 */
+}
 
 section.search-area .search-btn-area .btn-search {
   width: 107px;

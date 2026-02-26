@@ -148,7 +148,8 @@ function buildUserTable() {
         },
         columns: [
             {
-                title: "",
+                title: "선택",
+                hozAlign: "center",
                 field: "checkBox",
                 formatter: function (cell) {
                     var checked = cell.getRow().isSelected() ? " checked" : "";
