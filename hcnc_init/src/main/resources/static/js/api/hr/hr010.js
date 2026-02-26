@@ -1282,8 +1282,8 @@ function fillUserForm(d) {
     const rank = d.grade || "";
     const score = d.score || 0;
     if (rank) {
-        $("#grade").text(rank);
-        $("#score").text(score + "점");
+        $("#grade").text(rank + "등급");
+        $("#score").text("(" + score + "점)");
     } else {
         $("#grade").text("");
         $("#score").text("");

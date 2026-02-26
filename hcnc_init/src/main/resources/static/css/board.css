@@ -78,6 +78,23 @@ table a.btn {padding:3px 10px;}
     /* 텍스트 선택 금지 */
 }
 
+/* 기존 테두리 제거 */
+.tabulator {border: none !important;}
+.tabulator-header {border-top: none !important;}
+
+/*주개발언어, 보유역량기술 선택 모달 테이블*/
+.main-lang-picker-content .tabulator-row .tabulator-cell,
+.hr012-skill-picker-content .tabulator-row .tabulator-cell {
+  background: #F1F4F9 !important;
+  /*border-bottom: 2px solid #DEE2E7 !important;*/
+}
+/*.main-lang-picker-content .tabulator-row:first-child,
+.hr012-skill-picker-content .tabulator-row:first-child {
+  border-top: 2px solid #DEE2E7 !important;
+}
+.main-lang-picker-content .tabulator-row .tabulator-cell:hover,
+.hr012-skill-picker-content .tabulator-row .tabulator-cell:hover {background: unset !important;}*/
+
 /* Treemenu */
 .tree-menu-wrap .tabulator-row.tabulator-tree-level-0 > div {font-weight: 700; color: #ED242C;}
 .tree-menu-wrap .tabulator-row.tabulator-tree-level-1 > div {font-weight: 700;}
