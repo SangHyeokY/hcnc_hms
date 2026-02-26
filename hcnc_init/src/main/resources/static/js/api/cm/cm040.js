@@ -164,9 +164,24 @@ function buildTables() {
                      const val = cell.getValue();
                      return (grpCdMap && grpCdMap[val]) ? grpCdMap[val] : val;
                 }, editor: false, editable: false},
-            { title: "코드", field: "cd", hozAlign: "center" },
-            { title: "코드그룹명", field: "grp_nm" },
-            { title: "사용여부", field: "use_yn", hozAlign: "center", width: 90 }
+            {   title: "코드",
+                field: "cd",
+                hozAlign: "center",
+                formatter: function (cell) {
+                     const value = cell.getValue();
+                     if (!value) return "";
+                     return `<div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${value}</div>`;
+                }
+            },
+            {   title: "코드그룹명",
+                field: "grp_nm",
+                formatter: function (cell) {
+                     const value = cell.getValue();
+                     if (!value) return "";
+                     return `<div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${value}</div>`;
+                }
+            },
+            { title: "사용여부", field: "use_yn", hozAlign: "center" }
         ],
         rowSelected: r => syncRowCheckbox(r, true),
         rowDeselected: r => syncRowCheckbox(r, false),
