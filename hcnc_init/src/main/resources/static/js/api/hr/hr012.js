@@ -174,6 +174,9 @@ function buildHr012TableB() {
         layout: "fitColumns",
         placeholder: "데이터 없음",
         height: "100%",
+        // 페이징 설정
+        pagination: "local",       // 로컬 데이터 기준 페이지네이션
+        paginationSize: 8,         // 한 페이지에 8개씩 표시
         // 숙련도 테이블 데이터 로드 시 건수 반영
         dataLoaded: function () {
             updateHr012BTitleCount();
@@ -800,7 +803,9 @@ function buildHr012SkillPickerTable() {
 function syncHr012SkillPickerUi(forceRebuild) {
     const totalCount = Array.isArray(hr012SkillOptions) ? hr012SkillOptions.length : 0;
     const selectedCount = getHr012SelectedCodeSet().size;
-    $("#hr012-skill-picker-meta").text("전체 기술 " + totalCount + "개 / 선택 " + selectedCount + "개");
+    $("#hr012-skill-picker-meta").html(
+        `전체 기술 <span class="fw500 mg-l4">${totalCount}</span>개 / 선택 <span class="hcnc-grid-count-number">${selectedCount}</span>개`
+    );
 
     if (!hr012SkillPickerTable) {
         return;

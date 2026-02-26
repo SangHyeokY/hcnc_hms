@@ -75,6 +75,9 @@ table a.btn {padding:3px 10px;}
 .tabulator .tabulator-header {width: auto;}
 .tabulator-row .tabulator-cell.tabulator-editing > * {font-size: 15px !important;}
 
+.tabulator .tabulator-table > .tabulator-row > .tabulator-cell:last-child {border-right: 2px solid #EFF1F6; !important;}
+.tabulator-row:nth-child(2n) .tabulator-cell {background-color: #FBFCFE !important;}
+
 /* Global Grid Style (all Tabulator tables) */
 .tabulator {
   border-top: 0 !important;
@@ -88,8 +91,9 @@ table a.btn {padding:3px 10px;}
 .tabulator .tabulator-header {
   height: 48px !important;
   min-height: 48px !important;
-  border-left: 0 !important;
-  border-right: 0 !important;
+  border-top: 2px solid #DEE2E7 !important;
+  border-left: 2px solid #DEE2E7 !important;
+  border-right: 2px solid #DEE2E7 !important;
   border-top-left-radius: 8px !important;
   border-top-right-radius: 8px !important;
   overflow: hidden;
