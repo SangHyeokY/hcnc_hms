@@ -1267,7 +1267,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
   display: flex;
   flex-direction: column;
   position: absolute;
-  top: 50%; left: 50%;
+  top: 50%; left: 52%;
   transform: translate(-50%, -50%);
   /*width: 80%;
   min-width: 1240px;
@@ -2578,7 +2578,7 @@ section.search-area .search-btn-area .btn-search {
 
 /* HR010 수정/상세 팝업은 insert와 분리해 높이를 조금 더 확보 */
 #view-user-area:not(.insert) .modal-container-detail.main-human-modal {
-  width: clamp(900px, calc(100vw - 490px), 1500px);
+  width: clamp(900px, calc(100vw - 290px), 1640px);
   height: 92vh;
   max-height: 95vh;
   overflow: hidden;
