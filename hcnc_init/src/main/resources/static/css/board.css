@@ -67,10 +67,94 @@ table a.btn {padding:3px 10px;}
 .paging-box ul li a.on {background-color: #018ace; color: #fff; border: none;}
 
 /* Tabulator */
-.tabulator-row.tabulator-selectable:hover .tabulator-cell {background-color: #f8f8f8 !important; color: #333;}
+.tabulator-row.tabulator-selectable:hover .tabulator-cell {
+  background-color: #f8f8f8 !important;
+  color: #333;
+}
 .tabulator-row.tabulator-selected div.tabulator-cell {color: #E50019 !important; font-weight: 500 !important; background-color: #FFF8F8 !important}
 .tabulator .tabulator-header {width: auto;}
 .tabulator-row .tabulator-cell.tabulator-editing > * {font-size: 15px !important;}
+
+/* Global Grid Style (all Tabulator tables) */
+.tabulator {
+  border-top: 0 !important;
+  border-right: 0 !important;
+  border-bottom: 0 !important;
+  border-left: 0 !important;
+  /*border-radius: 8px 8px 0 0 !important;*/
+  overflow: hidden;
+}
+
+.tabulator .tabulator-header {
+  height: 48px !important;
+  min-height: 48px !important;
+  border-left: 0 !important;
+  border-right: 0 !important;
+  border-top-left-radius: 8px !important;
+  border-top-right-radius: 8px !important;
+  overflow: hidden;
+}
+
+.tabulator .tabulator-header .tabulator-col {
+  height: 48px !important;
+  min-height: 48px !important;
+  border-left: 0 !important;
+  border-right: 0 !important;
+  /*border-bottom: 1px solid #E8EAEE !important;*/
+  align-content: center;
+}
+
+.tabulator .tabulator-header .tabulator-col:first-child {
+  border-top-left-radius: 8px !important;
+}
+
+.tabulator .tabulator-header .tabulator-col:last-child {
+  border-top-right-radius: 8px !important;
+}
+
+.tabulator .tabulator-header .tabulator-col .tabulator-col-content {
+  height: 48px !important;
+  min-height: 48px !important;
+  padding: 0 10px !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tabulator .tabulator-header .tabulator-col .tabulator-col-content .tabulator-col-title {
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  line-height: 1.4 !important;
+}
+
+/* 그리드 좌우 라인 제거 */
+.tabulator .tabulator-tableHolder,
+.tabulator .tabulator-tableholder {
+  border-left: 0 !important;
+  border-right: 0 !important;
+}
+
+.tabulator-row .tabulator-cell,
+.tabulator-row .tabulator-cell + .tabulator-cell {
+  border-left: 0 !important;
+  border-right: 0 !important;
+}
+
+/* 공통 행 높이 46px */
+.tabulator .tabulator-row {
+  height: 46px !important;
+  min-height: 46px !important;
+}
+
+.tabulator .tabulator-row .tabulator-cell {
+  height: 46px !important;
+  min-height: 46px !important;
+  line-height: 46px !important;
+  font-size: 16px !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  box-sizing: border-box;
+}
 
 /* 모든 tabulator 테이블 css */
 .tabulator-table {
@@ -82,18 +166,20 @@ table a.btn {padding:3px 10px;}
 .tabulator {border: none !important;}
 .tabulator-header {border-top: none !important;}
 
-/*주개발언어, 보유역량기술 선택 모달 테이블*/
+/* 주개발언어, 보유역량기술 선택 모달 테이블 */
 .main-lang-picker-content .tabulator-row .tabulator-cell,
 .hr012-skill-picker-content .tabulator-row .tabulator-cell {
-  background: #F1F4F9 !important;
-  /*border-bottom: 2px solid #DEE2E7 !important;*/
+  cursor: default;
 }
-/*.main-lang-picker-content .tabulator-row:first-child,
-.hr012-skill-picker-content .tabulator-row:first-child {
-  border-top: 2px solid #DEE2E7 !important;
+.main-lang-picker-content .tabulator-row .tabulator-cell:first-child,
+.hr012-skill-picker-content .tabulator-row .tabulator-cell:first-child {
+  background: #EFF1F6 !important;
+  font-weight: bold;
 }
-.main-lang-picker-content .tabulator-row .tabulator-cell:hover,
-.hr012-skill-picker-content .tabulator-row .tabulator-cell:hover {background: unset !important;}*/
+.main-lang-picker-content .tabulator-row .tabulator-cell:first-child:hover,
+.hr012-skill-picker-content .tabulator-row .tabulator-cell:first-child:hover {
+  background: #EFF1F6 !important;
+}
 
 /* Treemenu */
 .tree-menu-wrap .tabulator-row.tabulator-tree-level-0 > div {font-weight: 700; color: #ED242C;}
