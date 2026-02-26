@@ -241,7 +241,7 @@ function buildHr013Table() {
                         row.update({ _prev_cust_nm: cell.getValue() || "" });
                     }
                 },
-                cellClick: startEditOnClick, width: 70
+                cellClick: startEditOnClick, width: 67
             },
             {
                 title: "프로젝트명",
@@ -333,7 +333,7 @@ function buildHr013Table() {
                 cellEdited: function(cell){
                     requestAnimationFrame(() => cell.getRow().reformat());
                 },
-                width: 140
+                width: 130
             },
             {
                 title: "역할",
@@ -349,7 +349,7 @@ function buildHr013Table() {
                         cell.setValue(value, true);
                     }
                 },
-                cellClick: startEditOnClick, width: 56
+                cellClick: startEditOnClick, width: 50
             },
             {
                 title: "시작일",
@@ -376,12 +376,11 @@ function buildHr013Table() {
                 hozAlign: "left",
                 formatter: hr013TableSkillFormatter,
                 editable: false,
-                width: 98,
                 cellClick: hr013TableSkillCellClick
             },
             // { title: "기술스택", field: "stack_txt", formatter: skillDisplayFormatter, editor: stackTagEditor, editable: isHr013Editable, cellClick: startEditOnClick },
-            { title: "투입률", field: "alloc_pct", hozAlign: "center", formatter: percentageFormatter, width: 67, editor: "input", editable: isHr013Editable, cellClick: startEditOnClick },
-            { title: "비고", field: "remark", editor: "input", editable: isHr013Editable, cellClick: startEditOnClick , widtgrow:1}
+            { title: "투입률", field: "alloc_pct", hozAlign: "center", formatter: percentageFormatter, width: 65, editor: "input", editable: isHr013Editable, cellClick: startEditOnClick },
+            { title: "비고", field: "remark", editor: "input", editable: isHr013Editable, cellClick: startEditOnClick, width: 50 },
         ],
         data: []
     });

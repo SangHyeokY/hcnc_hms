@@ -165,9 +165,9 @@ option{background:#fff; color:#333;}
 .tabulator .tabulator-footer .tabulator-page[data-page="prev"],
 .tabulator .tabulator-footer .tabulator-page[data-page="next"],
 .tabulator .tabulator-footer .tabulator-page[data-page="last"] {
-  min-width: 31px;
-  width: 31px;
-  height: 31px;
+  min-width: 32px;
+  width: 32px;
+  height: 32px;
   line-height: 29px;
   border: 1px solid #DEE2E7;
   border-radius: 50%;
@@ -365,9 +365,9 @@ option{background:#fff; color:#333;}
 }
 #TABLE_HR013_A .hr013-stack-cell {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   justify-content: space-between;
-  gap: 8px;
+  /* gap: 8px; */
   width: 100%;
 }
 #TABLE_HR013_A .hr013-stack-text {
@@ -2639,7 +2639,7 @@ section.search-area .search-btn-area .btn-search {
   color: #fff;
   border-radius: 8px;
   border: none;
-  padding: 6px 8px;
+  padding: 5px 5px;
   font-size: 13px;
   font-weight: 500;
   height: 100%;
@@ -2653,8 +2653,8 @@ section.search-area .search-btn-area .btn-search {
   border: 1px solid #E50019;
   color: #E50019;
   background: #fff;
-  border-radius: 8px;
-  padding: 5px 6px;
+  border-radius: 16px;
+  padding: 5px 5px;
   font-size: 13px;
   font-weight: 500;
   height: 100%;
