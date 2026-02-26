@@ -105,7 +105,7 @@ window.initTab3 = function () {
     });
 };
 
-// 프로젝트 제목 옆 건수(span.hcnc-grid-count-number) 업데이트
+// 프로젝트 제목 옆 건수(span.hcnc-sub-count-number) 업데이트
 function updateHr013TitleCount() {
     let count = 0;
     if (window.hr013Table && typeof window.hr013Table.getDataCount === "function") {
@@ -113,7 +113,7 @@ function updateHr013TitleCount() {
     } else if (window.hr013Table && typeof window.hr013Table.getData === "function") {
         count = window.hr013Table.getData().length;
     }
-    $("#hr013-count .hcnc-grid-count-number").text(count);
+    $("#hr013-count .hcnc-sub-count-number").text(count);
 }
 
 let jobMap = [];

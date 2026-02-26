@@ -92,11 +92,18 @@ table a.btn {padding:3px 10px;}
   border-top: 2px solid #DEE2E7 !important;
   border-left: 2px solid #DEE2E7 !important;
   border-right: 2px solid #DEE2E7 !important;
-  border-top-left-radius: 8px !important;
-  border-top-right-radius: 8px !important;
+  /*border-top-left-radius: 8px !important;
+  border-top-right-radius: 8px !important;*/
   overflow: hidden;
 }
 
+/* ====================== 헤더 부분 둥글게 처리 ====================== */
+/*.tabulator .tabulator-header .tabulator-col:first-child {
+  border-top-left-radius: 8px !important;
+}
+.tabulator .tabulator-header .tabulator-col:last-child {
+  border-top-right-radius: 8px !important;
+}*/
 .tabulator .tabulator-header .tabulator-col {
   height: 48px !important;
   min-height: 48px !important;
@@ -105,14 +112,7 @@ table a.btn {padding:3px 10px;}
   /*border-bottom: 1px solid #E8EAEE !important;*/
   align-content: center;
 }
-
-.tabulator .tabulator-header .tabulator-col:first-child {
-  border-top-left-radius: 8px !important;
-}
-
-.tabulator .tabulator-header .tabulator-col:last-child {
-  border-top-right-radius: 8px !important;
-}
+/* ================================================================= */
 
 .tabulator .tabulator-header .tabulator-col .tabulator-col-content {
   height: 48px !important;
@@ -166,16 +166,6 @@ table a.btn {padding:3px 10px;}
 /* 기존 테두리 제거 */
 .tabulator {border: none !important;}
 .tabulator-header {border-top: none !important;}
-
-/* 주개발언어, 보유역량기술 선택 모달 테이블 */
-.main-lang-picker-content .tabulator-row .tabulator-cell,
-.hr012-skill-picker-content .tabulator-row .tabulator-cell {
-  cursor: default;
-}
-.main-lang-picker-content .tabulator-row .tabulator-cell:first-child:hover,
-.hr012-skill-picker-content .tabulator-row .tabulator-cell:first-child:hover {
-  background: #EFF1F6 !important;
-}
 
 /* Treemenu */
 .tree-menu-wrap .tabulator-row.tabulator-tree-level-0 > div {font-weight: 700; color: #ED242C;}

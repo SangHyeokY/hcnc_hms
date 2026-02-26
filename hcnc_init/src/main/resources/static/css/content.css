@@ -253,6 +253,12 @@ option{background:#fff; color:#333;}
 
 /* 총 데이터 수 색상 */
 .hcnc-grid-count-number {
+    /*color: #E50019;*/
+    font-weight: 500;
+    margin-left: 4px;
+}
+/* 2중 팝업 내의 데이터 수 색상 */
+.hcnc-sub-count-number {
     color: #E50019;
     font-weight: 500;
     margin-left: 4px;
@@ -330,12 +336,7 @@ option{background:#fff; color:#333;}
   pointer-events: auto;
   cursor: pointer;
 }
-#TABLE_HR013_A .tabulator-row {
-  min-height: 44px;
-}
-#TABLE_HR013_A .tabulator-row .tabulator-cell {
-  min-height: 44px;
-}
+
 #TABLE_HR013_A .tabulator-cell[data-field="job_cd"].tabulator-editing {
   height: 44px;
   overflow: hidden;
@@ -1199,8 +1200,8 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .modal-content.hr020-main-pop .tab-article {
     min-width:0; width:100%; height:100%; display:grid; grid-template-rows: fit-content(100%) fit-content(100%) 1fr;
 }
-.modal-content h5{position:relative; padding-left:16px; font-size:22px; font-weight: 700;}
-.modal-content h5:before{content:""; position:absolute; top:50%; left:0; transform:translateY(-50%); display:block; background:#E50019; width:6px; height:20px; border-radius:6px;}
+.modal-content h2{position:relative; padding-left:16px; font-size:22px; font-weight: 700;}
+.modal-content h2:before{content:""; position:absolute; top:50%; left:0; transform:translateY(-50%); display:block; background:#E50019; width:6px; height:20px; border-radius:6px;}
 .modal-content .title-area .type span{padding: 3px 9px; color: #E50019; border-radius:8px; border: 1px solid #E50019;}
 .modal-content top-article{padding-bottom:10px;}
 .modal-content ul {list-style: none; margin: 0; padding: 0;}
@@ -1646,9 +1647,6 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
     border-radius: 8px;
     overflow: hidden;
 }
-#TABLE_HR012_SKILL_PICKER .tabulator-tableHolder {
-    overflow-x: auto !important;
-}
 /*#TABLE_HR012_SKILL_PICKER .tabulator-row .tabulator-cell {
     padding-top: 8px !important;
     padding-bottom: 8px !important;
@@ -1823,9 +1821,9 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 }
 
 /* 행 높이 자동 */
-.tabulator .tabulator-row {
+/*.tabulator .tabulator-row {
   height: auto !important;
-  min-height: 32px;                 /* 기본 행 높이 */
+  min-height: 32px;
 }
 
 /* formatter 안에 div가 있는 경우 대비 */
@@ -1842,12 +1840,27 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
   align-content: center;
   border: 0;
 }
+/* 모든 tabulator 테이블의 첫번째 열은 th 효과 처리 */
 .tabulator .tabulator-table > .tabulator-row > .tabulator-cell:first-child {
+  background: #EFF1F6 !important;
   border-left: 2px solid #DEE2E7 !important;
+  font-weight: bold;
 }
+/* 모든 tabulator 테이블의 마지막 열은 td 효과 처리 */
 .tabulator .tabulator-table > .tabulator-row > .tabulator-cell:last-child {
   border-right: 2px solid #DEE2E7 !important;
 }
+/* 위 두 조건에서 예외 사항이 되는 테이블*/
+#TABLE_HR010_A .tabulator-row .tabulator-cell:first-child,
+#TABLE_HR013_A .tabulator-row .tabulator-cell:first-child,
+#TABLE_HR020_A .tabulator-row .tabulator-cell:first-child,
+#TABLE_COMMON_MAIN .tabulator-row .tabulator-cell:first-child,
+#TABLE_COMMON_DETAIL .tabulator-row .tabulator-cell:first-child,
+#TABLE_USER .tabulator-row .tabulator-cell:first-child {
+    font-weight: normal !important;
+    background: transparent !important;
+}
+
 .tabulator .tabulator-tableHolder {
     border-top: 2px solid #DEE2E7;
 }
@@ -1860,12 +1873,10 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 /* ====================================================================================================== */
 .tabulator-row .tabulator-cell:first-child {text-align: center !important}
 
-.main-lang-picker-content > .tabulator-row > .tabulator-cell:first-child,
-.hr012-skill-picker-content > .tabulator-row > .tabulator-cell:first-child,
-#TABLE_HR012_A .tabulator-table > .tabulator-row > .tabulator-cell:first-child,
-#TABLE_HR012_B .tabulator-table > .tabulator-row > .tabulator-cell:first-child {
-  background: #EFF1F6 !important;
-  font-weight: bold;
+/* 주개발언어, 보유역량기술 선택 모달 테이블 */
+.main-lang-picker-content .tabulator-row .tabulator-cell,
+.hr012-skill-picker-content .tabulator-row .tabulator-cell {
+  cursor: default;
 }
 
 .tabulator-row.tabulator-selected {
@@ -1879,7 +1890,6 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .tabulator-row.tabulator-selected.tabulator-selectable:hover .tabulator-cell {
   color: #ED2455 !important;
 }
-
 .tabulator-row.tabulator-selectable:hover {
   background-color: #f8f8f8 !important;
   color: #333;
@@ -2409,18 +2419,6 @@ section.search-area .search-btn-area .btn-search {
   margin-bottom: 0;
 }
 
-/* 프로젝트(A) 그리드 셀 높이 고정 */
-#TABLE_HR013_A .tabulator-row:not(.stack-editing):not(.stack-multi-line),
-#TABLE_HR013_A .tabulator-row:not(.stack-editing):not(.stack-multi-line) .tabulator-cell {
-  height: 45px !important;
-  min-height: 45px !important;
-}
-#TABLE_HR013_A .tabulator-row:not(.stack-editing):not(.stack-multi-line) .tabulator-cell {
-  line-height: 45px !important;
-  padding-top: 0 !important;
-  padding-bottom: 0 !important;
-}
-
 /* 등록 첫 화면(탭 숨김)에서 팝업 자체 스크롤 방지 */
 #view-user-area.insert .modal-container-detail.main-human-modal {
   max-height: 90vh;
@@ -2448,17 +2446,6 @@ section.search-area .search-btn-area .btn-search {
 
 #TABLE_HR013_A .tabulator-row.stack-multi-line .hr013-stack-cell {
   align-items: flex-start;
-}
-
-#view-user-area #TABLE_HR012_B.tabulator .tabulator-footer .tabulator-page[data-page="first"],
-#view-user-area #TABLE_HR012_B.tabulator .tabulator-footer .tabulator-page[data-page="prev"],
-#view-user-area #TABLE_HR012_B.tabulator .tabulator-footer .tabulator-page[data-page="next"],
-#view-user-area #TABLE_HR012_B.tabulator .tabulator-footer .tabulator-page[data-page="last"] {
-  width: 29px;
-  height: 29px;
-  min-width: 29px;
-  line-height: 27px;
-  font-size: 16px;
 }
 
 #view-user-area #HR014_TAB_B .content-body {
