@@ -267,7 +267,7 @@ $(document).ready(async function () {
                 showAlert({
                     icon: 'warning',
                     title: '경고',
-                    html: `해당 탭은<strong>&nbsp;프로젝트</strong>탭에서<strong>&nbsp;당사&nbsp;</strong>프로젝트의
+                    html: `해당 탭은<strong>&nbsp;프로젝트</strong>탭에서<strong>&nbsp;당사(HCNC)&nbsp;</strong>프로젝트의
                            <strong>&nbsp;평가&nbsp;</strong>버튼을 클릭해야 접근 가능합니다.`
                 });
                 return;
@@ -1462,8 +1462,8 @@ async function closeUserViewModal() {
         const htmlContent = currentMode === "insert"
             ? `<span>${tabNamesHtml} 항목을 ${modeText}하고 있습니다.</span>
                <span>${modeText} 작업을 취소하고 닫으시겠습니까?</span>`
-            : `<span><strong>${devNm}</strong>님의 기본 인적사항 정보 중</span>
-               <span>${tabNamesHtml}</span>
+            : `<span><strong>${devNm}</strong>님의 인적사항에서</span>&nbsp;
+               <span>${tabNamesHtml}</span>&nbsp;
                <span>항목이 ${modeText}되었습니다.</span>
                <span>${modeText} 작업을 취소하고 닫으시겠습니까?</span>`;
 
