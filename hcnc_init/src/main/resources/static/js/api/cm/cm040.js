@@ -167,13 +167,8 @@ function buildTables() {
                     return (grpCdMap && grpCdMap[val]) ? grpCdMap[val] : val;
                 }, editor: false, editable: false
             },
-            { title: "코드", field: "cd", hozAlign: "center" },
-            { title: "코드그룹명", field: "grp_nm" },
-            { title: "사용여부", field: "use_yn", hozAlign: "center", width: 90 }
-                     const val = cell.getValue();
-                     return (grpCdMap && grpCdMap[val]) ? grpCdMap[val] : val;
-                }, editor: false, editable: false},
-            {   title: "코드",
+            {
+                title: "코드",
                 field: "cd",
                 hozAlign: "center",
                 formatter: function (cell) {
@@ -182,7 +177,8 @@ function buildTables() {
                      return `<div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${value}</div>`;
                 }
             },
-            {   title: "코드그룹명",
+            {
+                title: "코드그룹명",
                 field: "grp_nm",
                 formatter: function (cell) {
                      const value = cell.getValue();
@@ -190,7 +186,18 @@ function buildTables() {
                      return `<div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${value}</div>`;
                 }
             },
-            { title: "사용여부", field: "use_yn", hozAlign: "center" }
+            {
+                title: "사용여부",
+                field: "use_yn",
+                hozAlign: "center",
+                width: 90,
+                formatter: function (cell) {
+                    const val = cell.getValue();
+                    return (grpCdMap && grpCdMap[val]) ? grpCdMap[val] : val;
+                },
+                editor: false,
+                editable: false
+            },
         ],
         rowSelected: r => syncRowCheckbox(r, true),
         rowDeselected: r => syncRowCheckbox(r, false),
