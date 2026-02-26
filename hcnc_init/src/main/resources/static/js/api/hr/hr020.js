@@ -156,24 +156,24 @@ $(document).ready(async function () {
     $(".btn-main-view").on("click", function () {
         const rowData = btnEditView("상세정보를 조회할 ");
         if (!rowData) return;
-        openUserModal("view", rowData);
+        // openUserModal("view", rowData);
     });
 
     // 등록 버튼 이벤트
     $(".btn-main-add").on("click", function () {
-        openUserModal("insert");
+        // openUserModal("insert");
     });
 
     // 수정 버튼 이벤트
     $(".btn-main-edit").on("click", function () {
         const rowData = btnEditView("수정할 ");
         if (!rowData) return;
-        openUserModal("update", rowData);
+        // openUserModal("update", rowData);
     });
 
     // 삭제 버튼 이벤트
     $(".btn-main-del").on("click", function () {
-        deleteUserRows();
+        // deleteUserRows();
     });
 
     // 탭 변경 이벤트
@@ -540,7 +540,7 @@ function buildPrjTable() {
         // 행 더블 클릭
         rowDblClick: function (e, row) {
             var rowData = row.getData();
-            openUserModal("view", rowData);
+            // openUserModal("view", rowData);
         }
     });
 }

@@ -1637,7 +1637,7 @@ function validateUserForm() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            html: `<strong>근무 가능 형태</strong>를 선택해주세요.`
+            html: `<strong>근무가능형태</strong>를 선택해주세요.`
         });
         $("#select_work_md").focus();
         return false;
@@ -1690,7 +1690,7 @@ function validateUserForm() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            html: `<strong>KOSA등급</strong>을 선택해주세요.`
+            html: `<strong>KOSA 등급</strong>을 선택해주세요.`
         });
         $("#select_kosa_grd_cd").focus();
         return false;
@@ -1737,7 +1737,7 @@ function validateUserForm() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            html: `<strong>주요분야</strong>를 선택해주세요.`
+            html: `<strong>주요 분야</strong>를 선택해주세요.`
         });
         $("#select_main_fld_cd").focus();
         return false;
@@ -1759,12 +1759,11 @@ function validateUserForm() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            html: `<strong>주요고객사</strong>를 선택해주세요.`
+            html: `<strong>주요 고객사</strong>를 선택해주세요.`
         });
         $("#select_main_cust_cd").focus();
         return false;
     }
-
     return true;
 }
 

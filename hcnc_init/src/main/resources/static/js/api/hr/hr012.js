@@ -85,7 +85,7 @@ function applyTab2Readonly(isReadOnly) {
     }
 }
 
-// 숙련도(B) 제목 옆 건수(span.hcnc-grid-count-number) 업데이트
+// 숙련도(B) 제목 옆 건수(span.hcnc-sub-count-number) 업데이트
 function updateHr012BTitleCount() {
     let count = 0;
     if (window.hr012TableB && typeof window.hr012TableB.getDataCount === "function") {
@@ -93,7 +93,7 @@ function updateHr012BTitleCount() {
     } else if (window.hr012TableB && typeof window.hr012TableB.getData === "function") {
         count = window.hr012TableB.getData().length;
     }
-    $("#hr012b-count .hcnc-grid-count-number").text(count);
+    $("#hr012b-count .hcnc-sub-count-number").text(count);
 }
 
 function buildHr012TableA() {
@@ -108,9 +108,9 @@ function buildHr012TableA() {
         selectable: false,     // 행 선택 비활성화
         selectableRange: false, // v5 이상이면 안전하게 추가
         columns: [
-            { title: "코드", field: "cd", visible: false },
             { title: "구분", field: "cd_nm", hozAlign: "left", width: 180, minWidth: 160 },
-            { title: "상세", field: "skl_id_lst", hozAlign: "left",widthGrow: 1, formatter: tagFormatter }
+            { title: "상세", field: "skl_id_lst", hozAlign: "left",widthGrow: 1, formatter: tagFormatter },
+            { title: "코드", field: "cd", visible: false }
         ],
         data: []
     });
@@ -174,6 +174,9 @@ function buildHr012TableB() {
         layout: "fitColumns",
         placeholder: "데이터 없음",
         height: "100%",
+        // 페이징 설정
+        pagination: "local",       // 로컬 데이터 기준 페이지네이션
+        paginationSize: 10,        // 한 페이지에 10개씩 표시
         // 숙련도 테이블 데이터 로드 시 건수 반영
         dataLoaded: function () {
             updateHr012BTitleCount();
@@ -188,8 +191,8 @@ function buildHr012TableB() {
            changedTabs.tab2 = true;
         },
         columns: [
-            { title: "skl_id", field: "skl_id", visible:false },
             { title: "기술", field: "cd_nm", hozAlign: "left", widthGrow: 2 },
+            { title: "skl_id", field: "skl_id", visible:false },
             ...[1,2,3,4,5].map(i => ({
                 title: i.toString() + "점",
                 field: "lv" + i,
@@ -800,7 +803,9 @@ function buildHr012SkillPickerTable() {
 function syncHr012SkillPickerUi(forceRebuild) {
     const totalCount = Array.isArray(hr012SkillOptions) ? hr012SkillOptions.length : 0;
     const selectedCount = getHr012SelectedCodeSet().size;
-    $("#hr012-skill-picker-meta").text("전체 기술 " + totalCount + "개 / 선택 " + selectedCount + "개");
+    $("#hr012-skill-picker-meta").html(
+        `전체 기술 <span class="fw500 mg-l4">${totalCount}</span>개 / 선택 <span class="hcnc-sub-count-number">${selectedCount}</span>개`
+    );
 
     if (!hr012SkillPickerTable) {
         return;

@@ -759,8 +759,8 @@ function createGroupedSkillPicker(config) {
         var selectedCount = getSelectedSet().size;
         var text = typeof cfg.metaTextBuilder === "function"
             ? cfg.metaTextBuilder(totalCount, selectedCount)
-            : ("전체 기술 " + totalCount + "개 / 선택 " + selectedCount + "개");
-        $(cfg.metaSelector).text(text);
+            : `전체 기술 <span class="fw500 mg-l4">${totalCount}</span>개 / 선택 <span class="hcnc-sub-count-number">${selectedCount}</span>개`;
+        $(cfg.metaSelector).html(text);
     }
 
     function buildGroupNameMap() {  // 그룹코드 -> 그룹명 맵 생성
