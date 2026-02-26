@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout/layout}">
+    layout:decorate="~{layout/layout}">
 
 <th:block th:fragment="tab3Content">
     <div class="content list-area tab3-content hr014-tab-wrap">
@@ -15,7 +15,7 @@
                     <button type="button" onclick="location.href='/templates/ExcelUpload_Temp.xlsx'">
                         <img src="/icons/btn-ico-excel-download.png" alt="엑셀 양식 다운로드">양식 다운로드
                     </button>
-                    <input type="file" id="excelFile" style="display: none" accept=".xls,.xlsx"/>
+                    <input type="file" id="excelFile" style="display: none" accept=".xls,.xlsx" />
                     <button type="button" id="btnUpload">
                         <img src="/icons/btn-ico-excel-upload.png" alt="엑셀 파일 업로드">엑셀 업로드
                     </button>
@@ -99,7 +99,7 @@
                             </li>
                             <li class="table-col fl-ac full-row">
                                 <div class="table-cell">
-                                    <p class="cell-tit" >투입률</p>
+                                    <p class="cell-tit">투입률</p>
                                     <div class="cell-info">
                                         <input type="text" class="text" id="write_hr013_alloc_pct" placeholder="숫자%">
                                     </div>
@@ -114,10 +114,13 @@
                                             <div class="tag-input-box">
                                                 <div class="tag-help"></div>
                                                 <ul class="tag-list" id="hr013SkillTagList"></ul>
-                                                <input type="text" class="text" id="write_hr013_stack_input" list="write_hr013_stack_datalist" placeholder="기술 입력/선택 후 Enter" style="display:none;">
+                                                <input type="text" class="text" id="write_hr013_stack_input"
+                                                    list="write_hr013_stack_datalist" placeholder="기술 입력/선택 후 Enter"
+                                                    style="display:none;">
                                             </div>
                                             <div class="tag-select-row">
-                                                <button type="button" class="btn btn-add-skill btn-hr013-skill-picker" id="btn_hr013_skill_picker">기술 선택</button>
+                                                <button type="button" class="btn btn-add-skill btn-hr013-skill-picker"
+                                                    id="btn_hr013_skill_picker">기술 선택</button>
                                                 <datalist id="write_hr013_stack_datalist"></datalist>
                                                 <select id="write_hr013_skl_cd" style="display:none"></select>
                                                 <input type="hidden" id="write_hr013_stack_txt">
@@ -163,8 +166,8 @@
                 <div class="hr013-skill-picker-search-row">
                     <label for="hr013-skill-picker-search">기술 검색</label>
                     <div class="hr013-skill-picker-search-wrap">
-                        <input type="text" id="hr013-skill-picker-search" class="wp100"
-                               placeholder="기술명 입력 후 선택" autocomplete="off">
+                        <input type="text" id="hr013-skill-picker-search" class="wp100" placeholder="기술명 입력 후 선택"
+                            autocomplete="off">
                         <ul class="hr013-skill-picker-suggest" id="hr013-skill-picker-suggest"></ul>
                     </div>
                     <span class="hr013-skill-picker-meta" id="hr013-skill-picker-meta"></span>
@@ -180,6 +183,57 @@
             </div>
         </div>
     </div>
+
+    <!-- 프로젝트 코드 선택/등록 팝업 -->
+    <div class="modal-wrap" id="hr013-project-picker-area" style="display:none">
+        <div class="modal-container hr013-project-picker-container">
+            <div class="header">
+                <h4>프로젝트 선택</h4>
+                <div class="btn-area">
+                    <button class="close-btn" type="button" id="btn_hr013_project_picker_close_x">
+                        <img src="./icons/Icon-close.png" alt="" />
+                    </button>
+                </div>
+            </div>
+
+            <div class="modal-content hr013-project-picker-content">
+                <!-- 좌: 검색/목록 -->
+                <div class="hr013-project-picker-left">
+                    <div class="hr013-project-picker-search-row">
+                        <label for="hr013-project-picker-search">프로젝트 검색</label>
+                        <input type="text" id="hr013-project-picker-search" class="wp100" placeholder="프로젝트명 입력">
+                    </div>
+                    <div id="TABLE_HR013_PROJECT_PICKER"></div>
+                </div>
+
+                <!-- 우: 신규 등록 -->
+                <div class="hr013-project-picker-right">
+                    <p class="cell-tit">신규 프로젝트 등록</p>
+                    <div class="cell-info">
+                        <label for="write_hr013_project_cd_nm">명칭</label>
+                        <input type="text" id="write_hr013_project_cd_nm" class="text" placeholder="프로젝트명">
+                    </div>
+                    <div class="cell-info">
+                        <label for="write_hr013_project_inprj_yn">당사 여부</label>
+                        <select id="write_hr013_project_inprj_yn">
+                            <option value="Y">Y</option>
+                            <option value="N">N</option>
+                        </select>
+                    </div>
+                    <div class="btn-area">
+                        <button type="button" class="btn btn-save" id="btn_hr013_project_code_save">신규 등록</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-btn">
+                <ul>
+                    <li><button type="button" class="btn btn-close" id="btn_hr013_project_picker_apply">적용</button></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
 </th:block>
 
 </html>
