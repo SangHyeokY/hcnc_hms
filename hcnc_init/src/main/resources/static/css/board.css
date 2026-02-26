@@ -74,8 +74,6 @@ table a.btn {padding:3px 10px;}
 .tabulator-row.tabulator-selected div.tabulator-cell {color: #E50019 !important; font-weight: 500 !important; background-color: #FFF8F8 !important}
 .tabulator .tabulator-header {width: auto;}
 .tabulator-row .tabulator-cell.tabulator-editing > * {font-size: 15px !important;}
-
-.tabulator .tabulator-table > .tabulator-row > .tabulator-cell:last-child {border-right: 2px solid #EFF1F6; !important;}
 .tabulator-row:nth-child(2n) .tabulator-cell {background-color: #FBFCFE !important;}
 
 /* Global Grid Style (all Tabulator tables) */
@@ -141,7 +139,6 @@ table a.btn {padding:3px 10px;}
 .tabulator-row .tabulator-cell,
 .tabulator-row .tabulator-cell + .tabulator-cell {
   border-left: 0 !important;
-  border-right: 0 !important;
 }
 
 /* 공통 행 높이 46px */
@@ -174,11 +171,6 @@ table a.btn {padding:3px 10px;}
 .main-lang-picker-content .tabulator-row .tabulator-cell,
 .hr012-skill-picker-content .tabulator-row .tabulator-cell {
   cursor: default;
-}
-.main-lang-picker-content .tabulator-row .tabulator-cell:first-child,
-.hr012-skill-picker-content .tabulator-row .tabulator-cell:first-child {
-  background: #EFF1F6 !important;
-  font-weight: bold;
 }
 .main-lang-picker-content .tabulator-row .tabulator-cell:first-child:hover,
 .hr012-skill-picker-content .tabulator-row .tabulator-cell:first-child:hover {

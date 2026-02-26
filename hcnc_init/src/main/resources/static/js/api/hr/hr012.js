@@ -108,9 +108,9 @@ function buildHr012TableA() {
         selectable: false,     // 행 선택 비활성화
         selectableRange: false, // v5 이상이면 안전하게 추가
         columns: [
-            { title: "코드", field: "cd", visible: false },
             { title: "구분", field: "cd_nm", hozAlign: "left", width: 180, minWidth: 160 },
-            { title: "상세", field: "skl_id_lst", hozAlign: "left",widthGrow: 1, formatter: tagFormatter }
+            { title: "상세", field: "skl_id_lst", hozAlign: "left",widthGrow: 1, formatter: tagFormatter },
+            { title: "코드", field: "cd", visible: false }
         ],
         data: []
     });
@@ -191,8 +191,8 @@ function buildHr012TableB() {
            changedTabs.tab2 = true;
         },
         columns: [
-            { title: "skl_id", field: "skl_id", visible:false },
             { title: "기술", field: "cd_nm", hozAlign: "left", widthGrow: 2 },
+            { title: "skl_id", field: "skl_id", visible:false },
             ...[1,2,3,4,5].map(i => ({
                 title: i.toString() + "점",
                 field: "lv" + i,

@@ -134,9 +134,14 @@ option{background:#fff; color:#333;}
   text-align: center !important;
   height: 50px;
   color: #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-.tabulator .tabulator-footer .tabulator-page-size {
-  display: none !important;
+.tabulator .tabulator-footer .tabulator-paginator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .tabulator .tabulator-footer .tabulator-pages {
   margin: 0 auto;
@@ -144,6 +149,13 @@ option{background:#fff; color:#333;}
   align-items: center;
   justify-content: center;
   gap: 0;
+}
+.tabulator .tabulator-footer .tabulator-page.active {
+  font-weight: 500;
+  color: #111827;
+}
+.tabulator .tabulator-footer .tabulator-page-size {
+  display: none !important;
 }
 .tabulator .tabulator-footer .tabulator-page {
   min-width: 24px;
@@ -157,10 +169,8 @@ option{background:#fff; color:#333;}
   font-weight: 500;
   padding: 0;
 }
-.tabulator .tabulator-footer .tabulator-page.active {
-  font-weight: 500;
-  color: #111827;
-}
+
+/* tabulator 하단 footer의 css */
 .tabulator .tabulator-footer .tabulator-page[data-page="first"],
 .tabulator .tabulator-footer .tabulator-page[data-page="prev"],
 .tabulator .tabulator-footer .tabulator-page[data-page="next"],
@@ -404,8 +414,6 @@ option{background:#fff; color:#333;}
  * treeMenu Type
 =================================================================================*/
 .tree .none {display: none;}
-.tabulator-row .tabulator-cell:first-child {text-align: center !important}
-
 .tabulator .tabulator-header {color:#333 !important; font-size: 15px !important; font-weight: 600 !important;}
 .tabulator .tabulator-header .tabulator-col.tabulator-col-group .tabulator-col-group-cols {border-top: 2px solid #ebedf1 !important;}
 
@@ -1382,13 +1390,14 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
     display: none;
 }
 
+/*
 #TABLE_MAIN_LANG_PICKER .tabulator-table > .tabulator-row > .tabulator-cell:nth-child(2),
 #TABLE_HR012_SKILL_PICKER .tabulator-table > .tabulator-row > .tabulator-cell:nth-child(2),
 #TABLE_HR012_A .tabulator-table > .tabulator-row > .tabulator-cell:nth-child(2) {
     background-color: #fff !important;
     font-weight: bold;
     overflow-x: auto;
-}
+}*/
 
 /* 탭 영역  */
 .tab1-content .content-body,
@@ -1443,6 +1452,9 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .hr012-toolbar-02 p.tool-title,
 .hr014-toolbar-01 p.tool-title,
 .hr014-toolbar-02 p.tool-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   position: relative;
   padding-left: 27px;
   font-size: 18px;
@@ -1830,6 +1842,12 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
   align-content: center;
   border: 0;
 }
+.tabulator .tabulator-table > .tabulator-row > .tabulator-cell:first-child {
+  border-left: 2px solid #DEE2E7 !important;
+}
+.tabulator .tabulator-table > .tabulator-row > .tabulator-cell:last-child {
+  border-right: 2px solid #DEE2E7 !important;
+}
 .tabulator .tabulator-tableHolder {
     border-top: 2px solid #DEE2E7;
 }
@@ -1840,6 +1858,15 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
   border-bottom: solid 2px #DEE2E7 !important;
 }
 /* ====================================================================================================== */
+.tabulator-row .tabulator-cell:first-child {text-align: center !important}
+
+.main-lang-picker-content > .tabulator-row > .tabulator-cell:first-child,
+.hr012-skill-picker-content > .tabulator-row > .tabulator-cell:first-child,
+#TABLE_HR012_A .tabulator-table > .tabulator-row > .tabulator-cell:first-child,
+#TABLE_HR012_B .tabulator-table > .tabulator-row > .tabulator-cell:first-child {
+  background: #EFF1F6 !important;
+  font-weight: bold;
+}
 
 .tabulator-row.tabulator-selected {
   color: #ED2455 !important;
@@ -1868,28 +1895,19 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
   background: #ED2455 !important;
 }
 
-/* Tab2 보유역량 및 숙련도 테이블 */
-#TABLE_HR012_A .tabulator-table > .tabulator-row > .tabulator-cell:nth-child(2),
-#TABLE_HR012_B .tabulator-table > .tabulator-row > .tabulator-cell:nth-child(2) {
-  background-color: #EFF1F6 !important;
-  font-weight: bold;
-  text-align: center !important;
-}
 /* 보유역량(A) 상세 컬럼이 우측 영역 전체를 채우도록 폭 고정 */
 /*#TABLE_HR012_A, #TABLE_HR012_A.tabulator {
   width: calc(100% - 4px) !important;
 }*/
-#TABLE_HR012_B .tabulator-tableHolder {
-    height: calc(100% - 120px) !important; /* footer 높이만큼 빼기 */
+
+/*#TABLE_HR012_B .tabulator-tableHolder {
+    height: calc(100% - 120px) !important;
     min-height: calc(100% - 120px) !important;
     max-height: calc(100% - 120px) !important;
-}
-#TABLE_HR012_B .tabulator-footer { /* Footer 고정 */
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    z-index: 10; /* 겹침 방지 */
+}*/
+.tabulator .tabulator-footer {
+    width: 100% !important;
+    box-sizing: border-box;
 }
 
 /* ============================= 유틸 css ============================= */
