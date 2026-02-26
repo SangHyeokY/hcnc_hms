@@ -190,7 +190,7 @@ function buildTables() {
                 title: "사용여부",
                 field: "use_yn",
                 hozAlign: "center",
-                width: 90,
+                width: 85,
                 formatter: function (cell) {
                     const val = cell.getValue();
                     return (grpCdMap && grpCdMap[val]) ? grpCdMap[val] : val;

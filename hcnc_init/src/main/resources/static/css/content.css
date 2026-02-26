@@ -2419,6 +2419,68 @@ section.search-area .search-btn-area .btn-search {
   color: #111;
 }
 
+/* ===== HR013: 프로젝트 선택 팝업 ===== */
+/* 컨테이너/전체 레이아웃 */
+#hr013-project-picker-area .hr013-project-picker-container {
+  width: 980px;
+  min-width: 0;
+  max-width: calc(100% - 40px);
+}
+#hr013-project-picker-area .hr013-project-picker-content {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 14px;
+  height: auto;
+  max-height: 72vh;
+  overflow: hidden;
+}
+#hr013-project-picker-area .hr013-project-picker-left,
+#hr013-project-picker-area .hr013-project-picker-right {
+  min-width: 0;
+}
+
+/* 검색 영역(좌측 상단) */
+#hr013-project-picker-area .hr013-project-picker-search-row {
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+#hr013-project-picker-area .hr013-project-picker-search-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+#hr013-project-picker-area #hr013-project-picker-search {
+  min-width: 0;
+}
+#hr013-project-picker-area #btn_hr013_project_picker_search {
+  min-width: 72px;
+  white-space: nowrap;
+}
+
+/* 목록 테이블(좌측) */
+#hr013-project-picker-area #TABLE_HR013_PROJECT_PICKER {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+#hr013-project-picker-area #TABLE_HR013_PROJECT_PICKER .tabulator-row.tabulator-selected .tabulator-cell {
+  background-color: #f4f7ff !important;
+}
+
+/* 신규 등록 폼(우측) */
+#hr013-project-picker-area .hr013-project-picker-right .cell-info {
+  margin-bottom: 10px;
+}
+#hr013-project-picker-area .hr013-project-picker-right .cell-info label {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 13px;
+}
+/* ============================== */
+
 /* HR010 modal scroll tuning */
 #view-user-area .tab3-content .content-body {
   margin-bottom: 0;
