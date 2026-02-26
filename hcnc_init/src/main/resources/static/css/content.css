@@ -2159,12 +2159,12 @@ section.search-area .search-info #searchKeyword {
 }
 
 section.search-area .search-info #searchType {
-    width: 180px;
+    width: 200px;
     background-color: #F6F6F6; border: 1px solid #D9D9D9;
 }
 
 section.search-area .search-info #searchConditionKeyword { /* 새 검색어 입력폭 */
-  width: 260px !important; /* 조건검색 입력폭 */
+  width: 400px !important; /* 조건검색 입력폭 */
   background-color: #F6F6F6; border: 1px solid #D9D9D9;
 }
 
