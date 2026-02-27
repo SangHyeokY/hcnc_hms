@@ -18,6 +18,14 @@ var hr013ProjectPickerTable = null;     // 팝업 내 목록 테이블 인스턴
 var hr013ProjectPickerContextRow = null; // 어느 행에서 팝업 열었는지 기억
 var hr013SelectedProjectCode = null;     // 사용자가 선택한 코드 1건
 
+function isHr013InprjYnY(value) {
+    return String(value || "").trim().toUpperCase() === "Y";
+}
+
+function isHr013ProjectCodeSelectable(data) {
+    return isHr013InprjYnY(data && data.inprj_yn);
+}
+
 // 프로젝트 탭 초기화 (버튼/콤보/태그/테이블)
 window.initTab3 = function () {
     if (!window.hr013Table) buildHr013Table();
@@ -247,9 +255,9 @@ function buildHr013Table() {
                 field: "cust_nm",
                 editor: "input",
                 formatter: function (cell) {
-                	const value = cell.getValue();
-                	if (!value) return "";
-                	return `<div style="
+                    const value = cell.getValue();
+                    if (!value) return "";
+                    return `<div style="
                 		text-align:left;
                 		white-space: nowrap;
                 		overflow: hidden;
@@ -604,18 +612,38 @@ function initHr013ProjectPickerTable() {
     hr013ProjectPickerTable = new Tabulator("#TABLE_HR013_PROJECT_PICKER", {
         layout: "fitColumns",
         selectable: 1,
-        height: "360px",
+        height: "480px",
+        pagination: "local",
+        paginationSize: 8,
+        paginationSizeSelector: [5, 10, 15, 20],
         columns: [
             { title: "코드", field: "cd", width: 90, hozAlign: "center" },
             { title: "프로젝트명", field: "cd_nm", widthGrow: 1 },
             { title: "당사 여부", field: "inprj_yn", width: 90, hozAlign: "center" },
         ],
         rowClick: function (e, row) {
+            var data = row && typeof row.getData === "function" ? row.getData() : null;
+            if (!isHr013ProjectCodeSelectable(data)) {
+                showAlert({
+                    icon: "info",
+                    title: "알림",
+                    text: "당사 프로젝트만 선택할 수 있습니다."
+                });
+                return;
+            }
             row.select();
-            hr013SelectedProjectCode = row.getData();   // 사용자가 고른 코드 저장
+            hr013SelectedProjectCode = data;   // 사용자가 고른 코드 저장
         },
         rowSelected: function (row) {
-            hr013SelectedProjectCode = row.getData();
+            var data = row && typeof row.getData === "function" ? row.getData() : null;
+            if (!isHr013ProjectCodeSelectable(data)) {
+                if (typeof row.deselect === "function") {
+                    row.deselect();
+                }
+                hr013SelectedProjectCode = null;
+                return;
+            }
+            hr013SelectedProjectCode = data;
         },
         rowDeselected: function (row) {
             var data = row.getData();
@@ -631,6 +659,16 @@ function initHr013ProjectPickerTable() {
 function openHr013ProjectPicker(row) {
     bindHr013ProjectPickerEvents();
     if (!isHr013Editable()) return; // 조회 모드 차단
+
+    var rowData = row && typeof row.getData === "function" ? row.getData() : null;
+    if (rowData && !isHr013InprjYnY(rowData.inprj_yn)) {
+        showAlert({
+            icon: "info",
+            title: "알림",
+            text: "당사 프로젝트만 선택할 수 있습니다."
+        });
+        return;
+    }
 
     hr013ProjectPickerContextRow = row || null; // 어떤 행에서 열었는지 저장
     hr013SelectedProjectCode = null;    // 이전 선택 초기화
@@ -658,51 +696,113 @@ function closeHr013ProjectPicker(immediate) {
     }, 180);
 }
 
-// 팝업에서 사용자가 고른 코드를 찾기
-function focusHr013ProjectPickerRow(focusCd, focusName) {
-    if (!hr013ProjectPickerTable) return;
+function findHr013ProjectPickerDataIndex(list, targetCd, targetName) {
+    for (var i = 0; i < list.length; i += 1) {
+        var item = list[i] || {};
+        if (targetCd && String(item.cd || "") === targetCd) {
+            return i;
+        }
+        if (!targetCd && targetName && String(item.cd_nm || "").trim() === targetName) {
+            return i;
+        }
+    }
+    return -1;
+}
 
-    // Tabulator API가 없을 수 있는 타이밍(초기화 직후)을 방어한다.
-    var rows = (typeof hr013ProjectPickerTable.getRows === "function")
-        ? hr013ProjectPickerTable.getRows()
-        : [];
-    if (!rows || !rows.length) return;
-
-    var targetRow = null;
-    var targetCd = String(focusCd || "").trim();
-    var targetName = String(focusName || "").trim();
-
+function findHr013ProjectPickerRow(rows, targetCd, targetName) {
     for (var i = 0; i < rows.length; i += 1) {
         var row = rows[i];
         var data = row && typeof row.getData === "function" ? row.getData() : null;
         if (!data) continue;
-
         if (targetCd && String(data.cd || "") === targetCd) {
-            targetRow = row;
-            break;
+            return row;
         }
-
         if (!targetCd && targetName && String(data.cd_nm || "").trim() === targetName) {
-            targetRow = row;
-            break;
+            return row;
         }
     }
+    return null;
+}
 
-    if (!targetRow) {
+// 팝업에서 사용자가 고른 코드를 찾기(페이지 이동 포함)
+function focusHr013ProjectPickerRow(focusCd, focusName, dataList) {
+    if (!hr013ProjectPickerTable) return;
+
+    var targetCd = String(focusCd || "").trim();
+    var targetName = String(focusName || "").trim();
+    if (!targetCd && !targetName) return;
+
+    var allData = Array.isArray(dataList)
+        ? dataList
+        : ((typeof hr013ProjectPickerTable.getData === "function")
+            ? hr013ProjectPickerTable.getData()
+            : []);
+    if (!Array.isArray(allData) || !allData.length) return;
+
+    // 전체 데이터 기준 인덱스를 먼저 찾고, 페이지가 다르면 해당 페이지로 이동한다.
+    var targetIndex = findHr013ProjectPickerDataIndex(allData, targetCd, targetName);
+    if (targetIndex < 0) return;
+
+    var selectTargetRow = function () {
+        var activeRows = (typeof hr013ProjectPickerTable.getRows === "function")
+            ? hr013ProjectPickerTable.getRows("active")
+            : [];
+        if (!Array.isArray(activeRows) || !activeRows.length) {
+            activeRows = (typeof hr013ProjectPickerTable.getRows === "function")
+                ? hr013ProjectPickerTable.getRows()
+                : [];
+        }
+
+        var targetRow = findHr013ProjectPickerRow(activeRows || [], targetCd, targetName);
+        if (!targetRow) {
+            return;
+        }
+
+        var targetData = typeof targetRow.getData === "function" ? targetRow.getData() : null;
+        if (!isHr013ProjectCodeSelectable(targetData)) {
+            hr013SelectedProjectCode = null;
+            return;
+        }
+
+        if (typeof hr013ProjectPickerTable.deselectRow === "function") {
+            hr013ProjectPickerTable.deselectRow();
+        }
+        if (typeof targetRow.select === "function") {
+            targetRow.select();
+        }
+        hr013SelectedProjectCode = targetData;
+
+        if (typeof hr013ProjectPickerTable.scrollToRow === "function") {
+            var scrollResult = hr013ProjectPickerTable.scrollToRow(targetRow, "center", false);
+            if (scrollResult && typeof scrollResult.catch === "function") {
+                scrollResult.catch(function () { });
+            }
+        }
+    };
+
+    var pageSize = (typeof hr013ProjectPickerTable.getPageSize === "function")
+        ? Number(hr013ProjectPickerTable.getPageSize())
+        : 0;
+    if (!pageSize || pageSize <= 0) {
+        pageSize = Number(hr013ProjectPickerTable.options && hr013ProjectPickerTable.options.paginationSize);
+    }
+
+    if (typeof hr013ProjectPickerTable.setPage === "function" && pageSize > 0) {
+        var targetPage = Math.floor(targetIndex / pageSize) + 1;
+        var setPageResult = hr013ProjectPickerTable.setPage(targetPage);
+        if (setPageResult && typeof setPageResult.then === "function") {
+            setPageResult.then(function () {
+                setTimeout(selectTargetRow, 0);
+            }).catch(function () {
+                setTimeout(selectTargetRow, 0);
+            });
+        } else {
+            setTimeout(selectTargetRow, 0);
+        }
         return;
     }
 
-    if (typeof hr013ProjectPickerTable.deselectRow === "function") {
-        hr013ProjectPickerTable.deselectRow();
-    }
-    if (typeof targetRow.select === "function") {
-        targetRow.select();
-    }
-    hr013SelectedProjectCode = targetRow.getData();
-
-    if (typeof hr013ProjectPickerTable.scrollToRow === "function") {
-        hr013ProjectPickerTable.scrollToRow(targetRow, "center", false).catch(function () {});
-    }
+    selectTargetRow();
 }
 
 // 공통코드 목록 조회
@@ -725,7 +825,7 @@ function loadHr013ProjectCodeList(keyword, options) {
             var afterSetData = function () {
                 // 신규 저장 직후에는 방금 등록한 코드/명칭으로 자동 포커스한다.
                 if (focusCd || focusName) {
-                    focusHr013ProjectPickerRow(focusCd, focusName);
+                    focusHr013ProjectPickerRow(focusCd, focusName, list);
                     return;
                 }
                 // 일반 조회에서는 이전 선택을 제거해 오선택을 방지한다.
@@ -767,6 +867,12 @@ function applyHr013ProjectPickerSelection() {
         })
         return;
     }
+    if (!isHr013ProjectCodeSelectable(hr013SelectedProjectCode)) {
+        showAlert({
+            icon: "info", title: "알림", text: "당사 프로젝트만 선택할 수 있습니다."
+        });
+        return;
+    }
     const selectedName = String(hr013SelectedProjectCode.cd_nm || "").trim();
     if (!selectedName) {
         showAlert({ icon: "warning", title: "경고", text: "선택된 프로젝트명이 비어 있습니다." });
@@ -783,13 +889,27 @@ function applyHr013ProjectPickerSelection() {
 }
 
 // 신규 프로젝트 코드 저장
-function saveHr013ProjectCode() {
+async function saveHr013ProjectCode() {
     const cdNm = $.trim($("#write_hr013_project_cd_nm").val());
     const inprjYn = String($("#write_hr013_project_inprj_yn").val() || "N").toUpperCase();
 
     if (!cdNm) {
         showAlert({ icon: "warning", title: "경고", text: "프로젝트명을 입력해주세요." });
         $("#write_hr013_project_cd_nm").focus();
+        return;
+    }
+
+    const confirmResult = await showAlert({
+        icon: "warning",
+        title: "확인",
+        text: "\"" + cdNm + "\" 프로젝트를 등록하시겠습니까?",
+        showCancelButton: true,
+        confirmText: "등록",
+        cancelText: "취소",
+        cancelButtonColor: "#212E41"
+    });
+
+    if (!confirmResult.isConfirmed) {
         return;
     }
 
@@ -823,7 +943,7 @@ function saveHr013ProjectCode() {
                 inprj_yn: inprjYn
             };
 
-            showAlert({ icon: "success", title: "완료", text: "프로젝트 코드가 등록되었습니다." });
+            showAlert({ icon: "success", title: "완료", text: "신규 프로젝트 코드가 등록되었습니다." });
         },
         error: function () {
             showAlert({ icon: "error", title: "오류", text: "프로젝트 코드 저장 중 오류가 발생했습니다." });
