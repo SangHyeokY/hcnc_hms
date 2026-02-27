@@ -67,10 +67,6 @@ table a.btn {padding:3px 10px;}
 .paging-box ul li a.on {background-color: #018ace; color: #fff; border: none;}
 
 /* Tabulator */
-.tabulator-row.tabulator-selectable:hover .tabulator-cell {
-  background-color: #f8f8f8 !important;
-  color: #333;
-}
 .tabulator .tabulator-header {width: auto;}
 .tabulator-row .tabulator-cell.tabulator-editing > * {font-size: 15px !important;}
 .tabulator-row:nth-child(2n) .tabulator-cell {background-color: #FBFCFE !important;}
@@ -87,9 +83,15 @@ table a.btn {padding:3px 10px;}
 
 /* 선택된 행에 대한 css */
 .tabulator .tabulator-table .tabulator-row.tabulator-selected > .tabulator-cell {
-    color: #E50019 !important;
-    font-weight: 500 !important;
-    background-color: #FFF8F8 !important;
+  color: #ff8000 !important;
+  font-weight: 500 !important;
+  background-color: #fff9da !important;
+}
+
+/* 호버된 행에 대한 css */
+.tabulator-row.tabulator-selectable:hover .tabulator-cell {
+  color: #ed2455;
+  background-color: #fff8f8 !important;
 }
 
 /* ====================== 헤더 부분 둥글게 처리 ====================== */
@@ -115,9 +117,14 @@ table a.btn {padding:3px 10px;}
   min-height: 45px !important;
   border-left: 0 !important;
   border-right: 0 !important;
+  /*border-right: 2px solid #DEE2E7 !important;*/
   /*border-bottom: 1px solid #E8EAEE !important;*/
   align-content: center;
 }
+/* 헤더에 border 넣을 경우 활성화 */
+/*.tabulator .tabulator-header .tabulator-col:last-child {
+  border-right: none;
+}*/
 
 .tabulator .tabulator-header .tabulator-col .tabulator-col-content {
   height: 45px !important;

@@ -126,7 +126,6 @@ option{background:#fff; color:#333;}
 .tabulator-row .tabulator-cell.hcnc-align-center {text-align: center !important;}
 .tabulator-row .tabulator-cell.tabulator-align-right,
 .tabulator-row .tabulator-cell.hcnc-align-right {text-align: right !important;}
-.tabulator-row.tabulator-selectable:hover .tabulator-cell {background-color: #f3fcff !important; color: #0092c7;}
 .tabulator-placeholder {background: #fff !important;}
 .tabulator-tableHolder {background: #fff !important;} /* overflow-x: hidden !important; */
 .tabulator .row-check {pointer-events: none;}
@@ -263,7 +262,7 @@ option{background:#fff; color:#333;}
 }
 /* 2중 팝업 내의 데이터 수 색상 */
 .hcnc-sub-count-number {
-    /*color: #E50019;*/
+    color: #E50019;
     font-weight: 500;
     margin-left: 4px;
 }
@@ -498,15 +497,9 @@ button.btn.btn-add-skill:hover,
 }
 
 /*===============================================================================
-  HR015 - risk memo
+  HR014 - risk memo
 ================================================================================*/
-.risk-box {
-  display: grid;
-  grid-template-columns: 110px 1fr;
-  gap: 12px;
-  height: 100%;
-}
-.risk-list {
+/*.risk-list {
   border: 1px solid #dcdcdc;
   border-radius: 6px;
   overflow: hidden;
@@ -523,28 +516,57 @@ button.btn.btn-add-skill:hover,
 }
 .risk-list .risk-item.row input[type="checkbox"] {
   flex: 0 0 auto;
+}*/
+
+.risk-list-top {
+  gap: 12px;
+  width: 110px;
 }
-.risk-list .risk-item {
-  padding: 10px 12px;
-  border-bottom: 1px solid #eee;
-  cursor: pointer;
-  font-size: 14px;
-}
-.risk-list .risk-item.active {
-  background: #eaf2ff;
-  font-weight: 500;
-}
+
 .risk-detail, .risk-list-top {
   margin: 4px;
+  display: flex;
+  flex-direction: column;
+  /*border: none;*/
 }
-.risk-detail textarea {
-  width: 100%;
-  min-height: 120px;
-  border: 1px solid #dcdcdc;
-  border-radius: 6px;
-  padding: 10px 12px;
-  height: calc(100% - 4px);
+
+#view-user-area #HR014_TAB_B .risk-box-top {
+  grid-template-columns: 110px 1fr;
+  min-height: 0;
+  height: 100%;
+  display: grid;
+  gap: 12px;
 }
+
+#view-user-area #HR014_TAB_B .risk-list-top .risk-item {
+   border: 1px solid #c5ccd5;
+   border-radius: 8px;
+   padding: 6px 12px;
+   background: #ffffff;
+   font-weight: 700;
+   font-size: 15px;
+   color: #1D232D;
+   text-align: center;
+   align-content: center;
+   height: 40px;
+}
+
+#view-user-area #HR014_TAB_B .risk-list-top .risk-item.active {
+  border: 1px solid #E52237;
+  background: #E52237;
+  /*font-weight: 500;*/
+  color: #fff;
+}
+
+#view-user-area #HR014_TAB_B .risk-detail textarea {
+  height: 100%;
+  resize: none;
+  background: #ffffff;
+  /*border: 2px solid #D9D9D9;*/
+  border-radius: 8px;
+  padding: 12px 16px;
+}
+
 .risk-extra {
   margin: 10px 14px 12px;
   display: flex;
@@ -653,7 +675,8 @@ button.btn.btn-add-skill:hover,
 .hr014-side-tabs {
   display: flex;
   width: 100%;
-  border-bottom: 1px solid #DEE2E7;
+  /*border-bottom: 1px solid #DEE2E7;*/
+  border-bottom: 2px solid #EAECF0;
   position: sticky;
   top: 0;
   align-self: flex-start;
@@ -717,33 +740,6 @@ button.btn.btn-add-skill:hover,
   display: block;
 }
 
-.risk-list-top {
-  display: flex;
-  flex-direction:column;
-  border: none;
-  gap: 10px;
-}
-.risk-list-top .risk-item {
-  border: 1px solid rgba(1, 0, 0, 0.2);
-  border-radius:50px;
-  padding: 6px 12px;
-  background: #ffffff;
-  font-weight: 400;
-  font-size: 15px;
-  color: #1D232D;
-  text-align: center;
-  align-content: center;
-  height: 40px;
-}
-
-.risk-list-top .risk-item.active {
-  background: #E52237;
-  color: #fff;
-}
-.risk-box-top .risk-detail textarea {
-  background: #ffffff;
-  border-color: #D9D9D9;
-}
 .tab2-content .tab-btn,
 .tab2-content .tab-sub-btn,
 .tab4-content .tab-btn,
@@ -1894,11 +1890,11 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
   cursor: default;
 }
 
-.tabulator-row.tabulator-selected {
+/*.tabulator-row.tabulator-selected {
   color: #ED2455 !important;
   font-weight: 500 !important;
-  /*background-color: #F4F7FF !important;*/
-}
+  background-color: #F4F7FF !important;
+}*/
 
 /* Tabulator 체크박스 선택 색상 */
 .tabulator input[type="checkbox"] {
@@ -2044,6 +2040,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 #aboutGrade .tooltip .score-section {
   margin-bottom: 12px;
   display: flex;
+  white-space: nowrap;
 }
 
 #aboutGrade .tooltip .score-section strong {
@@ -2519,26 +2516,6 @@ section.search-area .search-btn-area .btn-search {
   overflow: hidden;
 }
 
-#view-user-area #HR014_TAB_B .risk-box-top {
-  grid-template-columns: 110px 1fr;
-  gap: 10px;
-  min-height: 0;
-  height: calc(100% - 6px);
-}
-
-#view-user-area #HR014_TAB_B .risk-list-top .risk-item {
-  height: 40px;
-  padding: 5px 10px;
-}
-
-#view-user-area #HR014_TAB_B .risk-detail textarea {
-  min-height: 0;
-  height: calc(100% - 40px);
-  max-height: 100%;
-  resize: none;
-}
-
-
 /* 인적사항 경력연차 행 높이 미세 축소 */
 #view-user-area #TABLE_HR010_B .career-exp-cell {
   padding-top: 2px !important;
@@ -2683,7 +2660,9 @@ section.search-area .search-btn-area .btn-search {
 }
 
 .hr014-title {
-  font-size: 16px; padding-left: 5px; color: #7b8794; font-weight: 400;
+  font-size: 16px;
+  font-weight: 500;
+  padding: 2px 0px 0px 10px;
 }
 
 .btn-prj-edit {
