@@ -144,7 +144,7 @@ const Layout = {
 document.addEventListener("DOMContentLoaded", () => {
   Layout.init();
 
-  const logoutBtn = document.querySelector(".logout-btn");
+  const logoutBtn = document.querySelector("#logout-btn");
       if(logoutBtn){
           logoutBtn.addEventListener("click", (e) => {
               showAlert({

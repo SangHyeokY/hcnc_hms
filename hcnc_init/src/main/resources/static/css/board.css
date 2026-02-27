@@ -91,7 +91,7 @@ table a.btn {padding:3px 10px;}
 /* 호버된 행에 대한 css */
 .tabulator-row.tabulator-selectable:hover .tabulator-cell {
   color: #ed2455;
-  background-color: #fff8f8 !important;
+  background-color: #FFF8F8 !important;
 }
 
 /* ====================== 헤더 부분 둥글게 처리 ====================== */

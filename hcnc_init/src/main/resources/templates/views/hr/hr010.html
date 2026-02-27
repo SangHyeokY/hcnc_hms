@@ -12,19 +12,19 @@
 <th:block layout:fragment="searchCondition">
     <div class="search-select hr010-search-condition-wrap">
         <p class="fl-ac">
-            <label for="searchType" class="">• 검색조건 &nbsp;</label>
+            <label for="searchType" class="fw600 pd-r10">• 검색조건</label>
             <select id="searchType" name="searchType" class="hr010-search-input hr010-search-type-input" ></select>
         </p>
     </div>
     <div class="search-input hr010-search-condition-keyword-wrap">
         <p class="fl-ac">
-            <label for="searchConditionKeyword" class="">• 검색어 &nbsp;</label>
+            <label for="searchConditionKeyword" class="fw600 pd-r10">• 검색어</label>
             <input type="text" class="hr010-search-input hr010-search-condition-keyword-input" id="searchConditionKeyword" name="searchConditionKeyword" placeholder="검색어를 입력하세요" />
         </p>
     </div>
     <div class="search-input hr010-search-tag-wrap">
         <p class="fl-ac">
-            <label for="searchKeyword" class="">• Tag 검색 &nbsp;</label>
+            <label for="searchKeyword" class="fw600 pd-r10">• Tag 검색</label>
             <input type="text" class="hr010-search-input hr010-search-keyword-input" id="searchKeyword" name="searchKeyword" placeholder="Tag 검색" />
         </p>
     </div>
@@ -416,6 +416,7 @@
         </div><!-- modal-container-detail -->
     </div><!-- modal-wrap -->
 
+    <!-- 인적사항 서브 모달 -->
     <div class="modal-wrap" id="main-lang-picker-area" style="display:none">
         <div class="modal-container main-lang-picker-container">
             <div class="header">
@@ -428,7 +429,7 @@
             </div>
             <div class="modal-content main-lang-picker-content">
                 <div class="main-lang-picker-search-row">
-                    <label for="main-lang-picker-search">기술 검색</label>
+                    <label for="main-lang-picker-search">• 기술 검색</label>
                     <div class="main-lang-picker-search-wrap">
                         <input type="text" id="main-lang-picker-search" class="wp100" placeholder="기술명 입력 후 선택"
                             autocomplete="off">
@@ -461,7 +462,7 @@
             </div>
             <div class="modal-content hr012-skill-picker-content">
                 <div class="hr012-skill-picker-search-row">
-                    <label for="hr012-skill-picker-search">기술 검색</label>
+                    <label for="hr012-skill-picker-search">• 기술 검색</label>
                     <div class="hr012-skill-picker-search-wrap">
                         <input type="text" id="hr012-skill-picker-search" class="wp100"
                                placeholder="기술명 입력 후 선택" autocomplete="off">

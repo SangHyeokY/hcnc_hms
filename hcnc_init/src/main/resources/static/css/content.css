@@ -153,9 +153,17 @@ option{background:#fff; color:#333;}
   justify-content: center;
   gap: 0;
 }
+
+.tabulator .tabulator-footer .tabulator-page:not(.disabled):hover {
+  color: #333 !important;
+}
+.tabulator .tabulator-footer .tabulator-pages .tabulator-page:hover {
+  background: #fff;
+}
+
 .tabulator .tabulator-footer .tabulator-page.active {
   font-weight: 500;
-  color: #111827;
+  color: #000;
 }
 .tabulator .tabulator-footer .tabulator-page-size {
   display: none !important;
@@ -167,9 +175,9 @@ option{background:#fff; color:#333;}
   border-radius: 0;
   border: none;
   background: transparent;
-  color: #5d6573;
+  color: #5F666E;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 400;
   padding: 0;
 }
 
@@ -181,8 +189,8 @@ option{background:#fff; color:#333;}
   min-width: 32px;
   width: 32px;
   height: 32px;
-  line-height: 29px;
-  border: 1px solid #DEE2E7;
+  /*line-height: 29px;*/
+  border: 2px solid #DEE2E7;
   border-radius: 50%;
   background: #EFF1F6;
   padding: 0;
@@ -948,14 +956,13 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 #main-lang-picker-area .main-lang-picker-search-row {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   margin-bottom: 12px;
 }
 #main-lang-picker-area .main-lang-picker-search-row > label {
   min-width: 56px;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 600;
-  color: #222;
 }
 #main-lang-picker-area .main-lang-picker-search-wrap {
   position: relative;
@@ -1131,8 +1138,8 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
     color: #FF6E4B;
     margin-left: auto;
     margin-right: 10px;
-    font-weight: 500;
-    font-size: 15px;
+    font-weight: 400;
+    font-size: 16px;
 }
 /* Hide layout-level buttons on common code page */
 .contents-wrap:has(.common-code-page) > section.white-full > .content-title .btn-area {display: none;}
@@ -1228,7 +1235,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .modal-content .title-area .type span{padding: 3px 9px; color: #E50019; border-radius:8px; border: 1px solid #E50019;}
 .modal-content top-article{padding-bottom:10px;}
 .modal-content ul {list-style: none; margin: 0; padding: 0;}
-.modal-content li.table-col {width: 100%; padding: 25px 0; gap: 20px;}
+.modal-content li.table-col {width: 100%; padding: 15px 0; gap: 20px;}
 .modal-content li.table-col .table-cell {width: 100%;}
 .modal-content .cell-tit {font-size: 15px; font-weight: 700; padding-bottom: 6px;}
 .modal-content .cell-info input,
@@ -2335,7 +2342,7 @@ section.search-area .search-btn-area .btn-search {
   display: flex;
   flex-direction: row;
   align-items: flex-end;
-  gap: 6px;
+  gap: 12px;
 }
 
 .contents-wrap:has(#TABLE_HR010_A) .hr010-user-type-tab,
@@ -2347,10 +2354,11 @@ section.search-area .search-btn-area .btn-search {
   align-items: center;
   padding: 13px 16px;
   gap: 8px;
-  width: 100px;
+  width: 150px;
   height: 32px;
   background: #E8EBF0;
-  border: 0px solid #C3C8D2;
+  border: 2px solid #DEE2E7;
+  border-bottom: none;
   border-radius: 8px 8px 0 0;
   color: #82878F;
   font-size: 16px;
@@ -2661,7 +2669,7 @@ section.search-area .search-btn-area .btn-search {
 
 .hr014-title {
   font-size: 16px;
-  font-weight: 500;
+  font-weight: 400;
   padding: 2px 0px 0px 10px;
 }
 
