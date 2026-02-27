@@ -2427,9 +2427,8 @@ section.search-area .search-btn-area .btn-search {
 /* ===== HR013: 프로젝트 선택 팝업 ===== */
 /* 컨테이너/전체 레이아웃 */
 #hr013-project-picker-area .hr013-project-picker-container {
-  width: 980px;
-  min-width: 0;
-  max-width: calc(100% - 40px);
+    width: calc(100% - 500px);
+    min-width: 0; max-width: calc(100% - 40px);
 }
 #hr013-project-picker-area .hr013-project-picker-content {
   display: grid;
@@ -2443,14 +2442,46 @@ section.search-area .search-btn-area .btn-search {
 #hr013-project-picker-area .hr013-project-picker-right {
   min-width: 0;
 }
+#hr013-project-picker-area .pill-title.pill-title--modal {
+  font-size: 22px;
+  padding: 4px 18px;
+}
+#hr013-project-picker-area .hr013-project-picker-right {
+  background: #f8fafd;
+  border: 1px solid #dee2e7;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 72px;
+}
 
 /* 검색 영역(좌측 상단) */
 #hr013-project-picker-area .hr013-project-picker-search-row {
   display: grid;
-  grid-template-columns: 96px 1fr;
+  grid-template-columns: 160px 1fr;
   align-items: center;
   gap: 8px;
   margin-bottom: 8px;
+}
+#hr013-project-picker-area .hr013-project-picker-search-row > label,
+#hr013-project-picker-area .hr013-project-picker-title {
+  position: relative;
+  margin: 0;
+  padding-left: 10px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #1d232d;
+}
+#hr013-project-picker-area .hr013-project-picker-search-row > label::before,
+#hr013-project-picker-area .hr013-project-picker-title::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 16px;
+  border-radius: 6px;
+  background: #e50019;
 }
 #hr013-project-picker-area .hr013-project-picker-search-wrap {
   display: flex;
@@ -2460,9 +2491,29 @@ section.search-area .search-btn-area .btn-search {
 #hr013-project-picker-area #hr013-project-picker-search {
   min-width: 0;
 }
+#hr013-project-picker-area input::placeholder {
+  color: #9aa3af;
+  opacity: 1;
+}
 #hr013-project-picker-area #btn_hr013_project_picker_search {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   min-width: 72px;
+  height: 38px;
+  padding: 0 14px;
+  border-radius: 8px;
+  border: 1px solid #212e41;
+  background: #212e41;
+  color: #fff;
+  font-weight: 600;
   white-space: nowrap;
+}
+#hr013-project-picker-area #btn_hr013_project_picker_search img {
+  width: 14px;
+  height: 14px;
+  display: block;
 }
 
 /* 목록 테이블(좌측) */
@@ -2471,18 +2522,36 @@ section.search-area .search-btn-area .btn-search {
   border-radius: 8px;
   overflow: hidden;
 }
-#hr013-project-picker-area #TABLE_HR013_PROJECT_PICKER .tabulator-row.tabulator-selected .tabulator-cell {
-  background-color: #f4f7ff !important;
-}
-
 /* 신규 등록 폼(우측) */
 #hr013-project-picker-area .hr013-project-picker-right .cell-info {
-  margin-bottom: 10px;
+    margin: 26px 0 26px 0;
+}
+#hr013-project-picker-area .hr013-project-picker-right .cell-info input,
+#hr013-project-picker-area .hr013-project-picker-right .cell-info select {
+  width: 100%;
 }
 #hr013-project-picker-area .hr013-project-picker-right .cell-info label {
   display: block;
-  margin-bottom: 4px;
-  font-size: 13px;
+  margin-bottom: 10px;
+  font-size: 16px;
+}
+#hr013-project-picker-area #btn_hr013_project_code_save {
+  height: 38px;
+  min-width: 96px;
+  border-radius: 8px;
+  border: 1px solid #e50019;
+  background: #fff;
+  color: #e50019;
+  font-weight: 600;
+}
+#hr013-project-picker-area #btn_hr013_project_picker_apply {
+  height: 38px;
+  min-width: 96px;
+  border-radius: 8px;
+  border: 1px solid #e50019;
+  background: #e50019;
+  color: #fff;
+  font-weight: 600;
 }
 /* ============================== */
 
@@ -2667,12 +2736,16 @@ section.search-area .search-btn-area .btn-search {
   font-weight: 700;
 }
 
+.btn-area.prj-save {
+    display: flex;
+    justify-content: end;
+}
+
 .hr014-title {
   font-size: 16px;
   font-weight: 400;
   padding: 2px 0px 0px 10px;
 }
-
 .btn-prj-edit {
   background-color: #1D232D;
   color: #fff;

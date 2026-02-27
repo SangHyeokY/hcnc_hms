@@ -1,14 +1,17 @@
 package com.hcncinit.controller.hr;
 
-import com.hcncinit.service.hr.Hr013Service;
-import jakarta.servlet.http.HttpSession;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.ModelAndView;
-
 import java.util.List;
 import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.hcncinit.service.hr.Hr013Service;
+
+import jakarta.servlet.http.HttpSession;
 
 @Controller
 @RequestMapping("/hr013")
@@ -53,6 +56,35 @@ public class Hr013Controller {
         applyDefaults(map);
         int res = hr013Service.delete(map);
         mv.addObject("success", res > 0);
+        return mv;
+    }
+
+
+    // [Tab3][프로젝트 코드] > 목록 조회
+    @RequestMapping("/project-code/list")
+    public ModelAndView listProjectCode(@RequestParam(required = false) Map<String, Object> map) {
+        ModelAndView mv = new ModelAndView("jsonView");
+        // 팝업 목록(검색어 포함) 조회
+        List<Map<String, Object>> list = hr013Service.listProjectCode(map);
+        mv.addObject("success", true);
+        mv.addObject("list", list);
+        return mv;
+    }
+
+    // [Tab3][프로젝트 코드] > 신규 등록
+    @RequestMapping("/project-code/save")
+    public ModelAndView saveProjectCode(@RequestParam Map<String, Object> map, HttpSession session) {
+        ModelAndView mv = new ModelAndView("jsonView");
+        applyLoginUser(map, session);
+        // 중복명 체크 + 다음 코드 생성 + 코드마스터 insert
+        int res = hr013Service.saveProjectCode(map);
+        mv.addObject("success", res > 0);
+        if (res <= 0) {
+            boolean isDuplicateName = "Y".equals(String.valueOf(map.get("dupYn")));
+            mv.addObject("message", isDuplicateName ? "이미 있는 프로젝트 명입니다." : "저장에 실패했습니다.");
+        }
+        // 프론트가 저장 직후 신규 행을 자동 포커스할 수 있도록 생성 코드를 함께 반환
+        mv.addObject("cd", map.get("cd"));
         return mv;
     }
 

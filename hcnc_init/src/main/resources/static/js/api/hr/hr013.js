@@ -9,6 +9,23 @@ var hr013JobOptions = [];
 var hr013SkillGroupOptions = [];
 var hr013SkillPicker = null;
 
+// 프로젝트 공통코드 그룹 상수
+const HR013_PROJECT_GRP_CD = "prj_cd";
+var HR013_PROJECT_INPRJ_FIELD = "adinfo_01"; // 부가정보1(당사프로젝트)
+
+// 프로젝트 선택 팝업 상태
+var hr013ProjectPickerTable = null;     // 팝업 내 목록 테이블 인스턴스
+var hr013ProjectPickerContextRow = null; // 어느 행에서 팝업 열었는지 기억
+var hr013SelectedProjectCode = null;     // 사용자가 선택한 코드 1건
+
+function isHr013InprjYnY(value) {
+    return String(value || "").trim().toUpperCase() === "Y";
+}
+
+function isHr013ProjectCodeSelectable(data) {
+    return isHr013InprjYnY(data && data.inprj_yn);
+}
+
 // 프로젝트 탭 초기화 (버튼/콤보/태그/테이블)
 window.initTab3 = function () {
     if (!window.hr013Table) buildHr013Table();
@@ -73,7 +90,7 @@ window.initTab3 = function () {
             normalizeJobRows();
             window.hr013Table.redraw(true);
         }
-        
+
         jobMap = getJobCodeMap();
     });
     setComCode("write_hr013_skl_cd", "skl_id", "", "cd", "cd_nm", function (res) {
@@ -93,6 +110,9 @@ window.initTab3 = function () {
         stackTagInput.setOptions(res || []);
         stackTagInput.setFromValue(pendingStackValue || $("#write_hr013_stack_txt").val());
         syncHr013SkillPickerUi(true);
+        // 프로젝트 선택 팝업 이벤트/테이블은 최초 1회 초기화
+        bindHr013ProjectPickerEvents();
+
         if (window.hr013Table) {
             syncStackLabelsFromCodes();
             window.hr013Table.redraw(true);
@@ -182,7 +202,7 @@ function buildHr013Table() {
             updateHr013TitleCount();
         },
         cellEdited: function () {
-           changedTabs.tab3 = true;
+            changedTabs.tab3 = true;
         },
         rowFormatter: function (row) {
             scheduleHr013StackRowState(row);
@@ -235,9 +255,9 @@ function buildHr013Table() {
                 field: "cust_nm",
                 editor: "input",
                 formatter: function (cell) {
-                	const value = cell.getValue();
-                	if (!value) return "";
-                	return `<div style="
+                    const value = cell.getValue();
+                    if (!value) return "";
+                    return `<div style="
                 		text-align:left;
                 		white-space: nowrap;
                 		overflow: hidden;
@@ -261,7 +281,7 @@ function buildHr013Table() {
                 title: "프로젝트명",
                 field: "prj_nm",
                 editor: "input",
-                formatter: function(cell){
+                formatter: function (cell) {
                     const v = cell.getValue() ?? "";
                     const d = cell.getRow().getData();
                     const showBtn = String(d.inprj_yn).toUpperCase() === "Y";
@@ -282,13 +302,13 @@ function buildHr013Table() {
                     if (currentMode === "view")
                         return false;
                     // 당사여부 체크된 경우 → 수정 불가
-                    if(rowData.inprj_yn === 'Y'){   // 또는 'Y'
+                    if (rowData.inprj_yn === 'Y') {   // 또는 'Y'
                         return false;
                     }
 
                     return true;
                 },
-                cellClick: function(a, b){
+                cellClick: function (a, b) {
                     // (e, cell) 또는 (cell) 또는 (e) 등 어떤 형태로 와도 견딤
                     let e = null;
                     let cell = null;
@@ -308,8 +328,8 @@ function buildHr013Table() {
                     }
 
                     // 버튼 클릭이면 평가만
-                    const btn = e?.target?.closest?.(".btn-prj-eval");
-                    if (btn) {
+                    const evalBtn = e?.target?.closest?.(".btn-prj-eval");
+                    if (evalBtn) {
                         e.preventDefault?.();
                         e.stopPropagation?.();
                         e.stopImmediatePropagation?.();
@@ -340,11 +360,21 @@ function buildHr013Table() {
                                 hideLoading();
                             });
                     }
+
+                    // 등록 버튼 클릭 처리(새 요구사항)
+                    const regBtn = e?.target?.closest?.(".btn-prj-edit");
+                    if (regBtn) {
+                        e.preventDefault?.();
+                        e.stopPropagation?.();
+                        e.stopImmediatePropagation?.();
+                        openHr013ProjectPicker(cell.getRow()); // 현재 행 컨텍스트로 팝업 오픈
+                        return;
+                    }
                 },
-                cellEditCancelled: function(cell){
+                cellEditCancelled: function (cell) {
                     requestAnimationFrame(() => cell.getRow().reformat());
                 },
-                cellEdited: function(cell){
+                cellEdited: function (cell) {
                     requestAnimationFrame(() => cell.getRow().reformat());
                 },
                 width: 130
@@ -383,7 +413,7 @@ function buildHr013Table() {
                 editable: isHr013Editable,
                 cellClick: startEditOnClick, width: 114
             },
-            { title: "계약단가", field: "rate_amt", hozAlign: "right", formatter: hr013AmountFormatter, editor: "input", editable: isHr013Editable, cellClick: startEditOnClick , width: 120},
+            { title: "계약단가", field: "rate_amt", hozAlign: "right", formatter: hr013AmountFormatter, editor: "input", editable: isHr013Editable, cellClick: startEditOnClick, width: 120 },
             {
                 title: "기술스택",
                 field: "skl_id_lst",
@@ -543,6 +573,384 @@ function openHr013SkillPicker(sourceType, row) {
         row: contextType === "grid" ? row : null
     });
 }
+
+// 프로젝트 선택 팝업 이벤트 바인딩(중복 바인딩 방지)
+function bindHr013ProjectPickerEvents() {
+    $("#btn_hr013_project_picker_close_x").off("click.hr013project").on("click.hr013project", function () {
+        closeHr013ProjectPicker(true); // 즉시 닫기
+    });
+
+    $("#btn_hr013_project_picker_apply").off("click.hr013project").on("click.hr013project", function () {
+        applyHr013ProjectPickerSelection(); // 선택값을 원본 행에 반영
+    });
+
+    $("#btn_hr013_project_code_save").off("click.hr013project").on("click.hr013project", function () {
+        saveHr013ProjectCode(); // 신규 공통코드 등록
+    });
+
+    $("#btn_hr013_project_picker_search").off("click.hr013project").on("click.hr013project", function () {
+        loadHr013ProjectCodeList($.trim($("#hr013-project-picker-search").val())); // 검색 버튼 클릭 시 조회
+    });
+
+    $("#hr013-project-picker-search").off("keyup.hr013project").on("keyup.hr013project", function (e) {
+        if (e.key === "Enter") {
+            loadHr013ProjectCodeList($.trim($(this).val()));    // 검색어로 목록 조회
+        }
+    });
+
+    initHr013ProjectPickerTable();  // 목록 테이블 생성(최초 1회)
+}
+
+
+// 팝업 내부 프로젝트 목록 테이블 생성
+function initHr013ProjectPickerTable() {
+    if (hr013ProjectPickerTable || !document.getElementById("TABLE_HR013_PROJECT_PICKER")) {
+        // 이미 생성됐거나 팝업 DOM이 아직 없으면 재생성하지 않는다.
+        return;
+    }
+
+    hr013ProjectPickerTable = new Tabulator("#TABLE_HR013_PROJECT_PICKER", {
+        layout: "fitColumns",
+        selectable: 1,
+        height: "480px",
+        pagination: "local",
+        paginationSize: 8,
+        paginationSizeSelector: [5, 10, 15, 20],
+        columns: [
+            { title: "코드", field: "cd", width: 90, hozAlign: "center" },
+            { title: "프로젝트명", field: "cd_nm", widthGrow: 1 },
+            { title: "당사 여부", field: "inprj_yn", width: 90, hozAlign: "center" },
+        ],
+        rowClick: function (e, row) {
+            var data = row && typeof row.getData === "function" ? row.getData() : null;
+            if (!isHr013ProjectCodeSelectable(data)) {
+                showAlert({
+                    icon: "info",
+                    title: "알림",
+                    text: "당사 프로젝트만 선택할 수 있습니다."
+                });
+                return;
+            }
+            row.select();
+            hr013SelectedProjectCode = data;   // 사용자가 고른 코드 저장
+        },
+        rowSelected: function (row) {
+            var data = row && typeof row.getData === "function" ? row.getData() : null;
+            if (!isHr013ProjectCodeSelectable(data)) {
+                if (typeof row.deselect === "function") {
+                    row.deselect();
+                }
+                hr013SelectedProjectCode = null;
+                return;
+            }
+            hr013SelectedProjectCode = data;
+        },
+        rowDeselected: function (row) {
+            var data = row.getData();
+            if (hr013SelectedProjectCode && data && hr013SelectedProjectCode.cd === data.cd) {
+                hr013SelectedProjectCode = null;
+            }
+        },
+        data: []
+    });
+}
+
+// 특정 행 컨텍스트로 프로젝트 선택 팝업 열기
+function openHr013ProjectPicker(row) {
+    bindHr013ProjectPickerEvents();
+    if (!isHr013Editable()) return; // 조회 모드 차단
+
+    var rowData = row && typeof row.getData === "function" ? row.getData() : null;
+    if (rowData && !isHr013InprjYnY(rowData.inprj_yn)) {
+        showAlert({
+            icon: "info",
+            title: "알림",
+            text: "당사 프로젝트만 선택할 수 있습니다."
+        });
+        return;
+    }
+
+    hr013ProjectPickerContextRow = row || null; // 어떤 행에서 열었는지 저장
+    hr013SelectedProjectCode = null;    // 이전 선택 초기화
+
+    $("#write_hr013_project_cd_nm").val("");
+    $("#write_hr013_project_inprj_yn").val("Y");
+    $("#hr013-project-picker-search").val("");
+
+    loadHr013ProjectCodeList("");   // 초기 목록 조회
+    $("#hr013-project-picker-area").show().addClass("show");
+}
+
+// 팝업 닫기
+function closeHr013ProjectPicker(immediate) {
+    const $modal = $("#hr013-project-picker-area");
+    if (immediate) {
+        $modal.removeClass("show").hide();
+        return;
+    }
+    $modal.removeClass("show");
+    setTimeout(function () {
+        if (!$modal.hasClass("show")) {
+            $modal.hide();
+        }
+    }, 180);
+}
+
+function findHr013ProjectPickerDataIndex(list, targetCd, targetName) {
+    for (var i = 0; i < list.length; i += 1) {
+        var item = list[i] || {};
+        if (targetCd && String(item.cd || "") === targetCd) {
+            return i;
+        }
+        if (!targetCd && targetName && String(item.cd_nm || "").trim() === targetName) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+function findHr013ProjectPickerRow(rows, targetCd, targetName) {
+    for (var i = 0; i < rows.length; i += 1) {
+        var row = rows[i];
+        var data = row && typeof row.getData === "function" ? row.getData() : null;
+        if (!data) continue;
+        if (targetCd && String(data.cd || "") === targetCd) {
+            return row;
+        }
+        if (!targetCd && targetName && String(data.cd_nm || "").trim() === targetName) {
+            return row;
+        }
+    }
+    return null;
+}
+
+// 팝업에서 사용자가 고른 코드를 찾기(페이지 이동 포함)
+function focusHr013ProjectPickerRow(focusCd, focusName, dataList) {
+    if (!hr013ProjectPickerTable) return;
+
+    var targetCd = String(focusCd || "").trim();
+    var targetName = String(focusName || "").trim();
+    if (!targetCd && !targetName) return;
+
+    var allData = Array.isArray(dataList)
+        ? dataList
+        : ((typeof hr013ProjectPickerTable.getData === "function")
+            ? hr013ProjectPickerTable.getData()
+            : []);
+    if (!Array.isArray(allData) || !allData.length) return;
+
+    // 전체 데이터 기준 인덱스를 먼저 찾고, 페이지가 다르면 해당 페이지로 이동한다.
+    var targetIndex = findHr013ProjectPickerDataIndex(allData, targetCd, targetName);
+    if (targetIndex < 0) return;
+
+    var selectTargetRow = function () {
+        var activeRows = (typeof hr013ProjectPickerTable.getRows === "function")
+            ? hr013ProjectPickerTable.getRows("active")
+            : [];
+        if (!Array.isArray(activeRows) || !activeRows.length) {
+            activeRows = (typeof hr013ProjectPickerTable.getRows === "function")
+                ? hr013ProjectPickerTable.getRows()
+                : [];
+        }
+
+        var targetRow = findHr013ProjectPickerRow(activeRows || [], targetCd, targetName);
+        if (!targetRow) {
+            return;
+        }
+
+        var targetData = typeof targetRow.getData === "function" ? targetRow.getData() : null;
+        if (!isHr013ProjectCodeSelectable(targetData)) {
+            hr013SelectedProjectCode = null;
+            return;
+        }
+
+        if (typeof hr013ProjectPickerTable.deselectRow === "function") {
+            hr013ProjectPickerTable.deselectRow();
+        }
+        if (typeof targetRow.select === "function") {
+            targetRow.select();
+        }
+        hr013SelectedProjectCode = targetData;
+
+        if (typeof hr013ProjectPickerTable.scrollToRow === "function") {
+            var scrollResult = hr013ProjectPickerTable.scrollToRow(targetRow, "center", false);
+            if (scrollResult && typeof scrollResult.catch === "function") {
+                scrollResult.catch(function () { });
+            }
+        }
+    };
+
+    var pageSize = (typeof hr013ProjectPickerTable.getPageSize === "function")
+        ? Number(hr013ProjectPickerTable.getPageSize())
+        : 0;
+    if (!pageSize || pageSize <= 0) {
+        pageSize = Number(hr013ProjectPickerTable.options && hr013ProjectPickerTable.options.paginationSize);
+    }
+
+    if (typeof hr013ProjectPickerTable.setPage === "function" && pageSize > 0) {
+        var targetPage = Math.floor(targetIndex / pageSize) + 1;
+        var setPageResult = hr013ProjectPickerTable.setPage(targetPage);
+        if (setPageResult && typeof setPageResult.then === "function") {
+            setPageResult.then(function () {
+                setTimeout(selectTargetRow, 0);
+            }).catch(function () {
+                setTimeout(selectTargetRow, 0);
+            });
+        } else {
+            setTimeout(selectTargetRow, 0);
+        }
+        return;
+    }
+
+    selectTargetRow();
+}
+
+// 공통코드 목록 조회
+function loadHr013ProjectCodeList(keyword, options) {
+    if (!hr013ProjectPickerTable) return;
+    options = options || {};
+    var focusCd = String(options.focusCd || "").trim();
+    var focusName = String(options.focusName || "").trim();
+
+    $.ajax({
+        url: "/hr013/project-code/list",
+        type: "GET",
+        data: {
+            keyword: keyword || "",
+            grp_cd: HR013_PROJECT_GRP_CD
+        },
+        success: function (res) {
+            const list = (res && res.list) ? res.list : [];
+            var setDataResult = hr013ProjectPickerTable.setData(list);
+            var afterSetData = function () {
+                // 신규 저장 직후에는 방금 등록한 코드/명칭으로 자동 포커스한다.
+                if (focusCd || focusName) {
+                    focusHr013ProjectPickerRow(focusCd, focusName, list);
+                    return;
+                }
+                // 일반 조회에서는 이전 선택을 제거해 오선택을 방지한다.
+                if (typeof hr013ProjectPickerTable.deselectRow === "function") {
+                    hr013ProjectPickerTable.deselectRow();
+                }
+                hr013SelectedProjectCode = null;
+            };
+
+            // setData는 환경에 따라 Promise/비Promise가 섞일 수 있어 두 경로를 모두 처리한다.
+            if (setDataResult && typeof setDataResult.then === "function") {
+                setDataResult.then(afterSetData);
+            } else {
+                setTimeout(afterSetData, 0);
+            }
+        },
+        error: function () {
+            showAlert({
+                icon: "error",
+                title: "오류",
+                text: "프로젝트 코드를 불러오지 못했습니다."
+            });
+        }
+    });
+}
+
+// 선택값을 원본 행(prj_nm)에 반영
+function applyHr013ProjectPickerSelection() {
+    if (!hr013SelectedProjectCode && hr013ProjectPickerTable && typeof hr013ProjectPickerTable.getSelectedData === "function") {
+        var selectedRows = hr013ProjectPickerTable.getSelectedData();
+        if (selectedRows && selectedRows.length > 0) {
+            hr013SelectedProjectCode = selectedRows[0];
+        }
+    }
+
+    if (!hr013ProjectPickerContextRow || !hr013SelectedProjectCode) {
+        showAlert({
+            icon: "info", title: "알림", text: "프로젝트를 선택해주세요."
+        })
+        return;
+    }
+    if (!isHr013ProjectCodeSelectable(hr013SelectedProjectCode)) {
+        showAlert({
+            icon: "info", title: "알림", text: "당사 프로젝트만 선택할 수 있습니다."
+        });
+        return;
+    }
+    const selectedName = String(hr013SelectedProjectCode.cd_nm || "").trim();
+    if (!selectedName) {
+        showAlert({ icon: "warning", title: "경고", text: "선택된 프로젝트명이 비어 있습니다." });
+        return;
+    }
+
+    // 실제 저장 컬럼은 기존 설계대로 prj_nm(프로젝트명)만 우선 반영한다.
+    hr013ProjectPickerContextRow.update({
+        prj_nm: selectedName
+    });
+
+    changedTabs.tab3 = true;
+    closeHr013ProjectPicker(false);
+}
+
+// 신규 프로젝트 코드 저장
+async function saveHr013ProjectCode() {
+    const cdNm = $.trim($("#write_hr013_project_cd_nm").val());
+    const inprjYn = String($("#write_hr013_project_inprj_yn").val() || "N").toUpperCase();
+
+    if (!cdNm) {
+        showAlert({ icon: "warning", title: "경고", text: "프로젝트명을 입력해주세요." });
+        $("#write_hr013_project_cd_nm").focus();
+        return;
+    }
+
+    const confirmResult = await showAlert({
+        icon: "warning",
+        title: "확인",
+        text: "\"" + cdNm + "\" 프로젝트를 등록하시겠습니까?",
+        showCancelButton: true,
+        confirmText: "등록",
+        cancelText: "취소",
+        cancelButtonColor: "#212E41"
+    });
+
+    if (!confirmResult.isConfirmed) {
+        return;
+    }
+
+    $.ajax({
+        url: "/hr013/project-code/save",
+        type: "POST",
+        data: {
+            grp_cd: HR013_PROJECT_GRP_CD,
+            cd_nm: cdNm,
+            inprj_yn: inprjYn
+        },
+        success: function (res) {
+            if (!res || !res.success) {
+                showAlert({ icon: "error", title: "오류", text: (res && res.message) || "저장 실패" });
+                return;
+            }
+
+            // 백엔드에서 생성한 코드(PRJ### 또는 숫자형)를 그대로 받아 재조회 기준으로 사용한다.
+            var savedCd = String((res && res.cd) || "").trim();
+
+            // 저장 직후 전체 목록 재조회 + 신규 항목 자동 선택/포커스
+            loadHr013ProjectCodeList("", {
+                focusCd: savedCd,
+                focusName: cdNm
+            });
+
+            // UX: 방금 입력값은 우선 행에 반영할 수 있게 선택 상태로 보관
+            hr013SelectedProjectCode = {
+                cd: savedCd,
+                cd_nm: cdNm,
+                inprj_yn: inprjYn
+            };
+
+            showAlert({ icon: "success", title: "완료", text: "신규 프로젝트 코드가 등록되었습니다." });
+        },
+        error: function () {
+            showAlert({ icon: "error", title: "오류", text: "프로젝트 코드 저장 중 오류가 발생했습니다." });
+        }
+    });
+}
+
 
 function closeHr013SkillPicker(immediate) {
     if (!hr013SkillPicker) {
@@ -1255,7 +1663,7 @@ function normalizeJobValue(value) {
     }
     if (typeof value === "object") {
         var current = value;
-        var guard = 0; 
+        var guard = 0;
         while (current && typeof current === "object" && guard < 4) {
             var candidate = current.cd || current.value || current.label || current.cd_nm || current.name || current.nm || current.id;
             if (candidate && typeof candidate !== "object") {
@@ -1808,9 +2216,9 @@ function editRisk(rowData) {
         : Promise.resolve((function () {
             riskState.leave_txt = risk.leave_txt || "";
             riskState.claim_txt = risk.claim_txt || "";
-            riskState.sec_txt   = risk.sec_txt   || "";
-            riskState.re_in_yn  = risk.re_in_yn  || "N";
-            riskState.memo      = risk.memo      || "";
+            riskState.sec_txt = risk.sec_txt || "";
+            riskState.re_in_yn = risk.re_in_yn || "N";
+            riskState.memo = risk.memo || "";
             $("#HR015_REIN_CHECK").prop("checked", riskState.re_in_yn === "Y");
             setRiskActive(riskActiveKey);
         })());
@@ -1822,19 +2230,19 @@ function editRisk(rowData) {
     });
 }
 
-$('#btnUpload').on('click', function() {
+$('#btnUpload').on('click', function () {
     $('#excelFile').click();
 });
 
-$('#excelFile').on('change', function(e) {
+$('#excelFile').on('change', function (e) {
     const file = e.target.files[0];
     e.target.value = '';
 
     if (!file) return showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
-          icon: 'info',
-          title: '알림',
-          text: '파일을 선택하세요.'
-      });
+        icon: 'info',
+        title: '알림',
+        text: '파일을 선택하세요.'
+    });
 
     else console.log('파일 선택 완료:', file.name);
 
@@ -1861,9 +2269,8 @@ $('#excelFile').on('change', function(e) {
 
                 // 입력된 job_cd가 실제로 공통코드에 있는 정보인지 확인
                 var jobcdYn = false;
-                hr013JobOptions.forEach(function(d) {
-                    if (item.job_cd.toUpperCase() === d.cd_nm.toUpperCase())
-                    {
+                hr013JobOptions.forEach(function (d) {
+                    if (item.job_cd.toUpperCase() === d.cd_nm.toUpperCase()) {
                         item.job_cd = d.cd;
                         if (!jobcdYn) jobcdYn = true;
                     }
@@ -1873,11 +2280,10 @@ $('#excelFile').on('change', function(e) {
                     item.job_cd = null;
 
                 var skl_lst = [];
-                item.skl_id_lst?.split(',').map(x => x.trim()).forEach(function(skl_id) {
-                    hr013SkillOptions.forEach(function(d) {
-                        if (skl_id.toUpperCase() === d.cd_nm.toUpperCase())
-                        {
-                            skl_lst.push({code: d.cd, label: d.cd_nm});
+                item.skl_id_lst?.split(',').map(x => x.trim()).forEach(function (skl_id) {
+                    hr013SkillOptions.forEach(function (d) {
+                        if (skl_id.toUpperCase() === d.cd_nm.toUpperCase()) {
+                            skl_lst.push({ code: d.cd, label: d.cd_nm });
                         }
                     });
                 });
