@@ -100,6 +100,7 @@ public class Hr013Service {
         // 코드명 중복은 UI 정책상 저장 실패(0)로 반환한다.
         Object dup = this.sqlSession.selectOne("com.hcncinit.Hr013Mapper.selectProjectCodeDupByName", map);
         if (dup != null) {
+            map.put("dupYn", "Y");
             return 0; // 중복명칭이면 실패 처리
         }
 

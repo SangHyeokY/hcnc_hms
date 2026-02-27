@@ -80,7 +80,8 @@ public class Hr013Controller {
         int res = hr013Service.saveProjectCode(map);
         mv.addObject("success", res > 0);
         if (res <= 0) {
-            mv.addObject("message", "저장에 실패했습니다.");
+            boolean isDuplicateName = "Y".equals(String.valueOf(map.get("dupYn")));
+            mv.addObject("message", isDuplicateName ? "이미 있는 프로젝트 명입니다." : "저장에 실패했습니다.");
         }
         // 프론트가 저장 직후 신규 행을 자동 포커스할 수 있도록 생성 코드를 함께 반환
         mv.addObject("cd", map.get("cd"));
