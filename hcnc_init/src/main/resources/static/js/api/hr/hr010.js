@@ -642,7 +642,7 @@ function buildUserTable() {
         },
         columns: [
             {
-                title: "선택",
+                title: "",
                 hozAlign: "center",
                 field: "checkBox",
                 formatter: function (cell) {

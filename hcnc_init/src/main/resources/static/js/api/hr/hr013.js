@@ -234,6 +234,17 @@ function buildHr013Table() {
                 title: "고객사",
                 field: "cust_nm",
                 editor: "input",
+                formatter: function (cell) {
+                	const value = cell.getValue();
+                	if (!value) return "";
+                	return `<div style="
+                		text-align:left;
+                		white-space: nowrap;
+                		overflow: hidden;
+                		text-overflow: ellipsis;">
+                		${value}
+                	</div>`;
+                },
                 editable: function (cell) {
                     return isHr013Editable() && cell.getRow().getData().inprj_yn !== "Y";
                 },
@@ -311,7 +322,7 @@ function buildHr013Table() {
                         editRisk(rowData)
                             .then(() => {
                                 $(".tab-btn").last().click();
-                                $(".hr014-title").text(rowData.prj_nm);
+                                $(".hr014-title").text("(프로젝트명 : " + rowData.prj_nm + ")");
 
                                 // 탭 클릭 직후 레이아웃 재계산이 필요한 경우가 있어 0ms로 한번 더
                                 setTimeout(() => {
@@ -325,7 +336,7 @@ function buildHr013Table() {
                             })
                             .finally(() => {
                                 $(".tab-btn").last().click();
-                                $(".hr014-title").text(rowData.prj_nm);
+                                $(".hr014-title").text("(프로젝트명 : " + rowData.prj_nm + ")");
                                 hideLoading();
                             });
                     }
