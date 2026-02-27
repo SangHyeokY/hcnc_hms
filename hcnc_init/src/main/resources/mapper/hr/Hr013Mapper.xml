@@ -173,4 +173,85 @@
         )
     </insert>
 
+    <!-- [Tab3 프로젝트 등록] -->
+    <!-- 프로젝트 코드 목록 -->
+    <select id="selectProjectCodeList" parameterType="map" resultType="hashmap">
+    SELECT cd,
+           cd_nm,
+           IFNULL(adinfo_01, 'N') AS inprj_yn
+    FROM tb_cd_mst
+    WHERE del_yn = 'N'
+      AND use_yn = 'Y'
+      AND grp_yn = 'N'
+      AND grp_cd = #{grp_cd}
+        <if test="keyword != null and keyword != ''">
+      AND (cd LIKE CONCAT('%', #{keyword}, '%')
+           OR cd_nm LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+    ORDER BY sort_no ASC, cd ASC
+    </select>
+
+    <!-- 프로젝트 코드명 중복 체크 -->
+    <select id="selectProjectCodeDupByName" parameterType="map" resultType="string">
+    SELECT cd
+    FROM tb_cd_mst
+    WHERE grp_cd = #{grp_cd}
+      AND grp_yn = 'N'
+      AND del_yn = 'N'
+      AND cd_nm = #{cd_nm}
+    LIMIT 1
+    </select>
+
+    <!-- 다음 코드 생성(기존 코드 패턴을 자동 승계) -->
+    <select id="selectNextProjectCode" parameterType="map" resultType="string">
+    <!-- prefixed: PRJ001 같은 접두사+숫자 패턴 -->
+    WITH prefixed AS (
+        SELECT REGEXP_SUBSTR(cd, '^[^0-9]+') AS prefix_part,
+               CAST(REGEXP_SUBSTR(cd, '[0-9]+$') AS UNSIGNED) AS num_val,
+               LENGTH(REGEXP_SUBSTR(cd, '[0-9]+$')) AS num_len
+        FROM tb_cd_mst
+        WHERE grp_cd = #{grp_cd}
+          AND grp_yn = 'N'
+          AND del_yn = 'N'
+          AND cd REGEXP '^[^0-9]+[0-9]+$'
+    ),
+    <!-- numeric_only: 001 같은 순수 숫자 패턴 -->
+    numeric_only AS (
+        SELECT CAST(cd AS UNSIGNED) AS num_val,
+               LENGTH(cd) AS num_len
+        FROM tb_cd_mst
+        WHERE grp_cd = #{grp_cd}
+          AND grp_yn = 'N'
+          AND del_yn = 'N'
+          AND cd REGEXP '^[0-9]+$'
+    )
+    <!-- 우선순위: 접두사 패턴 증가값 > 숫자 패턴 증가값 > 기본값(01) -->
+    SELECT COALESCE(
+        (
+            SELECT CONCAT(p.prefix_part, LPAD(p.num_val + 1, p.num_len, '0'))
+            FROM prefixed p
+            ORDER BY p.num_val DESC, p.num_len DESC
+            LIMIT 1
+        ),
+        (
+            SELECT LPAD(MAX(n.num_val) + 1, MAX(n.num_len), '0')
+            FROM numeric_only n
+        ),
+        '01'
+    ) AS next_cd
+    </select>
+
+    <!-- 프로젝트 코드 등록 -->
+    <insert id="insertProjectCode" parameterType="map">
+    INSERT INTO tb_cd_mst (
+        grp_cd, cd, cd_nm, grp_yn, sort_no, use_yn, del_yn,
+        adinfo_01, crt_ts, crt_by, upd_ts, upd_by
+    ) VALUES (
+        #{grp_cd}, #{cd}, #{cd_nm}, 'N',
+        (SELECT IFNULL(MAX(sort_no), 0) + 1 FROM tb_cd_mst t WHERE t.grp_cd = #{grp_cd}),
+        'Y', 'N',
+        #{inprj_yn}, NOW(), #{userId}, NOW(), #{userId}
+    )
+    </insert>
+
 </mapper>
