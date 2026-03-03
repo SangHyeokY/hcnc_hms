@@ -1246,7 +1246,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 /* 인력관리 팝업 - 테이블 */
 .modal-content #main-modal-table tr {height: 50px;}
 
-.modal-btn {padding: 15px 20px;}
+.modal-btn {padding: 0 20px 15px 20px;}
 .modal-btn ul {display: flex; justify-content: flex-end;}
 .modal-btn ul li {margin-right: 10px;}
 .modal-btn ul li:last-child {margin-right: 0;}
@@ -1833,6 +1833,15 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
         align-items: flex-start;
         flex-direction: column;
     }
+}
+
+#hr013-project-picker-area .hr013-project-picker-result-head {
+  margin: 23px 0 15px;
+}
+
+#hr013-project-picker-area .hr013-project-picker-result-title {
+  margin: 0;
+  font-size: 17px; font-weight: 700; color: #1d232d;
 }
 
 /* 셀 기본 설정 */
@@ -2454,10 +2463,11 @@ section.search-area .search-btn-area .btn-search {
 #hr013-project-picker-area .hr013-project-picker-content {
   display: grid;
   grid-template-columns: 1fr 300px;
-  gap: 14px;
   height: auto;
-  max-height: 72vh;
+  max-height: 56vh;
   overflow: hidden;
+  /* border-bottom: 2px solid #EAECF0; */
+  padding-bottom: 4px;
 }
 #hr013-project-picker-area .hr013-project-picker-left,
 #hr013-project-picker-area .hr013-project-picker-right {
@@ -2467,12 +2477,10 @@ section.search-area .search-btn-area .btn-search {
   font-size: 22px;
   padding: 4px 18px;
 }
-#hr013-project-picker-area .hr013-project-picker-right {
-  background: #f8fafd;
-  border: 1px solid #dee2e7;
-  border-radius: 8px;
-  padding: 12px;
-  margin-bottom: 72px;
+#hr013-project-picker-area .hr013-project-picker-right .cell-right {
+  background: #EFF1F6;
+  border: 1px solid #E0E3E8; border-radius: 8px;
+  padding: 25px 20px; margin-top: 23px;
 }
 
 /* 검색 영역(좌측 상단) */
@@ -2481,15 +2489,16 @@ section.search-area .search-btn-area .btn-search {
   grid-template-columns: 160px 1fr;
   align-items: center;
   gap: 8px;
-  margin-bottom: 8px;
 }
 #hr013-project-picker-area .hr013-project-picker-search-row > label,
 #hr013-project-picker-area .hr013-project-picker-title {
   position: relative;
   margin: 0;
+  padding: 0;
   padding-left: 10px;
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 700;
+  line-height: 140%;
   color: #1d232d;
 }
 #hr013-project-picker-area .hr013-project-picker-search-row > label::before,
@@ -2507,72 +2516,103 @@ section.search-area .search-btn-area .btn-search {
 #hr013-project-picker-area .hr013-project-picker-search-wrap {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 #hr013-project-picker-area #hr013-project-picker-search {
   min-width: 0;
 }
 #hr013-project-picker-area input::placeholder {
-  color: #9aa3af;
+  color: #838C96;
   opacity: 1;
 }
 #hr013-project-picker-area #btn_hr013_project_picker_search {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  min-width: 72px;
-  height: 38px;
-  padding: 0 14px;
-  border-radius: 8px;
+  gap: 8px;
+  min-width: 91px;
+  min-height: 43px;
+  padding: 11px 17.5px;
+  border-radius: 48px;
   border: 1px solid #212e41;
   background: #212e41;
   color: #fff;
   font-weight: 600;
   white-space: nowrap;
+  font-size: 18px;
 }
 #hr013-project-picker-area #btn_hr013_project_picker_search img {
   width: 14px;
   height: 14px;
   display: block;
 }
+#hr013-project-picker-area .hr013-project-picker-result-title {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  margin: 0; padding-left: 21px;
+  font-size: 18px; font-weight: 700; color: #1d232d;
+}
+#hr013-project-picker-area .hr013-project-picker-result-title::before {
+  content: "";
+  position: absolute;
+  top: 50%; left: 0;
+  transform: translateY(-50%);
+  width: 16px; height: 16px;
+  background: url("../icons/ico-right-arrow.png") no-repeat center;
+  background-size: contain;
+}
+
 
 /* 목록 테이블(좌측) */
 #hr013-project-picker-area #TABLE_HR013_PROJECT_PICKER {
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
+  border: 1px solid #e2e8f0; border-radius: 8px;
   overflow: hidden;
+}
+#hr013-project-picker-area #TABLE_HR013_PROJECT_PICKER .tabulator-cell {
+  border-right: solid 1px #e2e8f0 !important; border-left: solid 1px #e2e8f0 !important;
 }
 /* 신규 등록 폼(우측) */
 #hr013-project-picker-area .hr013-project-picker-right .cell-info {
-    margin: 26px 0 26px 0;
+   
 }
 #hr013-project-picker-area .hr013-project-picker-right .cell-info input,
 #hr013-project-picker-area .hr013-project-picker-right .cell-info select {
   width: 100%;
+  background-color: #ffffff;
+  margin-bottom: 20px;
 }
 #hr013-project-picker-area .hr013-project-picker-right .cell-info label {
   display: block;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   font-size: 16px;
+  font-weight: 600;
+  line-height: 140%;
 }
+
+
 #hr013-project-picker-area #btn_hr013_project_code_save {
-  height: 38px;
-  min-width: 96px;
-  border-radius: 8px;
-  border: 1px solid #e50019;
+  display: flex;
+  justify-content: center;
+  height: 45px; min-width: 262px;
+  border: 1px solid #ED242C;
   background: #fff;
-  color: #e50019;
-  font-weight: 600;
+  color: #ED242C;
+  font-weight: 700;
+  text-align: center;
+  font-size: 18px;
+  
 }
+#hr013-project-picker-area #btn_hr013_project_code_save img {
+  filter: brightness(0) saturate(100%) invert(16%) sepia(97%) saturate(5278%)
+          hue-rotate(338deg) brightness(95%) contrast(101%);
+}
+
 #hr013-project-picker-area #btn_hr013_project_picker_apply {
-  height: 38px;
-  min-width: 96px;
-  border-radius: 8px;
-  border: 1px solid #e50019;
+  height: 45px; min-width: 72px;
+  border-radius: 8px; border: 1px solid #e50019;
   background: #e50019;
-  color: #fff;
-  font-weight: 600;
+  color: #fff; font-weight: 600;
 }
 /* ============================== */
 
@@ -2595,14 +2635,12 @@ section.search-area .search-btn-area .btn-search {
 /* 프로젝트 기술스택이 길면 해당 행만 자동 확장 */
 #TABLE_HR013_A .tabulator-row.stack-multi-line,
 #TABLE_HR013_A .tabulator-row.stack-multi-line .tabulator-cell {
-  height: auto !important;
-  min-height: 45px !important;
+  height: auto !important; min-height: 45px !important;
 }
 
 #TABLE_HR013_A .tabulator-row.stack-multi-line .tabulator-cell {
   line-height: 1.4 !important;
-  padding-top: 8px !important;
-  padding-bottom: 8px !important;
+  padding-top: 8px !important; padding-bottom: 8px !important;
   align-content: flex-start;
 }
 
@@ -2616,8 +2654,7 @@ section.search-area .search-btn-area .btn-search {
 
 /* 인적사항 경력연차 행 높이 미세 축소 */
 #view-user-area #TABLE_HR010_B .career-exp-cell {
-  padding-top: 2px !important;
-  padding-bottom: 2px !important;
+  padding-top: 2px !important; padding-bottom: 2px !important;
 }
 
 #view-user-area #TABLE_HR010_B .career-spin-wrap {
@@ -2758,8 +2795,8 @@ section.search-area .search-btn-area .btn-search {
 }
 
 .btn-area.prj-save {
-    display: flex;
-    justify-content: end;
+    display: flex; justify-content: center;
+    padding-top: 185px;
 }
 
 .hr014-title {

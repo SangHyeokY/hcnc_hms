@@ -136,6 +136,11 @@ function updateHr013TitleCount() {
     $("#hr013-count .hcnc-grid-count-number").text(count);
 }
 
+// 프로젝트 선택 팝업 검색 결과 건수
+function updateHr013ProjectPickerCount(count) {
+    $("#hr013-project-picker-count .hcnc-grid-count-number").text(count||0);
+}
+
 let jobMap = [];
 
 function updateHr013StackRowState(row) {
@@ -821,6 +826,8 @@ function loadHr013ProjectCodeList(keyword, options) {
         },
         success: function (res) {
             const list = (res && res.list) ? res.list : [];
+            updateHr013ProjectPickerCount(list.length); // 검색 결과 건수 표시
+
             var setDataResult = hr013ProjectPickerTable.setData(list);
             var afterSetData = function () {
                 // 신규 저장 직후에는 방금 등록한 코드/명칭으로 자동 포커스한다.
@@ -843,6 +850,7 @@ function loadHr013ProjectCodeList(keyword, options) {
             }
         },
         error: function () {
+            updateHr013ProjectPickerCount(0);
             showAlert({
                 icon: "error",
                 title: "오류",
