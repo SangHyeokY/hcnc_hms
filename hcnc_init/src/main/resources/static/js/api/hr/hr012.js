@@ -107,6 +107,7 @@ function buildHr012TableA() {
         height: "100%",
         selectable: false,     // 행 선택 비활성화
         selectableRange: false, // v5 이상이면 안전하게 추가
+        resizableColumns: false,
         columns: [
             { title: "구분", field: "cd_nm", hozAlign: "left", width: 180, minWidth: 160 },
             { title: "상세", field: "skl_id_lst", hozAlign: "left",widthGrow: 1, formatter: tagFormatter },
@@ -804,7 +805,7 @@ function syncHr012SkillPickerUi(forceRebuild) {
     const totalCount = Array.isArray(hr012SkillOptions) ? hr012SkillOptions.length : 0;
     const selectedCount = getHr012SelectedCodeSet().size;
     $("#hr012-skill-picker-meta").html(
-        `전체 기술 <span class="fw500 mg-l4">${totalCount}</span>개 / 선택 <span class="hcnc-grid-count-number">${selectedCount}</span>개`
+        `전체 기술 <span class="fw500 mg-l4">${totalCount}</span>개 / 선택 <span class="hcnc-sub-count-number">${selectedCount}</span>개`
     );
 
     if (!hr012SkillPickerTable) {
