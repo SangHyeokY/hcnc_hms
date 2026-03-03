@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layout/layout}">
+
+<th:block layout:fragment="searchCondition">
+    <div class="search-select">
+        <p class="fl-ac">
+            <label for="hr030Perspective" class="fw600 pd-r10">• 관점</label>
+            <select id="hr030Perspective">
+                <option value="ops">운영</option>
+                <option value="people">인력</option>
+                <option value="delivery">프로젝트</option>
+            </select>
+        </p>
+    </div>
+    <div class="search-select">
+        <p class="fl-ac">
+            <label for="hr030Period" class="fw600 pd-r10">• 기간</label>
+            <select id="hr030Period">
+                <option value="day">오늘</option>
+                <option value="week" selected>이번 주</option>
+                <option value="month">이번 달</option>
+            </select>
+        </p>
+    </div>
+</th:block>
+
+<th:block layout:fragment="content">
+    <div class="content-title fl-sb fl-ac hr030-page-header">
+        <div class="hr030-page-copy-wrap">
+            <h4 class="page-sub-title">대시보드 테스트</h4>
+            <p class="hr030-page-copy">카드형 KPI, 클릭 전환, 호버 모션을 한 화면에서 확인하는 샘플입니다.</p>
+        </div>
+        <div class="btn-area hr030-header-actions">
+            <button type="button" class="hr030-toolbar-btn hr030-toolbar-btn--ghost" id="hr030Replay">
+                모션 다시 보기
+            </button>
+            <button type="button" class="hr030-toolbar-btn hr030-toolbar-btn--primary" id="hr030NextQueue">
+                다음 우선순위
+            </button>
+        </div>
+    </div>
+
+    <section class="hr030-dashboard" id="hr030-dashboard">
+        <section class="hr030-hero hr030-reveal">
+            <div class="hr030-hero-copy">
+                <span class="hr030-hero-kicker" id="hr030HeroKicker">운영 관점</span>
+                <h5 id="hr030HeroTitle">이번 주 집중해야 할 운영 신호</h5>
+                <p id="hr030HeroDesc">승인 대기, 리스크, 집중 작업을 한 흐름으로 빠르게 확인할 수 있도록 구성한 테스트 화면입니다.</p>
+            </div>
+            <div class="hr030-hero-meta">
+                <span class="hr030-meta-label">적용 기간</span>
+                <strong id="hr030HeroPeriod">이번 주</strong>
+                <small id="hr030HeroPulse">실시간 샘플 모드</small>
+            </div>
+        </section>
+
+        <section class="hr030-metric-grid">
+            <button type="button" class="hr030-metric-card hr030-metric-card--blue hr030-reveal is-active"
+                data-metric-key="urgent" data-panel-target="hr030PanelPriority">
+                <span class="hr030-metric-mark">OPS</span>
+                <span class="hr030-metric-label">즉시 확인</span>
+                <strong class="hr030-metric-value" data-metric-field="urgent" data-suffix="건">0</strong>
+                <small class="hr030-metric-foot">오늘 바로 열어봐야 할 항목</small>
+            </button>
+            <button type="button" class="hr030-metric-card hr030-metric-card--ink hr030-reveal"
+                data-metric-key="approval" data-panel-target="hr030PanelTrend">
+                <span class="hr030-metric-mark">FLOW</span>
+                <span class="hr030-metric-label">승인 대기</span>
+                <strong class="hr030-metric-value" data-metric-field="approval" data-suffix="건">0</strong>
+                <small class="hr030-metric-foot">지연되면 일정에 바로 영향</small>
+            </button>
+            <button type="button" class="hr030-metric-card hr030-metric-card--coral hr030-reveal"
+                data-metric-key="risk" data-panel-target="hr030PanelDetail">
+                <span class="hr030-metric-mark">RISK</span>
+                <span class="hr030-metric-label">리스크 신호</span>
+                <strong class="hr030-metric-value" data-metric-field="risk" data-suffix="건">0</strong>
+                <small class="hr030-metric-foot">선제 대응이 필요한 경고</small>
+            </button>
+            <button type="button" class="hr030-metric-card hr030-metric-card--teal hr030-reveal"
+                data-metric-key="focus" data-panel-target="hr030PanelQuick">
+                <span class="hr030-metric-mark">TEAM</span>
+                <span class="hr030-metric-label">집중도</span>
+                <strong class="hr030-metric-value" data-metric-field="focus" data-suffix="%">0</strong>
+                <small class="hr030-metric-foot">현재 처리 흐름의 안정도</small>
+            </button>
+        </section>
+
+        <section class="hr030-main-grid">
+            <article class="hr030-panel hr030-panel--queue hr030-reveal" id="hr030PanelPriority">
+                <div class="hr030-panel-head">
+                    <div>
+                        <p class="hr030-panel-kicker">Action Queue</p>
+                        <h5>지금 처리할 우선순위</h5>
+                    </div>
+                    <span class="hr030-panel-meta" id="hr030QueueMeta">0개 항목</span>
+                </div>
+                <div class="hr030-queue-list" id="hr030QueueList"></div>
+            </article>
+
+            <div class="hr030-side-grid">
+                <article class="hr030-panel hr030-panel--detail hr030-reveal" id="hr030PanelDetail">
+                    <div class="hr030-panel-head">
+                        <div>
+                            <p class="hr030-panel-kicker">Selected Focus</p>
+                            <h5>선택한 작업 상세</h5>
+                        </div>
+                    </div>
+                    <div class="hr030-detail-card">
+                        <span class="hr030-detail-status" id="hr030DetailStatus">즉시 대응</span>
+                        <h6 id="hr030DetailTitle">처리할 작업을 선택하세요</h6>
+                        <p id="hr030DetailDesc">좌측 목록에서 항목을 클릭하면 우측 상세 내용과 체크리스트가 바뀝니다.</p>
+                        <div class="hr030-detail-tags" id="hr030DetailTags"></div>
+                        <ul class="hr030-detail-checks" id="hr030DetailChecks"></ul>
+                    </div>
+                </article>
+
+                <article class="hr030-panel hr030-panel--trend hr030-reveal" id="hr030PanelTrend">
+                    <div class="hr030-panel-head">
+                        <div>
+                            <p class="hr030-panel-kicker">Weekly Flow</p>
+                            <h5>최근 흐름</h5>
+                        </div>
+                    </div>
+                    <div class="hr030-trend-list" id="hr030TrendList"></div>
+                </article>
+
+                <article class="hr030-panel hr030-panel--quick hr030-reveal" id="hr030PanelQuick">
+                    <div class="hr030-panel-head">
+                        <div>
+                            <p class="hr030-panel-kicker">Quick Actions</p>
+                            <h5>빠른 실행</h5>
+                        </div>
+                    </div>
+                    <div class="hr030-quick-actions">
+                        <button type="button" class="hr030-quick-action" data-action-label="상세 현황 열기">
+                            <strong>상세 현황 열기</strong>
+                            <span>선택한 항목 기준으로 상세 팝업 이동</span>
+                        </button>
+                        <button type="button" class="hr030-quick-action" data-action-label="우선순위 공유">
+                            <strong>우선순위 공유</strong>
+                            <span>현재 큐 상태를 팀 공지 형태로 복사</span>
+                        </button>
+                        <button type="button" class="hr030-quick-action" data-action-label="리스크 메모 남기기">
+                            <strong>리스크 메모 남기기</strong>
+                            <span>리스크 신호에 바로 메모를 남기는 흐름</span>
+                        </button>
+                    </div>
+                </article>
+            </div>
+        </section>
+    </section>
+
+    <script src="/js/api/hr/hr030.js"></script>
+</th:block>
+
+</html>
