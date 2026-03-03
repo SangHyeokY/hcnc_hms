@@ -304,6 +304,7 @@ input, select, textarea {
     /*background-color: #F6F6F6;*/
     border: 1px solid #D9D9D9;
     height: 40px;
+    transition: all 0.2s ease;
 }
 
 input::placeholder, select::placeholder, textarea::placeholder {
@@ -317,6 +318,12 @@ textarea:focus-visible {
     outline: none;
     border-color: #D9D9D9;
     box-shadow: 0 0 0 2px rgba(74,144,226,0.25);
+}
+input:not([readonly]):not([disabled]):hover,
+select:not([readonly]):not([disabled]):hover,
+textarea:not([readonly]):not([disabled]):hover {
+    border-color: #E50019;
+    box-shadow: 0 0 0 3px rgba(229, 0, 25, 0.25);
 }
 
 .main-human-modal input:is(:read-only, :disabled),

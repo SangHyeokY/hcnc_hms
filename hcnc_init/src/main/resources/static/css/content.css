@@ -2373,6 +2373,7 @@ section.search-area .search-btn-area .btn-search {
   flex-direction: row;
   align-items: flex-end;
   gap: 12px;
+  margin-left: 12px;
 }
 
 .contents-wrap:has(#TABLE_HR010_A) .hr010-user-type-tab,
@@ -2387,7 +2388,7 @@ section.search-area .search-btn-area .btn-search {
   width: 150px;
   height: 40px;
   background: #E8EBF0;
-  border: 2px solid #DEE2E7;
+  border: 1px solid #DEE2E7;
   border-bottom: none;
   border-radius: 8px 8px 0 0;
   color: #82878F;
