@@ -91,7 +91,7 @@ option{background:#fff; color:#333;}
 /*=================================================================================
  * Grid Table style
 =================================================================================*/
- .tabulator {border-top: none !important; border-right: 0; border-left: 0; border-bottom: 0; height: 100%; border-radius: 8px 8px 0 0; max-width: 100%; background:#fff; border:none; overflow: hidden;}
+.tabulator {border-top: none !important; border-right: 0; border-left: 0; border-bottom: 0; height: 100%; max-width: 100%; background:#fff; border:none; overflow: hidden;}
 .tabulator-header {padding: 0 !important; margin: 0 !important; border-bottom: 0 !important; font-size: 1em !important;}
 .tabulator-header .tabulator-col {
   background: #EFF1F6 !important;
@@ -112,7 +112,6 @@ option{background:#fff; color:#333;}
 .tabulator-row .tabulator-cell {border-left: 0 !important;}
 .tabulator-row {margin-bottom: 0 !important;}
 .tabulator-row .tabulator-cell {border-bottom: 1px solid #E0E3E8; text-align: center;}
-.tabulator-row .tabulator-cell + .tabulator-cell {border-left: 1px solid #f3f3f3 !important;}
 
 .tabulator .tabulator-row.tabulator-row-odd,
 .tabulator .tabulator-row.tabulator-row-even {
@@ -332,6 +331,9 @@ option{background:#fff; color:#333;}
   flex: 1 1 auto;
   min-height: 0;
 }
+#TABLE_USER.tabulator .tabulator-tableHolder {
+  overflow: hidden;
+}
 #TABLE_HR010_A.tabulator .tabulator-header,
 #TABLE_USER.tabulator .tabulator-header {
   flex: 0 0 auto; /* 높이 고정 */
@@ -426,7 +428,7 @@ option{background:#fff; color:#333;}
 =================================================================================*/
 .tree .none {display: none;}
 .tabulator .tabulator-header {color:#333 !important; font-size: 15px !important; font-weight: 600 !important;}
-.tabulator .tabulator-header .tabulator-col.tabulator-col-group .tabulator-col-group-cols {border-top: 2px solid #ebedf1 !important;}
+.tabulator .tabulator-header .tabulator-col.tabulator-col-group .tabulator-col-group-cols {border-top: 1px solid #ebedf1 !important;}
 
 /*===============================================================================
   HR014
@@ -1124,6 +1126,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 #TABLE_COMMON_MAIN .tabulator-tableHolder {
   min-height: calc(100% - 102px) !important;
   max-height: none !important;
+  overflow: hidden;
 }
 .common-code-section:first-child {width: 100%; display: flex;flex-direction: column;}
 .common-code-section:last-child {width: 100%; display: flex;flex-direction: column;}
@@ -1368,17 +1371,18 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .modal-human-area .table-area input[type="text"]:read-only, .modal-human-area .table-area :disabled {text-align:left;}
 .modal-human-area .table-area table {width: 100%; height: 100%;}
 
-/* ★ 테이블 border */
+/* ★ 테이블 border(테두리) */
 /* 공통 border 색상 통일 */
-.modal-human-area .table-area tr th, .modal-human-area .table-area tr td {border-bottom: 2px solid #DEE2E7;}
+.modal-human-area .table-area tr th, .modal-human-area .table-area tr td {border-bottom: 1px solid #DEE2E7;}
 /* 첫 줄 상단 border */
-.modal-human-area .table-area tr:first-child th, .modal-human-area .table-area tr:first-child td {border-top: 2px solid #DEE2E7;}
+.modal-human-area .table-area tr:first-child th, .modal-human-area .table-area tr:first-child td {border-top: 1px solid #DEE2E7;}
 /* th 전용 */
-.modal-human-area .table-area tr th {background: #EFF1F6;} /* border-left: 2px solid #DEE2E7;*/
+.modal-human-area .table-area tr th {background: #EFF1F6; border-left: 1px solid #DEE2E7;} /* */
 /* td 전용 */
 .modal-human-area .table-area tr td {padding: 4px;}
 /* 마지막 td 오른쪽 border */
-/*.modal-human-area .table-area tr td:last-child {border-right: 2px solid #DEE2E7;}*/
+.modal-human-area .table-area tr td:last-child {border-right: 1px solid #DEE2E7;}
+.hr010-main-pop .modal-human-area .brdt_css {border-right: 1px solid #DEE2E7;}
 
 .tab-area {position:relative; display: flex; width: 100%; margin-bottom:8px; gap: 0px; box-sizing: border-box; border-radius:6px; overflow:hidden;}
 /*.tab-area:before {content:""; position:absolute; left:0; bottom:1px; height:1px; width:100%; background:#ddd; z-index:-1;}*/
@@ -1522,9 +1526,6 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .tab2-content #TABLE_HR012_B.is-readonly * {
     cursor: default !important;
 }
-/*#TABLE_HR012_A .tabulator-tableHolder {
-    overflow-x: auto !important;
-}*/
 #TABLE_HR012_A .tabulator-cell[data-field="skl_id_lst"],
 #TABLE_HR012_A .tabulator-cell[tabulator-field="skl_id_lst"] {
     white-space: nowrap !important;
@@ -1854,39 +1855,60 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .tabulator .tabulator-cell > div {
   white-space: normal;
 }
-
-/* ================================================ 테두리 ================================================ */
-.tabulator {
-  border-radius: 0px !important;
-}
 .tabulator .tabulator-table > .tabulator-row > .tabulator-cell {
   min-height: 44px;
   align-content: center;
   border: 0;
 }
+/* ================================================ 테두리 ================================================ */
+.tabulator {
+   border-top-left-radius: 10px;
+   /*border-top-right-radius: 10px;*/
+   overflow: hidden;
+}
+
+/* 모든 tabulator 테이블 css */
+.tabulator .tabulator-table {
+  user-select: none;
+}
 /* 일부 tabulator 테이블의 첫번째 열은 th 효과 처리 */
 .th-effect .tabulator-table > .tabulator-row > .tabulator-cell:first-child {
   background: #EFF1F6 !important;
+  border-left: 1px solid #DEE2E7 !important;
   font-weight: bold;
+}
+.th-effect .tabulator-table > .tabulator-row:first-child {
+  border-top: solid 1px #DEE2E7 !important;
 }
 .th-effect .tabulator-table > .tabulator-row > .tabulator-cell:first-child:hover {
   background: #EFF1F6 !important;
 }
-
-/* 왼쪽에 테두리 */
-/*.tabulator .tabulator-row > .tabulator-cell:first-child {
-  box-shadow: inset 2px 0 0 #DEE2E7;
-}*/
-
-.tabulator .tabulator-tableHolder {
-    border-top: 2px solid #DEE2E7;
-}
 .tabulator .tabulator-table > .tabulator-row:not(:nth-child(1)) > .tabulator-cell {
-  border-top: solid 2px #DEE2E7 !important;;
+  border-top: solid 1px #DEE2E7 !important;
 }
 .tabulator .tabulator-table > .tabulator-row:nth-last-child(1) > .tabulator-cell {
-  border-bottom: solid 2px #DEE2E7 !important;
+  border-bottom: solid 1px #DEE2E7 !important;
 }
+/* 마지막 행의 첫 번째 셀 */
+.tabulator .tabulator-table .tabulator-row:last-child .tabulator-cell:first-child {
+  border-bottom-left-radius: 10px;
+  overflow: hidden;
+}
+/* 마지막 행의 마지막 셀 */
+.tabulator .tabulator-table .tabulator-row:last-child .tabulator-cell:last-child {
+  border-bottom-right-radius: 10px;
+  overflow: hidden;
+}
+.tabulator .tabulator-cell {
+  box-sizing: border-box;
+}
+/*가로 스크롤 없어야 하는 테이블*/
+/*#TABLE_HR012_A .tabulator-tableHolder,
+#TABLE_HR012_B .tabulator-tableHolder,
+#TABLE_HR013_A .tabulator-tableHolder,
+#TABLE_HR014_A .tabulator-tableHolder{
+  overflow-x: hidden;
+}*/
 /* ====================================================================================================== */
 .tabulator-row .tabulator-cell:first-child {text-align: center !important}
 
