@@ -2445,6 +2445,8 @@ section.search-area .search-btn-area .btn-search {
   height: auto;
   max-height: 72vh;
   overflow: hidden;
+  border-bottom: 2px solid #EAECF0;
+  padding-bottom: 4px;
 }
 #hr013-project-picker-area .hr013-project-picker-left,
 #hr013-project-picker-area .hr013-project-picker-right {
@@ -2458,7 +2460,7 @@ section.search-area .search-btn-area .btn-search {
   background: #f8fafd;
   border: 1px solid #dee2e7;
   border-radius: 8px;
-  padding: 12px;
+  padding: 15px;
   margin-bottom: 72px;
 }
 
@@ -2469,6 +2471,7 @@ section.search-area .search-btn-area .btn-search {
   align-items: center;
   gap: 8px;
   margin-bottom: 8px;
+  padding-top: 12px;
 }
 #hr013-project-picker-area .hr013-project-picker-search-row > label,
 #hr013-project-picker-area .hr013-project-picker-title {
@@ -2508,10 +2511,10 @@ section.search-area .search-btn-area .btn-search {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  min-width: 72px;
+  min-width: 80px;
   height: 38px;
-  padding: 0 14px;
-  border-radius: 8px;
+  padding: 19PX 25px;
+  border-radius: 48px;
   border: 1px solid #212e41;
   background: #212e41;
   color: #fff;
@@ -2528,7 +2531,7 @@ section.search-area .search-btn-area .btn-search {
   display: inline-flex;
   align-items: center;
   margin: 0; padding-left: 21px;
-  font-size: 17px; font-weight: 700; color: #1d232d;
+  font-size: 18px; font-weight: 700; color: #1d232d;
 }
 #hr013-project-picker-area .hr013-project-picker-result-title::before {
   content: "";
@@ -2547,6 +2550,10 @@ section.search-area .search-btn-area .btn-search {
   border-radius: 8px;
   overflow: hidden;
 }
+#hr013-project-picker-area #TABLE_HR013_PROJECT_PICKER .tabulator-cell {
+  border-right: solid 1px #e2e8f0 !important;
+  border-left: solid 1px #e2e8f0 !important;
+}
 /* 신규 등록 폼(우측) */
 #hr013-project-picker-area .hr013-project-picker-right .cell-info {
     margin: 26px 0 26px 0;
@@ -2554,23 +2561,26 @@ section.search-area .search-btn-area .btn-search {
 #hr013-project-picker-area .hr013-project-picker-right .cell-info input,
 #hr013-project-picker-area .hr013-project-picker-right .cell-info select {
   width: 100%;
+  background-color: #ffffff;
 }
 #hr013-project-picker-area .hr013-project-picker-right .cell-info label {
   display: block;
-  margin-bottom: 10px;
-  font-size: 16px;
+  margin-bottom: 15px;
+  padding-top: 34px;
+  font-size: 16px; font-weight: 700;
 }
 #hr013-project-picker-area #btn_hr013_project_code_save {
   height: 38px;
-  min-width: 96px;
-  border-radius: 8px;
+  min-width: 105px;
+  border-radius: 48px;
   border: 1px solid #e50019;
   background: #fff;
   color: #e50019;
   font-weight: 600;
+  padding: 20px 20px;
 }
 #hr013-project-picker-area #btn_hr013_project_picker_apply {
-  height: 38px;
+  height: 46px;
   min-width: 96px;
   border-radius: 8px;
   border: 1px solid #e50019;
