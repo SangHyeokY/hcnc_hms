@@ -248,7 +248,6 @@ option{background:#fff; color:#333;}
   font-weight: 400;
   line-height: 140%;
   letter-spacing: 0;
-  color: #1D232D;
   white-space: nowrap;
   pointer-events: none;
 }
@@ -264,7 +263,7 @@ option{background:#fff; color:#333;}
 
 /* 총 데이터 수 색상 */
 .hcnc-grid-count-number {
-    /*color: #E50019;*/
+    color: #1D232D;
     font-weight: 500;
     margin-left: 4px;
 }
@@ -2352,10 +2351,10 @@ section.search-area .search-btn-area .btn-search {
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  padding: 13px 16px;
+  padding: 0px 16px;
   gap: 8px;
   width: 150px;
-  height: 32px;
+  height: 40px;
   background: #E8EBF0;
   border: 2px solid #DEE2E7;
   border-bottom: none;

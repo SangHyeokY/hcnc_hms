@@ -85,7 +85,7 @@ function applyTab2Readonly(isReadOnly) {
     }
 }
 
-// 숙련도(B) 제목 옆 건수(span.hcnc-sub-count-number) 업데이트
+// 숙련도(B) 제목 옆 건수(span.hcnc-grid-count-number) 업데이트
 function updateHr012BTitleCount() {
     let count = 0;
     if (window.hr012TableB && typeof window.hr012TableB.getDataCount === "function") {
@@ -93,7 +93,7 @@ function updateHr012BTitleCount() {
     } else if (window.hr012TableB && typeof window.hr012TableB.getData === "function") {
         count = window.hr012TableB.getData().length;
     }
-    $("#hr012b-count .hcnc-sub-count-number").text(count);
+    $("#hr012b-count .hcnc-grid-count-number").text(count);
 }
 
 function buildHr012TableA() {
@@ -804,7 +804,7 @@ function syncHr012SkillPickerUi(forceRebuild) {
     const totalCount = Array.isArray(hr012SkillOptions) ? hr012SkillOptions.length : 0;
     const selectedCount = getHr012SelectedCodeSet().size;
     $("#hr012-skill-picker-meta").html(
-        `전체 기술 <span class="fw500 mg-l4">${totalCount}</span>개 / 선택 <span class="hcnc-sub-count-number">${selectedCount}</span>개`
+        `전체 기술 <span class="fw500 mg-l4">${totalCount}</span>개 / 선택 <span class="hcnc-grid-count-number">${selectedCount}</span>개`
     );
 
     if (!hr012SkillPickerTable) {
