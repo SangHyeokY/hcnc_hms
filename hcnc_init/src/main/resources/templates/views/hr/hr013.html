@@ -202,12 +202,19 @@
                     <div class="hr013-project-picker-search-row">
                         <label for="hr013-project-picker-search">프로젝트 검색</label>
                         <div class="hr013-project-picker-search-wrap">
-                            <input type="text" id="hr013-project-picker-search" class="wp100" placeholder="프로젝트명 입력 (Enter)">
+                            <input type="text" id="hr013-project-picker-search" class="wp100"
+                                placeholder="프로젝트명 입력 (Enter)">
                             <button type="button" class="btn btn-close" id="btn_hr013_project_picker_search">
                                 <img src="/icons/ico-search.png" alt="검색">
                                 검색
                             </button>
                         </div>
+                    </div>
+                    <div class="hr013-project-picker-result-head page-sub-title">
+                        <p class="hr013-project-picker-result-title">검색결과</p>
+                        <span id="hr013-project-picker-count" class="hcnc-grid-count hcnc-grid-count-title">
+                            총 <span class="hcnc-grid-count-number">0</span>건
+                        </span>
                     </div>
                     <div id="TABLE_HR013_PROJECT_PICKER"></div>
                 </div>
@@ -234,7 +241,8 @@
 
             <div class="modal-btn">
                 <ul>
-                    <li><button type="button" class="btn btn-close" id="btn_hr013_project_picker_apply">프로젝트 선택</button></li>
+                    <li><button type="button" class="btn btn-close" id="btn_hr013_project_picker_apply">프로젝트 선택</button>
+                    </li>
                 </ul>
             </div>
         </div>

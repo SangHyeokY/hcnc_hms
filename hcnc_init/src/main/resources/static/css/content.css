@@ -1834,6 +1834,15 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
     }
 }
 
+#hr013-project-picker-area .hr013-project-picker-result-head {
+  margin: 10px 0 8px;
+}
+
+#hr013-project-picker-area .hr013-project-picker-result-title {
+  margin: 0;
+  font-size: 17px; font-weight: 700; color: #1d232d;
+}
+
 /* 셀 기본 설정 */
 .tabulator .tabulator-cell {
   white-space: normal !important;   /* 줄바꿈 허용 */
@@ -2514,6 +2523,23 @@ section.search-area .search-btn-area .btn-search {
   height: 14px;
   display: block;
 }
+#hr013-project-picker-area .hr013-project-picker-result-title {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  margin: 0; padding-left: 21px;
+  font-size: 17px; font-weight: 700; color: #1d232d;
+}
+#hr013-project-picker-area .hr013-project-picker-result-title::before {
+  content: "";
+  position: absolute;
+  top: 50%; left: 0;
+  transform: translateY(-50%);
+  width: 16px; height: 16px;
+  background: url("../icons/ico-right-arrow.png") no-repeat center;
+  background-size: contain;
+}
+
 
 /* 목록 테이블(좌측) */
 #hr013-project-picker-area #TABLE_HR013_PROJECT_PICKER {
