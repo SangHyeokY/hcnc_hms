@@ -3103,3 +3103,4 @@ section.search-area .search-btn-area .btn-search {
 @media (prefers-reduced-motion: reduce) {
   .hr030-dock-item, .hr030-filter-chip, .hr030-apply-btn, .hr030-metric-card, .hr030-panel, .hr030-queue-item, .hr030-quick-action, .hr030-text-reveal, .hr030-trend-fill, .hr030-dashboard.is-ready .hr030-reveal { transition: none !important; animation: none !important; transform: none !important; }
 }
+/* ============= HR030 dashboard demo ================= */
