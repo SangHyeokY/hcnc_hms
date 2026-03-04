@@ -6,7 +6,7 @@ option{background:#fff; color:#333;}
  =================================================================================*/
 .login-wrap {display: flex; width: 100%; height: calc(100vh - 0px); background:url("../images/common/bg-login-02.png") center center no-repeat #eeeeee; background-size:150%; overflow: hidden;}
 .login-article{display:grid; width:100%; height:100%; place-items:center;}
-.login-txt-box {text-align: center; width: 530px; height: 650px; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #fff; border-radius: 20px;}
+.login-txt-box {text-align: center; width: 530px; height: 650px; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #fff; border-radius: 20px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);}
 .login-txt-box .content-title{width:100%; padding-bottom: 30px; }
 .login-txt-box .content-info{width:84%;}
 .login-txt-box h4 {display:block; background:url('../images/common/logo.png') center center no-repeat; background-size: contain; width:80%; margin:0 auto; padding-top:60px;}
@@ -1453,6 +1453,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
     color: #E50019;
     font-weight: 700;
     border-bottom:3px solid #E50019;
+    margin-top: 3px;
 }
 
 .hr014-side-tabs > button {
@@ -2372,7 +2373,7 @@ section.search-area .search-btn-area .btn-search {
   display: flex;
   flex-direction: row;
   align-items: flex-end;
-  gap: 12px;
+  gap: 8px;
   margin-left: 12px;
 }
 
