@@ -320,14 +320,22 @@ textarea:focus-visible {
     box-shadow: 0 0 0 2px rgba(74,144,226,0.5);
     background-color: #fff !important;
 }
-input:not([readonly]):not([disabled]):hover,
+input[type="text"]:not([readonly]):not([disabled]):hover,
+input[type="number"]:not([readonly]):not([disabled]):hover,
+input[type="email"]:not([readonly]):not([disabled]):hover,
+input[type="password"]:not([readonly]):not([disabled]):hover,
+input[type="button"]:not([readonly]):not([disabled]):hover,
 select:not([readonly]):not([disabled]):hover,
-textarea:not([readonly]):not([disabled]):hover,
-.modal-human-area .pic-area .profile-area.edit:hover {
+textarea:not([readonly]):not([disabled]):hover {
     outline: none;
     border-color: rgba(229, 0, 25, 0.5);
     box-shadow: 0 0 0 2px rgba(229, 0, 25, 0.5);
     background-color: #fff !important;
+}
+.modal-human-area .pic-area .profile-area.edit:hover {
+    outline: none;
+    border-color: rgba(229, 0, 25, 0.5);
+    box-shadow: 0 0 0 2px rgba(229, 0, 25, 0.5);
 }
 
 .main-human-modal input:is(:read-only, :disabled),
