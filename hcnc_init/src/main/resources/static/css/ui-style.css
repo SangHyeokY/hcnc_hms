@@ -322,7 +322,8 @@ textarea:focus-visible {
 }
 input:not([readonly]):not([disabled]):hover,
 select:not([readonly]):not([disabled]):hover,
-textarea:not([readonly]):not([disabled]):hover {
+textarea:not([readonly]):not([disabled]):hover,
+.modal-human-area .pic-area .profile-area.edit:hover {
     outline: none;
     border-color: rgba(229, 0, 25, 0.5);
     box-shadow: 0 0 0 2px rgba(229, 0, 25, 0.5);

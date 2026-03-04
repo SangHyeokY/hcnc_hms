@@ -1164,7 +1164,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 15px 20px;
+  padding: 10px 15px;
   border-bottom: 2px solid #EAECF0;
 }
 
@@ -1246,7 +1246,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 /* 인력관리 팝업 - 테이블 */
 .modal-content #main-modal-table tr {height: 50px;}
 
-.modal-btn {padding: 0 20px 15px 20px;}
+.modal-btn {padding:10px 15px;}
 .modal-btn ul {display: flex; justify-content: flex-end;}
 .modal-btn ul li {margin-right: 10px;}
 .modal-btn ul li:last-child {margin-right: 0;}
@@ -1342,7 +1342,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
   width: 100%;
   point: default;
 }
-.modal-human-area .pic-area .profile-area{
+.modal-human-area .pic-area .profile-area {
     position:relative;
     /*height: 270px;*/
     height:100%;
@@ -1352,7 +1352,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
     background:url("../images/common/bg-userimg.png")center center no-repeat #ECECEE;
     background-size:contain;
     overflow:hidden;
-} /* padding-top: 100%; */
+}
 .modal-human-area .pic-area .profile-area img{
     width: 100%;
     height: 100%;
