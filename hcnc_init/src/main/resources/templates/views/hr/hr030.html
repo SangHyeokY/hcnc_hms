@@ -5,12 +5,14 @@
 <th:block layout:fragment="searchCondition"></th:block>
 
 <th:block layout:fragment="content">
-    <div class="hr030-dashboard" id="hr030-dashboard">
-        <aside class="hr030-dock hr030-reveal" aria-label="대시보드 패널 이동">
-            <button type="button" class="hr030-dock-top" id="hr030DockTop">TOP</button>
-            <button type="button" class="hr030-dock-item is-active" data-panel-target="hr030PanelInsight">
-                <span class="hr030-dock-icon hr030-text-reveal">01</span>
-                <strong class="hr030-text-reveal">인사이트</strong>
+        <div class="hr030-dashboard" id="hr030-dashboard">
+            <aside class="hr030-dock hr030-reveal" aria-label="대시보드 패널 이동">
+                <div class="hr030-dock-top-slot" aria-hidden="true">
+                    <button type="button" class="hr030-dock-top" id="hr030DockTop">TOP</button>
+                </div>
+                <button type="button" class="hr030-dock-item is-active" data-panel-target="hr030PanelInsight">
+                    <span class="hr030-dock-icon hr030-text-reveal">01</span>
+                    <strong class="hr030-text-reveal">인사이트</strong>
             </button>
             <button type="button" class="hr030-dock-item" data-panel-target="hr030PanelPriority">
                 <span class="hr030-dock-icon hr030-text-reveal">02</span>

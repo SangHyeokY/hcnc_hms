@@ -303,7 +303,9 @@ function bindHr030ScrollAids() {
 
     function updateHr030ScrollAidState() {
         var scrollTop = Number(scrollContainer.scrollTop || 0);
-        topButton.classList.toggle("is-visible", scrollTop > 260);
+        var isVisible = topButton.classList.contains("is-visible");
+        var shouldShow = isVisible ? scrollTop > 56 : scrollTop > 260;
+        topButton.classList.toggle("is-visible", shouldShow);
     }
 
     scrollContainer.addEventListener("scroll", updateHr030ScrollAidState, { passive: true });
