@@ -2928,10 +2928,6 @@ section.search-area .search-btn-area .btn-search {
   animation-delay: var(--hr030-delay, 0ms);
 }
 
-.hr030-text-reveal {
-  will-change: opacity, transform, filter;
-}
-
 .hr030-dashboard.is-ready .hr030-reveal .hr030-text-reveal {
   animation: hr030TextLift 0.74s var(--hr030-ease-inertia) both;
   animation-delay: calc(var(--hr030-delay, 0ms) + var(--hr030-text-delay, 60ms));
@@ -2939,8 +2935,8 @@ section.search-area .search-btn-area .btn-search {
 
 .hr030-dock {
   position: fixed;
-  top: var(--hr030-dock-top, 24px);
-  left: var(--hr030-dock-left, 188px);
+  top: 40px;
+  left: calc(var(--hcnc-lnb-width, 248px) + var(--hcnc-contents-pad, 20px));
   z-index: 2;
   display: grid;
   align-content: start;
@@ -2950,8 +2946,7 @@ section.search-area .search-btn-area .btn-search {
   border-radius: var(--hr030-radius-xl);
   background: linear-gradient(180deg, #173169 0%, #234a97 42%, #3767c4 100%);
   box-shadow: 0 24px 42px rgba(12, 23, 46, 0.18);
-  transition: left 0.28s cubic-bezier(0.22, 1, 0.36, 1), top 0.28s cubic-bezier(0.22, 1, 0.36, 1);
-  will-change: transform;
+  transition: left 0.28s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .hr030-dock-top {
@@ -3009,7 +3004,6 @@ section.search-area .search-btn-area .btn-search {
   color: #fff;
   transform-origin: center left;
   transition: transform 460ms var(--hr030-ease-inertia), background-color 280ms ease, box-shadow 560ms var(--hr030-ease-inertia), color 280ms ease;
-  will-change: transform, box-shadow;
 }
 
 .hr030-dock-item:hover {
@@ -3190,7 +3184,6 @@ section.search-area .search-btn-area .btn-search {
   font-size: 15px;
   font-weight: 700;
   transition: transform var(--hr030-motion-base) var(--hr030-ease-spring), border-color var(--hr030-motion-fast) ease, color var(--hr030-motion-fast) ease, box-shadow var(--hr030-motion-slow) var(--hr030-ease-inertia), background-color var(--hr030-motion-base) ease;
-  will-change: transform, box-shadow;
 }
 
 .hr030-filter-chip:hover {
@@ -3279,7 +3272,6 @@ section.search-area .search-btn-area .btn-search {
   text-align: left;
   box-shadow: 0 18px 34px rgba(27, 45, 79, 0.06);
   transition: transform var(--hr030-motion-base) var(--hr030-ease-spring), box-shadow var(--hr030-motion-slow) var(--hr030-ease-inertia), border-color var(--hr030-motion-base) ease, background-color var(--hr030-motion-fast) ease;
-  will-change: transform, box-shadow;
 }
 
 .hr030-metric-card::before {
@@ -3408,7 +3400,6 @@ section.search-area .search-btn-area .btn-search {
   background: linear-gradient(180deg, #ffffff 0%, #f4f7fd 100%);
   box-shadow: 0 18px 38px rgba(15, 24, 46, 0.08);
   transition: transform var(--hr030-motion-base) var(--hr030-ease-spring), box-shadow var(--hr030-motion-slow) var(--hr030-ease-inertia), border-color var(--hr030-motion-base) ease;
-  will-change: transform, box-shadow;
 }
 
 .hr030-panel::before {
@@ -3670,7 +3661,6 @@ section.search-area .search-btn-area .btn-search {
   background: conic-gradient(var(--hr030-night-soft) 0 calc(var(--rate) * 1%), #2d6ef7 calc(var(--rate) * 1%) calc(var(--rate) * 1% + 12%), #e3eaf6 calc(var(--rate) * 1% + 12%) 100%);
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.46);
   transition: --rate 1150ms var(--hr030-ease-spring), transform 780ms var(--hr030-ease-inertia), box-shadow 780ms var(--hr030-ease-inertia);
-  will-change: transform;
 }
 
 .hr030-focus-ring::before {
@@ -3744,7 +3734,6 @@ section.search-area .search-btn-area .btn-search {
   background: linear-gradient(180deg, #fbfcff 0%, #f1f5fc 100%);
   color: var(--hr030-text-main);
   transition: transform var(--hr030-motion-base) var(--hr030-ease-spring), box-shadow var(--hr030-motion-slow) var(--hr030-ease-inertia), border-color var(--hr030-motion-base) ease, background-color var(--hr030-motion-base) ease;
-  will-change: transform, box-shadow;
 }
 
 .hr030-quick-action:hover {
@@ -3795,7 +3784,6 @@ section.search-area .search-btn-area .btn-search {
   background: linear-gradient(180deg, #ffffff 0%, #f4f7fd 100%);
   text-align: left;
   transition: transform var(--hr030-motion-base) var(--hr030-ease-spring), box-shadow var(--hr030-motion-slow) var(--hr030-ease-inertia), border-color var(--hr030-motion-base) ease;
-  will-change: transform, box-shadow;
 }
 
 .hr030-queue-item:hover {
@@ -4062,17 +4050,14 @@ section.search-area .search-btn-area .btn-search {
 @keyframes hr030TextLift {
   0% {
     opacity: 0;
-    filter: blur(4px);
-    transform: translateY(14px);
+    transform: translateY(10px);
   }
   72% {
     opacity: 1;
-    filter: blur(0);
-    transform: translateY(-2px);
+    transform: translateY(-1px);
   }
   100% {
     opacity: 1;
-    filter: blur(0);
     transform: translateY(0);
   }
 }
@@ -4080,30 +4065,25 @@ section.search-area .search-btn-area .btn-search {
 @keyframes hr030TextSwapOut {
   0% {
     opacity: 1;
-    filter: blur(0);
     transform: translateY(0) scale(1);
   }
   100% {
     opacity: 0;
-    filter: blur(6px);
-    transform: translateY(-8px) scale(0.992);
+    transform: translateY(-6px) scale(0.992);
   }
 }
 
 @keyframes hr030TextSwapIn {
   0% {
     opacity: 0;
-    filter: blur(6px);
-    transform: translateY(18px) scale(0.988);
+    transform: translateY(12px) scale(0.988);
   }
   72% {
     opacity: 1;
-    filter: blur(0);
-    transform: translateY(-2px) scale(1.004);
+    transform: translateY(-1px) scale(1.004);
   }
   100% {
     opacity: 1;
-    filter: blur(0);
     transform: translateY(0) scale(1);
   }
 }
