@@ -77,11 +77,18 @@ const Layout = {
     // 토글 직후 프레임에서 레이아웃 기준으로 테이블 폭을 다시 계산한다.
     requestAnimationFrame(() => {
       window.dispatchEvent(new Event("resize"));
+      if (!document.querySelector(".tabulator")) {
+        return;
+      }
       this.redrawTabulators();
     });
   },
 
   redrawTabulators() {
+    if (!document.querySelector(".tabulator")) {
+      return;
+    }
+
     Object.keys(window).forEach((key) => {
       const value = window[key];
       if (!value || typeof value !== "object") {
