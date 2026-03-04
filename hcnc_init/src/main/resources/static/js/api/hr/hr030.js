@@ -1,10 +1,13 @@
+// 필터 버튼을 눌렀을 때, 실제 반영 전에 잠깐 들고 있는 선택값
 var hr030PendingState = {
     perspective: "ops",
     period: "week"
 };
 
+// 자동 반영 지연 실행용 타이머 id
 var hr030ApplyTimer = 0;
 
+// 현재 대시보드가 실제로 보여주고 있는 상태값
 var hr030State = {
     perspective: "ops",
     period: "week",
@@ -14,6 +17,7 @@ var hr030State = {
     currentScenario: null
 };
 
+// KPI 키별 라벨/단위/설명 설정
 var hr030MetricConfig = {
     deploy: { label: "오늘 투입 예정", suffix: "명", desc: "당일 바로 확인해야 할 투입 인원입니다." },
     unassigned: { label: "프로젝트 미배정", suffix: "명", desc: "우선 매칭이 필요한 가용 인원입니다." },
@@ -21,6 +25,7 @@ var hr030MetricConfig = {
     risk: { label: "리스크 확인", suffix: "건", desc: "누락이나 지연이 발생하기 쉬운 경고 신호입니다." }
 };
 
+// 관점별 기본 시나리오 데이터(현재는 샘플 데이터 기반)
 var hr030ScenarioBase = {
     ops: {
         kicker: "전체 운영",
@@ -159,15 +164,24 @@ var hr030ScenarioBase = {
     }
 };
 
+// 기간 버튼별 라벨과 수치 배율 설정
 var hr030PeriodConfig = {
     day: { label: "오늘", metricFactor: 0.45, trendFactor: 0.5 },
     week: { label: "이번 주", metricFactor: 1, trendFactor: 1 },
     month: { label: "이번 달", metricFactor: 1.7, trendFactor: 1.8 }
 };
 
+/* ==========================================================================
+ * 1. 초기 진입 / 이벤트 바인딩
+ * - 대시보드 전용 클래스 부착
+ * - 버튼/칩/도크 이벤트 연결
+ * - 첫 렌더 호출
+ * ========================================================================== */
+
+// hr030 화면이 열릴 때 최초 1회 실행되는 진입점
 function initHr030Dashboard() {
     var dashboard = document.getElementById("hr030-dashboard");
-    var contentsWrap = null;
+    var contentsWrap = null;    // 나중에 부모 레이아웃에 클래스 추가 위해 선언
     var whiteFull = null;
 
     if (!dashboard) {
@@ -178,32 +192,35 @@ function initHr030Dashboard() {
     whiteFull = dashboard.closest(".white-full");
 
     if (contentsWrap) {
-        contentsWrap.classList.add("hr030-dashboard-wrap");
+        contentsWrap.classList.add("hr030-dashboard-wrap"); // 페이지 공통 제목/검색영역을 숨기고 대시보드 전용 grid/layout적용할 때 사용
     }
 
     if (whiteFull) {
-        whiteFull.classList.add("hr030-dashboard-shell");
+        whiteFull.classList.add("hr030-dashboard-shell");   // 대시보드 배경, 스크롤 구조, 높이 구조를 다르게 잡을 때 사용
     }
 
-    bindHr030FilterChips();
-    bindHr030MetricCards();
-    bindHr030Dock();
-    bindHr030ScrollAids();
-    prepareHr030Reveal();
-    renderHr030Dashboard();
+    bindHr030FilterChips(); // 관점/기간 칩 클릭 이벤트 연결
+    bindHr030MetricCards(); // kpi 카드 클릭 이벤트 연결
+    bindHr030Dock();    // 좌측 도크 버튼, TOP 버튼 이벤트 연결
+    bindHr030ScrollAids();  // 스크롤 위치에 따라 TOP 버튼 표시/숨김 상태를 관리
+    prepareHr030Reveal();   // 첫 로딩 애니메이션 딜레이값 미리 심기
+    renderHr030Dashboard(); // 실제 화면 데이터 계산해서 대시보드 처음 그림
 }
 
+// DOM 준비 상태에 따라 init 함수를 즉시 실행하거나 대기 등록
 if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", initHr030Dashboard);
 } else {
     initHr030Dashboard();
 }
 
+// 관점/기간 칩 그룹의 클릭 이벤트를 한 번에 연결
 function bindHr030FilterChips() {
-    bindHr030ChipGroup("#hr030PerspectiveGroup .hr030-filter-chip", "perspective");
-    bindHr030ChipGroup("#hr030PeriodGroup .hr030-filter-chip", "period");
+    bindHr030ChipGroup("#hr030PerspectiveGroup .hr030-filter-chip", "perspective"); // 관점 칩
+    bindHr030ChipGroup("#hr030PeriodGroup .hr030-filter-chip", "period");   // 기간 칩
 }
 
+// 개별 칩 클릭 시 pending 상태 갱신 후 자동 반영 예약
 function bindHr030ChipGroup(selector, key) {
     var chips = document.querySelectorAll(selector);
     chips.forEach(function (chip) {
@@ -220,19 +237,21 @@ function bindHr030ChipGroup(selector, key) {
             }
 
             hr030PendingState[key] = nextValue;
-            updateHr030ChipState(selector, key, nextValue);
-            pressHr030Element(chip);
+            updateHr030ChipState(selector, key, nextValue); // 관점/기간 칩에만 is-active 클래스를 맞춰주는 UI 동기화
+            pressHr030Element(chip);    // 클릭 애니메이션
             scheduleHr030AutoApply();
         });
     });
 }
 
+// 현재 선택된 칩에만 is-active 클래스를 맞춰주는 UI 동기화
 function updateHr030ChipState(selector, key, activeValue) {
     document.querySelectorAll(selector).forEach(function (chip) {
         chip.classList.toggle("is-active", String(chip.dataset[key] || "") === activeValue);
     });
 }
 
+// 상단 KPI 카드 클릭 시 포커스 지표/패널을 같이 갱신
 function bindHr030MetricCards() {
     document.querySelectorAll(".hr030-metric-card").forEach(function (card) {
         card.addEventListener("click", function () {
@@ -255,6 +274,7 @@ function bindHr030MetricCards() {
     });
 }
 
+// 좌측 도크 버튼과 TOP 버튼 이벤트 연결
 function bindHr030Dock() {
     var topButton = document.getElementById("hr030DockTop");
 
@@ -284,6 +304,7 @@ function bindHr030Dock() {
     });
 }
 
+// 스크롤 위치에 따라 TOP 버튼 표시/숨김 상태를 관리
 function bindHr030ScrollAids() {
     var scrollContainer = getHr030ScrollContainer();
     var topButton = document.getElementById("hr030DockTop");
@@ -303,6 +324,7 @@ function bindHr030ScrollAids() {
     updateHr030ScrollAidState();
 }
 
+// 최초 reveal 애니메이션에 들어갈 delay 값을 요소마다 심어 둔다
 function prepareHr030Reveal() {
     document.querySelectorAll("#hr030-dashboard .hr030-reveal").forEach(function (item, index) {
         item.style.setProperty("--hr030-delay", (index * 22) + "ms");
@@ -312,13 +334,22 @@ function prepareHr030Reveal() {
     });
 }
 
+/* ==========================================================================
+ * 2. 필터 적용 / 전체 렌더 흐름
+ * - pending 상태를 실제 상태로 반영
+ * - 시나리오 생성
+ * - 화면 각 영역 렌더
+ * ========================================================================== */
+
+// pending 상태를 실제 상태로 확정하고 전체 렌더를 다시 돌린다
 function applyHr030Filters() {
     hr030State.perspective = hr030PendingState.perspective;
     hr030State.period = hr030PendingState.period;
     renderHr030Dashboard();
-    replayHr030Motion();
+    replayHr030Motion();    // 렌더 후 애니메이션다시
 }
 
+// 칩을 누를 때마다 바로 재렌더하지 않고 짧게 모아서 자동 반영한다
 function scheduleHr030AutoApply() {
     var autoApply = document.getElementById("hr030AutoApply");
 
@@ -338,6 +369,7 @@ function scheduleHr030AutoApply() {
     }, 120);
 }
 
+// 필터 재적용 후 reveal 애니메이션을 다시 재생한다
 function replayHr030Motion() {
     var dashboard = document.getElementById("hr030-dashboard");
     if (!dashboard) {
@@ -345,10 +377,11 @@ function replayHr030Motion() {
     }
 
     dashboard.classList.remove("is-ready");
-    void dashboard.offsetWidth;
+    void dashboard.offsetWidth; // 레이아웃 계산 다시(reflow)
     dashboard.classList.add("is-ready");
 }
 
+// 현재 상태(hr030State)를 기준으로 대시보드 전체 영역을 다시 그린다
 function renderHr030Dashboard() {
     var scenario = buildHr030Scenario();
     var dashboard = document.getElementById("hr030-dashboard");
@@ -383,6 +416,7 @@ function renderHr030Dashboard() {
     }
 }
 
+// 관점/기간 조합에 맞는 실제 표시 데이터 묶음을 만든다
 function buildHr030Scenario() {
     var base = hr030ScenarioBase[hr030State.perspective] || hr030ScenarioBase.ops;
     var period = hr030PeriodConfig[hr030State.period] || hr030PeriodConfig.week;
@@ -408,6 +442,7 @@ function buildHr030Scenario() {
     };
 }
 
+// 상단 kicker/title/desc/period 문구를 갱신한다
 function renderHr030Topbar(scenario) {
     setHr030Text("hr030HeroKicker", scenario.kicker);
     setHr030Text("hr030HeroTitle", scenario.title);
@@ -416,6 +451,7 @@ function renderHr030Topbar(scenario) {
     updateHr030HeroPulse("현재 포커스: " + getHr030MetricLabel(hr030State.activeMetricKey));
 }
 
+// KPI 숫자 영역만 찾아 숫자 카운트업을 실행한다
 function renderHr030Metrics(metrics) {
     document.querySelectorAll(".hr030-metric-value").forEach(function (node) {
         var metricKey = String(node.dataset.metricField || "");
@@ -424,6 +460,14 @@ function renderHr030Metrics(metrics) {
     });
 }
 
+/* ==========================================================================
+ * 3. 인사이트 패널 렌더
+ * - 점수/요약
+ * - 미터 바
+ * - SVG 라인 차트
+ * ========================================================================== */
+
+// 운영 인사이트 패널의 점수/요약/보조 차트를 한 번에 갱신
 function renderHr030Insight(scenario) {
     var metrics = scenario.metrics;
     var score = buildHr030InsightScore(metrics);
@@ -435,6 +479,7 @@ function renderHr030Insight(scenario) {
     renderHr030InsightChart(scenario);
 }
 
+// KPI 값을 작은 미터 목록으로 변환해 왼쪽 보조 영역에 렌더링
 function renderHr030InsightMeters(metrics) {
     var meterEl = document.getElementById("hr030InsightMeters");
     if (!meterEl) {
@@ -461,6 +506,7 @@ function renderHr030InsightMeters(metrics) {
     }).join("");
 }
 
+// 인사이트 패널의 메인 SVG 차트를 렌더링한다
 function renderHr030InsightChart(scenario) {
     var chartEl = document.getElementById("hr030InsightChart");
     var axisEl = document.getElementById("hr030InsightAxis");
@@ -478,6 +524,7 @@ function renderHr030InsightChart(scenario) {
     }
 }
 
+// 현재 시나리오를 차트용 1차/2차 시계열 데이터로 변환한다
 function buildHr030InsightSeries(scenario) {
     var metrics = scenario.metrics;
     var trends = scenario.trends;
@@ -504,6 +551,7 @@ function buildHr030InsightSeries(scenario) {
     };
 }
 
+// 시계열 데이터를 SVG 문자열로 조립한다
 function buildHr030InsightSvg(primary, secondary) {
     var width = 620;
     var height = 250;
@@ -544,6 +592,7 @@ function buildHr030InsightSvg(primary, secondary) {
         '</svg>';
 }
 
+// 숫자 배열을 SVG 좌표계 점 목록으로 변환한다
 function mapHr030ChartPoints(series, width, height, padding) {
     var maxValue = Math.max.apply(null, series);
     var minValue = Math.min.apply(null, series);
@@ -557,12 +606,22 @@ function mapHr030ChartPoints(series, width, height, padding) {
     });
 }
 
+// 좌표 객체 배열을 "x,y x,y" 형태의 polyline 문자열로 바꾼다
 function stringifyHr030ChartPoints(points) {
     return points.map(function (point) {
         return point.x + "," + point.y;
     }).join(" ");
 }
 
+/* ==========================================================================
+ * 4. 우선 확인 / 상세 / 추이 / 활성 지표 렌더
+ * - 큐 목록 렌더
+ * - 선택 항목 상세 렌더
+ * - 추이 막대 렌더
+ * - 원형 링 지표 렌더
+ * ========================================================================== */
+
+// 우선 확인 목록을 그린 뒤 현재 포커스 항목을 맞춘다
 function renderHr030Queue(queue) {
     var listEl = document.getElementById("hr030QueueList");
     var metaEl = document.getElementById("hr030QueueMeta");
@@ -601,6 +660,7 @@ function renderHr030Queue(queue) {
     renderHr030Detail(findHr030QueueItem(hr030State.activeQueueId) || queue[0] || null);
 }
 
+// 큐 목록 각 버튼 클릭 시 상세 패널까지 같이 갱신되도록 연결
 function bindHr030QueueItems() {
     document.querySelectorAll(".hr030-queue-item").forEach(function (button) {
         button.addEventListener("click", function () {
@@ -612,6 +672,7 @@ function bindHr030QueueItems() {
     });
 }
 
+// 특정 queue id를 현재 선택 항목으로 확정한다
 function selectHr030QueueItem(queueId) {
     var selected = findHr030QueueItem(queueId);
     if (!selected) {
@@ -625,12 +686,14 @@ function selectHr030QueueItem(queueId) {
     renderHr030Detail(selected);
 }
 
+// 현재 큐 목록에서 id로 항목을 찾는다
 function findHr030QueueItem(queueId) {
     return hr030State.queueItems.find(function (item) {
         return item.id === queueId;
     }) || null;
 }
 
+// 현재 선택된 KPI에 맞는 우선 확인 항목을 자동으로 맞춘다
 function focusHr030QueueByMetric(metricKey, shouldPulse) {
     var item = hr030State.queueItems[hr030MetricIndexMap()[metricKey]] || hr030State.queueItems[0];
     if (!item) {
@@ -643,6 +706,7 @@ function focusHr030QueueByMetric(metricKey, shouldPulse) {
     }
 }
 
+// 선택된 큐 항목의 상세 설명/체크리스트를 오른쪽 패널에 표시
 function renderHr030Detail(item) {
     if (!item) {
         return;
@@ -665,6 +729,7 @@ function renderHr030Detail(item) {
     }
 }
 
+// 최근 흐름 데이터를 막대 목록으로 렌더링한다
 function renderHr030Trend(trends) {
     var trendEl = document.getElementById("hr030TrendList");
     if (!trendEl) {
@@ -690,6 +755,7 @@ function renderHr030Trend(trends) {
     }).join("");
 }
 
+// 현재 KPI 기준으로 원형 링 지표와 설명 문구를 갱신한다
 function renderHr030Focus(scenario) {
     if (!scenario) {
         return;
@@ -723,11 +789,13 @@ function renderHr030Focus(scenario) {
     }
 }
 
+// KPI 조합을 바탕으로 인사이트 점수를 계산한다
 function buildHr030InsightScore(metrics) {
     var score = 74 + (Number(metrics.deploy || 0) * 1.6) + (Number(metrics.approval || 0) * 0.8) - (Number(metrics.unassigned || 0) * 2.4) - (Number(metrics.risk || 0) * 3.2);
     return clamp(Math.round(score), 44, 96);
 }
 
+// 현재 시나리오와 포커스 KPI를 요약 문장으로 만든다
 function buildHr030InsightSummary(scenario) {
     var metrics = scenario.metrics;
     var activeMetric = hr030MetricConfig[hr030State.activeMetricKey] || hr030MetricConfig.deploy;
@@ -736,6 +804,14 @@ function buildHr030InsightSummary(scenario) {
     return scenario.periodLabel + " 기준 " + activeMetric.label + " " + activeValue + activeMetric.suffix + "과 " + (firstQueue ? firstQueue.title : "우선 점검 항목") + "가 동시에 걸려 있어 먼저 정리하는 흐름이 맞습니다.";
 }
 
+/* ==========================================================================
+ * 5. 상태 동기화 / 이동 / 애니메이션 유틸
+ * - active 카드/도크/패널 동기화
+ * - 스크롤 이동
+ * - 숫자/텍스트 애니메이션
+ * ========================================================================== */
+
+// 현재 activeMetricKey에 맞는 KPI 카드만 활성 상태로 만든다
 function updateHr030ActiveMetricCard() {
     document.querySelectorAll(".hr030-metric-card").forEach(function (card) {
         var isActive = String(card.dataset.metricKey || "") === hr030State.activeMetricKey;
@@ -744,6 +820,7 @@ function updateHr030ActiveMetricCard() {
     });
 }
 
+// 좌측 도크 active 표시를 전부 초기화한다
 function clearHr030DockState() {
     document.querySelectorAll(".hr030-dock-item").forEach(function (button) {
         button.classList.remove("is-active");
@@ -751,6 +828,7 @@ function clearHr030DockState() {
     });
 }
 
+// 현재 보고 있는 패널만 current 상태로 표시한다
 function updateHr030PanelState(panelId) {
     document.querySelectorAll(".hr030-panel").forEach(function (panel) {
         var isCurrent = panel.id === panelId;
@@ -759,6 +837,7 @@ function updateHr030PanelState(panelId) {
     });
 }
 
+// 도크 active와 패널 current 상태를 같이 맞춘다
 function updateHr030DockState(panelId) {
     document.querySelectorAll(".hr030-dock-item").forEach(function (button) {
         var isActive = String(button.dataset.panelTarget || "") === panelId;
@@ -769,6 +848,7 @@ function updateHr030DockState(panelId) {
     updateHr030PanelState(panelId);
 }
 
+// 특정 패널로 스크롤 이동하고, 제목 문구/강조 상태를 함께 갱신한다
 function goToHr030Panel(panelId, label, shouldSyncDock) {
     var panel = document.getElementById(panelId || "");
     if (!panel) {
@@ -789,6 +869,7 @@ function goToHr030Panel(panelId, label, shouldSyncDock) {
     }, 220);
 }
 
+// 실제 스크롤이 일어나는 컨테이너를 찾아 반환한다
 function getHr030ScrollContainer() {
     var dashboard = document.getElementById("hr030-dashboard");
 
@@ -799,6 +880,7 @@ function getHr030ScrollContainer() {
     return dashboard.closest(".content-body") || document.scrollingElement || document.documentElement;
 }
 
+// 패널 강조 애니메이션을 강제로 다시 재생한다
 function pulseHr030Panel(panelId) {
     var panel = document.getElementById(panelId || "");
     if (!panel) {
@@ -810,6 +892,7 @@ function pulseHr030Panel(panelId) {
     panel.classList.add("is-emphasis");
 }
 
+// 클릭한 요소에 눌림 애니메이션 클래스를 다시 붙여 재생한다
 function pressHr030Element(element) {
     if (!element) {
         return;
@@ -824,6 +907,7 @@ function pressHr030Element(element) {
     element.classList.add("is-pressed");
 }
 
+// 숫자 텍스트를 requestAnimationFrame 기반으로 부드럽게 카운트업한다
 function animateHr030Number(node, targetValue, suffix) {
     if (!node) {
         return;
@@ -862,14 +946,17 @@ function animateHr030Number(node, targetValue, suffix) {
     node.dataset.frameId = String(requestAnimationFrame(step));
 }
 
+// 상단 보조 문구(현재 포커스)를 갱신하는 얇은 래퍼
 function updateHr030HeroPulse(text) {
     setHr030Text("hr030HeroPulse", text);
 }
 
+// KPI 키를 사용자 표시용 한글 라벨로 변환한다
 function getHr030MetricLabel(metricKey) {
     return (hr030MetricConfig[metricKey] || hr030MetricConfig.deploy).label;
 }
 
+// KPI 키와 queue 순서를 연결하는 인덱스 맵
 function hr030MetricIndexMap() {
     return {
         deploy: 0,
@@ -879,6 +966,7 @@ function hr030MetricIndexMap() {
     };
 }
 
+// 텍스트를 즉시 교체하거나, 상황에 따라 부드러운 교체 애니메이션으로 바꾼다
 function setHr030Text(id, text) {
     var element = document.getElementById(id);
     var dashboard = document.getElementById("hr030-dashboard");
@@ -938,6 +1026,7 @@ function setHr030Text(id, text) {
     element.dataset.textReady = "true";
 }
 
+// 숫자를 최소/최대 범위 안으로 잘라내는 공용 유틸
 function clamp(value, min, max) {
     return Math.min(Math.max(value, min), max);
 }
