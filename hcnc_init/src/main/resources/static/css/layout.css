@@ -18,7 +18,7 @@
 /* 좌측 lnb 토글 버튼 */
 .lnb-toggle-handle {
   top: 17%;
-  position: absolute; 
+  position: absolute;
   left: 0; /* 좌표 기준은 항상 0으로 두고 transform으로 이동 */
   width: 16px;
   height: 75px;
@@ -44,8 +44,8 @@
   width: 10px;
   height: 10px;
   background: url("../images/common/ico-arrow-down.png") no-repeat center;
-  background-size: contain; 
-  filter: brightness(0) invert(1); 
+  background-size: contain;
+  filter: brightness(0) invert(1);
   transition: transform 0.28s ease;
   transform: rotate(90deg);
   font-size: 0;

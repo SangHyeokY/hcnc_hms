@@ -306,7 +306,7 @@ function validateHr011Form() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            html: `<strong>소속사<strong>를 입력해주세요.`
+            html: `<strong>소속사</strong>를 입력해주세요.`
         });
         $("#org_nm").focus();
         return false;
