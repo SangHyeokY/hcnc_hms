@@ -17,6 +17,12 @@ export const menuData = [
         visible: true,
       },
       {
+        title: "대시보드",
+        path: "/hr030",
+        type: "A",
+        visible: true,
+      },
+      {
         title: "인적사항 (상세기능) - 평가 및 리스크 탭",
         path: "/hr015",
         type: "A",
