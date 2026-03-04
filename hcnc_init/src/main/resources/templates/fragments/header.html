@@ -43,7 +43,7 @@
           <div class="profile-img">
             <img src="/images/common/user-img-none.png" alt="프로필" />
           </div>
-          <div th:text="${session.LOGIN_USER_ID}"></div>
+        <div th:text="|${session.LOGIN_USER_NM} (${session.LOGIN_USER_ID})|"></div>
       </div>
     </div>
   </div>
