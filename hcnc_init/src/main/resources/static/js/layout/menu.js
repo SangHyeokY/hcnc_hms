@@ -175,7 +175,32 @@ const Menu = {
   },
 
   toggleMenuItem(parentLi, submenu, shouldOpen, toggleLinkOn = false) {
+    const parentUl = parentLi.parentElement;
+
+    // 같은 depth의 다른 열린 메뉴 닫기
+    if (shouldOpen && parentUl) {
+      const siblings = parentUl.querySelectorAll(":scope > li.on");
+
+      siblings.forEach((sibling) => {
+        if (sibling === parentLi) return;
+
+        sibling.classList.remove("on");
+
+        const siblingSub = sibling.querySelector(":scope > ul");
+        if (siblingSub) {
+          this.closeSubMenu(siblingSub);
+        }
+
+        const siblingLink = sibling.querySelector(":scope > a");
+        if (siblingLink) {
+          siblingLink.classList.remove("on");
+        }
+      });
+    }
+
+    // 기존 동작
     parentLi.classList.toggle("on", shouldOpen);
+
     if (shouldOpen) {
       this.openSubMenu(submenu);
     } else {
