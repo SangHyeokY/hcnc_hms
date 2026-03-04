@@ -169,10 +169,6 @@ var hr030PeriodConfig = {
 
 function initHr030Dashboard() {
     var dashboard = document.getElementById("hr030-dashboard");
-    var containerWrap = document.querySelector(".container-wrap");
-    var contentsWrap = dashboard ? dashboard.closest(".contents-wrap") : null;
-    var resizeObserver = null;
-    var layoutObserver = null;
     if (!dashboard) {
         return;
     }
@@ -185,36 +181,6 @@ function initHr030Dashboard() {
     bindHr030ScrollAids();
     prepareHr030Reveal();
     renderHr030Dashboard();
-    scheduleHr030DockSync();
-    window.addEventListener("resize", scheduleHr030DockSync);
-
-    if ("ResizeObserver" in window) {
-        resizeObserver = new ResizeObserver(function () {
-            scheduleHr030DockSync();
-        });
-        resizeObserver.observe(dashboard);
-        if (contentsWrap) {
-            resizeObserver.observe(contentsWrap);
-        }
-    }
-
-    if (containerWrap) {
-        containerWrap.addEventListener("transitionend", function (event) {
-            if (event.propertyName === "grid-template-columns" || event.propertyName === "width") {
-                scheduleHr030DockSync();
-            }
-        });
-
-        if ("MutationObserver" in window) {
-            layoutObserver = new MutationObserver(function () {
-                scheduleHr030DockSync();
-            });
-            layoutObserver.observe(containerWrap, {
-                attributes: true,
-                attributeFilter: ["class"]
-            });
-        }
-    }
 }
 
 if (document.readyState === "loading") {
@@ -838,50 +804,6 @@ function getHr030ScrollContainer() {
     }
 
     return dashboard.closest(".content-body") || document.scrollingElement || document.documentElement;
-}
-
-function syncHr030DockPosition() {
-    var dashboard = document.getElementById("hr030-dashboard");
-    var dock = dashboard ? dashboard.querySelector(".hr030-dock") : null;
-    var rect = null;
-    var left = 0;
-
-    if (!dashboard || !dock) {
-        return;
-    }
-
-    if (window.innerWidth <= 1320) {
-        dock.style.removeProperty("--hr030-dock-left");
-        dock.style.removeProperty("--hr030-dock-top");
-        return;
-    }
-
-    rect = dashboard.getBoundingClientRect();
-    left = Math.round(rect.left);
-    dock.style.setProperty("--hr030-dock-left", Math.max(12, left) + "px");
-    dock.style.setProperty("--hr030-dock-top", Math.max(20, Math.round(rect.top)) + "px");
-}
-
-var hr030DockSyncFrame = 0;
-var hr030DockSyncTimerA = 0;
-var hr030DockSyncTimerB = 0;
-
-function scheduleHr030DockSync() {
-    if (hr030DockSyncFrame) {
-        cancelAnimationFrame(hr030DockSyncFrame);
-    }
-    if (hr030DockSyncTimerA) {
-        window.clearTimeout(hr030DockSyncTimerA);
-    }
-    if (hr030DockSyncTimerB) {
-        window.clearTimeout(hr030DockSyncTimerB);
-    }
-
-    hr030DockSyncFrame = requestAnimationFrame(function () {
-        syncHr030DockPosition();
-        hr030DockSyncTimerA = window.setTimeout(syncHr030DockPosition, 160);
-        hr030DockSyncTimerB = window.setTimeout(syncHr030DockPosition, 320);
-    });
 }
 
 function pulseHr030Panel(panelId) {
