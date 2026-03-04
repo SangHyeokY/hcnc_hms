@@ -1,5 +1,3 @@
-var HR030_CONTEXT_PATH = String(window.__CONTEXT_PATH__ || "").replace(/\/$/, "");
-
 var hr030PendingState = {
     perspective: "ops",
     period: "week"
@@ -169,14 +167,26 @@ var hr030PeriodConfig = {
 
 function initHr030Dashboard() {
     var dashboard = document.getElementById("hr030-dashboard");
+    var contentsWrap = null;
+    var whiteFull = null;
+
     if (!dashboard) {
         return;
     }
 
-    document.body.classList.add("hr030-dashboard-page");
+    contentsWrap = dashboard.closest(".contents-wrap");
+    whiteFull = dashboard.closest(".white-full");
+
+    if (contentsWrap) {
+        contentsWrap.classList.add("hr030-dashboard-wrap");
+    }
+
+    if (whiteFull) {
+        whiteFull.classList.add("hr030-dashboard-shell");
+    }
+
     bindHr030FilterChips();
     bindHr030MetricCards();
-    bindHr030QuickActions();
     bindHr030Dock();
     bindHr030ScrollAids();
     prepareHr030Reveal();
@@ -245,25 +255,6 @@ function bindHr030MetricCards() {
     });
 }
 
-function bindHr030QuickActions() {
-    document.querySelectorAll(".hr030-quick-action").forEach(function (button) {
-        button.addEventListener("click", function () {
-            var targetHref = String(button.dataset.actionHref || "");
-            updateHr030HeroPulse(String(button.dataset.actionLabel || "바로 이동") + " 준비 완료");
-            updateHr030DockState("hr030PanelFocus");
-            pressHr030Element(button);
-
-            if (!targetHref) {
-                return;
-            }
-
-            setTimeout(function () {
-                window.location.href = withHr030BasePath(targetHref);
-            }, 180);
-        });
-    });
-}
-
 function bindHr030Dock() {
     var topButton = document.getElementById("hr030DockTop");
 
@@ -314,9 +305,9 @@ function bindHr030ScrollAids() {
 
 function prepareHr030Reveal() {
     document.querySelectorAll("#hr030-dashboard .hr030-reveal").forEach(function (item, index) {
-        item.style.setProperty("--hr030-delay", (index * 36) + "ms");
+        item.style.setProperty("--hr030-delay", (index * 22) + "ms");
         item.querySelectorAll(".hr030-text-reveal").forEach(function (textNode, textIndex) {
-            textNode.style.setProperty("--hr030-text-delay", (48 + (textIndex * 20)) + "ms");
+            textNode.style.setProperty("--hr030-text-delay", (28 + (textIndex * 12)) + "ms");
         });
     });
 }
@@ -791,7 +782,7 @@ function goToHr030Panel(panelId, label, shouldSyncDock) {
     }
 
     updateHr030HeroPulse(String(label || "패널") + " 패널 확인");
-    panel.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
+    panel.scrollIntoView({ behavior: "smooth", block: "start", inline: "nearest" });
 
     window.setTimeout(function () {
         pulseHr030Panel(panelId);
@@ -824,6 +815,10 @@ function pressHr030Element(element) {
         return;
     }
 
+    if (element.matches(".hr030-dock-item, .hr030-quick-action")) {
+        return;
+    }
+
     element.classList.remove("is-pressed");
     void element.offsetWidth;
     element.classList.add("is-pressed");
@@ -840,7 +835,7 @@ function animateHr030Number(node, targetValue, suffix) {
     }
 
     var startValue = Number(String(node.textContent || "0").replace(/[^\d.-]/g, "")) || 0;
-    var duration = 780;
+    var duration = 920;
     var startTime = 0;
 
     function step(timestamp) {
@@ -849,7 +844,9 @@ function animateHr030Number(node, targetValue, suffix) {
         }
 
         var progress = Math.min((timestamp - startTime) / duration, 1);
-        var eased = 1 - Math.pow(1 - progress, 3);
+        var eased = progress < 0.5
+            ? 4 * progress * progress * progress
+            : 1 - Math.pow((-2 * progress) + 2, 3) / 2;
         var value = Math.round(startValue + ((targetValue - startValue) * eased));
         node.textContent = value + suffix;
 
@@ -943,12 +940,4 @@ function setHr030Text(id, text) {
 
 function clamp(value, min, max) {
     return Math.min(Math.max(value, min), max);
-}
-
-function withHr030BasePath(path) {
-    var normalized = String(path || "").startsWith("/") ? String(path || "") : "/" + String(path || "");
-    if (!HR030_CONTEXT_PATH) {
-        return normalized;
-    }
-    return normalized.indexOf(HR030_CONTEXT_PATH) === 0 ? normalized : HR030_CONTEXT_PATH + normalized;
 }
