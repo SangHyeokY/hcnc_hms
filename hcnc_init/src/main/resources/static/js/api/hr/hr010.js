@@ -98,8 +98,8 @@ $(document).ready(async function () {
         }
 
         currentHr010UserTypeTab = nextType;
-        $(".hr010-user-type-tab").removeClass("active");
-        $(this).addClass("active");
+        $(".hr010-user-type-tab").removeClass("is-active");
+        $(this).addClass("is-active");
 
         applyHr010UserTypeFilter();
         if (window.userTable) {
