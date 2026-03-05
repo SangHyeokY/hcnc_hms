@@ -468,7 +468,7 @@ function buildPrjTable() {
                     e.stopPropagation();
                     e.preventDefault();
                 },
-                width: 50,
+                width: 60,
                 headerSort: false,
                 download: false
             },

@@ -25,7 +25,7 @@ const Menu = {
     }
     navWrap.innerHTML = this.createMenu(menuData);
     this.toggleMenu();
-    this.restoreExpandedMenus();
+    // this.restoreExpandedMenus();
     this.activeMenu();
     this.saveExpandedMenus();
   },

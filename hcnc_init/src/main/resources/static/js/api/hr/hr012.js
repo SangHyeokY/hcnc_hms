@@ -110,8 +110,8 @@ function buildHr012TableA() {
         resizableColumns: false,
         columns: [
             { title: "구분", field: "cd_nm", hozAlign: "left", width: 180, minWidth: 160 },
+            { title: "코드", field: "cd", visible: false },
             { title: "상세", field: "skl_id_lst", hozAlign: "left",widthGrow: 1, formatter: tagFormatter },
-            { title: "코드", field: "cd", visible: false }
         ],
         data: []
     });
