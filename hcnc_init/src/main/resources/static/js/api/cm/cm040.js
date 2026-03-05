@@ -36,7 +36,7 @@ var MODAL_TIMINGS = {
 var currentDetailGrpCd = ""; // DETAIL formatter/폭 계산에서 사용
 var detailBaseWidths = {
     checkBox: 50,
-    cd: 90,
+    cd: 80,
     sort_no: 90,
     use_yn: 90
 };
@@ -154,7 +154,7 @@ function buildTables() {
                     e.preventDefault();
                 },
                 frozen: true,
-                width: 50,
+                width: 60,
                 headerSort: false,
                 download: false
             },
@@ -225,7 +225,7 @@ function buildTables() {
         // - 합계가 크면 가로 스크롤 노출
         layout: "fitData",
         placeholder: "데이터 없음",
-        //        selectable: true,
+        // selectable: true,
         selectable: 1,
         movableRows: true,
         columnDefaults: {
@@ -250,7 +250,7 @@ function buildTables() {
                     e.preventDefault();
                 },
                 frozen: true,
-                width: 50,
+                width: 60,
                 headerSort: false,
                 download: false
             },
@@ -406,8 +406,8 @@ function getDetailContainerWidth() {
     var holder = tableEl.querySelector(".tabulator-tableholder")
         || tableEl.querySelector(".tabulator-tableHolder");
     var baseWidth = holder ? holder.clientWidth : tableEl.clientWidth;
-    // 경계선/오차를 감안해 2px를 여유로 둔다.
-    return Math.max(0, baseWidth - 2);
+    var columnCount = detailTable.getColumns(true).length;
+    return Math.max(0, baseWidth - (columnCount - 1));
 }
 
 function sumDetailWidths(widthMap) {

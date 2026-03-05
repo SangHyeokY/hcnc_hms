@@ -642,7 +642,7 @@ function buildUserTable() {
         },
         columns: [
             {
-                title: "",
+                title: "선택",
                 hozAlign: "center",
                 field: "checkBox",
                 formatter: function (cell) {
@@ -655,7 +655,7 @@ function buildUserTable() {
                     e.preventDefault();
                 },
                 frozen: true,
-                width: 50,
+                width: 60,
                 headerSort: false,
                 download: false
             },
@@ -697,6 +697,10 @@ function buildUserTable() {
             },
             { title: "생년월일", field: "brdt", hozAlign: "center", headerSort: true, widthGrow: 2, minWidth: 120 },
             { title: "연락처", field: "tel", hozAlign: "center", widthGrow: 3, minWidth: 150, headerSort: false },
+            { title: "dev_id", field: "dev_id", visible: false },
+            { title: "kosa_grd_cd", field: "kosa_grd_cd", visible: false },
+            { title: "main_fld_cd", field: "main_fld_cd", visible: false },
+            { title: "main_cust_cd", field: "main_cust_cd", visible: false },
             {
                 title: "이메일",
                 field: "email", widthGrow: 4, minWidth: 180, headerSort: false,
@@ -779,10 +783,6 @@ function buildUserTable() {
                     return (ctrtTypMap && ctrtTypMap[val]) ? ctrtTypMap[val] : val;
                 }, editor: false, editable: false, widthGrow: 1, minWidth: 100
             },
-            { title: "dev_id", field: "dev_id", visible: false },
-            { title: "kosa_grd_cd", field: "kosa_grd_cd", visible: false },
-            { title: "main_fld_cd", field: "main_fld_cd", visible: false },
-            { title: "main_cust_cd", field: "main_cust_cd", visible: false },
         ],
         data: [],
         // 행 클릭

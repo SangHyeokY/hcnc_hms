@@ -160,7 +160,7 @@ function buildUserTable() {
                     e.stopPropagation();
                     e.preventDefault();
                 },
-                width: 50,
+                width: 60,
                 hozAlign: "center",
                 headerSort: false,
                 download: false

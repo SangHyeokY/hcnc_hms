@@ -84,33 +84,6 @@ table a.btn {padding:3px 10px;}
   background-color: #FFF8F8 !important;
 }
 
-/* ====================== 헤더 부분 둥글게 처리 ====================== */
-.tabulator .tabulator-header .tabulator-col:first-child {
-  border-top-left-radius: 10px !important;
-}
-.tabulator .tabulator-header .tabulator-col:last-child {
-  border-top-right-radius: 10px !important;
-}
-.tabulator .tabulator-header {
-  height: 45px !important;
-  min-height: 45px !important;
-  border-top: 1px solid #DEE2E7 !important;
-  border-left: 1px solid #DEE2E7 !important;
-  border-right: 1px solid #DEE2E7 !important;
-  border-top-left-radius: 10px !important;
-  border-top-right-radius: 10px !important;
-  overflow: hidden;
-}
-
-.tabulator .tabulator-header .tabulator-col {
-  height: 45px !important;
-  min-height: 45px !important;
-  border-left: 0 !important;
-  border-right: 0 !important;
-  /*border-right: 2px solid #DEE2E7 !important;*/
-  /*border-bottom: 1px solid #E8EAEE !important;*/
-  align-content: center;
-}
 /* 헤더에 border 넣을 경우 활성화 */
 /*.tabulator .tabulator-header .tabulator-col:last-child {
   border-right: none;
@@ -124,7 +97,7 @@ table a.btn {padding:3px 10px;}
   align-items: center;
   justify-content: center;
 }
-/* ================================================================= */
+
 .tabulator .tabulator-header .tabulator-col .tabulator-col-content .tabulator-col-title {
   font-size: 16px !important;
   font-weight: 700 !important;
@@ -138,25 +111,22 @@ table a.btn {padding:3px 10px;}
   border-right: 0 !important;
 }
 
-.tabulator-row .tabulator-cell,
+/*.tabulator-row .tabulator-cell,
 .tabulator-row .tabulator-cell + .tabulator-cell {
   border-left: 0 !important;
+}*/
+.tabulator .tabulator-cell,
+.tabulator .tabulator-col {
+  box-sizing: border-box;
 }
-
+/* 모든 tabulator 테이블 css */
+.tabulator .tabulator-table {
+  user-select: none;
+}
 /* 공통 행 높이 46px */
 .tabulator .tabulator-row {
   height: 45px !important;
   min-height: 45px !important;
-}
-
-.tabulator .tabulator-row .tabulator-cell {
-  height: 45px !important;
-  min-height: 45px !important;
-  line-height: 45px !important;
-  font-size: 16px !important;
-  padding-top: 0 !important;
-  padding-bottom: 0 !important;
-  box-sizing: border-box;
 }
 
 /* 기존 테두리 제거 */
