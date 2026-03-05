@@ -328,6 +328,9 @@ table a.btn {padding:3px 10px;}
 /*=================================================================================
  * Table - thumb (썸네일)
  =================================================================================*/
-
+table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
 
  .vue-treeselect__menu {z-index: 999; background-color: #fff !important;}
