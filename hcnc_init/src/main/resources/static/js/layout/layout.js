@@ -62,9 +62,22 @@ const Layout = {
 
     toggleBtn.addEventListener("click", () => {
       const nextExpanded = containerWrap.classList.contains("is-collapsed");
+      this.markSidebarTransition(containerWrap);
       this.applySidebarState(containerWrap, toggleIcon, nextExpanded);
       localStorage.setItem(key, nextExpanded ? "Y" : "N");
     });
+  },
+
+  markSidebarTransition(containerWrap) {
+    if (!containerWrap) {
+      return;
+    }
+
+    clearTimeout(this.sidebarTransitionTimer);
+    containerWrap.classList.add("is-sidebar-toggling");
+    this.sidebarTransitionTimer = window.setTimeout(() => {
+      containerWrap.classList.remove("is-sidebar-toggling");
+    }, 320);
   },
 
   applySidebarState(containerWrap, toggleIcon, isExpanded) {

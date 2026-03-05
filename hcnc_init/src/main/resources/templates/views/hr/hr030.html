@@ -5,26 +5,43 @@
 <th:block layout:fragment="searchCondition"></th:block>
 
 <th:block layout:fragment="content">
-    <div class="hr030-dashboard" id="hr030-dashboard">
-        <aside class="hr030-dock hr030-reveal" aria-label="대시보드 패널 이동">
-            <button type="button" class="hr030-dock-top" id="hr030DockTop">TOP</button>
-            <button type="button" class="hr030-dock-item is-active" data-panel-target="hr030PanelInsight">
-                <span class="hr030-dock-icon hr030-text-reveal">01</span>
-                <strong class="hr030-text-reveal">인사이트</strong>
-            </button>
-            <button type="button" class="hr030-dock-item" data-panel-target="hr030PanelPriority">
-                <span class="hr030-dock-icon hr030-text-reveal">02</span>
-                <strong class="hr030-text-reveal">우선 확인</strong>
-            </button>
-            <button type="button" class="hr030-dock-item" data-panel-target="hr030PanelDetail">
-                <span class="hr030-dock-icon hr030-text-reveal">03</span>
-                <strong class="hr030-text-reveal">선택 항목</strong>
-            </button>
-            <button type="button" class="hr030-dock-item" data-panel-target="hr030PanelFocus">
-                <span class="hr030-dock-icon hr030-text-reveal">04</span>
-                <strong class="hr030-text-reveal">활성 지표</strong>
-            </button>
-        </aside>
+        <script>
+            (function () {
+                var script = document.currentScript;
+                var contentsWrap = script && script.closest ? script.closest(".contents-wrap") : null;
+                var whiteFull = script && script.closest ? script.closest(".white-full") : null;
+
+                if (contentsWrap) {
+                    contentsWrap.classList.add("hr030-dashboard-wrap");
+                }
+
+                if (whiteFull) {
+                    whiteFull.classList.add("hr030-dashboard-shell");
+                }
+            })();
+        </script>
+        <div class="hr030-dashboard" id="hr030-dashboard">
+            <aside class="hr030-dock hr030-reveal" aria-label="대시보드 패널 이동">
+                <div class="hr030-dock-top-slot" aria-hidden="true">
+                    <button type="button" class="hr030-dock-top" id="hr030DockTop">TOP</button>
+                </div>
+                <button type="button" class="hr030-dock-item is-active" data-panel-target="hr030PanelInsight">
+                    <span class="hr030-dock-icon hr030-text-reveal">01</span>
+                    <strong class="hr030-text-reveal">인사이트</strong>
+                </button>
+                <button type="button" class="hr030-dock-item" data-panel-target="hr030PanelPriority">
+                    <span class="hr030-dock-icon hr030-text-reveal">02</span>
+                    <strong class="hr030-text-reveal">우선 확인</strong>
+                </button>
+                <button type="button" class="hr030-dock-item" data-panel-target="hr030PanelDetail">
+                    <span class="hr030-dock-icon hr030-text-reveal">03</span>
+                    <strong class="hr030-text-reveal">선택 항목</strong>
+                </button>
+                <button type="button" class="hr030-dock-item" data-panel-target="hr030PanelFocus">
+                    <span class="hr030-dock-icon hr030-text-reveal">04</span>
+                    <strong class="hr030-text-reveal">활성 지표</strong>
+                </button>
+            </aside>
 
         <div class="hr030-board">
             <header class="hr030-topbar hr030-reveal">
@@ -137,18 +154,18 @@
                     </div>
 
                     <div class="hr030-mini-actions">
-                        <button type="button" class="hr030-quick-action" data-action-label="기본 인적사항 이동" data-action-href="/hr010">
+                        <a class="hr030-quick-action" th:href="@{/hr010}" href="/hr010">
                             <span class="hr030-quick-name">기본 인적사항</span>
                             <span class="hr030-quick-arrow">+</span>
-                        </button>
-                        <button type="button" class="hr030-quick-action" data-action-label="진행 프로젝트 이동" data-action-href="/hr020">
+                        </a>
+                        <a class="hr030-quick-action" th:href="@{/hr020}" href="/hr020">
                             <span class="hr030-quick-name">진행 프로젝트</span>
                             <span class="hr030-quick-arrow">+</span>
-                        </button>
-                        <button type="button" class="hr030-quick-action" data-action-label="공통코드 관리 이동" data-action-href="/cm040">
+                        </a>
+                        <a class="hr030-quick-action" th:href="@{/cm040}" href="/cm040">
                             <span class="hr030-quick-name">공통코드 관리</span>
                             <span class="hr030-quick-arrow">+</span>
-                        </button>
+                        </a>
                     </div>
                 </article>
 
