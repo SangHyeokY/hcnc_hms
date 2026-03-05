@@ -383,25 +383,25 @@ function replayHr030Motion() {
 
 // 현재 상태(hr030State)를 기준으로 대시보드 전체 영역을 다시 그린다
 function renderHr030Dashboard() {
-    var scenario = buildHr030Scenario();
+    var scenario = buildHr030Scenario();    // 데이터 계산
     var dashboard = document.getElementById("hr030-dashboard");
-    hr030State.currentScenario = scenario;
+    hr030State.currentScenario = scenario;  // 최신 시나리오를 상태에 저장
 
     if (dashboard) {
-        dashboard.dataset.textMode = "sync";
+        dashboard.dataset.textMode = "sync";    // 렌더중에는 애니메이션 없이 바로 텍스트 교체
     }
 
-    renderHr030Topbar(scenario);
-    renderHr030Metrics(scenario.metrics);
-    renderHr030Insight(scenario);
-    renderHr030Queue(scenario.queue);
-    focusHr030QueueByMetric(hr030State.activeMetricKey, false);
-    renderHr030Trend(scenario.trends);
-    renderHr030Focus(scenario);
-    updateHr030ActiveMetricCard();
-    updateHr030ChipState("#hr030PerspectiveGroup .hr030-filter-chip", "perspective", hr030PendingState.perspective);
-    updateHr030ChipState("#hr030PeriodGroup .hr030-filter-chip", "period", hr030PendingState.period);
-    updateHr030DockState("hr030PanelInsight");
+    renderHr030Topbar(scenario);    // 상단 제목/설명/기간 표시
+    renderHr030Metrics(scenario.metrics);   // KPI 숫자
+    renderHr030Insight(scenario);   // 인사이트 패널
+    renderHr030Queue(scenario.queue);   // 우선 확인 목록 렌더
+    focusHr030QueueByMetric(hr030State.activeMetricKey, false); // 현재 선택된 KPI에 맞는 우선 확인 항목을 자동으로 맞춘다
+    renderHr030Trend(scenario.trends);  // 최근 흐름 렌더
+    renderHr030Focus(scenario); // 활성 지표 링/설명 렌더
+    updateHr030ActiveMetricCard();  // 현재 선택된 KPI 카드 활성/불활성
+    updateHr030ChipState("#hr030PerspectiveGroup .hr030-filter-chip", "perspective", hr030PendingState.perspective);    // pending 과 실제 state 이미 같음으로 참조
+    updateHr030ChipState("#hr030PeriodGroup .hr030-filter-chip", "period", hr030PendingState.period);   // 관점과 기간 버튼
+    updateHr030DockState("hr030PanelInsight");  // 렌더 직후 기본 포커스(운영 인사이트)
 
     if (dashboard && !dashboard.classList.contains("is-ready")) {
         requestAnimationFrame(function () {
@@ -411,7 +411,7 @@ function renderHr030Dashboard() {
 
     if (dashboard) {
         requestAnimationFrame(function () {
-            dashboard.dataset.textMode = "animate";
+            dashboard.dataset.textMode = "animate"; // 렌더 끝난 후 애니메이션 다시 재생
         });
     }
 }
@@ -456,7 +456,7 @@ function renderHr030Metrics(metrics) {
     document.querySelectorAll(".hr030-metric-value").forEach(function (node) {
         var metricKey = String(node.dataset.metricField || "");
         var suffix = String(node.dataset.suffix || "");
-        animateHr030Number(node, Number(metrics[metricKey] || 0), suffix);
+        animateHr030Number(node, Number(metrics[metricKey] || 0), suffix); // 숫자 위임
     });
 }
 
@@ -492,9 +492,9 @@ function renderHr030InsightMeters(metrics) {
     }, 1);
 
     meterEl.innerHTML = entries.map(function (key) {
-        var config = hr030MetricConfig[key];
-        var value = Number(metrics[key] || 0);
-        var ratio = Math.max(12, Math.round((value / maxValue) * 100));
+        var config = hr030MetricConfig[key];    // 라벨
+        var value = Number(metrics[key] || 0);  // 숫자 
+        var ratio = Math.max(12, Math.round((value / maxValue) * 100)); // 진행바 너비(최소12%)
         return "" +
             '<div class="hr030-meter">' +
                 '<div class="hr030-meter-head">' +
@@ -518,7 +518,7 @@ function renderHr030InsightChart(scenario) {
     chartEl.innerHTML = buildHr030InsightSvg(series.primary, series.secondary);
 
     if (axisEl) {
-        axisEl.innerHTML = series.labels.map(function (label) {
+        axisEl.innerHTML = series.labels.map(function (label) { // 축 라벨
             return '<span class="hr030-text-reveal">' + label + '</span>';
         }).join("");
     }
@@ -564,7 +564,7 @@ function buildHr030InsightSvg(primary, secondary) {
         { x: primaryPoints[primaryPoints.length - 1].x, y: height - padding },
         { x: primaryPoints[0].x, y: height - padding }
     ]));
-    var grid = [0.2, 0.4, 0.6, 0.8].map(function (ratio) {
+    var grid = [0.2, 0.4, 0.6, 0.8].map(function (ratio) {  // y축 보조선 4개
         var y = Math.round((height - (padding * 2)) * ratio) + padding;
         return '<line x1="0" y1="' + y + '" x2="' + width + '" y2="' + y + '" />';
     }).join("");
@@ -606,7 +606,7 @@ function mapHr030ChartPoints(series, width, height, padding) {
     });
 }
 
-// 좌표 객체 배열을 "x,y x,y" 형태의 polyline 문자열로 바꾼다
+// 좌표 객체 배열을 "x,y x,y" 형태의 polyline 문자열로 바꾼다(문자열만 받기때문에)
 function stringifyHr030ChartPoints(points) {
     return points.map(function (point) {
         return point.x + "," + point.y;
@@ -632,7 +632,7 @@ function renderHr030Queue(queue) {
     var targetQueueId = hr030State.activeQueueId;
     if (!queue.some(function (item) { return item.id === targetQueueId; })) {
         targetQueueId = (queue[hr030MetricIndexMap()[hr030State.activeMetricKey]] || queue[0] || {}).id || "";
-    }
+    }   // 이전 선택 id가 새 queue 에 없으면 최종 항목을 찾는다
 
     hr030State.queueItems = queue.slice();
     hr030State.activeQueueId = targetQueueId;
@@ -664,7 +664,7 @@ function renderHr030Queue(queue) {
 function bindHr030QueueItems() {
     document.querySelectorAll(".hr030-queue-item").forEach(function (button) {
         button.addEventListener("click", function () {
-            selectHr030QueueItem(String(button.dataset.queueId || ""));
+            selectHr030QueueItem(String(button.dataset.queueId || "")); // activeQueueId와 active클래스 갱신
             updateHr030DockState("hr030PanelDetail");
             pulseHr030Panel("hr030PanelDetail");
             pressHr030Element(button);
