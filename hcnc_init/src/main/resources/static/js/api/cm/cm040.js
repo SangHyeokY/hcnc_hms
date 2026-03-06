@@ -223,7 +223,8 @@ function buildTables() {
         // 폭은 코드에서 직접 계산해 적용한다.
         // - 합계가 컨테이너보다 작으면 자동 균일 확장(빈공간 없음)
         // - 합계가 크면 가로 스크롤 노출
-        layout: "fitData",
+        // layout: "fitData",
+        layout: "fitColumns",
         placeholder: "데이터 없음",
         // selectable: true,
         selectable: 1,

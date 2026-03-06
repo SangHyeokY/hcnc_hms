@@ -91,7 +91,7 @@ option{background:#fff; color:#333;}
 /*=================================================================================
  * Grid Table style
 =================================================================================*/
-.tabulator {border-top: none !important; border-right: 0; border-left: 0; border-bottom: 0; height: 100%; max-width: 100%; background:#fff; border:none; overflow: hidden;}
+.tabulator {border-top: none !important; border-right: 0; border-left: 0; border-bottom: 0; height: 100%; width: 100% !important; max-width: 100%; background:#fff; border:none; overflow: hidden;}
 .tabulator-header {padding: 0 !important; margin: 0 !important; border-bottom: 0 !important; font-size: 1em !important;}
 .tabulator-header .tabulator-col {
   background: #EFF1F6 !important;
@@ -101,7 +101,7 @@ option{background:#fff; color:#333;}
   /* max-height: 70px;*/
 }
 /* 테이블 자체 */
-.tabulator-table {width: 100% !important;}
+.tabulator-table {width: 100% !important; table-layout: fixed;}
 .tabulator .tabulator-header .tabulator-col:first-child {padding-left: 0 !important;}
 .tabulator .tabulator-header .tabulator-col:last-child {border-right: 0 !important;}
 .tabulator .tabulator-header .tabulator-col .tabulator-col-content {text-align: center; padding: 7px 10px !important;}
@@ -1059,7 +1059,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
   font-size: 12px;
   font-weight: 500;
   line-height: 1;
-  padding: 6px 10px 3.5px 10px;
+  padding: 6px 10px 5px 10px;
   cursor: pointer;
 }
 #TABLE_MAIN_LANG_PICKER .main-lang-skill-chip:hover {
@@ -1118,7 +1118,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 ================================================================================*/
 .common-code-page{height:100%;}
 .common-code-page .form-wrap{height:100%;}
-.common-code-wrap {display: grid; grid-template-columns: 28% 1fr; gap: 20px; height: 100%; width: 100%; box-sizing: border-box;}
+.common-code-wrap {display: grid; grid-template-columns: 30% 1fr; gap: 20px; height: 100%; width: 100%; box-sizing: border-box;}
 .common-code-section {flex: 1 1 480px; min-height: 420px;}
 .common-code-section .content-body {height: 0; flex: 1} /* overflow-x: hidden */
 .common-code-section .tabulator {width: 100%; display: flex; flex-direction: column;}
@@ -1126,7 +1126,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 #TABLE_COMMON_MAIN .tabulator-tableHolder {
   min-height: calc(100% - 102px) !important;
   max-height: none !important;
-  overflow: hidden;
+  /*overflow: hidden;*/
 }
 .common-code-section:first-child {width: 100%; display: flex;flex-direction: column;}
 .common-code-section:last-child {width: 100%; display: flex;flex-direction: column;}
@@ -1496,6 +1496,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
   padding-left: 27px;
   font-size: 18px;
   font-weight: 700;
+  white-space: nowrap;
 }
 
 .hr012-toolbar-01 p.tool-title::before,
@@ -2727,7 +2728,7 @@ section.search-area .search-btn-area .btn-search {
 .hr014-title {
   font-size: 16px;
   font-weight: 400;
-  padding: 2px 0px 0px 10px;
+  padding: 0px 0px 2px 10px;
 }
 .btn-prj-edit {
   background-color: #1D232D;
