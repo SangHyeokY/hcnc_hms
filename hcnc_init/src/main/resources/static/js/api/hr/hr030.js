@@ -19,18 +19,18 @@ var hr030State = {
 
 // KPI 키별 라벨/단위/설명 설정
 var hr030MetricConfig = {
-    deploy: { label: "오늘 투입 예정", suffix: "명", desc: "당일 바로 확인해야 할 투입 인원입니다." },
-    unassigned: { label: "프로젝트 미배정", suffix: "명", desc: "우선 매칭이 필요한 가용 인원입니다." },
-    approval: { label: "승인 대기", suffix: "건", desc: "승인 지연 시 일정 영향이 커지는 항목입니다." },
-    risk: { label: "리스크 확인", suffix: "건", desc: "누락이나 지연이 발생하기 쉬운 경고 신호입니다." }
+    deploy: { label: "오늘 투입 예정", suffix: "명", desc: "투입 확정/배정 확인" },
+    unassigned: { label: "프로젝트 미배정", suffix: "명", desc: "가용 인원 우선 매칭" },
+    approval: { label: "승인 대기", suffix: "건", desc: "승인 지연 항목 처리" },
+    risk: { label: "리스크 확인", suffix: "건", desc: "누락/지연 리스크 점검" }
 };
 
 // 관점별 기본 시나리오 데이터(현재는 샘플 데이터 기반)
 var hr030ScenarioBase = {
     ops: {
         kicker: "전체 운영",
-        title: "오늘 먼저 확인해야 할 항목",
-        desc: "투입 예정, 프로젝트 미배정, 승인 대기, 리스크 확인만 먼저 보여줍니다.",
+        title: "오늘 확인 항목",
+        desc: "핵심 4지표만 표시",
         metrics: { deploy: 8, unassigned: 3, approval: 5, risk: 2 },
         trends: [
             { label: "신규 인력 등록", count: 6 },
@@ -43,7 +43,7 @@ var hr030ScenarioBase = {
                 badge: "긴급",
                 badgeTone: "danger",
                 title: "오늘 투입 예정 인원 확인",
-                desc: "투입일이 임박했지만 프로젝트 정보가 아직 확정되지 않은 인원이 있습니다.",
+                desc: "투입일 임박 인원 우선 확인",
                 checks: ["투입 예정 인원 확인", "프로젝트 배정 여부 재확인", "담당자와 고객사 회신 상태 점검"]
             },
             {
@@ -51,7 +51,7 @@ var hr030ScenarioBase = {
                 badge: "확인",
                 badgeTone: "cool",
                 title: "프로젝트 미배정 인원 정리",
-                desc: "가용 인원 중 아직 프로젝트가 비어 있는 대상을 먼저 정리해야 합니다.",
+                desc: "가용 인원 우선 매칭 필요",
                 checks: ["미배정 인원 기술 확인", "우선 투입 후보 정리", "필요 시 희망 단가 재검토"]
             },
             {
@@ -59,7 +59,7 @@ var hr030ScenarioBase = {
                 badge: "승인",
                 badgeTone: "slate",
                 title: "승인 대기 건 처리",
-                desc: "승인 지연이 길어질수록 상세 수정과 투입 일정에 영향을 줄 수 있습니다.",
+                desc: "지연 건 우선 승인 처리",
                 checks: ["승인 대기 건 우선순위 확인", "보류 사유 누락 여부 확인", "완료 후 관련자 공유"]
             },
             {
@@ -67,15 +67,15 @@ var hr030ScenarioBase = {
                 badge: "주의",
                 badgeTone: "warn",
                 title: "리스크 입력 누락 확인",
-                desc: "상세 탭 값이 비어 있을 가능성이 있는 항목을 먼저 확인해야 합니다.",
+                desc: "누락 가능 항목 선점검",
                 checks: ["최근 수정 이력 확인", "상세 팝업 값 비교", "누락이면 담당자에게 정정 요청"]
             }
         ]
     },
     people: {
         kicker: "인력 운영",
-        title: "투입 예정과 미배정 인원을 먼저 정리해야 합니다",
-        desc: "인력 운영에서 실제 일정에 영향을 주는 항목만 추려서 보여줍니다.",
+        title: "인력 핵심 항목",
+        desc: "투입/미배정/승인/리스크 중심",
         metrics: { deploy: 11, unassigned: 4, approval: 3, risk: 1 },
         trends: [
             { label: "신규 인력 등록", count: 9 },
@@ -88,7 +88,7 @@ var hr030ScenarioBase = {
                 badge: "긴급",
                 badgeTone: "danger",
                 title: "이번 주 투입 예정 인원 확인",
-                desc: "투입 예정일이 가까운 인원부터 고객사 확인 상태를 점검해야 합니다.",
+                desc: "D-2 대상부터 우선 점검",
                 checks: ["D-2 대상부터 우선 확인", "고객사 회신 여부 확인", "미확정 건은 우선순위 재조정"]
             },
             {
@@ -96,7 +96,7 @@ var hr030ScenarioBase = {
                 badge: "확인",
                 badgeTone: "cool",
                 title: "프로젝트 미배정 인원 정리",
-                desc: "기술과 경력에 맞는 프로젝트 후보를 우선 매칭해야 합니다.",
+                desc: "기술/경력 기반 우선 매칭",
                 checks: ["주 기술 태그 확인", "가용 시점 비교", "우선 프로젝트 후보 정리"]
             },
             {
@@ -104,7 +104,7 @@ var hr030ScenarioBase = {
                 badge: "승인",
                 badgeTone: "slate",
                 title: "승인 대기 인력 정보 정리",
-                desc: "승인 중인 정보가 길어지면 투입과 단가 협의가 함께 밀릴 수 있습니다.",
+                desc: "승인 지연 정보 즉시 정리",
                 checks: ["승인 대기 사유 확인", "누락 입력값 정리", "완료 후 즉시 반영"]
             },
             {
@@ -112,15 +112,15 @@ var hr030ScenarioBase = {
                 badge: "주의",
                 badgeTone: "warn",
                 title: "희망 단가와 리스크 후보 점검",
-                desc: "희망 단가와 리스크 신호가 함께 있는 인원은 따로 확인이 필요합니다.",
+                desc: "고단가/리스크 후보 우선 확인",
                 checks: ["고단가 대상 우선 확인", "리스크 메모 여부 확인", "조정 필요 건 분류"]
             }
         ]
     },
     project: {
         kicker: "프로젝트 운영",
-        title: "배정, 승인, 리스크를 먼저 끊어봐야 합니다",
-        desc: "프로젝트 운영에서 일정에 직접 영향 주는 항목만 남긴 화면입니다.",
+        title: "프로젝트 핵심 항목",
+        desc: "배정/승인/리스크 중심",
         metrics: { deploy: 6, unassigned: 2, approval: 6, risk: 3 },
         trends: [
             { label: "프로젝트 등록", count: 5 },
@@ -133,7 +133,7 @@ var hr030ScenarioBase = {
                 badge: "긴급",
                 badgeTone: "danger",
                 title: "투입 예정 프로젝트 배정 확인",
-                desc: "투입일이 임박한 프로젝트부터 인력 배정 상태를 다시 확인해야 합니다.",
+                desc: "투입 임박 프로젝트 배정 점검",
                 checks: ["투입 예정 프로젝트 우선 확인", "인력 배정 상태 검토", "누락 시 바로 담당자 확인"]
             },
             {
@@ -141,7 +141,7 @@ var hr030ScenarioBase = {
                 badge: "확인",
                 badgeTone: "cool",
                 title: "당사 프로젝트 선택 조건 재확인",
-                desc: "프로젝트 선택 팝업에서 당사 여부 조건이 의도대로 동작하는지 다시 점검합니다.",
+                desc: "당사 여부 선택 조건 점검",
                 checks: ["Y/N 행 동작 확인", "선택 제한 문구 확인", "적용 버튼 방어 로직 점검"]
             },
             {
@@ -149,7 +149,7 @@ var hr030ScenarioBase = {
                 badge: "승인",
                 badgeTone: "slate",
                 title: "프로젝트 승인 대기 처리",
-                desc: "승인 지연 시 신규 등록과 배정 작업이 함께 밀릴 수 있습니다.",
+                desc: "승인 지연 항목 우선 처리",
                 checks: ["승인 대기 건 우선순위 확인", "보류 사유 확인", "완료 후 목록 재확인"]
             },
             {
@@ -157,7 +157,7 @@ var hr030ScenarioBase = {
                 badge: "주의",
                 badgeTone: "warn",
                 title: "리스크 프로젝트 후보 점검",
-                desc: "일정 지연 또는 정보 누락 가능성이 있는 프로젝트를 먼저 확인합니다.",
+                desc: "지연/누락 후보 선점검",
                 checks: ["최근 수정 프로젝트 점검", "리스크 메모 확인", "필요 시 담당자 공유"]
             }
         ]
@@ -265,7 +265,7 @@ function bindHr030MetricCards() {
             updateHr030ActiveMetricCard();
             renderHr030Focus(hr030State.currentScenario || buildHr030Scenario());
             focusHr030QueueByMetric(metricKey, false);
-            updateHr030HeroPulse("현재 포커스: " + getHr030MetricLabel(metricKey));
+            updateHr030HeroPulse("포커스: " + getHr030MetricLabel(metricKey));
             clearHr030DockState();
             updateHr030PanelState(panelId);
             pulseHr030Panel(panelId);
@@ -448,7 +448,7 @@ function renderHr030Topbar(scenario) {
     setHr030Text("hr030HeroTitle", scenario.title);
     setHr030Text("hr030HeroDesc", scenario.desc);
     setHr030Text("hr030HeroPeriod", scenario.periodLabel);
-    updateHr030HeroPulse("현재 포커스: " + getHr030MetricLabel(hr030State.activeMetricKey));
+    updateHr030HeroPulse("포커스: " + getHr030MetricLabel(hr030State.activeMetricKey));
 }
 
 // KPI 숫자 영역만 찾아 숫자 카운트업을 실행한다
@@ -576,12 +576,12 @@ function buildHr030InsightSvg(primary, secondary) {
         '<svg viewBox="0 0 ' + width + ' ' + height + '" aria-hidden="true">' +
             '<defs>' +
                 '<linearGradient id="hr030InsightArea" x1="0" y1="0" x2="0" y2="1">' +
-                    '<stop offset="0%" stop-color="rgba(42, 122, 255, 0.34)" />' +
-                    '<stop offset="100%" stop-color="rgba(42, 122, 255, 0)" />' +
+                    '<stop offset="0%" stop-color="rgba(229, 0, 25, 0.26)" />' +
+                    '<stop offset="100%" stop-color="rgba(229, 0, 25, 0)" />' +
                 '</linearGradient>' +
                 '<linearGradient id="hr030InsightLine" x1="0" y1="0" x2="1" y2="0">' +
-                    '<stop offset="0%" stop-color="#1a53c8" />' +
-                    '<stop offset="100%" stop-color="#7ed9ff" />' +
+                    '<stop offset="0%" stop-color="#e50019" />' +
+                    '<stop offset="100%" stop-color="#c59652" />' +
                 '</linearGradient>' +
             '</defs>' +
             '<g class="hr030-chart-grid">' + grid + '</g>' +
@@ -771,7 +771,7 @@ function renderHr030Focus(scenario) {
     var baselineMap = { deploy: 64, unassigned: 58, approval: 61, risk: 53 };
     var rate = clamp(Math.round((baselineMap[metricKey] || 56) + ((value / Math.max(total, 1)) * 18)), 42, 93);
     var focusTitle = metricConfig.label;
-    var focusDesc = scenario.periodLabel + " 기준 " + value + metricConfig.suffix + "이 잡혀 있어 " + metricConfig.desc;
+    var focusDesc = scenario.periodLabel + " " + value + metricConfig.suffix + " · " + metricConfig.desc;
     var ringEl = document.getElementById("hr030FocusRing");
     var rateEl = document.getElementById("hr030FocusRate");
 
@@ -801,7 +801,7 @@ function buildHr030InsightSummary(scenario) {
     var activeMetric = hr030MetricConfig[hr030State.activeMetricKey] || hr030MetricConfig.deploy;
     var activeValue = Number(metrics[hr030State.activeMetricKey] || 0);
     var firstQueue = scenario.queue[0];
-    return scenario.periodLabel + " 기준 " + activeMetric.label + " " + activeValue + activeMetric.suffix + "과 " + (firstQueue ? firstQueue.title : "우선 점검 항목") + "가 동시에 걸려 있어 먼저 정리하는 흐름이 맞습니다.";
+    return scenario.periodLabel + " " + activeMetric.label + " " + activeValue + activeMetric.suffix + " · " + (firstQueue ? firstQueue.title : "우선 점검");
 }
 
 /* ==========================================================================
