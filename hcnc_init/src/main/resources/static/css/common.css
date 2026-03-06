@@ -473,6 +473,7 @@ a.disable {background-color:#bababa !important; pointer-events: none;/*이벤트
 
 .pd-r3  {padding-right:3px !important;}
 .pd-r5  {padding-right:5px !important;}
+.pd-r8  {padding-right:8px !important;}
 .pd-r10 {padding-right:10px !important;}
 .pd-r15 {padding-right:15px !important;}
 .pd-r20 {padding-right:20px !important;}
@@ -499,6 +500,7 @@ a.disable {background-color:#bababa !important; pointer-events: none;/*이벤트
 
 .pd-l3  {padding-left:3px !important;}
 .pd-l5  {padding-left:5px !important;}
+.pd-l8  {padding-left:8px !important;}
 .pd-l10 {padding-left:10px !important;}
 .pd-l15 {padding-left:15px !important;}
 .pd-l20 {padding-left:20px !important;}

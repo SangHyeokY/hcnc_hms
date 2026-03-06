@@ -659,12 +659,12 @@ function buildUserTable() {
                 headerSort: false,
                 download: false
             },
-            { title: "성명", field: "dev_nm", hozAlign: "center", headerSort: true, widthGrow: 1, minWidth: 100, frozen: true },
+            { title: "성명", field: "dev_nm", hozAlign: "center", headerSort: true, widthGrow: 1, minWidth: 60, frozen: true },
             {
                 title: "평가 등급",
                 field: "grade",
                 hozAlign: "center",
-                widthGrow: 2, minWidth: 120, frozen: true,
+                widthGrow: 2, frozen: true,
                 formatter: function (cell) {
                     const d = cell.getRow().getData();
                     if (!d.grade) return "";
@@ -674,7 +674,7 @@ function buildUserTable() {
             {
                 title: "주 개발언어",
                 field: "main_lang_nm",
-                widthGrow: 4, minWidth: 180, frozen: true,
+                widthGrow: 4, minWidth: 120, frozen: true,
                 formatter: function (cell) {
                     const value = cell.getValue();
                     if (!value) return "";
@@ -689,21 +689,21 @@ function buildUserTable() {
             {
                 title: "희망단가",
                 field: "hope_rate_amt",
-                widthGrow: 3, minWidth: 150, frozen: true,
+                widthGrow: 3, minWidth: 100, frozen: true,
                 formatter: function (cell) {
                     const value = cell.getValue();
                     return `<div style="text-align:right;">${amountFormatter(value)}</div>`;
                 }
             },
-            { title: "생년월일", field: "brdt", hozAlign: "center", headerSort: true, widthGrow: 2, minWidth: 120 },
-            { title: "연락처", field: "tel", hozAlign: "center", widthGrow: 3, minWidth: 150, headerSort: false },
+            { title: "생년월일", field: "brdt", hozAlign: "center", headerSort: true, widthGrow: 2, minWidth: 80, visible: false },
+            { title: "연락처", field: "tel", hozAlign: "center", widthGrow: 3, minWidth: 100, headerSort: false },
             { title: "dev_id", field: "dev_id", visible: false },
             { title: "kosa_grd_cd", field: "kosa_grd_cd", visible: false },
             { title: "main_fld_cd", field: "main_fld_cd", visible: false },
             { title: "main_cust_cd", field: "main_cust_cd", visible: false },
             {
                 title: "이메일",
-                field: "email", widthGrow: 4, minWidth: 180, headerSort: false,
+                field: "email", widthGrow: 3, headerSort: false,
                 formatter: function (cell) {
                     const value = cell.getValue();
                     if (!value) return "";
@@ -719,7 +719,7 @@ function buildUserTable() {
             {
                 title: "거주지역",
                 field: "region",
-                widthGrow: 1, minWidth: 100,
+                widthGrow: 2,
                 formatter: function (cell) {
                     const value = cell.getValue();
                     if (!value) return "";
@@ -735,8 +735,7 @@ function buildUserTable() {
             {
                 title: "경력연차",
                 field: "exp_yr",
-                widthGrow: 1,
-                minWidth: 100,
+                widthGrow: 2,
                 formatter: function (cell) {
                     return `<div style="text-align:right;">${formatCareerYearMonth(cell.getValue())}</div>`;
                 }
@@ -744,8 +743,8 @@ function buildUserTable() {
             {
                 title: "최종학력",
                 field: "edu_last",
-                widthGrow: 4, minWidth: 180, headerSort: false,
-                formatter: function (cell) {
+                widthGrow: 4, minWidth: 120, headerSort: false, visible: false,
+                /*formatter: function (cell) {
                     const value = cell.getValue();
                     if (!value) return "";
                     return `<div style="
@@ -755,12 +754,12 @@ function buildUserTable() {
                         text-overflow: ellipsis;">
                         ${value}
                     </div>`;
-                }
+                }*/
             },
             {
                 title: "보유 자격증",
                 field: "cert_txt",
-                widthGrow: 4, minWidth: 180, headerSort: false,
+                widthGrow: 4, headerSort: false,
                 formatter: function (cell) {
                     const value = cell.getValue();
                     if (!value) return "";
@@ -773,7 +772,7 @@ function buildUserTable() {
                     </div>`;
                 }
             },
-            { title: "투입 가능 시점", field: "avail_dt", hozAlign: "center", widthGrow: 2, minWidth: 120 },
+            { title: "투입 가능 시점", field: "avail_dt", hozAlign: "center", widthGrow: 2, minWidth: 80 },
             {
                 title: "계약 형태",
                 field: "ctrt_typ",
@@ -781,7 +780,7 @@ function buildUserTable() {
                 formatter: function (cell) {
                     const val = cell.getValue();
                     return (ctrtTypMap && ctrtTypMap[val]) ? ctrtTypMap[val] : val;
-                }, editor: false, editable: false, widthGrow: 1, minWidth: 100
+                }, editor: false, editable: false, widthGrow: 2
             },
         ],
         data: [],

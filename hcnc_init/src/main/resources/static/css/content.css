@@ -132,13 +132,15 @@ option{background:#fff; color:#333;}
   position: relative;
   border: none !important;
   background: #fff !important;
-  padding: 10px 16px 8px !important;
+  padding-bottom: 30px !important;
   text-align: center !important;
   height: 50px;
   color: #333;
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 100% !important;
+  box-sizing: border-box;
 }
 .tabulator .tabulator-footer .tabulator-paginator {
   display: flex;
@@ -289,10 +291,10 @@ option{background:#fff; color:#333;}
 }
 
 /* 공통코드 > 코드그룹은 폭이 좁아 건수 텍스트를 항상 페이지 버튼 아래로 배치 */
-#TABLE_COMMON_MAIN .tabulator-footer {
+/*#TABLE_COMMON_MAIN .tabulator-footer {
   background: #fff !important;
   min-height: 76px;
-}
+}*/
 
 #TABLE_COMMON_MAIN .tabulator-footer .hcnc-grid-count {
   position: static;
@@ -321,28 +323,24 @@ option{background:#fff; color:#333;}
   flex: 1 1 auto;
   min-height: 0;
 }
-#TABLE_HR010_A.tabulator,
+/*#TABLE_HR010_A.tabulator,
 #TABLE_USER.tabulator {
   display: flex;
   flex-direction: column;
-}
-#TABLE_HR010_A.tabulator .tabulator-tableHolder,
-#TABLE_USER.tabulator .tabulator-tableHolder {
-  flex: 1 1 auto;
-  min-height: 0;
-}
+}*/
+/*
 #TABLE_USER.tabulator .tabulator-tableHolder {
   overflow: hidden;
-}
-#TABLE_HR010_A.tabulator .tabulator-header,
+}*/
+/*#TABLE_HR010_A.tabulator .tabulator-header,
 #TABLE_USER.tabulator .tabulator-header {
-  flex: 0 0 auto; /* 높이 고정 */
-}
-#TABLE_HR010_A.tabulator .tabulator-footer,
+  flex: 0 0 auto;
+}*/
+/*#TABLE_HR010_A.tabulator .tabulator-footer,
 #TABLE_USER.tabulator .tabulator-footer {
   flex: 0 0 auto;
   margin-top: auto;
-}
+}*/
 
 #TABLE_HR013_A .row-check {
   pointer-events: auto;
@@ -1130,7 +1128,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 }
 
 /* 시스템 - 공통코드 관리 영역 (좌, 우) */
-.common-code-section:first-child {width: calc(100% + 1px); display: flex; flex-direction: column;}
+.common-code-section:first-child {width: calc(100% + 3px); display: flex; flex-direction: column;}
 .common-code-section:last-child {display: flex; flex-direction: column;}
 
 #TABLE_COMMON_DETAIL .tabulator-cell,
@@ -1229,7 +1227,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 }
 .modal-content.main-lang-picker-content{flex-direction:column; height:auto;}
 .modal-content.main-lang-picker-content .tabulator .tabulator-header,
-.modal-content.main-lang-picker-content .tabulator .tabulator-footer{display:none !important;}
+.modal-content.main-lang-picker-content .tabulator .tabulator-footer {display:none !important;}
 .modal-content.main-lang-picker-content .tabulator .tabulator-tableHolder{height:100% !important; overflow-x: hidden;}
 .modal-content.hr010-main-pop{display:grid; grid-template-columns: auto  1fr;}
 .modal-content.hr010-main-pop:has(> .tab-article[style*="display: none"]),
@@ -1979,6 +1977,30 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 #TABLE_HR014_A .tabulator-tableHolder{
   overflow-x: hidden;
 }*/
+
+/* 기본 인적사항 / 사용자 정보 테이블 */
+.full-table {
+  border: 1px solid #DEE2E7 !important;
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+}
+.full-table .tabulator-header {
+  border: 1px solid #EFF1F6 !important;
+  border-bottom: 1px solid #DEE2E7 !important;
+}
+/* 기본 인적사항 / 사용자 정보 테이블 왼쪽 테두리 무력화 */
+.full-table.tabulator .tabulator-tableHolder .tabulator-row .tabulator-cell:first-child {
+  border-left: none !important;
+}
+/* 기본 인적사항 / 사용자 정보 테이블 오른쪽 테두리 무력화 */
+.full-table.tabulator .tabulator-tableHolder .tabulator-row .tabulator-cell:last-child {
+  border-right: none !important;
+}
+/* 기본 인적사항 / 사용자 정보 테이블 마지막 행 둥근 테두리 무력화 */
+.full-table.tabulator .tabulator-tableHolder .tabulator-row:last-child .tabulator-cell {
+  border-bottom-left-radius: 0px;
+  border-bottom-right-radius: 0px;
+}
 /* ====================================================================================================== */
 .tabulator-row .tabulator-cell:first-child {text-align: center !important}
 
@@ -2014,10 +2036,6 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
     min-height: calc(100% - 120px) !important;
     max-height: calc(100% - 120px) !important;
 }*/
-.tabulator .tabulator-footer {
-    width: 100% !important;
-    box-sizing: border-box;
-}
 
 /* ============================= 유틸 css ============================= */
 

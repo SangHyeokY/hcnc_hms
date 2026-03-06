@@ -177,7 +177,7 @@ function buildHr012TableB() {
         height: "100%",
         // 페이징 설정
         pagination: "local",       // 로컬 데이터 기준 페이지네이션
-        paginationSize: 8,        // 한 페이지에 8개씩 표시
+        paginationSize: 10,        // 한 페이지에 10개씩 표시
         // 숙련도 테이블 데이터 로드 시 건수 반영
         dataLoaded: function () {
             updateHr012BTitleCount();
