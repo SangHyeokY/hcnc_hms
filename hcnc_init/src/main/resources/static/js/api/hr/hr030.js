@@ -581,7 +581,7 @@ function buildHr030InsightSvg(primary, secondary) {
                 '</linearGradient>' +
                 '<linearGradient id="hr030InsightLine" x1="0" y1="0" x2="1" y2="0">' +
                     '<stop offset="0%" stop-color="#e50019" />' +
-                    '<stop offset="100%" stop-color="#c59652" />' +
+                    '<stop offset="100%" stop-color="#f2a24f" />' +
                 '</linearGradient>' +
             '</defs>' +
             '<g class="hr030-chart-grid">' + grid + '</g>' +
