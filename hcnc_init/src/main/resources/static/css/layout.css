@@ -6,12 +6,12 @@
 .main-container-wrap {width:100%; min-width: 1200px; position: relative; background-color:#EFF1F6; min-width:1200px; min-height:calc(100vh - 90px)}
 .main-container-wrap header .header {width:100%; max-width:1300px; margin:0 auto; height:50px;}
 
-.container-wrap {--hcnc-lnb-width:248px; --hcnc-contents-pad:20px; display: grid; min-height:calc(100vh - 80px); grid-template-columns: 248px 1fr;  grid-template-rows: 100vh; background:#f6f7fb; position: relative; transition: grid-template-columns 0.28s cubic-bezier(0.22,1,0.36,1);}
+.container-wrap {--hcnc-lnb-width:240px; --hcnc-contents-pad:20px; display: grid; min-height:calc(100vh - 80px); grid-template-columns: 240px 1fr;  grid-template-rows: 100vh; background:#f6f7fb; position: relative; transition: grid-template-columns 0.28s cubic-bezier(0.22,1,0.36,1);}
 .container-wrap .lnb-wrap {height: calc(100vh - 80px); background-color:#fff; position: relative; box-shadow: 0px 3px 6px 0px rgba(0,0,0,0.13);}
 .container-wrap .container .contents-wrap {padding:20px 20px; height: 100vh; display:grid; gap:20px; grid-auto-rows: 36px auto;}
 .container-wrap .container .contents-wrap:has(.search-area){ grid-auto-rows: 36px 70px auto;}
 .container-wrap > header {min-width: 0; overflow: hidden; contain: layout paint; transition: width 0.28s ease, padding 0.28s ease, box-shadow 0.28s ease;}
-.container-wrap > header > .lnb {width: 218px; min-width: 218px;} /* 248px(사이드바 폭) - 30px(header 좌우 패딩) */
+.container-wrap > header > .lnb {width: 210px; min-width: 210px;} /* 240px(사이드바 폭) - 30px(header 좌우 패딩) */
 .container-wrap.is-collapsed {--hcnc-lnb-width:0px; grid-template-columns: 0 1fr;}
 .container-wrap.is-collapsed > header {width: 0; padding: 0; box-shadow: none;}
 
@@ -33,7 +33,7 @@
   font-size: 12px;
   font-weight: 700;
   cursor: pointer;
-  transform: translate(248px, -50%);
+  transform: translate(240px, -50%);
   transition: transform 0.28s cubic-bezier(0.22,1,0.36,1), background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
   will-change: transform;
   z-index: 250;
@@ -79,7 +79,7 @@
 header {background:
           radial-gradient(circle at top right, rgba(229, 0, 25, 0.045), transparent 24%),
           radial-gradient(circle at bottom left, rgba(229, 0, 25, 0.03), transparent 22%),
-          linear-gradient(135deg, #ffffff 0%, #fffafa 50%, #fff7f8 100%); padding:30px 15px 15px 15px; z-index:100; color: #111; box-shadow:0 3px 6px rgba(0,0,0,0.08);}
+          linear-gradient(135deg, #ffffff 0%, #fffafa 50%, #fff7f8 100%); padding:30px 15px; z-index:100; color: #111; box-shadow:0 3px 6px rgba(0,0,0,0.08);}
 header h1 {display: flex; justify-content: center;}
 header h1 a{display:block; width:100%; height: 40px;}
 header h1 a img{display:block; width:auto; height: 40px; margin:0 auto;}
@@ -99,7 +99,7 @@ footer {width:100%; height:30px; line-height: 30px; padding:0 20px; display: fle
 
 
 .profile h4{font-size:15px; font-weight:500; color:#B1B1B1;}
-.profile-area {display: flex; align-items: center; gap: 6px; height: 48px; width: 100%; color: #242424; font-weight: 500;}
+.profile-area {display: flex; align-items: center; gap: 6px; height: 48px; width: 100%; color: #242424; font-weight: 500; padding: 0 8px;}
 .profile-area .profile-img {position:relative; display:block; width: 36px; height: 36px; margin-right:4px; border-radius:50%; overflow:hidden; background-size:cover;}
 .profile-area .profile-img img {position:absolute; width:100%; top:0%; left:0%;}
 
@@ -145,12 +145,14 @@ footer {width:100%; height:30px; line-height: 30px; padding:0 20px; display: fle
 }
 .left-menu .nav .lnb-menu .dep2 {
   padding: 0;
-  background:#f5f5f5;
+  background: #EFF1F6;
   border-radius: 8px;
+  margin-top: 6px;
 }
 .left-menu .nav .lnb-menu .dep2 > li{position:relative;}
-.left-menu .nav .lnb-menu .dep2 > li > a {display: block; color:#838C96; font-weight: 500; padding: 6px 28px 6px 18px;} /* font-size:14px; */
+.left-menu .nav .lnb-menu .dep2 > li > a {display: block; color:#838C96; font-weight: 500; padding: 8px 18px;} /* font-size:14px; */
 .left-menu .nav .lnb-menu .dep2 > li:first-child > a{padding-top:12px;}
+.left-menu .nav .lnb-menu .dep2 > li:last-child > a{padding-bottom:12px;}
 .left-menu .nav .lnb-menu .dep2 > li.has-children > a {background: url('../images/common/Ico-arrow-down-sub.png') 91% center no-repeat; background-size: 10px;}
 .left-menu .nav .lnb-menu .dep2 > li > a.on {font-weight: 600; color:#F0F1F3;}
 .left-menu .nav .lnb-menu .dep2 li.has-children.on > a {background: url('../images/common/Ico-arrow-up-sub.png') 91% center no-repeat; background-size: 10px; color: #202224; font-weight: 700;}
@@ -185,7 +187,7 @@ footer {width:100%; height:30px; line-height: 30px; padding:0 20px; display: fle
 
 /* 로그아웃 버튼 css */
 #logout-btn {width: 100%; border: none; background: none;}
-.mem-area {background: #212E41; border-radius: 8px; margin-bottom: 10px; padding: 0px 10px; display: flex; align-items: center; color: #fff; gap: 6px; height: 48px; width: 100%; position: relative; overflow: hidden;}
+.mem-area {background: #212E41; border-radius: 8px; padding: 0px 10px; display: flex; align-items: center; color: #fff; gap: 6px; height: 48px; width: 100%; position: relative; overflow: hidden;}
 .mem-area > div span.ico-lock {display:block;}
 .mem-area .logout-txt {border:none; background:none; color:#fff; font-weight:700; font-size:14px;}
 .mem-area .ico-lock {display:inline-block; width:30px; height:30px; background:url('../images/common/logout.png')center center no-repeat; background-size:contain;}

@@ -130,6 +130,12 @@ function buildTables() {
      * ========================= */
     mainTable = new Tabulator("#TABLE_COMMON_MAIN", {
         layout: "fitColumns",
+        dataLoaded:function(){
+            var rows = this.getRows();
+            if(rows.length > 0){
+                rows[0].select();
+            }
+        },
         placeholder: "데이터 없음",
         selectable: 1,
         columnDefaults: {
@@ -162,6 +168,7 @@ function buildTables() {
                 title: "코드그룹",
                 field: "grp_cd",
                 hozAlign: "center",
+                widthGrow:1,
                 formatter: function (cell) {
                     const val = cell.getValue();
                     return (grpCdMap && grpCdMap[val]) ? grpCdMap[val] : val;
@@ -171,6 +178,7 @@ function buildTables() {
                 title: "코드",
                 field: "cd",
                 hozAlign: "center",
+                widthGrow:1,
                 formatter: function (cell) {
                      const value = cell.getValue();
                      if (!value) return "";
@@ -180,6 +188,7 @@ function buildTables() {
             {
                 title: "코드그룹명",
                 field: "grp_nm",
+                widthGrow:1,
                 formatter: function (cell) {
                      const value = cell.getValue();
                      if (!value) return "";
@@ -223,7 +232,8 @@ function buildTables() {
         // 폭은 코드에서 직접 계산해 적용한다.
         // - 합계가 컨테이너보다 작으면 자동 균일 확장(빈공간 없음)
         // - 합계가 크면 가로 스크롤 노출
-        layout: "fitData",
+        // layout: "fitData",
+        layout: "fitColumns",
         placeholder: "데이터 없음",
         // selectable: true,
         selectable: 1,
@@ -254,15 +264,15 @@ function buildTables() {
                 headerSort: false,
                 download: false
             },
-            { title: "코드", field: "cd", hozAlign: "center", width: detailBaseWidths.cd },
+            { title: "코드", field: "cd", hozAlign: "center", widthGrow:1}, /* width: detailBaseWidths.cd  */
             { title: "코드명", field: "cd_nm", width: 140, minWidth: 120 },
-            { title: "정렬순서", field: "sort_no", hozAlign: "center", width: detailBaseWidths.sort_no },
-            { title: "부가정보1", field: "adinfo_01", formatter: amountFormatter, width: 180, minWidth: 110 },
-            { title: "부가정보2", field: "adinfo_02", formatter: amountFormatter, width: 130, minWidth: 110 },
-            { title: "부가정보3", field: "adinfo_03", formatter: amountFormatter, width: 130, minWidth: 110 },
-            { title: "부가정보4", field: "adinfo_04", formatter: amountFormatter, width: 130, minWidth: 110 },
-            { title: "부가정보5", field: "adinfo_05", formatter: amountFormatter, width: 130, minWidth: 110 },
-            { title: "사용여부", field: "use_yn", hozAlign: "center", width: detailBaseWidths.use_yn, minWidth: 80 }
+            { title: "정렬순서", field: "sort_no", hozAlign: "center", widthGrow:1}, /* width: detailBaseWidths.sort_no */
+            { title: "부가정보1", field: "adinfo_01", formatter: amountFormatter, widthGrow:1},
+            { title: "부가정보2", field: "adinfo_02", formatter: amountFormatter, widthGrow:1},
+            { title: "부가정보3", field: "adinfo_03", formatter: amountFormatter, widthGrow:1},
+            { title: "부가정보4", field: "adinfo_04", formatter: amountFormatter, widthGrow:1},
+            { title: "부가정보5", field: "adinfo_05", formatter: amountFormatter, widthGrow:1},
+            { title: "사용여부", field: "use_yn", hozAlign: "center", widthGrow:1} /* width: detailBaseWidths.use_yn,  */
         ],
         rowSelected: r => syncRowCheckbox(r, true),
         rowDeselected: r => syncRowCheckbox(r, false),
@@ -828,7 +838,7 @@ function loadDetailTableData(grpCd) {
         success: function (response) {
             var list = Array.isArray(response.list) ? response.list : [];
             var setResult = detailTable.setData(list);
-            if (setResult && typeof setResult.then === "function") {
+            /*if (setResult && typeof setResult.then === "function") {
                 // Tabulator 비동기 setData인 경우 폭 계산 타이밍을 then 체인으로 맞춘다.
                 setResult
                     .then(function () {
@@ -845,7 +855,8 @@ function loadDetailTableData(grpCd) {
                 if (detailTable && typeof detailTable.redraw === "function") {
                     detailTable.redraw(true);
                 }
-            }
+            }*/
+            setResult.then(function () {detailTable.redraw(true);});
         },
         error: function () {
             showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)

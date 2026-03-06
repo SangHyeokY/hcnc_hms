@@ -27,7 +27,7 @@
     </div>
     <div class="header-btn-wrap">
 
-      <button id="logout-btn">
+      <button id="logout-btn" class="mg-b10">
         <span class="mem-area">
           <span class="ico-lock"></span>
             <span class="logout-txt">
@@ -39,12 +39,13 @@
         </span>
       </button>
 
-      <div class="profile-area mg-b10 pd-l10 pd-r10">
+      <div class="profile-area">
           <div class="profile-img">
             <img src="/images/common/user-img-none.png" alt="프로필" />
           </div>
         <div th:text="|${session.LOGIN_USER_NM} (${session.LOGIN_USER_ID})|"></div>
       </div>
+
     </div>
   </div>
 </header>
