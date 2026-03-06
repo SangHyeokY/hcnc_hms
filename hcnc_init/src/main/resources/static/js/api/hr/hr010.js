@@ -91,14 +91,14 @@ $(document).ready(async function () {
     // 탭별 이벤트 정의
     $(".search-btn-area .btn-search").text("조회");
 
-    $(".hr010-user-type-tab").on("click", function () {
+    $(".hr030-filter-chip").on("click", function () {
         var nextType = String($(this).data("userType") || "staff");
         if (currentHr010UserTypeTab === nextType) {
             return;
         }
 
         currentHr010UserTypeTab = nextType;
-        $(".hr010-user-type-tab").removeClass("is-active");
+        $(".hr030-filter-chip").removeClass("is-active");
         $(this).addClass("is-active");
 
         applyHr010UserTypeFilter();
@@ -1157,7 +1157,7 @@ openUserModal = async function (mode, data) {
 
     // 인력 관리 등록 시, 정해진 탭에 따라 자동으로 선택
     if (mode === "insert") {
-        const activeTabBtn = document.querySelector(".hr010-user-type-tab.active");
+        const activeTabBtn = document.querySelector(".hr030-filter-chip.active");
         const devTyp = activeTabBtn?.dataset.userType === "freelancer" ? "HCNC_F" : "HCNC_S";
         $("#select_dev_typ").val(devTyp).trigger("change");
     }

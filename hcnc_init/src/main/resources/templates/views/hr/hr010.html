@@ -51,10 +51,10 @@
     </div>
     <div class="hr010-user-type-tabs mg-b15" role="tablist" aria-label="인력 구분">
         <div class="hr030-filter-block">
-            <span class="hr030-filter-label hr030-text-reveal">구분</span>
-            <div class="hr030-chip-group" id="hr030PeriodGroup">
-                <button type="button" class="hr010-user-type-tab is-active" data-user-type="staff">직원</button>
-                <button type="button" class="hr010-user-type-tab" data-user-type="freelancer">프리랜서</button>
+            <span class="hr030-filter-label hr030-text-reveal" style="--hr030-text-delay: 52ms;">구분</span>
+            <div class="hr030-chip-group" id="hr030PerspectiveGroup">
+                <button type="button" class="hr030-filter-chip is-active" data-user-type="staff">직원</button>
+                <button type="button" class="hr030-filter-chip" data-user-type="freelancer">프리랜서</button>
             </div>
         </div>
     </div>
@@ -139,7 +139,7 @@
                                 </tr>
                                 <tr>
                                     <th>투입 가능 시점</th>
-                                    <td><input type="date" class="wp100" id="avail_dt"></td>
+                                    <td class="profile_border"><input type="date" class="wp100" id="avail_dt"></td>
                                     <th rowspan="2">등급</th>
                                     <td rowspan="2">
                                         <div class="fl-ct fd-col ta-c wp100 gap-6">
@@ -292,11 +292,11 @@
                                 </tr>
                                 <tr>
                                     <th>최종학력</th>
-                                    <td><input type="text" class="wp100" id="edu_last" disabled></td>
+                                    <td class="profile_border"><input type="text" class="wp100" id="edu_last" disabled></td>
                                 </tr>
                                 <tr>
                                     <th>단가</th>
-                                    <td><input type="text" class="wp100" id="hope_rate_amt" placeholder="0원" disabled></td>
+                                    <td class="profile_border"><input type="text" class="wp100" id="hope_rate_amt" placeholder="0원" disabled></td>
                                     <th>KOSA<br>등급</th>
                                     <td>
                                         <select id="select_kosa_grd_cd" class="wp100"></select>
@@ -305,7 +305,7 @@
                                 </tr>
                                 <tr>
                                     <th>경력연차</th>
-                                    <td class="career-exp-cell">
+                                    <td class="career-exp-cell profile_border">
                                         <div class="career-spin-wrap">
                                             <div class="career-spin-field">
                                                 <input type="number" class="career-spin-input" id="exp_yr_year" min="0" max="99" step="1" value="0" disabled>
@@ -332,7 +332,7 @@
                                 </tr>
                                 <tr>
                                     <th>계약 형태</th>
-                                    <td><select id="select_ctrt_typ" class="wp100"></select></td>
+                                    <td class="profile_border"><select id="select_ctrt_typ" class="wp100"></select></td>
                                     <th>주요<br>고객사</th>
                                     <td><select id="select_main_cust_cd" class="wp100"></select></td>
                                 <!--<td><input type="text" class="wp100" id="main_cust_cd" disabled></td>-->

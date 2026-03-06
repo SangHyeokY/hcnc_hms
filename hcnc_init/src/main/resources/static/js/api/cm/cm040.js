@@ -265,7 +265,7 @@ function buildTables() {
                 download: false
             },
             { title: "코드", field: "cd", hozAlign: "center", widthGrow:1}, /* width: detailBaseWidths.cd  */
-            { title: "코드명", field: "cd_nm", width: 140, minWidth: 120 },
+            { title: "코드명", field: "cd_nm", widthGrow:1},
             { title: "정렬순서", field: "sort_no", hozAlign: "center", widthGrow:1}, /* width: detailBaseWidths.sort_no */
             { title: "부가정보1", field: "adinfo_01", formatter: amountFormatter, widthGrow:1},
             { title: "부가정보2", field: "adinfo_02", formatter: amountFormatter, widthGrow:1},
