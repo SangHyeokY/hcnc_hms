@@ -1128,8 +1128,11 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
   max-height: none !important;
   /*overflow: hidden;*/
 }
-.common-code-section:first-child {width: 100%; display: flex;flex-direction: column;}
-.common-code-section:last-child {width: 100%; display: flex;flex-direction: column;}
+
+/* 시스템 - 공통코드 관리 영역 (좌, 우) */
+.common-code-section:first-child {width: calc(100% + 1px); display: flex; flex-direction: column;}
+.common-code-section:last-child {display: flex; flex-direction: column;}
+
 #TABLE_COMMON_DETAIL .tabulator-cell,
 #TABLE_COMMON_DETAIL .tabulator-cell > div {
   white-space: nowrap !important;
