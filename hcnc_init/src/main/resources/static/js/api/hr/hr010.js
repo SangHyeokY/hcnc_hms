@@ -659,7 +659,7 @@ function buildUserTable() {
                 headerSort: false,
                 download: false
             },
-            { title: "성명", field: "dev_nm", hozAlign: "center", headerSort: true, widthGrow: 1, minWidth: 60, frozen: true },
+            { title: "성명", field: "dev_nm", hozAlign: "center", headerSort: true, widthGrow: 2, frozen: true },
             {
                 title: "평가 등급",
                 field: "grade",
