@@ -1394,7 +1394,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 /* 생년월일 오른쪽 border */
 .hr010-main-pop .modal-human-area .profile_border {border-right: 1px solid #DEE2E7;}
 
-.tab-area {position:relative; display: flex; width: 100%; margin-bottom:8px; gap: 0px; box-sizing: border-box; border-radius:6px; overflow:hidden;}
+.tab-area {position:relative; display: flex; width: 100%; margin-bottom: 10px; gap: 0px; box-sizing: border-box; border-radius:6px; overflow:hidden;}
 /*.tab-area:before {content:""; position:absolute; left:0; bottom:1px; height:1px; width:100%; background:#ddd; z-index:-1;}*/
 .tab-btn, .tab-sub-btn {display:block; border-right:1px solid #C3C8D2; flex:1; min-width:0; text-align: center; padding: 13px 20px; font-weight: 500; color: ##E8EBF0; background:#212E4114; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
 .tab-btn:last-child, .tab-sub-btn:last-child{border-right:none;}
