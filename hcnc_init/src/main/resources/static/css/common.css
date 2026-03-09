@@ -50,7 +50,7 @@ a.disable {background-color:#bababa !important; pointer-events: none;/*이벤트
 .dis-b {display:block;}
 .dis-n {display:none !important;}
 
-/* Float - 사용 비추천*/
+/* Float - 사용 비추천 */
 .fl {float:left !important;}
 .fr {float:right !important;}
 .cb {clear:both !important; font-size:0px !important;}

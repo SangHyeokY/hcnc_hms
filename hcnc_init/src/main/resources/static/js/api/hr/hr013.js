@@ -617,9 +617,9 @@ function initHr013ProjectPickerTable() {
     hr013ProjectPickerTable = new Tabulator("#TABLE_HR013_PROJECT_PICKER", {
         layout: "fitColumns",
         selectable: 1,
-        height: "480px",
+        /*height: "480px",*/
         pagination: "local",
-        paginationSize: 8,
+        paginationSize: 10,
         paginationSizeSelector: [5, 10, 15, 20],
         columns: [
             { title: "코드", field: "cd", width: 90, hozAlign: "center" },

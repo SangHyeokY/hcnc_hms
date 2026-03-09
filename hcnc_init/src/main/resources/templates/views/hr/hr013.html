@@ -3,7 +3,7 @@
     layout:decorate="~{layout/layout}">
 
 <th:block th:fragment="tab3Content">
-    <div class="content list-area tab3-content hr014-tab-wrap">
+    <div class="content tab3-content hms-tab-wrap">
         <div class="hr013-toolbar page-sub-title fl-sb">
             <p class="tool-title">프로젝트
                 <span id="hr013-count" class="hcnc-grid-count hcnc-grid-count-title" data-grid-for="TABLE_HR013_A">
@@ -205,7 +205,7 @@
                             <input type="text" id="hr013-project-picker-search" class="wp100"
                                 placeholder="검색어를 입력하세요 (Enter)">
                             <button type="button" class="btn btn-close" id="btn_hr013_project_picker_search">
-                                <img src="/icons/ico-search.png" alt="검색">
+                                <!--<img src="/icons/ico-search.png" alt="검색">-->
                                 조회
                             </button>
                         </div>
@@ -237,17 +237,14 @@
                         <div class="btn-area prj-save">
                             <button type="button" class="btn btn-save" id="btn_hr013_project_code_save"><img src="./images/common/btn-ico-plus.png">신규 등록</button>
                         </div>
-
+                    </div>
+                    <div>
+                        <button type="button" class="btn btn-close" id="btn_hr013_project_picker_apply">등록</button>
                     </div>
                 </div>
             </div>
-
-            <div class="modal-btn">
-                <ul>
-                    <li><button type="button" class="btn btn-close" id="btn_hr013_project_picker_apply">등록</button>
-                    </li>
-                </ul>
-            </div>
+<!--            <div class="modal-btn">-->
+<!--            </div>-->
         </div>
     </div>
 
