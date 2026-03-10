@@ -84,7 +84,7 @@ header h1 {display: flex; justify-content: center;}
 header h1 a{display:block; width:100%; height: 40px;}
 header h1 a img{display:block; width:auto; height: 40px; margin:0 auto;}
 header .logo-sub {justify-content: center; display: flex}
-header .logo-sub .sub-box{display: inline-block; background:#E5001917; color:#E50019; border-radius: 50px; padding: 6px 14px; font-weight: 700; margin-top: 15px; font-size: 14px;}
+header .logo-sub .sub-box{display: inline-block; background:#E5001917; color:#E50019; border-radius: 50px; padding: 6px 14px; font-weight: 700; margin-top: 15px; font-size: 16px;}
 header .header-contents{display:flex; justify-content:space-between; align-items:center; background-color:#1E2E41; width:calc(100% - 260px); margin-right:20px; border-radius:20px; height:56px; padding:0 20px 0 30px; font-size:20px; font-weight:700;}
 
 header .header-btn-wrap .alarm {position: relative;}
@@ -109,6 +109,7 @@ footer {width:100%; height:30px; line-height: 30px; padding:0 20px; display: fle
 
 .left-menu {width:100%; padding: 20px 0;}
 .left-menu .nav {height:100%;overflow:auto;}
+.lnb-menu span {font-size: 18px;}
 .app-sidebar.left-menu .app-nav.nav {opacity: 1; transform: translateX(0); transition: opacity 0.24s ease, transform 0.28s cubic-bezier(0.22,1,0.36,1);}
 .container-wrap.is-collapsed .app-sidebar.left-menu .app-nav.nav {opacity: 0; transform: translateX(-10px); pointer-events: none;}
 .left-menu .nav::-webkit-scrollbar {width:7px; height: 10px; border-radius: 10px;}

@@ -194,6 +194,7 @@ function buildHr013Table() {
         layout: "fitColumns",
         placeholder: "데이터 없음",
         height: "100%",
+        // height: "94%",
         // 페이징 설정
         pagination: "local",       // 로컬 데이터 기준 페이지네이션
         paginationSize: 10,        // 한 페이지에 10개씩 표시

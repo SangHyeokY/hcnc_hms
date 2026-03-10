@@ -3,7 +3,7 @@
       layout:decorate="~{layout/layout}">
 
 <th:block th:fragment="tab2Content">
-    <div class="content hms-tab-wrap tab2-content">
+    <div class="content tab2-content">
         <div class="hr014-shell">
             <div class="hms-tab-wrap">
                 <div class="hr014-side-tabs" id="HR014_SIDE_TABS">
@@ -29,11 +29,13 @@
                         </span>
                     </p>
                 </div>
-                <div class="content-body">
-                    <!-- Tabulator 테이블 div -->
-                    <div id="TABLE_HR012_A" class="th-effect"></div>
-                    <!-- Tabulator 테이블 div -->
-                    <div id="TABLE_HR012_B" class="th-effect" style="display:none;"></div>
+                <div class="scroll-body">
+                    <div class="content-body">
+                        <!-- Tabulator 테이블 div -->
+                        <div id="TABLE_HR012_A" class="th-effect"></div>
+                        <!-- Tabulator 테이블 div -->
+                        <div id="TABLE_HR012_B" class="th-effect" style="display:none;"></div>
+                    </div>
                 </div>
             </div>
         </div>

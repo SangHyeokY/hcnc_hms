@@ -28,9 +28,11 @@
                 </div>
             </div>
         </div>
-        <div class="content-body">
-            <!-- Tab3 내용 -->
-            <div id="TABLE_HR013_A"></div>
+        <div class="scroll-body">
+            <div class="content-body">
+                <!-- Tab3 내용 -->
+                <div id="TABLE_HR013_A"></div>
+            </div>
         </div>
     </div>
 
@@ -155,7 +157,7 @@
     <div class="modal-wrap" id="hr013-skill-picker-area" style="display:none">
         <div class="modal-container hr013-skill-picker-container">
             <div class="header">
-                <h4>프로젝트 기술 선택</h4>
+                <h3 class="sub-title">프로젝트 기술<span>선택</span></h3>
                 <div class="btn-area">
                     <button class="close-btn" type="button" id="btn_hr013_skill_picker_close_x">
                         <img src="./icons/Icon-close.png" alt="" />
@@ -164,7 +166,7 @@
             </div>
             <div class="modal-content hr013-skill-picker-content">
                 <div class="hr013-skill-picker-search-row">
-                    <label for="hr013-skill-picker-search">기술 검색</label>
+                    <label for="hr013-skill-picker-search">• 기술 검색</label>
                     <div class="hr013-skill-picker-search-wrap">
                         <input type="text" id="hr013-skill-picker-search" class="wp100" placeholder="기술명 입력 후 선택"
                             autocomplete="off">
@@ -172,7 +174,7 @@
                     </div>
                     <span class="hr013-skill-picker-meta" id="hr013-skill-picker-meta"></span>
                 </div>
-                <div id="TABLE_HR013_SKILL_PICKER"></div>
+                <div id="TABLE_HR013_SKILL_PICKER" class="th-effect"></div>
             </div>
             <div class="modal-btn">
                 <ul>
@@ -188,7 +190,7 @@
     <div class="modal-wrap" id="hr013-project-picker-area" style="display:none">
         <div class="modal-container hr013-project-picker-container">
             <div class="header">
-                <h4 class="pill-title pill-title--modal">프로젝트 추가 등록</h4>
+                <h3 class="sub-title">프로젝트 목록<span>추가</span></h3>
                 <div class="btn-area">
                     <button class="close-btn" type="button" id="btn_hr013_project_picker_close_x">
                         <img src="./icons/Icon-close.png" alt="" />
@@ -203,7 +205,7 @@
                         <label for="hr013-project-picker-search">프로젝트 검색</label>
                         <div class="hr013-project-picker-search-wrap">
                             <input type="text" id="hr013-project-picker-search" class="wp100"
-                                placeholder="검색어를 입력하세요 (Enter)">
+                                placeholder="검색어를 입력하세요">
                             <button type="button" class="btn btn-close" id="btn_hr013_project_picker_search">
                                 <!--<img src="/icons/ico-search.png" alt="검색">-->
                                 조회

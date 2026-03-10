@@ -759,7 +759,7 @@ function createGroupedSkillPicker(config) {
         var selectedCount = getSelectedSet().size;
         var text = typeof cfg.metaTextBuilder === "function"
             ? cfg.metaTextBuilder(totalCount, selectedCount)
-            : `전체 기술 <span class="fw500 mg-l4">${totalCount}</span>개 / 선택 <span class="hcnc-sub-count-number">${selectedCount}</span>개`;
+            : `전체 기술 <span class="fw700 mg-l4">${totalCount}</span>개 / 선택 <span class="hcnc-sub-count-number">${selectedCount}</span>개`;
         $(cfg.metaSelector).html(text);
     }
 
