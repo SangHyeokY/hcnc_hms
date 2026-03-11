@@ -281,7 +281,7 @@ function buildHr013Table() {
                         row.update({ _prev_cust_nm: cell.getValue() || "" });
                     }
                 },
-                cellClick: startEditOnClick, width: 67
+                cellClick: startEditOnClick, width: 120
             },
             {
                 title: "프로젝트명",
@@ -383,7 +383,7 @@ function buildHr013Table() {
                 cellEdited: function (cell) {
                     requestAnimationFrame(() => cell.getRow().reformat());
                 },
-                width: 130
+                width: 210
             },
             {
                 title: "역할",
@@ -399,7 +399,7 @@ function buildHr013Table() {
                         cell.setValue(value, true);
                     }
                 },
-                cellClick: startEditOnClick, width: 50
+                cellClick: startEditOnClick, width: 70
             },
             {
                 title: "시작일",
@@ -419,18 +419,18 @@ function buildHr013Table() {
                 editable: isHr013Editable,
                 cellClick: startEditOnClick, width: 114
             },
-            { title: "계약단가", field: "rate_amt", hozAlign: "right", formatter: hr013AmountFormatter, editor: "input", editable: isHr013Editable, cellClick: startEditOnClick, width: 120 },
+            { title: "계약단가", field: "rate_amt", hozAlign: "right", formatter: hr013AmountFormatter, editor: "input", editable: isHr013Editable, cellClick: startEditOnClick, width: 100 },
             {
                 title: "기술스택",
                 field: "skl_id_lst",
-                hozAlign: "left",
+                /*hozAlign: "left",*/
                 formatter: hr013TableSkillFormatter,
                 editable: false,
-                cellClick: hr013TableSkillCellClick
+                cellClick: hr013TableSkillCellClick, width: 80
             },
             // { title: "기술스택", field: "stack_txt", formatter: skillDisplayFormatter, editor: stackTagEditor, editable: isHr013Editable, cellClick: startEditOnClick },
-            { title: "투입률", field: "alloc_pct", hozAlign: "center", formatter: percentageFormatter, width: 65, editor: "input", editable: isHr013Editable, cellClick: startEditOnClick },
-            { title: "비고", field: "remark", editor: "input", editable: isHr013Editable, cellClick: startEditOnClick, width: 50 },
+            { title: "투입률", field: "alloc_pct", hozAlign: "center", formatter: percentageFormatter, width: 66, editor: "input", editable: isHr013Editable, cellClick: startEditOnClick },
+            { title: "비고", field: "remark", editor: "input", editable: isHr013Editable, cellClick: startEditOnClick},
         ],
         data: []
     });
@@ -1780,13 +1780,17 @@ function hr013TableSkillFormatter(cell) {
     var labelText = getHr013SkillLabelText(value, rowData ? rowData.stack_txt : "");
     var textHtml = labelText ? hr013EscapeHtml(labelText) : "-";
 
-    if (window.hr010ReadOnly) {
-        return "<span class='hr013-stack-text'>" + textHtml + "</span>";
-    }
+// 기술스택 표기가 너무 길어져서 별도의 팝업으로 분리
+//    if (window.hr010ReadOnly) {
+//        return "<span class='hr013-stack-text'>" + textHtml + "</span>";
+//    }
+//    return "<div class='hr013-stack-cell'>" +
+//        "<span class='hr013-stack-text'>" + textHtml + "</span>" +
+//        "<button type='button' class='btn-prj-skl'>기술 선택</button>" +
+//        "</div>";
     return "<div class='hr013-stack-cell'>" +
-        "<span class='hr013-stack-text'>" + textHtml + "</span>" +
-        "<button type='button' class='btn-prj-skl'>기술 선택</button>" +
-        "</div>";
+           "<button type='button' class='btn-prj-skl'>기술 선택</button>" +
+           "</div>";
 }
 
 function hr013TableSkillCellClick(e, cell) {

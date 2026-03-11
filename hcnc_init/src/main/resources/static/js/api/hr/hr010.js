@@ -267,7 +267,7 @@ $(document).ready(async function () {
                 showAlert({
                     icon: 'warning',
                     title: '경고',
-                    html: `해당 탭은<strong>&nbsp;프로젝트</strong>탭에서<strong>&nbsp;당사(HCNC)&nbsp;</strong>프로젝트의
+                    html: `해당 탭은<strong>&nbsp;프로젝트</strong>&nbsp;탭에서<strong>&nbsp;당사(HCNC)&nbsp;</strong>프로젝트의
                            <strong>&nbsp;평가&nbsp;</strong>버튼을 클릭해야 접근 가능합니다.`
                 });
                 return;
@@ -385,13 +385,13 @@ $(document).ready(async function () {
 
             // 저장한 탭의 이름 저장
             const savedTabNames = savedTabs.length
-                ? savedTabs.map(n => `<strong>${n}</strong>`).join(", ")
+                ? savedTabs.map(n => `<strong>${n}</strong>`).join(",&nbsp;")
                 : "<strong>인적사항</strong>";  // 혹시 savedTabs가 비어있다면 인적사항 표시
 
             showAlert({
                 icon: 'success',
                 title: currentMode === "insert" ? "등록 완료" : "저장 완료",
-                html: `${savedTabNames} 정보가 저장되었습니다.`
+                html: `${savedTabNames}&nbsp;정보가 저장되었습니다.`
             });
 
             // 탭 상태 초기화

@@ -133,7 +133,7 @@ option{background:#fff; color:#333;}
     background-color: #fff !important;
 }
 /* .tabulator-row .tabulator-cell {background-color: #fff !important; padding: 2px 10px !important; max-height: 34px; line-height: 30px;} */
-.tabulator-row .tabulator-cell {font-size: 16px; font-weight: 400; !important; padding: 2px 10px !important; line-height: 30px;}
+.tabulator-row .tabulator-cell {font-size: 16px; font-weight: 400 !important; padding: 2px 10px !important; line-height: 30px;}
 .tabulator-row .tabulator-cell.tabulator-align-left,
 .tabulator-row .tabulator-cell.hcnc-align-left {text-align: left !important;}
 .tabulator-row .tabulator-cell.tabulator-align-center,
@@ -419,10 +419,17 @@ option{background:#fff; color:#333;}
 }*/
 
 /* 프로젝트 탭 input 높이 */
-#TABLE_HR013_A input {
-  height: 35px !important;
+#TABLE_HR013_A input[type="date"], #TABLE_HR013_A input[type="text"] {
+  height: 30px !important;
 }
-
+#TABLE_HR013_A select {
+  height: 30px !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: url(../images/common/ico-arrow-down.png) calc(100% - 10px) center no-repeat;
+  background-size: 14px;
+}
 #TABLE_HR013_A .row-check {
   pointer-events: auto;
   cursor: pointer;
@@ -446,6 +453,10 @@ option{background:#fff; color:#333;}
   pointer-events: none;
   cursor: default;
 }
+#TABLE_HR013_A .tabulator-row .tabulator-cell {
+  padding: 0 4px !important;
+}
+
 #TABLE_HR013_A .tabulator-row.stack-editing {
   height: auto !important;
 }
@@ -468,7 +479,8 @@ option{background:#fff; color:#333;}
 #TABLE_HR013_A .hr013-stack-cell {
   display: flex;
   align-items: baseline;
-  justify-content: space-between;
+  justify-content: center;
+  /*justify-content: space-between;*/
   /* gap: 8px; */
   width: 100%;
 }
@@ -485,7 +497,6 @@ option{background:#fff; color:#333;}
   padding: 4px 8px;
   font-size: 12px;
 }
-
 
 /* 아이콘 크기 강제 통일 */
 .hr013-toolbar .btn-area button img{
@@ -2579,7 +2590,7 @@ section.search-area .search-info #searchConditionKeyword { /* 새 검색어 입�
   border: 1px solid #E50019;
   color: #E50019;
   background: #fff;
-  border-radius: 16px;
+  border-radius: 8px;
   padding: 5px 5px;
   font-size: 13px;
   font-weight: 500;
