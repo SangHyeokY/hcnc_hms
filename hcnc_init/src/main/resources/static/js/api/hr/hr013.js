@@ -239,7 +239,7 @@ function buildHr013Table() {
                 }
             },
             {
-                title: "당사 여부",
+                title: "당사여부",
                 field: "inprj_yn",
                 hozAlign: "center",
                 formatter: inprjCheckboxFormatter,
@@ -254,7 +254,7 @@ function buildHr013Table() {
                     toggleInprjValue(resolved);
                     changedTabs.tab3 = true;
                     window.hr013Table.redraw(true);
-                }, width: 84
+                }, width: 80
             },
             {
                 title: "고객사",
@@ -383,7 +383,7 @@ function buildHr013Table() {
                 cellEdited: function (cell) {
                     requestAnimationFrame(() => cell.getRow().reformat());
                 },
-                width: 210
+                width: 160
             },
             {
                 title: "역할",
@@ -399,7 +399,7 @@ function buildHr013Table() {
                         cell.setValue(value, true);
                     }
                 },
-                cellClick: startEditOnClick, width: 70
+                cellClick: startEditOnClick, width: 60
             },
             {
                 title: "시작일",
@@ -408,7 +408,7 @@ function buildHr013Table() {
                 formatter: dateDisplayFormatter,
                 editor: dateEditor,
                 editable: isHr013Editable,
-                cellClick: startEditOnClick, width: 114
+                cellClick: startEditOnClick, width: 110
             },
             {
                 title: "종료일",
@@ -417,9 +417,9 @@ function buildHr013Table() {
                 formatter: dateDisplayFormatter,
                 editor: dateEditor,
                 editable: isHr013Editable,
-                cellClick: startEditOnClick, width: 114
+                cellClick: startEditOnClick, width: 110
             },
-            { title: "계약단가", field: "rate_amt", hozAlign: "right", formatter: hr013AmountFormatter, editor: "input", editable: isHr013Editable, cellClick: startEditOnClick, width: 100 },
+            { title: "계약단가", field: "rate_amt", hozAlign: "right", formatter: hr013AmountFormatter, editor: "input", editable: isHr013Editable, cellClick: startEditOnClick, width: 90 },
             {
                 title: "기술스택",
                 field: "skl_id_lst",

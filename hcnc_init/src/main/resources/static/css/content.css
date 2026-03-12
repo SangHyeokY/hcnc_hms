@@ -151,9 +151,9 @@ option{background:#fff; color:#333;}
 }
 #TABLE_HR013_A .tabulator-tableHolder,
 #TABLE_HR013_PROJECT_PICKER .tabulator-tableHolder {
-  height: 450px !important;
-  min-height: 450px !important;
-  max-height: 450px !important;
+  height: 480px !important;
+  min-height: 480px !important;
+  max-height: 480px !important;
 }
 /* 특정 푸터 위치 아래에 고정 */
 #TABLE_HR013_A .tabulator-footer,
@@ -1223,8 +1223,8 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .detail-sort-hint {
     color: #FF6E4B;
     margin-left: auto;
-    margin-right: 10px;
-    font-weight: 400;
+    margin-right: 20px;
+    font-weight: 500;
     font-size: 16px;
 }
 /* Hide layout-level buttons on common code page */
@@ -1256,12 +1256,11 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .pill-title--modal{
   margin: 0;
 }
-/* 모달 (상세/등록/수정 텍스트) */
-.pill-title--modal span {font-size: 16px; font-weight: 500; padding: 2px 0px 0px 10px;}
 .modal-container.main-lang-picker-container .btn-area button{width:40px; height:40px;}
 .modal-container.main-lang-picker-container .btn-area button img{width:100%;}
+
 /* 상단 타이틀 타원형 디자인 */
-.pill-title{
+.pill-title {
   display: inline-flex;
   align-items: center;
   /*padding: 5px 22px;
@@ -1290,11 +1289,24 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
   font-weight: 700;
   font-size: 24px;
 }
-.sub-title span {
+/*.sub-title span {
   font-size: 16px;
   font-weight: 500;
   padding: 2px 0px 0px 10px;
+}*/
+
+/* 모달 (상세/등록/수정 텍스트) */
+.pill-title span,
+.sub-title span {
+    font-size: 16px;
+    font-weight: 600;
+    color: #E50019;
+    background: #ED24551F;
+    padding: 4px 15px;
+    border-radius: 46px;
+    margin-left: 10px;
 }
+
 /*
 .modal-wrap .header .modal-close {background: #d7dde8; border-radius: 50%; width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; font-size: 16px; color: #2f3a4a;}
 .modal-wrap .header .modal-close:before {content: "×"; line-height: 1;}
@@ -1337,7 +1349,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .modal-btn {padding: 20px;}
 .modal-btn ul {display: flex; justify-content: flex-end;}
 /*.modal-btn ul li {margin-right: 10px;}*/
-.modal-btn ul li:last-child {margin-right: 0;}
+.modal-btn ul li:last-child {margin-left: 15px;}
 .modal-btn .btn {padding: 8px 20px; border-radius: 8px; background-color: #fff; border: 1px solid #E50019; color: #E50019; font-weight: 500;} /*font-size: 14px;*/
 /* .modal-btn .btn.btn-save {background: #5A8DFF; border-color: #5A8DFF; color: #fff;} */
 .modal-btn #btn-user-save,
@@ -1806,7 +1818,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
   background: #EFF1F6 !important;
   /*border-left: 1px solid #DEE2E7 !important;
   border-right: 1px solid #DEE2E7 !important;*/
-  font-weight: bold;
+  font-weight: bold !important;
 }
 /* 일부 tabulator 테이블의 첫번째 열은 th 효과 처리 */
 .th-effect .tabulator-table > .tabulator-row > .tabulator-cell:first-child:hover {
@@ -2222,7 +2234,8 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 }
 
 /* HR010 인적사항 검색 입력 스타일 */ /* HR020 진행 프로젝트 내역검색 입력 스타일 */
-section.search-area .search-info #searchKeyword {
+section.search-area .search-info #searchKeyword,
+section.search-area .search-info #insertNm {
     min-width: 600px !important;
     width: auto;
     line-height: 40px;
@@ -2501,7 +2514,7 @@ section.search-area .search-info #searchConditionKeyword { /* 새 검색어 입�
 
 /* HR010 팝업 전체 높이 */
 #view-user-area .modal-container-detail.main-human-modal {
-  height: 880px;
+  height: 884px;
 }
 
 /* HR010 수정/상세 팝업은 insert와 분리해 너비를 조금 더 확보 */
