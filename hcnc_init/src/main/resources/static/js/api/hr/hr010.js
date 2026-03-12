@@ -661,10 +661,10 @@ function buildUserTable() {
             },
             { title: "성명", field: "dev_nm", hozAlign: "center", headerSort: true, widthGrow: 2, frozen: true },
             {
-                title: "평가 등급",
+                title: "평가등급",
                 field: "grade",
                 hozAlign: "center",
-                widthGrow: 2, frozen: true,
+                frozen: true, width: 120,
                 formatter: function (cell) {
                     const d = cell.getRow().getData();
                     if (!d.grade) return "";
@@ -672,7 +672,7 @@ function buildUserTable() {
                 }
             },
             {
-                title: "주 개발언어",
+                title: "주개발언어",
                 field: "main_lang_nm",
                 widthGrow: 4, minWidth: 120, frozen: true,
                 formatter: function (cell) {
@@ -757,7 +757,7 @@ function buildUserTable() {
                 }*/
             },
             {
-                title: "보유 자격증",
+                title: "보유자격증",
                 field: "cert_txt",
                 widthGrow: 4, headerSort: false,
                 formatter: function (cell) {
@@ -772,9 +772,9 @@ function buildUserTable() {
                     </div>`;
                 }
             },
-            { title: "투입 가능 시점", field: "avail_dt", hozAlign: "center", widthGrow: 2, minWidth: 80 },
+            { title: "투입가능시점", field: "avail_dt", hozAlign: "center", width: 113 },
             {
-                title: "계약 형태",
+                title: "계약형태",
                 field: "ctrt_typ",
                 hozAlign: "center",
                 formatter: function (cell) {

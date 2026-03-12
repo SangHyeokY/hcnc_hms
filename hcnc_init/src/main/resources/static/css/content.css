@@ -1349,7 +1349,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .modal-btn {padding: 20px;}
 .modal-btn ul {display: flex; justify-content: flex-end;}
 /*.modal-btn ul li {margin-right: 10px;}*/
-.modal-btn ul li:last-child {margin-left: 15px;}
+.modal-btn ul li:has(button:not([style*="display:none"])):last-of-type button {margin-left: 15px;}
 .modal-btn .btn {padding: 8px 20px; border-radius: 8px; background-color: #fff; border: 1px solid #E50019; color: #E50019; font-weight: 500;} /*font-size: 14px;*/
 /* .modal-btn .btn.btn-save {background: #5A8DFF; border-color: #5A8DFF; color: #fff;} */
 .modal-btn #btn-user-save,
