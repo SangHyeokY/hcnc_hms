@@ -698,7 +698,7 @@ function upsertMainBtn() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            html: `<strong>코드그룹</strong>을 입력해주세요.`
+            html: `<strong>코드그룹</strong>을(를) 입력해주세요.`
         });
         $("#write_main_grp_cd").focus();
         return;
@@ -708,7 +708,7 @@ function upsertMainBtn() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            html: `<strong>코드그룹명</strong>을 입력해주세요.`
+            html: `<strong>코드그룹명</strong>을(를) 입력해주세요.`
         });
         $("#write_main_grp_nm").focus();
         return;
@@ -718,7 +718,7 @@ function upsertMainBtn() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            html: `<strong>코드</strong>를 입력해주세요.`
+            html: `<strong>코드</strong>을(를) 입력해주세요.`
         });
         $("#write_main_cd").focus();
         return;
@@ -990,7 +990,7 @@ function upsertDetailBtn() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            html: `<strong>코드그룹</strong>을 선택해주세요.`
+            html: `<strong>코드그룹</strong>을(를) 선택해주세요.`
         });
         return;
     }
@@ -999,7 +999,7 @@ function upsertDetailBtn() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            html: `<strong>코드</strong>를 입력해주세요.`
+            html: `<strong>코드</strong>을(를) 입력해주세요.`
         });
         $("#write_detail_cd").focus();
         return;
@@ -1009,7 +1009,7 @@ function upsertDetailBtn() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            html: `<strong>코드명</strong>을 입력해주세요.`
+            html: `<strong>코드명</strong>을(를) 입력해주세요.`
         });
         $("#write_detail_cd_nm").focus();
         return;
@@ -1019,7 +1019,7 @@ function upsertDetailBtn() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            html: `<strong>정렬순서</strong>를 입력해주세요.`
+            html: `<strong>정렬순서</strong>을(를) 입력해주세요.`
         });
         $("#write_detail_sort_no").focus();
         return;

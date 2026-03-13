@@ -2603,7 +2603,7 @@ section.search-area .search-info #searchConditionKeyword { /* 새 검색어 입�
 .hr014-title {
   font-weight: 400;
   font-size: 16px;
-  padding: 0px 0px 2px 10px;
+  padding-left: 10px;
 }
 .btn-prj-edit {
   background-color: #212E41;

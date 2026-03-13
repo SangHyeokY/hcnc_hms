@@ -1346,7 +1346,7 @@ function saveHr013Row() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            html: `<strong>당사 여부</strong>를 선택해주세요.`
+            html: `<strong>당사여부</strong>을(를) 선택해주세요.`
         });
         return;
     }
@@ -1354,7 +1354,7 @@ function saveHr013Row() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            html: `<strong>시작일</strong>을 입력해주세요.`
+            html: `<strong>시작일</strong>을(를) 입력해주세요.`
         });
         return;
     }
@@ -1362,7 +1362,7 @@ function saveHr013Row() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            html: `<strong>종료일</strong>을 입력해주세요.`
+            html: `<strong>종료일</strong>을(를) 입력해주세요.`
         });
         return;
     }
@@ -1370,7 +1370,7 @@ function saveHr013Row() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            html: `<strong>고객사</strong>를 입력해주세요.`
+            html: `<strong>고객사</strong>을(를) 입력해주세요.`
         });
         return;
     }
@@ -1378,7 +1378,7 @@ function saveHr013Row() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            html: `<strong>프로젝트명</strong>을 입력해주세요.`
+            html: `<strong>프로젝트명</strong>을(를) 입력해주세요.`
         });
         return;
     }
@@ -1386,7 +1386,7 @@ function saveHr013Row() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            html: `<strong>계약단가</strong>를 입력해주세요.`
+            html: `<strong>계약단가</strong>을(를) 입력해주세요.`
         });
         return;
     }
@@ -1394,7 +1394,7 @@ function saveHr013Row() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            html: `<strong>역할</strong>을 선택해주세요.`
+            html: `<strong>역할</strong>을(를) 선택해주세요.`
         });
         return;
     }
@@ -1402,7 +1402,7 @@ function saveHr013Row() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            html: `<strong>투입률</strong>을 입력해주세요.`
+            html: `<strong>투입률</strong>을(를) 입력해주세요.`
         });
         return;
     }
@@ -1410,7 +1410,7 @@ function saveHr013Row() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            html: `<strong>기술스택</strong>을 선택해주세요.`
+            html: `<strong>기술스택</strong>을(를) 선택해주세요.`
         });
         return;
     }

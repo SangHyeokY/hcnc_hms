@@ -95,7 +95,7 @@ function toActivationYn(lockYn) {
 
 function buildUserTable() {
     if (!window.Tabulator) {
-        console.error("Tabulator가 로드되지 않았습니다.");
+        console.error("데이터가 로드되지 않았습니다.");
         return;
     }
 
@@ -251,7 +251,7 @@ function upsertUserBtn() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: "warning",
             title: "경고",
-            html: `<strong>아이디</strong>를 입력해주세요.`
+            html: `<strong>아이디</strong>을(를) 입력해주세요.`
         });
         $("#write_user_id").focus();
         return;
@@ -261,7 +261,7 @@ function upsertUserBtn() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: "warning",
             title: "경고",
-            html: `<strong>이름</strong>을 입력해주세요.`
+            html: `<strong>이름</strong>을(를) 입력해주세요.`
         });
         $("#write_user_nm").focus();
         return;
@@ -271,7 +271,7 @@ function upsertUserBtn() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: "warning",
             title: "경고",
-            html: `<strong>역할</strong>을 선택해주세요.`
+            html: `<strong>역할</strong>을(를) 선택해주세요.`
         });
         $("#write_role_cd").focus();
         return;
@@ -281,7 +281,7 @@ function upsertUserBtn() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: "warning",
             title: "경고",
-            html: `<strong>비밀번호</strong>를 입력해주세요.`
+            html: `<strong>비밀번호</strong>을(를) 입력해주세요.`
         });
         $("#write_pwd_hash").focus();
         return;

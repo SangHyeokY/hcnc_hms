@@ -1557,7 +1557,7 @@ function validateUserForm() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            html: `<strong>성명</strong>을 입력하세요.`
+            html: `<strong>성명</strong>을(를) 입력하세요.`
         });
         $("#dev_nm").focus();
         return false;
@@ -1568,7 +1568,7 @@ function validateUserForm() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            html: `<strong>소속 구분</strong>을 선택해주세요.`
+            html: `<strong>소속구분</strong>을(를) 선택해주세요.`
         });
         $("#select_dev_typ").focus();
         return false;
@@ -1579,7 +1579,7 @@ function validateUserForm() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            html: `<strong>생년월일</strong>을 입력하세요.`
+            html: `<strong>생년월일</strong>을(를) 입력하세요.`
         });
         $("#brdt").focus();
         return false;
@@ -1590,7 +1590,7 @@ function validateUserForm() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            html: `<strong>연락처</strong>를 입력하세요.`
+            html: `<strong>연락처</strong>을(를) 입력하세요.`
         });
         $("#tel").focus();
         return false;
@@ -1612,7 +1612,7 @@ function validateUserForm() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            html: `<strong>이메일</strong>을 입력하세요.`
+            html: `<strong>이메일</strong>을(를) 입력하세요.`
         });
         $("#email").focus();
         return false;
@@ -1636,7 +1636,7 @@ function validateUserForm() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            html: `<strong>근무가능형태</strong>를 선택해주세요.`
+            html: `<strong>근무가능형태</strong>을(를) 선택해주세요.`
         });
         $("#select_work_md").focus();
         return false;
@@ -1647,7 +1647,7 @@ function validateUserForm() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            html: `<strong>투입 가능 시점</strong>을 입력하세요.`
+            html: `<strong>투입가능시점</strong>을(를) 입력하세요.`
         });
         $("#avail_dt").focus();
         return false;
@@ -1658,7 +1658,7 @@ function validateUserForm() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            html: `<strong>최종학력</strong>을 입력하세요.`
+            html: `<strong>최종학력</strong>을(를) 입력하세요.`
         });
         $("#edu_last").focus();
         return false;
@@ -1669,7 +1669,7 @@ function validateUserForm() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            html: `<strong>단가</strong>를 입력해주세요.`
+            html: `<strong>단가</strong>을(를) 입력해주세요.`
         });
         $("#hope_rate_amt").focus();
         return false;
@@ -1678,7 +1678,7 @@ function validateUserForm() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            html: `<strong>단가</strong>는 최대 999,999,999원까지 입력 가능합니다.`
+            html: `<strong>단가</strong>은(는) 최대 999,999,999원까지 입력 가능합니다.`
         });
         $("#hope_rate_amt").focus();
         return false;
@@ -1689,7 +1689,7 @@ function validateUserForm() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            html: `<strong>KOSA 등급</strong>을 선택해주세요.`
+            html: `<strong>KOSA등급</strong>을(를) 선택해주세요.`
         });
         $("#select_kosa_grd_cd").focus();
         return false;
@@ -1700,7 +1700,7 @@ function validateUserForm() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            html: `<strong>경력연차(년/개월)</strong>을 입력하세요.`
+            html: `<strong>경력연차(년/개월)</strong>을(를) 입력하세요.`
         });
         if (expYrYear === "") {
             $("#exp_yr_year").focus();
@@ -1713,7 +1713,7 @@ function validateUserForm() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            html: `<strong>경력연차(년/개월)</strong>을 입력하세요.`
+            html: `<strong>경력연차(년/개월)</strong>을(를) 입력하세요.`
         });
         $("#exp_yr_year").focus();
         return false;
@@ -1724,7 +1724,7 @@ function validateUserForm() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            html: `<strong>경력연차</strong>는 년(0~99), 개월(0~12) 범위 내에서 입력해주세요.`
+            html: `<strong>경력연차</strong>은(는) 년(0~99), 개월(0~12) 범위 내에서 입력해주세요.`
         });
         $("#exp_yr_year").focus();
         return false;
@@ -1736,7 +1736,7 @@ function validateUserForm() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            html: `<strong>주요 분야</strong>를 선택해주세요.`
+            html: `<strong>주요분야</strong>을(를) 선택해주세요.`
         });
         $("#select_main_fld_cd").focus();
         return false;
@@ -1747,7 +1747,7 @@ function validateUserForm() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            html: `<strong>계약 형태</strong>를 선택해주세요.`
+            html: `<strong>계약형태</strong>을(를) 선택해주세요.`
         });
         $("#select_ctrt_typ").focus();
         return false;
@@ -1758,7 +1758,7 @@ function validateUserForm() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            html: `<strong>주요 고객사</strong>를 선택해주세요.`
+            html: `<strong>주요고객사</strong>을(를) 선택해주세요.`
         });
         $("#select_main_cust_cd").focus();
         return false;

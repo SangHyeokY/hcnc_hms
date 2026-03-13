@@ -449,7 +449,7 @@ function buildRiskList() {
     if ($list.length === 0) {
         return;
     }
-    var placeholder = window.hr010ReadOnly ? "" : "관련 내용을 구체적으로 입력하세요.";
+    var placeholder = window.hr010ReadOnly ? "" : "이탈이력을 구체적으로 입력하세요.";
     $list.empty();
     riskKeys.forEach(function (item) {
         var $btn = $("<div class='risk-item'></div>");
@@ -481,9 +481,24 @@ function buildRiskList() {
 // 리스크 항목 선택 처리
 function setRiskActive(key) {
     riskActiveKey = key;
+
     $("#HR015_RISK_LIST .risk-item").removeClass("active");
     $("#HR015_RISK_LIST .risk-item[data-key='" + key + "']").addClass("active");
 
+    // 선택된 항목 찾기
+    var item = riskKeys.find(function (r) {
+        return r.key === key;
+    });
+
+    // placeholder 변경
+    if (!window.hr010ReadOnly && item) {
+        $("#HR015_RISK_TEXT").prop(
+            "placeholder",
+            item.label + "을(를) 구체적으로 입력하세요."
+        );
+    }
+
+    // 기존 값 세팅
     if (key === "memo_txt") {
         $("#HR015_RISK_TEXT").val(riskState.memo || "");
     } else {
