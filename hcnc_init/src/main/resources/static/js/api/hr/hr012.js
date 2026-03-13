@@ -785,7 +785,7 @@ function buildHr012SkillPickerTable() {
 
     hr012SkillPickerTable = new Tabulator("#TABLE_HR012_SKILL_PICKER", {
         layout: "fitColumns",
-        height: "367px",
+        height: "360px",
         placeholder: "등록된 기술이 없습니다.",
         headerHozAlign: "center",
         columnDefaults: {

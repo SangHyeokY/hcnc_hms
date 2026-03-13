@@ -772,7 +772,7 @@ function buildUserTable() {
                     </div>`;
                 }
             },
-            { title: "투입가능시점", field: "avail_dt", hozAlign: "center", width: 113 },
+            { title: "투입가능시점", field: "avail_dt", hozAlign: "center", width: 115 },
             {
                 title: "계약형태",
                 field: "ctrt_typ",

@@ -623,7 +623,7 @@ function initHr013ProjectPickerTable() {
         paginationSize: 10,
         paginationSizeSelector: [5, 10, 15, 20],
         columns: [
-            { title: "코드", field: "cd", width: 90, hozAlign: "center" },
+            { title: "코드", field: "cd", width: 120, hozAlign: "center" },
             { title: "프로젝트명", field: "cd_nm", widthGrow: 1 },
             { title: "당사 여부", field: "inprj_yn", width: 90, hozAlign: "center" },
         ],

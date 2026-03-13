@@ -340,6 +340,30 @@ textarea:not([readonly]):not([disabled]):hover {
     box-shadow: 0 0 0 2px rgba(229, 0, 25, 0.5);
 }
 
+/* 인력관리 팝업 => 테이블 hover */
+#main-modal-table:hover,
+#TABLE_HR011_A table:hover {
+    box-shadow: 0 0 6px rgba(229, 0, 25, 0.18), 0 0 14px rgba(229, 0, 25, 0.1);
+}
+/* tabulator 테이블 hover */
+#TABLE_COMMON_MAIN:hover,
+#TABLE_COMMON_DETAIL:hover,
+#TABLE_USER:hover,
+#TABLE_HR010_A:hover,
+#TABLE_MAIN_LANG_PICKER:hover,
+#TABLE_HR012_A:hover,
+#TABLE_HR012_B:hover,
+#TABLE_HR012_SKILL_PICKER:hover,
+#TABLE_HR013_A:hover,
+#TABLE_HR013_SKILL_PICKER:hover,
+#TABLE_HR013_PROJECT_PICKER:hover,
+.cell-right:hover,
+#TABLE_HR014_A:hover,
+#TABLE_HR020_A:hover {
+  box-shadow: 0 0 6px rgba(229, 0, 25, 0.18), 0 0 14px rgba(229, 0, 25, 0.1);
+  border-radius: 12px;
+}
+
 .main-human-modal input:is(:read-only, :disabled),
 .main-human-modal select:disabled,
 #TABLE_HR011_A textarea:is(:read-only, :disabled) {
