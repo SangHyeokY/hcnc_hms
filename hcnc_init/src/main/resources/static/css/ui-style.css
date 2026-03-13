@@ -359,7 +359,8 @@ textarea:not([readonly]):not([disabled]):hover {
 #TABLE_HR013_PROJECT_PICKER:hover,
 .cell-right:hover,
 #TABLE_HR014_A:hover,
-#TABLE_HR020_A:hover {
+#TABLE_HR020_A:hover,
+#HR014_TAB_B .risk-wrap:hover {
   box-shadow: 0 0 6px rgba(229, 0, 25, 0.18), 0 0 14px rgba(229, 0, 25, 0.1);
   border-radius: 12px;
 }

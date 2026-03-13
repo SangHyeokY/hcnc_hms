@@ -192,7 +192,7 @@ function buildHr012TableB() {
            changedTabs.tab2 = true;
         },
         columns: [
-            { title: "기술", field: "cd_nm", hozAlign: "left", widthGrow: 2 },
+            { title: "기술", field: "cd_nm", hozAlign: "left", width: 180, minWidth: 160},
             { title: "skl_id", field: "skl_id", visible:false },
             ...[1,2,3,4,5].map(i => ({
                 title: i.toString() + "점",

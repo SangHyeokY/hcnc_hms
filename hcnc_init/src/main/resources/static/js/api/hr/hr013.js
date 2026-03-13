@@ -254,7 +254,7 @@ function buildHr013Table() {
                     toggleInprjValue(resolved);
                     changedTabs.tab3 = true;
                     window.hr013Table.redraw(true);
-                }, width: 80
+                }, minWidth: 80, width: 85
             },
             {
                 title: "고객사",
@@ -426,7 +426,7 @@ function buildHr013Table() {
                 /*hozAlign: "left",*/
                 formatter: hr013TableSkillFormatter,
                 editable: false,
-                cellClick: hr013TableSkillCellClick, width: 80
+                cellClick: hr013TableSkillCellClick, minWidth: 80, width: 85
             },
             // { title: "기술스택", field: "stack_txt", formatter: skillDisplayFormatter, editor: stackTagEditor, editable: isHr013Editable, cellClick: startEditOnClick },
             { title: "투입률", field: "alloc_pct", hozAlign: "center", formatter: percentageFormatter, width: 66, editor: "input", editable: isHr013Editable, cellClick: startEditOnClick },
@@ -625,7 +625,7 @@ function initHr013ProjectPickerTable() {
         columns: [
             { title: "코드", field: "cd", width: 120, hozAlign: "center" },
             { title: "프로젝트명", field: "cd_nm", widthGrow: 1 },
-            { title: "당사 여부", field: "inprj_yn", width: 90, hozAlign: "center" },
+            { title: "당사 여부", field: "inprj_yn", minWidth: 80, width: 85, hozAlign: "center" },
         ],
         rowClick: function (e, row) {
             var data = row && typeof row.getData === "function" ? row.getData() : null;

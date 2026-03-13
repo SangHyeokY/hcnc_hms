@@ -129,7 +129,7 @@ function buildHr014TableA() {
             evalData.set(window.hr013_prj_nm, window.hr014TableA.getData());
         },
         columns: [
-            { title: "항 목", field: "cd_nm", hozAlign: "center", width: 125, minWidth: 125, maxWidth: 125 },
+            { title: "항 목", field: "cd_nm", hozAlign: "center", width: 150, minWidth: 150, maxWidth: 150 },
             {
                 title: "1점",
                 field: "lv1",

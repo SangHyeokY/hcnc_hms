@@ -618,6 +618,12 @@ button.btn.btn-add-skill:hover,
   flex: 0 0 auto;
 }*/
 
+#HR014_TAB_B .risk-wrap {
+  border-radius: 12px;
+  border: 1px solid #DEE2E7;
+  padding: 12px;
+}
+
 .risk-list-top {
   gap: 12px;
   width: 110px;
@@ -633,7 +639,7 @@ button.btn.btn-add-skill:hover,
 #view-user-area #HR014_TAB_B .risk-box-top {
   grid-template-columns: 110px 1fr;
   min-height: 0;
-  height: 519px;
+  height: 489px;
   display: grid;
   gap: 12px;
 }
@@ -1481,7 +1487,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
   border-bottom: 1px solid #DEE2E7;
 }
 /* th 전용 */
-.modal-human-area .table-area tr th {background: #EFF1F6; border-right: 1px solid #DEE2E7;} /* */
+.modal-human-area .table-area tr th {background: #EFF1F6; border-right: 1px solid #DEE2E7; text-align: left; padding-left: 15px;} /* */
 .modal-human-area .table-area tr:first-child th:first-child {border-top-left-radius: 12px;}
 .modal-human-area .table-area tr:last-child th:first-child {border-bottom-left-radius: 12px;}
 /* td 전용 */
@@ -1538,6 +1544,13 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
     font-weight: bold;
     overflow-x: auto;
 }*/
+
+#TABLE_HR011_A .tab1-textarea {
+  padding: 12px !important;
+}
+#TABLE_HR011_A .tab1-textarea textarea {
+  border-radius: 8px;
+}
 
 #TABLE_HR011_A #amt,
 #TABLE_HR011_A #amt.is-readonly,
@@ -1820,6 +1833,8 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
   /*border-left: 1px solid #DEE2E7 !important;
   border-right: 1px solid #DEE2E7 !important;*/
   font-weight: bold !important;
+  text-align: left !important;
+  padding-left: 15px !important;
 }
 /* 일부 tabulator 테이블의 첫번째 열은 th 효과 처리 */
 .th-effect .tabulator-table > .tabulator-row > .tabulator-cell:first-child:hover {
@@ -2260,6 +2275,7 @@ section.search-area .search-info #insertNm {
   padding-right: 30px;
 }*/
 
+.search-select, .search-input {white-space: nowrap;}
 .contents-wrap:has(#TABLE_HR010_A) section.search-area .search-info .search-select,
 .contents-wrap:has(#TABLE_HR010_A) section.search-area .search-info .search-input {
   flex: 0 0 auto; /* 검색영역 항목 자동 줄바꿈 방지 */
