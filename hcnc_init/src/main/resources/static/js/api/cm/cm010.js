@@ -163,7 +163,8 @@ function buildUserTable() {
                 width: 60,
                 hozAlign: "center",
                 headerSort: false,
-                download: false
+                download: false,
+                resizable: false
             },
             { title: "ID", field: "user_id", hozAlign: "center", widthGrow: 1 },
             { title: "이름", field: "user_nm", widthGrow: 1 },

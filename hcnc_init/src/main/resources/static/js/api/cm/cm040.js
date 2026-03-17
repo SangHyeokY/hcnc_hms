@@ -162,7 +162,8 @@ function buildTables() {
                 frozen: true,
                 width: 60,
                 headerSort: false,
-                download: false
+                download: false,
+                resizable: false
             },
             {
                 title: "코드그룹",
@@ -262,7 +263,8 @@ function buildTables() {
                 frozen: true,
                 width: 60,
                 headerSort: false,
-                download: false
+                download: false,
+                resizable: false
             },
             { title: "코드", field: "cd", hozAlign: "center", widthGrow:1}, /* width: detailBaseWidths.cd  */
             { title: "코드명", field: "cd_nm", widthGrow:1},

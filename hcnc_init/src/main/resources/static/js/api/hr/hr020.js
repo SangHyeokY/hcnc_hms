@@ -470,7 +470,8 @@ function buildPrjTable() {
                 },
                 width: 60,
                 headerSort: false,
-                download: false
+                download: false,
+                resizable: false
             },
             { title: "성명", field: "dev_nm", hozAlign: "center", widthGrow: 1, minWidth: 90 },
             {

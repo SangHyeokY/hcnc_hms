@@ -155,6 +155,7 @@ footer {width:100%; height:30px; line-height: 30px; padding:0 20px; display: fle
 .left-menu .nav .lnb-menu .dep1 > li.on:nth-child(3) > a {background: url('../images/common/lnb-three-w.png') 10px center no-repeat; background-size: 20px;}
 .left-menu .nav .lnb-menu .dep1 > li.on:nth-child(4) > a {background: url('../images/common/lnb-four-w.png') 12px center no-repeat; background-size: 17px;}
 .left-menu .nav .lnb-menu .dep1 > li.on:nth-child(5) > a {background: url('../images/common/lnb-five-w.png') 10px center no-repeat; background-size: 22px;}
+.left-menu .nav .lnb-menu .dep1 > li.on {border-bottom: 3px solid #DEE2E7; border-radius: 8px;}
 /* =================================== */
 
 .left-menu .nav .lnb-menu .dep1 > li.has-children > a:before {content: ""; display: inline-block; background: url('../images/common/Ico-arrow-down.png') no-repeat center; background-size:contain; position: absolute; right: 18px; z-index: 10; width: 10px; height: 10px;}
