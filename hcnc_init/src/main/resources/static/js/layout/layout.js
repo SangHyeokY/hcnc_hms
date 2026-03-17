@@ -1,4 +1,5 @@
 import { menuData } from "../data/menuData.js";
+import { showAlert } from "../api/common.js";
 
 // 정적 뷰(HTML)는 컨텍스트 경로 없이 루트 기준으로 가져온다.
 const withBasePath = (path = "") => {
@@ -170,7 +171,7 @@ document.addEventListener("DOMContentLoaded", () => {
               showAlert({
                   icon: 'info',
                   title: '알림',
-                  html: `<strong>로그아웃</strong>하시겠습니까?`,
+                  html: `<strong>로그아웃</strong>&nbsp;하시겠습니까?`,
                   showCancelButton: true,       // 취소 버튼 추가
                   confirmButtonText: '확인',
                   cancelButtonText: '취소',
