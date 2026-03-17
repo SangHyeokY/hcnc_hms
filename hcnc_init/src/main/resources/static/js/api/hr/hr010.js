@@ -657,6 +657,7 @@ function buildUserTable() {
                 frozen: true,
                 width: 60,
                 headerSort: false,
+                resizable: false,
                 download: false
             },
             { title: "성명", field: "dev_nm", hozAlign: "center", headerSort: true, widthGrow: 2, frozen: true },

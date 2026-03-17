@@ -254,7 +254,7 @@ function buildHr013Table() {
                     toggleInprjValue(resolved);
                     changedTabs.tab3 = true;
                     window.hr013Table.redraw(true);
-                }, minWidth: 80, width: 85
+                }, minWidth: 80, width: 80, maxWidth: 80, resizable: false
             },
             {
                 title: "고객사",

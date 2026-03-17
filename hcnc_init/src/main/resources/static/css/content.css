@@ -423,6 +423,9 @@ option{background:#fff; color:#333;}
 #TABLE_HR013_A input[type="date"], #TABLE_HR013_A input[type="text"], #TABLE_HR014_A input[type="text"] {
   height: 30px !important;
 }
+#TABLE_HR013_A input[type="date"] {
+  width: 100% !important;
+}
 #TABLE_HR013_A select {
   height: 30px !important;
   display: flex;
@@ -916,7 +919,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 ================================================================================*/
 
 .tag-input label {display: block; margin-bottom: 6px; font-weight: 600; color: #2f3542;}
-.tag-input-box {position: relative; display: flex; flex-wrap: wrap; gap: 6px; align-items: center;  border-radius: 4px;  max-width: 100%;}
+.tag-input-box {position: relative; display: flex; flex-wrap: wrap; gap: 6px; border-radius: 4px;  max-width: 100%;} /*align-items: center;*/
 .tag-input-box::after {
   display: none;
 }
@@ -2115,14 +2118,15 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 
 .career-spin-input {
     width: 40px !important;
+    border-radius: 6px 0 0 6px !important;
+    margin-right: 2px;
     padding: 0 6px !important;
-    height: 34px;
+    /*height: 34px;
     line-height: 34px;
     border: 1px solid #DEE2E7 !important;
     border-right: 0 !important;
-    border-radius: 6px 0 0 6px !important;
     background: #fff !important;
-    box-shadow: none !important;
+    box-shadow: none !important;*/
 }
 
 .career-spin-field {
@@ -2157,26 +2161,30 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 }
 
 .career-spin-btn {
-    height: 17px;
+    height: 19px;
     padding: 0;
-    border: 1px solid #dee2e7;
-    background: #f8f9fb;
-    color: #5d6575;
-    font-size: 10px;
+    border: transparent;
+    background: #212E41;
+    color: #fff;
+    font-size: 9px;
     line-height: 1;
 }
-
 .career-spin-btn:first-child {
-    border-bottom: 0;
-    border-radius: 0 4px 0 0;
+    margin-bottom: 2px;
+    border-radius: 0 6px 0 0;
 }
 
+/*.career-spin-btn:first-child {
+    border-bottom: 0;
+    border-radius: 0 4px 0 0;
+}*/
+
 .career-spin-btn:last-child {
-    border-radius: 0 0 4px 0;
+    border-radius: 0 0 6px 0;
 }
 
 .career-spin-btn:hover {
-    background: #edf2ff;
+    background: #324760;
 }
 
 .career-spin-btn:disabled {
@@ -2490,17 +2498,17 @@ section.search-area .search-info #searchConditionKeyword { /* 새 검색어 입�
 }
 
 #view-user-area #TABLE_HR010_B .career-spin-wrap {
-  gap: 4px;
+  gap: 6px;
 }
 
-#view-user-area #TABLE_HR010_B .career-spin-input {
+/*#view-user-area #TABLE_HR010_B .career-spin-input {
   height: 32px;
   line-height: 32px;
-}
+}*/
 
-#view-user-area #TABLE_HR010_B .career-spin-btn {
+/*#view-user-area #TABLE_HR010_B .career-spin-btn {
   height: 16px;
-}
+}*/
 
 /*
 #view-user-area #TABLE_HR010_B #exp_yr_text {
@@ -2618,6 +2626,7 @@ section.search-area .search-info #searchConditionKeyword { /* 새 검색어 입�
   align-items: center;
   gap: 6px;
   cursor: pointer;
+  white-space: nowrap;
 }
 .btn-prj-skl,
 .btn-prj-eval {
@@ -2634,6 +2643,7 @@ section.search-area .search-info #searchConditionKeyword { /* 새 검색어 입�
   gap: 6px;
   cursor: pointer;
   min-width: fit-content;
+  white-space: nowrap;
 }
 .prj-cell {
   display: flex;
