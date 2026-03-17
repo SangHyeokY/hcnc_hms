@@ -1264,7 +1264,7 @@ function createGroupedSkillPicker(config) {
 /* =========================
  * 공통 Swal 토스트(toast) 함수
  * ========================= */
-export function showAlert({
+function showAlert({
     icon = 'info',
     title = '',
     text = '',

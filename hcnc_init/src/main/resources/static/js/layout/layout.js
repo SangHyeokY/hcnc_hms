@@ -1,5 +1,4 @@
 import { menuData } from "../data/menuData.js";
-import { showAlert } from "../api/common.js";
 
 // 정적 뷰(HTML)는 컨텍스트 경로 없이 루트 기준으로 가져온다.
 const withBasePath = (path = "") => {
