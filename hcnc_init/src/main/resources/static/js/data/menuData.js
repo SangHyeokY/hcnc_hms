@@ -23,11 +23,19 @@ export const menuData = [
     ],
   },
   {
-    title: "Title",
-    path: "/#",
+    title: "Title1",
+    /*path: "/#",*/
     name: "sample",
     type: "ETC",
-    renderPath: "/views/sample.html",
-    visible: false,
+    /*renderPath: "/views/sample.html",*/
+    visible: true,
+  },
+  {
+    title: "Title2",
+    /*path: "/#",*/
+    name: "sample",
+    type: "ETC",
+    /*renderPath: "/views/sample2.html",*/
+    visible: true,
   },
 ];

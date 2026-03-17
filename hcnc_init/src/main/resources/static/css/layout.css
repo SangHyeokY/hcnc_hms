@@ -135,26 +135,26 @@ footer {width:100%; height:30px; line-height: 30px; padding:0 20px; display: fle
 .left-menu .nav .lnb-menu ul .on {display: block;}
 .left-menu .nav .lnb-menu .dep1.no-bg a {background:none;}
 .left-menu .nav .lnb-menu .dep1 > li {position:relative; margin-bottom: 6px; overflow: hidden;}
-.left-menu .nav .lnb-menu .dep1 > li > a {position: relative; display: flex; align-items: center; padding: 12px 28px 12px 36px; font-weight: 600; color:#202224; transition: background-color 0.24s ease, color 0.24s ease;}
+.left-menu .nav .lnb-menu .dep1 > li > a {position: relative; display: flex; align-items: center; padding: 14px 28px 14px 45px; font-size: 18px; font-weight: 600; color:#202224; transition: background-color 0.24s ease, color 0.24s ease;}
 .left-menu .nav .lnb-menu .dep1 > li > a:hover {background-color: #EDEFF5 !important; border-radius: 8px;}
 
 /* 닫혀있는 lnb 버튼 아이콘 */
-.left-menu .nav .lnb-menu .dep1 > li:nth-child(1) > a {background: url('../images/common/lnb-one.png') 10px center no-repeat; background-size: 18px;}
-.left-menu .nav .lnb-menu .dep1 > li:nth-child(2) > a {background: url('../images/common/lnb-two.png') 10px center no-repeat; background-size: 20px;}
-.left-menu .nav .lnb-menu .dep1 > li:nth-child(3) > a {background: url('../images/common/lnb-three.png') 10px center no-repeat; background-size: 20px;}
-.left-menu .nav .lnb-menu .dep1 > li:nth-child(4) > a {background: url('../images/common/lnb-four.png') 10px center no-repeat; background-size: 17px;}
-.left-menu .nav .lnb-menu .dep1 > li:nth-child(5) > a {background: url('../images/common/lnb-five.png') 10px center no-repeat; background-size: 21px;}
+.left-menu .nav .lnb-menu .dep1 > li:nth-child(1) > a {background: url('../images/common/lnb-one.png') 15px center no-repeat; background-size: 22px;}
+.left-menu .nav .lnb-menu .dep1 > li:nth-child(2) > a {background: url('../images/common/lnb-two.png') 15px center no-repeat; background-size: 24px;}
+.left-menu .nav .lnb-menu .dep1 > li:nth-child(3) > a {background: url('../images/common/lnb-three.png') 15px center no-repeat; background-size: 24px;}
+.left-menu .nav .lnb-menu .dep1 > li:nth-child(4) > a {background: url('../images/common/lnb-four.png') 15px center no-repeat; background-size: 24px;}
+.left-menu .nav .lnb-menu .dep1 > li:nth-child(5) > a {background: url('../images/common/lnb-five.png') 15px center no-repeat; background-size: 23px;}
 /* =================================== */
 
 .left-menu .nav .lnb-menu .dep1 > li.on > a {background-color: #E50019 !important; color:#fff; font-weight: 600; border-radius: 8px;}
 .left-menu .nav .lnb-menu .dep1 > li.on > a:hover {background-color: #E50019 !important;}
 
 /* 열려있는 lnb 버튼 아이콘 */
-.left-menu .nav .lnb-menu .dep1 > li.on:nth-child(1) > a {background: url('../images/common/lnb-one-w.png') 10px center no-repeat; background-size: 18px;}
-.left-menu .nav .lnb-menu .dep1 > li.on:nth-child(2) > a {background: url('../images/common/lnb-two-w.png') 10px center no-repeat; background-size: 20px;}
-.left-menu .nav .lnb-menu .dep1 > li.on:nth-child(3) > a {background: url('../images/common/lnb-three-w.png') 14px center no-repeat; background-size: 14px;}
-.left-menu .nav .lnb-menu .dep1 > li.on:nth-child(4) > a {background: url('../images/common/lnb-four-w.png') 12px center no-repeat; background-size: 17px;}
-.left-menu .nav .lnb-menu .dep1 > li.on:nth-child(5) > a {background: url('../images/common/lnb-five-w.png') 10px center no-repeat; background-size: 22px;}
+.left-menu .nav .lnb-menu .dep1 > li.on:nth-child(1) > a {background: url('../images/common/lnb-one-w.png') 15px center no-repeat; background-size: 22px;}
+.left-menu .nav .lnb-menu .dep1 > li.on:nth-child(2) > a {background: url('../images/common/lnb-two-w.png') 15px center no-repeat; background-size: 24px;}
+.left-menu .nav .lnb-menu .dep1 > li.on:nth-child(3) > a {background: url('../images/common/lnb-three-w.png') 18px center no-repeat; background-size: 18px;}
+.left-menu .nav .lnb-menu .dep1 > li.on:nth-child(4) > a {background: url('../images/common/lnb-four-w.png') 17px center no-repeat; background-size: 24px;}
+.left-menu .nav .lnb-menu .dep1 > li.on:nth-child(5) > a {background: url('../images/common/lnb-five-w.png') 15px center no-repeat; background-size: 23px;}
 /*.left-menu .nav .lnb-menu .dep1 > li.on {border-bottom: 3px solid #DEE2E7; border-radius: 8px;}*/
 /* =================================== */
 
@@ -162,11 +162,11 @@ footer {width:100%; height:30px; line-height: 30px; padding:0 20px; display: fle
 .left-menu .nav .lnb-menu .dep1 > li.on > a:before {background: url('../images/common/Ico-arrow-up-w.png') no-repeat center; background-size:contain; }
 
 /* 열려있는 lnb 버튼 hover */
-.left-menu .nav .lnb-menu .dep1 > li.on:nth-child(1) > a:hover {background: url('../images/common/lnb-one-w.png') 10px center no-repeat, linear-gradient(135deg,#b10013 0%,#e50019 60%,#ff5064 100%); background-size: 18px, auto;}
-.left-menu .nav .lnb-menu .dep1 > li.on:nth-child(2) > a:hover {background: url('../images/common/lnb-two-w.png') 10px center no-repeat, linear-gradient(135deg,#b10013 0%,#e50019 60%,#ff5064 100%); background-size: 20px, auto;}
-.left-menu .nav .lnb-menu .dep1 > li.on:nth-child(3) > a:hover {background: url('../images/common/lnb-three-w.png') 14px center no-repeat, linear-gradient(135deg,#b10013 0%,#e50019 60%,#ff5064 100%); background-size: 14px, auto;}
-.left-menu .nav .lnb-menu .dep1 > li.on:nth-child(4) > a:hover {background: url('../images/common/lnb-four-w.png') 10px center no-repeat, linear-gradient(135deg,#b10013 0%,#e50019 60%,#ff5064 100%); background-size: 17px, auto;}
-.left-menu .nav .lnb-menu .dep1 > li.on:nth-child(5) > a:hover {background: url('../images/common/lnb-five-w.png') 10px center no-repeat, linear-gradient(135deg,#b10013 0%,#e50019 60%,#ff5064 100%); background-size: 22px, auto;}
+.left-menu .nav .lnb-menu .dep1 > li.on:nth-child(1) > a:hover {background: url('../images/common/lnb-one-w.png') 15px center no-repeat, linear-gradient(135deg,#b10013 0%,#e50019 60%,#ff5064 100%); background-size: 22px, auto;}
+.left-menu .nav .lnb-menu .dep1 > li.on:nth-child(2) > a:hover {background: url('../images/common/lnb-two-w.png') 15px center no-repeat, linear-gradient(135deg,#b10013 0%,#e50019 60%,#ff5064 100%); background-size: 24px, auto;}
+.left-menu .nav .lnb-menu .dep1 > li.on:nth-child(3) > a:hover {background: url('../images/common/lnb-three-w.png') 18px center no-repeat, linear-gradient(135deg,#b10013 0%,#e50019 60%,#ff5064 100%); background-size: 18px, auto;}
+.left-menu .nav .lnb-menu .dep1 > li.on:nth-child(4) > a:hover {background: url('../images/common/lnb-four-w.png') 15px center no-repeat, linear-gradient(135deg,#b10013 0%,#e50019 60%,#ff5064 100%); background-size: 24px, auto;}
+.left-menu .nav .lnb-menu .dep1 > li.on:nth-child(5) > a:hover {background: url('../images/common/lnb-five-w.png') 15px center no-repeat, linear-gradient(135deg,#b10013 0%,#e50019 60%,#ff5064 100%); background-size: 23px, auto;}
 /* =================================== */
 
 .left-menu .nav .lnb-menu .dep2,
@@ -185,16 +185,16 @@ footer {width:100%; height:30px; line-height: 30px; padding:0 20px; display: fle
   border-radius: 8px;
   margin-top: 6px;
 }
-.left-menu .nav .lnb-menu .dep2 > li{position:relative;}
-.left-menu .nav .lnb-menu .dep2 > li > a {display: block; color:#838C96; font-weight: 500; padding: 8px 18px;} /* font-size:14px; */
-.left-menu .nav .lnb-menu .dep2 > li:first-child > a{padding-top:12px;}
-.left-menu .nav .lnb-menu .dep2 > li:last-child > a{padding-bottom:12px;}
+.left-menu .nav .lnb-menu .dep2 > li {position:relative;}
+.left-menu .nav .lnb-menu .dep2 > li > a {display: block; color:#838C96; font-weight: 500; padding: 9px 18px 9px 40px} /* font-size:14px; */
+.left-menu .nav .lnb-menu .dep2 > li:first-child > a {padding-top: 15px;}
+.left-menu .nav .lnb-menu .dep2 > li:last-child > a {padding-bottom: 15px;}
 .left-menu .nav .lnb-menu .dep2 > li.has-children > a {background: url('../images/common/Ico-arrow-down-sub.png') 91% center no-repeat; background-size: 10px;}
-.left-menu .nav .lnb-menu .dep2 > li > a.on {font-weight: 600; color:#F0F1F3;}
-.left-menu .nav .lnb-menu .dep2 li.has-children.on > a {background: url('../images/common/Ico-arrow-up-sub.png') 91% center no-repeat; background-size: 10px; color: #202224; font-weight: 700;}
-.left-menu .nav .lnb-menu .dep2 li.no-children.on > a {color: #fff; font-weight: 700;}
+.left-menu .nav .lnb-menu .dep2 > li > a.on {font-weight: 500; color:#F0F1F3;}
+.left-menu .nav .lnb-menu .dep2 li.has-children.on > a {background: url('../images/common/Ico-arrow-up-sub.png') 91% center no-repeat; background-size: 10px; color: #202224; font-weight: 500;}
+.left-menu .nav .lnb-menu .dep2 li.no-children.on > a {color: #fff; font-weight: 500;}
 .left-menu .nav .lnb-menu .dep2 li.no-children > a {transition: transform 0.18s ease; transform-origin: left center;}
-.left-menu .nav .lnb-menu .dep2 li.no-children > a:hover {transform: scale(1.06) translateX(2px); font-weight: 700; color: #fff;}
+.left-menu .nav .lnb-menu .dep2 li.no-children > a:hover {transform: scale(1.06) translateX(2px); font-weight: 500; color: #fff;}
 /* 주석사유 : 앞에 선으로 표시하던 효과삭제 */
 /* .left-menu .nav .lnb-menu .dep1 > li > .dep2 > li:before{
   content: "";
