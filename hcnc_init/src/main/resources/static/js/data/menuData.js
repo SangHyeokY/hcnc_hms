@@ -28,7 +28,7 @@ export const menuData = [
     name: "sample",
     type: "ETC",
     /*renderPath: "/views/sample.html",*/
-    visible: true,
+    visible: false,
   },
   {
     title: "Title2",
@@ -36,6 +36,6 @@ export const menuData = [
     name: "sample",
     type: "ETC",
     /*renderPath: "/views/sample2.html",*/
-    visible: true,
+    visible: false,
   },
 ];
