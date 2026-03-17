@@ -3,6 +3,9 @@
 // 인적사항 리스트 테이블
 var userTable;
 
+// 모달
+var $modal = $("#view-user-area");
+
 // 모드(insert: 등록 / update: 수정 / view: 상세조회)
 var currentMode = "insert";
 var currentHr010UserTypeTab = "staff";
@@ -55,8 +58,6 @@ let isSaving = false;
 
 // 저장 성공 여부 플래그
 let isSuccess = false;
-
-
 
 // 개발자ID
 window.currentDevId = null;
@@ -951,16 +952,29 @@ function loadUserTableImgDataAsync(data) {
             xhrFields: { responseType: "arraybuffer" },
             data: data,
             success: function (response) {
-                const blob = new Blob([response], { type: "image/jpeg" });
-                const imgUrl = URL.createObjectURL(blob);
-
-                if (response.byteLength > 0)
-                    $("#dev_img").show();
-                else
-                    $("#dev_img").hide();
-
-                $("#dev_img")[0].src = imgUrl;
-                resolve(); // 완료 시 resolve
+                const $img = $("#dev_img");
+                const hasImage = response && response.byteLength > 0;
+                const $reUploadProfile = $modal.find(".modal-human-area .pic-area .profile-area .re-upload-image");
+                const prevUrl = $img.data("url");
+                if (prevUrl) {
+                    URL.revokeObjectURL(prevUrl);
+                }
+                if (hasImage) {
+                    const blob = new Blob([response], { type: "image/jpeg" });
+                    const imgUrl = URL.createObjectURL(blob);
+                    $img
+                        .attr("src", imgUrl)
+                        .data("url", imgUrl)
+                        .show();
+                } else {
+                    $img
+                        .attr("src", "")
+                        .removeData("url")
+                        .hide();
+                }
+                $img.toggleClass("has-img", hasImage);
+                $reUploadProfile.toggle(currentMode === "update" && hasImage);
+                resolve();
             },
             error: function (e) {
                 console.error(e);
@@ -1143,7 +1157,7 @@ openUserModal = async function (mode, data) {
 
     currentMode = mode;
     initTabs = true;
-    const $modal = $("#view-user-area");
+    // const $modal = $("#view-user-area");
 
     showLoading(); // 로딩바 표시
     $modal.removeClass("show").hide();
@@ -1335,7 +1349,6 @@ function setModalMode(mode) {
     const isInsert = mode === "insert"; // 등록
     const isUpdate = mode === "update"; // 수정
 
-    var $modal = $("#view-user-area");
     var $title = $modal.find("#modal-title");
     $modal.toggleClass("is-view-mode", isView);
 
@@ -1482,7 +1495,7 @@ async function closeUserViewModal() {
     }
 
     // 모달 닫기
-    const $modal = $("#view-user-area");
+    // const $modal = $("#view-user-area");
     closeMainLangPicker(true);
     if (typeof closeHr012SkillPicker === "function") closeHr012SkillPicker(true);
     if (typeof closeHr013SkillPicker === "function") closeHr013SkillPicker(true);

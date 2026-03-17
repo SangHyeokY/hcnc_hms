@@ -224,6 +224,7 @@ function buildHr013Table() {
                 hozAlign: "center",
                 headerSort: false,
                 width: 20,
+                resizable: false,
                 cellClick: function (e, cell) {
                     if (window.hr010ReadOnly) {
                         return;
