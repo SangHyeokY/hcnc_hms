@@ -144,27 +144,47 @@ option{background:#fff; color:#333;}
 .tabulator-placeholder {background: #fff !important;}
 .tabulator-tableHolder {background: #fff !important; overflow-y: auto;}
 .tabulator .row-check {pointer-events: none;}
+/* 스크롤 영역 (항상 높이는 유지) */
+.tabulator .tabulator-tableHolder::-webkit-scrollbar {height: 10px;}
+/* thumb 기본 상태 */
+.tabulator .tabulator-tableHolder::-webkit-scrollbar-thumb {
+  background: rgba(33, 46, 65, 0.6);
+  border-radius: 999px;
+  transition: background 0.3s ease;  /* 부드럽게 */
+}
+/* thumb 위에 마우스 올리면 더 진하게 */
+.tabulator .tabulator-tableHolder::-webkit-scrollbar-thumb:hover {background: rgba(33, 46, 65, 1);}
+/* 트랙 */
+.tabulator .tabulator-tableHolder::-webkit-scrollbar-track {background: transparent;}
 
 /* 특정 테이블 홀더 높이 고정 */
 #TABLE_HR013_PROJECT_PICKER,
 #TABLE_HR013_A {
   height: 550px !important;
 }
-#TABLE_HR013_A .tabulator-tableHolder,
+#TABLE_HR013_A .tabulator-tableHolder {
+  height: 460px !important;
+  min-height: 460px !important;
+  max-height: 460px !important;
+}
+#TABLE_HR013_A .tabulator-header .tabulator-col-title {
+  white-space: nowrap;
+  overflow: visible;
+  text-overflow: clip;
+}
 #TABLE_HR013_PROJECT_PICKER .tabulator-tableHolder {
   height: 480px !important;
   min-height: 480px !important;
   max-height: 480px !important;
 }
 /* 특정 푸터 위치 아래에 고정 */
-#TABLE_HR013_A .tabulator-footer,
 #TABLE_HR013_PROJECT_PICKER .tabulator-footer {
   position: absolute;
   bottom: 0;
 }
 /* 숙련도 탭(TABLE_HR012_B) 세로 스크롤 방지: 헤더 높이만 미세 축소 */
 #TABLE_HR012_B {
-  height: 495px !important
+  height: 500px !important;
 }
 #TABLE_HR012_B .tabulator-tableHolder {
   height: 400px !important;
@@ -482,18 +502,14 @@ option{background:#fff; color:#333;}
 }
 #TABLE_HR013_A .hr013-stack-cell {
   display: flex;
-  align-items: baseline;
-  justify-content: center;
-  /*justify-content: space-between;*/
-  /* gap: 8px; */
+  justify-content: space-between;
+  align-items: center;
   width: 100%;
 }
 #TABLE_HR013_A .hr013-stack-text {
   display: inline-block;
   min-width: 0;
-  white-space: normal;
-  word-break: break-word;
-  line-height: 1.4;
+  /*white-space: normal; word-break: break-word;*/
 }
 #TABLE_HR013_A .btn-hr013-cell-skill-picker {
   flex: 0 0 auto;
@@ -1326,7 +1342,8 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
   flex:1;
   min-height:0;
   gap:20px;
-  padding:20px 20px 0 20px;
+  padding: 20px 20px 5px 20px;
+  overflow: auto;
 }
 .modal-content.main-lang-picker-content{flex-direction:column;} /* height:auto;*/
 .modal-content.main-lang-picker-content .tabulator .tabulator-header,
@@ -1356,7 +1373,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 
 /* 인력관리 팝업 - 테이블 */
 .modal-content #main-modal-table tr {height: 50px;}
-.modal-btn {padding: 20px;}
+.modal-btn {padding: 15px 20px 20px;}
 .modal-btn ul {display: flex; justify-content: flex-end;}
 /*.modal-btn ul li {margin-right: 10px;}*/
 .modal-btn ul li:has(button:not([style*="display:none"])):last-of-type button {margin-left: 15px;}
@@ -2264,7 +2281,6 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 @media screen and (max-height: 800px) {
     .modal-container-detail {
         max-height: 80vh;
-        overflow-y: auto; /* 내용이 많을 경우 스크롤 생성 */
     }
 }
 
@@ -2412,7 +2428,7 @@ section.search-area .search-info #searchConditionKeyword { /* 새 검색어 입�
 #hr012-skill-picker-area .hr012-skill-picker-content,
 #hr013-skill-picker-area .hr013-skill-picker-content {
   max-height: 68vh;
-  overflow: visible;
+  overflow: auto;
   flex-direction: column;
   height: auto;
 }
@@ -2429,7 +2445,7 @@ section.search-area .search-info #searchConditionKeyword { /* 새 검색어 입�
 /* ===== HR013: 프로젝트 선택 팝업 ===== */
 /* 컨테이너/전체 레이아웃 */
 #hr013-project-picker-area .hr013-project-picker-container {height: 760px; width: calc(100% - 500px); min-width: 0; max-width: calc(100% - 40px); }
-#hr013-project-picker-area .hr013-project-picker-content {padding:20px; display: grid; grid-template-columns: 1fr 300px; overflow: hidden; /* max-height: 56vh; min-height: 690px; border-bottom: 2px solid #EAECF0;  padding-bottom: 4px; */}
+#hr013-project-picker-area .hr013-project-picker-content {padding:20px; display: grid; grid-template-columns: 1fr 300px; overflow: auto; /* max-height: 56vh; min-height: 690px; border-bottom: 2px solid #EAECF0;  padding-bottom: 4px; */}
 #hr013-project-picker-area .hr013-project-picker-left, #hr013-project-picker-area .hr013-project-picker-right {position: relative; min-width: 0; }
 #hr013-project-picker-area .pill-title.pill-title--modal { font-size: 22px; padding: 4px 18px; }
 #hr013-project-picker-area .hr013-project-picker-right .cell-right { background: #EFF1F6; border: 1px solid #E0E3E8; border-radius: 8px; padding: 20px; margin-top: 20px; }
@@ -2554,7 +2570,8 @@ section.search-area .search-info #searchConditionKeyword { /* 새 검색어 입�
 
 /* HR010 팝업 전체 높이 */
 #view-user-area .modal-container-detail.main-human-modal {
-  height: 884px;
+  height: 885px;
+  overflow: hidden;
 }
 
 /* HR010 수정/상세 팝업은 insert와 분리해 너비를 조금 더 확보 */

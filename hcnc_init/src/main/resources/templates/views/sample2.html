@@ -1,40 +1,235 @@
 <!DOCTYPE html>
-<html lang="ko" 
-      xmlns:th="http://www.thymeleaf.org" 
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/layout}">
 
-<!-- 이 페이지만의 추가 버튼 (엑셀만 필요한 경우) -->
-<th:block layout:fragment="additionalButtons">
-    <button type="button" class="btn-excel">엑셀</button>
+<th:block layout:fragment="searchCondition">
+    <div class="search-select">
+        <label class="fw600">• 검색조건 &nbsp;</label>
+        <select name="searchType" id="searchType">
+            <option value="">전체</option>
+            <option value="user_id">ID</option>
+            <option value="user_nm">이름</option>
+            <option value="email">이메일</option>
+            <option value="tel">연락처</option>
+            <option value="role_cd">권한</option>
+            <option value="job_cd">직무</option>
+            <option value="dept_cd">부서</option>
+        </select>
+    </div>
+    <div class="search-input">
+        <p class="fl-ac">
+            <label for="searchKeyword" class="fw600 pd-r10">• 검색어</label>
+            <input type="text" class="" id="searchKeyword" name="searchKeyword" placeholder="ID/이름/이메일/연락처/권한/직무/부서 검색" />
+        </p>
+    </div>
+    <div class="search-select search-useyn-radio">
+        <label class="search-useyn-label fw600 pd-r10">• 사용여부</label>
+        <div class="radio-box search-useyn-options">
+            <label for="searchUseYnAll">
+                <input type="radio" id="searchUseYnAll" name="searchUseYnRadio" value="" checked> 전체
+            </label>
+            <label for="searchUseYnY">
+                <input type="radio" id="searchUseYnY" name="searchUseYnRadio" value="Y"> 사용
+            </label>
+            <label for="searchUseYnN">
+                <input type="radio" id="searchUseYnN" name="searchUseYnRadio" value="N"> 미사용
+            </label>
+        </div>
+    </div>
 </th:block>
 
-<!-- 실제 컨텐츠 영역 -->
-<div layout:fragment="content">
-    <div class="form-wrap">
-        <h5>상세 정보</h5>
-        <div class="table-wrap">
-            <div id="TABLE_MAIN">
-                <table>
-                    <tr>
-                        <td>sample2 내용</td>
-                    </tr>
-                </table>
+<th:block layout:fragment="content">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js" rel="stylesheet">
+    <style>
+        .main { flex: 1; padding: 20px; }
+
+        .kpi-container {
+          display: grid;
+          grid-template-columns: repeat(5, 1fr);
+          gap: 15px;
+          margin-bottom: 20px;
+        }
+
+        .card {
+          background: #fff;
+          border-radius: 12px;
+          padding: 20px;
+          box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+          transition: all 0.2s ease;
+          cursor: pointer;
+        }
+
+        .card:hover {
+          transform: translateY(-5px);
+          box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+
+        .card h3 { font-size: 13px; color: #888; }
+
+        .card p { font-size: 24px; font-weight: bold; margin-top: 10px; color:#212E41; }
+
+        .chart-row {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 20px;
+          margin-bottom: 20px;
+        }
+
+        .chart-box {
+          background: #fff;
+          border-radius: 12px;
+          padding: 20px 20px 55px;
+          height: 300px;
+          box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+          transition: all 0.2s ease;
+        }
+
+        .chart-box:hover {
+          transform: translateY(-3px);
+          box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+        }
+
+        .chart-box canvas {
+          width: 100% !important;
+        }
+
+        .full-chart { height: 320px; margin-bottom: 20px; }
+
+        .section-title {
+          font-size: 14px;
+          font-weight: 600;
+          color: #212E41;
+          margin-bottom: 10px;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          border-bottom: 1px solid #eee;
+          padding-bottom: 6px;
+        }
+
+        .risk {
+          background: #fff;
+          padding: 20px;
+          border-radius: 12px;
+          box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+        }
+
+        .risk:hover {
+          transform: translateY(-3px);
+          box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+        }
+
+        .risk li {
+          padding: 12px;
+          border-bottom: 1px solid #eee;
+          display:flex;
+          justify-content: space-between;
+          transition: background 0.2s;
+        }
+
+        .risk li:hover { background: #f8f9fb; }
+
+        .risk li:last-child { border-bottom: none; }
+    </style>
+
+    <div class="main">
+
+        <!-- KPI -->
+        <div class="kpi-container">
+            <div class="card"><h3>전체 프리랜서</h3><p>120명</p></div>
+            <div class="card"><h3>현재 투입 인원</h3><p>85명</p></div>
+            <div class="card"><h3>대기 인원</h3><p>25명</p></div>
+            <div class="card"><h3>진행 프로젝트</h3><p>18개</p></div>
+            <div class="card"><h3>7일 내 종료</h3><p class="highlight">3건</p></div>
+        </div>
+
+        <!-- 차트 -->
+        <div class="chart-row">
+            <div class="chart-box">
+                <div class="section-title">👤 인력 상태</div>
+                <canvas id="peopleChart"></canvas>
+            </div>
+            <div class="chart-box">
+                <div class="section-title">📊 프로젝트 상태</div>
+                <canvas id="projectChart"></canvas>
             </div>
         </div>
-        <!-- 폼 내용 -->
-    </div>
-</div>
 
-<!-- 페이지별 스크립트 -->
-<th:block layout:fragment="scripts">
-    <script th:inline="javascript">
-        $(document).ready(function() {
-            $('.btn-excel').on('click', function() {
-                console.log('엑셀 다운로드');
-            });
+        <div class="chart-box full-chart">
+            <div class="section-title">📈 월별 프로젝트 추이</div>
+            <canvas id="monthlyChart"></canvas>
+        </div>
+
+        <!-- 리스크 -->
+        <div class="risk">
+            <div class="section-title">⚠ 리스크 / 알림</div>
+            <ul>
+                <li><span>7일 이내 종료 프로젝트</span><span class="highlight">3건</span></li>
+                <li><span>미배정 인력</span><span class="highlight">25명</span></li>
+                <li><span>지연 프로젝트</span><span class="highlight">2건</span></li>
+                <li><span>장기 투입 인력 (6개월 이상)</span><span class="highlight">12명</span></li>
+            </ul>
+        </div>
+
+    </div>
+
+    <script>
+        new Chart(document.getElementById('peopleChart'), {
+          type: 'doughnut',
+          data: {
+            labels: ['투입', '대기', '휴면'],
+            datasets: [{
+              data: [85, 25, 10],
+              backgroundColor: ['#E50019', '#212E41', '#ccc']
+            }]
+          },
+          options: { maintainAspectRatio: false }
+        });
+
+        new Chart(document.getElementById('projectChart'), {
+          type: 'bar',
+          data: {
+            labels: ['진행중', '완료', '지연', '대기'],
+            datasets: [{
+              label: '프로젝트 수',
+              data: [18, 40, 2, 5],
+              backgroundColor: ['#E50019', '#212E41'],
+              borderRadius: 6,          // 둥근 바 (요즘 스타일)
+              barThickness: 40          // 핵심 (너비 줄이기)
+            }]
+          },
+          options: {
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false } // 범례 제거 (깔끔)
+            },
+            scales: {
+              y: {
+                beginAtZero: true
+              }
+            }
+          }
+        });
+
+        new Chart(document.getElementById('monthlyChart'), {
+          type: 'line',
+          data: {
+            labels: ['1월','2월','3월','4월','5월','6월'],
+            datasets: [{
+              label: '프로젝트 수',
+              data: [5, 10, 8, 15, 12, 18],
+              borderColor: '#E50019',
+              pointBackgroundColor: '#212E41',
+              pointBorderColor: '#ccc',
+              pointRadius: 5,
+              pointHoverRadius: 7,
+            }]
+          },
+          options: { maintainAspectRatio: false }
         });
     </script>
+
 </th:block>
 
 </html>

@@ -191,7 +191,8 @@ function buildHr013Table() {
     if (!document.getElementById("TABLE_HR013_A")) return;
 
     window.hr013Table = new Tabulator("#TABLE_HR013_A", {
-        layout: "fitColumns",
+        // layout: "fitColumns",
+        layout: "fitData",
         placeholder: "데이터 없음",
         height: "100%",
         // height: "94%",
@@ -255,7 +256,7 @@ function buildHr013Table() {
                     toggleInprjValue(resolved);
                     changedTabs.tab3 = true;
                     window.hr013Table.redraw(true);
-                }, minWidth: 80, width: 80, maxWidth: 80, resizable: false
+                }, width: 80, resizable: false
             },
             {
                 title: "고객사",
@@ -384,7 +385,7 @@ function buildHr013Table() {
                 cellEdited: function (cell) {
                     requestAnimationFrame(() => cell.getRow().reformat());
                 },
-                width: 160
+                width: 250
             },
             {
                 title: "역할",
@@ -403,6 +404,25 @@ function buildHr013Table() {
                 cellClick: startEditOnClick, width: 60
             },
             {
+                title: "계약단가",
+                field: "rate_amt",
+                hozAlign: "right",
+                formatter: hr013AmountFormatter,
+                editor: "input",
+                editable: isHr013Editable,
+                cellClick: startEditOnClick,
+                width: 150
+            },
+            {
+                title: "기술스택",
+                field: "skl_id_lst",
+                /*hozAlign: "left",*/
+                formatter: hr013TableSkillFormatter,
+                editable: false,
+                cellClick: hr013TableSkillCellClick
+            },
+            // { title: "기술스택", field: "stack_txt", formatter: skillDisplayFormatter, editor: stackTagEditor, editable: isHr013Editable, cellClick: startEditOnClick },
+            {
                 title: "시작일",
                 field: "st_dt",
                 hozAlign: "center",
@@ -420,16 +440,6 @@ function buildHr013Table() {
                 editable: isHr013Editable,
                 cellClick: startEditOnClick, width: 110
             },
-            { title: "계약단가", field: "rate_amt", hozAlign: "right", formatter: hr013AmountFormatter, editor: "input", editable: isHr013Editable, cellClick: startEditOnClick, width: 90 },
-            {
-                title: "기술스택",
-                field: "skl_id_lst",
-                /*hozAlign: "left",*/
-                formatter: hr013TableSkillFormatter,
-                editable: false,
-                cellClick: hr013TableSkillCellClick, minWidth: 80, width: 85
-            },
-            // { title: "기술스택", field: "stack_txt", formatter: skillDisplayFormatter, editor: stackTagEditor, editable: isHr013Editable, cellClick: startEditOnClick },
             { title: "투입률", field: "alloc_pct", hozAlign: "center", formatter: percentageFormatter, width: 66, editor: "input", editable: isHr013Editable, cellClick: startEditOnClick },
             { title: "비고", field: "remark", editor: "input", editable: isHr013Editable, cellClick: startEditOnClick},
         ],
@@ -634,7 +644,7 @@ function initHr013ProjectPickerTable() {
                 showAlert({
                     icon: "info",
                     title: "알림",
-                    text: "당사 프로젝트만 선택할 수 있습니다."
+                    html: `<strong>당사 프로젝트</strong>만 선택할 수 있습니다.`
                 });
                 return;
             }
@@ -672,7 +682,7 @@ function openHr013ProjectPicker(row) {
         showAlert({
             icon: "info",
             title: "알림",
-            text: "당사 프로젝트만 선택할 수 있습니다."
+            html: `<strong>당사 프로젝트</strong>만 선택할 수 있습니다.`
         });
         return;
     }
@@ -879,7 +889,7 @@ function applyHr013ProjectPickerSelection() {
     }
     if (!isHr013ProjectCodeSelectable(hr013SelectedProjectCode)) {
         showAlert({
-            icon: "info", title: "알림", text: "당사 프로젝트만 선택할 수 있습니다."
+            icon: "info", title: "알림", html: `<strong>당사 프로젝트</strong>만 선택할 수 있습니다.`
         });
         return;
     }
@@ -1782,16 +1792,15 @@ function hr013TableSkillFormatter(cell) {
     var textHtml = labelText ? hr013EscapeHtml(labelText) : "-";
 
 // 기술스택 표기가 너무 길어져서 별도의 팝업으로 분리
-//    if (window.hr010ReadOnly) {
-//        return "<span class='hr013-stack-text'>" + textHtml + "</span>";
-//    }
+    if (window.hr010ReadOnly) {
+        return `<span class="hr013-stack-text">` + textHtml + `</span>`;
+    }
+    return `<div class="hr013-stack-cell">` +
+        `<span class="hr013-stack-text" style="white-space: nowrap; padding-right: 15px;">` + textHtml + `</span>` +
+        `<button type="button" class="btn-prj-skl">기술 선택</button>` + `</div>`;
 //    return "<div class='hr013-stack-cell'>" +
-//        "<span class='hr013-stack-text'>" + textHtml + "</span>" +
-//        "<button type='button' class='btn-prj-skl'>기술 선택</button>" +
-//        "</div>";
-    return "<div class='hr013-stack-cell'>" +
-           "<button type='button' class='btn-prj-skl'>기술 선택</button>" +
-           "</div>";
+//           "<button type='button' class='btn-prj-skl'>기술 선택</button>" +
+//           "</div>";
 }
 
 function hr013TableSkillCellClick(e, cell) {
@@ -2151,10 +2160,13 @@ function toDateInput(v) {
 
 // 숫자 콤마 포맷(입력값)
 function formatNumberInput(value) {
-    if (value === null || value === undefined) return "";
-    var raw = String(value).replace(/[^\d]/g, "");
-    if (raw === "") return "";
-    return raw.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    if (!value) return "";
+    // 숫자만 추출
+    const onlyNumber = value.toString().replace(/\D/g, "");
+    if (!onlyNumber) return "";
+    // 숫자 포맷 (콤마)
+    const formatted = Number(onlyNumber).toLocaleString();
+    return formatted + "원";
 }
 
 // rate_amt가 숫자/문자열/객체 어떤 형태여도 숫자 문자열로 통일한다.
