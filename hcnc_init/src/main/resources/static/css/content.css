@@ -234,6 +234,7 @@ option{background:#fff; color:#333;}
   justify-content: center;
   width: 100% !important;
   box-sizing: border-box;
+  padding-bottom: 10px;
 }
 .tabulator .tabulator-footer .tabulator-paginator {
   display: flex;
@@ -1931,9 +1932,6 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .full-table .tabulator-header {
   border: 1px solid #EFF1F6 !important;
   border-bottom: 1px solid #DEE2E7 !important;
-}
-.full-table .tabulator-footer {
-  padding-bottom: 30px !important;
 }
 /* 기본 인적사항 / 사용자 정보 테이블 왼쪽 테두리 무력화 */
 .full-table.tabulator .tabulator-tableHolder .tabulator-row .tabulator-cell:first-child {
