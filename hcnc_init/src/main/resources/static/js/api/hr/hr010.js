@@ -585,6 +585,46 @@ function normalizeJobValue(value) {
     return String(value);
 }
 
+// 이름에서 성 제외한 2글자 추출하기
+function getProfileText(name) {
+    if (!name) return "";
+
+    name = name.trim();
+
+    if (name.length >= 3) {
+        return name.slice(1, 3); // 성 제외 2글자
+    }
+
+    return name;
+}
+// 이니셜 아이콘을 만들기 위한 색상표
+function stringToSoftColor(str) {
+    let hash = 0;
+
+    for (let i = 0; i < str.length; i++) {
+        hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    }
+
+    const h = Math.abs(hash) % 360;
+
+    // 파스텔 느낌 유지하면서 대비 확보
+    const s = 55 + (Math.abs(hash) % 15);      // 55~70
+    const l = 45 + (Math.abs(hash >> 3) % 10); // 45~55
+
+    return `hsl(${h}, ${s}%, ${l}%)`;
+}
+// 둥근 프로필 생성
+function makeProfileCircle(name) {
+    const text = getProfileText(name);
+    const bgColor = stringToSoftColor(name);
+
+    return `
+        <div class="profile-circle-icon" style="background:${bgColor}">
+            ${text}
+        </div>
+    `;
+}
+
 // ============================================================================== //
 
 // 인적사항 리스트 테이블 생성 정의
@@ -661,7 +701,36 @@ function buildUserTable() {
                 resizable: false,
                 download: false
             },
-            { title: "성명", field: "dev_nm", hozAlign: "center", headerSort: true, widthGrow: 2, frozen: true },
+            {
+                title: "성명",
+                field: "dev_nm",
+                headerSort: true,
+                widthGrow: 2,
+                frozen: true,
+                formatter: function (cell) {
+                    const row = cell.getRow().getData();
+                    const name = row.dev_nm || "";
+                    const imgUrl = row.img_url;
+
+                    let profileHtml = "";
+
+                    if (row.has_img && imgUrl) {
+                        profileHtml = `
+                            <img src="${imgUrl}" class="profile-circle-icon"
+                                 onerror="this.style.display='none'"/>
+                        `;
+                    } else {
+                        profileHtml = makeProfileCircle(name);
+                    }
+
+                    return `
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            ${profileHtml}
+                            <span>${name}</span>
+                        </div>
+                    `;
+                }
+            },
             {
                 title: "평가등급",
                 field: "grade",
@@ -922,6 +991,20 @@ async function loadUserTableData() {
             row.grade = s.rank || "";
             row.score = s.score || 0;
         });
+
+        await Promise.all(
+            list.map(row => {
+                if (row.has_img === 1 || row.has_img === "1") {
+                    return new Promise(resolve => {
+                        const img = new Image();
+                        img.src = row.img_url;
+                        img.onload = resolve;
+                        img.onerror = resolve;
+                    });
+                }
+                return Promise.resolve();
+            })
+        );
 
         const filteredList = applyHr010ConditionFilter(list, searchType, conditionKeyword); // 조회조건 필터 적용
         hr010SourceRows = filteredList; // 필터 결과를 그리드 소스로 반영

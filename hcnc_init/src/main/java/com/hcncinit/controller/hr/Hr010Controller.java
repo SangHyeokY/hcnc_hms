@@ -34,7 +34,20 @@ public class Hr010Controller {
         // 확인용 1
         // System.out.println("select_hr010 호출됨, param = " + map);
         List<Map<String, Object>> resList = hr010Service.select_hr010(map);
-        // 확인용 2
+        for (Map<String, Object> row : resList) {
+            String devId = (String) row.get("dev_id");
+
+            boolean hasImg = "1".equals(String.valueOf(row.get("has_img")));
+            row.put("has_img", hasImg); // boolean으로 덮어쓰기
+
+            if (hasImg) {
+                row.put("img_url", "/hr010/list/img?dev_id=" + devId);
+            }
+            // 확인용 2
+            System.out.println("has_img 원본 = " + row.get("has_img"));
+        }
+
+        // 확인용 3
         // System.out.println("조회 결과 = " + resList);
         mv.addObject("res", resList);
         // System.out.println("조회 결과 = " + mv);
@@ -43,13 +56,24 @@ public class Hr010Controller {
 
     // [기본 인적사항] > 이미지
     @RequestMapping("/list/img")
-    public ResponseEntity<byte[]> select_hr010_img(@RequestParam(required = false) Map<String, Object> map) {
-        // 확인용 1
-        // System.out.println("select_hr010_img 호출됨, param = " + map);
+    public ResponseEntity<byte[]> select_hr010_img(@RequestParam Map<String, Object> map) {
+
         byte[] bytes = hr010Service.select_hr010_img(map);
-        // 확인용 2
-        // System.out.println("조회 결과 = " + bytes);
-        return ResponseEntity.ok(bytes);
+
+        // 🔥 1. 데이터 없으면 404
+        if (bytes == null || bytes.length == 0) {
+            return ResponseEntity.notFound().build();
+        }
+
+        // 🔥 2. MIME 자동 판별
+        MediaType mediaType = detectImageType(bytes);
+
+        return ResponseEntity.ok()
+                .contentType(mediaType)
+                .header("Cache-Control", "no-cache, no-store, must-revalidate")
+                .header("Pragma", "no-cache")
+                .header("Expires", "0")
+                .body(bytes);
     }
 
     // [기본 인적사항] > 신규 등록/수정
@@ -157,6 +181,36 @@ public class Hr010Controller {
         mv.addObject("message", "접근 권한이 없습니다.");
         mv.addObject("list", List.of());    // list API 응답 호환
         return mv;
+    }
+
+    private MediaType detectImageType(byte[] bytes) {
+
+        // JPEG: FF D8
+        if (bytes.length >= 2 &&
+                (bytes[0] & 0xFF) == 0xFF &&
+                (bytes[1] & 0xFF) == 0xD8) {
+            return MediaType.IMAGE_JPEG;
+        }
+
+        // PNG: 89 50 4E 47
+        if (bytes.length >= 4 &&
+                (bytes[0] & 0xFF) == 0x89 &&
+                (bytes[1] & 0xFF) == 0x50 &&
+                (bytes[2] & 0xFF) == 0x4E &&
+                (bytes[3] & 0xFF) == 0x47) {
+            return MediaType.IMAGE_PNG;
+        }
+
+        // GIF: 47 49 46
+        if (bytes.length >= 3 &&
+                (bytes[0] & 0xFF) == 0x47 &&
+                (bytes[1] & 0xFF) == 0x49 &&
+                (bytes[2] & 0xFF) == 0x46) {
+            return MediaType.IMAGE_GIF;
+        }
+
+        // 🔥 fallback (기본값)
+        return MediaType.APPLICATION_OCTET_STREAM;
     }
 
 }

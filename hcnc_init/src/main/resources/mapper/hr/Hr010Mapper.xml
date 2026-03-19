@@ -24,6 +24,10 @@
             , kosa_grd_cd
             , main_fld_cd
             , main_cust_cd
+            , CASE
+                WHEN dev_img IS NOT NULL THEN 1
+                ELSE 0
+                END AS has_img
         FROM tb_dev_info
         WHERE del_yn='N'
         AND use_yn='Y'

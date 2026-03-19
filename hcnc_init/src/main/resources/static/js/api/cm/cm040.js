@@ -418,8 +418,10 @@ function getDetailContainerWidth() {
     var holder = tableEl.querySelector(".tabulator-tableholder")
         || tableEl.querySelector(".tabulator-tableHolder");
     var baseWidth = holder ? holder.clientWidth : tableEl.clientWidth;
-    var columnCount = detailTable.getColumns(true).length;
-    return Math.max(0, baseWidth - (columnCount - 1));
+
+    //var columnCount = detailTable.getColumns(true).length;
+    //return Math.max(0, baseWidth - (columnCount - 1));
+    return baseWidth;
 }
 
 function sumDetailWidths(widthMap) {

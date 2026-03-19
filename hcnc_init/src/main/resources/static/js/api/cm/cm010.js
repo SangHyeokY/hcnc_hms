@@ -167,7 +167,7 @@ function buildUserTable() {
                 resizable: false
             },
             { title: "ID", field: "user_id", hozAlign: "center", widthGrow: 1 },
-            { title: "이름", field: "user_nm", widthGrow: 1 },
+            { title: "이름", field: "user_nm", hozAlign: "center", widthGrow: 1 },
             { title: "e-mail", field: "email", widthGrow: 2 },
             { title: "연락처", field: "tel", hozAlign: "center", widthGrow: 2 },
             { title: "권한", field: "role_nm", hozAlign: "center", widthGrow: 1 },
