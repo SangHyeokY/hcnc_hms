@@ -441,7 +441,7 @@ function buildHr013Table() {
                 cellClick: startEditOnClick, width: 110
             },
             { title: "투입률", field: "alloc_pct", hozAlign: "center", formatter: percentageFormatter, width: 66, editor: "input", editable: isHr013Editable, cellClick: startEditOnClick },
-            { title: "비고", field: "remark", editor: "input", editable: isHr013Editable, cellClick: startEditOnClick},
+            { title: "비고", field: "remark", editor: "input", editable: isHr013Editable, cellClick: startEditOnClick, width: 250},
         ],
         data: []
     });

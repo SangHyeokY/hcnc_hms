@@ -954,7 +954,6 @@ function loadUserTableImgDataAsync(data) {
             success: function (response) {
                 const $img = $("#dev_img");
                 const hasImage = response && response.byteLength > 0;
-                const $reUploadProfile = $modal.find(".modal-human-area .pic-area .profile-area .re-upload-image");
                 const prevUrl = $img.data("url");
                 if (prevUrl) {
                     URL.revokeObjectURL(prevUrl);
@@ -973,7 +972,6 @@ function loadUserTableImgDataAsync(data) {
                         .hide();
                 }
                 $img.toggleClass("has-img", hasImage);
-                $reUploadProfile.toggle(currentMode === "update" && hasImage);
                 resolve();
             },
             error: function (e) {
@@ -1189,7 +1187,15 @@ openUserModal = async function (mode, data) {
             // loadUserScoreAsync(data.dev_id),
             loadUserTableImgDataAsync(data)
         ]);
-        // console.log("Tab1 새로고침 완료");
+    }
+
+    // 프로필 사진 추가하기 아이콘 보이기
+    const $reUploadProfile = $modal.find(".re-upload-image");
+    const hasImage = $("#dev_img").hasClass("has-img");
+    if (mode === "update" && hasImage && data.dev_id) {
+        $reUploadProfile.show();
+    } else {
+        $reUploadProfile.hide();
     }
 
     // tab1 활성화
