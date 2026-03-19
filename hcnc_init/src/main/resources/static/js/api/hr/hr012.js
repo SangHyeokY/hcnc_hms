@@ -178,6 +178,8 @@ function buildHr012TableB() {
         // 페이징 설정
         pagination: "local",       // 로컬 데이터 기준 페이지네이션
         paginationSize: 10,        // 한 페이지에 10개씩 표시
+        selectableRange: false, // v5 이상이면 안전하게 추가
+        resizableColumns: false,
         // 숙련도 테이블 데이터 로드 시 건수 반영
         dataLoaded: function () {
             updateHr012BTitleCount();
@@ -788,6 +790,8 @@ function buildHr012SkillPickerTable() {
         height: "360px",
         placeholder: "등록된 기술이 없습니다.",
         headerHozAlign: "center",
+        selectableRange: false, // v5 이상이면 안전하게 추가
+        resizableColumns: false,
         columnDefaults: {
             headerSort: false,
             resizable: false

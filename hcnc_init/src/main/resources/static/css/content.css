@@ -30,10 +30,10 @@ option{background:#fff; color:#333;}
 
 /*=================================================================================*/
 /* 탭 영역 */
-.hms-tab-wrap {flex:1; display: flex; flex-direction:column; gap: 10px; min-height:0;}
+.hms-tab-wrap {flex:1; display: flex; flex-direction:column; gap: 10px; min-height:0; height: 100% !important;}
 /* 탭 영역 스크롤 */
 .hms-tab-wrap .scroll-body {min-height:0; flex:1; display:flex; flex-direction:column;}
-.hms-tab-wrap .scroll-body .content-body {min-height:0;} /*overflow-y: auto;*/ /*스크롤 시도 실패*/
+.hms-tab-wrap .scroll-body .content-body {min-height:0;}
 
 .content-body .content-title h4 {
   position: relative;
@@ -144,29 +144,16 @@ option{background:#fff; color:#333;}
 .tabulator-placeholder {background: #fff !important;}
 .tabulator-tableHolder {background: #fff !important; overflow-y: auto;}
 .tabulator .row-check {pointer-events: none;}
-/* 스크롤 영역 (항상 높이는 유지) */
-.tabulator .tabulator-tableHolder::-webkit-scrollbar {height: 10px;}
-/* thumb 기본 상태 */
-.tabulator .tabulator-tableHolder::-webkit-scrollbar-thumb {
-  background: rgba(33, 46, 65, 0.6);
-  border-radius: 999px;
-  transition: background 0.3s ease;  /* 부드럽게 */
-}
-/* thumb 위에 마우스 올리면 더 진하게 */
-.tabulator .tabulator-tableHolder::-webkit-scrollbar-thumb:hover {background: rgba(33, 46, 65, 1);}
-/* 트랙 */
-.tabulator .tabulator-tableHolder::-webkit-scrollbar-track {background: transparent;}
 
 /* 특정 테이블 홀더 높이 고정 */
-#TABLE_HR013_PROJECT_PICKER,
-#TABLE_HR013_A {
+#TABLE_HR013_PROJECT_PICKER {
   height: 550px !important;
 }
-#TABLE_HR013_A .tabulator-tableHolder {
-  height: 460px !important;
-  min-height: 460px !important;
-  max-height: 460px !important;
-}
+/*#TABLE_HR013_A .tabulator-tableHolder {
+  height: 480px !important;
+  min-height: 480px !important;
+  max-height: 480px !important;
+}*/
 #TABLE_HR013_A .tabulator-header .tabulator-col-title {
   white-space: nowrap;
   overflow: visible;
@@ -183,14 +170,14 @@ option{background:#fff; color:#333;}
   bottom: 0;
 }
 /* 숙련도 탭(TABLE_HR012_B) 세로 스크롤 방지: 헤더 높이만 미세 축소 */
-#TABLE_HR012_B {
+/*#TABLE_HR012_B {
   height: 500px !important;
 }
 #TABLE_HR012_B .tabulator-tableHolder {
   height: 400px !important;
   min-height: 400px !important;
   max-height: 400px !important;
-}
+}*/
 #view-user-area #TABLE_HR012_B .tabulator-header {
   height: 40px !important;
   min-height: 40px !important;
@@ -217,10 +204,10 @@ option{background:#fff; color:#333;}
   line-height: 40px !important;
 }
 /* 푸터 위치 아래에 고정 */
-#TABLE_HR012_B .tabulator-footer {
+/*#TABLE_HR012_B .tabulator-footer {
   position: absolute;
-  bottom: 0px;
-}
+  bottom: -20px;
+}*/
 
 .tabulator .tabulator-footer {
   position: relative;
@@ -508,8 +495,8 @@ option{background:#fff; color:#333;}
   width: 100%;
 }
 #TABLE_HR013_A .hr013-stack-text {
-  display: inline-block;
-  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
   /*white-space: normal; word-break: break-word;*/
 }
 #TABLE_HR013_A .btn-hr013-cell-skill-picker {
@@ -1444,10 +1431,10 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .modal-container-detail {
   display: flex;
   flex-direction: column;
-  position: absolute;
+  position: fixed;
   min-height:0;
   top: 50%;
-  left: 52%;
+  left: 50%;
   transform: translate(-50%, -50%);
   /*width: 80%;
   min-width: 1240px;
@@ -1567,7 +1554,9 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 #TABLE_HR012_A > .tabulator-header {
     display: none;
 }
-
+#TABLE_HR012_A, #TABLE_HR014_A {
+  height: auto !important;
+}
 /*
 #TABLE_MAIN_LANG_PICKER .tabulator-table > .tabulator-row > .tabulator-cell:nth-child(2),
 #TABLE_HR012_SKILL_PICKER .tabulator-table > .tabulator-row > .tabulator-cell:nth-child(2),
@@ -1576,7 +1565,6 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
     font-weight: bold;
     overflow-x: auto;
 }*/
-
 #TABLE_HR011_A .tab1-textarea {
   padding: 12px !important;
 }
@@ -1774,11 +1762,9 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
     white-space: nowrap;
 }*/
 
-/*#TABLE_HR013_SKILL_PICKER .tabulator-row .tabulator-cell {
-    padding-top: 8px !important;
-    padding-bottom: 8px !important;
-    vertical-align: top;
-}*/
+#TABLE_HR013_SKILL_PICKER .tabulator-row {
+    cursor: default;
+}*
 /*#TABLE_HR013_SKILL_PICKER .hr013-skill-chip-wrap {
     display: flex;
     flex-wrap: wrap;
@@ -2442,7 +2428,11 @@ section.search-area .search-info #searchConditionKeyword { /* 새 검색어 입�
 
 /* ===== HR013: 프로젝트 선택 팝업 ===== */
 /* 컨테이너/전체 레이아웃 */
-#hr013-project-picker-area .hr013-project-picker-container {height: 760px; width: calc(100% - 500px); min-width: 0; max-width: calc(100% - 40px); }
+#hr013-project-picker-area .hr013-project-picker-container {
+  width: 1200px;
+  min-width: 0;
+  max-width: 90vw;
+} /*height: 760px;*/
 #hr013-project-picker-area .hr013-project-picker-content {padding:20px; display: grid; grid-template-columns: 1fr 300px; overflow: auto; /* max-height: 56vh; min-height: 690px; border-bottom: 2px solid #EAECF0;  padding-bottom: 4px; */}
 #hr013-project-picker-area .hr013-project-picker-left, #hr013-project-picker-area .hr013-project-picker-right {position: relative; min-width: 0; }
 #hr013-project-picker-area .pill-title.pill-title--modal { font-size: 22px; padding: 4px 18px; }
@@ -2568,7 +2558,8 @@ section.search-area .search-info #searchConditionKeyword { /* 새 검색어 입�
 
 /* HR010 팝업 전체 높이 */
 #view-user-area .modal-container-detail.main-human-modal {
-  height: 885px;
+  max-height: 95vh;
+  height: auto;
   overflow: hidden;
 }
 
@@ -2643,8 +2634,8 @@ section.search-area .search-info #searchConditionKeyword { /* 새 검색어 입�
   background-color: #212E41;
   color: #fff;
   border-radius: 8px;
-  border: none;
-  padding: 5px 5px;
+  border: 1px solid #212E41;
+  padding: 5px;
   font-size: 13px;
   font-weight: 500;
   height: 100%;
@@ -2660,7 +2651,7 @@ section.search-area .search-info #searchConditionKeyword { /* 새 검색어 입�
   color: #E50019;
   background: #fff;
   border-radius: 8px;
-  padding: 5px 5px;
+  padding: 5px;
   font-size: 13px;
   font-weight: 500;
   height: 100%;

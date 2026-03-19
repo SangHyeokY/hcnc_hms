@@ -1,7 +1,7 @@
 @charset "UTF-8";
 
 * {box-sizing: border-box;}
-body, button {
+body {
 	font-family: "Inter", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
 	font-weight: 400;
 	font-size:16px;
@@ -10,6 +10,11 @@ body, button {
 	-webkit-text-size-adjust: none;
 	-moz-text-size-adjust: none;
 	-ms-text-size-adjust: none;
+}
+button {
+	font: inherit;
+    color: inherit;
+    line-height: 1.4;
 }
 .font-tomorrow {
   font-family: "Tomorrow", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;

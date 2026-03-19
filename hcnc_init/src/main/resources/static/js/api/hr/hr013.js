@@ -630,6 +630,8 @@ function initHr013ProjectPickerTable() {
         layout: "fitColumns",
         selectable: 1,
         /*height: "480px",*/
+        selectableRange: false, // v5 이상이면 안전하게 추가
+        resizableColumns: false,
         pagination: "local",
         paginationSize: 10,
         paginationSizeSelector: [5, 10, 15, 20],

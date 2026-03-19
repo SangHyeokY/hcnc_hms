@@ -860,6 +860,8 @@ function createGroupedSkillPicker(config) {
             height: cfg.tableHeight,
             placeholder: cfg.emptyText,
             headerHozAlign: "center",
+            selectableRange: false, // v5 이상이면 안전하게 추가
+            resizableColumns: false,
             columnDefaults: {
                 headerSort: false,
                 resizable: false

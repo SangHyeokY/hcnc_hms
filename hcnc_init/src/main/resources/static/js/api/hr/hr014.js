@@ -121,6 +121,8 @@ function buildHr014TableA() {
         // 관리자평가(A)는 현재 페이징 미사용. 필요 시 true/"local"로 즉시 전환 가능.
         pagination: false,
         headerSort: true,
+        selectableRange: false, // v5 이상이면 안전하게 추가
+        resizableColumns: false,
         placeholder: "데이터 없음",
         headerHozAlign: "center",
         // 평가의견 입력이 변경되면 탭 저장 대상에 포함

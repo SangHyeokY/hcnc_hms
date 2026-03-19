@@ -573,3 +573,17 @@ dl.dot-gray dd {margin-left: 5px; margin-right: 30px; font-weight: 600;}
     background-color: #fbfbfb;
 }
 .off-list p::before {content: "· ";}
+
+/*=================================================================================
+ * scroll-bar
+ =================================================================================*/
+/* 스크롤 영역 (항상 높이는 유지) */ /* Chrome, Edge, Safari */
+::-webkit-scrollbar {height: 10px; width: 10px;}
+/* thumb 기본 상태 */
+::-webkit-scrollbar-thumb {border: 2px solid transparent; background-clip: content-box; background: rgba(33, 46, 65, 0.6); border-radius: 999px; transition: background 0.3s ease;}
+/* thumb 위에 마우스 올리면 더 진하게 */
+::-webkit-scrollbar-thumb:hover {background: rgba(33, 46, 65, 1);}
+/* 트랙 (css 잘 안먹음) */
+::-webkit-scrollbar-track {background: transparent;}
+/* Firefox*/
+* {scrollbar-width: auto; scrollbar-color: rgba(33, 46, 65, 0.6) transparent;}
