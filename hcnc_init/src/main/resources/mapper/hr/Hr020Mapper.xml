@@ -13,6 +13,12 @@
             , prj.job_cd -- 역할
             , rate.rate_amt -- 비고
             , prj.remark -- 비고
+            , tel -- 연락처
+            , email -- 이메일
+            , CASE
+            WHEN dev_img IS NOT NULL THEN TO_BASE64(dev_img)
+            ELSE NULL
+            END AS dev_img_base64
         FROM tb_dev_info dev
         LEFT JOIN tb_dev_prj_info prj
         ON dev.dev_id = prj.dev_id

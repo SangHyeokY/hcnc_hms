@@ -401,7 +401,7 @@ function buildHr013Table() {
                         cell.setValue(value, true);
                     }
                 },
-                cellClick: startEditOnClick, width: 60
+                cellClick: startEditOnClick, width: 80
             },
             {
                 title: "계약단가",
@@ -429,7 +429,7 @@ function buildHr013Table() {
                 formatter: dateDisplayFormatter,
                 editor: dateEditor,
                 editable: isHr013Editable,
-                cellClick: startEditOnClick, width: 110
+                cellClick: startEditOnClick, width: 155
             },
             {
                 title: "종료일",
@@ -438,7 +438,7 @@ function buildHr013Table() {
                 formatter: dateDisplayFormatter,
                 editor: dateEditor,
                 editable: isHr013Editable,
-                cellClick: startEditOnClick, width: 110
+                cellClick: startEditOnClick, width: 155
             },
             { title: "투입률", field: "alloc_pct", hozAlign: "center", formatter: percentageFormatter, width: 66, editor: "input", editable: isHr013Editable, cellClick: startEditOnClick },
             { title: "비고", field: "remark", editor: "input", editable: isHr013Editable, cellClick: startEditOnClick, width: 250},

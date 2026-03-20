@@ -319,6 +319,7 @@ $(document).ready(async function () {
 
     // ★ 팝업에서 인적사항 및 tab 정보 저장 (통합 저장)
     $(document).on("click", "#btn-user-save", async function () {
+        savedTabs = [];
         const activeTab = $(".tab-btn.active").data("tab");
         console.log("현재 탭 :", activeTab);
 
@@ -358,7 +359,10 @@ $(document).ready(async function () {
             if (!success) {
                 throw new Error("인적사항 저장 실패");
             }
-            savedTabs.push("인적사항");
+
+            if (changedTabs.mainArea) {
+                savedTabs.push("인적사항");
+            }
 
             // 세부정보 저장
             if (currentMode != "insert") {
@@ -678,6 +682,7 @@ function buildUserTable() {
                 title: "성명",
                 field: "dev_nm",
                 headerSort: true,
+                resizable: false,
                 width: 140,
                 frozen: true,
                 formatter: function (cell) {

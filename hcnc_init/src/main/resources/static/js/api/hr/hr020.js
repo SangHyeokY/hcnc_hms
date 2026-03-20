@@ -1,8 +1,5 @@
 // 사용자 관리 - hr020.js (hcnc_hms)
 
-// '진행 프로젝트 내역'으로 변경하기!!!!
-// 기능 구현 이후, 불필요한 부분 덜어내기
-
 // 인적사항 리스트 테이블
 var prjTable;
 
@@ -11,58 +8,28 @@ var currentMode = "insert";
 var currentHr020UserTypeTab = "staff";
 var hr020SourceRows = [];
 
-// 주 개발언어 태그 입력 공통 모듈
-var mainLangTagInput = null;
-var pendingMainLangValue = "";
-var mainLangPicker = null;
-var mainLangSkillOptions = [];
-var mainLangGroupOptions = [];
-
 // 역할 공통코드
-var jobCdMap = [];
-var jobCdOptions = [];
-
-// 개인/법인 공통코드
-//var ctrtTypMap = [];
-//var ctrtTypOptions = [];
-
-// 저장된 탭 alert 표시하기 위한 리스트
-// var savedTabs = [];
-
-// 탭 전체 입력/수정 여부 판단 => 전역 플래그
-// let initTabs = false;
+var jobCdMap = {};
+//var jobCdMap = {
+//    "01": "개발",
+//    "02": "PM",
+//    "03": "PL"
+//};
 
 // 저장/로딩중 팝업 표시 여부 플래그
-let isSaving = false;
+// let isSaving = false;
 
 // 저장 성공 여부 플래그
-let isSuccess = false;
+// let isSuccess = false;
 
 // 개발자ID
 window.currentDevId = null;
-
-// 탭 개별 입력/수정 여부 판단
-const changedTabs = {
-    tab1: false, // 1번째 Tab
-    tab2: false, // 2번재 Tab
-    tab3: false, // 3번째 Tab
-    tab4: false  // 4번째 Tab
-};
-
-const tabNameMap = {
-    tab1: "소속 및 계약정보",
-    tab2: "보유역량 및 숙련도",
-    tab3: "프로젝트",
-    tab4: "평가 및 리스크"
-};
 
 // ============================================================================== //
 
 // 문서 첫 생성 시 실행
 $(document).ready(async function () {
     buildPrjTable();
-
-    // console.log(Swal); // swal 오류 확인용
 
     // 탭별 이벤트 정의
     $(".search-btn-area .btn-search").text("조회");
@@ -83,46 +50,25 @@ $(document).ready(async function () {
         }
     });
 
-    // 역할 셀렉트 공통콤보
-    setComCode("select_job_cd", "JOB_CD", "", "cd", "cd_nm", function () {
-        jobCdOptions = $("#select_job_cd option").map(function () {
-            return { cd: this.value, cd_nm: $(this).text() };
-        }).get();
-        initSelectDefault("select_job_cd", "역할");
-        jobCdMap = getJobCdMap();
-        if (window.prjTable) {
-            const col = window.prjTable.getColumn("job_cd");
-            if (col) {
-                col.getCells().forEach(cell => cell.reformat());
-            }
-        }
-    });
-
-    // 개인, 법인 셀렉트 공통콤보
-    //    setComCode("select_ctrt_typ", "CTRT_TYP", "", "cd", "cd_nm", function () {
-    //        ctrtTypOptions = $("#select_ctrt_typ option").map(function () {
-    //            return { cd: this.value, cd_nm: $(this).text() };
-    //        }).get();
-    //        initSelectDefault("select_ctrt_typ", "개인/법인");
-    //        ctrtTypMap = getCtrtTypMap();
-    //        if (window.prjTable) {
-    //            const col = window.prjTable.getColumn("ctrt_typ");
-    //            if (col) {
-    //                col.getCells().forEach(cell => cell.reformat());
-    //            }
-    //        }
-    //    });
-
     // 테이블 로딩이 끝날 때 까지 로딩바 표시
     showLoading();
+    await new Promise(resolve => {
+        setComCode("write_hr020_job_cd", "job_cd", "", "cd", "cd_nm", function (list) {
+            jobCdMap = {};
+            (list || []).forEach(function (item) {
+                if (item.cd) {
+                    jobCdMap[item.cd] = item.cd_nm;
+                }
+            });
+            resolve();
+        });
+    });
     await loadPrjTableData();
 
     // 로딩 완료 후 테이블 건수 표시
     if (window.prjTable) updateTabulatorGridCount(window.prjTable);
 
     hideLoading();
-
-    $(".tab-panel").hide(); // Tab 숨기기
 
     // ================================================ //
 
@@ -175,187 +121,22 @@ $(document).ready(async function () {
     $(".btn-main-del").on("click", function () {
         // deleteUserRows();
     });
-
-    // 탭 변경 이벤트
-    $(".tab-btn").on("click", function () {
-        const tabId = $(this).data("tab");
-
-        $(".tab-btn").removeClass("active");
-        $(this).addClass("active");
-
-        $(".tab-panel").hide();
-        $("#" + tabId).show();
-        updateTabActions(tabId);
-        refreshTabLayout(tabId);
-    });
-
-    // Tab1 변경 이벤트
-    //    $("#tab1").on("change input", "input, select, textarea", function () {
-    //        if (initTabs) return;
-    //        changedTabs.tab1 = true;
-    //    });
-
-    // Tab2 변경 이벤트
-    //    $("#tab2").on("change input", "input, select, textarea", function () {
-    //        if (initTabs) return;
-    //        changedTabs.tab2 = true;
-    //    });
-
-    // Tab3 변경 이벤트
-    //    $("#tab3").on("change input", "input, select, textarea", function () {
-    //        if (initTabs) return;
-    //        changedTabs.tab3 = true;
-    //    });
-
-    // Tab4 변경 이벤트
-    //    $("#tab4").on("change input", "input, select, textarea", function () {
-    //        if (initTabs) return;
-    //        changedTabs.tab4 = true;
-    //    });
-
-    // ================================================ //
-
-    // ★ 팝업에서 인적사항 및 tab 정보 저장 (통합 저장)
-    $(document).on("click", "#btn-user-save", async function () {
-        const activeTab = $(".tab-btn.active").data("tab");
-        console.log("현재 탭 :", activeTab);
-
-        if (isSaving) return;
-
-        // 로딩 표시
-        isSaving = true;
-        showLoading();
-
-        // 기본 유효성 검사
-        if (!validateUserForm()) {
-            console.log("인적사항 유효성 실패");
-            hideLoading();
-            isSaving = false;
-            return;
-        }
-
-        // 탭별 유효성 검사 (update 모드만)
-        //        if (currentMode !== "insert" && currentMode !== "view") {
-        //            if ((changedTabs.tab1 && !validateHr011Form()) ||
-        //                (changedTabs.tab2 && !validateHr012Form()) ||
-        //                (changedTabs.tab3 && !window.hr013Table) ||
-        //                (changedTabs.tab4 && !window.hr014TableA)) {
-        //
-        //                console.log("탭 유효성 실패");
-        //
-        //                hideLoading();
-        //                isSaving = false;
-        //                return;
-        //            }
-        //        }
-
-        try {
-            // 인적사항 저장
-            const success = await upsertUserBtn();
-            if (!success) {
-                throw new Error("인적사항 저장 실패");
-            }
-
-            // 세부정보 저장
-            //            if(currentMode != "insert"){
-            //                // 탭 데이터 순차 저장
-            //                if (changedTabs.tab1) {
-            //                    await saveHr011TableData();
-            //                    savedTabs.push("소속 및 계약정보");
-            //                }
-            //                if (changedTabs.tab2) {
-            //                    await saveHr012TableData();
-            //                    savedTabs.push("보유역량 및 숙련도");
-            //                }
-            //                if (changedTabs.tab3) {
-            //                    await saveHr013InlineRows();
-            //                    savedTabs.push("프로젝트");
-            //                }
-            //                if (changedTabs.tab4) {
-            //                    await saveTab4All();
-            //                    savedTabs.push("평가 및 리스크");
-            //                }
-            //            }
-
-            // 저장 완료 후, 상태 플래그 변경
-            isSuccess = true;
-
-            // 저장한 탭의 이름 저장
-            const savedTabNames = savedTabs.map(n => `'${n}'`);
-
-            showAlert({
-                icon: 'success',
-                title: currentMode === "insert" ? "등록 완료" : "저장 완료",
-                text: savedTabs.length
-                    ? `${savedTabNames.join(", ")} 저장이 완료되었습니다.`
-                    : `'인적사항' 정보가 저장되었습니다.`
-            });
-
-            // 탭 상태 초기화
-            Object.keys(changedTabs).forEach(k => changedTabs[k] = false);
-
-            // 신규 등록이면 팝업 닫기
-            if (currentMode === "insert") {
-                closeUserViewModal();
-            }
-
-        } catch (e) {
-            console.error(e);
-
-            showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
-                icon: 'error',
-                title: '오류',
-                text: '저장 중 오류가 발생했습니다.'
-            });
-
-        } finally {
-            isSaving = false;
-            hideLoading();
-
-            // 저장에 성공했다면...
-            if (isSuccess) {
-                prjTable.clearData();
-                await loadPrjTableData();
-            }
-            console.log("저장 작업 종료, 로딩 상태 :", isSaving); // false여야 정상
-        }
-    });
 });
 
 // ============================================================================== //
 
 // 역할 코드 -> 라벨 맵 생성 (역할)
-function getJobCdMap() {
-    var map = {};
-    if (jobCdOptions && jobCdOptions.length) {
-        jobCdOptions.forEach(function (item) {
-            if (item.cd) {
-                map[item.cd] = item.cd_nm || item.cd;
-            }
-        });
-        return map;
-    }
-    $("#select_job_cd option").each(function () {
-        var val = this.value;
-        if (val) {
-            map[val] = $(this).text();
-        }
-    });
-    return map;
-}
-
-// 역할 코드 -> 라벨 맵 생성 (계약형태 : 개인/법인)
-//function getCtrtTypMap() {
+//function getJobCodeMap() {
 //    var map = {};
-//    if (ctrtTypOptions && ctrtTypOptions.length) {
-//        ctrtTypOptions.forEach(function (item) {
+//    if (hr020JobOptions && hr020JobOptions.length) {
+//        hr020JobOptions.forEach(function (item) {
 //            if (item.cd) {
 //                map[item.cd] = item.cd_nm || item.cd;
 //            }
 //        });
 //        return map;
 //    }
-//    $("#select_ctrt_typ option").each(function () {
+//    $("#write_hr020_job_cd option").each(function () {
 //        var val = this.value;
 //        if (val) {
 //            map[val] = $(this).text();
@@ -364,16 +145,12 @@ function getJobCdMap() {
 //    return map;
 //}
 
-// 콤보 기본 옵션/선택 처리
-function initSelectDefault(selectId, placeholderText) {
-    var $sel = $("#" + selectId);
-    if ($sel.find("option[value='']").length === 0) {
-        $sel.prepend("<option value=''>" + placeholderText + "</option>");
-    }
-    $sel.val("");
-    if (!$sel.val()) {
-        $sel.find("option:first").prop("selected", true);
-    }
+// 역할 표시용 라벨 변환
+function jobCodeFormatter(cell) {
+    var raw = normalizeJobValue(cell.getValue());
+    if (!raw) return "-";
+
+    return jobCdMap[raw] || raw;
 }
 
 // 역할 값이 객체로 와도 문자열로 정규화
@@ -399,6 +176,57 @@ function normalizeJobValue(value) {
         return "";
     }
     return String(value);
+}
+
+// 역할 코드/라벨 정합성 보정(코드 우선)
+function normalizeJobCodes() {
+    if (!window.prjTable) {
+        return;
+    }
+    var map = jobCdMap;
+    var labelToCode = {};
+    Object.keys(map).forEach(function (code) {
+        labelToCode[map[code]] = code;
+    });
+    // 코드가 우선이며, 라벨만 있는 값은 코드로 역매핑한다.
+    window.prjTable.getRows().forEach(function (row) {
+        var data = row.getData();
+        var current = normalizeJobValue(data.job_cd) || "";
+        if (current && map[current]) {
+            if (!data.role_nm) {
+                row.update({ role_nm: map[current] });
+            }
+            return;
+        }
+        var label = normalizeJobValue(data.role_nm) || current;
+        if (label && labelToCode[label]) {
+            row.update({ job_cd: labelToCode[label], role_nm: label });
+        }
+    });
+}
+
+// 콤보 기본 옵션/선택 처리
+//function initSelectDefault(selectId, placeholderText) {
+//    var $sel = $("#" + selectId);
+//    if ($sel.find("option[value='']").length === 0) {
+//        $sel.prepend("<option value=''>" + placeholderText + "</option>");
+//    }
+//    $sel.val("");
+//    if (!$sel.val()) {
+//        $sel.find("option:first").prop("selected", true);
+//    }
+//}
+
+// 둥근 프로필 생성
+function makeProfileCircle(name) {
+    const text = getProfileText(name);
+    const bgColor = stringToSoftColor(name);
+
+    return `
+        <div class="profile-circle-icon" style="background:${bgColor}">
+            ${text}
+        </div>
+    `;
 }
 
 // ============================================================================== //
@@ -441,6 +269,7 @@ function buildPrjTable() {
     }
 
     // 테이블 정의
+    // layout: "fitColumns"일 때, widthGrow 사용할 땐, minWidth도 사용 / 그냥 너비만 지정할 땐 width만 주기
     prjTable = new Tabulator("#TABLE_HR020_A", {
         layout: "fitColumns",
         height: "100%",
@@ -473,11 +302,80 @@ function buildPrjTable() {
                 download: false,
                 resizable: false
             },
-            { title: "성명", field: "dev_nm", hozAlign: "center", widthGrow: 1, minWidth: 90 },
+            {
+                title: "성명",
+                field: "dev_nm",
+                headerSort: true,
+                resizable: false,
+                width: 140,
+                formatter: function (cell) {
+                    const row = cell.getRow().getData();
+                    const name = row.dev_nm || "";
+                    const imgUrl = row.img_url;
+
+                    let profileHtml = "";
+
+                    if (row.has_img && imgUrl) {
+                        profileHtml = `
+                            <img src="${imgUrl}" class="profile-circle-icon"
+                                 onerror="this.style.display='none'"/>
+                        `;
+                    } else {
+                        profileHtml = makeProfileCircle(name);
+                    }
+
+                    return `
+                        <div class="profile-circle-wrap">
+                            ${profileHtml}
+                            <span>${name}</span>
+                        </div>
+                    `;
+                }
+            },
+            { title: "고객사", field: "cust_nm", widthGrow: 4, formatter: cell => emptyToDash(cell.getValue()) },
+            { title: "dev_id", field: "dev_id", visible: false },
+            { title: "프로젝트명", field: "prj_nm", widthGrow: 4, formatter: cell => emptyToDash(cell.getValue()) },
+            {
+                title: "역할",
+                field: "job_cd",
+                hozAlign: "center",
+                formatter: jobCodeFormatter,
+                editor: false,
+                editable: false,
+                widthGrow: 1
+            },
+            {
+                title: "계약단가",
+                field: "rate_amt",
+                widthGrow: 3,
+                formatter: function (cell) {
+                    const value = cell.getValue();
+                    const formatted = amountFormatter(value);
+                    return `<div style="text-align:right;">
+                        ${formatted || "-"}
+                    </div>`;
+                }
+            },
+            { title: "연락처", field: "tel", hozAlign: "center", widthGrow: 3, headerSort: false },
+            {
+                title: "이메일",
+                field: "email", widthGrow: 3, headerSort: false,
+                formatter: function (cell) {
+                    const value = cell.getValue();
+                    if (!value) return "";
+                    return `<div style="
+                        text-align:left;
+                        white-space: nowrap;
+                        overflow: hidden;
+                        text-overflow: ellipsis;">
+                        ${value}
+                    </div>`;
+                }
+            },
             {
                 title: "거주지역",
                 field: "region",
-                widthGrow: 1, minWidth: 90,
+                widthGrow: 2,
                 formatter: function (cell) {
                     const value = cell.getValue();
                     if (!value) return "";
@@ -493,37 +391,12 @@ function buildPrjTable() {
             {
                 title: "경력연차",
                 field: "exp_yr",
-                widthGrow: 1,
-                minWidth: 90,
+                widthGrow: 2,
                 formatter: function (cell) {
                     return `<div style="text-align:right;">${formatCareerYearMonth(cell.getValue())}</div>`;
                 }
             },
-            { title: "고객사", field: "cust_nm", hozAlign: "center", widthGrow: 2, minWidth: 120 },
-            { title: "프로젝트명", field: "prj_nm", hozAlign: "center", widthGrow: 2, minWidth: 120 },
-            {
-                title: "역할",
-                field: "job_cd",
-                hozAlign: "center",
-                formatter: function (cell) {
-                    const val = cell.getValue();
-                    console.log("!! data : ", cell.getRow().getData());
-                    console.log("!! map : ", jobCdMap);
-                    console.log("!! val : ", val);
-                    return (jobCdMap && jobCdMap[val]) ? jobCdMap[val] : val;
-                }, editor: false, editable: false, widthGrow: 1, minWidth: 90
-            },
-            {
-                title: "계약단가",
-                field: "rate_amt",
-                widthGrow: 1, minWidth: 90,
-                formatter: function (cell) {
-                    const value = cell.getValue();
-                    return `<div style="text-align:right;">${amountFormatter(value)}</div>`;
-                }
-            },
-            { title: "비고", field: "remark", headerSort: false, widthGrow: 3, minWidth: 150 },
-            { title: "dev_id", field: "dev_id", visible: false }
+            { title: "비고", field: "remark", headerSort: false, width: 200 }
         ],
         data: [],
         // 행 클릭
@@ -545,7 +418,6 @@ function buildPrjTable() {
         }
     });
 }
-
 // ============================================================================== //
 // 타입 판별/필터 함수
 function resolveHr020UserType(row) {
@@ -627,39 +499,16 @@ async function loadPrjTableData() {
         });
 
         const list = response.res || [];
+
         if (!list.length) {
             hr020SourceRows = [];
             applyHr020UserTypeFilter();
             return;
         }
 
-        // 점수 불러오기
-        //        const scorePromises = list.map(row =>
-        //            fetchUserScore(row.dev_id)
-        //                .then(res => ({
-        //                    dev_id: row.dev_id,
-        //                    ...(res.res || {})
-        //                }))
-        //                .catch(() => ({
-        //                    dev_id: row.dev_id
-        //                }))
-        //        );
-        //
-        //        const scores = await Promise.all(scorePromises);
-        //
-        //        const scoreMap = {};
-        //        scores.forEach(s => {
-        //            scoreMap[s.dev_id] = s;
-        //        });
-        //
-        //        list.forEach(row => {
-        //            const s = scoreMap[row.dev_id] || {};
-        //            row.grade = s.rank || "";
-        //            row.score = s.score || 0;
-        //        });
-
         hr020SourceRows = list;
         applyHr020UserTypeFilter();
+        normalizeJobCodes();
         // prjTable.setData(response.res || []);
     } catch (e) {
         console.error(e);
@@ -669,804 +518,6 @@ async function loadPrjTableData() {
             text: '사용자 데이터를 불러오는 중 오류가 발생했습니다.',
         });
     }
-}
-
-// ============================================================================== //
-
-// 인적사항 데이터 신규 등록/수정 이벤트
-function upsertUserBtn() {
-    return new Promise((resolve, reject) => {
-
-        var payload = {
-            dev_id: $("#dev_id").val(),
-            dev_nm: $("#dev_nm").val(),
-            brdt: $("#brdt").val(),
-            tel: $("#tel").val(),
-            email: $("#email").val(),
-            region: $("#region").val(),
-            main_lang: $("#main_lang").val(),
-            exp_yr: composeCareerExpValue(),
-            edu_last: $("#edu_last").val(),
-            cert_txt: $("#cert_txt").val(),
-            rate_amt: normalizeAmountValue($("#rate_amt").val()),
-            avail_dt: $("#avail_dt").val(),
-            ctrt_typ: $("#select_ctrt_typ").val(),
-            work_md: $("#select_job_cd").val(),
-            dev_type: $("#dev_type").val(),
-            crt_by: ""
-        };
-
-        const activeTab = $(".tab-btn.active").data("tab");
-        const file = $("#fileProfile")[0].files[0];
-        const fd = new FormData();
-
-        // 1) 텍스트 필드들 추가
-        Object.keys(payload).forEach(k => {
-            if (k === "dev_img") return;
-            if (payload[k] == null) return;
-            fd.append(k, payload[k]);
-        });
-
-        // 2) 파일 추가 (컨트롤러 @RequestPart 이름과 동일해야 함)
-        if (file) fd.append("dev_img", file);
-
-        $.ajax({
-            url: "/hr020/upsert",
-            type: "POST",
-            data: fd,
-            processData: false,
-            contentType: false,
-            dataType: "json",
-
-            success: function (response) {
-                if (!response || response.success === false) {
-                    console.log(response?.message || "저장에 실패했습니다.");
-                    showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
-                        icon: 'error',
-                        title: '오류',
-                        text: '저장 중 오류가 발생했습니다.'
-                    });
-                    resolve(false);
-                    return;
-                }
-                if (response.dev_id) {
-                    window.currentDevId = response.dev_id;
-                    $("#dev_id").val(response.dev_id);
-                }
-                resolve(true);
-            },
-            error: function (xhr) {
-                console.log("저장 중 오류가 발생했습니다.");
-                showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
-                    icon: 'error',
-                    title: '오류',
-                    text: '저장 중 오류가 발생했습니다.'
-                });
-                reject(xhr);
-            }
-        });
-    });
-}
-
-// ============================================================================== //
-
-// 데이터 삭제 요청 - toast 방식  추가해야될 사항(현재 삭제하겠냐는 문구에 잡힌 파라미터 수정 필요)
-async function deleteUserRows() {
-    var selectedRows = prjTable.getSelectedRows();
-
-    // 선택 없음
-    if (selectedRows.length === 0) {
-        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
-            icon: 'info',
-            title: '알림',
-            text: '삭제할 사용자를 선택해주세요.'
-        });
-        return;
-    }
-
-    // 선택된 첫 번째 행의 이름 가져오기
-    var firstRowData = selectedRows[0].getData();
-
-    // 1단계 확인 모달
-    const firstResult = await showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
-        title: '경고',
-        text: `'${firstRowData.dev_nm}' 사용자 정보를 삭제하시겠습니까?`,
-        icon: 'warning',
-        showCancelButton: true,
-        cancelButtonText: '취소',
-        cancelButtonColor: '#212E41'
-    });
-    if (!firstResult.isConfirmed) return;
-
-    const secondResult = await showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
-        title: '경고',
-        text: `다시 확인 버튼을 누르시면 '${firstRowData.dev_nm}' 사용자의 데이터가 삭제되며, 되돌릴 수 없습니다.`,
-        icon: 'warning',
-        showCancelButton: true,
-        cancelButtonText: '취소',
-        cancelButtonColor: '#212E41'
-    });
-    if (!secondResult.isConfirmed) return;
-
-    // 실제 삭제 Ajax 호출
-    var pending = selectedRows.length;
-
-    selectedRows.forEach(function (row) {
-        $.ajax({
-            url: "/hr020/delete",
-            type: "POST",
-            data: { dev_id: row.getData().dev_id },
-            success: function () {
-                pending -= 1;
-                if (pending === 0) {
-                    loadPrjTableData();
-                    showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
-                        icon: 'success',
-                        title: '완료',
-                        text: `'${firstRowData.dev_nm}' 사용자의 데이터가 삭제되었습니다.`
-                    });
-                }
-            },
-            error: function () {
-                showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
-                    icon: 'error',
-                    title: '오류',
-                    text: '삭제 중 오류가 발생했습니다.'
-                });
-            }
-        });
-    });
-}
-
-// ============================================================================== //
-
-// 모달(팝업) 열리는 이벤트 처리
-openUserModal = async function (mode, data) {
-    currentMode = mode;
-    initTabs = true;
-    const $modal = $("#view-user-area");
-
-    showLoading(); // 로딩바 표시
-    $modal.removeClass("show");
-    $modal.show();
-
-    if (mode === "insert") clearUserForm();
-    else fillUserForm(data || prjTable.getSelectedRows()[0].getData());
-    setModalMode(mode);
-
-    // initAllTabs(); // 모든 tab 초기화
-
-    // tab1 활성화
-    $(".tab-btn").removeClass("active");
-    $(".tab-btn[data-tab='tab1']").addClass("active");
-    $(".tab-panel").hide();
-    $("#tab1").show();
-
-    // 인력 관리 등록 시, 정해진 탭에 따라 자동으로 선택
-    if (mode === "insert") {
-        const activeTabBtn = document.querySelector(".hr030-filter-chip.active");
-        const devType = activeTabBtn?.dataset.userType === "freelancer" ? "HCNC_F" : "HCNC_S";
-        $("#dev_type").val(devType).trigger("change");
-
-    }
-
-    window.hr014TabInitialized = false;
-    initMainLangTags();
-
-    // 조회, 수정할 때
-    if (mode !== "insert" && data?.dev_id) {
-        // console.log("Promise로 팝업에 띄울 데이터 호출 중...");
-        updateTabActions("tab1");
-        refreshTabLayout("tab1");
-    }
-
-    // 팝업 표시 완료 + 로딩 종료
-    setTimeout(() => {
-        initTabs = false;
-        $modal.addClass("show");
-        hideLoading(); // 로딩바 숨김
-    }, 100);
-};
-
-// 모든 tab 초기화
-function initAllTabs() {
-    initTab1();
-    if (currentMode !== "insert") { // 등록 mode가 아닐 경우
-        initTab2();
-        initTab3();
-        initTab4();
-    }
-}
-
-// 팝업에 인적사항 데이터 채워넣기
-function fillUserForm(d) {
-    window.currentDevId = d.dev_id;
-    $("#dev_id").val(d.dev_id || "");
-    $("#dev_nm").val(d.dev_nm || "");
-    $("#brdt").val(d.brdt || "");
-    $("#tel").val(d.tel || "");
-    $("#email").val(d.email || "");
-    $("#region").val(d.region || "");
-
-    $("#main_lang").val(d.main_lang || "");
-    pendingMainLangValue = d.main_lang || ""; // main_lang 채워넣기 전용
-    if (mainLangTagInput) {
-        mainLangTagInput.setFromValue(pendingMainLangValue);
-    }
-
-    setCareerSpinInputs(d.exp_yr);
-    $("#edu_last").val(d.edu_last || "");
-    $("#cert_txt").val(d.cert_txt || "");
-    $("#avail_dt").val(d.avail_dt || "");
-    // $("#dev_id_input").text(d.dev_id || "");
-
-    $("#rate_amt").val(
-        formatAmount(d.rate_amt)
-    );
-
-    $("#dev_type").val(d.dev_type || "");
-
-    // 셀렉트 work_md
-    if (d.work_md && jobCdMap[d.work_md]) {
-        $("#select_job_cd").val(d.work_md);
-    } else {
-        $("#select_job_cd").val("");
-    }
-
-    // 셀렉트 ctrt_typ
-    if (d.ctrt_typ && ctrtTypMap[d.ctrt_typ]) {
-        $("#select_ctrt_typ").val(d.ctrt_typ);
-    } else {
-        $("#select_ctrt_typ").val("");
-    }
-
-    $("#dev_type").val(""); // 기본값 초기화
-
-    // '소속 구분' 값 재할당
-    if (d.dev_id) {
-        if (d.dev_id.startsWith("HCNC_F")) {
-            $("#dev_type").val("HCNC_F");
-        } else if (d.dev_id.startsWith("HCNC_S")) {
-            $("#dev_type").val("HCNC_S");
-        }
-    }
-
-    const rank = d.grade || "";
-    const score = d.score || 0;
-    if (rank, score) {
-        $("#grade").text(rank);
-        $("#score").text(score + "점");
-    } else {
-        $("#grade").text("");
-        $("#score").text("");
-    }
-    $("#aboutGrade").show();
-}
-
-// 팝업 닫히면 값 초기화하기
-function clearUserForm() {
-    window.currentDevId = null;
-    $("#dev_img").hide();
-    $("#dev_img")[0].src = "";
-    $("#dev_id").val("");
-    $("#dev_nm").val("");
-    $("#brdt").val("");
-    $("#tel").val("");
-    $("#email").val("");
-    $("#region").val("");
-
-    $("#main_lang").val("");
-    pendingMainLangValue = "";
-    if (mainLangTagInput) {
-        mainLangTagInput.clear();
-    }
-
-    setCareerSpinInputs("");
-    $("#edu_last").val("");
-    $("#cert_txt").val("");
-    $("#avail_dt").val("");
-    $("#rate_amt").val("");
-    $("#dev_type").val("");
-    $("#select_job_cd").val("");
-    $("#select_ctrt_typ").val("");
-    $("#grade").text("");
-    $("#score").text("");
-    $("#aboutGrade").hide();
-}
-
-// ============================================================================== //
-
-// 팝업의 역할에 따라 sub-title 변경 되기
-function setModalMode(mode) {
-    console.log("Mode 구분 :", mode);
-
-    const isView = mode === "view"; // 상세(조회)
-    const isInsert = mode === "insert"; // 등록
-    const isUpdate = mode === "update"; // 수정
-
-    var $modal = $("#view-user-area");
-    var $title = $modal.find("#modal-title");
-    $modal.toggleClass("is-view-mode", isView);
-
-    if (mode) {
-        $title.text(
-            mode === "view" ? "상세" :
-                mode === "insert" ? "등록" :
-                    "수정"
-        );
-        $modal
-            .removeClass("view insert update")
-            .addClass(mode);
-    }
-
-    // ================================
-    // 공통 입력 제어 (조회 기준)
-    // ================================
-    const isReadOnly = isView;
-
-    $modal.find("input, textarea")
-        .prop("readonly", isReadOnly)
-        .prop("disabled", isReadOnly);
-
-    $modal.find("select")
-        .not("#dev_type")
-        .prop("disabled", isReadOnly);
-
-
-    // ================================
-    // dev_type 전용 제어
-    // ================================
-    $modal.find("#dev_type")
-        .toggleClass("select-dev-type", isInsert) // 등록만 셀렉트 추가
-        .prop("disabled", !isInsert); // 등록이 아니면 모두 disabled
-
-
-    // ================================
-    // career-exp 전용 제어
-    // ================================
-    $(".career-spin-wrap").toggle(!isView); // 조회가 아니면 모두 hide
-    $(".career-exp-text").toggle(isView);
-
-    // ================================
-    // 등록 전용 처리
-    // ================================
-    if (isInsert) {
-        $("#grade").text("");
-        $("#score").text("-");
-    }
-
-    // 주 개발언어 입력창은 팝업 트리거 전용으로 항상 readonly 유지
-    $("#main_lang_input").prop("readonly", true);
-    $(".career-spin-btn").prop("disabled", isView);
-    syncCareerExpText();
-
-    // Mode에 따른 버튼 숨김/표시
-    $("#btn-user-save").toggle(isInsert || isUpdate);
-    $("#btn-excel").toggle(isView);
-    $(".tab-article").toggle(!isInsert);
-    $("#main_lang_input, #btn_main_lang_picker").toggle(!isView);
-    $(".showingbtn").toggle(isUpdate || isInsert);
-    if (isView) {
-        closeMainLangPicker(true);
-        if (typeof closeHr012SkillPicker === "function") {
-            closeHr012SkillPicker(true);
-        }
-        if (typeof closeHr013SkillPicker === "function") {
-            closeHr013SkillPicker(true);
-        }
-    }
-
-    const $tagBox = $("#mainLangTagList").closest(".tag-input-box");
-    $tagBox.toggleClass("is-readonly", isView);
-    $tagBox.find(".tag-help").toggle(!isView);
-
-    updateTabActions($(".tab-btn.active").data("tab"));
-
-    // Tab 연동
-    window.hr020ReadOnly = isView;
-    broadcastTabReadonly(isView);
-}
-
-// Tab의 readonly 제어
-function broadcastTabReadonly(isReadOnly) {
-    $(document).trigger("tab:readonly", [isReadOnly]);
-}
-
-// ============================================================================== //
-
-// 모달 닫히면 영역 사라지게 하기
-function closeUserViewModal() {
-    // document.getElementById("view-user-area").style.display = "none";
-    const $modal = $("#view-user-area");
-    closeMainLangPicker(true);
-    if (typeof closeHr012SkillPicker === "function") {
-        closeHr012SkillPicker(true);
-    }
-    if (typeof closeHr013SkillPicker === "function") {
-        closeHr013SkillPicker(true);
-    }
-    $modal.removeClass("show");
-
-    // 초기화
-    savedTabs = [];
-
-    setTimeout(() => {
-        $modal.hide();
-        clearUserForm();
-    }, 250);
-}
-
-// 탭별 버튼 표시
-function updateTabActions(tabId) {
-    if (window.hr020ReadOnly) {
-        $(".tab-actions").removeClass("active");
-        $(".tab-action-bar").hide();
-        return;
-    }
-    $(".tab-action-bar").show();
-    $(".tab-actions").removeClass("active");
-    $(".tab-actions[data-tab='" + tabId + "']").addClass("active");
-}
-
-// 탭 표시 후 레이아웃 재계산
-function refreshTabLayout(tabId) {
-    setTimeout(function () {
-        if (tabId === "tab2" && window.hr012TableA) {
-            window.hr012TableA.redraw(true);
-        }
-        if (tabId === "tab2" && window.hr012TableB) {
-            window.hr012TableB.redraw(true);
-        }
-        if (tabId === "tab3" && window.hr013Table) {
-            window.hr013Table.redraw(true);
-        }
-        if (tabId === "tab4" && window.hr014TableA) {
-            window.hr014TableA.redraw(true);
-        }
-    }, 10);
-}
-
-// ============================================================================== //
-
-// 데이터 유효성 검사
-function validateUserForm() {
-
-    // 값 가져오기
-    const dev_nm = ($("#dev_nm").val() || "").trim();            // 성명
-    const brdt = ($("#brdt").val() || "").trim();                // 생년월일
-    // ==
-    const tel = ($("#tel").val() || "").trim();                  // 연락처
-    const email = ($("#email").val() || "").trim();              // 이메일
-    // ==
-    const expYrYear = ($("#exp_yr_year").val() || "").trim();    // 경력연차(년)
-    const expYrMonth = ($("#exp_yr_month").val() || "").trim();  // 경력연차(개월)
-    const eduLast = ($("#edu_last").val() || "").trim();         // 최종학력
-    // ==
-    const devType = ($("#dev_type").val() || "").trim();         // 소속 구분 (dev_id에서 S: 직원, F: 프리랜서)
-    const workMd = ($("#select_job_cd").val() || "").trim();    // 근무 가능형태 (01: 상주, 02: 재택, 03: 혼합)
-    // ==
-    const hopeRaw = normalizeAmountValue($("#rate_amt").val()); // 계약단가 금액
-    const availDt = ($("#avail_dt").val() || "").trim();         // 투입 가능일
-    const ctrtTyp = ($("#select_ctrt_typ").val() || "").trim();  // 계약 형태 (01: 개인, 02: 법인)
-
-    // 최대 입력 가능 숫자
-    const MAX_AMT = 999999999;
-
-    // ↓ 데이터 입력 순서대로 작성할 것
-
-    // 개발자 이름
-    if (!dev_nm) {
-        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
-            icon: 'warning',
-            title: '경고',
-            text: `'성명'을 입력하세요.`
-        });
-        $("#dev_nm").focus();
-        return false;
-    }
-
-    // 생년월일
-    if (!brdt) {
-        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
-            icon: 'warning',
-            title: '경고',
-            text: `'생년월일'을 입력하세요.`
-        });
-        $("#brdt").focus();
-        return false;
-    }
-
-    // 전화번호
-    if (!tel) {
-        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
-            icon: 'warning',
-            title: '경고',
-            text: `'연락처'를 입력하세요.`
-        });
-        $("#tel").focus();
-        return false;
-    }
-
-    // 전화번호 (숫자만 입력)
-    if (!/^[0-9\-]+$/.test(tel)) {
-        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
-            icon: 'warning',
-            title: '경고',
-            text: `'연락처' 형식이 올바르지 않습니다.`
-        });
-        $("#tel").focus();
-        return false;
-    }
-
-    // 이메일
-    if (!email) {
-        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
-            icon: 'warning',
-            title: '경고',
-            text: `'이메일'을 입력하세요.`
-        });
-        $("#email").focus();
-        return false;
-    }
-
-    const emailRegex =
-        /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
-
-    if (!emailRegex.test(email)) {
-        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
-            icon: 'warning',
-            title: '경고',
-            text: `'이메일' 형식이 올바르지 않습니다.`
-        });
-        $("#email").focus();
-        return false;
-    }
-
-    // 경력연차
-    if (expYrYear === "" || expYrMonth === "") {
-        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
-            icon: 'warning',
-            title: '경고',
-            text: `'경력연차(년/개월)'를 입력하세요.`
-        });
-        if (expYrYear === "") {
-            $("#exp_yr_year").focus();
-        } else {
-            $("#exp_yr_month").focus();
-        }
-        return false;
-    }
-    if (!/^\d+$/.test(expYrYear) || !/^\d+$/.test(expYrMonth)) {
-        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
-            icon: 'warning',
-            title: '경고',
-            text: `'경력연차(년/개월)'를 입력하세요.`
-        });
-        $("#exp_yr_year").focus();
-        return false;
-    }
-
-    var expYearNum = Number(expYrYear);
-    var expMonthNum = Number(expYrMonth);
-    if (expYearNum < 0 || expYearNum > 99 || expMonthNum < 0 || expMonthNum > 12) {
-        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
-            icon: 'warning',
-            title: '경고',
-            text: `'경력연차'는 년(0~99), 개월(0~12) 범위 내에서 입력해주세요.`
-        });
-        $("#exp_yr_year").focus();
-        return false;
-    }
-
-    syncCareerExpValue();
-
-    // 최종학력
-    if (!eduLast) {
-        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
-            icon: 'warning',
-            title: '경고',
-            text: `'최종학력'을 입력하세요.`
-        });
-        $("#edu_last").focus();
-        return false;
-    }
-
-    // 소속 구분
-    if (!devType || devType == "") {
-        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
-            icon: 'warning',
-            title: '경고',
-            text: `'소속 구분'을 선택해주세요.`
-        });
-        $("#dev_type").focus();
-        return false;
-    }
-
-    // 근무 가능 형태
-    if (!workMd || workMd == "") {
-        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
-            icon: 'warning',
-            title: '경고',
-            text: `'근무 가능 형태'를 선택해주세요.`
-        });
-        $("#select_job_cd").focus();
-        return false;
-    }
-
-    // 계약단가
-    if (!hopeRaw) {
-        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
-            icon: 'warning',
-            title: '경고',
-            text: `'계약단가'를 입력해주세요.`
-        });
-        $("#rate_amt").focus();
-        return false;
-    }
-    if (Number(hopeRaw) > MAX_AMT) {
-        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
-            icon: 'warning',
-            title: '경고',
-            text: `'계약단가'는 최대 999,999,999원까지 입력 가능합니다.`
-        });
-        $("#rate_amt").focus();
-        return false;
-    }
-
-    // 투입 가능일
-    if (!availDt) {
-        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
-            icon: 'warning',
-            title: '경고',
-            text: `'투입 가능 시점'을 입력하세요.`
-        });
-        $("#avail_dt").focus();
-        return false;
-    }
-
-    // 계약 형태
-    if (!ctrtTyp || ctrtTyp == "") {
-        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
-            icon: 'warning',
-            title: '경고',
-            text: `'계약 형태'를 선택해주세요.`
-        });
-        $("#select_ctrt_typ").focus();
-        return false;
-    }
-
-    return true;
-}
-
-// ============================================================================== //
-
-// 주 개발언어 태그/팝업 초기화
-function initMainLangTags() {
-    if (!mainLangTagInput) {
-        mainLangTagInput = createTagInput({
-            inputSelector: "#main_lang_input",
-            listSelector: "#mainLangTagList",
-            hiddenSelector: "#main_lang",
-            getValue: function (item) { return item.cd; },
-            getLabel: function (item) { return item.cd_nm; },
-            matchMode: "prefix",
-            // 주개발언어는 x 삭제가 아닌 기술선택 팝업에서만 변경한다.
-            removable: false,
-            onTagChange: function () {
-                syncMainLangPickerUi();
-            }
-        });
-        initMainLangPicker();
-        bindMainLangPickerEvents();
-    }
-
-    setComCode("main_lang_select", "skl_id", "", "cd", "cd_nm", function (res) {
-        mainLangSkillOptions = Array.isArray(res) ? res : [];
-        mainLangTagInput.setOptions(mainLangSkillOptions);
-        mainLangTagInput.setFromValue(pendingMainLangValue || $("#main_lang").val());
-        pendingMainLangValue = $("#main_lang").val() || pendingMainLangValue;
-        syncMainLangPickerUi(true);
-    });
-
-    getComCode("skl_grp", "", function (res) {
-        mainLangGroupOptions = Array.isArray(res) ? res : [];
-        syncMainLangPickerUi(true);
-    });
-}
-
-// ============================================================================== //
-
-// 공통 팩토리 기반 주개발언어 선택 팝업 초기화
-function initMainLangPicker() {
-    if (mainLangPicker || typeof createGroupedSkillPicker !== "function") {
-        return;
-    }
-    mainLangPicker = createGroupedSkillPicker({
-        namespace: "main_lang",
-        pickerAreaSelector: "#main-lang-picker-area",
-        openTriggerSelector: "#main_lang_input, #btn_main_lang_picker",
-        applyTriggerSelector: "#btn_main_lang_picker_apply",
-        closeTriggerSelector: "#btn_main_lang_picker_close_x",
-        tableSelector: "#TABLE_MAIN_LANG_PICKER",
-        searchInputSelector: "#main-lang-picker-search",
-        searchWrapSelector: ".main-lang-picker-search-wrap",
-        suggestListSelector: "#main-lang-picker-suggest",
-        metaSelector: "#main-lang-picker-meta",
-        chipClass: "main-lang-skill-chip",
-        chipWrapClass: "main-lang-skill-chip-wrap",
-        suggestItemClass: "main-lang-suggest-item",
-        flashClass: "is-flash",
-        groupColumnWidth: 180,
-        getSkillOptions: function () {
-            return mainLangSkillOptions || [];
-        },
-        getGroupOptions: function () {
-            return mainLangGroupOptions || [];
-        },
-        getSelectedCodes: function () {
-            var set = new Set();
-            String($("#main_lang").val() || "")
-                .split(",")
-                .forEach(function (item) {
-                    var code = $.trim(item);
-                    if (code) {
-                        set.add(code);
-                    }
-                });
-            return set;
-        },
-        isReadonly: function () {
-            return currentMode === "view";
-        },
-        onApply: function (payload) {
-            if (mainLangTagInput) {
-                mainLangTagInput.setFromValue(payload.csv || "");
-            }
-            pendingMainLangValue = payload.csv || "";
-        }
-    });
-}
-
-// 팝업 이벤트는 공통 유틸이 네임스페이스로 1회만 등록한다.
-function bindMainLangPickerEvents() {
-    initMainLangPicker();
-    if (mainLangPicker) {
-        mainLangPicker.bindEvents();
-    }
-}
-
-// 읽기 전용이 아닐 때만 팝업을 열고, 선택 원본은 hidden(#main_lang) 기준으로 로드한다.
-function openMainLangPicker() {
-    if (currentMode === "view") {
-        return;
-    }
-    initMainLangPicker();
-    if (mainLangPicker) {
-        mainLangPicker.open();
-    }
-}
-
-function closeMainLangPicker(immediate) {
-    if (!mainLangPicker) {
-        return;
-    }
-    mainLangPicker.close(immediate);
-}
-
-// "적용" 클릭 시에만 draft 선택값이 태그/hidden 값으로 확정 반영된다.
-function applyMainLangPickerSelection() {
-    if (!mainLangPicker) {
-        closeMainLangPicker();
-        return;
-    }
-    mainLangPicker.apply();
-}
-
-function syncMainLangPickerUi(forceRebuild) {
-    if (!mainLangPicker) {
-        return;
-    }
-    mainLangPicker.sync(forceRebuild);
 }
 
 // ============================================================================== //
@@ -1586,20 +637,14 @@ $("#rate_amt")
         }
     });
 
-// 숫자에 콤마 표시
-function formatNumber(num) {
-    if (!num) return "";
-    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-}
-
 // 테이블에 점수 등급 표시
-function fetchUserScore(devId) {
-    return $.ajax({
-        url: "/hr020/getScore",
-        type: "GET",
-        data: { dev_id: devId }
-    });
-}
+//function fetchUserScore(devId) {
+//    return $.ajax({
+//        url: "/hr020/getScore",
+//        type: "GET",
+//        data: { dev_id: devId }
+//    });
+//}
 
 // alert 문자 가공
 function btnEditView(alertPrefix = "") {
@@ -1619,6 +664,9 @@ function btnEditView(alertPrefix = "") {
         return null;
     }
     return rows[0].getData();
+}
+function emptyToDash(value) {
+    return (value === null || value === undefined || value === "") ? "-" : value;
 }
 
 // 계약단가(,),(테이블표)

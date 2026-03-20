@@ -11,7 +11,7 @@ export const menuData = [
     visible: true,
     children: [
       { title: "기본 인적사항", path: "/hr010", type: "A", visible: true },
-      { title: "진행 프로젝트 내역", path: "/hr020", type: "A", visible: true },
+      { title: "프로젝트 내역", path: "/hr020", type: "A", visible: true },
     ],
   },
   {
