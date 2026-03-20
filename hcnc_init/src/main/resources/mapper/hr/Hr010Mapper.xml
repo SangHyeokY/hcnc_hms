@@ -25,9 +25,9 @@
             , main_fld_cd
             , main_cust_cd
             , CASE
-                WHEN dev_img IS NOT NULL THEN 1
-                ELSE 0
-                END AS has_img
+                WHEN dev_img IS NOT NULL THEN TO_BASE64(dev_img)
+                ELSE NULL
+                END AS dev_img_base64
         FROM tb_dev_info
         WHERE del_yn='N'
         AND use_yn='Y'
@@ -51,14 +51,14 @@
     </select>
 
     <!-- 인력관리 > 기본 인적사항 이미지 -->
-    <select id="select_hr010_img" parameterType="map" resultType="_byte[]">
-        SELECT dev_img
-        FROM tb_dev_info
-        WHERE del_yn='N'
-        AND use_yn='Y'
-        AND dev_id LIKE CONCAT('%', #{dev_id}, '%')
-        LIMIT 1
-    </select>
+<!--    <select id="select_hr010_img" parameterType="map" resultType="_byte[]">-->
+<!--        SELECT dev_img-->
+<!--        FROM tb_dev_info-->
+<!--        WHERE del_yn='N'-->
+<!--        AND use_yn='Y'-->
+<!--        AND dev_id LIKE CONCAT('%', #{dev_id}, '%')-->
+<!--        LIMIT 1-->
+<!--    </select>-->
 
     <!-- 인적사항 신규 등록/수정 -->
     <insert id="insert_hr010" parameterType="map">

@@ -25,11 +25,11 @@ public class Hr010Service {
     }
 
     // [기본 인적사항] > 이미지
-    @QryLog(scrnCd = "HR010", fnCd = "DEV_IMG", opTyp = "SELECT")
-    public byte[] select_hr010_img(Map<String, Object> map) {
-        byte[] res = this.sqlSession.selectOne("com.hcncinit.Hr010Mapper.select_hr010_img", map);
-        return res;
-    }
+//    @QryLog(scrnCd = "HR010", fnCd = "DEV_IMG", opTyp = "SELECT")
+//    public byte[] select_hr010_img(Map<String, Object> map) {
+//        byte[] res = this.sqlSession.selectOne("com.hcncinit.Hr010Mapper.select_hr010_img", map);
+//        return res;
+//    }
 
     // [기본 인적사항] > 신규 등록/수정
     @QryLog(scrnCd = "HR010", fnCd = "DEV_SAVE", opTyp = "UPSERT")

@@ -667,6 +667,7 @@ function buildUserTable() {
     }
 
     // 테이블 정의
+    // layout: "fitColumns"일 때, widthGrow 사용할 땐, minWidth도 사용 / 그냥 너비만 지정할 땐 width만 주기
     userTable = new Tabulator("#TABLE_HR010_A", {
         layout: "fitColumns",
         height: "100%",
@@ -705,7 +706,7 @@ function buildUserTable() {
                 title: "성명",
                 field: "dev_nm",
                 headerSort: true,
-                widthGrow: 2,
+                width: 140,
                 frozen: true,
                 formatter: function (cell) {
                     const row = cell.getRow().getData();
@@ -745,7 +746,7 @@ function buildUserTable() {
             {
                 title: "주개발언어",
                 field: "main_lang_nm",
-                widthGrow: 4, minWidth: 120, frozen: true,
+                widthGrow: 3, minWidth: 120, frozen: true,
                 formatter: function (cell) {
                     const value = cell.getValue();
                     if (!value) return "";
@@ -760,14 +761,14 @@ function buildUserTable() {
             {
                 title: "희망단가",
                 field: "hope_rate_amt",
-                widthGrow: 3, minWidth: 100, frozen: true,
+                widthGrow: 2, minWidth: 80, frozen: true,
                 formatter: function (cell) {
                     const value = cell.getValue();
                     return `<div style="text-align:right;">${amountFormatter(value)}</div>`;
                 }
             },
-            { title: "생년월일", field: "brdt", hozAlign: "center", headerSort: true, widthGrow: 2, minWidth: 80, visible: false },
-            { title: "연락처", field: "tel", hozAlign: "center", widthGrow: 3, minWidth: 100, headerSort: false },
+            { title: "생년월일", field: "brdt", hozAlign: "center", headerSort: true, visible: false },
+            { title: "연락처", field: "tel", hozAlign: "center", widthGrow: 2, minWidth: 80, headerSort: false },
             { title: "dev_id", field: "dev_id", visible: false },
             { title: "kosa_grd_cd", field: "kosa_grd_cd", visible: false },
             { title: "main_fld_cd", field: "main_fld_cd", visible: false },
@@ -814,7 +815,7 @@ function buildUserTable() {
             {
                 title: "최종학력",
                 field: "edu_last",
-                widthGrow: 4, minWidth: 120, headerSort: false, visible: false,
+                headerSort: false, visible: false,
                 /*formatter: function (cell) {
                     const value = cell.getValue();
                     if (!value) return "";
@@ -830,7 +831,7 @@ function buildUserTable() {
             {
                 title: "보유자격증",
                 field: "cert_txt",
-                widthGrow: 4, headerSort: false,
+                widthGrow: 3, minWidth: 120, headerSort: false,
                 formatter: function (cell) {
                     const value = cell.getValue();
                     if (!value) return "";
@@ -843,7 +844,7 @@ function buildUserTable() {
                     </div>`;
                 }
             },
-            { title: "투입가능시점", field: "avail_dt", hozAlign: "center", width: 115 },
+            { title: "투입가능시점", field: "avail_dt", hozAlign: "center", width: 120 },
             {
                 title: "계약형태",
                 field: "ctrt_typ",
@@ -851,7 +852,7 @@ function buildUserTable() {
                 formatter: function (cell) {
                     const val = cell.getValue();
                     return (ctrtTypMap && ctrtTypMap[val]) ? ctrtTypMap[val] : val;
-                }, editor: false, editable: false, widthGrow: 2
+                }, editor: false, editable: false, width: 100
             },
         ],
         data: [],
@@ -870,8 +871,9 @@ function buildUserTable() {
         // 행 더블 클릭
         rowDblClick: function (e, row) {
             var rowData = row.getData();
-            loadUserTableImgDataAsync(rowData);
-            openUserModal("view", rowData);
+            loadUserTableImgDataAsync(rowData).then(() => {
+                openUserModal("view", rowData);
+            });
         }
     });
 }
@@ -1023,52 +1025,70 @@ async function loadUserTableData() {
 
 // db로부터 프로필 이미지 가져오기
 function loadUserTableImgDataAsync(data) {
-    return new Promise((resolve, reject) => {
-        if (!userTable || typeof userTable.setData !== "function") {
-            resolve(); // 테이블 없으면 그냥 resolve
-            return;
+    return new Promise((resolve) => {
+        const $img = $("#dev_img");
+
+        // row에 img_url이 있는지 확인
+        const imgUrl = data.img_url; // /list에서 내려준 Base64 URL
+        const hasImage = !!imgUrl;
+
+        if (hasImage) {
+            $img.attr("src", imgUrl).show();
+        } else {
+            $img.attr("src", "").hide();
         }
 
-        $.ajax({
-            url: "/hr010/list/img",
-            type: "GET",
-            xhrFields: { responseType: "arraybuffer" },
-            data: data,
-            success: function (response) {
-                const $img = $("#dev_img");
-                const hasImage = response && response.byteLength > 0;
-                const prevUrl = $img.data("url");
-                if (prevUrl) {
-                    URL.revokeObjectURL(prevUrl);
-                }
-                if (hasImage) {
-                    const blob = new Blob([response], { type: "image/jpeg" });
-                    const imgUrl = URL.createObjectURL(blob);
-                    $img
-                        .attr("src", imgUrl)
-                        .data("url", imgUrl)
-                        .show();
-                } else {
-                    $img
-                        .attr("src", "")
-                        .removeData("url")
-                        .hide();
-                }
-                $img.toggleClass("has-img", hasImage);
-                resolve();
-            },
-            error: function (e) {
-                console.error(e);
-                showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
-                    icon: 'error',
-                    title: '오류',
-                    text: '사용자 데이터를 불러오는 중 오류가 발생했습니다.',
-                });
-                resolve(); // 에러여도 UI는 표시 가능하도록 resolve
-            }
-        });
+        $img.toggleClass("has-img", hasImage);
+        resolve();
     });
 }
+//function loadUserTableImgDataAsync(data) {
+//    return new Promise((resolve, reject) => {
+//        if (!userTable || typeof userTable.setData !== "function") {
+//            resolve(); // 테이블 없으면 그냥 resolve
+//            return;
+//        }
+//
+//        $.ajax({
+//            url: "/hr010/list/img",
+//            type: "GET",
+//            xhrFields: { responseType: "arraybuffer" },
+//            data: data,
+//            success: function (response) {
+//                const $img = $("#dev_img");
+//                const hasImage = response && response.byteLength > 0;
+//                const prevUrl = $img.data("url");
+//                if (prevUrl) {
+//                    URL.revokeObjectURL(prevUrl);
+//                }
+//                if (hasImage) {
+//                    const blob = new Blob([response], { type: "image/jpeg" });
+//                    const imgUrl = URL.createObjectURL(blob);
+//                    $img
+//                        .attr("src", imgUrl)
+//                        .data("url", imgUrl)
+//                        .show();
+//                } else {
+//                    $img
+//                        .attr("src", "")
+//                        .removeData("url")
+//                        .hide();
+//                }
+//                $img.toggleClass("has-img", hasImage);
+//                resolve();
+//            },
+//            error: function (e) {
+//                console.error(e);
+//                showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+//                    icon: 'error',
+//                    title: '오류',
+//                    text: '사용자 데이터를 불러오는 중 오류가 발생했습니다.',
+//                });
+//                resolve(); // 에러여도 UI는 표시 가능하도록 resolve
+//            }
+//        });
+//    });
+//}
 
 // ============================================================================== //
 

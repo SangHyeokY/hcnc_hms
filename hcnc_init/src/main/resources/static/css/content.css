@@ -561,7 +561,9 @@ button.btn.btn-add-skill,
     gap: 6px;
     cursor: pointer;
 }
-
+#main-modal-table button.btn.btn-add-skill {
+    margin-right: 6px;
+}
 button.btn.btn-add-skill:hover,
 .hr012-toolbar-01 button.btn.btn-add-skill:hover {
     background-color: #324760;
