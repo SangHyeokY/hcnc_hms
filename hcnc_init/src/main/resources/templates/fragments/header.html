@@ -19,14 +19,14 @@
       </div>
 
       <div class="profile-area pd10 mg-t20">
-        <div class="profile-img">
-          <img src="/images/common/user-img-none.png" alt="프로필" />
+        <div class="profile-img" id="profileImgContainer"></div>
+        <div>
+          <div id="profileName" class="fw700 fs18"></div>
+          <div id="profileId" class="fw500 fs18"></div>
         </div>
-        <div th:text="|${session.LOGIN_USER_NM}|" class="fw700"></div>
-        <div th:text="|(${session.LOGIN_USER_ID})|" class="fw500"></div>
       </div>
 
-      <div style="border-bottom: 2px solid #EAECF0;" class="mg-t20"> </div>
+<!--      <div style="border-bottom: 2px solid #EAECF0;" class="mg-t20"> </div>-->
 
       <aside class="app-sidebar left-menu">
         <nav class="app-nav nav">

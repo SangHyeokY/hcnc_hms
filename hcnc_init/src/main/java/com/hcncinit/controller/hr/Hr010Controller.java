@@ -35,8 +35,7 @@ public class Hr010Controller {
         List<Map<String, Object>> resList = hr010Service.select_hr010(map);
 
         for (Map<String, Object> row : resList) {
-            // dev_id 가져오기
-            String devId = (String) row.get("dev_id");
+            // String devId = (String) row.get("dev_id");
 
             // 기존 has_img boolean 변환
             Object base64Obj = row.get("dev_img_base64");
@@ -45,7 +44,7 @@ public class Hr010Controller {
 
             // 이미지가 있으면 Base64 URL로 넣기
             if (hasImg) {
-                row.put("img_url", "data:image/jpeg;base64," + base64Obj.toString());
+                row.put("img_url", "data:image/jpeg;base64," + base64Obj);
             } else {
                 row.put("img_url", null);
             }

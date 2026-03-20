@@ -95,7 +95,85 @@
       </div>
     </div>
 </div>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    window.LOGIN_USER = {
+        id: /*[[${session.LOGIN_USER_ID}]]*/ '',
+        name: /*[[${session.LOGIN_USER_NM}]]*/ '',
+        img: /*[[${LOGIN_USER_IMG}]]*/ null
+    };
+    /*]]>*/
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const { id: devId, name: devName, img: devImg } = window.LOGIN_USER || {};
+      setUserProfile(devId, devName, devImg);
+    });
 
+    // lnb에 프로필 이미지 표시하기
+    function setUserProfile(devId, devName, devImgBase64) {
+        const $container = $("#profileImgContainer");
+        $container.empty(); // 기존 내용 제거
+
+        if (devImgBase64) {
+            // Base64 이미지 사용
+            const $img = $("<img>")
+                .attr("src", devImgBase64)
+                .addClass("profile-circle-icon-img"); // CSS 클래스
+            $container.append($img);
+        } else {
+            // 이미지 없으면 이니셜 아이콘 생성
+            const iconHtml = makeProfileBigCircle(devName);
+            $container.append(iconHtml);
+        }
+
+        // 이름/아이디 세팅
+        $("#profileName").text(devName);
+        $("#profileId").text(`${devId}`);
+    }
+
+    // 이름에서 성 제외한 2글자 추출하기
+    function getProfileText(name) {
+        if (!name) return "";
+
+        name = name.trim();
+
+        if (name.length >= 3) {
+            return name.slice(1, 3); // 성 제외 2글자
+        }
+
+        return name;
+    }
+
+    // 이니셜 아이콘을 만들기 위한 색상표
+    function stringToSoftColor(str) {
+        let hash = 0;
+
+        for (let i = 0; i < str.length; i++) {
+            hash = str.charCodeAt(i) + ((hash << 5) - hash);
+        }
+
+        const h = Math.abs(hash) % 360;
+
+        // 파스텔 느낌 유지하면서 대비 확보
+        const s = 55 + (Math.abs(hash) % 15);      // 55~70
+        const l = 45 + (Math.abs(hash >> 3) % 10); // 45~55
+
+        return `hsl(${h}, ${s}%, ${l}%)`;
+    }
+
+    // 둥근 프로필 생성
+    function makeProfileBigCircle(name) {
+        const text = getProfileText(name);
+        const bgColor = stringToSoftColor(name);
+
+        return `
+            <div class="profile-circle-bigIcon" style="background:${bgColor}">
+                ${text}
+            </div>
+        `;
+    }
+</script>
 <script>
     (function () {
         var ctx = document.body.dataset.contextPath;

@@ -165,4 +165,14 @@
          WHERE user_id = #{user_id}
     </update>
 
+    <!-- 사용자 프로필 이미지 -->
+    <select id="getProfileImg" parameterType="map" resultType="_byte[]">
+        SELECT dev_img
+        FROM tb_dev_info
+        WHERE del_yn='N'
+        AND use_yn='Y'
+        AND dev_id = #{dev_id}
+        LIMIT 1
+    </select>
+
 </mapper>

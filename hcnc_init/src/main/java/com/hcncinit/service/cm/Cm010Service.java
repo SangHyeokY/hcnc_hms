@@ -53,6 +53,12 @@ public class Cm010Service {
         return this.sqlSession.update("com.hcncinit.Cm010Mapper.updateLastLogin", param);
     }
 
+    // 프로필 이미지
+    @QryLog(scrnCd = "CM010", fnCd = "PROFILE_IMG", opTyp = "SELECT")
+    public byte[] getProfileImg(String devId) {
+        return this.sqlSession.selectOne("com.hcncinit.Cm010Mapper.getProfileImg", devId);
+    }
+
     public void ensureUser(Map<String, Object> map) {
         // 세션 사용자 기본값 설정
         Object userId = map.get("userId");

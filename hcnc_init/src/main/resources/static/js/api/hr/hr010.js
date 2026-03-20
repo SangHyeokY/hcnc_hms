@@ -585,34 +585,6 @@ function normalizeJobValue(value) {
     return String(value);
 }
 
-// 이름에서 성 제외한 2글자 추출하기
-function getProfileText(name) {
-    if (!name) return "";
-
-    name = name.trim();
-
-    if (name.length >= 3) {
-        return name.slice(1, 3); // 성 제외 2글자
-    }
-
-    return name;
-}
-// 이니셜 아이콘을 만들기 위한 색상표
-function stringToSoftColor(str) {
-    let hash = 0;
-
-    for (let i = 0; i < str.length; i++) {
-        hash = str.charCodeAt(i) + ((hash << 5) - hash);
-    }
-
-    const h = Math.abs(hash) % 360;
-
-    // 파스텔 느낌 유지하면서 대비 확보
-    const s = 55 + (Math.abs(hash) % 15);      // 55~70
-    const l = 45 + (Math.abs(hash >> 3) % 10); // 45~55
-
-    return `hsl(${h}, ${s}%, ${l}%)`;
-}
 // 둥근 프로필 생성
 function makeProfileCircle(name) {
     const text = getProfileText(name);
@@ -725,7 +697,7 @@ function buildUserTable() {
                     }
 
                     return `
-                        <div style="display:flex; align-items:center; gap:8px;">
+                        <div class="profile-circle-wrap">
                             ${profileHtml}
                             <span>${name}</span>
                         </div>
@@ -1584,7 +1556,7 @@ async function closeUserViewModal() {
         const htmlContent = currentMode === "insert"
             ? `<span>${tabNamesHtml} 항목을 ${modeText}하고 있습니다.</span>
                <span>${modeText} 작업을 취소하고 닫으시겠습니까?</span>`
-            : `<span><strong>${devNm}</strong>님의 인적사항에서</span>&nbsp;
+            : `<span><strong>${devNm}</strong>님의</span>&nbsp;
                <span>${tabNamesHtml}</span>&nbsp;
                <span>항목이 ${modeText}되었습니다.</span>
                <span>${modeText} 작업을 취소하고 닫으시겠습니까?</span>`;

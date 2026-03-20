@@ -72,12 +72,21 @@ public class LoginController {
         session.setAttribute("LOGIN_PW_CHG", user.get("pwd_chg_yn"));
         cm010Service.updateLastLogin(userId);
 
+        // 프로필 이미지 Base64 추가
+        byte[] imgBytes = cm010Service.getProfileImg(userId); // service에서 dev_img 가져오기
+        String imgBase64 = null;
+        if (imgBytes != null && imgBytes.length > 0) {
+            imgBase64 = "data:image/jpeg;base64," + java.util.Base64.getEncoder().encodeToString(imgBytes);
+        }
+
         mv.addObject("success", true);
         mv.addObject("LOGIN_USER_ID", userId);
         mv.addObject("LOGIN_USER_NM", user.get("user_nm"));
         mv.addObject("LOGIN_AUTH", user.get("role_cd"));
         mv.addObject("LOGIN_LOCK", user.get("lock_yn"));
         mv.addObject("LOGIN_PW_CHG", user.get("pwd_chg_yn"));
+        mv.addObject("LOGIN_USER_IMG", imgBase64); // Base64 전달
+
         return mv;
     }
 
