@@ -21,7 +21,7 @@ var bizTypOptions = [];
 window.initTab1 = function () {
   return new Promise((resolve) => {
 
-      setComCode("select_biz_typ", "BIZ_TYP", "", "cd", "cd_nm", function () {
+      setComCode("select_biz_typ", "BIZ_TYP", "", "cd", "cd_nm", async function () {
 
           bizTypOptions = $("#select_biz_typ option").map(function () {
               return { cd: this.value, cd_nm: $(this).text() };
@@ -30,13 +30,11 @@ window.initTab1 = function () {
           initSelectDefault("select_biz_typ", "개인/개인사업자/법인");
           bizTypMap = getBizTypMap();
 
-          // 테이블 데이터 로드도 async라면 Promise로 처리
-          Promise.resolve(loadHr011TableData(window.currentDevId))
-              .then(() => {
-                  resolve(); // 여기서 완료 신호
-              });
-      });
+          // AJAX 끝날 때까지 기다림
+          await loadHr011TableData(window.currentDevId);
 
+          resolve();
+      });
   });
 };
 
@@ -183,28 +181,38 @@ function clearHr011Form() {
 
 // Tab1에 '소속 및 계약정보' 테이블 불러오기
 function loadHr011TableData(devId) {
-    if (!devId) {
-        clearHr011Form(); // 데이터 초기화
-        setHr011Mode("insert");
-        return;
-    }
+    return new Promise((resolve) => {
 
-    // db로부터 데이터 조회하기
-    $.ajax({
-        url: "/hr011/tab1",
-        type: "GET",
-        data: { dev_id: devId },
-        success: (res) => {
-            const data = res?.res ?? null;
-            window.hr011Data = data;
-            clearHr011Form(); // 데이터 초기화
-            if (data) {fillHr011Form(data);} // db로부터 받아온 데이터 채우기
-          },
-        error: () => {
-            console.log("데이터 조회 실패");
+        if (!devId) {
             clearHr011Form();
             setHr011Mode("insert");
+            resolve();
+            return;
         }
+
+        $.ajax({
+            url: "/hr011/tab1",
+            type: "GET",
+            data: { dev_id: devId },
+            success: (res) => {
+                const data = res?.res ?? null;
+                window.hr011Data = data;
+
+                clearHr011Form();
+
+                if (data) {
+                    fillHr011Form(data);
+                }
+
+                resolve();
+            },
+            error: () => {
+                console.log("데이터 조회 실패");
+                clearHr011Form();
+                setHr011Mode("insert");
+                resolve(); // 에러여도 resolve
+            }
+        });
     });
 }
 

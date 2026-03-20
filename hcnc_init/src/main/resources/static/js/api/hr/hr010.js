@@ -995,7 +995,7 @@ async function loadUserTableData() {
     }
 }
 
-// db로부터 프로필 이미지 가져오기
+// 프로필 이미지 가져오기
 function loadUserTableImgDataAsync(data) {
     return new Promise((resolve) => {
         const $img = $("#dev_img");
@@ -1144,7 +1144,7 @@ function upsertUserBtn() {
 
 // ============================================================================== //
 
-// 데이터 삭제 요청 - toast 방식  추가해야될 사항(현재 삭제하겠냐는 문구에 잡힌 파라미터 수정 필요)
+// 데이터 삭제 요청
 async function deleteUserRows() {
     var selectedRows = userTable.getSelectedRows();
 
@@ -1221,7 +1221,6 @@ async function reloadHr010List() {
     hideLoading();
 }
 
-
 // ============================================================================== //
 
 // 모달(팝업) 열리는 이벤트 처리
@@ -1239,7 +1238,6 @@ openUserModal = async function (mode, data) {
     else fillUserForm(data || userTable.getSelectedRows()[0].getData());
 
     setModalMode(mode);
-    await initAllTabs(); // 모든 tab 초기화
     applyHr014TabPermission(); // tab4(권한 검증후 표시) 활성화
 
     // 인력 관리 등록 시, 정해진 탭에 따라 자동으로 선택
@@ -1257,9 +1255,9 @@ openUserModal = async function (mode, data) {
         // console.log("Promise로 팝업에 띄울 데이터 호출 중...");
         updateTabActions("tab1");
         refreshTabLayout("tab1");
-        // 모두 Promise로 변경
+
         await Promise.all([
-            // loadUserScoreAsync(data.dev_id),
+            initAllTabs(),
             loadUserTableImgDataAsync(data)
         ]);
     }
@@ -1290,12 +1288,12 @@ openUserModal = async function (mode, data) {
 // 모든 tab 초기화
 async function initAllTabs() {
     // 처음에 보여질 Tab1만 await
-    await initTab1();
+    await window.initTab1();
     if (currentMode !== "insert") {
-        initTab2();   // 기다릴 필요 없음
-        initTab3();
+        window.initTab2();   // 기다릴 필요 없음
+        window.initTab3();
         if (canAccessHr014Tab()) {
-            initTab4();
+            window.initTab4();
         }
     }
 }
