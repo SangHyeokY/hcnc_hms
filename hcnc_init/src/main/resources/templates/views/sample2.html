@@ -1,46 +1,29 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/layout}">
 
-<th:block layout:fragment="searchCondition">
-    <div class="search-select">
-        <label class="fw600">• 검색조건 &nbsp;</label>
-        <select name="searchType" id="searchType">
-            <option value="">전체</option>
-            <option value="user_id">ID</option>
-            <option value="user_nm">이름</option>
-            <option value="email">이메일</option>
-            <option value="tel">연락처</option>
-            <option value="role_cd">권한</option>
-            <option value="job_cd">직무</option>
-            <option value="dept_cd">부서</option>
-        </select>
-    </div>
-    <div class="search-input">
-        <p class="fl-ac">
-            <label for="searchKeyword" class="fw600 pd-r10">• 검색어</label>
-            <input type="text" class="" id="searchKeyword" name="searchKeyword" placeholder="ID/이름/이메일/연락처/권한/직무/부서 검색" />
-        </p>
-    </div>
-    <div class="search-select search-useyn-radio">
-        <label class="search-useyn-label fw600 pd-r10">• 사용여부</label>
-        <div class="radio-box search-useyn-options">
-            <label for="searchUseYnAll">
-                <input type="radio" id="searchUseYnAll" name="searchUseYnRadio" value="" checked> 전체
-            </label>
-            <label for="searchUseYnY">
-                <input type="radio" id="searchUseYnY" name="searchUseYnRadio" value="Y"> 사용
-            </label>
-            <label for="searchUseYnN">
-                <input type="radio" id="searchUseYnN" name="searchUseYnRadio" value="N"> 미사용
-            </label>
-        </div>
-    </div>
-</th:block>
+<th:block layout:fragment="searchCondition"></th:block>
 
 <th:block layout:fragment="content">
+
+    <!-- 클래스 주입 -->
+    <script>
+        (function () {
+            var script = document.currentScript;
+            var contentsWrap = script && script.closest ? script.closest(".contents-wrap") : null;
+            var whiteFull = script && script.closest ? script.closest(".white-full") : null;
+
+            if (contentsWrap) contentsWrap.classList.add("hr030-dashboard-wrap");
+            if (whiteFull) whiteFull.classList.add("hr030-dashboard-shell");
+        })();
+    </script>
+
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js" rel="stylesheet">
+
+    <!-- 스타일 -->
     <style>
         .main { flex: 1; padding: 20px; }
 
@@ -66,7 +49,6 @@
         }
 
         .card h3 { font-size: 13px; color: #888; }
-
         .card p { font-size: 24px; font-weight: bold; margin-top: 10px; color:#212E41; }
 
         .chart-row {
@@ -129,7 +111,6 @@
         }
 
         .risk li:hover { background: #f8f9fb; }
-
         .risk li:last-child { border-bottom: none; }
     </style>
 
@@ -174,62 +155,63 @@
 
     </div>
 
+    <!-- ✅ 차트 생성 (DOM 로딩 후 실행) -->
     <script>
-        new Chart(document.getElementById('peopleChart'), {
-          type: 'doughnut',
-          data: {
-            labels: ['투입', '대기', '휴면'],
-            datasets: [{
-              data: [85, 25, 10],
-              backgroundColor: ['#E50019', '#212E41', '#ccc']
-            }]
-          },
-          options: { maintainAspectRatio: false }
-        });
+        document.addEventListener("DOMContentLoaded", function () {
 
-        new Chart(document.getElementById('projectChart'), {
-          type: 'bar',
-          data: {
-            labels: ['진행중', '완료', '지연', '대기'],
-            datasets: [{
-              label: '프로젝트 수',
-              data: [18, 40, 2, 5],
-              backgroundColor: ['#E50019', '#212E41'],
-              borderRadius: 6,          // 둥근 바 (요즘 스타일)
-              barThickness: 40          // 핵심 (너비 줄이기)
-            }]
-          },
-          options: {
-            maintainAspectRatio: false,
-            plugins: {
-              legend: { display: false } // 범례 제거 (깔끔)
-            },
-            scales: {
-              y: {
-                beginAtZero: true
-              }
-            }
-          }
-        });
+            new Chart(document.getElementById('peopleChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['투입', '대기', '휴면'],
+                    datasets: [{
+                        data: [85, 25, 10],
+                        backgroundColor: ['#E50019', '#212E41', '#ccc']
+                    }]
+                },
+                options: { maintainAspectRatio: false }
+            });
 
-        new Chart(document.getElementById('monthlyChart'), {
-          type: 'line',
-          data: {
-            labels: ['1월','2월','3월','4월','5월','6월'],
-            datasets: [{
-              label: '프로젝트 수',
-              data: [5, 10, 8, 15, 12, 18],
-              borderColor: '#E50019',
-              pointBackgroundColor: '#212E41',
-              pointBorderColor: '#ccc',
-              pointRadius: 5,
-              pointHoverRadius: 7,
-            }]
-          },
-          options: { maintainAspectRatio: false }
+            new Chart(document.getElementById('projectChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['진행중', '완료', '지연', '대기'],
+                    datasets: [{
+                        data: [18, 40, 2, 5],
+                        backgroundColor: ['#E50019', '#212E41', '#aaa', '#ddd'],
+                        borderRadius: 6,
+                        barThickness: 40
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+
+            new Chart(document.getElementById('monthlyChart'), {
+                type: 'line',
+                data: {
+                    labels: ['1월','2월','3월','4월','5월','6월'],
+                    datasets: [{
+                        label: '프로젝트 수',
+                        data: [5, 10, 8, 15, 12, 18],
+                        borderColor: '#E50019',
+                        pointBackgroundColor: '#212E41',
+                        pointBorderColor: '#ccc',
+                        pointRadius: 5,
+                        pointHoverRadius: 7
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false
+                }
+            });
+
         });
     </script>
 
 </th:block>
-
 </html>

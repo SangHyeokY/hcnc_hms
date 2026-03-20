@@ -375,7 +375,8 @@ function buildHr013Table() {
                         e.preventDefault?.();
                         e.stopPropagation?.();
                         e.stopImmediatePropagation?.();
-                        openHr013ProjectPicker(cell.getRow()); // 현재 행 컨텍스트로 팝업 오픈
+
+                        openHr013ProjectPicker(cell.getRow()); // 내부에서 로딩 처리함
                         return;
                     }
                 },
@@ -675,9 +676,9 @@ function initHr013ProjectPickerTable() {
 }
 
 // 특정 행 컨텍스트로 프로젝트 선택 팝업 열기
-function openHr013ProjectPicker(row) {
+async function openHr013ProjectPicker(row) {
     bindHr013ProjectPickerEvents();
-    if (!isHr013Editable()) return; // 조회 모드 차단
+    if (!isHr013Editable()) return;
 
     var rowData = row && typeof row.getData === "function" ? row.getData() : null;
     if (rowData && !isHr013InprjYnY(rowData.inprj_yn)) {
@@ -689,15 +690,41 @@ function openHr013ProjectPicker(row) {
         return;
     }
 
-    hr013ProjectPickerContextRow = row || null; // 어떤 행에서 열었는지 저장
-    hr013SelectedProjectCode = null;    // 이전 선택 초기화
+    showLoading();
 
-    $("#write_hr013_project_cd_nm").val("");
-    $("#write_hr013_project_inprj_yn").val("Y");
-    $("#hr013-project-picker-search").val("");
+    try {
+        hr013ProjectPickerContextRow = row || null;
+        hr013SelectedProjectCode = null;
 
-    loadHr013ProjectCodeList("");   // 초기 목록 조회
-    $("#hr013-project-picker-area").show().addClass("show");
+        $("#write_hr013_project_cd_nm").val("");
+        $("#write_hr013_project_inprj_yn").val("Y");
+        $("#hr013-project-picker-search").val("");
+
+        // 데이터 먼저 로딩
+        await loadHr013ProjectCodeList("");
+
+        const $modal = $("#hr013-project-picker-area");
+        $modal.show().addClass("show");
+
+        setTimeout(() => {
+            if (hr013ProjectPickerTable) {
+                hr013ProjectPickerTable.redraw(true);
+            }
+
+            // 한 번 더 (안정성)
+            setTimeout(() => {
+                if (hr013ProjectPickerTable) {
+                    hr013ProjectPickerTable.redraw(true);
+                }
+            }, 50);
+
+        }, 0);
+
+    } catch (e) {
+        console.error(e);
+    } finally {
+        hideLoading();
+    }
 }
 
 // 팝업 닫기
@@ -826,51 +853,49 @@ function focusHr013ProjectPickerRow(focusCd, focusName, dataList) {
 
 // 공통코드 목록 조회
 function loadHr013ProjectCodeList(keyword, options) {
-    if (!hr013ProjectPickerTable) return;
+    if (!hr013ProjectPickerTable) return Promise.resolve();
+
     options = options || {};
     var focusCd = String(options.focusCd || "").trim();
     var focusName = String(options.focusName || "").trim();
 
-    $.ajax({
+    return $.ajax({
         url: "/hr013/project-code/list",
         type: "GET",
         data: {
             keyword: keyword || "",
             grp_cd: HR013_PROJECT_GRP_CD
-        },
-        success: function (res) {
-            const list = (res && res.list) ? res.list : [];
-            updateHr013ProjectPickerCount(list.length); // 검색 결과 건수 표시
+        }
+    }).then(function (res) {
+        const list = (res && res.list) ? res.list : [];
+        updateHr013ProjectPickerCount(list.length);
 
-            var setDataResult = hr013ProjectPickerTable.setData(list);
+        var setDataResult = hr013ProjectPickerTable.setData(list);
+
+        return new Promise(function (resolve) {
             var afterSetData = function () {
-                // 신규 저장 직후에는 방금 등록한 코드/명칭으로 자동 포커스한다.
                 if (focusCd || focusName) {
                     focusHr013ProjectPickerRow(focusCd, focusName, list);
-                    return;
-                }
-                // 일반 조회에서는 이전 선택을 제거해 오선택을 방지한다.
-                if (typeof hr013ProjectPickerTable.deselectRow === "function") {
+                } else {
                     hr013ProjectPickerTable.deselectRow();
+                    hr013SelectedProjectCode = null;
                 }
-                hr013SelectedProjectCode = null;
+                resolve();
             };
 
-            // setData는 환경에 따라 Promise/비Promise가 섞일 수 있어 두 경로를 모두 처리한다.
             if (setDataResult && typeof setDataResult.then === "function") {
                 setDataResult.then(afterSetData);
             } else {
                 setTimeout(afterSetData, 0);
             }
-        },
-        error: function () {
-            updateHr013ProjectPickerCount(0);
-            showAlert({
-                icon: "error",
-                title: "오류",
-                text: "프로젝트 코드를 불러오지 못했습니다."
-            });
-        }
+        });
+    }).catch(function () {
+        updateHr013ProjectPickerCount(0);
+        showAlert({
+            icon: "error",
+            title: "오류",
+            text: "프로젝트 코드를 불러오지 못했습니다."
+        });
     });
 }
 

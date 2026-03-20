@@ -3,7 +3,8 @@ export const menuData = [
     title: "홈",
     visible: true,
     children: [
-      { title: "대시보드", path: "/hr030", type: "A", visible: true },
+      { title: "대시보드 예제1", path: "/hr030", type: "A", visible: true },
+      { title: "대시보드 예제2", path: "/sample2", type: "A", visible: true }
     ],
   },
   {
