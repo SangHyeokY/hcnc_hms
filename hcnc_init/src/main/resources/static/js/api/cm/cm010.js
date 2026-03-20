@@ -149,7 +149,8 @@ function buildUserTable() {
         headerSort: true,
         placeholder: "데이터 없음",
         headerHozAlign: "center",
-        selectable: true,
+        // selectable: true,
+        selectable: 1, // 1개만 선택 가능
         selectableRangeMode: "click",
         columnDefaults: {
             resizable: true,
