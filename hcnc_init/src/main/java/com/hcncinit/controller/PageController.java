@@ -31,9 +31,16 @@ public class PageController {
     }
 
     @GetMapping("/sample2")
-    public ModelAndView sample2() {
+    public ModelAndView sample2(HttpSession session, Model model) {
         ModelAndView mv = new ModelAndView();
         mv.setViewName("views/sample2");
+
+        String auth = (String) session.getAttribute("LOGIN_AUTH");
+        String lock = (String) session.getAttribute("LOGIN_LOCK");
+        String pwchg = (String) session.getAttribute("LOGIN_PW_CHG");
+        model.addAttribute("LOGIN_AUTH", auth);
+        model.addAttribute("LOGIN_LOCK", lock);
+        model.addAttribute("LOGIN_PW_CHG", pwchg);
         return mv;
     }
 
