@@ -93,6 +93,18 @@ function toActivationYn(lockYn) {
     return "";
 }
 
+// 둥근 프로필 생성
+function makeProfileCircle(name) {
+    const text = getProfileText(name);
+    const bgColor = stringToSoftColor(name);
+
+    return `
+        <div class="profile-circle-icon" style="background:${bgColor}">
+            ${text}
+        </div>
+    `;
+}
+
 function buildUserTable() {
     if (!window.Tabulator) {
         console.error("데이터가 로드되지 않았습니다.");
@@ -167,7 +179,36 @@ function buildUserTable() {
                 resizable: false
             },
             { title: "ID", field: "user_id", hozAlign: "center", widthGrow: 1 },
-            { title: "이름", field: "user_nm", hozAlign: "center", widthGrow: 1 },
+            {
+                title: "이름",
+                field: "user_nm",
+                headerSort: true,
+                resizable: false,
+                width: 200,
+                formatter: function (cell) {
+                    const row = cell.getRow().getData();
+                    const name = row.user_nm || "";
+                    const imgUrl = row.img_url;
+
+                    let profileHtml = "";
+
+                    if (row.has_img && imgUrl) {
+                        profileHtml = `
+                            <img src="${imgUrl}" class="profile-circle-icon"
+                                 onerror="this.style.display='none'"/>
+                        `;
+                    } else {
+                        profileHtml = makeProfileCircle(name);
+                    }
+
+                    return `
+                        <div class="profile-circle-wrap">
+                            ${profileHtml}
+                            <span>${name}</span>
+                        </div>
+                    `;
+                }
+            },
             { title: "e-mail", field: "email", widthGrow: 2 },
             { title: "연락처", field: "tel", hozAlign: "center", widthGrow: 2 },
             { title: "권한", field: "role_nm", hozAlign: "center", widthGrow: 1 },

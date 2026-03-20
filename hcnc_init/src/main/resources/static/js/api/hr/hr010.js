@@ -723,7 +723,7 @@ function buildUserTable() {
             {
                 title: "주개발언어",
                 field: "main_lang_nm",
-                widthGrow: 3, minWidth: 120, frozen: true,
+                widthGrow: 4, minWidth: 120, frozen: true,
                 formatter: function (cell) {
                     const value = cell.getValue();
                     if (!value) return "";
@@ -738,14 +738,14 @@ function buildUserTable() {
             {
                 title: "희망단가",
                 field: "hope_rate_amt",
-                widthGrow: 2, minWidth: 80, frozen: true,
+                widthGrow: 3, minWidth: 80, frozen: true,
                 formatter: function (cell) {
                     const value = cell.getValue();
                     return `<div style="text-align:right;">${amountFormatter(value)}</div>`;
                 }
             },
             { title: "생년월일", field: "brdt", hozAlign: "center", headerSort: true, visible: false },
-            { title: "연락처", field: "tel", hozAlign: "center", widthGrow: 2, minWidth: 80, headerSort: false },
+            { title: "연락처", field: "tel", hozAlign: "center", widthGrow: 3, minWidth: 150, headerSort: false },
             { title: "dev_id", field: "dev_id", visible: false },
             { title: "kosa_grd_cd", field: "kosa_grd_cd", visible: false },
             { title: "main_fld_cd", field: "main_fld_cd", visible: false },
