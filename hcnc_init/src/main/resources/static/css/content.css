@@ -468,15 +468,14 @@ option{background:#fff; color:#333;}
 /* 프로젝트 탭, 평가 및 리스크 input 높이 */
 #TABLE_HR013_A input[type="date"], #TABLE_HR013_A input[type="text"], #TABLE_HR014_A input[type="text"] {
   height: 30px !important;
+  line-height: normal;
 }
 #TABLE_HR013_A input[type="date"] {
   width: 100% !important;
 }
 #TABLE_HR013_A select {
   height: 30px !important;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  line-height: normal;
   background: url(../images/common/ico-arrow-down.png) calc(100% - 10px) center no-repeat;
   background-size: 14px;
 }

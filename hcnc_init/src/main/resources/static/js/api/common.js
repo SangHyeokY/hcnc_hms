@@ -776,6 +776,13 @@ function createGroupedSkillPicker(config) {
         return groupNameMap;
     }
 
+    function getPriority(text) {
+        if (/^[0-9]/.test(text)) return 1;
+        if (/^[a-zA-Z]/.test(text)) return 2;
+        if (/^[ㄱ-ㅎ가-힣]/.test(text)) return 3;
+        return 4;
+    }
+
     function buildRows() {  // Tabulator 행 데이터 생성
         // 그리드 데이터는 "분야 1행 + 분야별 기술칩 묶음" 구조로 생성한다.
         var groupRows = [];
@@ -789,7 +796,8 @@ function createGroupedSkillPicker(config) {
             var row = {
                 groupCode: groupCode,
                 groupName: group.cd_nm || groupCode,
-                sortOrder: idx,
+                // sortOrder: idx,
+                sortOrder: group.sort_no,
                 skills: []
             };
             groupMap[groupCode] = row;
@@ -826,10 +834,18 @@ function createGroupedSkillPicker(config) {
         return groupRows
             .filter(function (row) { return row.skills.length > 0; })   // 기술 없는 그룹 제외
             .sort(function (a, b) {
-                if (a.sortOrder !== b.sortOrder) {  // sortOrder 다르면
-                    return a.sortOrder - b.sortOrder;   // sortOrder 우선
+                if (a.sortOrder !== b.sortOrder) {
+                    return a.sortOrder - b.sortOrder;
                 }
-                return a.groupName.localeCompare(b.groupName, "ko");    // 이름으로 2차 정렬
+
+                var pa = getPriority(a.groupName);
+                var pb = getPriority(b.groupName);
+
+                if (pa !== pb) {
+                    return pa - pb;
+                }
+
+                return a.groupName.localeCompare(b.groupName, "ko");
             });
     }
 
