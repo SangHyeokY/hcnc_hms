@@ -1703,6 +1703,21 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
   white-space: nowrap;
 }
 
+.tab4-content .hr014-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.tab4-content .hr014-title-wrap .select_prj_cd {
+    width: 350px !important;
+}
+
+.tab4-content.is-readonly .hr014-title-wrap .select_prj_cd {
+    pointer-events: auto;
+    opacity: 1;
+}
+
 /* "상세" 보기로 tab2의 숙련도 평가 테이블 볼 때, 클릭 방지 */
 .tab2-content #TABLE_HR012_B.is-readonly .tabulator-table * {
     cursor: default !important;

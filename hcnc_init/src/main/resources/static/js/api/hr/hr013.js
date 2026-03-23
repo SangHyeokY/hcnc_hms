@@ -316,7 +316,7 @@ function buildHr013Table() {
 
                     return true;
                 },
-                cellClick: function (a, b) {
+                cellClick: async function (a, b) {
                     // (e, cell) 또는 (cell) 또는 (e) 등 어떤 형태로 와도 견딤
                     let e = null;
                     let cell = null;
@@ -343,30 +343,17 @@ function buildHr013Table() {
                         e.stopImmediatePropagation?.();
 
                         const rowData = cell.getRow().getData();
-                        console.log("평가:", rowData.prj_nm, rowData);
+                        window.hr013_prj_nm = rowData.dev_prj_id;
 
-                        showLoading(); // 로딩바 표시
+                        $(".tab-btn").last().click();
 
-                        editRisk(rowData)
-                            .then(() => {
-                                $(".tab-btn").last().click();
-                                $(".hr014-title").text("(프로젝트명 : " + rowData.prj_nm + ")");
+                        console.log("dev_id :",rowData.dev_id);
+                        console.log("dev_prj_id :",rowData.dev_prj_id);
 
-                                // 탭 클릭 직후 레이아웃 재계산이 필요한 경우가 있어 0ms로 한번 더
-                                setTimeout(() => {
-                                    if (window.hr014TableA) window.hr014TableA.redraw(true);
-                                    if (window.hr014TableB) window.hr014TableB.redraw(true);
-                                }, 0);
-                            })
-                            .catch((e) => {
-                                console.error(e);
-                                alert("데이터 로드 중 오류가 발생했습니다.");
-                            })
-                            .finally(() => {
-                                $(".tab-btn").last().click();
-                                $(".hr014-title").text("(프로젝트명 : " + rowData.prj_nm + ")");
-                                hideLoading();
-                            });
+                         await loadTab4ByProject (
+                            rowData.dev_id,
+                            rowData.dev_prj_id
+                         );
                     }
 
                     // 등록 버튼 클릭 처리(새 요구사항)
@@ -2364,4 +2351,24 @@ function getPriority(text) {
     if (/^[0-9]/.test(text)) return 2;      // 숫자 (2번째)
     if (/^[ㄱ-ㅎ가-힣]/.test(text)) return 3; // 한글 (3번째)
     return 4;                               // 기타 (4번째)
+}
+
+// 평가 => 탭4로 이동
+async function loadTab4ByProject(devId, prjId) {
+    showLoading();
+
+    try {
+        window.currentDevId = devId;
+        window.hr013_prj_nm = prjId;
+
+        await Promise.all([
+            loadHr014TableDataA(),
+            loadHr014TableDataB()
+        ]);
+
+    } catch (e) {
+        console.error("Tab4 로드 실패", e);
+    } finally {
+        hideLoading();
+    }
 }

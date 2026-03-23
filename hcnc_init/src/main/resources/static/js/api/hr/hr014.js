@@ -22,6 +22,7 @@ var riskActiveKey = "leave_txt";
 $(document).off("tab:readonly.hr014").on("tab:readonly.hr014", function(_, isReadOnly) {
     applyTab4Readonly(!!isReadOnly);
 });
+
 window.initTab4 = function() {
     // 서브 탭 초기 상태 설정
     var $tab4 = $("#tab4");
@@ -58,7 +59,7 @@ window.initTab4 = function() {
     //     riskState.sec_txt = risk.sec_txt || "";
     //     riskState.re_in_yn = risk.re_in_yn || "N";
     //     riskState.memo = risk.memo || "";
-    //     $("#HR015_REIN_CHECK").prop("checked", riskState.re_in_yn === "Y");
+    //     $("#HR014_REIN_CHECK").prop("checked", riskState.re_in_yn === "Y");
     //     setRiskActive(riskActiveKey);
     // }
     // }
@@ -227,8 +228,31 @@ function loadHr014TableDataA() {
                 dev_prj_id: window.hr013_prj_nm
             },
             success: function (response) {
+                if (!response.success) {
+                    reject("fail");
+                    return;
+                }
+
                 const dataArray = Array.isArray(response.list) ? response.list : [];
+                const projectList = Array.isArray(response.projectList) ? response.projectList : [];
+
                 window.hr014TableA.setData(dataArray);
+
+                // 자사 프로젝트 표시
+                const $select = $(".select_prj_cd");
+                const selected = window.hr013_prj_nm;
+
+                if ($select.children().length === 0) {
+                    projectList.forEach(function (item) {
+                        const isSelected = item.dev_prj_id == selected ? "selected" : "";
+                        $select.append(
+                            `<option value="${item.dev_prj_id}" ${isSelected}>${item.prj_nm}</option>`
+                        );
+                    });
+                } else {
+                    // 선택만 변경
+                    $select.val(selected);
+                }
 
                 // setData 이후 렌더까지 체감상 보장하려면(선택)
                 // renderComplete 이벤트 1회 대기
@@ -247,6 +271,47 @@ function loadHr014TableDataA() {
         });
     });
 }
+
+// 셀렉트 선택 시, 테이블 재로드
+$(document).on("change", ".select_prj_cd", async function () {
+    const selectedPrjId = $(this).val();
+    // const devId = window.currentDevId;
+
+    showLoading();
+
+    try {
+        // A 초기화 (레이아웃 틀은 유지)
+        const data = window.hr014TableA.getData();
+        const cleared = data.map(row => ({
+            ...row,
+            lv1: "N",
+            lv2: "N",
+            lv3: "N",
+            lv4: "N",
+            lv5: "N",
+            cmt: ""
+        }));
+        window.hr014TableA.setData(cleared);
+
+        // B 초기화 (레이아웃 틀은 유지)
+        $("#HR014_RISK_TEXT").val(" ");
+
+        // 선택된 프로젝트 유지
+        window.hr013_prj_nm = selectedPrjId;
+
+        // 두 개 동시에 기다리기 (병렬)
+        await Promise.all([
+            loadHr014TableDataA(),
+            loadHr014TableDataB()
+        ]);
+
+    } catch (e) {
+        console.error("데이터 로드 실패", e);
+    } finally {
+        // 무조건 로딩 종료
+        hideLoading();
+    }
+});
 
 // =============================================================================================================================
 
@@ -339,7 +404,7 @@ function loadHr014TableDataB() {
                 riskState.re_in_yn  = risk.re_in_yn  || "N";
                 riskState.memo      = risk.memo      || "";
 
-                $("#HR015_REIN_CHECK").prop("checked", riskState.re_in_yn === "Y");
+                $("#HR014_REIN_CHECK").prop("checked", riskState.re_in_yn === "Y");
                 setRiskActive(riskActiveKey);
 
                 riskData.set(window.hr013_prj_nm, {...riskState});
@@ -413,7 +478,7 @@ function saveTableB(alertFlag) {
         });
     });
 
-    // riskState.re_in_yn = $("#HR015_REIN_CHECK").is(":checked") ? "Y" : "N";
+    // riskState.re_in_yn = $("#HR014_REIN_CHECK").is(":checked") ? "Y" : "N";
 
     $.ajax({
         url: "/hr014/b/save",
@@ -447,7 +512,7 @@ function saveTableB(alertFlag) {
 
 // 리스크 항목 리스트 렌더링
 function buildRiskList() {
-    var $list = $("#HR015_RISK_LIST");
+    var $list = $("#HR014_RISK_LIST");
     if ($list.length === 0) {
         return;
     }
@@ -464,7 +529,7 @@ function buildRiskList() {
         $list.append($btn);
     });
 
-    $("#HR015_RISK_TEXT").prop("placeholder", placeholder)
+    $("#HR014_RISK_TEXT").prop("placeholder", placeholder)
         .off("input").on("input", function () {
             if (window.hr010ReadOnly) return;
             var value = $(this).val();
@@ -473,7 +538,7 @@ function buildRiskList() {
             riskData.set(window.hr013_prj_nm, {...riskState});
         });
 
-    $("#HR015_REIN_CHECK").off("change").on("change", function () {
+    $("#HR014_REIN_CHECK").off("change").on("change", function () {
         if (window.hr010ReadOnly) return;
         riskState.re_in_yn = $(this).is(":checked") ? "Y" : "N";
         riskData.set(window.hr013_prj_nm, {...riskState});
@@ -484,8 +549,8 @@ function buildRiskList() {
 function setRiskActive(key) {
     riskActiveKey = key;
 
-    $("#HR015_RISK_LIST .risk-item").removeClass("active");
-    $("#HR015_RISK_LIST .risk-item[data-key='" + key + "']").addClass("active");
+    $("#HR014_RISK_LIST .risk-item").removeClass("active");
+    $("#HR014_RISK_LIST .risk-item[data-key='" + key + "']").addClass("active");
 
     // 선택된 항목 찾기
     var item = riskKeys.find(function (r) {
@@ -494,7 +559,7 @@ function setRiskActive(key) {
 
     // placeholder 변경
     if (!window.hr010ReadOnly && item) {
-        $("#HR015_RISK_TEXT").prop(
+        $("#HR014_RISK_TEXT").prop(
             "placeholder",
             item.label + "을(를) 구체적으로 입력하세요."
         );
@@ -502,9 +567,9 @@ function setRiskActive(key) {
 
     // 기존 값 세팅
     if (key === "memo_txt") {
-        $("#HR015_RISK_TEXT").val(riskState.memo || "");
+        $("#HR014_RISK_TEXT").val(riskState.memo || "");
     } else {
-        $("#HR015_RISK_TEXT").val(riskState[key] || "");
+        $("#HR014_RISK_TEXT").val(riskState[key] || "");
     }
 }
 
@@ -559,22 +624,24 @@ function saveTab4All() {
 window.saveTab4All = saveTab4All;
 
 function applyTab4Readonly(isReadOnly) {
-    $("#HR015_RISK_TEXT").prop("disabled", isReadOnly);
-    $("#HR015_REIN_CHECK").prop("disabled", isReadOnly);
+    $("#HR014_RISK_TEXT").prop("disabled", isReadOnly);
+    $("#HR014_REIN_CHECK").prop("disabled", isReadOnly);
     $("#TABLE_HR014_A").toggleClass("is-readonly", !!isReadOnly);
     // tab2/tab4가 같은 id를 재사용하므로 tab4 영역으로 스코프를 제한한다.
     $(".tab4-content .hr014-side-tabs").toggleClass("is-readonly", !!isReadOnly);
+    // select는 항상 활성화 유지
+    $(".select_prj_cd").prop("disabled", false);
 }
 
 window.applyTab4Readonly = applyTab4Readonly;
 
-$("#HR015_RISK_TEXT").on("change", function () {
+$("#HR014_RISK_TEXT").on("change", function () {
     // 텍스트 영역은 항상 현재 선택된 항목(riskActiveKey)과 동기화된다.
     riskData.set(window.hr013_prj_nm, {...riskState});
 });
 
 // 팝업이 닫힐 때 데이터 초기화
-function closeTab4Popup() {
+function clearTab4Popup() {
     // 테이블 초기화
     if (window.hr014TableA) window.hr014TableA.clearData();
 
@@ -584,19 +651,19 @@ function closeTab4Popup() {
     riskState = { leave_txt: "", claim_txt: "", sec_txt: "", re_in_yn: "N", memo: "" };
 
     // UI 초기화
-    $("#HR015_RISK_TEXT").val("");
-    $("#HR015_REIN_CHECK").prop("checked", false);
-    $("#HR015_RISK_LIST .risk-item").removeClass("active");
+    $("#HR014_RISK_TEXT").val("");
+    $("#HR014_REIN_CHECK").prop("checked", false);
+    $("#HR014_RISK_LIST .risk-item").removeClass("active");
 
     // Active Key 초기화
     riskActiveKey = "leave_txt";
 }
 
 // 인적사항 팝업 닫혔을 때
-$(".close-btn").on("click", closeTab4Popup);
+$(".close-btn").on("click", clearTab4Popup);
 
 $(document).on("keydown", function(e) {
     if (e.key === "Escape") {
-       closeTab4Popup();
+       clearTab4Popup();
     }
 });

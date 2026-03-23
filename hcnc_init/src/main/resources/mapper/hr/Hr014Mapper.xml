@@ -137,4 +137,16 @@
         </if>
     </insert>
 
+    <!-- [Tab4] 당사의 프로젝트 조회 -->
+    <select id="select_HCNC_project" resultType="hashmap" parameterType="map">
+        SELECT
+        dev_prj_id,
+        prj_nm
+        FROM tb_dev_prj_info
+        WHERE del_yn = 'N'
+        AND inprj_yn = 'Y'
+        AND dev_id = #{dev_id}
+        ORDER BY prj_nm
+    </select>
+
 </mapper>

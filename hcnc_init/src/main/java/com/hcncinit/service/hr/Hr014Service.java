@@ -72,6 +72,12 @@ public class Hr014Service {
         }
     }
 
+    // [Tab4] 당사의 프로젝트 조회
+    @QryLog(scrnCd = "HR010", fnCd = "TAB4_HCNC_LIST", opTyp = "SELECT")
+    public List<Map<String, Object>> selectProjectList(String devId) {
+        return this.sqlSession.selectList("com.hcncinit.Hr014Mapper.select_HCNC_project", devId);
+    }
+
     private void requireHr014Access(Map<String, Object> map) {
         Object roleObj = (map == null) ? null : map.get("login_role_cd");
         String roleCd = (roleObj == null) ? "" : String.valueOf(roleObj).trim();
