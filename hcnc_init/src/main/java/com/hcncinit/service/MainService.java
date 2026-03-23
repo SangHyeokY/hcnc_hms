@@ -56,16 +56,4 @@ public class MainService {
         int result = this.sqlSession.update("com.hcncinit.MainMapper.gUpdate", map);
         return result;
     }
-
-    // 인력관리 > 기본 인적사항 (임시/검색x), 따로 분류할건지는 논의
-    public List<Map<String, Object>> select_hr010(Map<String, Object> map) {
-        return this.sqlSession.selectList("com.hcncinit.MainMapper.select_hr010", map);
-    }
-
-    // 인력관리 > 기본 인적사항 (상세) (임시/검색x), 따로 분류할건지는 논의
-    public Map<String, Object> select_hr011(Map<String,Object> map){
-        Map<String, Object> result;
-        result = this.sqlSession.selectOne("com.hcncinit.MainMapper.select_hr011", map);
-        return result;
-    };
 }

@@ -79,38 +79,4 @@ public class MainController {
         mv.addObject("res", res);
         return mv;
     }
-
-    // 인력관리 > 기본 인적사항 (임시/검색x), 따로 분류할건지는 논의
-    @RequestMapping("/select_hr010")
-    public ModelAndView select_hr010 (@RequestParam(required = false) Map<String,Object> map) {
-
-        // 확인용 1
-        System.out.println("select_hr010 호출됨, param = " + map);
-
-        List<Map<String, Object>> resList = mainService.select_hr010(map);
-        ModelAndView mv = new ModelAndView("jsonView");
-
-        // 확인용 2
-        System.out.println("조회 결과 = " + resList);
-
-        mv.addObject("res", resList);
-        return mv;
-    }
-
-    // 인력관리 > 기본 인적사항 (상세) (임시/검색x), 따로 분류할건지는 논의
-    @RequestMapping("/select_hr011")
-    public ModelAndView select_hr011 (@RequestParam(required = false) Map<String,Object> map) {
-
-        // 확인용 1
-        System.out.println("select_hr011 호출됨, param = " + map);
-
-        Map<String,Object> res = mainService.select_hr011(map);
-        ModelAndView mv = new ModelAndView("jsonView");
-
-        // 확인용 2
-        System.out.println("조회 결과 = " + res);
-
-        mv.addObject("res", res);
-        return mv;
-    }
 }

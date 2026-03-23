@@ -38,7 +38,14 @@
                     LEFT JOIN skl s
                               ON g.cd = s.skl_grp
         GROUP BY g.cd, g.cd_nm, g.sort_no
-        ;
+        ORDER BY -- 정렬순서 (영문 1 / 숫자 2 / 한글 3 / 그외 4)
+            CASE
+                WHEN g.cd_nm REGEXP '^[A-Za-z]' THEN 1
+                WHEN g.cd_nm REGEXP '^[0-9]' THEN 2
+                WHEN g.cd_nm REGEXP '^[가-힣]' THEN 3
+                ELSE 4
+            END,
+        g.cd_nm;
     </select>
 
     <!-- [Tab2] 보유역량 및 숙련도 > 보유역량 신규/수정 저장 -->

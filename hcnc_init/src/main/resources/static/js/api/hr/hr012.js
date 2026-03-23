@@ -189,7 +189,6 @@ function buildHr012TableB() {
             updateHr012BTitleCount();
         },
         cellEdited: function (cell) {
-           console.log("cellEdited B !!!!");
            console.log(cell.getValue());
            changedTabs.tab2 = true;
         },
@@ -200,6 +199,7 @@ function buildHr012TableB() {
                 title: i.toString() + "점",
                 field: "lv" + i,
                 hozAlign: "center",
+                headerSort: false,
                 formatter: radioFormatter,
                 cellClick: function(e, cell){
                     if (currentMode === "view") return;
@@ -931,16 +931,25 @@ function buildHr012SkillPickerRows() {
         });
     });
 
-    return groupRows
-        .filter(function (row) {
-            return row.skills.length > 0;
-        })
-        .sort(function (a, b) {
-            if (a.sortOrder !== b.sortOrder) {
-                return a.sortOrder - b.sortOrder;
-            }
-            return a.groupName.localeCompare(b.groupName, "ko");
-        });
+    // 보유역량 기술 테이블 정렬
+    return groupRows.sort((a, b) => {
+        const pa = getPriority(a.groupName);
+        const pb = getPriority(b.groupName);
+
+        if (pa !== pb) return pa - pb;
+
+        return a.groupName.localeCompare(b.groupName, "ko");
+    });
+//    return groupRows
+//        .filter(function (row) {
+//            return row.skills.length > 0;
+//        })
+//        .sort(function (a, b) {
+//            if (a.sortOrder !== b.sortOrder) { // 거의 항상 true
+//                return a.sortOrder - b.sortOrder;
+//            }
+//            return a.groupName.localeCompare(b.groupName, "ko");
+//        });
 }
 
 function hr012SkillChipFormatter(cell) {
@@ -1208,4 +1217,12 @@ function hr012EscapeHtml(value) {
         .replace(/>/g, "&gt;")
         .replace(/\"/g, "&quot;")
         .replace(/'/g, "&#39;");
+}
+
+// 보유역량 기술 테이블 정렬 순서
+function getPriority(text) {
+    if (/^[a-zA-Z]/.test(text)) return 1;   // 영문 (1번째)
+    if (/^[0-9]/.test(text)) return 2;      // 숫자 (2번째)
+    if (/^[ㄱ-ㅎ가-힣]/.test(text)) return 3; // 한글 (3번째)
+    return 4;                               // 기타 (4번째)
 }

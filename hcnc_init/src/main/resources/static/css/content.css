@@ -1703,12 +1703,13 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
   color: #1D232D;
   white-space: nowrap;
 }
-.tab2-content #TABLE_HR012_A.is-readonly,
-.tab2-content #TABLE_HR012_B.is-readonly,
-.tab2-content #TABLE_HR012_A.is-readonly *,
-.tab2-content #TABLE_HR012_B.is-readonly * {
+
+/* "상세" 보기로 tab2의 숙련도 평가 테이블 볼 때, 클릭 방지 */
+.tab2-content #TABLE_HR012_B.is-readonly .tabulator-table * {
     cursor: default !important;
+    pointer-events: auto;
 }
+
 #TABLE_HR012_A .tabulator-cell[data-field="skl_id_lst"] .tag-list,
 #TABLE_HR012_A .tabulator-cell[tabulator-field="skl_id_lst"] .tag-list {
     flex-wrap: nowrap;
