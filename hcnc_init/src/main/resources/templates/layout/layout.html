@@ -132,14 +132,14 @@
         $("#profileId").text(`${devId}`);
     }
 
-    // 이름에서 성 제외한 2글자 추출하기
+    // 이름에서 뒤 2글자 추출하기
     function getProfileText(name) {
         if (!name) return "";
 
         name = name.trim();
 
-        if (name.length >= 3) {
-            return name.slice(1, 3); // 성 제외 2글자
+        if (name.length >= 2) {
+            return name.slice(-2); // 뒤에서 2글자
         }
 
         return name;
