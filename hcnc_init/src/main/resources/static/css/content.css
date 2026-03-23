@@ -686,7 +686,7 @@ button.btn.btn-add-skill:hover,
 #view-user-area #HR014_TAB_B .risk-box-top {
   grid-template-columns: 110px 1fr;
   min-height: 0;
-  height: 489px;
+  height: 499px;
   display: grid;
   gap: 12px;
 }

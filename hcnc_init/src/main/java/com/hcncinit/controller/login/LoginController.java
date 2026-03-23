@@ -23,6 +23,7 @@ public class LoginController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    // 비밀번호 변경
     @PostMapping("/pwChg")
     public ModelAndView pwChg(@RequestParam Map<String, Object> map) {
 
@@ -32,7 +33,9 @@ public class LoginController {
 
         map.put("password", passwordEncoder.encode(password));
 
-        System.out.println("cm010Service = " + cm010Service); // ⭐ null 여부 즉시 확인
+        System.out.println("userId = " + userId + "/ password = " + password);
+        System.out.println("cm010Service = " + cm010Service); // null 여부 즉시 확인
+
         cm010Service.pwChg(map);
         mv.addObject("success", true);
         return mv;
@@ -73,7 +76,7 @@ public class LoginController {
         cm010Service.updateLastLogin(userId);
 
         // 프로필 이미지 Base64 추가
-        byte[] imgBytes = cm010Service.getProfileImg(userId); // service에서 dev_img 가져오기
+        byte[] imgBytes = cm010Service.getProfileImg(userId); // userId와 devId가 존재하고, 일치할 경우에 dev_img 가져오기
         String imgBase64 = null;
         if (imgBytes != null && imgBytes.length > 0) {
             imgBase64 = "data:image/jpeg;base64," + java.util.Base64.getEncoder().encodeToString(imgBytes);
