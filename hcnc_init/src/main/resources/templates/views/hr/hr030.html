@@ -5,208 +5,130 @@
 <th:block layout:fragment="searchCondition"></th:block>
 
 <th:block layout:fragment="content">
-        <script>
-            (function () {
-                var script = document.currentScript;
-                var contentsWrap = script && script.closest ? script.closest(".contents-wrap") : null;
-                var whiteFull = script && script.closest ? script.closest(".white-full") : null;
+    <script>
+        (function () {
+            var script = document.currentScript;
+            var contentsWrap = script && script.closest ? script.closest(".contents-wrap") : null;
+            var whiteFull = script && script.closest ? script.closest(".white-full") : null;
 
-                if (contentsWrap) {
-                    contentsWrap.classList.add("hr030-dashboard-wrap");
-                }
+            if (contentsWrap) {
+                contentsWrap.classList.add("hr030-dashboard-wrap");
+            }
 
-                if (whiteFull) {
-                    whiteFull.classList.add("hr030-dashboard-shell");
-                }
-            })();
-        </script>
-        <div class="hr030-dashboard" id="hr030-dashboard">
-            <aside class="hr030-dock hr030-reveal" aria-label="대시보드 패널 이동">
-                <div class="hr030-dock-top-slot" aria-hidden="true">
-                    <button type="button" class="hr030-dock-top" id="hr030DockTop">TOP</button>
+            if (whiteFull) {
+                whiteFull.classList.add("hr030-dashboard-shell");
+            }
+        })();
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+    <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+
+    <div class="hr030-dashboard hr030-saas-dashboard" id="hr030-dashboard">
+        <div class="hr030-admin-shell">
+            <header class="hr030-admin-topbar" aria-label="인력관리 대시보드 상단">
+                <div class="hr030-admin-topbar-row">
+                    <div class="hr030-admin-brand">
+                        <span class="hr030-admin-kicker">운영 현황</span>
+                        <div>
+                            <h4>프리랜서 인력관리 메인 대시보드</h4>
+                            <p>투입 현황, 검토 요청, 종료 예정 인력을 한 화면에서 확인하는 운영 메인 화면입니다.</p>
+                        </div>
+                    </div>
+
+                    <div class="hr030-admin-actions">
+                        <label class="hr030-admin-search" for="hr030DashboardSearch">
+                            <i data-lucide="search" aria-hidden="true"></i>
+                            <input type="search" id="hr030DashboardSearch" placeholder="이름, 기술, 프로젝트, 요청번호 검색" autocomplete="off">
+                        </label>
+
+                        <div class="hr030-admin-meta">
+                            <div class="hr030-admin-chip" aria-live="polite">
+                                <i data-lucide="calendar-days" aria-hidden="true"></i>
+                                <span id="hr030TodayLabel">2026년 3월 23일 월요일</span>
+                            </div>
+
+                            <button type="button" class="hr030-admin-alert" aria-label="알림 4건">
+                                <i data-lucide="bell" aria-hidden="true"></i>
+                                <span class="hr030-admin-alert-count" id="hr030AlertCount">4</span>
+                            </button>
+
+                            <div class="hr030-admin-user" aria-label="현재 사용자">
+                                <span class="hr030-admin-user-avatar" id="hr030UserAvatar">관리</span>
+                                <div class="hr030-admin-user-copy">
+                                    <strong id="hr030UserName">프리랜서 운영 관리자</strong>
+                                    <span>운영 총괄</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <button type="button" class="hr030-dock-item is-active" data-panel-target="hr030PanelInsight">
-                    <span class="hr030-dock-icon hr030-text-reveal">01</span>
-                    <strong class="hr030-text-reveal">인사이트</strong>
-                </button>
-                <button type="button" class="hr030-dock-item" data-panel-target="hr030PanelPriority">
-                    <span class="hr030-dock-icon hr030-text-reveal">02</span>
-                    <strong class="hr030-text-reveal">우선 확인</strong>
-                </button>
-                <button type="button" class="hr030-dock-item" data-panel-target="hr030PanelDetail">
-                    <span class="hr030-dock-icon hr030-text-reveal">03</span>
-                    <strong class="hr030-text-reveal">선택 항목</strong>
-                </button>
-                <button type="button" class="hr030-dock-item" data-panel-target="hr030PanelFocus">
-                    <span class="hr030-dock-icon hr030-text-reveal">04</span>
-                    <strong class="hr030-text-reveal">활성 지표</strong>
-                </button>
-            </aside>
 
-        <div class="hr030-board">
-            <header class="hr030-topbar hr030-reveal">
-                <div class="hr030-topbar-copy">
-                    <span class="hr030-topbar-kicker hr030-text-reveal" id="hr030HeroKicker">전체 운영</span>
-                    <h4 class="hr030-text-reveal" id="hr030HeroTitle">오늘 확인 항목</h4>
-                </div>
+                <div class="hr030-admin-toolbar">
+                    <div class="hr030-admin-filter">
+                        <span class="hr030-admin-filter-label">상태 필터</span>
+                        <div class="hr030-admin-filter-group" id="hr030StatusFilterGroup">
+                            <button type="button" class="is-active" data-status-filter="all">전체</button>
+                            <button type="button" data-status-filter="투입중">투입중</button>
+                            <button type="button" data-status-filter="대기중">대기중</button>
+                            <button type="button" data-status-filter="제안중">제안중</button>
+                            <button type="button" data-status-filter="검토중">검토중</button>
+                        </div>
+                    </div>
 
-                <div class="hr030-topbar-controls">
-                    <div class="hr030-filter-block">
-                        <span class="hr030-filter-label hr030-text-reveal">관점</span>
-                        <div class="hr030-chip-group" id="hr030PerspectiveGroup">
-                            <button type="button" class="hr030-filter-chip is-active" data-perspective="ops">전체 운영</button>
-                            <button type="button" class="hr030-filter-chip" data-perspective="people">인력 운영</button>
-                            <button type="button" class="hr030-filter-chip" data-perspective="project">프로젝트 운영</button>
-                        </div>
-                    </div>
-                    <div class="hr030-filter-block">
-                        <span class="hr030-filter-label hr030-text-reveal">기간</span>
-                        <div class="hr030-chip-group" id="hr030PeriodGroup">
-                            <button type="button" class="hr030-filter-chip" data-period="day">오늘</button>
-                            <button type="button" class="hr030-filter-chip is-active" data-period="week">이번 주</button>
-                            <button type="button" class="hr030-filter-chip" data-period="month">이번 달</button>
-                        </div>
-                    </div>
-                    <div class="hr030-auto-apply hr030-text-reveal" id="hr030AutoApply">
-                        <span class="hr030-auto-apply-dot"></span>
-                        <div class="hr030-auto-apply-copy">
-                            <strong>자동 반영</strong>
-                            <p>관점과 기간을 누르면 바로 적용됩니다.</p>
-                        </div>
-                    </div>
+                    <p class="hr030-admin-search-note" id="hr030SearchResultNote" aria-live="polite">이름, 기술, 프로젝트, 요청번호 기준으로 빠르게 찾을 수 있습니다.</p>
                 </div>
             </header>
 
-            <section class="hr030-stat-strip">
-                <button type="button" class="hr030-metric-card hr030-metric-card--primary hr030-reveal is-active"
-                    data-metric-key="deploy" data-panel-target="hr030PanelPriority">
-                    <span class="hr030-metric-index hr030-text-reveal">01</span>
-                    <span class="hr030-metric-label hr030-text-reveal">오늘 투입 예정</span>
-                    <strong class="hr030-metric-value hr030-text-reveal" data-metric-field="deploy" data-suffix="명">0</strong>
-                    <small class="hr030-metric-foot hr030-text-reveal">우선 확인</small>
-                </button>
-                <button type="button" class="hr030-metric-card hr030-metric-card--cool hr030-reveal"
-                    data-metric-key="unassigned" data-panel-target="hr030PanelPriority">
-                    <span class="hr030-metric-index hr030-text-reveal">02</span>
-                    <span class="hr030-metric-label hr030-text-reveal">프로젝트 미배정</span>
-                    <strong class="hr030-metric-value hr030-text-reveal" data-metric-field="unassigned" data-suffix="명">0</strong>
-                    <small class="hr030-metric-foot hr030-text-reveal">즉시 매칭</small>
-                </button>
-                <button type="button" class="hr030-metric-card hr030-metric-card--slate hr030-reveal"
-                    data-metric-key="approval" data-panel-target="hr030PanelTrend">
-                    <span class="hr030-metric-index hr030-text-reveal">03</span>
-                    <span class="hr030-metric-label hr030-text-reveal">승인 대기</span>
-                    <strong class="hr030-metric-value hr030-text-reveal" data-metric-field="approval" data-suffix="건">0</strong>
-                    <small class="hr030-metric-foot hr030-text-reveal">지연 점검</small>
-                </button>
-                <button type="button" class="hr030-metric-card hr030-metric-card--danger hr030-reveal"
-                    data-metric-key="risk" data-panel-target="hr030PanelDetail">
-                    <span class="hr030-metric-index hr030-text-reveal">04</span>
-                    <span class="hr030-metric-label hr030-text-reveal">리스크 확인</span>
-                    <strong class="hr030-metric-value hr030-text-reveal" data-metric-field="risk" data-suffix="건">0</strong>
-                    <small class="hr030-metric-foot hr030-text-reveal">누락 점검</small>
-                </button>
-            </section>
+            <section class="hr030-kpi-grid" id="hr030KpiGrid" aria-label="핵심 인력 현황"></section>
 
-            <section class="hr030-board-grid">
-                <article class="hr030-panel hr030-panel--insight hr030-reveal" id="hr030PanelInsight">
-                    <div class="hr030-panel-head">
-                        <div>
-                            <h5 class="hr030-text-reveal">운영 인사이트</h5>
-                            <p class="hr030-panel-copy hr030-text-reveal" id="hr030HeroPulse">포커스: 오늘 투입 예정</p>
-                        </div>
-                        <span class="hr030-panel-pill hr030-text-reveal" id="hr030HeroPeriod">이번 주</span>
-                    </div>
-
-                    <div class="hr030-insight-grid">
-                        <div class="hr030-insight-copy">
-                            <span class="hr030-insight-kicker hr030-text-reveal">집중 점수</span>
-                            <strong class="hr030-insight-score hr030-text-reveal" id="hr030InsightScore">0%</strong>
-                            <p class="hr030-insight-summary hr030-text-reveal" id="hr030InsightSummary">핵심 신호 요약</p>
-                            <div class="hr030-insight-meters" id="hr030InsightMeters"></div>
-                        </div>
-
-                        <div class="hr030-insight-chart-card">
-                            <div class="hr030-insight-chart" id="hr030InsightChart"></div>
-                            <div class="hr030-chart-axis" id="hr030InsightAxis"></div>
-                        </div>
+            <section class="hr030-main-grid">
+                <article class="hr030-panel hr030-panel--chart">
+                    <div id="hr030DeptHeader"></div>
+                    <div class="hr030-panel-chart-wrap">
+                        <canvas id="hr030DeptChart" aria-label="직무별 인원 현황 차트"></canvas>
                     </div>
                 </article>
 
-                <article class="hr030-panel hr030-panel--focus hr030-reveal" id="hr030PanelFocus">
-                    <div class="hr030-panel-head">
-                        <div>
-                            <h5 class="hr030-text-reveal">활성 지표</h5>
-                            <p class="hr030-panel-copy hr030-text-reveal">즉시 이동 메뉴</p>
-                        </div>
-                    </div>
-
-                    <div class="hr030-focus-wrap">
-                        <div class="hr030-focus-ring" id="hr030FocusRing" style="--rate: 0;">
-                            <span class="hr030-text-reveal" id="hr030FocusRate">0%</span>
-                        </div>
-
-                        <div class="hr030-focus-copy">
-                            <strong class="hr030-text-reveal" id="hr030FocusTitle">오늘 투입 예정</strong>
-                            <p class="hr030-text-reveal" id="hr030FocusDesc">기준값 계산 완료</p>
-                        </div>
-                    </div>
-
-                    <div class="hr030-mini-actions">
-                        <a class="hr030-quick-action" th:href="@{/hr010}" href="/hr010">
-                            <span class="hr030-quick-name">기본 인적사항</span>
-                            <span class="hr030-quick-arrow">+</span>
-                        </a>
-                        <a class="hr030-quick-action" th:href="@{/hr020}" href="/hr020">
-                            <span class="hr030-quick-name">진행 프로젝트</span>
-                            <span class="hr030-quick-arrow">+</span>
-                        </a>
-                        <a class="hr030-quick-action" th:href="@{/cm040}" href="/cm040">
-                            <span class="hr030-quick-name">공통코드 관리</span>
-                            <span class="hr030-quick-arrow">+</span>
-                        </a>
+                <article class="hr030-panel hr030-panel--chart">
+                    <div id="hr030TrendHeader"></div>
+                    <div class="hr030-panel-chart-wrap">
+                        <canvas id="hr030TrendChart" aria-label="최근 6개월 등록 및 종료 추이 차트"></canvas>
                     </div>
                 </article>
 
-                <article class="hr030-panel hr030-panel--queue hr030-reveal" id="hr030PanelPriority">
-                    <div class="hr030-panel-head">
-                        <div>
-                            <h5 class="hr030-text-reveal">우선 확인</h5>
-                            <p class="hr030-panel-copy hr030-text-reveal">실행 순서</p>
+                <article class="hr030-panel hr030-panel--chart hr030-panel--attendance">
+                    <div id="hr030AttendanceHeader"></div>
+                    <div class="hr030-attendance-wrap">
+                        <div class="hr030-attendance-chart">
+                            <canvas id="hr030AttendanceChart" aria-label="가동 상태 분포 차트"></canvas>
                         </div>
-                        <span class="hr030-panel-meta hr030-text-reveal" id="hr030QueueMeta">0건</span>
+                        <div class="hr030-attendance-legend" id="hr030AttendanceLegend"></div>
                     </div>
-                    <div class="hr030-queue-list" id="hr030QueueList"></div>
                 </article>
 
-                <article class="hr030-panel hr030-panel--trend hr030-reveal" id="hr030PanelTrend">
-                    <div class="hr030-panel-head">
-                        <div>
-                            <h5 class="hr030-text-reveal">흐름</h5>
-                            <p class="hr030-panel-copy hr030-text-reveal">기간 변화</p>
-                        </div>
+                <article class="hr030-panel hr030-panel--table hr030-panel--wide">
+                    <div id="hr030EmployeeHeader"></div>
+                    <div class="hr030-table-wrap">
+                        <div class="hr030-table-meta" id="hr030EmployeeTableMeta">이름, 기술, 상태 기준으로 정렬할 수 있습니다.</div>
+                        <div class="hr030-table-shell" id="hr030RecentEmployeeTable" aria-label="최근 등록 인력 목록"></div>
                     </div>
-                    <div class="hr030-trend-list" id="hr030TrendList"></div>
                 </article>
 
-                <article class="hr030-panel hr030-panel--detail hr030-reveal" id="hr030PanelDetail">
-                    <div class="hr030-panel-head">
-                        <div>
-                            <h5 class="hr030-text-reveal">선택한 항목</h5>
-                            <p class="hr030-panel-copy hr030-text-reveal">체크 포인트</p>
-                        </div>
-                    </div>
-                    <div class="hr030-detail-card">
-                        <span class="hr030-detail-status hr030-text-reveal" id="hr030DetailStatus" data-tone="cool">확인 필요</span>
-                        <h6 class="hr030-text-reveal" id="hr030DetailTitle">처리할 항목을 선택하세요</h6>
-                        <p class="hr030-text-reveal" id="hr030DetailDesc">항목 선택 시 체크리스트 표시</p>
-                        <ul class="hr030-detail-checks" id="hr030DetailChecks"></ul>
-                    </div>
+                <article class="hr030-panel hr030-panel--approval">
+                    <div id="hr030ApprovalHeader"></div>
+                    <div class="hr030-list-wrap hr030-approval-list" id="hr030ApprovalList" aria-label="투입 검토 요청 리스트"></div>
+                </article>
+
+                <article class="hr030-panel hr030-panel--schedule">
+                    <div id="hr030ScheduleHeader"></div>
+                    <div class="hr030-list-wrap hr030-schedule-list" id="hr030ScheduleList" aria-label="오늘 일정 및 공지사항"></div>
                 </article>
             </section>
         </div>
     </div>
 
+    <script src="/js/api/hr/hr030.data.js"></script>
     <script src="/js/api/hr/hr030.js"></script>
 
 </th:block>
