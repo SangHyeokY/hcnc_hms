@@ -2357,3 +2357,11 @@ $('#excelFile').on('change', function (e) {
         }
     });
 });
+
+// 보유역량 기술 테이블 정렬 순서
+function getPriority(text) {
+    if (/^[a-zA-Z]/.test(text)) return 1;   // 영문 (1번째)
+    if (/^[0-9]/.test(text)) return 2;      // 숫자 (2번째)
+    if (/^[ㄱ-ㅎ가-힣]/.test(text)) return 3; // 한글 (3번째)
+    return 4;                               // 기타 (4번째)
+}
