@@ -408,41 +408,75 @@
     }
 
     function renderAttendanceDonut() {
-        var container = byId("hr030AttendanceChart");
-        var data = dashboardData.charts.attendance || [];
-        var total = data.reduce(function (sum, item) {
+        var host = document.querySelector(".hr030-attendance-chart");
+        var canvas = byId("hr030AttendanceChart");
+        var total = (dashboardData.charts.attendance || []).reduce(function (sum, item) {
             return sum + (item.value || 0);
         }, 0);
-        var size = 176;
-        var center = 88;
-        var radius = 64;
-        var stroke = 28;
-        var circumference = 2 * Math.PI * radius;
-        var cumulative = 0;
-        var rings = data.map(function (item) {
-            var value = item.value || 0;
-            var percent = total > 0 ? value / total : 0;
-            var dash = circumference * percent;
-            var gap = circumference - dash;
-            var offset = circumference * cumulative;
-            cumulative += percent;
+        var centerTextPlugin = {
+            id: "hr030AttendanceCenterText",
+            afterDraw: function (chart) {
+                var meta = chart.getDatasetMeta(0);
+                var point = meta && meta.data && meta.data[0];
+                var ctx;
+                var x;
+                var y;
 
-            return [
-                '<circle cx="' + center + '" cy="' + center + '" r="' + radius + '" fill="none" stroke="' + escapeHtml(item.color) + '" stroke-width="' + stroke + '" stroke-linecap="round" stroke-dasharray="' + dash + ' ' + gap + '" stroke-dashoffset="' + (circumference - offset) + '" transform="rotate(-90 ' + center + " " + center + ')"></circle>'
-            ].join("");
-        }).join("");
+                if (!point) {
+                    return;
+                }
 
-        container.outerHTML = [
-            '<div id="hr030AttendanceChart" class="hr030-attendance-donut" role="img" aria-label="가동 상태 분포 도넛차트">',
-            '  <svg viewBox="0 0 ' + size + ' ' + size + '" preserveAspectRatio="xMidYMid meet" aria-hidden="true">',
-            '    <circle cx="' + center + '" cy="' + center + '" r="' + radius + '" fill="none" stroke="#edf1f6" stroke-width="' + stroke + '"></circle>',
-            rings,
-            '    <circle cx="' + center + '" cy="' + center + '" r="33" fill="#ffffff"></circle>',
-            '    <text x="' + center + '" y="89" text-anchor="middle" fill="#1f2937" font-size="22" font-weight="700">' + formatNumber(total) + '</text>',
-            '    <text x="' + center + '" y="107" text-anchor="middle" fill="#8d97a5" font-size="10" font-weight="600">합계</text>',
-            "  </svg>",
-            "</div>"
-        ].join("");
+                ctx = chart.ctx;
+                x = point.x;
+                y = point.y;
+
+                ctx.save();
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillStyle = "#1f2937";
+                ctx.font = "700 22px Pretendard Variable, Pretendard, Noto Sans KR, sans-serif";
+                ctx.fillText(formatNumber(total), x, y - 4);
+                ctx.fillStyle = "#8d97a5";
+                ctx.font = "600 10px Pretendard Variable, Pretendard, Noto Sans KR, sans-serif";
+                ctx.fillText("합계", x, y + 16);
+                ctx.restore();
+            }
+        };
+
+        if (!host) {
+            return;
+        }
+
+        if (!canvas || String(canvas.tagName || "").toLowerCase() !== "canvas") {
+            host.innerHTML = '<canvas id="hr030AttendanceChart" aria-label="가동 상태 분포 차트"></canvas>';
+            canvas = byId("hr030AttendanceChart");
+        }
+
+        state.charts.attendance = new Chart(canvas, {
+            type: "doughnut",
+            data: {
+                labels: dashboardData.charts.attendance.map(function (item) { return item.label; }),
+                datasets: [{
+                    data: dashboardData.charts.attendance.map(function (item) { return item.value; }),
+                    backgroundColor: dashboardData.charts.attendance.map(function (item) { return item.color; }),
+                    borderWidth: 0,
+                    hoverOffset: 2,
+                    spacing: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: "42%",
+                layout: {
+                    padding: 2
+                },
+                plugins: {
+                    legend: { display: false }
+                }
+            },
+            plugins: [centerTextPlugin]
+        });
     }
 
     function destroyChart(chartKey) {
@@ -478,7 +512,6 @@
                 }]
             },
             options: {
-                animation: false,
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
@@ -536,7 +569,6 @@
                 ]
             },
             options: {
-                animation: false,
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {

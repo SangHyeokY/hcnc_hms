@@ -3403,21 +3403,6 @@ section.search-area .search-info #searchConditionKeyword { /* 새 검색어 입�
   align-self: start;
 }
 
-#hr030-dashboard.hr030-saas-dashboard .hr030-attendance-donut {
-  width: 100%;
-  max-width: 176px;
-  aspect-ratio: 1 / 1;
-  margin: 0 auto;
-  overflow: visible;
-}
-
-#hr030-dashboard.hr030-saas-dashboard .hr030-attendance-donut svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-  overflow: visible;
-}
-
 #hr030-dashboard.hr030-saas-dashboard .hr030-attendance-legend {
   display: grid;
   gap: 0;
