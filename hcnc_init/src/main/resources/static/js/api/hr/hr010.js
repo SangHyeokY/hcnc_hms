@@ -287,38 +287,35 @@ $(document).ready(async function () {
     // 메인 영역 변경 이벤트
     $(document).on("change input", "#main-modal-table input, #main-modal-table select, #main-modal-table textarea", function () {
         if (initTabs) return;
-        if (currentMode === "insert") return;
-        changedTabs.mainArea = true;ㅉ
+        if (currentMode === "view") return;
+        changedTabs.mainArea = true;
     });
 
     // Tab1 변경 이벤트
     $("#tab1").on("change input", "input, select, textarea", function () {
         if (initTabs) return;
-        if (currentMode === "insert") return;
+        if (currentMode === "view") return;
         changedTabs.tab1 = true;
     });
 
     // Tab2 변경 이벤트
     $("#tab2").on("change input", "input, select, textarea", function () {
         if (initTabs) return;
-        if (currentMode === "insert") return;
+        if (currentMode === "view") return;
         changedTabs.tab2 = true;
     });
 
     // Tab3 변경 이벤트
     $("#tab3").on("change input", "input, select, textarea", function () {
         if (initTabs) return;
-        if (currentMode === "insert") return;
+        if (currentMode === "view") return;
         changedTabs.tab3 = true;
     });
 
     // Tab4 변경 이벤트
     $("#tab4").on("change input", "input, select, textarea", function () {
-        console.log("🔥 tab4 change 발생", e.target);
-        console.trace(); // 🔥 호출 스택 찍힘
-
         if (initTabs) return;
-        if (currentMode === "insert") return;
+        if (currentMode === "view") return;
         changedTabs.tab4 = true;
     });
 
@@ -1497,28 +1494,35 @@ function broadcastTabReadonly(isReadOnly) {
 
 async function closeUserViewModal() {
     console.log("changedTabs:", changedTabs);
+    console.log("currentMode:", currentMode);
 
-    if (currentMode === "insert") {
-        changedTabs.tab4 = false;
+    const isViewMode = currentMode === "view";
+
+    if (isViewMode) {
+        // 상태 초기화만 하고 바로 닫기
+        closeMainLangPicker(true);
+        if (typeof closeHr012SkillPicker === "function") closeHr012SkillPicker(true);
+        if (typeof closeHr013SkillPicker === "function") closeHr013SkillPicker(true);
+
+        clearTab4Popup();
+
+        $modal.removeClass("show");
+
+        setTimeout(() => {
+            $modal.hide();
+            clearUserForm();
+            savedTabs = [];
+            Object.keys(changedTabs).forEach(k => changedTabs[k] = false);
+        }, 250);
+
+        return; // 여기서 끝
     }
 
-    // 수정된 탭 목록 구하기 (insert 모드일 때, tab4의 변경 유무는 무시)
-    const modifiedTabs = Object.keys(changedTabs).filter(tab => {
-        // insert 모드에서 tab4는 무시
-        if (currentMode === "insert" && tab === "tab4") return false;
-        return changedTabs[tab];
-    });
-    // tab4는 경고 무시
-    const hasMeaningfulChange =
-        currentMode === "insert"
-            ? modifiedTabs.some(tab => tab !== "tab4")
-            : modifiedTabs.length > 0;
+    // 수정된 탭 목록 구하기 (view 모드일 때, tab4의 변경 유무는 무시)
+    const modifiedTabs = Object.keys(changedTabs).filter(tab => changedTabs[tab]);
 
-    if (currentMode === "insert" && modifiedTabs.length === 0) {
-        // 아무 경고 없이 그냥 닫기
-    } else if (modifiedTabs.length > 0) {
-        const devNmInput = document.getElementById("dev_nm");
-        const devNm = devNmInput ? devNmInput.value : "";
+    if (modifiedTabs.length > 0) {
+        const devNm = $("#dev_nm").val() || "";
 
         // 탭 이름을 읽기 쉽게 변환
         const tabNamesHtml = modifiedTabs
@@ -1527,10 +1531,10 @@ async function closeUserViewModal() {
                 return i < modifiedTabs.length - 1 ? `${nameHtml}<span>&nbsp;,&nbsp;</span>` : nameHtml;
             }).join('');
 
-        const modeText = currentMode === "insert" ? "등록"
-            : currentMode === "update" ? "수정"
-                : currentMode === "view" ? "조회"
-                    : currentMode; // 알 수 없는 경우 그대로
+        const modeText = currentMode === "insert" ? "등록" :
+                         currentMode === "update" ? "수정" :
+                         currentMode === "view" ? "조회" :
+                         currentMode; // 알 수 없는 경우 그대로
 
         // 신규 등록이면 이름 제외, 탭과 모드 안내만 표시
         const htmlContent = currentMode === "insert"

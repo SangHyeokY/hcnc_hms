@@ -104,7 +104,10 @@ function buildHr014TableA() {
         cellEdited: function () {
             if (window.isTab4Loading) return;
             changedTabs.tab4 = true;
-            evalData.set(window.hr013_prj_nm, window.hr014TableA.getData());
+            evalData.set(
+                window.hr013_prj_nm,
+                window.hr014TableA.getData()
+            );
         },
         columns: [
             { title: "항 목", field: "cd_nm", hozAlign: "center", width: 150, minWidth: 150, maxWidth: 150 },
@@ -211,8 +214,6 @@ function loadHr014TableDataA() {
                 const dataArray = Array.isArray(response.list) ? response.list : [];
                 const projectList = Array.isArray(response.projectList) ? response.projectList : [];
 
-                window.hr014TableA.setData(dataArray);
-
                 // 자사 프로젝트 표시
                 const $select = $(".select_prj_cd");
                 const selected = window.hr013_prj_nm;
@@ -252,33 +253,23 @@ async function reloadTab4(selectedPrjId) {
     window.isTab4Loading = true;
 
     try {
-        // A 초기화 (레이아웃 틀은 유지)
-        const data = window.hr014TableA.getData();
-        const cleared = data.map(row => ({
-            ...row,
-            lv1: "N",
-            lv2: "N",
-            lv3: "N",
-            lv4: "N",
-            lv5: "N",
-            cmt: ""
-        }));
-        window.hr014TableA.setData(cleared);
-
-        // B 초기화 (레이아웃 틀은 유지)
-        $("#HR014_RISK_TEXT").val("");
-
-        // 선택값 반영
         window.hr013_prj_nm = selectedPrjId;
 
-        // 데이터 로딩
-        await Promise.all([
+        // 서버 데이터 가져오기
+        const [aData] = await Promise.all([
             loadHr014TableDataA(),
             loadHr014TableDataB()
         ]);
 
-    } catch (e) {
-        console.error("데이터 로드 실패", e);
+        // 기존 사용자 입력이 있으면 그걸 우선
+        const saved = evalData.get(selectedPrjId);
+
+        if (saved) {
+            window.hr014TableA.setData(saved);
+        } else {
+            window.hr014TableA.setData(aData);
+        }
+
     } finally {
         window.isTab4Loading = false;
         hideLoading();
@@ -381,13 +372,8 @@ function loadHr014TableDataB() {
 // ================================================================================= //
 
 // 탭1 평가 저장
-function saveTableA(alertFlag) {
-    if (alertFlag === undefined) {
-        alertFlag = true;
-    }
-    if (!window.hr014TableA) {
-        return;
-    }
+function saveTableA(alertFlag, returnPromise) {
+    if (!window.hr014TableA) return Promise.resolve();
 
     const eval = [];
 
@@ -400,35 +386,25 @@ function saveTableA(alertFlag) {
         });
     });
 
-    $.ajax({
+    return $.ajax({
         url: "/hr014/a/save",
         type: "POST",
         data: {
             dev_id: window.currentDevId || $("#dev_id").val(),
             rows: JSON.stringify(buildSaveEvalRows(eval))
-        },
-        success: function (response) {
-            if (response.success) {
-                loadHr014TableDataA();
-                if (alertFlag) {
-                    console.log("Tab4-a 저장되었습니다.");
-                }
-            } else {
-                console.log("Tab4-a 저장 오류");
-            }
-        },
-        error: function () {
-            alert("저장 중 오류가 발생했습니다.");
+        }
+    }).then(response => {
+        if (response.success) {
+            loadHr014TableDataA();
+            if (alertFlag) console.log("Tab4-a 저장되었습니다.");
+        } else {
+            return Promise.reject("A 저장 실패");
         }
     });
 }
 
 // 탭2 리스크 저장
-function saveTableB(alertFlag) {
-    if (alertFlag === undefined) {
-        alertFlag = true;
-    }
-
+function saveTableB(alertFlag, returnPromise) {
     const risk = [];
 
     riskData.forEach((valueArray, key) => {
@@ -438,34 +414,19 @@ function saveTableB(alertFlag) {
         });
     });
 
-    // riskState.re_in_yn = $("#HR014_REIN_CHECK").is(":checked") ? "Y" : "N";
-
-    $.ajax({
+    return $.ajax({
         url: "/hr014/b/save",
         type: "POST",
         data: {
             dev_id: window.currentDevId || $("#dev_id").val(),
             rows: JSON.stringify(risk)
-            // dev_id: window.currentDevId || $("#dev_id").val(),
-            // leave_txt: riskState.leave_txt,
-            // claim_txt: riskState.claim_txt,
-            // sec_txt: riskState.sec_txt,
-            // re_in_yn: riskState.re_in_yn,
-            // memo: riskState.memo
-        },
-        success: function (response) {
-            if (response.success) {
-                loadHr014TableDataB();
-//                if (alertFlag) {
-//                    console.log("Tab4-b 저장되었습니다." + response.res);
-//                }
-                console.log("Tab4-b 저장되었습니다.");
-            } else {
-                // console.log("Tab4-b 저장 오류", response);
-            }
-        },
-        error: function () {
-            alert("저장 중 오류가 발생했습니다.");
+        }
+    }).then(response => {
+        if (response.success) {
+            loadHr014TableDataB();
+            if (alertFlag) console.log("Tab4-b 저장되었습니다.");
+        } else {
+            return Promise.reject("B 저장 실패");
         }
     });
 }
@@ -577,8 +538,16 @@ function saveTab4Active() {
 
 // 탭4 전체 저장 (평가 + 리스크)
 function saveTab4All() {
-    saveTableA(false); // alert 끔
-    saveTableB(false); // alert 끔
+    Promise.all([
+        saveTableA(false, true),
+        saveTableB(false, true)
+    ])
+    .then(() => {
+        console.log("Tab4 전체 저장 완료");
+    })
+    .catch(() => {
+        alert("저장 중 일부 실패");
+    });
 }
 
 window.saveTab4All = saveTab4All;
@@ -602,28 +571,42 @@ $("#HR014_RISK_TEXT").on("change", function () {
 
 // 팝업이 닫힐 때 데이터 초기화
 function clearTab4Popup() {
-    // 테이블 초기화
-    if (window.hr014TableA) window.hr014TableA.clearData();
+    // view 모드는 유지
+    if (currentMode === "view") return;
 
-    // 전역 데이터 초기화
+    // 모든 프로젝트 데이터 초기화 (이게 핵심)
     evalData.delete(window.hr013_prj_nm);
     riskData.delete(window.hr013_prj_nm);
-    riskState = { leave_txt: "", claim_txt: "", sec_txt: "", re_in_yn: "N", memo: "" };
+
+    // 상태 초기화
+    riskState = {
+        leave_txt: "",
+        claim_txt: "",
+        sec_txt: "",
+        re_in_yn: "N",
+        memo: ""
+    };
 
     // UI 초기화
     $("#HR014_RISK_TEXT").val("");
     $("#HR014_REIN_CHECK").prop("checked", false);
     $("#HR014_RISK_LIST .risk-item").removeClass("active");
 
-    // Active Key 초기화
     riskActiveKey = "leave_txt";
+
+    // 테이블도 초기화 (선택)
+    if (window.hr014TableA) {
+        window.hr014TableA.clearData();
+    }
 }
 
 // 인적사항 팝업 닫혔을 때
-$(".close-btn").on("click", clearTab4Popup);
+$(".close-btn").on("click", function() {
+    closeUserViewModal();
+});
 
 $(document).on("keydown", function(e) {
     if (e.key === "Escape") {
-       clearTab4Popup();
+        closeUserViewModal(); // clear 직접 호출 금지
     }
 });
