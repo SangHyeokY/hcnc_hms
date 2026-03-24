@@ -61,6 +61,8 @@
                                 </div>
                             </div>
                         </div>
+
+                        <p class="hr030-admin-search-note is-empty" id="hr030SearchResultNote" aria-live="polite"></p>
                     </div>
                 </div>
 
@@ -75,54 +77,52 @@
                             <button type="button" data-status-filter="검토중">검토중</button>
                         </div>
                     </div>
-
-                    <p class="hr030-admin-search-note" id="hr030SearchResultNote" aria-live="polite">이름, 기술, 프로젝트, 요청번호 기준으로 빠르게 찾을 수 있습니다.</p>
                 </div>
             </header>
 
             <section class="hr030-kpi-grid" id="hr030KpiGrid" aria-label="핵심 인력 현황"></section>
 
             <section class="hr030-main-grid">
-                <article class="hr030-panel hr030-panel--chart">
-                    <div id="hr030DeptHeader"></div>
-                    <div class="hr030-panel-chart-wrap">
-                        <canvas id="hr030DeptChart" aria-label="직무별 인원 현황 차트"></canvas>
-                    </div>
-                </article>
-
-                <article class="hr030-panel hr030-panel--chart">
-                    <div id="hr030TrendHeader"></div>
-                    <div class="hr030-panel-chart-wrap">
-                        <canvas id="hr030TrendChart" aria-label="최근 6개월 등록 및 종료 추이 차트"></canvas>
-                    </div>
-                </article>
-
-                <article class="hr030-panel hr030-panel--chart hr030-panel--attendance">
-                    <div id="hr030AttendanceHeader"></div>
-                    <div class="hr030-attendance-wrap">
-                        <div class="hr030-attendance-chart">
-                            <canvas id="hr030AttendanceChart" aria-label="가동 상태 분포 차트"></canvas>
+                <article class="hr030-panel hr030-panel--map">
+                    <div id="hr030RegionHeader"></div>
+                    <div class="hr030-region-layout">
+                        <div class="hr030-region-map-card">
+                            <div class="hr030-region-map-top">
+                                <strong>권역 선택</strong>
+                                <button type="button" class="hr030-region-reset" id="hr030RegionReset">전체 보기</button>
+                            </div>
+                            <div class="hr030-region-map" id="hr030RegionMap" aria-label="지역별 인력 지도"></div>
+                            <div class="hr030-region-map-note" id="hr030RegionMapNote"></div>
                         </div>
-                        <div class="hr030-attendance-legend" id="hr030AttendanceLegend"></div>
+
+                        <div class="hr030-region-detail" id="hr030RegionDetail" aria-label="선택 지역 상세"></div>
                     </div>
                 </article>
 
-                <article class="hr030-panel hr030-panel--table hr030-panel--wide">
+                <article class="hr030-panel hr030-panel--skills">
+                    <div id="hr030SkillHeader"></div>
+                    <div class="hr030-skill-layout">
+                        <div class="hr030-skill-chart-wrap">
+                            <canvas id="hr030SkillChart" aria-label="주력 기술 분포 차트"></canvas>
+                        </div>
+                        <div class="hr030-skill-list" id="hr030SkillList" aria-label="주력 기술 분포 목록"></div>
+                    </div>
+                </article>
+
+                <article class="hr030-panel hr030-panel--table">
                     <div id="hr030EmployeeHeader"></div>
                     <div class="hr030-table-wrap">
-                        <div class="hr030-table-meta" id="hr030EmployeeTableMeta">이름, 기술, 상태 기준으로 정렬할 수 있습니다.</div>
+                        <div class="hr030-table-meta" id="hr030EmployeeTableMeta">이름, 기술, 지역 기준으로 바로 정렬할 수 있습니다.</div>
                         <div class="hr030-table-shell" id="hr030RecentEmployeeTable" aria-label="최근 등록 인력 목록"></div>
                     </div>
                 </article>
 
-                <article class="hr030-panel hr030-panel--approval">
-                    <div id="hr030ApprovalHeader"></div>
-                    <div class="hr030-list-wrap hr030-approval-list" id="hr030ApprovalList" aria-label="투입 검토 요청 리스트"></div>
-                </article>
-
-                <article class="hr030-panel hr030-panel--schedule">
-                    <div id="hr030ScheduleHeader"></div>
-                    <div class="hr030-list-wrap hr030-schedule-list" id="hr030ScheduleList" aria-label="오늘 일정 및 공지사항"></div>
+                <article class="hr030-panel hr030-panel--issues">
+                    <div id="hr030IssueHeader"></div>
+                    <div class="hr030-issue-panel">
+                        <div class="hr030-issue-summary" id="hr030IssueSummary"></div>
+                        <div class="hr030-list-wrap hr030-issue-list" id="hr030IssueList" aria-label="운영 이슈 패널"></div>
+                    </div>
                 </article>
             </section>
         </div>
