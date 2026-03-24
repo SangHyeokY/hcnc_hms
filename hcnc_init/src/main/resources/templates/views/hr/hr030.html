@@ -80,23 +80,23 @@
                 </div>
             </header>
 
-            <section class="hr030-kpi-grid" id="hr030KpiGrid" aria-label="핵심 인력 현황"></section>
+            <div class="hr030-kpi-grid" id="hr030KpiGrid" aria-label="핵심 인력 현황"></div>
 
-            <section class="hr030-main-grid">
+            <div class="hr030-main-grid">
                 <article class="hr030-panel hr030-panel--map">
                     <div id="hr030RegionHeader"></div>
-                    <div class="hr030-region-layout">
-                        <div class="hr030-region-map-card">
-                            <div class="hr030-region-map-top">
-                                <strong>권역 선택</strong>
-                                <button type="button" class="hr030-region-reset" id="hr030RegionReset">전체 보기</button>
-                            </div>
-                            <div class="hr030-region-map" id="hr030RegionMap" aria-label="지역별 인력 지도"></div>
-                            <div class="hr030-region-map-note" id="hr030RegionMapNote"></div>
+                    <div class="hr030-region-map-card">
+                        <div class="hr030-region-map-top">
+                            <strong>권역 선택</strong>
+                            <button type="button" class="hr030-region-reset" id="hr030RegionReset">전체 보기</button>
                         </div>
-
-                        <div class="hr030-region-detail" id="hr030RegionDetail" aria-label="선택 지역 상세"></div>
+                        <div class="hr030-region-map" id="hr030RegionMap" aria-label="지역별 인력 지도"></div>
+                        <div class="hr030-region-map-note" id="hr030RegionMapNote"></div>
                     </div>
+                </article>
+
+                <article class="hr030-panel hr030-panel--detail">
+                    <div class="hr030-region-detail" id="hr030RegionDetail" aria-label="선택 지역 상세"></div>
                 </article>
 
                 <article class="hr030-panel hr030-panel--skills">
@@ -124,7 +124,7 @@
                         <div class="hr030-list-wrap hr030-issue-list" id="hr030IssueList" aria-label="운영 이슈 패널"></div>
                     </div>
                 </article>
-            </section>
+            </div>
         </div>
     </div>
 
