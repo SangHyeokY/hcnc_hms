@@ -34,14 +34,14 @@ $(document).ready(async function () {
     // 탭별 이벤트 정의
     $(".search-btn-area .btn-search").text("조회");
 
-    $(".hr030-filter-chip").on("click", function () {
+    $(".toggle-filter-chip").on("click", function () {
         var nextType = String($(this).data("userType") || "staff");
         if (currentHr020UserTypeTab === nextType) {
             return;
         }
 
         currentHr020UserTypeTab = nextType;
-        $(".hr030-filter-chip").removeClass("active");
+        $(".toggle-filter-chip").removeClass("active");
         $(this).addClass("active");
 
         applyHr020UserTypeFilter();

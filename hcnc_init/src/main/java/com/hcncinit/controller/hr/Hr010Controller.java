@@ -164,57 +164,5 @@ public class Hr010Controller {
         return mv;
     }
 
-//    // [기본 인적사항] > 이미지
-//    @RequestMapping("/list/img")
-//    public ResponseEntity<byte[]> select_hr010_img(@RequestParam Map<String, Object> map) {
-//
-//        byte[] bytes = hr010Service.select_hr010_img(map);
-//
-//        // 1. 데이터 없으면 404
-//        if (bytes == null || bytes.length == 0) {
-//            return ResponseEntity.notFound().build();
-//        }
-//
-//        // 2. MIME 자동 판별
-//        MediaType mediaType = detectImageType(bytes);
-//
-//        return ResponseEntity.ok()
-//                .contentType(mediaType)
-//                .header("Cache-Control", "no-cache, no-store, must-revalidate")
-//                .header("Pragma", "no-cache")
-//                .header("Expires", "0")
-//                .body(bytes);
-//    }
-//
-//    private MediaType detectImageType(byte[] bytes) {
-//
-//        // JPEG: FF D8
-//        if (bytes.length >= 2 &&
-//                (bytes[0] & 0xFF) == 0xFF &&
-//                (bytes[1] & 0xFF) == 0xD8) {
-//            return MediaType.IMAGE_JPEG;
-//        }
-//
-//        // PNG: 89 50 4E 47
-//        if (bytes.length >= 4 &&
-//                (bytes[0] & 0xFF) == 0x89 &&
-//                (bytes[1] & 0xFF) == 0x50 &&
-//                (bytes[2] & 0xFF) == 0x4E &&
-//                (bytes[3] & 0xFF) == 0x47) {
-//            return MediaType.IMAGE_PNG;
-//        }
-//
-//        // GIF: 47 49 46
-//        if (bytes.length >= 3 &&
-//                (bytes[0] & 0xFF) == 0x47 &&
-//                (bytes[1] & 0xFF) == 0x49 &&
-//                (bytes[2] & 0xFF) == 0x46) {
-//            return MediaType.IMAGE_GIF;
-//        }
-//
-//        // fallback (기본값)
-//        return MediaType.APPLICATION_OCTET_STREAM;
-//    }
-
 }
 
