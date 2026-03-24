@@ -38,6 +38,7 @@ window.initTab3 = function () {
     // 프로젝트 제목 옆 건수 표기 초기화
     updateHr013TitleCount();
     loadHr013TableData();
+
     // 상위 모달의 view/update 상태를 탭3 테이블 readonly 스타일과 동기화한다.
     $(document).off("tab:readonly.hr013").on("tab:readonly.hr013", function (_, isReadOnly) {
         applyTab3Readonly(!!isReadOnly);
