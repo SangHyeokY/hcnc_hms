@@ -42,35 +42,9 @@ window.initTab4 = function() {
         window.hr014TableA.redraw(true);
     });
 
-    // 초기 데이터 로드 (한 번만)
-    // if (!window.hr014TabInitialized) {
-    // var eval = evalData.get(window.hr013_prj_nm);
-    // if (eval !== null || eval !== undefined)
-    //     loadHr014TableDataA();
-    // else
-    //     window.hr014TableA.setData(eval);
-    //
-    // var risk = riskData.get(window.hr013_prj_nm);
-    // if (risk !== null || risk !== undefined)
-    //     loadHr014TableDataB();
-    // else {
-    //     riskState.leave_txt = risk.leave_txt || "";
-    //     riskState.claim_txt = risk.claim_txt || "";
-    //     riskState.sec_txt = risk.sec_txt || "";
-    //     riskState.re_in_yn = risk.re_in_yn || "N";
-    //     riskState.memo = risk.memo || "";
-    //     $("#HR014_REIN_CHECK").prop("checked", riskState.re_in_yn === "Y");
-    //     setRiskActive(riskActiveKey);
-    // }
-    // }
-
     // A/B 테이블 보여주기/숨기기
     $tab4.find("#TABLE_HR014_A").show();
     $tab4.find("#TABLE_HR014_B").hide();
-
-//    if (window.hr014TableA) {
-//        window.hr014TableA.redraw(true);
-//    }
 
     initHr014Tabs();
     buildRiskList();
@@ -128,6 +102,7 @@ function buildHr014TableA() {
         headerHozAlign: "center",
         // 평가의견 입력이 변경되면 탭 저장 대상에 포함
         cellEdited: function () {
+            if (window.isTab4Loading) return;
             changedTabs.tab4 = true;
             evalData.set(window.hr013_prj_nm, window.hr014TableA.getData());
         },
@@ -242,17 +217,16 @@ function loadHr014TableDataA() {
                 const $select = $(".select_prj_cd");
                 const selected = window.hr013_prj_nm;
 
-                if ($select.children().length === 0) {
-                    projectList.forEach(function (item) {
-                        const isSelected = item.dev_prj_id == selected ? "selected" : "";
-                        $select.append(
-                            `<option value="${item.dev_prj_id}" ${isSelected}>${item.prj_nm}</option>`
-                        );
-                    });
-                } else {
-                    // 선택만 변경
-                    $select.val(selected);
-                }
+                // 항상 초기화
+                $select.empty();
+
+                projectList.forEach(function (item) {
+                    const isSelected = item.dev_prj_id == selected ? "selected" : "";
+                    $select.append(
+                        `<option value="${item.dev_prj_id}" ${isSelected}>${item.prj_nm}</option>`
+                    );
+                });
+                $select.val(selected);
 
                 // setData 이후 렌더까지 체감상 보장하려면(선택)
                 // renderComplete 이벤트 1회 대기
@@ -272,12 +246,10 @@ function loadHr014TableDataA() {
     });
 }
 
-// 셀렉트 선택 시, 테이블 재로드
-$(document).on("change", ".select_prj_cd", async function () {
-    const selectedPrjId = $(this).val();
-    // const devId = window.currentDevId;
-
+// 보유역량 평가 => 이동[TAB4 => TAB3]
+async function reloadTab4(selectedPrjId) {
     showLoading();
+    window.isTab4Loading = true;
 
     try {
         // A 초기화 (레이아웃 틀은 유지)
@@ -294,12 +266,12 @@ $(document).on("change", ".select_prj_cd", async function () {
         window.hr014TableA.setData(cleared);
 
         // B 초기화 (레이아웃 틀은 유지)
-        $("#HR014_RISK_TEXT").val(" ");
+        $("#HR014_RISK_TEXT").val("");
 
-        // 선택된 프로젝트 유지
+        // 선택값 반영
         window.hr013_prj_nm = selectedPrjId;
 
-        // 두 개 동시에 기다리기 (병렬)
+        // 데이터 로딩
         await Promise.all([
             loadHr014TableDataA(),
             loadHr014TableDataB()
@@ -308,9 +280,15 @@ $(document).on("change", ".select_prj_cd", async function () {
     } catch (e) {
         console.error("데이터 로드 실패", e);
     } finally {
-        // 무조건 로딩 종료
+        window.isTab4Loading = false;
         hideLoading();
     }
+}
+
+// 셀렉트 선택 시, 테이블 재로드
+$(document).on("change", ".select_prj_cd", async function () {
+    const selectedPrjId = $(this).val();
+    await reloadTab4(selectedPrjId);
 });
 
 // =============================================================================================================================
@@ -366,24 +344,6 @@ function escapeHtml(value) {
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#39;");
 }
-
-//function buildHr014TableB() {
-//    if (window.hr014TableB) return;
-//
-//    window.hr014TableB = new Tabulator("#TABLE_HR014_B", {
-//        layout: "fitColumns",
-//        placeholder: "데이터 없음",
-//        columns: [
-//            { title: "기술", field: "cd_nm", hozAlign: "left", widthGrow: 2 },
-//            { title: "1", field: "lv1", hozAlign: "center", formatter: scoreCheckboxFormatter },
-//            { title: "2", field: "lv2", hozAlign: "center", formatter: scoreCheckboxFormatter },
-//            { title: "3", field: "lv3", hozAlign: "center", formatter: scoreCheckboxFormatter },
-//            { title: "4", field: "lv4", hozAlign: "center", formatter: scoreCheckboxFormatter },
-//            { title: "5", field: "lv5", hozAlign: "center", formatter: scoreCheckboxFormatter }
-//        ],
-//        data: []
-//    });
-//}
 
 function loadHr014TableDataB() {
     const devId = window.currentDevId || $("#dev_id").val();

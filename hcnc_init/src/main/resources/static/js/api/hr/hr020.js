@@ -10,17 +10,6 @@ var hr020SourceRows = [];
 
 // 역할 공통코드
 var jobCdMap = {};
-//var jobCdMap = {
-//    "01": "개발",
-//    "02": "PM",
-//    "03": "PL"
-//};
-
-// 저장/로딩중 팝업 표시 여부 플래그
-// let isSaving = false;
-
-// 저장 성공 여부 플래그
-// let isSuccess = false;
 
 // 개발자ID
 window.currentDevId = null;
@@ -125,26 +114,6 @@ $(document).ready(async function () {
 
 // ============================================================================== //
 
-// 역할 코드 -> 라벨 맵 생성 (역할)
-//function getJobCodeMap() {
-//    var map = {};
-//    if (hr020JobOptions && hr020JobOptions.length) {
-//        hr020JobOptions.forEach(function (item) {
-//            if (item.cd) {
-//                map[item.cd] = item.cd_nm || item.cd;
-//            }
-//        });
-//        return map;
-//    }
-//    $("#write_hr020_job_cd option").each(function () {
-//        var val = this.value;
-//        if (val) {
-//            map[val] = $(this).text();
-//        }
-//    });
-//    return map;
-//}
-
 // 역할 표시용 라벨 변환
 function jobCodeFormatter(cell) {
     var raw = normalizeJobValue(cell.getValue());
@@ -204,18 +173,6 @@ function normalizeJobCodes() {
         }
     });
 }
-
-// 콤보 기본 옵션/선택 처리
-//function initSelectDefault(selectId, placeholderText) {
-//    var $sel = $("#" + selectId);
-//    if ($sel.find("option[value='']").length === 0) {
-//        $sel.prepend("<option value=''>" + placeholderText + "</option>");
-//    }
-//    $sel.val("");
-//    if (!$sel.val()) {
-//        $sel.find("option:first").prop("selected", true);
-//    }
-//}
 
 // 둥근 프로필 생성
 function makeProfileCircle(name) {
@@ -474,19 +431,6 @@ async function loadPrjTableData() {
         return;
     }
 
-    // 키워드 검색
-    //    let keyword = $("#searchKeyword").val().trim();
-    //    if (keyword) {
-    //        keyword = keyword
-    //            .split(/[\s,]+/)
-    //            .filter(w => w)
-    //            .map(w => "+" + w)
-    //            .join(" ");
-    //    } else {
-    //        keyword = null;
-    //    }
-    // console.log("키워드 :", keyword);
-
     try {
         // 리스트 불러오기
         const response = await $.ajax({
@@ -636,15 +580,6 @@ $("#rate_amt")
             return;
         }
     });
-
-// 테이블에 점수 등급 표시
-//function fetchUserScore(devId) {
-//    return $.ajax({
-//        url: "/hr020/getScore",
-//        type: "GET",
-//        data: { dev_id: devId }
-//    });
-//}
 
 // alert 문자 가공
 function btnEditView(alertPrefix = "") {
