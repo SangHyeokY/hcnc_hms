@@ -38,6 +38,7 @@ window.initTab3 = function () {
     // 프로젝트 제목 옆 건수 표기 초기화
     updateHr013TitleCount();
     loadHr013TableData();
+
     // 상위 모달의 view/update 상태를 탭3 테이블 readonly 스타일과 동기화한다.
     $(document).off("tab:readonly.hr013").on("tab:readonly.hr013", function (_, isReadOnly) {
         applyTab3Readonly(!!isReadOnly);
@@ -195,7 +196,6 @@ function buildHr013Table() {
         layout: "fitData",
         placeholder: "데이터 없음",
         height: "100%",
-        // height: "94%",
         // 페이징 설정
         pagination: "local",       // 로컬 데이터 기준 페이지네이션
         paginationSize: 10,        // 한 페이지에 10개씩 표시
@@ -304,78 +304,38 @@ function buildHr013Table() {
                     `;
                 },
                 editable: function (cell) {
-
                     const rowData = cell.getRow().getData();
-
+                    // "조회"일 경우
                     if (currentMode === "view")
                         return false;
                     // 당사여부 체크된 경우 → 수정 불가
                     if (rowData.inprj_yn === 'Y') {   // 또는 'Y'
                         return false;
                     }
-
                     return true;
                 },
-                cellClick: function (a, b) {
-                    // (e, cell) 또는 (cell) 또는 (e) 등 어떤 형태로 와도 견딤
-                    let e = null;
-                    let cell = null;
-
-                    // 케이스1: (e, cell)
-                    if (b && typeof b.edit === "function") {
-                        e = a;
-                        cell = b;
-                    }
-                    // 케이스2: (cell)
-                    else if (a && typeof a.edit === "function") {
-                        cell = a;
-                    }
-                    // 케이스3: cell을 못 받는 이벤트로 호출됨 → 여기서 끝내야 함
-                    else {
-                        return; // ★ 여기서 cell.edit() 하면 100% 터짐
-                    }
-
+                cellClick: async function (e, cell) {
+                    if (!cell) return;
                     // 버튼 클릭이면 평가만
-                    const evalBtn = e?.target?.closest?.(".btn-prj-eval");
+                    const evalBtn = e?.target?.closest(".btn-prj-eval");
                     if (evalBtn) {
-                        e.preventDefault?.();
-                        e.stopPropagation?.();
-                        e.stopImmediatePropagation?.();
+                        e.stopPropagation();
 
                         const rowData = cell.getRow().getData();
-                        console.log("평가:", rowData.prj_nm, rowData);
+                        window.currentDevId = rowData.dev_id;
 
-                        showLoading(); // 로딩바 표시
+                        // 이게 있어야 경고 팝업이 안뜬다.
+                        window.hr013_prj_nm = rowData.dev_prj_id;
 
-                        editRisk(rowData)
-                            .then(() => {
-                                $(".tab-btn").last().click();
-                                $(".hr014-title").text("(프로젝트명 : " + rowData.prj_nm + ")");
+                        $(".tab-btn").last().click();
 
-                                // 탭 클릭 직후 레이아웃 재계산이 필요한 경우가 있어 0ms로 한번 더
-                                setTimeout(() => {
-                                    if (window.hr014TableA) window.hr014TableA.redraw(true);
-                                    if (window.hr014TableB) window.hr014TableB.redraw(true);
-                                }, 0);
-                            })
-                            .catch((e) => {
-                                console.error(e);
-                                alert("데이터 로드 중 오류가 발생했습니다.");
-                            })
-                            .finally(() => {
-                                $(".tab-btn").last().click();
-                                $(".hr014-title").text("(프로젝트명 : " + rowData.prj_nm + ")");
-                                hideLoading();
-                            });
+                        await reloadTab4(rowData.dev_prj_id);
+                        return;
                     }
-
                     // 등록 버튼 클릭 처리(새 요구사항)
-                    const regBtn = e?.target?.closest?.(".btn-prj-edit");
+                    const regBtn = e?.target?.closest(".btn-prj-edit");
                     if (regBtn) {
-                        e.preventDefault?.();
-                        e.stopPropagation?.();
-                        e.stopImmediatePropagation?.();
-
+                        e.stopPropagation();
                         openHr013ProjectPicker(cell.getRow()); // 내부에서 로딩 처리함
                         return;
                     }
@@ -417,12 +377,10 @@ function buildHr013Table() {
             {
                 title: "기술스택",
                 field: "skl_id_lst",
-                /*hozAlign: "left",*/
                 formatter: hr013TableSkillFormatter,
                 editable: false,
                 cellClick: hr013TableSkillCellClick
             },
-            // { title: "기술스택", field: "stack_txt", formatter: skillDisplayFormatter, editor: stackTagEditor, editable: isHr013Editable, cellClick: startEditOnClick },
             {
                 title: "시작일",
                 field: "st_dt",
@@ -1825,9 +1783,6 @@ function hr013TableSkillFormatter(cell) {
     return `<div class="hr013-stack-cell">` +
         `<span class="hr013-stack-text" style="white-space: nowrap; padding-right: 15px;">` + textHtml + `</span>` +
         `<button type="button" class="btn-prj-skl">기술 선택</button>` + `</div>`;
-//    return "<div class='hr013-stack-cell'>" +
-//           "<button type='button' class='btn-prj-skl'>기술 선택</button>" +
-//           "</div>";
 }
 
 function hr013TableSkillCellClick(e, cell) {
@@ -2017,16 +1972,6 @@ function initSelectDefault(selectId, placeholderText) {
         $sel.find("option:first").prop("selected", true);
     }
 }
-
-// 테이블 표시용 기술스택 변환
-// function skillDisplayFormatter(cell) {
-//     var row = cell.getRow().getData();
-//     if (row && row.stack_txt_nm != null && row.stack_txt_nm !== "") {
-//         return row.stack_txt_nm;
-//     }
-//     var value = cell.getValue();
-//     return getSkillLabelList(value);
-// }
 
 // 테이블 표시용 기술스택 변환
 function skillDisplayFormatter(cell) {

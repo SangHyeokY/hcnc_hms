@@ -34,8 +34,11 @@ public class Hr014Controller {
         map.put("login_role_cd", getLoginRoleCd(session));
         ModelAndView mv = new ModelAndView("jsonView");
         List<Map<String, Object>> list = hr014Service.listA(map);
+        String devId = String.valueOf(map.get("dev_id"));
+        List<Map<String, Object>> projectList = hr014Service.selectProjectList(devId);
         mv.addObject("success", true);
         mv.addObject("list", list);
+        mv.addObject("projectList", projectList);
         return mv;
     }
 

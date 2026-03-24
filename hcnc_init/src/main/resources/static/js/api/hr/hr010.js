@@ -92,14 +92,14 @@ $(document).ready(async function () {
     // 탭별 이벤트 정의
     $(".search-btn-area .btn-search").text("조회");
 
-    $(".hr030-filter-chip").on("click", function () {
+    $(".toggle-filter-chip").on("click", function () {
         var nextType = String($(this).data("userType") || "staff");
         if (currentHr010UserTypeTab === nextType) {
             return;
         }
 
         currentHr010UserTypeTab = nextType;
-        $(".hr030-filter-chip").removeClass("is-active");
+        $(".toggle-filter-chip").removeClass("is-active");
         $(this).addClass("is-active");
 
         applyHr010UserTypeFilter();
@@ -287,31 +287,38 @@ $(document).ready(async function () {
     // 메인 영역 변경 이벤트
     $(document).on("change input", "#main-modal-table input, #main-modal-table select, #main-modal-table textarea", function () {
         if (initTabs) return;
-        changedTabs.mainArea = true;
-        // console.log("mainArea 변경됨");
+        if (currentMode === "insert") return;
+        changedTabs.mainArea = true;ㅉ
     });
 
     // Tab1 변경 이벤트
     $("#tab1").on("change input", "input, select, textarea", function () {
         if (initTabs) return;
+        if (currentMode === "insert") return;
         changedTabs.tab1 = true;
     });
 
     // Tab2 변경 이벤트
     $("#tab2").on("change input", "input, select, textarea", function () {
         if (initTabs) return;
+        if (currentMode === "insert") return;
         changedTabs.tab2 = true;
     });
 
     // Tab3 변경 이벤트
     $("#tab3").on("change input", "input, select, textarea", function () {
         if (initTabs) return;
+        if (currentMode === "insert") return;
         changedTabs.tab3 = true;
     });
 
     // Tab4 변경 이벤트
     $("#tab4").on("change input", "input, select, textarea", function () {
+        console.log("🔥 tab4 change 발생", e.target);
+        console.trace(); // 🔥 호출 스택 찍힘
+
         if (initTabs) return;
+        if (currentMode === "insert") return;
         changedTabs.tab4 = true;
     });
 
@@ -1019,53 +1026,6 @@ function loadUserTableImgDataAsync(data) {
         resolve();
     });
 }
-//function loadUserTableImgDataAsync(data) {
-//    return new Promise((resolve, reject) => {
-//        if (!userTable || typeof userTable.setData !== "function") {
-//            resolve(); // 테이블 없으면 그냥 resolve
-//            return;
-//        }
-//
-//        $.ajax({
-//            url: "/hr010/list/img",
-//            type: "GET",
-//            xhrFields: { responseType: "arraybuffer" },
-//            data: data,
-//            success: function (response) {
-//                const $img = $("#dev_img");
-//                const hasImage = response && response.byteLength > 0;
-//                const prevUrl = $img.data("url");
-//                if (prevUrl) {
-//                    URL.revokeObjectURL(prevUrl);
-//                }
-//                if (hasImage) {
-//                    const blob = new Blob([response], { type: "image/jpeg" });
-//                    const imgUrl = URL.createObjectURL(blob);
-//                    $img
-//                        .attr("src", imgUrl)
-//                        .data("url", imgUrl)
-//                        .show();
-//                } else {
-//                    $img
-//                        .attr("src", "")
-//                        .removeData("url")
-//                        .hide();
-//                }
-//                $img.toggleClass("has-img", hasImage);
-//                resolve();
-//            },
-//            error: function (e) {
-//                console.error(e);
-//                showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
-//                    icon: 'error',
-//                    title: '오류',
-//                    text: '사용자 데이터를 불러오는 중 오류가 발생했습니다.',
-//                });
-//                resolve(); // 에러여도 UI는 표시 가능하도록 resolve
-//            }
-//        });
-//    });
-//}
 
 // ============================================================================== //
 
@@ -1247,7 +1207,7 @@ openUserModal = async function (mode, data) {
 
     // 인력 관리 등록 시, 정해진 탭에 따라 자동으로 선택
     if (mode === "insert") {
-        const activeTabBtn = document.querySelector(".hr030-filter-chip.active");
+        const activeTabBtn = document.querySelector(".toggle-filter-chip.active");
         const devTyp = activeTabBtn?.dataset.userType === "freelancer" ? "HCNC_F" : "HCNC_S";
         $("#select_dev_typ").val(devTyp).trigger("change");
     }
@@ -1536,10 +1496,27 @@ function broadcastTabReadonly(isReadOnly) {
 // ============================================================================== //
 
 async function closeUserViewModal() {
-    // 수정된 탭 목록 구하기
-    const modifiedTabs = Object.keys(changedTabs).filter(tab => changedTabs[tab]);
+    console.log("changedTabs:", changedTabs);
 
-    if (modifiedTabs.length > 0) {
+    if (currentMode === "insert") {
+        changedTabs.tab4 = false;
+    }
+
+    // 수정된 탭 목록 구하기 (insert 모드일 때, tab4의 변경 유무는 무시)
+    const modifiedTabs = Object.keys(changedTabs).filter(tab => {
+        // insert 모드에서 tab4는 무시
+        if (currentMode === "insert" && tab === "tab4") return false;
+        return changedTabs[tab];
+    });
+    // tab4는 경고 무시
+    const hasMeaningfulChange =
+        currentMode === "insert"
+            ? modifiedTabs.some(tab => tab !== "tab4")
+            : modifiedTabs.length > 0;
+
+    if (currentMode === "insert" && modifiedTabs.length === 0) {
+        // 아무 경고 없이 그냥 닫기
+    } else if (modifiedTabs.length > 0) {
         const devNmInput = document.getElementById("dev_nm");
         const devNm = devNmInput ? devNmInput.value : "";
 

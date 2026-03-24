@@ -260,46 +260,6 @@ function loadHr012TableDataB() {
     });
 }
 
-//function saveHr012TableB(devId) {
-//    return new Promise((resolve, reject) => {
-//        if (!window.hr012TableB) return reject("Tab2B 테이블 없음");
-//        if (!devId) return reject("devId 없음");
-//
-//        const tableData = window.hr012TableB.getData(); // 데이터 임시 저장
-//        const saveList = tableData.map(row => {
-//            let lvl = 0;
-//            if (row.lv5) lvl = 5;
-//            else if (row.lv4) lvl = 4;
-//            else if (row.lv3) lvl = 3;
-//            else if (row.lv2) lvl = 2;
-//            else if (row.lv1) lvl = 1;
-//
-//            return {
-//                devId: devId,
-//                sklId: row.skl_id,
-//                lvl: lvl
-//            };
-//        });
-//
-//        console.log("Tab2_숙련도 저장한 데이터");
-//        console.table(saveList);
-//
-//        $.ajax({
-//            url: "/hr012/tab2_2_save",
-//            type: "POST",
-//            contentType: "application/json; charset=utf-8",
-//            data: JSON.stringify(saveList),
-//            success: function(response) {
-//                loadHr012TableDataB();
-//                resolve(); // ← 여기가 중요!
-//            },
-//            error: function() {
-//                reject("숙련도 저장 실패"); // ← 실패 처리
-//            }
-//        });
-//    });
-//}
-
 // 유효성 검사
 function validateHr012Form() {
     return true;
