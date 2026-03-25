@@ -1570,7 +1570,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
 .tab4-content .hr014-title-wrap {
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 25px;
 }
 
 .tab4-content .hr014-title-wrap .select_prj_cd {

@@ -392,15 +392,20 @@ $(document).ready(async function () {
             // 저장 완료 후, 상태 플래그 변경
             isSuccess = true;
 
+            // 저장 완료 플래그
+            const hasSaved = savedTabs.length > 0;
+
             // 저장한 탭의 이름 저장
-            const savedTabNames = savedTabs.length
+            const savedTabNames = hasSaved
                 ? savedTabs.map(n => `<strong>${n}</strong>`).join(",&nbsp;")
-                : "<strong>인적사항</strong>";  // 혹시 savedTabs가 비어있다면 인적사항 표시
+                : "";
 
             showAlert({
                 icon: 'success',
                 title: currentMode === "insert" ? "등록 완료" : "저장 완료",
-                html: `${savedTabNames}&nbsp;정보가 저장되었습니다.`
+                html: hasSaved
+                    ? `${savedTabNames}&nbsp;정보가 저장되었습니다.`
+                    : `<strong>변경 사항</strong>이 없습니다.`
             });
 
             // 탭 상태 초기화
@@ -1251,8 +1256,8 @@ openUserModal = async function (mode, data) {
 async function initAllTabs() {
     // 처음에 보여질 Tab1만 await
     await window.initTab1();
-    if (currentMode !== "insert") {
-        window.initTab2();   // 기다릴 필요 없음
+    if (currentMode !== "insert") { // 필요 시, 다른 부분들도 await 사용하도록 수정하기
+        window.initTab2();
         window.initTab3();
         if (canAccessHr014Tab()) {
             window.initTab4();
