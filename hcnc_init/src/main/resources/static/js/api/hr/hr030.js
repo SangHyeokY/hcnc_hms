@@ -45,13 +45,7 @@
         { key: "lead", label: "특급", description: "11년 이상", color: "#f3b44f" }
     ];
 
-    var technicalSkillMeta = {
-        "Java/Spring": { label: "Java/Spring", color: "#4f6ff7" },
-        "React/Vue": { label: "React/Vue", color: "#1fb6a6" },
-        "Python/Data": { label: "Python/Data", color: "#f3b44f" },
-        "QA/테스트": { label: "QA/테스트", color: "#eb8079" },
-        "웹퍼블리싱": { label: "웹퍼블리싱", color: "#a173ff" }
-    };
+    var skillColorPalette = ["#4f6ff7", "#1fb6a6", "#f3b44f", "#a173ff", "#eb8079", "#4cb0ff", "#33c18d"];
 
     var kpiIconMap = {
         total: "users",
@@ -64,8 +58,12 @@
         query: "",
         statusFilter: "all",
         selectedRegionId: dashboardData.map.defaultRegionId || "all",
-        skillViewMode: "top5",
+        skillViewMode: "all",
         availabilityCardFilter: "all",
+        skillCatalogLoaded: false,
+        skillCatalogRequested: false,
+        skillCatalogMap: {},
+        skillCatalogLabels: [],
         employeeTable: null,
         charts: {
             skills: null,
@@ -193,26 +191,561 @@
         return careerBandMeta[3];
     }
 
-    function normalizeTechnicalSkillLabel(label) {
+    function buildSkillCatalog(items) {
+        var catalogMap = {};
+        var catalogLabels = [];
+
+        (items || []).forEach(function (item) {
+            var label = String(item && (item.cd_nm || item.label || item.name || item.cd) || "").trim();
+            var normalized;
+
+            if (!label) {
+                return;
+            }
+
+            normalized = normalizeText(label);
+            catalogMap[normalized] = label;
+
+            if (catalogLabels.indexOf(label) === -1) {
+                catalogLabels.push(label);
+            }
+        });
+
+        state.skillCatalogMap = catalogMap;
+        state.skillCatalogLabels = catalogLabels;
+        state.skillCatalogLoaded = Object.keys(catalogMap).length > 0;
+    }
+
+    function loadSkillCatalog() {
+        if (state.skillCatalogRequested || typeof getComCode !== "function") {
+            return;
+        }
+
+        state.skillCatalogRequested = true;
+        getComCode("skl_id", "", function (res) {
+            buildSkillCatalog(Array.isArray(res) ? res : []);
+            renderDashboard();
+        });
+    }
+
+    function buildSkillCandidates(label) {
         var raw = String(label || "").trim();
+        var normalized = normalizeText(raw);
+        var candidates = [];
 
         if (!raw) {
-            return "";
+            return candidates;
         }
 
-        if (raw === "웹퍼블리싱" || raw === "퍼블리싱") {
-            return "웹퍼블리싱";
+        function pushCandidate(value) {
+            if (value && candidates.indexOf(value) === -1) {
+                candidates.push(value);
+            }
         }
 
-        if (raw === "QA" || raw === "QA/운영") {
+        pushCandidate(raw);
+
+        if (normalized.indexOf("java") > -1 || normalized.indexOf("spring") > -1) {
+            pushCandidate("Java/Spring");
+            pushCandidate("Java");
+            pushCandidate("Spring");
+        }
+
+        if (normalized.indexOf("react") > -1 || normalized.indexOf("vue") > -1) {
+            pushCandidate("React/Vue");
+            pushCandidate("React");
+            pushCandidate("Vue");
+        }
+
+        if (normalized.indexOf("javascript") > -1 || normalized.indexOf("typescript") > -1) {
+            pushCandidate("JavaScript");
+            pushCandidate("TypeScript");
+        }
+
+        if (normalized.indexOf("python") > -1 || normalized.indexOf("data") > -1) {
+            pushCandidate("Python/Data");
+            pushCandidate("Python");
+            pushCandidate("Data");
+        }
+
+        if (normalized.indexOf("qa") > -1 || normalized.indexOf("테스트") > -1 || normalized.indexOf("test") > -1) {
+            pushCandidate("QA/테스트");
+            pushCandidate("QA");
+            pushCandidate("테스트");
+        }
+
+        if (normalized.indexOf("퍼블") > -1 || normalized.indexOf("publishing") > -1 || normalized.indexOf("html") > -1 || normalized.indexOf("css") > -1) {
+            pushCandidate("웹퍼블리싱");
+            pushCandidate("퍼블리싱");
+            pushCandidate("HTML/CSS");
+        }
+
+        if (normalized.indexOf("pm") > -1 || normalized.indexOf("pl") > -1 || normalized.indexOf("pmo") > -1 || normalized.indexOf("기획") > -1) {
+            pushCandidate("PM/PL");
+            pushCandidate("PMO");
+        }
+
+        return candidates;
+    }
+
+    function getFallbackTechnicalSkillLabel(label) {
+        var normalized = normalizeText(label);
+
+        if (normalized.indexOf("java") > -1 || normalized.indexOf("spring") > -1) {
+            return "Java/Spring";
+        }
+
+        if (normalized.indexOf("react") > -1 || normalized.indexOf("vue") > -1 ||
+            normalized.indexOf("javascript") > -1 || normalized.indexOf("typescript") > -1) {
+            return "React/Vue";
+        }
+
+        if (normalized.indexOf("python") > -1 || normalized.indexOf("data") > -1) {
+            return "Python/Data";
+        }
+
+        if (normalized.indexOf("qa") > -1 || normalized.indexOf("테스트") > -1 || normalized.indexOf("test") > -1) {
             return "QA/테스트";
         }
 
-        if (raw === "Java/Spring" || raw === "React/Vue" || raw === "Python/Data") {
-            return raw;
+        if (normalized.indexOf("퍼블") > -1 || normalized.indexOf("publishing") > -1 ||
+            normalized.indexOf("html") > -1 || normalized.indexOf("css") > -1) {
+            return "웹퍼블리싱";
         }
 
         return "";
+    }
+
+    function getSkillFamilyRule(label) {
+        var normalized = normalizeText(label);
+
+        if (!normalized) {
+            return null;
+        }
+
+        if ((normalized.indexOf("java") > -1 || normalized.indexOf("spring") > -1) && normalized.indexOf("javascript") === -1) {
+            return {
+                include: ["springboot", "spring", "java", "jsp", "jpa", "mybatis", "egov", "전자정부"],
+                exclude: ["javascript"],
+                priority: ["springboot", "spring", "java", "jpa", "mybatis", "jsp", "egov", "전자정부"]
+            };
+        }
+
+        if (normalized.indexOf("react") > -1 || normalized.indexOf("vue") > -1 ||
+            normalized.indexOf("javascript") > -1 || normalized.indexOf("typescript") > -1) {
+            return {
+                include: ["react", "vue", "typescript", "javascript", "next", "nuxt", "angular"],
+                exclude: [],
+                priority: ["react", "vue", "typescript", "javascript", "next", "nuxt", "angular"]
+            };
+        }
+
+        if (normalized.indexOf("python") > -1 || normalized.indexOf("data") > -1) {
+            return {
+                include: ["python", "pandas", "spark", "airflow", "django", "flask", "data", "etl"],
+                exclude: [],
+                priority: ["python", "pandas", "spark", "airflow", "django", "flask", "data", "etl"]
+            };
+        }
+
+        if (normalized.indexOf("qa") > -1 || normalized.indexOf("테스트") > -1 || normalized.indexOf("test") > -1) {
+            return {
+                include: ["qa", "test", "테스트", "selenium", "cypress", "jmeter", "xray"],
+                exclude: [],
+                priority: ["qa", "test", "테스트", "selenium", "cypress", "jmeter", "xray"]
+            };
+        }
+
+        if (normalized.indexOf("퍼블") > -1 || normalized.indexOf("publishing") > -1 ||
+            normalized.indexOf("html") > -1 || normalized.indexOf("css") > -1) {
+            return {
+                include: ["html", "css", "scss", "sass", "publishing", "퍼블", "웹접근성"],
+                exclude: [],
+                priority: ["html", "css", "scss", "sass", "publishing", "퍼블", "웹접근성"]
+            };
+        }
+
+        return null;
+    }
+
+    function getSkillFamilySeedLabels(label) {
+        var normalized = normalizeText(label);
+
+        if (!normalized) {
+            return [];
+        }
+
+        if ((normalized.indexOf("java") > -1 || normalized.indexOf("spring") > -1) && normalized.indexOf("javascript") === -1) {
+            return ["Java", "Spring", "Spring Boot", "JPA"];
+        }
+
+        if (normalized.indexOf("react") > -1 || normalized.indexOf("vue") > -1 ||
+            normalized.indexOf("javascript") > -1 || normalized.indexOf("typescript") > -1) {
+            return ["React", "Vue", "TypeScript", "JavaScript"];
+        }
+
+        if (normalized.indexOf("python") > -1 || normalized.indexOf("data") > -1) {
+            return ["Python", "Pandas", "ETL"];
+        }
+
+        if (normalized.indexOf("qa") > -1 || normalized.indexOf("테스트") > -1 || normalized.indexOf("test") > -1) {
+            return ["QA", "테스트자동화"];
+        }
+
+        if (normalized.indexOf("퍼블") > -1 || normalized.indexOf("publishing") > -1 ||
+            normalized.indexOf("html") > -1 || normalized.indexOf("css") > -1) {
+            return ["HTML", "CSS", "웹접근성"];
+        }
+
+        return [];
+    }
+
+    function isRoleSkillLabel(label) {
+        var normalized = normalizeText(label);
+
+        return normalized === "pm" ||
+            normalized === "pl" ||
+            normalized.indexOf("pm/") === 0 ||
+            normalized.indexOf("pmo") > -1 ||
+            normalized.indexOf("projectmanager") > -1 ||
+            normalized.indexOf("manager") > -1 ||
+            normalized.indexOf("기획") > -1 ||
+            normalized.indexOf("관리") > -1;
+    }
+
+    function isTechnicalSkillLabel(label) {
+        var familyRule = getSkillFamilyRule(label);
+
+        return !!label && !isRoleSkillLabel(label) && !!familyRule;
+    }
+
+    function resolveTechnicalSkillLabel(label) {
+        var candidates = buildSkillCandidates(label);
+        var resolved = "";
+
+        candidates.some(function (candidate) {
+            var match = state.skillCatalogMap[normalizeText(candidate)];
+
+            if (match) {
+                resolved = match;
+                return true;
+            }
+
+            return false;
+        });
+
+        if (resolved) {
+            return resolved;
+        }
+
+        if (state.skillCatalogLoaded) {
+            return "";
+        }
+
+        return getFallbackTechnicalSkillLabel(label);
+    }
+
+    function getCatalogSkillScore(label, familyRule) {
+        var normalized = normalizeText(label);
+        var score = 0;
+
+        (familyRule.priority || []).forEach(function (keyword, index) {
+            if (normalized.indexOf(keyword) > -1) {
+                score += (familyRule.priority.length - index) * 10;
+            }
+        });
+
+        if (label.indexOf("/") > -1 || label.indexOf("·") > -1) {
+            score -= 8;
+        }
+
+        score -= normalized.length / 100;
+        return score;
+    }
+
+    function appendUniqueSkillLabel(target, label) {
+        if (label && target.indexOf(label) === -1) {
+            target.push(label);
+        }
+    }
+
+    function resolveCatalogSkillSeedLabel(seedLabel) {
+        var normalizedSeed = normalizeText(seedLabel);
+        var candidates;
+
+        if (!normalizedSeed || !state.skillCatalogLoaded) {
+            return seedLabel;
+        }
+
+        if (state.skillCatalogMap[normalizedSeed]) {
+            return state.skillCatalogMap[normalizedSeed];
+        }
+
+        candidates = state.skillCatalogLabels.filter(function (catalogLabel) {
+            return isTechnicalSkillLabel(catalogLabel) && normalizeText(catalogLabel).indexOf(normalizedSeed) > -1;
+        }).sort(function (a, b) {
+            var exactA = normalizeText(a) === normalizedSeed ? 1 : 0;
+            var exactB = normalizeText(b) === normalizedSeed ? 1 : 0;
+            var atomicA = (a.indexOf("/") === -1 && a.indexOf("·") === -1) ? 1 : 0;
+            var atomicB = (b.indexOf("/") === -1 && b.indexOf("·") === -1) ? 1 : 0;
+
+            if (exactA !== exactB) {
+                return exactB - exactA;
+            }
+
+            if (atomicA !== atomicB) {
+                return atomicB - atomicA;
+            }
+
+            return a.length - b.length;
+        });
+
+        return candidates[0] || seedLabel;
+    }
+
+    function buildResolvedTechnicalSkillLabels(label) {
+        var familyRule = getSkillFamilyRule(label);
+        var exactMatch = resolveTechnicalSkillLabel(label);
+        var matches = [];
+        var atomicMatches;
+        var preferredSeeds = getSkillFamilySeedLabels(label);
+
+        if (!state.skillCatalogLoaded) {
+            if (preferredSeeds.length) {
+                return preferredSeeds.slice(0, 4);
+            }
+
+            return exactMatch ? [exactMatch] : [];
+        }
+
+        if (!familyRule) {
+            return exactMatch && isTechnicalSkillLabel(exactMatch) ? [exactMatch] : [];
+        }
+
+        matches = state.skillCatalogLabels.filter(function (catalogLabel) {
+            var normalized = normalizeText(catalogLabel);
+
+            if (!isTechnicalSkillLabel(catalogLabel)) {
+                return false;
+            }
+
+            if ((familyRule.exclude || []).some(function (keyword) {
+                return normalized.indexOf(keyword) > -1;
+            })) {
+                return false;
+            }
+
+            return (familyRule.include || []).some(function (keyword) {
+                return normalized.indexOf(keyword) > -1;
+            });
+        }).sort(function (a, b) {
+            return getCatalogSkillScore(b, familyRule) - getCatalogSkillScore(a, familyRule);
+        });
+
+        if (exactMatch && isTechnicalSkillLabel(exactMatch) && matches.indexOf(exactMatch) === -1) {
+            matches.unshift(exactMatch);
+        }
+
+        preferredSeeds.forEach(function (seedLabel) {
+            appendUniqueSkillLabel(matches, resolveCatalogSkillSeedLabel(seedLabel));
+        });
+
+        atomicMatches = matches.filter(function (catalogLabel) {
+            return catalogLabel.indexOf("/") === -1 && catalogLabel.indexOf("·") === -1;
+        });
+
+        if (atomicMatches.length) {
+            matches = atomicMatches.concat(matches.filter(function (catalogLabel) {
+                return atomicMatches.indexOf(catalogLabel) === -1;
+            }));
+        }
+
+        return matches.slice(0, 3);
+    }
+
+    function getSkillDistributionWeights(size) {
+        if (size <= 1) {
+            return [1];
+        }
+
+        if (size === 2) {
+            return [0.58, 0.42];
+        }
+
+        if (size === 3) {
+            return [0.5, 0.3, 0.2];
+        }
+
+        if (size === 4) {
+            return [0.35, 0.26, 0.22, 0.17];
+        }
+
+        if (size === 5) {
+            return [0.3, 0.24, 0.19, 0.15, 0.12];
+        }
+
+        if (size === 6) {
+            return [0.26, 0.21, 0.17, 0.14, 0.12, 0.1];
+        }
+
+        return Array.apply(null, { length: size }).map(function (_, index) {
+            return size - index;
+        }).map(function (value, _, arr) {
+            var total = arr.reduce(function (sum, current) {
+                return sum + current;
+            }, 0);
+
+            return value / total;
+        });
+    }
+
+    function splitSkillValue(total, labels) {
+        var weights = getSkillDistributionWeights(labels.length);
+        var rows = labels.map(function (label, index) {
+            var raw = total * (weights[index] || 0);
+            return {
+                label: label,
+                value: Math.floor(raw),
+                remainder: raw - Math.floor(raw)
+            };
+        });
+        var allocated = rows.reduce(function (sum, item) {
+            return sum + item.value;
+        }, 0);
+        var remaining = total - allocated;
+        var cursor = 0;
+
+        rows.sort(function (a, b) {
+            return b.remainder - a.remainder;
+        });
+
+        while (remaining > 0 && rows.length) {
+            rows[cursor % rows.length].value += 1;
+            cursor += 1;
+            remaining -= 1;
+        }
+
+        return rows.filter(function (item) {
+            return item.value > 0;
+        }).sort(function (a, b) {
+            return b.value - a.value;
+        });
+    }
+
+    function getTechnicalSkillColor(label, index) {
+        var normalized = normalizeText(label);
+
+        if (label === "기타") {
+            return "#94a3b8";
+        }
+
+        if (normalized.indexOf("java") > -1 || normalized.indexOf("spring") > -1) {
+            return "#4f6ff7";
+        }
+
+        if (normalized.indexOf("react") > -1 || normalized.indexOf("vue") > -1 ||
+            normalized.indexOf("javascript") > -1 || normalized.indexOf("typescript") > -1) {
+            return "#1fb6a6";
+        }
+
+        if (normalized.indexOf("python") > -1 || normalized.indexOf("data") > -1) {
+            return "#f3b44f";
+        }
+
+        if (normalized.indexOf("qa") > -1 || normalized.indexOf("테스트") > -1 || normalized.indexOf("test") > -1) {
+            return "#eb8079";
+        }
+
+        if (normalized.indexOf("퍼블") > -1 || normalized.indexOf("publishing") > -1 ||
+            normalized.indexOf("html") > -1 || normalized.indexOf("css") > -1) {
+            return "#a173ff";
+        }
+
+        return skillColorPalette[index % skillColorPalette.length];
+    }
+
+    function buildRegionSkillDistribution(regionSkills) {
+        var isAllView = state.skillViewMode === "all";
+        var skillMap = {};
+        var otherValue = 0;
+        var maxVisible = state.skillViewMode === "top3" ? 3 : state.skillViewMode === "top5" ? 5 : 7;
+        var minShare = isAllView ? 5 : 0;
+        var skills;
+        var total;
+
+        (regionSkills || []).forEach(function (item) {
+            var value = Number(item && item.value || 0);
+            var resolvedLabels = buildResolvedTechnicalSkillLabels(item && item.label);
+            var distributedSkills;
+
+            if (!value) {
+                return;
+            }
+
+            if (!resolvedLabels.length) {
+                otherValue += value;
+                return;
+            }
+
+            distributedSkills = splitSkillValue(value, resolvedLabels);
+
+            distributedSkills.forEach(function (distributedItem) {
+                if (!skillMap[distributedItem.label]) {
+                    skillMap[distributedItem.label] = {
+                        label: distributedItem.label,
+                        value: 0
+                    };
+                }
+
+                skillMap[distributedItem.label].value += distributedItem.value;
+            });
+        });
+
+        skills = Object.keys(skillMap).map(function (key) {
+            return skillMap[key];
+        }).sort(function (a, b) {
+            return (b.value || 0) - (a.value || 0);
+        });
+
+        total = skills.reduce(function (sum, item) {
+            return sum + (item.value || 0);
+        }, 0);
+
+        if (skills.length > maxVisible) {
+            skills.slice(maxVisible).forEach(function (item) {
+                otherValue += item.value || 0;
+            });
+            skills = skills.slice(0, maxVisible);
+        }
+
+        skills = skills.filter(function (item, index) {
+            var share = total ? (item.value / total) * 100 : 0;
+
+            if (index < maxVisible && item.value >= 2 && share >= minShare) {
+                return true;
+            }
+
+            otherValue += item.value || 0;
+            return false;
+        });
+
+        skills = skills.map(function (item, index) {
+            return {
+                label: item.label,
+                value: item.value,
+                color: getTechnicalSkillColor(item.label, index)
+            };
+        });
+
+        if (otherValue > 0) {
+            skills.push({
+                label: "기타",
+                value: otherValue,
+                color: getTechnicalSkillColor("기타", skills.length)
+            });
+        }
+
+        return skills;
     }
 
     function buildCenterLabelPlugin(pluginId, primaryText, secondaryText) {
@@ -551,45 +1084,11 @@
         var currentRegion = getCurrentRegion();
         var canvas = byId("hr030SkillChart");
         var listEl = byId("hr030SkillList");
-        var skillMap = {};
-        var skills;
+        var skills = buildRegionSkillDistribution(currentRegion.skills);
         var total;
         var topSkill;
         var topSkillPercent;
         var centerLabelPlugin;
-
-        currentRegion.skills.forEach(function (item) {
-            var normalizedLabel = normalizeTechnicalSkillLabel(item.label);
-            var meta;
-
-            if (!normalizedLabel) {
-                return;
-            }
-
-            meta = technicalSkillMeta[normalizedLabel];
-
-            if (!skillMap[normalizedLabel]) {
-                skillMap[normalizedLabel] = {
-                    label: meta.label,
-                    value: 0,
-                    color: meta.color
-                };
-            }
-
-            skillMap[normalizedLabel].value += Number(item.value || 0);
-        });
-
-        skills = Object.keys(skillMap).map(function (key) {
-            return skillMap[key];
-        }).sort(function (a, b) {
-            return (b.value || 0) - (a.value || 0);
-        });
-
-        if (state.skillViewMode === "top3") {
-            skills = skills.slice(0, 3);
-        } else if (state.skillViewMode === "top5") {
-            skills = skills.slice(0, 5);
-        }
 
         total = skills.reduce(function (sum, item) {
             return sum + (item.value || 0);
@@ -1103,7 +1602,7 @@
         if (skillHeader) {
             skillHeader.innerHTML = renderSectionHeader({
                 title: "주력 기술 분포",
-                description: currentRegion.name + " 권역에서 많이 투입되는 기술 스택 기준 분포",
+                description: currentRegion.name + " 권역 기준 실제 기술태그 상위 분포",
                 controlHtml: renderHeaderSelect({
                     type: "skill-view",
                     card: "skills",
@@ -1175,6 +1674,10 @@
 
     function bindStatusFilter() {
         var filterGroup = byId("hr030StatusFilterGroup");
+
+        if (!filterGroup) {
+            return;
+        }
 
         filterGroup.addEventListener("click", function (event) {
             var target = event.target.closest("button[data-status-filter]");
@@ -1292,6 +1795,7 @@
     function initialize() {
         setStaticContent();
         renderDashboard();
+        loadSkillCatalog();
         bindSearch();
         bindStatusFilter();
         bindRegionSelection();

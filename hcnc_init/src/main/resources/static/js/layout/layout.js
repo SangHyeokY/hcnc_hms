@@ -163,9 +163,82 @@ const Layout = {
 document.addEventListener("DOMContentLoaded", () => {
   Layout.init();
 
+  const profileMenu = document.querySelector(".header-profile-menu");
+  const profileTrigger = profileMenu?.querySelector(".header-profile-trigger");
+  let isProfileMenuOpen = false;
+  let suppressProfileHover = false;
+
+  const syncProfileMenu = () => {
+      if(!profileMenu || !profileTrigger){
+          return;
+      }
+
+      profileMenu.classList.toggle("is-open", isProfileMenuOpen);
+      profileMenu.classList.toggle("is-suppress-hover", suppressProfileHover);
+      profileTrigger.setAttribute("aria-expanded", isProfileMenuOpen ? "true" : "false");
+  };
+
+  if(profileMenu && profileTrigger){
+      profileTrigger.addEventListener("click", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+
+          if(isProfileMenuOpen){
+              isProfileMenuOpen = false;
+              suppressProfileHover = true;
+          } else {
+              isProfileMenuOpen = true;
+              suppressProfileHover = false;
+          }
+
+          syncProfileMenu();
+      });
+
+      profileMenu.addEventListener("mouseleave", () => {
+          if(!isProfileMenuOpen && suppressProfileHover){
+              suppressProfileHover = false;
+              syncProfileMenu();
+          }
+      });
+
+      document.addEventListener("click", (e) => {
+          if(profileMenu.contains(e.target)){
+              return;
+          }
+
+          if(isProfileMenuOpen || suppressProfileHover){
+              isProfileMenuOpen = false;
+              suppressProfileHover = false;
+              syncProfileMenu();
+          }
+      });
+
+      document.addEventListener("keydown", (e) => {
+          if(e.key !== "Escape"){
+              return;
+          }
+
+          if(isProfileMenuOpen || suppressProfileHover){
+              isProfileMenuOpen = false;
+              suppressProfileHover = false;
+              syncProfileMenu();
+              profileTrigger.blur();
+          }
+      });
+
+      syncProfileMenu();
+  }
+
   const logoutBtn = document.querySelector("#logout-btn");
       if(logoutBtn){
           logoutBtn.addEventListener("click", (e) => {
+              if(profileMenu && profileTrigger){
+                  isProfileMenuOpen = false;
+                  suppressProfileHover = false;
+                  syncProfileMenu();
+                  profileTrigger.blur();
+              }
+
               showAlert({
                   icon: 'info',
                   title: '알림',
