@@ -1,42 +1,39 @@
 export const menuData = [
   {
-    title: "홈",
+    title: "대시보드",
+    path: "/hr030",
+    icon: "dashboard",
     visible: true,
-    children: [
-      { title: "대시보드 예제1", path: "/hr030", type: "A", visible: true },
-      { title: "대시보드 예제2", path: "/sample2", type: "A", visible: true }
-    ],
+    type: "A"
   },
   {
-    title: "인적 자원",
+    title: "인적사항",
+    path: "/hr010",
+    icon: "employee",
     visible: true,
-    children: [
-      { title: "기본 인적사항", path: "/hr010", type: "A", visible: true },
-      { title: "프로젝트 내역", path: "/hr020", type: "A", visible: true },
-    ],
+    type: "A"
   },
   {
-    title: "시스템",
+    title: "프로젝트",
+    path: "/hr020",
+    icon: "project",
     visible: true,
-    children: [
-      { title: "공통코드 관리", path: "/cm040", type: "A", visible: true },
-      { title: "사용자 관리", path: "/cm010", type: "A", visible: true },
-    ],
+    type: "A"
   },
   {
-    title: "Title1",
-    /*path: "/#",*/
-    name: "sample",
-    type: "ETC",
-    /*renderPath: "/views/sample.html",*/
-    visible: false,
+    title: "코드관리",
+    path: "/cm040",
+    icon: "code",
+    visible: true,
+    type: "A",
+    adminOnly: true
   },
   {
-    title: "Title2",
-    /*path: "/#",*/
-    name: "sample",
-    type: "ETC",
-    /*renderPath: "/views/sample2.html",*/
-    visible: false,
-  },
+    title: "사용자 관리",
+    path: "/cm010",
+    icon: "users",
+    visible: true,
+    type: "A",
+    adminOnly: true
+  }
 ];

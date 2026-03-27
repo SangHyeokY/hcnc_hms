@@ -145,7 +145,7 @@ const Menu = {
   createMenu(menuDataList, depth = 1, parentKey = "") {
     let html = "";
     menuDataList.forEach((menu, idx) => {
-      if (menu.title === "시스템" && LOGIN_AUTH.value !== "01") return;
+      if (menu.adminOnly && LOGIN_AUTH.value !== "01") return;
 
       if (menu.visible === false) return;
       const hasChildren =
@@ -155,9 +155,11 @@ const Menu = {
       const href = menu.path
         ? appendBasePath(menu.path)
         : "javascript:void(0);";
+      const icon = menu.icon || "dashboard";
       html += `
             <li class="${itemClass}" data-menu-key="${menuKey}">
-                <a href="${href}">
+                <a href="${href}" class="menu-link" data-icon="${icon}">
+                    <span class="menu-icon" aria-hidden="true"></span>
                     <span class="menu-title">${menu.title}</span>
                 </a>
             `;

@@ -3,31 +3,53 @@
   th:fragment="headerFragment"
   xmlns:th="http://www.thymeleaf.org"
 >
-  <div class="lnb">
-    <div class="header-top">
+  <div class="header-topbar">
+    <div class="header-brand">
       <h1 id="logo" class="logo">
-        <!-- <a th:href="@{/P110}" href="/P110"> -->
         <a th:href="@{/hr030}">
           <img
             th:src="@{/images/common/header-logo.png}"
             src="../images/common/header-logo.png"
+            alt="HCNC"
           />
         </a>
       </h1>
-      <div class="logo-sub flex" style="justify-content: center; display: flex">
+      <div class="logo-sub">
         <div class="sub-box">인적 자원 관리 시스템</div>
       </div>
+    </div>
 
-      <div class="profile-area pd10 mg-t20">
-        <div class="profile-img" id="profileImgContainer"></div>
-        <div>
-          <div id="profileName" class="fw700 fs18"></div>
-          <div id="profileId" class="fw500 fs18"></div>
-        </div>
+    <div class="header-tools">
+      <div class="header-search-wrap">
+        <label class="header-search" for="hr030DashboardSearch">
+          <span class="header-search-icon" aria-hidden="true"></span>
+          <input
+            type="search"
+            id="hr030DashboardSearch"
+            placeholder="검색어를 입력하세요."
+            autocomplete="off"
+          />
+        </label>
+        <p class="header-search-note is-empty" id="hr030SearchResultNote" aria-live="polite"></p>
       </div>
 
-<!--      <div style="border-bottom: 2px solid #EAECF0;" class="mg-t20"> </div>-->
+      <button type="button" class="header-alert hr030-admin-alert" aria-label="알림">
+        <span class="header-alert-icon" aria-hidden="true"></span>
+        <span class="header-alert-count" id="hr030AlertCount"></span>
+      </button>
 
+      <div class="profile-area header-profile">
+        <div class="profile-img" id="profileImgContainer"></div>
+        <div class="header-profile-copy">
+          <div id="profileName" class="fw700 fs16"></div>
+          <div id="profileId" class="fw500 fs14"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="lnb">
+    <div class="lnb-inner">
       <aside class="app-sidebar left-menu">
         <nav class="app-nav nav">
           <div class="lnb-menu">
@@ -35,21 +57,18 @@
           </div>
         </nav>
       </aside>
-    </div>
-    <div class="header-btn-wrap">
 
-      <button id="logout-btn">
-        <span class="mem-area">
-          <span class="ico-lock"></span>
-            <span class="logout-txt">
-              <span class="">로그아웃</span>
-            </span>
+      <div class="header-btn-wrap">
+        <button id="logout-btn" type="button">
+          <span class="mem-area">
+            <span class="ico-lock"></span>
+            <span class="logout-txt">로그아웃</span>
             <span class="right-arrow">
               <img src="/images/common/Ico-arrow-right.png" alt=">" />
             </span>
-        </span>
-      </button>
-
+          </span>
+        </button>
+      </div>
     </div>
   </div>
 </header>

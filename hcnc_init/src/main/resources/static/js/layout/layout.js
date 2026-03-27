@@ -13,6 +13,7 @@ const Layout = {
 
     const contentsWrap = document.querySelector(".contents-wrap");
     const article = document.querySelector("article");
+    const fallbackItem = menuData.find((item) => item.visible !== false);
 
     // 초기 페이지의 경우 PageCommon 정보로 이동
     if (window.PageCommon && window.PageCommon.currentPage) {
@@ -26,12 +27,10 @@ const Layout = {
         this.loadMenu(menuItem, contentsWrap, article);
       } else {
         console.warn("현재 페이지 정보를 찾을 수 없습니다");
-        const fallbackItem = menuData[0].children[0];
         this.loadMenu(fallbackItem, contentsWrap, article);
       }
     } else {
       console.warn("PageCommon 정보가 없습니다.");
-      const fallbackItem = menuData[0].children[0];
       this.loadMenu(fallbackItem, contentsWrap, article);
     }
   },

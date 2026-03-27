@@ -5,6 +5,7 @@
         return;
     }
 
+    // 대시보드 전역 메타 정보와 화면 상태값
     var employeeStatusMap = {
         "투입중": true,
         "대기중": true,
@@ -31,16 +32,49 @@
         "운영 보강": "info"
     };
 
+    var availabilityStatusMeta = [
+        { label: "투입중", color: "#4f6ff7" },
+        { label: "대기중", color: "#f3b44f" },
+        { label: "종료예정", color: "#a173ff" }
+    ];
+
+    var careerBandMeta = [
+        { key: "junior", label: "초급", description: "4년 이하", color: "#7c9af8" },
+        { key: "mid", label: "중급", description: "5~7년", color: "#4f6ff7" },
+        { key: "senior", label: "고급", description: "8~10년", color: "#1fb6a6" },
+        { key: "lead", label: "특급", description: "11년 이상", color: "#f3b44f" }
+    ];
+
+    var technicalSkillMeta = {
+        "Java/Spring": { label: "Java/Spring", color: "#4f6ff7" },
+        "React/Vue": { label: "React/Vue", color: "#1fb6a6" },
+        "Python/Data": { label: "Python/Data", color: "#f3b44f" },
+        "QA/테스트": { label: "QA/테스트", color: "#eb8079" },
+        "웹퍼블리싱": { label: "웹퍼블리싱", color: "#a173ff" }
+    };
+
+    var kpiIconMap = {
+        total: "users",
+        employee: "user",
+        freelancer: "briefcase",
+        available: "zap"
+    };
+
     var state = {
         query: "",
         statusFilter: "all",
         selectedRegionId: dashboardData.map.defaultRegionId || "all",
+        skillViewMode: "top5",
+        availabilityCardFilter: "all",
         employeeTable: null,
         charts: {
-            skills: null
+            skills: null,
+            availability: null,
+            category: null
         }
     };
 
+    // 공통 포맷터와 작은 렌더링 헬퍼
     function byId(id) {
         return document.getElementById(id);
     }
@@ -100,24 +134,134 @@
             '    <h5>' + escapeHtml(options.title) + "</h5>",
             '    <p>' + escapeHtml(options.description) + "</p>",
             "  </div>",
-            '  <span class="hr030-section-meta">' + escapeHtml(options.meta) + "</span>",
+            options.controlHtml || ('  <span class="hr030-section-meta">' + escapeHtml(options.meta) + "</span>"),
             "</div>"
         ].join("");
     }
 
-    function renderDashboardCard(item) {
+    function renderHeaderSelect(config) {
+        var attributes = [
+            'class="hr030-card-select"',
+            'data-dashboard-select="' + escapeHtml(config.type) + '"'
+        ];
+
+        if (config.card) {
+            attributes.push('data-card="' + escapeHtml(config.card) + '"');
+        }
+
         return [
-            '<article class="hr030-kpi-card" aria-label="' + escapeHtml(item.label) + '">',
-            '  <div class="hr030-kpi-top">',
+            '<label class="hr030-card-select-wrap">',
+            '  <span class="blind">' + escapeHtml(config.label || "보기 기준 선택") + "</span>",
+            '  <select ' + attributes.join(" ") + ">",
+            (config.options || []).map(function (option) {
+                var selected = option.value === config.value ? ' selected' : "";
+
+                return '<option value="' + escapeHtml(option.value) + '"' + selected + ">" + escapeHtml(option.label) + "</option>";
+            }).join(""),
+            "  </select>",
+            "</label>"
+        ].join("");
+    }
+
+    function getPrimaryCategory(item) {
+        var raw = item && item.department ? item.department : "";
+
+        return String(raw).split("·")[0].trim() || "기타";
+    }
+
+    function parseCareerYears(position) {
+        var matched = String(position || "").match(/\d+/);
+
+        return matched ? Number(matched[0]) : null;
+    }
+
+    function getCareerBand(item) {
+        var years = parseCareerYears(item && item.position);
+
+        if (years === null || years <= 4) {
+            return careerBandMeta[0];
+        }
+
+        if (years <= 7) {
+            return careerBandMeta[1];
+        }
+
+        if (years <= 10) {
+            return careerBandMeta[2];
+        }
+
+        return careerBandMeta[3];
+    }
+
+    function normalizeTechnicalSkillLabel(label) {
+        var raw = String(label || "").trim();
+
+        if (!raw) {
+            return "";
+        }
+
+        if (raw === "웹퍼블리싱" || raw === "퍼블리싱") {
+            return "웹퍼블리싱";
+        }
+
+        if (raw === "QA" || raw === "QA/운영") {
+            return "QA/테스트";
+        }
+
+        if (raw === "Java/Spring" || raw === "React/Vue" || raw === "Python/Data") {
+            return raw;
+        }
+
+        return "";
+    }
+
+    function buildCenterLabelPlugin(pluginId, primaryText, secondaryText) {
+        return {
+            id: pluginId,
+            afterDraw: function (chart) {
+                var ctx = chart.ctx;
+                var meta = chart.getDatasetMeta(0);
+                var centerPoint = meta && meta.data && meta.data[0];
+                var x;
+                var y;
+
+                if (!centerPoint) {
+                    return;
+                }
+
+                x = centerPoint.x;
+                y = centerPoint.y;
+
+                ctx.save();
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillStyle = "#18253f";
+                ctx.font = '700 23px "Pretendard Variable", "Pretendard", "Noto Sans KR", sans-serif';
+                ctx.fillText(primaryText, x, y - 8);
+                ctx.fillStyle = "#7f776c";
+                ctx.font = '600 11px "Pretendard Variable", "Pretendard", "Noto Sans KR", sans-serif';
+                ctx.fillText(secondaryText, x, y + 15);
+                ctx.restore();
+            }
+        };
+    }
+
+    function renderDashboardCard(item) {
+        var iconName = kpiIconMap[item.key] || "circle";
+
+        return [
+            '<article class="hr030-kpi-card" data-kpi-key="' + escapeHtml(item.key || "") + '" aria-label="' + escapeHtml(item.label) + " " + formatNumber(item.value) + "명" + '">',
+            '  <span class="hr030-kpi-icon" aria-hidden="true"><i data-lucide="' + escapeHtml(iconName) + '"></i></span>',
+            '  <div class="hr030-kpi-copy">',
             '    <span class="hr030-kpi-label">' + escapeHtml(item.label) + "</span>",
-            '    <span class="hr030-kpi-delta is-' + escapeHtml(item.deltaTone) + '">' + escapeHtml(item.delta) + "</span>",
+            '    <strong class="hr030-kpi-value"><span class="hr030-kpi-number">' + formatNumber(item.value) + '</span><span class="hr030-kpi-unit">명</span></strong>',
+            '    <span class="hr030-kpi-description">' + escapeHtml(item.description) + "</span>",
             "  </div>",
-            '  <strong class="hr030-kpi-value">' + formatNumber(item.value) + "</strong>",
-            '  <p class="hr030-kpi-description">' + escapeHtml(item.description) + "</p>",
             "</article>"
         ].join("");
     }
 
+    // 현재 화면 조건에 맞는 데이터 가공
     function getCurrentRegion() {
         var selectedId = state.selectedRegionId;
         var region;
@@ -202,6 +346,7 @@
         return parts[1] + "." + parts[2];
     }
 
+    // 인력 테이블 렌더링과 폴백 처리
     function employeeNameFormatter(cell) {
         var row = cell.getRow().getData();
 
@@ -302,9 +447,12 @@
         initEmployeeTable(dataRows);
     }
 
+    // 좌측 카드: 지역 지도와 권역 상세 렌더링
     function renderRegionMap() {
         var container = byId("hr030RegionMap");
+        var noteEl = byId("hr030RegionMapNote");
         var selectedId = state.selectedRegionId;
+        var selectedRegion = getCurrentRegion();
         var regionsSvg = dashboardData.map.regions.map(function (region) {
             var isActive = selectedId === region.id;
 
@@ -326,30 +474,34 @@
             "</svg>"
         ].join("");
 
-        byId("hr030RegionMapNote").textContent = (selectedId === "all" ? "전체 권역" : getCurrentRegion().name) + " 기준 상세와 주력 기술이 함께 바뀝니다.";
+        if (noteEl) {
+            noteEl.innerHTML = [
+                '<div class="hr030-region-legend">',
+                '  <span><i class="is-headcount"></i>지역별 총 인원 규모</span>',
+                '  <span><i class="is-selected"></i>선택된 지역</span>',
+                "</div>",
+                '<span class="hr030-region-selection-badge">' + escapeHtml(selectedId === "all" ? "전체" : selectedRegion.name) + "</span>"
+            ].join("");
+        }
     }
 
     function renderRegionDetail() {
         var region = getCurrentRegion();
         var detailEl = byId("hr030RegionDetail");
-        var isOverview = region.id === "all";
-        var projectRows = isOverview ? region.projects.slice(0, 2) : region.projects;
+        var availableRatio = region.headcount ? Math.round((region.available / region.headcount) * 100) : 0;
         var stats = [
             { label: "총 인원", value: formatNumber(region.headcount) + "명" },
-            { label: "즉시 제안 가능", value: formatNumber(region.available) + "명" },
+            { label: "투입 가능", value: formatNumber(region.available) + "명" },
             { label: "현재 투입", value: formatNumber(region.active) + "명" },
-            { label: "운영 이슈", value: formatNumber(region.issueCount) + "건" },
-            { label: "평균 경력", value: escapeHtml(region.avgCareer) },
-            { label: "평균 희망단가", value: escapeHtml(region.avgRate) }
+            { label: "평균 경력", value: escapeHtml(region.avgCareer) }
         ];
-
-        detailEl.classList.toggle("is-overview", isOverview);
+        var noteText = region.note || "지도를 클릭하면 우측 상세 정보가 함께 바뀌고, 같은 데이터셋을 기준으로 구성한 내용을 재사용할 수 있도록 만든 예시입니다.";
 
         detailEl.innerHTML = [
             '<div class="hr030-region-detail-head">',
             '  <div class="hr030-region-detail-copy">',
-            '    <h6>' + escapeHtml(region.name) + ' 상세</h6>',
-            '    <p>' + escapeHtml(region.note) + "</p>",
+            '    <h6>' + escapeHtml(region.name) + "</h6>",
+            '    <p>권역별 인력 운영 지표를 빠르게 비교할 수 있습니다.</p>',
             "  </div>",
             '  <span class="hr030-region-detail-skill">주력 ' + escapeHtml(region.leadSkill) + "</span>",
             "</div>",
@@ -363,34 +515,22 @@
                 ].join("");
             }).join(""),
             "</div>",
-            '<div class="hr030-region-meta-row">',
-            '  <div class="hr030-region-industry-list">',
-            region.industries.map(renderStatusBadge).join(""),
+            '<div class="hr030-region-summary-grid">',
+            '  <div class="hr030-region-summary-card hr030-region-summary-card--ratio">',
+            '    <span>투입 가능 비율</span>',
+            '    <div class="hr030-region-ratio-row">',
+            '      <strong>' + formatNumber(availableRatio) + "%</strong>",
+            '      <div class="hr030-region-ratio-bar"><i style="width:' + escapeHtml(availableRatio) + '%"></i></div>',
+            "    </div>",
             "  </div>",
-            '  <div class="hr030-region-ending">종료 예정 ' + formatNumber(region.endingSoon) + "건</div>",
-            "</div>",
-            '<div class="hr030-region-project-box">',
-            '  <div class="hr030-region-project-title">' + (isOverview ? "대표 진행 현황" : "주요 진행 현황") + "</div>",
-            '  <div class="hr030-region-project-list">',
-            projectRows.map(function (item) {
-                return [
-                    '<div class="hr030-region-project-item">',
-                    '  <div class="hr030-region-project-main">',
-                    '    <strong>' + escapeHtml(item.client) + "</strong>",
-                    '    <p>' + escapeHtml(item.role) + "</p>",
-                    "  </div>",
-                    '  <div class="hr030-region-project-side">',
-                    "    " + renderStatusBadge(item.status),
-                    '    <span>' + escapeHtml(item.dueText) + "</span>",
-                    "  </div>",
-                    "</div>"
-                ].join("");
-            }).join(""),
+            '  <div class="hr030-region-summary-card hr030-region-summary-card--note">',
+            '    <p>' + escapeHtml(noteText) + "</p>",
             "  </div>",
             "</div>"
         ].join("");
     }
 
+    // 차트 공통 설정과 중앙 카드 차트 렌더링
     function destroyChart(chartKey) {
         if (state.charts[chartKey]) {
             state.charts[chartKey].destroy();
@@ -398,83 +538,114 @@
         }
     }
 
+    function applyChartDefaults() {
+        if (typeof Chart !== "function") {
+            return;
+        }
+
+        Chart.defaults.font.family = '"Pretendard Variable", "Pretendard", "Noto Sans KR", sans-serif';
+        Chart.defaults.color = "#64748b";
+    }
+
     function renderSkillDistribution() {
         var currentRegion = getCurrentRegion();
         var canvas = byId("hr030SkillChart");
         var listEl = byId("hr030SkillList");
-        var skills = currentRegion.skills.slice().sort(function (a, b) {
+        var skillMap = {};
+        var skills;
+        var total;
+        var topSkill;
+        var topSkillPercent;
+        var centerLabelPlugin;
+
+        currentRegion.skills.forEach(function (item) {
+            var normalizedLabel = normalizeTechnicalSkillLabel(item.label);
+            var meta;
+
+            if (!normalizedLabel) {
+                return;
+            }
+
+            meta = technicalSkillMeta[normalizedLabel];
+
+            if (!skillMap[normalizedLabel]) {
+                skillMap[normalizedLabel] = {
+                    label: meta.label,
+                    value: 0,
+                    color: meta.color
+                };
+            }
+
+            skillMap[normalizedLabel].value += Number(item.value || 0);
+        });
+
+        skills = Object.keys(skillMap).map(function (key) {
+            return skillMap[key];
+        }).sort(function (a, b) {
             return (b.value || 0) - (a.value || 0);
         });
-        var total = skills.reduce(function (sum, item) {
+
+        if (state.skillViewMode === "top3") {
+            skills = skills.slice(0, 3);
+        } else if (state.skillViewMode === "top5") {
+            skills = skills.slice(0, 5);
+        }
+
+        total = skills.reduce(function (sum, item) {
             return sum + (item.value || 0);
         }, 0);
-        var topSkill = skills.reduce(function (best, item) {
+        topSkill = skills.reduce(function (best, item) {
             if (!best || (item.value || 0) > (best.value || 0)) {
                 return item;
             }
 
             return best;
         }, null);
-        var topSkillPercent = total && topSkill ? (topSkill.value / total) * 100 : 0;
-        var centerLabelPlugin = {
-            id: "hr030SkillCenterLabel",
-            afterDraw: function (chart) {
-                var ctx = chart.ctx;
-                var meta = chart.getDatasetMeta(0);
-                var centerPoint = meta && meta.data && meta.data[0];
-                var x;
-                var y;
+        topSkillPercent = total && topSkill ? (topSkill.value / total) * 100 : 0;
+        centerLabelPlugin = buildCenterLabelPlugin(
+            "hr030SkillCenterLabel",
+            formatPercent(topSkillPercent) + "%",
+            topSkill ? topSkill.label : "주력 비중"
+        );
 
-                if (!centerPoint) {
-                    return;
-                }
+        if (listEl) {
+            if (!skills.length) {
+                listEl.innerHTML = '<div class="hr030-empty-state">표시할 기술 스택 데이터가 없습니다.</div>';
+            } else {
+                listEl.innerHTML = skills.map(function (item) {
+                    var percent = total ? ((item.value / total) * 100).toFixed(1) : "0.0";
 
-                x = centerPoint.x;
-                y = centerPoint.y;
-
-                ctx.save();
-                ctx.textAlign = "center";
-                ctx.textBaseline = "middle";
-                ctx.fillStyle = "#18253f";
-                ctx.font = '700 24px "Pretendard Variable", "Pretendard", "Noto Sans KR", sans-serif';
-                ctx.fillText(formatPercent(topSkillPercent) + "%", x, y - 8);
-                ctx.fillStyle = "#75829b";
-                ctx.font = '600 11px "Pretendard Variable", "Pretendard", "Noto Sans KR", sans-serif';
-                ctx.fillText(topSkill ? topSkill.label : "주력 비중", x, y + 16);
-                ctx.restore();
+                    return [
+                        '<div class="hr030-skill-item">',
+                        '  <div class="hr030-skill-item-head">',
+                        '    <div class="hr030-skill-item-main">',
+                        '      <span class="hr030-skill-dot" style="background:' + escapeHtml(item.color) + '"></span>',
+                        '      <div class="hr030-skill-copy">',
+                        '        <strong>' + escapeHtml(item.label) + "</strong>",
+                        "      </div>",
+                        "    </div>",
+                        '    <div class="hr030-skill-side">',
+                        '      <span class="hr030-skill-count">' + formatNumber(item.value) + "명</span>",
+                        '      <strong class="hr030-skill-share">' + percent + "%</strong>",
+                        "    </div>",
+                        "  </div>",
+                        '  <span class="hr030-skill-bar"><i style="width:' + percent + '%;background:' + escapeHtml(item.color) + '"></i></span>',
+                        "</div>"
+                    ].join("");
+                }).join("");
             }
-        };
-
-        listEl.innerHTML = skills.map(function (item) {
-            var percent = total ? ((item.value / total) * 100).toFixed(1) : "0.0";
-
-            return [
-                '<div class="hr030-skill-item">',
-                '  <div class="hr030-skill-item-head">',
-                '    <div class="hr030-skill-item-main">',
-                '      <span class="hr030-skill-dot" style="background:' + escapeHtml(item.color) + '"></span>',
-                '      <div class="hr030-skill-copy">',
-                '        <strong>' + escapeHtml(item.label) + "</strong>",
-                "      </div>",
-                "    </div>",
-                '    <div class="hr030-skill-side">',
-                '      <span class="hr030-skill-count">' + formatNumber(item.value) + "명</span>",
-                '      <strong class="hr030-skill-share">' + percent + "%</strong>",
-                "    </div>",
-                "  </div>",
-                '  <span class="hr030-skill-bar"><i style="width:' + percent + '%;background:' + escapeHtml(item.color) + '"></i></span>',
-                "</div>"
-            ].join("");
-        }).join("");
+        }
 
         if (typeof Chart !== "function" || !canvas) {
             return;
         }
 
+        applyChartDefaults();
         destroyChart("skills");
 
-        Chart.defaults.font.family = '"Pretendard Variable", "Pretendard", "Noto Sans KR", sans-serif';
-        Chart.defaults.color = "#64748b";
+        if (!skills.length) {
+            return;
+        }
 
         state.charts.skills = new Chart(canvas, {
             type: "doughnut",
@@ -500,6 +671,316 @@
         });
     }
 
+    // 우측 카드: 가용 인력 요약 차트와 리스트 렌더링
+    function renderAvailabilityPanel(employeeRows) {
+        var canvas = byId("hr030AvailabilityChart");
+        var summaryEl = byId("hr030AvailabilitySummary");
+        var listEl = byId("hr030AvailabilityList");
+        var availabilityStatuses = {
+            "투입중": true,
+            "대기중": true,
+            "종료예정": true
+        };
+        var statusSortOrder = {
+            "대기중": 0,
+            "종료예정": 1,
+            "투입중": 2
+        };
+        var relevantRows = employeeRows.filter(function (item) {
+            if (!availabilityStatuses[item.status]) {
+                return false;
+            }
+
+            if (state.availabilityCardFilter !== "all" && item.status !== state.availabilityCardFilter) {
+                return false;
+            }
+
+            return true;
+        }).slice().sort(function (a, b) {
+            var toneDiff = (statusSortOrder[a.status] || 99) - (statusSortOrder[b.status] || 99);
+
+            if (toneDiff !== 0) {
+                return toneDiff;
+            }
+
+            return String(a.availableDate || "").localeCompare(String(b.availableDate || ""));
+        });
+        var summaryData = availabilityStatusMeta.map(function (item) {
+            var value = relevantRows.filter(function (row) {
+                return row.status === item.label;
+            }).length;
+
+            return {
+                label: item.label,
+                value: value,
+                color: item.color
+            };
+        }).filter(function (item) {
+            return state.availabilityCardFilter === "all" || item.label === state.availabilityCardFilter;
+        });
+        var total = summaryData.reduce(function (sum, item) {
+            return sum + item.value;
+        }, 0);
+
+        if (summaryEl) {
+            summaryEl.innerHTML = summaryData.map(function (item) {
+                var share = total ? formatPercent((item.value / total) * 100) : "0.0";
+
+                return [
+                    '<div class="hr030-status-card">',
+                    '  <span class="hr030-status-card-label"><i style="background:' + escapeHtml(item.color) + '"></i>' + escapeHtml(item.label) + "</span>",
+                    '  <strong>' + formatNumber(item.value) + "명</strong>",
+                    '  <span class="hr030-status-card-meta">' + share + "%</span>",
+                    "</div>"
+                ].join("");
+            }).join("");
+        }
+
+        if (listEl) {
+            if (!relevantRows.length) {
+                listEl.innerHTML = '<div class="hr030-empty-state">조건에 맞는 가용 인력 데이터가 없습니다.</div>';
+            } else {
+                listEl.innerHTML = relevantRows.map(function (item) {
+                    return [
+                        '<div class="hr030-person-row">',
+                        '  <div class="hr030-person-main">',
+                        '    <strong>' + escapeHtml(item.name) + "</strong>",
+                        '    <span>' + escapeHtml(getPrimaryCategory(item)) + " · " + escapeHtml(item.region) + " · " + escapeHtml(item.availableDate) + "</span>",
+                        "  </div>",
+                        "  " + renderStatusBadge(item.status),
+                        "</div>"
+                    ].join("");
+                }).join("");
+            }
+        }
+
+        if (typeof Chart !== "function" || !canvas) {
+            return;
+        }
+
+        applyChartDefaults();
+        destroyChart("availability");
+
+        state.charts.availability = new Chart(canvas, {
+            type: "bar",
+            data: {
+                labels: summaryData.map(function (item) { return item.label; }),
+                datasets: [{
+                    data: summaryData.map(function (item) { return item.value; }),
+                    backgroundColor: summaryData.map(function (item) { return item.color; }),
+                    borderRadius: 999,
+                    borderSkipped: false,
+                    borderWidth: 0,
+                    barThickness: 16,
+                    maxBarThickness: 16
+                }]
+            },
+            options: {
+                indexAxis: "y",
+                responsive: true,
+                maintainAspectRatio: false,
+                layout: {
+                    padding: {
+                        left: 2,
+                        right: 6,
+                        top: 2,
+                        bottom: 2
+                    }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        displayColors: false,
+                        callbacks: {
+                            label: function (context) {
+                                var value = Number(context.raw || 0);
+                                var share = total ? formatPercent((value / total) * 100) : "0.0";
+
+                                return context.label + " " + formatNumber(value) + "명 (" + share + "%)";
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        border: { display: false },
+                        grid: {
+                            color: "rgba(235, 227, 215, 0.9)",
+                            drawTicks: false
+                        },
+                        ticks: {
+                            precision: 0,
+                            color: "#8e887d",
+                            font: {
+                                size: 10
+                            },
+                            callback: function (value) {
+                                return value + "명";
+                            }
+                        }
+                    },
+                    y: {
+                        border: { display: false },
+                        grid: { display: false },
+                        ticks: {
+                            color: "#5f5b55",
+                            font: {
+                                size: 11,
+                                weight: 700
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    function renderCategoryDistribution(employeeRows) {
+        var canvas = byId("hr030CategoryChart");
+        var listEl = byId("hr030CategoryList");
+        var categories = careerBandMeta.map(function (item) {
+            return {
+                key: item.key,
+                label: item.label,
+                description: item.description,
+                color: item.color,
+                value: 0
+            };
+        });
+        var total;
+
+        employeeRows.forEach(function (item) {
+            var band = getCareerBand(item);
+            var target = categories.find(function (category) {
+                return category.key === band.key;
+            });
+
+            if (target) {
+                target.value += 1;
+            }
+        });
+
+        total = categories.reduce(function (sum, item) {
+            return sum + item.value;
+        }, 0);
+
+        if (listEl) {
+            if (!total) {
+                listEl.innerHTML = '<div class="hr030-empty-state">표시할 경력 기준 데이터가 없습니다.</div>';
+            } else {
+                listEl.innerHTML = categories.map(function (item) {
+                    var percent = total ? ((item.value / total) * 100).toFixed(1) : "0.0";
+
+                    return [
+                        '<div class="hr030-skill-item">',
+                        '  <div class="hr030-skill-item-head">',
+                        '    <div class="hr030-skill-item-main">',
+                        '      <span class="hr030-skill-dot" style="background:' + escapeHtml(item.color) + '"></span>',
+                        '      <div class="hr030-skill-copy">',
+                        '        <strong>' + escapeHtml(item.label) + "</strong>",
+                        '        <span>' + escapeHtml(item.description) + "</span>",
+                        "      </div>",
+                        "    </div>",
+                        '    <div class="hr030-skill-side">',
+                        '      <span class="hr030-skill-count">' + formatNumber(item.value) + "명</span>",
+                        '      <strong class="hr030-skill-share">' + percent + "%</strong>",
+                        "    </div>",
+                        "  </div>",
+                        '  <span class="hr030-skill-bar"><i style="width:' + percent + '%;background:' + escapeHtml(item.color) + '"></i></span>',
+                        "</div>"
+                    ].join("");
+                }).join("");
+            }
+        }
+
+        if (typeof Chart !== "function" || !canvas) {
+            return;
+        }
+
+        applyChartDefaults();
+        destroyChart("category");
+
+        if (!total) {
+            return;
+        }
+
+        state.charts.category = new Chart(canvas, {
+            type: "bar",
+            data: {
+                labels: categories.map(function (item) { return item.label; }),
+                datasets: [{
+                    data: categories.map(function (item) { return item.value; }),
+                    backgroundColor: categories.map(function (item) { return item.color; }),
+                    borderRadius: 8,
+                    borderSkipped: false,
+                    borderWidth: 0,
+                    barThickness: 14,
+                    maxBarThickness: 14
+                }]
+            },
+            options: {
+                indexAxis: "y",
+                responsive: true,
+                maintainAspectRatio: false,
+                layout: {
+                    padding: {
+                        left: 2,
+                        right: 4,
+                        top: 0,
+                        bottom: 0
+                    }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        displayColors: false,
+                        callbacks: {
+                            label: function (context) {
+                                var value = Number(context.raw || 0);
+                                var share = total ? formatPercent((value / total) * 100) : "0.0";
+
+                                return context.label + " " + formatNumber(value) + "명 (" + share + "%)";
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        border: { display: false },
+                        grid: {
+                            color: "rgba(235, 227, 215, 0.72)",
+                            drawTicks: false
+                        },
+                        ticks: {
+                            precision: 0,
+                            color: "#8e887d",
+                            font: {
+                                size: 9
+                            },
+                            callback: function (value) {
+                                return value + "명";
+                            }
+                        }
+                    },
+                    y: {
+                        border: { display: false },
+                        grid: { display: false },
+                        ticks: {
+                            color: "#5f5b55",
+                            font: {
+                                size: 10,
+                                weight: 700
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // 예비 위젯용 운영 이슈 렌더러
     function renderIssueSummary(issueRows) {
         var summaryEl = byId("hr030IssueSummary");
         var reviewCount = issueRows.filter(function (item) { return item.status === "검토중"; }).length;
@@ -545,67 +1026,146 @@
         }).join("");
     }
 
+    // 카드 헤더와 상단 고정 콘텐츠 갱신
     function setStaticContent() {
         var alertButton = document.querySelector(".hr030-admin-alert");
-        var userName = window.LOGIN_USER && window.LOGIN_USER.name ? window.LOGIN_USER.name : "프리랜서 운영 관리자";
         var alertCount = dashboardData.alertCount || 0;
+        var alertCountEl = byId("hr030AlertCount");
 
-        byId("hr030TodayLabel").textContent = getTodayLabel();
-        byId("hr030AlertCount").textContent = String(alertCount);
-        byId("hr030UserName").textContent = userName;
-        byId("hr030UserAvatar").textContent = getAvatarText(userName);
+        if (alertCountEl) {
+            alertCountEl.textContent = alertCount > 0 ? String(alertCount) : "";
+        }
 
         if (alertButton) {
-            alertButton.setAttribute("aria-label", "알림 " + alertCount + "건");
+            alertButton.setAttribute("aria-label", alertCount > 0 ? "알림 " + alertCount + "건" : "알림");
         }
 
         byId("hr030KpiGrid").innerHTML = dashboardData.kpis.map(renderDashboardCard).join("");
+        initializeIcons();
     }
 
-    function updateHeaders(employeeRows, issueRows) {
+    function updateHeaders(employeeRows) {
         var currentRegion = getCurrentRegion();
+        var regionOptions = [{ value: "all", label: "전체" }].concat(dashboardData.map.regions.map(function (region) {
+            return { value: region.id, label: region.name };
+        }));
+        var skillOptions = [
+            { value: "all", label: "전체" },
+            { value: "top5", label: "상위 5개" },
+            { value: "top3", label: "상위 3개" }
+        ];
+        var availabilityOptions = [
+            { value: "all", label: "전체" },
+            { value: "투입중", label: "투입중" },
+            { value: "대기중", label: "대기중" },
+            { value: "종료예정", label: "종료예정" }
+        ];
+        var availabilityCount = employeeRows.filter(function (item) {
+            return item.status === "투입중" || item.status === "대기중" || item.status === "종료예정";
+        }).filter(function (item) {
+            return state.availabilityCardFilter === "all" || item.status === state.availabilityCardFilter;
+        }).length;
+        var regionHeader = byId("hr030RegionHeader");
+        var detailHeader = byId("hr030DetailHeader");
+        var skillHeader = byId("hr030SkillHeader");
+        var availabilityHeader = byId("hr030AvailabilityHeader");
+        var placeholderHeader = byId("hr030PlaceholderHeader");
+        var availabilityListHeader = byId("hr030AvailabilityListHeader");
 
-        byId("hr030RegionHeader").innerHTML = renderSectionHeader({
-            title: "지역별 인력 지도",
-            description: "권역을 클릭하면 상세 지표와 하단 목록이 함께 바뀝니다.",
-            meta: state.selectedRegionId === "all" ? "전체 8개 권역" : currentRegion.name
-        });
+        if (regionHeader) {
+            regionHeader.innerHTML = renderSectionHeader({
+                title: "지역별 인력 지도",
+                description: "권역을 클릭하면 상세 지표와 주력 기술 구성이 함께 바뀝니다.",
+                controlHtml: renderHeaderSelect({
+                    type: "region",
+                    card: "map",
+                    label: "지역 선택",
+                    value: state.selectedRegionId,
+                    options: regionOptions
+                })
+            });
+        }
 
-        byId("hr030SkillHeader").innerHTML = renderSectionHeader({
-            title: "주력 기술 분포",
-            description: currentRegion.name + " 기준 기술 스택 비중",
-            meta: "주력 " + currentRegion.leadSkill
-        });
+        if (detailHeader) {
+            detailHeader.innerHTML = renderSectionHeader({
+                title: state.selectedRegionId === "all" ? "전체 권역 상세" : currentRegion.name + " 상세",
+                description: "선택한 권역의 주요 운영 수치를 확인합니다.",
+                controlHtml: renderHeaderSelect({
+                    type: "region",
+                    card: "detail",
+                    label: "상세 지역 선택",
+                    value: state.selectedRegionId,
+                    options: regionOptions
+                })
+            });
+        }
 
-        byId("hr030EmployeeHeader").innerHTML = renderSectionHeader({
-            title: "최근 등록 인력 목록",
-            description: currentRegion.name + " 기준 최근 등록 또는 검색된 인력",
-            meta: "총 " + formatNumber(employeeRows.length) + "명"
-        });
+        if (skillHeader) {
+            skillHeader.innerHTML = renderSectionHeader({
+                title: "주력 기술 분포",
+                description: currentRegion.name + " 권역에서 많이 투입되는 기술 스택 기준 분포",
+                controlHtml: renderHeaderSelect({
+                    type: "skill-view",
+                    card: "skills",
+                    label: "기술 보기 기준",
+                    value: state.skillViewMode,
+                    options: skillOptions
+                })
+            });
+        }
 
-        byId("hr030IssueHeader").innerHTML = renderSectionHeader({
-            title: "운영 이슈 패널",
-            description: currentRegion.name + " 기준 지금 확인할 운영 이슈",
-            meta: "총 " + formatNumber(issueRows.length) + "건"
-        });
+        if (availabilityHeader) {
+            availabilityHeader.innerHTML = renderSectionHeader({
+                title: "가용 인력 / 투입 가능 인원",
+                description: currentRegion.name + " 기준 상태별 인원 요약과 즉시 확인 리스트",
+                controlHtml: renderHeaderSelect({
+                    type: "availability-view",
+                    card: "availability",
+                    label: "가용 인력 보기 기준",
+                    value: state.availabilityCardFilter,
+                    options: availabilityOptions
+                })
+            });
+        }
+
+        if (placeholderHeader) {
+            placeholderHeader.innerHTML = renderSectionHeader({
+                title: "추가 카드",
+                description: "추후 운영 위젯을 배치할 수 있는 준비 영역입니다.",
+                controlHtml: renderHeaderSelect({
+                    type: "placeholder-view",
+                    card: "placeholder",
+                    label: "추가 카드 보기 기준",
+                    value: "all",
+                    options: [{ value: "all", label: "전체" }]
+                })
+            });
+        }
+
+        if (availabilityListHeader) {
+            availabilityListHeader.innerHTML = "<strong>가용 인력 리스트</strong><span>조건 일치 " + formatNumber(availabilityCount) + "명</span>";
+        }
     }
 
     function renderDashboard() {
         var employeeRows = getVisibleEmployees();
         var issueRows = getVisibleIssues();
 
-        updateHeaders(employeeRows, issueRows);
+        updateHeaders(employeeRows);
         updateSearchResultNote(employeeRows, issueRows);
         renderRegionMap();
         renderRegionDetail();
+        renderAvailabilityPanel(employeeRows);
         renderSkillDistribution();
-        renderEmployeeTable(employeeRows);
-        renderIssueSummary(issueRows);
-        renderIssueList(issueRows);
     }
 
+    // 사용자 상호작용 바인딩
     function bindSearch() {
         var searchInput = byId("hr030DashboardSearch");
+
+        if (!searchInput) {
+            return;
+        }
 
         searchInput.addEventListener("input", function (event) {
             state.query = event.target.value || "";
@@ -684,18 +1244,58 @@
         }
     }
 
+    function bindCardSelects() {
+        var dashboard = byId("hr030-dashboard");
+
+        if (!dashboard) {
+            return;
+        }
+
+        dashboard.addEventListener("change", function (event) {
+            var target = event.target;
+            var selectType;
+            var value;
+
+            if (!target || target.tagName !== "SELECT") {
+                return;
+            }
+
+            selectType = target.getAttribute("data-dashboard-select");
+            value = target.value || "all";
+
+            if (selectType === "region") {
+                state.selectedRegionId = value;
+                renderDashboard();
+                return;
+            }
+
+            if (selectType === "skill-view") {
+                state.skillViewMode = value;
+                renderDashboard();
+                return;
+            }
+
+            if (selectType === "availability-view") {
+                state.availabilityCardFilter = value;
+                renderDashboard();
+            }
+        });
+    }
+
     function initializeIcons() {
         if (window.lucide && typeof window.lucide.createIcons === "function") {
             window.lucide.createIcons();
         }
     }
 
+    // 초기 진입 시점 부트스트랩
     function initialize() {
         setStaticContent();
         renderDashboard();
         bindSearch();
         bindStatusFilter();
         bindRegionSelection();
+        bindCardSelects();
         initializeIcons();
     }
 

@@ -3,51 +3,35 @@ window.HR030_DASHBOARD_DATA = {
     kpis: [
         {
             key: "total",
-            label: "전체 프리랜서 수",
+            label: "전체 인원",
             value: 248,
             delta: "+4",
             deltaTone: "up",
-            description: "최근 30일 등록 기준"
+            description: "직원 + 프리랜서 운영 풀 기준"
         },
         {
-            key: "active",
-            label: "현재 투입 인원",
-            value: 186,
-            delta: "75.0%",
+            key: "employee",
+            label: "직원 수",
+            value: 92,
+            delta: "37.1%",
             deltaTone: "neutral",
-            description: "진행 프로젝트 배정 기준"
+            description: "내부 인력 운영 기준"
         },
         {
-            key: "standby",
-            label: "대기 인원",
+            key: "freelancer",
+            label: "프리랜서 수",
+            value: 156,
+            delta: "62.9%",
+            deltaTone: "neutral",
+            description: "외부 투입 가능 인력 풀 기준"
+        },
+        {
+            key: "available",
+            label: "즉시 투입 가능",
             value: 34,
-            delta: "-3",
-            deltaTone: "down",
-            description: "즉시 제안 가능 인력 포함"
-        },
-        {
-            key: "proposal",
-            label: "제안중 인원",
-            value: 21,
             delta: "+2",
             deltaTone: "up",
-            description: "고객 제안 진행 기준"
-        },
-        {
-            key: "ending",
-            label: "계약 종료 예정",
-            value: 7,
-            delta: "D-14",
-            deltaTone: "warn",
-            description: "2주 내 종료 예정"
-        },
-        {
-            key: "issues",
-            label: "검토 요청 건수",
-            value: 9,
-            delta: "+2",
-            deltaTone: "warn",
-            description: "조치 필요 운영 이슈"
+            description: "즉시 제안 또는 재배치 가능 기준"
         }
     ],
     map: {
@@ -372,6 +356,126 @@ window.HR030_DASHBOARD_DATA = {
             joinDate: "2026-02-05",
             availableDate: "03.31",
             status: "대기중"
+        },
+        {
+            employeeId: "FR260201",
+            name: "윤지민",
+            department: "PM/PL · 금융권 운영",
+            regionId: "incheon",
+            region: "인천",
+            position: "10년차",
+            employmentType: "820만원",
+            joinDate: "2026-02-01",
+            availableDate: "03.29",
+            status: "검토중"
+        },
+        {
+            employeeId: "FR260129",
+            name: "최민석",
+            department: "Java/Spring · 공공 차세대",
+            regionId: "seoul",
+            region: "서울",
+            position: "11년차",
+            employmentType: "790만원",
+            joinDate: "2026-01-29",
+            availableDate: "즉시",
+            status: "투입중"
+        },
+        {
+            employeeId: "FR260122",
+            name: "강하늘",
+            department: "QA/운영 · 제조 운영",
+            regionId: "busan",
+            region: "부산/울산",
+            position: "7년차",
+            employmentType: "610만원",
+            joinDate: "2026-01-22",
+            availableDate: "04.03",
+            status: "대기중"
+        },
+        {
+            employeeId: "FR260118",
+            name: "송다은",
+            department: "React/Vue · 퍼블리싱",
+            regionId: "gangwon",
+            region: "강원",
+            position: "4년차",
+            employmentType: "480만원",
+            joinDate: "2026-01-18",
+            availableDate: "03.30",
+            status: "제안중"
+        },
+        {
+            employeeId: "FR260115",
+            name: "임주원",
+            department: "Python/Data · 분석 리포팅",
+            regionId: "gyeonggi",
+            region: "경기",
+            position: "6년차",
+            employmentType: "590만원",
+            joinDate: "2026-01-15",
+            availableDate: "04.05",
+            status: "검토중"
+        },
+        {
+            employeeId: "FR260111",
+            name: "배정민",
+            department: "Java/Spring · 공공/SI",
+            regionId: "incheon",
+            region: "인천",
+            position: "9년차",
+            employmentType: "730만원",
+            joinDate: "2026-01-11",
+            availableDate: "D-5",
+            status: "종료예정"
+        },
+        {
+            employeeId: "FR260108",
+            name: "문가영",
+            department: "PMO · 운영 보강",
+            regionId: "chungcheong",
+            region: "충청",
+            position: "8년차",
+            employmentType: "640만원",
+            joinDate: "2026-01-08",
+            availableDate: "즉시",
+            status: "대기중"
+        },
+        {
+            employeeId: "FR260103",
+            name: "조태윤",
+            department: "React/Vue · 커머스 고도화",
+            regionId: "gyeongsang",
+            region: "경상",
+            position: "5년차",
+            employmentType: "540만원",
+            joinDate: "2026-01-03",
+            availableDate: "04.02",
+            status: "제안중"
+        },
+        {
+            employeeId: "FR251229",
+            name: "신유진",
+            department: "Java/Spring · 제조 운영",
+            regionId: "busan",
+            region: "부산/울산",
+            position: "13년차",
+            employmentType: "880만원",
+            joinDate: "2025-12-29",
+            availableDate: "상시",
+            status: "투입중"
+        },
+        {
+            employeeId: "FR251223",
+            name: "허민재",
+            department: "QA · 테스트 자동화",
+            regionId: "jeolla",
+            region: "전라",
+            position: "6년차",
+            employmentType: "570만원",
+            joinDate: "2025-12-23",
+            availableDate: "D-12",
+            status: "종료예정"
         }
     ],
     issues: [
