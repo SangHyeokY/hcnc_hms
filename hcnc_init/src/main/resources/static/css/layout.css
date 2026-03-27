@@ -30,7 +30,7 @@ body {background: var(--hcnc-shell-bg); color: var(--hcnc-shell-text);}
   --hcnc-lnb-width: var(--hcnc-sidebar-width);
   --hcnc-contents-pad: 28px;
   min-height: 100vh;
-  background: linear-gradient(180deg, #ffffff 0%, #f7f9fc 100%);
+  background: #f7f9fc;
   position: relative;
 }
 
@@ -128,10 +128,10 @@ header .header-topbar {
   align-items: center;
   justify-content: space-between;
   gap: 18px;
-  background: rgba(255, 255, 255, 0.94);
-  backdrop-filter: blur(18px);
+  background: #ffffff;
+  backdrop-filter: none;
   border-bottom: 1px solid var(--hcnc-shell-line);
-  box-shadow: 0 10px 28px rgba(44, 36, 24, 0.06);
+  box-shadow: 0 8px 22px rgba(44, 36, 24, 0.04);
   z-index: 310;
 }
 header .header-brand {
@@ -190,10 +190,12 @@ header .header-search:focus-within {
   box-shadow: 0 0 0 4px rgba(232, 84, 98, 0.08);
 }
 header .header-search .header-search-icon {
+  display: block;
+  flex: 0 0 auto;
   width: 18px;
   height: 18px;
-  background: url("../images/common/ico-search.png") center center no-repeat;
-  background-size: contain;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 18 18' fill='none'%3E%3Ccircle cx='8' cy='8' r='4.75' stroke='%238892A1' stroke-width='1.6'/%3E%3Cpath d='M11.4 11.4L15 15' stroke='%238892A1' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E") center center no-repeat;
+  background-size: 18px 18px;
   opacity: 0.72;
 }
 header .header-search input {
@@ -310,6 +312,20 @@ footer {width:100%; height:30px; line-height: 30px; padding:0 20px; display: fle
     border: 1px solid var(--hcnc-shell-line);
     border-radius: 999px;
 }
+.header-profile-menu {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+.header-profile-menu::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    right: 0;
+    width: 168px;
+    height: 14px;
+    background: transparent;
+}
 .profile-area #profileId {
     color: var(--hcnc-shell-muted);
 }
@@ -329,6 +345,23 @@ footer {width:100%; height:30px; line-height: 30px; padding:0 20px; display: fle
     min-height: 44px;
     padding: 5px 10px 5px 7px;
 }
+.header-profile-trigger {
+    appearance: none;
+    -webkit-appearance: none;
+    border: 1px solid var(--hcnc-shell-line);
+    cursor: pointer;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+.header-profile-trigger:hover,
+.header-profile-menu.is-open .header-profile-trigger,
+.header-profile-menu:focus-within .header-profile-trigger {
+    border-color: #d7deea;
+    background: #ffffff;
+    box-shadow: 0 10px 20px rgba(44, 36, 24, 0.08);
+}
+.header-profile-trigger:focus {
+    outline: none;
+}
 .header-profile .header-profile-copy {
     display: grid;
     gap: 2px;
@@ -338,6 +371,59 @@ footer {width:100%; height:30px; line-height: 30px; padding:0 20px; display: fle
     height: 34px;
     margin-right: 0;
     font-size: 13px;
+}
+.header-profile-popover {
+    position: absolute;
+    top: calc(100% + 4px);
+    right: 0;
+    min-width: 144px;
+    padding: 6px;
+    border: 1px solid #e8edf5;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.98);
+    box-shadow: 0 16px 30px rgba(30, 41, 59, 0.12);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(-6px) scale(0.98);
+    transform-origin: top right;
+    transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
+    z-index: 340;
+}
+.header-profile-menu:not(.is-suppress-hover):hover .header-profile-popover,
+.header-profile-menu.is-open .header-profile-popover {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateY(0) scale(1);
+}
+.header-popover-action {
+    width: 100%;
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    padding: 10px 12px;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--hcnc-shell-text);
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.2;
+    cursor: pointer;
+    transition: background-color 0.18s ease, color 0.18s ease;
+}
+.header-popover-action:hover {
+    background: #f4f7fb;
+    color: var(--hcnc-shell-primary);
+}
+.header-popover-lock {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    flex: 0 0 auto;
+    background: url('../images/common/logout.png') center center no-repeat;
+    background-size: contain;
 }
 
 .profile-area .alarm{}
@@ -496,34 +582,7 @@ footer {width:100%; height:30px; line-height: 30px; padding:0 20px; display: fle
   height: 50%;
 } */
 
-/* 로그아웃 버튼 css */
-#logout-btn {width: 100%; border: none; background: none;}
-.header-btn-wrap {margin-top: auto; padding-top: 14px; border-top: 1px solid var(--hcnc-shell-line);}
-.mem-area {
-  background: var(--hcnc-shell-panel);
-  border: 1px solid var(--hcnc-shell-line);
-  border-radius: 18px;
-  padding: 10px 6px 8px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  color: var(--hcnc-shell-text);
-  gap: 5px;
-  min-height: 74px;
-  width: 100%;
-  position: relative;
-  overflow: hidden;
-}
-.mem-area > div span.ico-lock {display:block;}
-.mem-area .logout-txt {color:var(--hcnc-shell-text); font-size:11px; font-weight:700; line-height:1.25; text-align:center;}
-.mem-area .ico-lock {display:inline-block; width:24px; height:24px; background:url('../images/common/logout.png')center center no-repeat; background-size:contain;}
-.mem-area::after {content: ""; position: absolute; top: 0; right: 0; height: 100%; width: 0; background: linear-gradient(to left, rgba(232,84,98,0.16) 0%, rgba(232,84,98,0.04) 55%, rgba(232,84,98,0) 100%); transition: width 0.35s cubic-bezier(.4,0,.2,1); z-index: 0;}
-.mem-area:hover::after {width: 180px;}
-.mem-area > * {position: relative; z-index: 1;}
-.mem-area .right-arrow {display: none;}
-.mem-area .right-arrow img {width: auto; height: 12px; margin-left: 3px;}
-.mem-area:hover .right-arrow {transform: translateX(6px);}
+#logout-btn { border: none; background: none; }
 
 /*=================================================================================
  * Container style

@@ -38,11 +38,19 @@
         <span class="header-alert-count" id="hr030AlertCount"></span>
       </button>
 
-      <div class="profile-area header-profile">
-        <div class="profile-img" id="profileImgContainer"></div>
-        <div class="header-profile-copy">
-          <div id="profileName" class="fw700 fs16"></div>
-          <div id="profileId" class="fw500 fs14"></div>
+      <div class="header-profile-menu">
+        <button type="button" class="profile-area header-profile header-profile-trigger" aria-label="계정 메뉴" aria-haspopup="menu" aria-expanded="false">
+          <div class="profile-img" id="profileImgContainer"></div>
+          <div class="header-profile-copy">
+            <div id="profileName" class="fw700 fs16"></div>
+            <div id="profileId" class="fw500 fs14"></div>
+          </div>
+        </button>
+        <div class="header-profile-popover" aria-label="계정 메뉴" role="menu">
+          <button id="logout-btn" type="button" class="header-popover-action">
+            <span class="header-popover-lock" aria-hidden="true"></span>
+            <span>로그아웃</span>
+          </button>
         </div>
       </div>
     </div>
@@ -57,18 +65,6 @@
           </div>
         </nav>
       </aside>
-
-      <div class="header-btn-wrap">
-        <button id="logout-btn" type="button">
-          <span class="mem-area">
-            <span class="ico-lock"></span>
-            <span class="logout-txt">로그아웃</span>
-            <span class="right-arrow">
-              <img src="/images/common/Ico-arrow-right.png" alt=">" />
-            </span>
-          </span>
-        </button>
-      </div>
     </div>
   </div>
 </header>
