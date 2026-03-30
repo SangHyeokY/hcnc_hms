@@ -994,8 +994,8 @@ async function loadUserTableData() {
             })
         );
 
-        const filteredList = applyHr010ConditionFilter(list, searchType, conditionKeyword); // 조회조건 필터 적용
-        hr010SourceRows = filteredList; // 필터 결과를 그리드 소스로 반영
+         // 조회조건 필터 적용
+        hr010SourceRows = applyHr010ConditionFilter(list, searchType, conditionKeyword); // 필터 결과를 그리드 소스로 반영
         applyHr010UserTypeFilter(); // 직원/프리랜서 탭 필터 적용
 
         // [Card View] ====================================================================

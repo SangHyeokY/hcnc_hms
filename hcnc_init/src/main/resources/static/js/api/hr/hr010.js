@@ -14,8 +14,11 @@ $(document).ready(async function () {
     bindEvents();
     showLoading();
 
-    initDropdownFilter("work_md");
-    initDropdownFilter("ctrt_typ");
+    // 공통코드 공통 함수
+    initDropdownFilter("work_md"); // 근무가능형태
+    initDropdownFilter("ctrt_typ"); // 계약형태
+    initDropdownFilter("sido_cd"); // 거주지역
+    initDropdownFilter("skl_grp"); // 주개발언어 - 스킬
 
     await loadUserTableData();
     hideLoading();
@@ -450,7 +453,7 @@ function bindCardEvents(container, list) {
         if (!card) return;
         const devId = card.dataset.id;
         const row = list.find(r => r.dev_id === devId);
-        console.log(row);
+        // console.log(row);
         alert(JSON.stringify(row, null, 2));
     };
 }
@@ -487,19 +490,33 @@ $(document).on("click", ".dropdown-menu li", function () {
 // 공통코드 불러오기
 // ==============================
 const dropdownFilters = {
-    work_md: {
+    work_md: { // 근무가능형태
         selectId: "select_work_md",
         code: "WORK_MD",
         options: [],
         map: {},
         container: ".dropdown-work-md"
     },
-    ctrt_typ: {
+    ctrt_typ: { // 계약형태
         selectId: "select_ctrt_typ",
         code: "CTRT_TYP",
         options: [],
         map: {},
         container: ".dropdown-ctrt-typ"
+    },
+    sido_cd: { // 거주지역
+        selectId: "select_sido-cd",
+        code: "SIDO_CD",
+        options: [],
+        map: {},
+        container: ".dropdown-sido-cd"
+    },
+    skl_grp: { // 주개발언어 - 스킬
+        selectId: "select_skl_grp",
+        code: "SKL_GRP",
+        options: [],
+        map: {},
+        container: ".dropdown-skl-grp"
     }
 };
 

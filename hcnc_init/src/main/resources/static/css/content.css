@@ -2452,6 +2452,7 @@ section.search-area .search-info #searchConditionKeyword { /* 새 검색어 입�
   transition: border-color 220ms ease, color 220ms ease, background-color 220ms ease;
   box-shadow: none;
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .toggle-filter-chip:hover {
@@ -2543,12 +2544,12 @@ section.search-area .search-info #searchConditionKeyword { /* 새 검색어 입�
 #hr030-dashboard.hr030-saas-dashboard .hr030-panel--placeholder { grid-template-rows: minmax(0, 1fr); }
 #hr030-dashboard.hr030-saas-dashboard .hr030-region-combined { min-height: 0; height: 100%; display: flex; flex-direction: column; gap: 0; padding: 8px 0 10px; }
 #hr030-dashboard.hr030-saas-dashboard .hr030-region-combined-section { min-height: 0; display: flex; flex-direction: column; }
-#hr030-dashboard.hr030-saas-dashboard .hr030-region-combined-section--map { flex: 0 0 56%; border-bottom: 0 !important; }
+#hr030-dashboard.hr030-saas-dashboard .hr030-region-combined-section--map { flex: 0 0 64%; border-bottom: 0 !important; }
 #hr030-dashboard.hr030-saas-dashboard .hr030-region-combined-section--map .hr030-section-head { padding: 2px 0 6px; }
-#hr030-dashboard.hr030-saas-dashboard .hr030-region-combined-section--detail .hr030-section-head { padding: 8px 0 6px; }
+#hr030-dashboard.hr030-saas-dashboard .hr030-region-combined-section--detail .hr030-section-head { padding: 6px 0 4px; }
 #hr030-dashboard.hr030-saas-dashboard .hr030-region-combined-section .hr030-section-head { border-bottom: 0 !important; margin: 0 14px; }
 #hr030-dashboard.hr030-saas-dashboard .hr030-region-combined-section .hr030-region-map-card, #hr030-dashboard.hr030-saas-dashboard .hr030-region-combined-section .hr030-region-detail { min-height: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; padding-left: 14px; padding-right: 14px; }
-#hr030-dashboard.hr030-saas-dashboard .hr030-region-combined-section--detail { flex: 1 1 0; padding-top: 2px; }
+#hr030-dashboard.hr030-saas-dashboard .hr030-region-combined-section--detail { flex: 1 1 0; padding-top: 0; }
 #hr030-dashboard.hr030-saas-dashboard .hr030-placeholder-card { height: 100%; min-height: 0; display: flex; align-items: center; justify-content: center; margin: 14px; border: 1px dashed #d7deea; border-radius: 18px; background: linear-gradient(180deg, #ffffff 0%, #f9fbfe 100%); }
 #hr030-dashboard.hr030-saas-dashboard .hr030-placeholder-copy { display: grid; gap: 8px; max-width: 280px; text-align: center; }
 #hr030-dashboard.hr030-saas-dashboard .hr030-placeholder-copy strong { color: var(--hr030-text-main); font-size: 15px; font-weight: 700; }
@@ -2622,39 +2623,56 @@ section.search-area .search-info #searchConditionKeyword { /* 새 검색어 입�
 #hr030-dashboard.hr030-saas-dashboard .hr030-region-map-top strong { font-size: 14px; font-weight: 700; color: var(--hr030-text-main); }
 #hr030-dashboard.hr030-saas-dashboard .hr030-region-reset { min-height: 28px; padding: 0 10px; border: 1px solid var(--hr030-line); border-radius: 999px; background: #fff; color: var(--hr030-text-sub); font-size: 12px; font-weight: 700; cursor: pointer; }
 #hr030-dashboard.hr030-saas-dashboard .hr030-region-reset:hover { border-color: #cad7ff; color: var(--hr030-primary-strong); }
-#hr030-dashboard.hr030-saas-dashboard .hr030-region-map { min-height: 0; min-height: 214px; border-radius: 14px; background: linear-gradient(180deg, #fbfdff 0%, #f4f8ff 100%); border: 1px solid #dde7f5; display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 10px; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95); }
+#hr030-dashboard.hr030-saas-dashboard .hr030-region-map { min-height: 0; min-height: 264px; border-radius: 14px; background: linear-gradient(180deg, #fbfdff 0%, #f4f8ff 100%); border: 1px solid #dde7f5; display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 2px 4px; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95); }
 #hr030-dashboard.hr030-saas-dashboard .hr030-map-svg { display: block; width: 100%; height: 100%; max-width: 100%; max-height: 100%; }
+#hr030-dashboard.hr030-saas-dashboard .hr030-map-svg--regional { overflow: visible; transform: scale(1.02); transform-origin: center; }
 #hr030-dashboard.hr030-saas-dashboard .hr030-map-backdrop path { fill: #eff4fb; stroke: #dfe8f3; stroke-width: 1.5; }
 #hr030-dashboard.hr030-saas-dashboard .hr030-map-region { cursor: pointer; outline: none; }
-#hr030-dashboard.hr030-saas-dashboard .hr030-map-shape { fill: #dfe8ff; stroke: #ffffff; stroke-width: 2.5; filter: drop-shadow(0 4px 10px rgba(79, 111, 247, 0.12)); transition: fill 180ms ease; }
-#hr030-dashboard.hr030-saas-dashboard .hr030-map-region:hover .hr030-map-shape, #hr030-dashboard.hr030-saas-dashboard .hr030-map-region:focus .hr030-map-shape { fill: #bfd0ff; }
-#hr030-dashboard.hr030-saas-dashboard .hr030-map-region.is-active .hr030-map-shape { fill: #4f6ff7; }
+#hr030-dashboard.hr030-saas-dashboard .hr030-map-shape { fill: var(--hr030-map-fill, #dfe8ff); stroke: #ffffff; stroke-width: 2.5; filter: drop-shadow(0 4px 10px rgba(79, 111, 247, 0.12)); transition: fill 180ms ease, stroke-width 180ms ease, filter 180ms ease; }
+#hr030-dashboard.hr030-saas-dashboard .hr030-map-region:hover .hr030-map-shape, #hr030-dashboard.hr030-saas-dashboard .hr030-map-region:focus .hr030-map-shape { fill: var(--hr030-map-fill-hover, #bfd0ff); stroke-width: 3; filter: drop-shadow(0 6px 14px rgba(79, 111, 247, 0.16)); }
+#hr030-dashboard.hr030-saas-dashboard .hr030-map-region.is-active .hr030-map-shape { fill: var(--hr030-map-fill-active, #4f6ff7); stroke-width: 3.1; filter: drop-shadow(0 7px 16px rgba(79, 111, 247, 0.2)); }
+#hr030-dashboard.hr030-saas-dashboard .hr030-map-province-shape.is-muted { fill: #e8eef8; stroke: #d5dfee; filter: none; opacity: 0.78; }
+#hr030-dashboard.hr030-saas-dashboard .hr030-map-badge { pointer-events: none; }
+#hr030-dashboard.hr030-saas-dashboard .hr030-map-hit-area { fill: rgba(255, 255, 255, 0); stroke: none; pointer-events: all; }
+#hr030-dashboard.hr030-saas-dashboard .hr030-map-badge-body { opacity: 0.98; transform-box: fill-box; transform-origin: center; transform: scale(2.45); transition: opacity 180ms ease, transform 180ms ease; }
+#hr030-dashboard.hr030-saas-dashboard .hr030-map-region:hover .hr030-map-badge-body, #hr030-dashboard.hr030-saas-dashboard .hr030-map-region:focus .hr030-map-badge-body { opacity: 1; transform: scale(3.05); }
+#hr030-dashboard.hr030-saas-dashboard .hr030-map-region.is-active .hr030-map-badge-body { opacity: 1; transform: scale(2.7); }
+#hr030-dashboard.hr030-saas-dashboard .hr030-map-badge rect { fill: var(--hr030-map-badge-fill, rgba(255, 255, 255, 0.98)); stroke: var(--hr030-map-badge-stroke, #d7e2f2); stroke-width: 1.2; }
+#hr030-dashboard.hr030-saas-dashboard .hr030-map-badge-name, #hr030-dashboard.hr030-saas-dashboard .hr030-map-badge-value { text-anchor: middle; dominant-baseline: middle; }
+#hr030-dashboard.hr030-saas-dashboard .hr030-map-badge-name { fill: #34415d; font-size: 13px; font-weight: 700; letter-spacing: -0.02em; transition: font-size 180ms ease; }
+#hr030-dashboard.hr030-saas-dashboard .hr030-map-badge-value { fill: #52627e; font-size: 20px; font-weight: 800; transition: font-size 180ms ease; }
+#hr030-dashboard.hr030-saas-dashboard .hr030-map-region:hover .hr030-map-badge-name, #hr030-dashboard.hr030-saas-dashboard .hr030-map-region:focus .hr030-map-badge-name { font-size: 15px; }
+#hr030-dashboard.hr030-saas-dashboard .hr030-map-region:hover .hr030-map-badge-value, #hr030-dashboard.hr030-saas-dashboard .hr030-map-region:focus .hr030-map-badge-value { font-size: 23px; }
+#hr030-dashboard.hr030-saas-dashboard .hr030-map-region.is-active .hr030-map-badge-name { font-size: 15px; }
+#hr030-dashboard.hr030-saas-dashboard .hr030-map-region.is-active .hr030-map-badge-value { font-size: 22px; }
+#hr030-dashboard.hr030-saas-dashboard .hr030-map-badge.is-active rect { fill: var(--hr030-map-badge-active-fill, #4f6ff7); stroke: var(--hr030-map-badge-active-fill, #4f6ff7); }
+#hr030-dashboard.hr030-saas-dashboard .hr030-map-badge.is-active .hr030-map-badge-name, #hr030-dashboard.hr030-saas-dashboard .hr030-map-badge.is-active .hr030-map-badge-value { fill: #ffffff; }
 #hr030-dashboard.hr030-saas-dashboard .hr030-map-label, #hr030-dashboard.hr030-saas-dashboard .hr030-map-value { text-anchor: middle; pointer-events: none; }
 #hr030-dashboard.hr030-saas-dashboard .hr030-map-label { fill: #24304a; font-size: 12.5px; font-weight: 700; }
 #hr030-dashboard.hr030-saas-dashboard .hr030-map-value { fill: #6c7890; font-size: 11.5px; font-weight: 700; }
 #hr030-dashboard.hr030-saas-dashboard .hr030-map-region.is-active .hr030-map-label, #hr030-dashboard.hr030-saas-dashboard .hr030-map-region.is-active .hr030-map-value { fill: #ffffff; }
-#hr030-dashboard.hr030-saas-dashboard .hr030-region-map-note { min-height: 32px; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 0 2px; }
+#hr030-dashboard.hr030-saas-dashboard .hr030-region-map-note { min-height: 26px; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 0 2px; }
 #hr030-dashboard.hr030-saas-dashboard .hr030-region-legend { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
 #hr030-dashboard.hr030-saas-dashboard .hr030-region-legend span { display: inline-flex; align-items: center; gap: 6px; color: var(--hr030-text-soft); font-size: 10px; font-weight: 600; line-height: 1.2; }
 #hr030-dashboard.hr030-saas-dashboard .hr030-region-legend i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
 #hr030-dashboard.hr030-saas-dashboard .hr030-region-legend i.is-headcount { background: #4f6ff7; }
 #hr030-dashboard.hr030-saas-dashboard .hr030-region-legend i.is-selected { background: #18b7e6; }
 #hr030-dashboard.hr030-saas-dashboard .hr030-region-selection-badge { min-height: 20px; padding: 0 10px; display: inline-flex; align-items: center; justify-content: center; border-radius: 999px; background: #edf2ff; color: var(--hr030-primary-strong); font-size: 10px; font-weight: 700; }
-#hr030-dashboard.hr030-saas-dashboard .hr030-region-detail { display: grid; grid-template-rows: auto auto auto; align-content: start; gap: 10px; padding: 2px 14px 12px; height: auto; }
+#hr030-dashboard.hr030-saas-dashboard .hr030-region-detail { display: grid; grid-template-rows: auto auto auto; align-content: start; gap: 8px; padding: 0 14px 8px; height: auto; }
 #hr030-dashboard.hr030-saas-dashboard .hr030-region-detail-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
-#hr030-dashboard.hr030-saas-dashboard .hr030-region-detail-copy { display: grid; gap: 2px; }
-#hr030-dashboard.hr030-saas-dashboard .hr030-region-detail-copy h6 { margin: 0; font-size: 20px; font-weight: 700; color: var(--hr030-text-main); }
-#hr030-dashboard.hr030-saas-dashboard .hr030-region-detail-copy p { margin: 0; color: var(--hr030-text-sub); font-size: 11px; line-height: 1.32; }
+#hr030-dashboard.hr030-saas-dashboard .hr030-region-detail-copy { display: grid; gap: 1px; }
+#hr030-dashboard.hr030-saas-dashboard .hr030-region-detail-copy h6 { margin: 0; font-size: 18px; font-weight: 700; color: var(--hr030-text-main); }
+#hr030-dashboard.hr030-saas-dashboard .hr030-region-detail-copy p { margin: 0; color: var(--hr030-text-sub); font-size: 10px; line-height: 1.28; }
 #hr030-dashboard.hr030-saas-dashboard .hr030-region-detail-skill { display: inline-flex; align-items: center; min-height: 24px; padding: 0 9px; border-radius: 999px; background: #eef3ff; color: var(--hr030-primary-strong); font-size: 11px; font-weight: 700; white-space: nowrap; }
-#hr030-dashboard.hr030-saas-dashboard .hr030-region-stat-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
-#hr030-dashboard.hr030-saas-dashboard .hr030-region-stat-card { display: grid; gap: 6px; min-height: 70px; padding: 12px 14px; border: 1px solid var(--hr030-line-soft); border-radius: 12px; background: #ffffff; box-shadow: var(--hr030-inner-card-shadow); }
-#hr030-dashboard.hr030-saas-dashboard .hr030-region-stat-card span { color: var(--hr030-text-soft); font-size: 10px; font-weight: 600; }
-#hr030-dashboard.hr030-saas-dashboard .hr030-region-stat-card strong { color: var(--hr030-text-main); font-size: 18px; font-weight: 700; line-height: 1.1; }
-#hr030-dashboard.hr030-saas-dashboard .hr030-region-summary-grid { display: grid; grid-template-columns: minmax(210px, 0.9fr) minmax(0, 1.1fr); gap: 10px; min-height: 0; }
-#hr030-dashboard.hr030-saas-dashboard .hr030-region-summary-card { display: grid; align-content: start; gap: 10px; padding: 14px 16px; border: 1px solid var(--hr030-line-soft); border-radius: 12px; background: #ffffff; box-shadow: var(--hr030-inner-card-shadow); }
-#hr030-dashboard.hr030-saas-dashboard .hr030-region-summary-card span { color: var(--hr030-text-soft); font-size: 10px; font-weight: 600; }
-#hr030-dashboard.hr030-saas-dashboard .hr030-region-ratio-row { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 14px; }
-#hr030-dashboard.hr030-saas-dashboard .hr030-region-ratio-row strong { color: var(--hr030-text-main); font-size: 18px; font-weight: 700; line-height: 1; }
+#hr030-dashboard.hr030-saas-dashboard .hr030-region-stat-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; }
+#hr030-dashboard.hr030-saas-dashboard .hr030-region-stat-card { display: grid; gap: 5px; min-height: 58px; padding: 9px 11px; border: 1px solid var(--hr030-line-soft); border-radius: 12px; background: #ffffff; box-shadow: var(--hr030-inner-card-shadow); }
+#hr030-dashboard.hr030-saas-dashboard .hr030-region-stat-card span { color: var(--hr030-text-soft); font-size: 9px; font-weight: 600; }
+#hr030-dashboard.hr030-saas-dashboard .hr030-region-stat-card strong { color: var(--hr030-text-main); font-size: 16px; font-weight: 700; line-height: 1.1; }
+#hr030-dashboard.hr030-saas-dashboard .hr030-region-summary-grid { display: grid; grid-template-columns: minmax(170px, 0.84fr) minmax(0, 1.16fr); gap: 8px; min-height: 0; }
+#hr030-dashboard.hr030-saas-dashboard .hr030-region-summary-card { display: grid; align-content: start; gap: 8px; padding: 11px 12px; border: 1px solid var(--hr030-line-soft); border-radius: 12px; background: #ffffff; box-shadow: var(--hr030-inner-card-shadow); }
+#hr030-dashboard.hr030-saas-dashboard .hr030-region-summary-card span { color: var(--hr030-text-soft); font-size: 9px; font-weight: 600; }
+#hr030-dashboard.hr030-saas-dashboard .hr030-region-ratio-row { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 10px; }
+#hr030-dashboard.hr030-saas-dashboard .hr030-region-ratio-row strong { color: var(--hr030-text-main); font-size: 16px; font-weight: 700; line-height: 1; }
 #hr030-dashboard.hr030-saas-dashboard .hr030-region-ratio-bar { position: relative; width: 100%; height: 12px; border-radius: 999px; background: #dfe7f3; overflow: hidden; }
 #hr030-dashboard.hr030-saas-dashboard .hr030-region-ratio-bar i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #18b7e6 0%, #2f62f4 100%); }
 #hr030-dashboard.hr030-saas-dashboard .hr030-region-summary-card--note p { margin: 0; color: var(--hr030-text-sub); font-size: 12px; line-height: 1.55; word-break: keep-all; }
@@ -2768,7 +2786,7 @@ section.search-area .search-info #searchConditionKeyword { /* 새 검색어 입�
 
 .hr010-dashboard-wrap #CARD_HR010_A {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     grid-template-rows: repeat(2, 1fr);
     gap: 20px;
     height: 600px;     /* 2행 높이 맞추기 */
@@ -2784,6 +2802,8 @@ section.search-area .search-info #searchConditionKeyword { /* 새 검색어 입�
     cursor: pointer;
     transition: 0.2s;
     border: 1px solid #eee;
+    width: 100%;
+    height: 100%;
 }
 
 /* 인적사항 카드 호버시 */
@@ -2836,6 +2856,7 @@ section.search-area .search-info #searchConditionKeyword { /* 새 검색어 입�
 
 /* 카드 정보 (인적사항) - ... 표시 */
 .hr010-dashboard-wrap .card-info div {
+    min-width: 0;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -2894,7 +2915,7 @@ section.search-area .search-info #searchConditionKeyword { /* 새 검색어 입�
 .hr010-dashboard-wrap .hr010-filter-dropdowns {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    /* gap: 10px; */
 }
 
 /* 아코디언 메뉴 버튼 */
@@ -2903,7 +2924,7 @@ section.search-area .search-info #searchConditionKeyword { /* 새 검색어 입�
     height: 60px;
     border: 1px solid #ddd;
     border-radius: 8px;
-    background: #F6F9FD;
+    background: #FFFFFF;
     padding: 0 12px;
     text-align: left;
     cursor: pointer;
@@ -2926,14 +2947,14 @@ section.search-area .search-info #searchConditionKeyword { /* 새 검색어 입�
     max-height: 0;
     overflow: hidden;
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    border-radius: 8px;
     background: #fafafa;
     margin-top: 6px;
 }
 
 /* 아코디언 메뉴 열렸을 때 */
 .hr010-dashboard-wrap .dropdown.open .dropdown-menu {
-    max-height: 200px; /* 충분히 크게 */
+    max-height: 400px !important; /* 충분히 크게 */
+    overflow-y: auto; /* 스크롤 */
 }
 
 /* 아코디언 메뉴 열렸을 때, 선택된 항목 */
@@ -2945,6 +2966,19 @@ section.search-area .search-info #searchConditionKeyword { /* 새 검색어 입�
 .hr010-dashboard-wrap .dropdown-menu li {
     padding: 10px;
     cursor: pointer;
+}
+
+/* 아코디언 하위 메뉴 맨 위 */
+.hr010-dashboard-wrap .dropdown-menu li:first-child {
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+
+/* 아코디언 하위 메뉴 맨 아래 */
+.hr010-dashboard-wrap .dropdown-menu li:last-child {
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+    margin-bottom: 6px;
 }
 
 /* 아코디언 내부 호버 */

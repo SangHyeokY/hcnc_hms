@@ -1,0 +1,498 @@
+// 사용자 관리 - 소속 및 계약 정보 hr011.js (hcnc_hms)
+
+// view일 때는 수정 불가, update일 때는 수정 가능
+$(document).on("tab:readonly", function (_, isReadOnly) {
+    setHr011Mode(isReadOnly ? "view" : "update");
+});
+
+// mode 초기값 : view, 테이블 데이터 초기값 : null
+let hr011Mode = "view";
+window.hr011Data = null;
+
+// const HR011_FIELDS = "#org_nm, #select_biz_typ, #st_dt, #ed_dt, #amt, #remark"; // 데이터 담을 상수
+
+// 사업자 유형 공통코드
+var bizTypMap = [];
+var bizTypOptions = [];
+
+// ============================================================================== //
+
+// Tab1 초기값 설정
+window.initTab1 = function () {
+  return new Promise((resolve) => {
+
+      setComCode("select_biz_typ", "BIZ_TYP", "", "cd", "cd_nm", async function () {
+
+          bizTypOptions = $("#select_biz_typ option").map(function () {
+              return { cd: this.value, cd_nm: $(this).text() };
+          }).get();
+
+          initSelectDefault("select_biz_typ", "개인/개인사업자/법인");
+          bizTypMap = getBizTypMap();
+
+          // AJAX 끝날 때까지 기다림
+          await loadHr011TableData(window.currentDevId);
+
+          resolve();
+      });
+  });
+};
+
+// 역할 코드 -> 라벨 맵 생성 (사업자 유형 : 개인/개인사업자/법인)
+function getBizTypMap() {
+    var map = {};
+    if (bizTypOptions && bizTypOptions.length) {
+        bizTypOptions.forEach(function (item) {
+            if (item.cd) {
+                map[item.cd] = item.cd_nm || item.cd;
+            }
+        });
+        return map;
+    }
+    $("#select_biz_typ option").each(function () {
+        var val = this.value;
+        if (val) {
+            map[val] = $(this).text();
+        }
+    });
+    return map;
+}
+
+// 콤보 기본 옵션, 선택 처리
+function initSelectDefault(selectId, placeholderText) {
+    var $sel = $("#" + selectId);
+    if ($sel.find("option[value='']").length === 0) {
+        $sel.prepend("<option value=''>" + placeholderText + "</option>");
+    }
+    $sel.val("");
+    if (!$sel.val()) {
+        $sel.find("option:first").prop("selected", true);
+    }
+}
+
+// 역할 값이 객체로 와도 문자열로 정규화
+function normalizeJobValue(value) {
+    if (value == null) {
+        return "";
+    }
+    if (typeof value === "object") {
+        var current = value;
+        var guard = 0;
+        while (current && typeof current === "object" && guard < 4) {
+            var candidate = current.cd || current.value || current.label || current.cd_nm || current.name || current.nm || current.id;
+            if (candidate && typeof candidate !== "object") {
+                return String(candidate);
+            }
+            if (candidate && typeof candidate === "object") {
+                current = candidate;
+                guard += 1;
+                continue;
+            }
+            break;
+        }
+        return "";
+    }
+    return String(value);
+}
+
+// ============================================================================== //
+
+// 모드 제어 함수
+function setHr011Mode(mode) {
+    hr011Mode = mode;
+    const isView = mode === "view"; // view일 때는 수정불가능
+    const isEditable = mode === "insert" || mode === "update"; // insert와 update는 수정가능
+    $("#modal-title").text(
+        isView ? "상세" : mode === "insert" ? "등록" : "수정"
+    );
+
+    $("#org_nm").prop("readonly", !isEditable).toggleClass("is-readonly", !isEditable);
+    $("#select_biz_typ").prop("disabled", !isEditable).toggleClass("is-readonly", !isEditable);
+    $("#st_dt").prop("readonly", !isEditable).toggleClass("is-readonly", !isEditable);
+    $("#ed_dt").prop("readonly", !isEditable).toggleClass("is-readonly", !isEditable);
+    $("#remark").prop("readonly", !isEditable).toggleClass("is-readonly", !isEditable);
+
+    if (!isEditable) {
+        $("#amt").prop("readonly", true).addClass("is-readonly");
+    } else {
+        $("#amt").prop("readonly", false).removeClass("is-readonly");
+    }
+
+//    if (isEditable) { // insert, update mode일 때
+//        $fields
+//            .prop("disabled", false)
+//            .prop("readonly", false)
+//            .removeAttr("disabled")
+//            .removeAttr("readonly")
+//            .removeClass("is-readonly");
+//    } else { // view mode일 때
+//        $fields
+//            .prop("disabled", true)
+//            .prop("readonly", true)
+//            .addClass("is-readonly");
+//    }
+}
+
+// Tab1 조회할 시, 데이터 표시
+function openHr011(mode) {
+    // 수정 mode
+    if (mode === "update") {
+        if (!window.hr011Data) {
+            showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+                icon: 'error',
+                title: '오류',
+                html: `<strong>소속 및 계약정보</strong>&nbsp;데이터가 존재하지 않습니다.`
+            });
+            return;
+        }
+        setHr011Mode("update");
+        return;
+    }
+
+    // 신규 등록(insert) 시 최초 입력을 위한 초기화
+    if (mode === "insert") {
+        clearHr011Form();
+        window.hr011Data = null;
+        setHr011Mode("insert");
+        return;
+    }
+
+    // 해당 조건이 모두 아니라면 view mode
+    setHr011Mode("view");
+}
+
+// Tab1에 데이터 채워넣기
+function fillHr011Form(data) {
+    $("#org_nm").val(data.org_nm || "");
+    $("#st_dt").val(data.st_dt || "");
+    $("#ed_dt").val(data.ed_dt || "");
+    $("#remark").val(data.remark || "");
+    $("#amt").val(formatAmount(data.amt));
+    if ($("#select_biz_typ option").length > 0) {
+        $("#select_biz_typ").val(data.biz_typ || "");
+    }
+}
+
+// Tab1의 데이터 초기화
+function clearHr011Form() {
+    $("#org_nm, #select_biz_typ, #st_dt, #ed_dt, #remark").val("");
+    $("#amt").val("0원");
+}
+
+// Tab1에 '소속 및 계약정보' 테이블 불러오기
+function loadHr011TableData(devId) {
+    return new Promise((resolve) => {
+
+        if (!devId) {
+            clearHr011Form();
+            setHr011Mode("insert");
+            resolve();
+            return;
+        }
+
+        $.ajax({
+            url: "/hr011/tab1",
+            type: "GET",
+            data: { dev_id: devId },
+            success: (res) => {
+                const data = res?.res ?? null;
+                window.hr011Data = data;
+
+                clearHr011Form();
+
+                if (data) {
+                    fillHr011Form(data);
+                }
+
+                resolve();
+            },
+            error: () => {
+                console.log("데이터 조회 실패");
+                clearHr011Form();
+                setHr011Mode("insert");
+                resolve(); // 에러여도 resolve
+            }
+        });
+    });
+}
+
+// '소속 및 계약정보' 테이블 데이터 수정, 저장
+function saveHr011TableData() {
+    // if (!validateHr011Form()) return; // hr010.js로 이관
+
+    const param = {
+        ctrtId: hr011Mode === "update" ? window.hr011Data?.ctrt_id : null,
+        devId: window.currentDevId,
+        orgNm: $("#org_nm").val(),
+        bizTyp: $("#select_biz_typ").val(),
+        stDt: $("#st_dt").val(),
+        edDt: $("#ed_dt").val(),
+        amt: normalizeAmountValue($("#amt").val()),
+        remark: $("#remark").val()
+    };
+
+    $.ajax({
+        url: "/hr011/tab1_upsert",
+        type: "POST",
+        contentType: "application/json",
+        data: JSON.stringify(param),
+        success: () => {
+            // alert("저장되었습니다.");
+            // setHr011Mode("view");
+            loadHr011TableData(window.currentDevId);
+        },
+        error: () => showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+                         icon: 'error',
+                         title: '오류',
+                         html: `<strong>소속 및 계약정보</strong>&nbsp;저장 중 오류가 발생했습니다.`
+                     })
+    });
+}
+
+// Tab1 데이터 삭제 (미사용 중)
+async function deleteHr011() {
+    if (!window.hr011Data?.ctrt_id) {
+        await showAlert({
+            icon: 'error',
+            title: '오류',
+            html: `<strong>소속 및 계약정보</strong>&nbsp;데이터가 존재하지 않습니다.`
+        });
+        return;
+    }
+
+    const result = await showAlert({
+        icon: 'warning',
+        title: '경고',
+        text: '정말로 삭제하시겠습니까?',
+        showCancelButton: true,
+        cancelButtonText: '취소',
+        cancelButtonColor: '#212E41'
+    });
+
+    if (!result.isConfirmed) return;
+
+    $.ajax({
+        url: "/hr011/tab1_delete",
+        type: "POST",
+        contentType: "application/json",
+        data: JSON.stringify({
+            ctrtId: window.hr011Data.ctrt_id,
+            devId: window.currentDevId
+        }),
+        success: () => {
+            showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+                icon: 'success',
+                title: '완료',
+                html: `<strong>소속 및 계약정보</strong>&nbsp;데이터가 삭제되었습니다.`
+            });
+            loadHr011TableData(window.currentDevId);
+        },
+        error: () => showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+                                 icon: 'error',
+                                 title: '오류',
+                                 html: `<strong>소속 및 계약정보</strong>&nbsp;데이터를 삭제하는 중 오류가 발생했습니다.`
+                             })
+    });
+}
+
+// ============================================================================== //
+
+// 유효성 검사
+function validateHr011Form() {
+
+    // 값 가져오기
+    const orgNm   = $("#org_nm").val().trim();         // 소속사
+    const stDt    = $("#st_dt").val();                 // 계약 시작일
+    const edDt    = $("#ed_dt").val();                 // 계약 종료일
+    const bizTyp  = $("#select_biz_typ").val().trim(); // 사업자 유형
+    const amtRaw  = normalizeAmountValue($("#amt").val());   // 계약 금액
+
+    // 최대 입력 가능 숫자
+    const MAX_AMT = 999999999;
+
+    if (!orgNm) {
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'warning',
+            title: '경고',
+            html: `<strong>소속사</strong>을(를) 입력해주세요.`
+        });
+        $("#org_nm").focus();
+        return false;
+    }
+
+    if (!stDt) {
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'warning',
+            title: '경고',
+            html: `<strong>계약시작일</strong>을(를) 입력해주세요.`
+        });
+        $("#st_dt").focus();
+        return false;
+    }
+
+    if (!edDt) {
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'warning',
+            title: '경고',
+            html: `<strong>계약종료일</strong>을(를) 입력해주세요.`
+        });
+        $("#ed_dt").focus();
+        return false;
+    }
+
+    if (new Date(stDt) > new Date(edDt)) {
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'warning',
+            title: '경고',
+            html: `<strong>계약종료일</strong>은(는)&nbsp;<strong>계약시작일</strong>&nbsp;이후여야 합니다.`
+        });
+        $("#ed_dt").focus();
+        return false;
+    }
+
+    if (!bizTyp || bizTyp == null) {
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'warning',
+            title: '경고',
+            html: `<strong>사업자유형</strong>을(를) 선택해주세요.`
+        });
+        $("#select_biz_typ").focus();
+        return false;
+    }
+
+    if (!amtRaw) {
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'warning',
+            title: '경고',
+            html: `<strong>계약금액</strong>을(를) 입력해주세요.`
+        });
+        $("#amt").focus();
+        return false;
+    }
+
+    if (isNaN(amtRaw) || Number(amtRaw) <= 0) {
+         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'warning',
+            title: '경고',
+            html: `<strong>계약금액</strong>은(는) 0보다 큰 숫자여야 합니다.`
+        });
+        $("#amt").focus();
+        return false;
+    }
+
+    if (Number(amtRaw) > MAX_AMT) {
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'warning',
+            title: '경고',
+            html: `<strong>계약금액</strong>은(는) 최대 999,999,999원까지 입력 가능합니다.`
+        });
+        $("#amt").focus();
+        return false;
+    }
+
+    return true;
+}
+
+// ============================================================================== //
+
+// 숫자에 콤마
+function formatNumber(num) {
+    if (!num) return "";
+    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+// 숫자만 입력
+$("#amt")
+    .on("input", function () {
+        const raw = this.value || "";
+        const caret = Number.isFinite(this.selectionStart) ? this.selectionStart : raw.length;
+        const digitsBeforeCaret = countAmountDigitsBeforeCaret(raw, caret);
+        const inputNumber = normalizeAmountValue(raw);
+        const formatted = formatAmount(inputNumber);
+        this.value = formatted;
+        setAmountCaretByDigitIndex(this, digitsBeforeCaret);
+    })
+    .on("focus", function () {
+        moveAmountCaretToEditableEnd(this);
+    })
+    .on("click", function () {
+        const input = this;
+        setTimeout(function () {
+            clampAmountCaretToEditableRange(input);
+        }, 0);
+    })
+    .on("keydown", function (e) {
+        const value = this.value || "";
+        const suffixIndex = getAmountEditableEndIndex(value);
+        const start = Number.isFinite(this.selectionStart) ? this.selectionStart : suffixIndex;
+        const end = Number.isFinite(this.selectionEnd) ? this.selectionEnd : suffixIndex;
+
+        if ((e.key === "ArrowRight" || e.key === "End") && start >= suffixIndex && end >= suffixIndex) {
+            e.preventDefault();
+            this.setSelectionRange(suffixIndex, suffixIndex);
+            return;
+        }
+
+        if (e.key === "Backspace" && start === end && start > suffixIndex) {
+            e.preventDefault();
+            this.setSelectionRange(suffixIndex, suffixIndex);
+            return;
+        }
+
+        if (e.key === "Delete" && start === end && start >= suffixIndex) {
+            e.preventDefault();
+            return;
+        }
+    });
+
+// 문자열 가공
+function normalizeAmountValue(str) {
+    return str ? str.replace(/,/g, "") : "";
+}
+
+function formatAmount(num) {
+    if (!num) return "0원";
+    return formatNumber(num) + "원";
+}
+
+// caret 위치 계산: 숫자 기준
+function countAmountDigitsBeforeCaret(value, caret) {
+    let count = 0;
+    for (let i = 0; i < caret; i++) {
+        if (/\d/.test(value[i])) count++;
+    }
+    return count;
+}
+
+// caret 위치 재설정
+function setAmountCaretByDigitIndex(input, digitIndex) {
+    const value = input.value || "";
+    let digitsSeen = 0;
+    let pos = 0;
+    while (pos < value.length && digitsSeen < digitIndex) {
+        if (/\d/.test(value[pos])) digitsSeen++;
+        pos++;
+    }
+    input.setSelectionRange(pos, pos);
+}
+
+// caret를 항상 "원" 앞 끝으로 이동
+function moveAmountCaretToEditableEnd(input) {
+    const suffixIndex = getAmountEditableEndIndex(input.value);
+    input.setSelectionRange(suffixIndex, suffixIndex);
+}
+
+// "원" 바로 뒤로 커서 못 가게 제한
+function clampAmountCaretToEditableRange(input) {
+    const suffixIndex = getAmountEditableEndIndex(input.value);
+    const start = input.selectionStart;
+    const end = input.selectionEnd;
+    if (start > suffixIndex || end > suffixIndex) {
+        input.setSelectionRange(suffixIndex, suffixIndex);
+    }
+}
+
+// editable 끝 인덱스 계산
+function getAmountEditableEndIndex(value) {
+    return value ? value.length - (value.endsWith("원") ? 1 : 0) : 0;
+}
