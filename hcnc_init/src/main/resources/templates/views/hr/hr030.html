@@ -22,6 +22,7 @@
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
     <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
 
     <div class="hr030-dashboard hr030-saas-dashboard" id="hr030-dashboard">
@@ -37,68 +38,52 @@
             <div class="hr030-kpi-grid" id="hr030KpiGrid" aria-label="핵심 인력 현황"></div>
 
             <div class="hr030-main-grid">
-                <div class="hr030-main-column hr030-main-column--left">
-                    <article class="hr030-panel hr030-panel--region">
-                        <div class="hr030-region-combined">
-                            <div class="hr030-region-combined-section hr030-region-combined-section--map">
-                                <div id="hr030RegionHeader"></div>
-                                <div class="hr030-region-map-card">
-                                    <div class="hr030-region-map-top">
-                                        <strong>권역 선택</strong>
-                                        <button type="button" class="hr030-region-reset" id="hr030RegionReset">전체 보기</button>
-                                    </div>
-                                    <div class="hr030-region-map" id="hr030RegionMap" aria-label="지역별 인력 지도"></div>
-                                    <div class="hr030-region-map-note" id="hr030RegionMapNote"></div>
+                <article class="hr030-panel hr030-panel--region">
+                    <div class="hr030-region-combined">
+                        <div class="hr030-region-combined-section hr030-region-combined-section--map">
+                            <div id="hr030RegionHeader"></div>
+                            <div class="hr030-region-map-card">
+                                <div class="hr030-region-map-top">
+                                    <strong>권역 선택</strong>
+                                    <button type="button" class="hr030-region-reset" id="hr030RegionReset">전체 보기</button>
                                 </div>
-                            </div>
-
-                            <div class="hr030-region-combined-section hr030-region-combined-section--detail">
-                                <div id="hr030DetailHeader"></div>
-                                <div class="hr030-region-detail" id="hr030RegionDetail" aria-label="선택 지역 상세"></div>
+                                <div class="hr030-region-map" id="hr030RegionMap" aria-label="지역별 인력 지도"></div>
+                                <div class="hr030-region-map-note" id="hr030RegionMapNote"></div>
                             </div>
                         </div>
-                    </article>
-                </div>
 
-                <div class="hr030-main-column hr030-main-column--center">
-                    <article class="hr030-panel hr030-panel--skills">
-                        <div id="hr030SkillHeader"></div>
-                        <div class="hr030-skill-layout">
-                            <div class="hr030-skill-chart-wrap">
-                                <canvas id="hr030SkillChart" aria-label="주력 기술 분포 차트"></canvas>
-                            </div>
-                            <div class="hr030-skill-list" id="hr030SkillList" aria-label="주력 기술 분포 목록"></div>
+                        <div class="hr030-region-combined-section hr030-region-combined-section--detail">
+                            <div id="hr030DetailHeader"></div>
+                            <div class="hr030-region-detail" id="hr030RegionDetail" aria-label="선택 지역 상세"></div>
                         </div>
-                    </article>
+                    </div>
+                </article>
 
-                    <article class="hr030-panel hr030-panel--placeholder">
-                        <div id="hr030PlaceholderHeader"></div>
-                        <div class="hr030-placeholder-card" aria-label="추가 위젯 영역">
-                            <div class="hr030-placeholder-copy">
-                                <strong>추가 카드 영역</strong>
-                                <p>추후 운영 지표나 공지, 일정 위젯을 배치할 수 있는 빈 카드입니다.</p>
-                            </div>
+                <article class="hr030-panel hr030-panel--skills">
+                    <div id="hr030SkillHeader"></div>
+                    <div class="hr030-skill-layout">
+                        <div class="hr030-skill-chart-wrap">
+                            <div id="hr030SkillChart" class="hr030-skill-treemap" aria-label="주력 기술 분포 차트"></div>
                         </div>
-                    </article>
-                </div>
+                        <div class="hr030-skill-list hr030-skill-summary" id="hr030SkillList" aria-label="주력 기술 분포 요약"></div>
+                    </div>
+                </article>
 
-                <div class="hr030-main-column hr030-main-column--right">
-                    <article class="hr030-panel hr030-panel--availability">
-                        <div id="hr030AvailabilityHeader"></div>
-                        <div class="hr030-availability-combined">
-                            <div class="hr030-availability-layout">
-                                <div class="hr030-mini-chart-wrap hr030-mini-chart-wrap--availability">
-                                    <canvas id="hr030AvailabilityChart" aria-label="가용 인력 상태 비교 차트"></canvas>
-                                </div>
-                                <div class="hr030-status-stack" id="hr030AvailabilitySummary" aria-label="가용 인력 상태 요약"></div>
+                <article class="hr030-panel hr030-panel--availability">
+                    <div id="hr030AvailabilityHeader"></div>
+                    <div class="hr030-availability-combined">
+                        <div class="hr030-availability-layout">
+                            <div class="hr030-mini-chart-wrap hr030-mini-chart-wrap--availability">
+                                <canvas id="hr030AvailabilityChart" aria-label="가용 인력 상태 비교 차트"></canvas>
                             </div>
-                            <div class="hr030-availability-list-board" aria-label="가용 인력 목록 패널">
-                                <div class="hr030-availability-list-subhead" id="hr030AvailabilityListHeader"></div>
-                                <div class="hr030-availability-employee-list hr030-availability-employee-list--panel" id="hr030AvailabilityList" aria-label="가용 인력 목록"></div>
-                            </div>
+                            <div class="hr030-status-stack" id="hr030AvailabilitySummary" aria-label="가용 인력 상태 요약"></div>
                         </div>
-                    </article>
-                </div>
+                        <div class="hr030-availability-list-board" aria-label="가용 인력 목록 패널">
+                            <div class="hr030-availability-list-subhead" id="hr030AvailabilityListHeader"></div>
+                            <div class="hr030-availability-employee-list hr030-availability-employee-list--panel" id="hr030AvailabilityList" aria-label="가용 인력 목록"></div>
+                        </div>
+                    </div>
+                </article>
             </div>
         </div>
     </div>
