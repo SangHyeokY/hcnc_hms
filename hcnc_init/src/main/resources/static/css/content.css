@@ -49,7 +49,6 @@ option{background:#fff; color:#333;}
 #hms-table, #hms-table-wrap {
     height: calc(100% - 35px);
 }
-*/
 
 /* toast 팝업 뒤 배경 */
 .swal2-container {
@@ -826,9 +825,9 @@ button.btn.btn-add-skill:hover,
  * Toast style
 =================================================================================*/
 .v-toast__item {border-radius: 10px !important; opacity: 1 !important; padding: 10px 10px 10px 90px; width: 435px; height: 120px;}
-.v-toast__item--error {background:url(../images/sub/ico-toast-error.png) 7% 50% #E96A6A no-repeat !important;}
-.v-toast__item--warning {background: url(../images/sub/ico-toast-warning.png) 7% 50% #FFB63A no-repeat !important;}
-.v-toast__item--success {background: url(../images/sub/ico-toast-success.png) 7% 50% #419DE1 no-repeat !important;}
+/*.v-toast__item--error {background:url(../images/sub/ico-toast-error.png) 7% 50% #E96A6A no-repeat !important;}*/
+/*.v-toast__item--warning {background: url(../images/sub/ico-toast-warning.png) 7% 50% #FFB63A no-repeat !important;}*/
+/*.v-toast__item--success {background: url(../images/sub/ico-toast-success.png) 7% 50% #419DE1 no-repeat !important;}*/
 .v-toast__text {color: #fff; padding: 0 !important; font-size: 22px; font-weight: 600;}
 .v-toast__text p {margin-bottom: 5px;}
 .v-toast__text p:last-child {margin-bottom: 0;}
@@ -1312,7 +1311,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
   margin-left: 0;
 }
 .modal-btn #btn-excel{
-  background: #fff url("/icons/btn-ico-excel-download.png") no-repeat 16px ;
+  background: #fff url("../icons/btn-ico-excel-download.png") no-repeat 16px ;
   background-size:18px 18px;
   padding-left: 40px;
 }
@@ -2757,4 +2756,59 @@ section.search-area .search-info #searchConditionKeyword { /* 새 검색어 입�
 #hr030-dashboard.hr030-saas-dashboard .hr030-region-project-item { grid-template-columns: 1fr; }
 #hr030-dashboard.hr030-saas-dashboard .hr030-region-detail.is-overview .hr030-region-project-list { grid-template-columns: 1fr; }
 #hr030-dashboard.hr030-saas-dashboard .hr030-list-side { justify-items: start; }
+}
+
+
+/* ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ 인적사항 화면 css (임시 작업) ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ */
+.container-wrap .container .contents-wrap.hr010-dashboard-wrap { box-sizing: border-box; height: 100vh; min-height: 100vh; grid-auto-rows: initial; gap: 0; overflow: hidden; }
+.contents-wrap.hr010-dashboard-wrap > .page-common, .contents-wrap.hr010-dashboard-wrap > .page-common { display: none; }
+.contents-wrap.hr010-dashboard-wrap > .page-common, .contents-wrap.hr010-dashboard-wrap > section.search-area { display: none; }
+.contents-wrap.hr010-dashboard-wrap > section.white-full.hr010-dashboard-shell { display: flex; flex-direction: column; height: 100%; min-height: 0; padding: 0; border: 0; border-radius: 0; box-shadow: none; overflow: hidden; background: linear-gradient(180deg, #ffffff 0%, #ffffff 42%, #fbfcff 100%); }
+.contents-wrap.hr010-dashboard-wrap > section.white-full.hr010-dashboard-shell > .content-body { flex: 1 1 auto; height: 100%; min-height: 0; overflow: hidden; padding: 0; background: transparent; }
+
+#CARD_HR010_A {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-auto-rows: 1fr;
+    gap: 16px;
+    height: 600px;     /* 2행 높이 맞추기 */
+    overflow-y: auto;  /* 스크롤 */
+}
+
+.user-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 16px;
+    cursor: pointer;
+    transition: 0.2s;
+    border: 1px solid #eee;
+}
+
+.user-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+}
+
+.user-card.selected {
+    border: 2px solid #6366f1;
+}
+
+.card-header {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.profile-circle-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.card-info {
+    font-size: 13px;
+    color: #555;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
 }
