@@ -25,42 +25,102 @@
         })();
     </script>
 
-    <!-- ================= 검색 영역 ================= -->
-    <section class="search-area mg-b20">
-        <form action="">
-            <div class="fl-sb">
-                <div class="search-info">
-                    <div class="search-input hr010-search-tag-wrap">
-                        <p class="fl-ac">
-                            <label for="searchKeyword" class="fw600 pd-r10">• Tag 검색</label>
-                            <input type="text" class="hr010-search-input hr010-search-keyword-input" id="searchKeyword" name="searchKeyword" placeholder="Tag 검색" />
-                        </p>
+    <section class="hr010-smart-filter">
+        <div class="content-title fl-sb fl-ac">
+            <h4 class="page-sub-title">스마트 필터</h4>
+        </div>
+        <div class="smart-filter">
+            <div class="hr010-user-type-tabs mg-b15" role="tablist" aria-label="인력 구분">
+                <div class="toggle-filter-block">
+                    <div class="toggle-group" id="togglePerspectiveGroup">
+                        <button type="button" class="toggle-filter-chip is-active" data-user-type="all">전체</button>
+                        <button type="button" class="toggle-filter-chip" data-user-type="staff">직원</button>
+                        <button type="button" class="toggle-filter-chip" data-user-type="freelancer">프리랜서</button>
                     </div>
                 </div>
-                <div class="search-btn-area">
-                    <button class="btn-search">조회</button>
-                </div>
             </div>
-        </form>
+            <div class="hr010-filter-dropdowns">
+
+                <div class="dropdown">
+                    <button class="dropdown-btn">주개발언어 <span>▼</span></button>
+                    <ul class="dropdown-menu">
+                        <li>sample1</li>
+                        <li>sample2</li>
+                        <li>sample3</li>
+                    </ul>
+                </div>
+
+                <div class="dropdown dropdown-ctrt-typ">
+                    <button class="dropdown-btn">계약형태 <span>▼</span></button>
+                    <select id="select_ctrt_typ" style="display:none;"></select>
+                    <ul class="dropdown-menu">
+                        <li>sample1</li>
+                        <li>sample2</li>
+                        <li>sample3</li>
+                    </ul>
+                </div>
+
+                <div class="dropdown dropdown-work-md">
+                    <button class="dropdown-btn">근무가능형태 <span>▼</span></button>
+                    <select id="select_work_md" style="display:none;"></select>
+                    <ul class="dropdown-menu">
+                        <li>sample1</li>
+                        <li>sample2</li>
+                        <li>sample3</li>
+                    </ul>
+                </div>
+
+                <div class="dropdown">
+                    <button class="dropdown-btn">등급 <span>▼</span></button>
+                    <ul class="dropdown-menu">
+                        <li>sample1</li>
+                        <li>sample2</li>
+                        <li>sample3</li>
+                    </ul>
+                </div>
+
+                <div class="dropdown">
+                    <button class="dropdown-btn">거주지역 <span>▼</span></button>
+                    <ul class="dropdown-menu">
+                        <li>sample1</li>
+                        <li>sample2</li>
+                        <li>sample3</li>
+                    </ul>
+                </div>
+
+            </div>
+        </div>
     </section>
 
-    <!-- ================= 메인 리스트 ================= -->
-    <section class="white-full">
+    <section class="hr010-main">
         <div class="content-title fl-sb fl-ac">
             <h4 class="page-sub-title">인적사항 목록</h4>
         </div>
-        <div class="hr010-user-type-tabs mg-b15" role="tablist" aria-label="인력 구분">
-            <div class="toggle-filter-block">
-                <span class="toggle-filter-label toggle-text-reveal" style="--toggle-text-delay: 52ms;">구분</span>
-                <div class="toggle-group" id="togglePerspectiveGroup">
-                    <button type="button" class="toggle-filter-chip is-active" data-user-type="all">전체</button>
-                    <button type="button" class="toggle-filter-chip" data-user-type="staff">직원</button>
-                    <button type="button" class="toggle-filter-chip" data-user-type="freelancer">프리랜서</button>
+        <!-- ================= 검색 영역 ================= -->
+        <section class="search-area mg-b20">
+            <form action="">
+                <div class="fl-sb">
+                    <div class="search-info">
+                        <div class="search-input hr010-search-tag-wrap">
+                            <p class="fl-ac">
+                                <label for="searchKeyword" class="fw600 pd-r10">• 키워드 검색</label>
+                                <input type="text" class="hr010-search-input hr010-search-keyword-input" id="searchKeyword" name="searchKeyword" placeholder="키워드로 검색하기" />
+                            </p>
+                        </div>
+                    </div>
+                    <div class="search-btn-area">
+                        <button class="btn-search">조회</button>
+                    </div>
                 </div>
-            </div>
-        </div>
-        <div id="CARD_HR010_A"></div>
-        <input type="hidden" id="dev_id" name="dev_id" th:value="${dev_id}">
+            </form>
+        </section>
+
+        <!-- ================= 메인 리스트 ================= -->
+        <section class="white-full">
+            <div id="CARD_HR010_A"></div>
+            <input type="hidden" id="dev_id" name="dev_id" th:value="${dev_id}">
+            <input type="hidden" id="dev_nm" name="dev_nm" th:value="${dev_nm}">
+        </section>
     </section>
 
     <script src="/js/api/hr/hr010.js"></script>
