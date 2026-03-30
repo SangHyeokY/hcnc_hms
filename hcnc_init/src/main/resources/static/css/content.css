@@ -2527,15 +2527,18 @@ section.search-area .search-info #searchConditionKeyword { /* 새 검색어 입�
 #hr030-dashboard.hr030-saas-dashboard .hr030-kpi-number { font-size: inherit; font-weight: inherit; line-height: inherit; }
 #hr030-dashboard.hr030-saas-dashboard .hr030-kpi-unit { font-size: 16px; font-weight: 700; letter-spacing: -0.02em; color: #18253f; }
 #hr030-dashboard.hr030-saas-dashboard .hr030-kpi-description { display: none; }
-#hr030-dashboard.hr030-saas-dashboard .hr030-main-grid { min-height: 0; height: 100%; display: grid; grid-template-columns: minmax(300px, 0.92fr) minmax(420px, 1.34fr) minmax(300px, 0.94fr); gap: 10px; align-items: start; }
+#hr030-dashboard.hr030-saas-dashboard .hr030-main-grid { min-height: 0; height: 100%; display: grid; grid-template-columns: minmax(400px, 0.92fr) minmax(500px, 1.34fr) minmax(400px, 0.94fr); grid-template-rows: minmax(0, 1.08fr) minmax(0, 0.92fr); gap: 8px; align-items: stretch; }
 #hr030-dashboard.hr030-saas-dashboard .hr030-main-column { height: 100%; min-width: 0; min-height: 0; display: grid; gap: 10px; }
 #hr030-dashboard.hr030-saas-dashboard .hr030-main-column--left { grid-template-rows: minmax(0, 1fr); }
-#hr030-dashboard.hr030-saas-dashboard .hr030-main-column--center { grid-template-rows: repeat(2, minmax(0, 1fr)); gap: 20px; }
+#hr030-dashboard.hr030-saas-dashboard .hr030-main-column--center { grid-template-rows: minmax(0, 1.18fr) minmax(0, 0.82fr); gap: 16px; }
 #hr030-dashboard.hr030-saas-dashboard .hr030-main-column--right { grid-template-rows: minmax(0, 1fr); }
 #hr030-dashboard.hr030-saas-dashboard .hr030-panel { position: relative; min-height: 0; height: 100%; display: grid; grid-template-rows: auto minmax(0, 1fr); overflow: hidden; border-radius: 20px; }
 #hr030-dashboard.hr030-saas-dashboard .hr030-panel::before { display: none; }
 #hr030-dashboard.hr030-saas-dashboard .hr030-panel--detail { grid-template-rows: minmax(0, 1fr); }
 #hr030-dashboard.hr030-saas-dashboard .hr030-panel--region { grid-template-rows: minmax(0, 1fr); }
+#hr030-dashboard.hr030-saas-dashboard .hr030-panel--region { grid-column: 1; grid-row: 1 / 3; }
+#hr030-dashboard.hr030-saas-dashboard .hr030-panel--skills { grid-column: 2 / 4; grid-row: 1; }
+#hr030-dashboard.hr030-saas-dashboard .hr030-panel--availability { grid-column: 2 / 4; grid-row: 2; }
 #hr030-dashboard.hr030-saas-dashboard .hr030-panel--region::before, #hr030-dashboard.hr030-saas-dashboard .hr030-panel--availability::before { display: none; }
 #hr030-dashboard.hr030-saas-dashboard .hr030-panel--placeholder { grid-template-rows: minmax(0, 1fr); }
 #hr030-dashboard.hr030-saas-dashboard .hr030-region-combined { min-height: 0; height: 100%; display: flex; flex-direction: column; gap: 0; padding: 8px 0 10px; }
@@ -2655,9 +2658,10 @@ section.search-area .search-info #searchConditionKeyword { /* 새 검색어 입�
 #hr030-dashboard.hr030-saas-dashboard .hr030-region-ratio-bar { position: relative; width: 100%; height: 12px; border-radius: 999px; background: #dfe7f3; overflow: hidden; }
 #hr030-dashboard.hr030-saas-dashboard .hr030-region-ratio-bar i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #18b7e6 0%, #2f62f4 100%); }
 #hr030-dashboard.hr030-saas-dashboard .hr030-region-summary-card--note p { margin: 0; color: var(--hr030-text-sub); font-size: 12px; line-height: 1.55; word-break: keep-all; }
-#hr030-dashboard.hr030-saas-dashboard .hr030-skill-layout { display: grid; grid-template-columns: minmax(156px, 46%) minmax(0, 1fr); gap: 8px; padding: 8px 10px 10px; align-items: center; }
+#hr030-dashboard.hr030-saas-dashboard .hr030-skill-layout { display: grid; grid-template-rows: minmax(0, 1fr) auto; gap: 4px; padding: 0 0 18px; align-items: stretch; height: 100%; }
 #hr030-dashboard.hr030-saas-dashboard .hr030-skill-layout--compact { height: 100%; }
-#hr030-dashboard.hr030-saas-dashboard .hr030-skill-chart-wrap { min-height: 0; height: 100%; min-height: 160px; display: flex; align-items: center; justify-content: center; padding: 2px 2px; }
+#hr030-dashboard.hr030-saas-dashboard .hr030-skill-chart-wrap { min-height: 0; height: 100%; display: flex; align-items: stretch; justify-content: stretch; overflow: hidden; padding: 0; }
+#hr030-dashboard.hr030-saas-dashboard .hr030-skill-treemap { width: 100%; height: 100%; min-height: 0; }
 #hr030-dashboard.hr030-saas-dashboard .hr030-skill-chart-wrap canvas { width: 100% !important; max-width: 196px; height: 100% !important; }
 #hr030-dashboard.hr030-saas-dashboard .hr030-skill-chart-wrap--compact canvas, #hr030-dashboard.hr030-saas-dashboard .hr030-mini-chart-wrap canvas { max-width: 168px; }
 #hr030-dashboard.hr030-saas-dashboard .hr030-panel--category .hr030-skill-chart-wrap { min-height: 128px; padding: 2px 2px 0; align-items: stretch; overflow: hidden; }
@@ -2667,7 +2671,10 @@ section.search-area .search-info #searchConditionKeyword { /* 새 검색어 입�
 #hr030-dashboard.hr030-saas-dashboard .hr030-panel--category .hr030-skill-copy strong, #hr030-dashboard.hr030-saas-dashboard .hr030-panel--category .hr030-skill-share { font-size: 12px; }
 #hr030-dashboard.hr030-saas-dashboard .hr030-panel--category .hr030-skill-count { font-size: 11px; }
 #hr030-dashboard.hr030-saas-dashboard .hr030-skill-list { display: grid; gap: 6px; align-content: start; min-height: 0; overflow: auto; padding-right: 2px; }
+#hr030-dashboard.hr030-saas-dashboard .hr030-skill-summary { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 3px; overflow: visible; padding: 0px 10px; }
+#hr030-dashboard.hr030-saas-dashboard .hr030-skill-summary-label { grid-column: 1 / -1; color: var(--hr030-text-soft); font-size: 9px; font-weight: 700; line-height: 1; letter-spacing: 0.04em; text-transform: uppercase; }
 #hr030-dashboard.hr030-saas-dashboard .hr030-skill-item { display: grid; gap: 6px; padding: 7px 10px; border: 1px solid var(--hr030-line-soft); border-radius: 12px; background: #ffffff; box-shadow: var(--hr030-inner-card-shadow); }
+#hr030-dashboard.hr030-saas-dashboard .hr030-skill-summary .hr030-skill-item {padding: 8px 20px; }
 #hr030-dashboard.hr030-saas-dashboard .hr030-skill-item-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: center; }
 #hr030-dashboard.hr030-saas-dashboard .hr030-skill-item-main { display: flex; align-items: center; gap: 8px; min-width: 0; }
 #hr030-dashboard.hr030-saas-dashboard .hr030-skill-dot { width: 10px; height: 10px; border-radius: 50%; flex: 0 0 auto; }
@@ -2689,8 +2696,8 @@ section.search-area .search-info #searchConditionKeyword { /* 새 검색어 입�
 #hr030-dashboard.hr030-saas-dashboard .hr030-issue-list::-webkit-scrollbar-thumb { border-radius: 999px; background: #c9d4e5; }
 #hr030-dashboard.hr030-saas-dashboard .hr030-issue-list::-webkit-scrollbar-track { background: transparent; }
 #hr030-dashboard.hr030-saas-dashboard .hr030-issue-item { grid-template-columns: minmax(0, 1fr) auto; align-items: center; }
-#hr030-dashboard.hr030-saas-dashboard .hr030-availability-combined { height: 100%; min-height: 0; display: flex; flex-direction: column; gap: 0; }
-#hr030-dashboard.hr030-saas-dashboard .hr030-availability-layout { min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; gap: 6px; padding: 8px 10px 10px; align-items: stretch; border-bottom: 0 !important; flex: 0 0 auto; }
+#hr030-dashboard.hr030-saas-dashboard .hr030-availability-combined { height: 100%; min-height: 0; display: grid; grid-template-columns: minmax(0, 1.18fr) minmax(352px, 0.82fr); gap: 10px; padding: 8px 10px 10px; align-items: stretch; }
+#hr030-dashboard.hr030-saas-dashboard .hr030-availability-layout { min-height: 0; height: 100%; display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; gap: 6px; padding: 0; align-items: stretch; border-bottom: 0 !important; min-width: 0; }
 #hr030-dashboard.hr030-saas-dashboard .hr030-mini-chart-wrap { min-height: 0; min-width: 0; display: flex; align-items: center; justify-content: center; padding: 10px 6px; }
 #hr030-dashboard.hr030-saas-dashboard .hr030-mini-chart-wrap--availability { min-height: 138px; align-items: stretch; padding: 0 1px; }
 #hr030-dashboard.hr030-saas-dashboard .hr030-mini-chart-wrap--availability canvas { width: 100% !important; height: 100% !important; max-width: none; }
@@ -2702,7 +2709,7 @@ section.search-area .search-info #searchConditionKeyword { /* 새 검색어 입�
 #hr030-dashboard.hr030-saas-dashboard .hr030-status-card strong { color: var(--hr030-text-main); font-size: 14px; font-weight: 800; line-height: 1; }
 #hr030-dashboard.hr030-saas-dashboard .hr030-status-card-meta { color: var(--hr030-text-soft); font-size: 9px; font-weight: 700; line-height: 1; }
 #hr030-dashboard.hr030-saas-dashboard .hr030-availability-employee-list { min-height: 0; display: grid; align-content: start; gap: 6px; overflow: auto; }
-#hr030-dashboard.hr030-saas-dashboard .hr030-availability-list-board { min-height: 0; display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 8px; padding: 10px 10px 10px; flex: 1 1 auto; }
+#hr030-dashboard.hr030-saas-dashboard .hr030-availability-list-board { min-height: 0; height: 100%; display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 8px; padding: 0; min-width: 0; }
 #hr030-dashboard.hr030-saas-dashboard .hr030-availability-list-subhead { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 #hr030-dashboard.hr030-saas-dashboard .hr030-availability-list-subhead strong { color: var(--hr030-text-main); font-size: 13px; font-weight: 700; line-height: 1.2; }
 #hr030-dashboard.hr030-saas-dashboard .hr030-availability-list-subhead span { color: var(--hr030-text-soft); font-size: 11px; font-weight: 600; line-height: 1.2; }
@@ -2731,15 +2738,16 @@ section.search-area .search-info #searchConditionKeyword { /* 새 검색어 입�
 #hr030-dashboard.hr030-saas-dashboard .hr030-admin-shell { height: auto; min-height: 100%; }
 #hr030-dashboard.hr030-saas-dashboard .hr030-admin-topbar-row { grid-template-columns: 1fr; }
 #hr030-dashboard.hr030-saas-dashboard .hr030-kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-#hr030-dashboard.hr030-saas-dashboard .hr030-main-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); height: auto; }
-#hr030-dashboard.hr030-saas-dashboard .hr030-main-column--right { grid-column: 1 / -1; }
-#hr030-dashboard.hr030-saas-dashboard .hr030-main-column { height: auto; grid-template-rows: auto; align-content: start; }
+#hr030-dashboard.hr030-saas-dashboard .hr030-main-grid { grid-template-columns: 1fr; grid-template-rows: auto; height: auto; }
+#hr030-dashboard.hr030-saas-dashboard .hr030-panel--region, #hr030-dashboard.hr030-saas-dashboard .hr030-panel--skills, #hr030-dashboard.hr030-saas-dashboard .hr030-panel--availability { grid-column: auto; grid-row: auto; }
 }
 @media (max-width: 860px) {
 #hr030-dashboard.hr030-saas-dashboard .hr030-kpi-grid, #hr030-dashboard.hr030-saas-dashboard .hr030-main-grid { grid-template-columns: 1fr; }
-#hr030-dashboard.hr030-saas-dashboard .hr030-main-column--right { grid-column: auto; }
+#hr030-dashboard.hr030-saas-dashboard .hr030-panel--region, #hr030-dashboard.hr030-saas-dashboard .hr030-panel--skills, #hr030-dashboard.hr030-saas-dashboard .hr030-panel--availability { grid-column: auto; grid-row: auto; }
+#hr030-dashboard.hr030-saas-dashboard .hr030-availability-combined { grid-template-columns: 1fr; }
 #hr030-dashboard.hr030-saas-dashboard .hr030-availability-layout, #hr030-dashboard.hr030-saas-dashboard .hr030-skill-layout { grid-template-columns: 1fr; align-items: stretch; }
 #hr030-dashboard.hr030-saas-dashboard .hr030-mini-chart-wrap, #hr030-dashboard.hr030-saas-dashboard .hr030-skill-chart-wrap { min-height: 180px; }
+#hr030-dashboard.hr030-saas-dashboard .hr030-skill-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 #hr030-dashboard.hr030-saas-dashboard .hr030-status-stack { grid-template-columns: 1fr; }
 #hr030-dashboard.hr030-saas-dashboard .hr030-region-stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 #hr030-dashboard.hr030-saas-dashboard .hr030-region-project-item { grid-template-columns: 1fr; }

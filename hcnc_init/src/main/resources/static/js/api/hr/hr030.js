@@ -64,6 +64,8 @@
         skillCatalogRequested: false,
         skillCatalogMap: {},
         skillCatalogLabels: [],
+        skillChartEnterTimer: null,
+        skillTreemapMorphTimer: null,
         employeeTable: null,
         charts: {
             skills: null,
@@ -636,7 +638,7 @@
         var normalized = normalizeText(label);
 
         if (label === "기타") {
-            return "#94a3b8";
+            return "#909090";
         }
 
         if (normalized.indexOf("java") > -1 || normalized.indexOf("spring") > -1) {
@@ -668,8 +670,8 @@
         var isAllView = state.skillViewMode === "all";
         var skillMap = {};
         var otherValue = 0;
-        var maxVisible = state.skillViewMode === "top3" ? 3 : state.skillViewMode === "top5" ? 5 : 7;
-        var minShare = isAllView ? 5 : 0;
+        var maxVisible = state.skillViewMode === "top3" ? 3 : state.skillViewMode === "top5" ? 5 : 20;
+        var minShare = isAllView ? 3 : 0;
         var skills;
         var total;
 
@@ -746,6 +748,95 @@
         }
 
         return skills;
+    }
+
+    function getSkillCategoryMeta(label) {
+        var normalized = normalizeText(label);
+
+        if (label === "기타") {
+            return { key: "other", label: "기타", color: "#cbd5e1" };
+        }
+
+        if ((normalized.indexOf("java") > -1 || normalized.indexOf("spring") > -1 || normalized.indexOf("jpa") > -1 || normalized.indexOf("mybatis") > -1) && normalized.indexOf("javascript") === -1) {
+            return { key: "backend", label: "백엔드", color: "#4f6ff7" };
+        }
+
+        if (normalized.indexOf("react") > -1 || normalized.indexOf("vue") > -1 || normalized.indexOf("typescript") > -1 || normalized.indexOf("javascript") > -1) {
+            return { key: "frontend", label: "프론트엔드", color: "#1fb6a6" };
+        }
+
+        if (normalized.indexOf("qa") > -1 || normalized.indexOf("test") > -1 || normalized.indexOf("테스트") > -1) {
+            return { key: "qa", label: "QA", color: "#eb8079" };
+        }
+
+        if (normalized.indexOf("html") > -1 || normalized.indexOf("css") > -1 || normalized.indexOf("퍼블") > -1 || normalized.indexOf("접근성") > -1) {
+            return { key: "publishing", label: "퍼블리싱", color: "#a173ff" };
+        }
+
+        if (normalized.indexOf("python") > -1 || normalized.indexOf("data") > -1 || normalized.indexOf("etl") > -1 || normalized.indexOf("pandas") > -1) {
+            return { key: "data", label: "데이터", color: "#f3b44f" };
+        }
+
+        return { key: "other", label: "기타", color: "#94a3b8" };
+    }
+
+    function buildSkillTreemapData(skills) {
+        var grouped = {};
+
+        (skills || []).forEach(function (item) {
+            var groupMeta = getSkillCategoryMeta(item.label);
+
+            if (!grouped[groupMeta.key]) {
+                grouped[groupMeta.key] = {
+                    name: groupMeta.label,
+                    value: 0,
+                    itemStyle: {
+                        color: groupMeta.color,
+                        borderColor: "#ffffff",
+                        borderWidth: 3,
+                        gapWidth: 3
+                    },
+                    children: []
+                };
+            }
+
+            grouped[groupMeta.key].value += Number(item.value || 0);
+            grouped[groupMeta.key].children.push({
+                name: item.label,
+                value: Number(item.value || 0),
+                itemStyle: {
+                    color: item.color,
+                    borderColor: "#ffffff",
+                    borderWidth: 2,
+                    gapWidth: 2
+                }
+            });
+        });
+
+        return Object.keys(grouped).map(function (key) {
+            return grouped[key];
+        }).sort(function (a, b) {
+            return (b.value || 0) - (a.value || 0);
+        });
+    }
+
+    function buildSkillTreemapSeedData(treemapData) {
+        return (treemapData || []).map(function (group) {
+            var children = (group.children || []).map(function (child) {
+                return {
+                    name: child.name,
+                    value: 1,
+                    itemStyle: child.itemStyle
+                };
+            });
+
+            return {
+                name: group.name,
+                value: Math.max(children.length, 1),
+                itemStyle: group.itemStyle,
+                children: children
+            };
+        });
     }
 
     function buildCenterLabelPlugin(pluginId, primaryText, secondaryText) {
@@ -1066,7 +1157,11 @@
     // 차트 공통 설정과 중앙 카드 차트 렌더링
     function destroyChart(chartKey) {
         if (state.charts[chartKey]) {
-            state.charts[chartKey].destroy();
+            if (typeof state.charts[chartKey].dispose === "function") {
+                state.charts[chartKey].dispose();
+            } else if (typeof state.charts[chartKey].destroy === "function") {
+                state.charts[chartKey].destroy();
+            }
             state.charts[chartKey] = null;
         }
     }
@@ -1080,15 +1175,46 @@
         Chart.defaults.color = "#64748b";
     }
 
+    function resizeCharts() {
+        Object.keys(state.charts).forEach(function (chartKey) {
+            var chart = state.charts[chartKey];
+
+            if (chart && typeof chart.resize === "function") {
+                chart.resize();
+            }
+        });
+    }
+
+    function replaySkillChartEntry(chartEl) {
+        var chartWrap = chartEl && chartEl.closest(".hr030-skill-chart-wrap");
+
+        if (!chartWrap) {
+            return;
+        }
+
+        chartWrap.classList.remove("is-entering");
+        void chartWrap.offsetWidth;
+        chartWrap.classList.add("is-entering");
+
+        if (state.skillChartEnterTimer) {
+            window.clearTimeout(state.skillChartEnterTimer);
+        }
+
+        state.skillChartEnterTimer = window.setTimeout(function () {
+            chartWrap.classList.remove("is-entering");
+            state.skillChartEnterTimer = null;
+        }, 820);
+    }
+
     function renderSkillDistribution() {
         var currentRegion = getCurrentRegion();
-        var canvas = byId("hr030SkillChart");
+        var chartEl = byId("hr030SkillChart");
         var listEl = byId("hr030SkillList");
         var skills = buildRegionSkillDistribution(currentRegion.skills);
+        var summarySkills;
+        var treemapData;
         var total;
         var topSkill;
-        var topSkillPercent;
-        var centerLabelPlugin;
 
         total = skills.reduce(function (sum, item) {
             return sum + (item.value || 0);
@@ -1100,18 +1226,21 @@
 
             return best;
         }, null);
-        topSkillPercent = total && topSkill ? (topSkill.value / total) * 100 : 0;
-        centerLabelPlugin = buildCenterLabelPlugin(
-            "hr030SkillCenterLabel",
-            formatPercent(topSkillPercent) + "%",
-            topSkill ? topSkill.label : "주력 비중"
-        );
+        summarySkills = skills.filter(function (item) {
+            return item.label !== "기타";
+        }).slice(0, 4);
+
+        if (!summarySkills.length) {
+            summarySkills = skills.slice(0, 4);
+        }
 
         if (listEl) {
             if (!skills.length) {
                 listEl.innerHTML = '<div class="hr030-empty-state">표시할 기술 스택 데이터가 없습니다.</div>';
             } else {
-                listEl.innerHTML = skills.map(function (item) {
+                listEl.innerHTML = [
+                    '<div class="hr030-skill-summary-label">Top 4</div>',
+                    summarySkills.map(function (item) {
                     var percent = total ? ((item.value / total) * 100).toFixed(1) : "0.0";
 
                     return [
@@ -1131,41 +1260,165 @@
                         '  <span class="hr030-skill-bar"><i style="width:' + percent + '%;background:' + escapeHtml(item.color) + '"></i></span>',
                         "</div>"
                     ].join("");
-                }).join("");
+                }).join("")
+                ].join("");
             }
         }
 
-        if (typeof Chart !== "function" || !canvas) {
-            return;
-        }
-
-        applyChartDefaults();
         destroyChart("skills");
 
-        if (!skills.length) {
+        if (!chartEl) {
             return;
         }
 
-        state.charts.skills = new Chart(canvas, {
-            type: "doughnut",
-            plugins: [centerLabelPlugin],
-            data: {
-                labels: skills.map(function (item) { return item.label; }),
-                datasets: [{
-                    data: skills.map(function (item) { return item.value; }),
-                    backgroundColor: skills.map(function (item) { return item.color; }),
-                    borderWidth: 0,
-                    hoverOffset: 3,
-                    spacing: 0
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                cutout: "54%",
-                plugins: {
-                    legend: { display: false }
+        if (!skills.length) {
+            chartEl.innerHTML = '<div class="hr030-empty-state">표시할 기술 스택 데이터가 없습니다.</div>';
+            return;
+        }
+
+        if (typeof echarts !== "object" || typeof echarts.init !== "function") {
+            return;
+        }
+
+        chartEl.innerHTML = "";
+        treemapData = buildSkillTreemapData(skills);
+        state.charts.skills = echarts.init(chartEl, null, { renderer: "svg" });
+        state.charts.skills.setOption({
+            animation: true,
+            animationDuration: 240,
+            animationDurationUpdate: 900,
+            animationEasing: "quarticOut", 
+            animationEasingUpdate: "quarticOut",
+            tooltip: {
+                backgroundColor: "rgba(15, 23, 42, 0.92)",
+                borderWidth: 0,
+                textStyle: {
+                    color: "#ffffff",
+                    fontFamily: '"Pretendard Variable", "Pretendard", "Noto Sans KR", sans-serif'
+                },
+                formatter: function (params) {
+                    var value = Number(params.value || 0);
+                    var share = total ? formatPercent((value / total) * 100) : "0.0";
+                    var path = (params.treePathInfo || []).map(function (item) {
+                        return item.name;
+                    }).filter(Boolean).slice(1).join(" / ");
+
+                    return [
+                        '<div style="display:grid;gap:4px;min-width:120px;">',
+                        '  <strong style="font-size:13px;font-weight:700;">' + escapeHtml(params.name || "") + "</strong>",
+                        path ? '  <span style="font-size:11px;opacity:0.78;">' + escapeHtml(path) + "</span>" : "",
+                        '  <span style="font-size:12px;">' + formatNumber(value) + "명 · " + share + "%</span>",
+                        "</div>"
+                    ].join("");
                 }
+            },
+            series: [{
+                type: "treemap",
+                left: 0,
+                right: 0,
+                top: 0,
+                bottom: 0,
+                width: "100%",
+                height: "100%",
+                roam: false,
+                nodeClick: false,
+                breadcrumb: { show: false },
+                visibleMin: 20,
+                sort: "desc",
+                squareRatio: 1,
+                label: {
+                    show: true,
+                    formatter: function (params) {
+                        var value = Number(params.value || 0);
+
+                        if (value < 2) {
+                            return "";
+                        }
+
+                        return params.name;
+                    },
+                    color: "#ffffff",
+                    fontSize: 12,
+                    fontWeight: 700
+                },
+                upperLabel: {
+                    show: true,
+                    height: 12,
+                    color: "#334155",
+                    fontSize: 11,
+                    fontWeight: 700
+                },
+                itemStyle: {
+                    borderColor: "#ffffff",
+                    borderWidth: 1,
+                    gapWidth: 1,
+                    borderRadius: 2
+                },
+                levels: [
+                    {
+                        itemStyle: {
+                            borderColor: "transparent",
+                            borderWidth: 0,
+                            gapWidth: 1
+                        }
+                    },
+                    {
+                        upperLabel: {
+                            show: true,
+                            height: 12,
+                            color: "#24304a",
+                            fontSize: 11,
+                            fontWeight: 700
+                        },
+                        itemStyle: {
+                            borderColor: "#ffffff",
+                            borderWidth: 1,
+                            gapWidth: 1,
+                            borderRadius: 2
+                        }
+                    },
+                    {
+                        label: {
+                            show: true,
+                            color: "#ffffff",
+                            fontSize: 12,
+                            fontWeight: 700
+                        },
+                        itemStyle: {
+                            borderColor: "#ffffff",
+                            borderWidth: 1,
+                            gapWidth: 1,
+                            borderRadius: 2
+                        }
+                    }
+                ],
+                universalTransition: true,
+                data: buildSkillTreemapSeedData(treemapData)
+            }]
+        });
+        replaySkillChartEntry(chartEl);
+
+        if (state.skillTreemapMorphTimer) {
+            window.clearTimeout(state.skillTreemapMorphTimer);
+        }
+
+        state.skillTreemapMorphTimer = window.setTimeout(function () {
+            if (!state.charts.skills) {
+                return;
+            }
+
+            state.charts.skills.setOption({
+                series: [{
+                    type: "treemap",
+                    universalTransition: true,
+                    data: treemapData
+                }]
+            });
+        }, 60);
+
+        requestAnimationFrame(function () {
+            if (state.charts.skills && typeof state.charts.skills.resize === "function") {
+                state.charts.skills.resize();
             }
         });
     }
@@ -1800,6 +2053,7 @@
         bindStatusFilter();
         bindRegionSelection();
         bindCardSelects();
+        window.addEventListener("resize", resizeCharts);
         initializeIcons();
     }
 

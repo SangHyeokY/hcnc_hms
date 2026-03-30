@@ -92,19 +92,21 @@
     window.LOGIN_USER = {
         id: /*[[${session.LOGIN_USER_ID}]]*/ '',
         name: /*[[${session.LOGIN_USER_NM}]]*/ '',
+        job: /*[[${session.LOGIN_USER_JOB_NM}]]*/ '',
         img: /*[[${LOGIN_USER_IMG}]]*/ null
     };
     /*]]>*/
 </script>
 <script>
     document.addEventListener("DOMContentLoaded", () => {
-      const { id: devId, name: devName, img: devImg } = window.LOGIN_USER || {};
-      setUserProfile(devId, devName, devImg);
+      const { id: devId, name: devName, job: devJob, img: devImg } = window.LOGIN_USER || {};
+      setUserProfile(devId, devName, devImg, devJob);
     });
 
     // lnb에 프로필 이미지 표시하기
-    function setUserProfile(devId, devName, devImgBase64) {
+    function setUserProfile(devId, devName, devImgBase64, devJob) {
         const $container = $("#profileImgContainer");
+        const $job = $("#profileJob");
         $container.empty(); // 기존 내용 제거
 
         if (devImgBase64) {
@@ -121,6 +123,11 @@
 
         // 이름/아이디 세팅
         $("#profileName").text(devName);
+        if (devJob) {
+            $job.text(devJob).removeClass("is-empty");
+        } else {
+            $job.text("").addClass("is-empty");
+        }
         $("#profileId").text(`${devId}`);
     }
 

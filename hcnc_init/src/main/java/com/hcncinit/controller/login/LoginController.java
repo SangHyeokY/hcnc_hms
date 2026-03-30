@@ -70,6 +70,7 @@ public class LoginController {
 
         session.setAttribute("LOGIN_USER_ID", userId);
         session.setAttribute("LOGIN_USER_NM", user.get("user_nm"));
+        session.setAttribute("LOGIN_USER_JOB_NM", user.get("job_nm"));
         session.setAttribute("LOGIN_AUTH", user.get("role_cd"));
         session.setAttribute("LOGIN_LOCK", user.get("lock_yn"));
         session.setAttribute("LOGIN_PW_CHG", user.get("pwd_chg_yn"));
@@ -85,6 +86,7 @@ public class LoginController {
         mv.addObject("success", true);
         mv.addObject("LOGIN_USER_ID", userId);
         mv.addObject("LOGIN_USER_NM", user.get("user_nm"));
+        mv.addObject("LOGIN_USER_JOB_NM", user.get("job_nm"));
         mv.addObject("LOGIN_AUTH", user.get("role_cd"));
         mv.addObject("LOGIN_LOCK", user.get("lock_yn"));
         mv.addObject("LOGIN_PW_CHG", user.get("pwd_chg_yn"));

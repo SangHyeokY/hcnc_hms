@@ -20,7 +20,7 @@
     </div>
 
     <div class="header-tools">
-      <div class="header-search-wrap">
+      <div class="header-search-wrap is-hidden" aria-hidden="true">
         <label class="header-search" for="hr030DashboardSearch">
           <span class="header-search-icon" aria-hidden="true"></span>
           <input
@@ -33,7 +33,7 @@
         <p class="header-search-note is-empty" id="hr030SearchResultNote" aria-live="polite"></p>
       </div>
 
-      <button type="button" class="header-alert hr030-admin-alert" aria-label="알림">
+      <button type="button" class="header-alert hr030-admin-alert is-hidden" aria-label="알림" aria-hidden="true" tabindex="-1">
         <span class="header-alert-icon" aria-hidden="true"></span>
         <span class="header-alert-count" id="hr030AlertCount"></span>
       </button>
@@ -42,9 +42,13 @@
         <button type="button" class="profile-area header-profile header-profile-trigger" aria-label="계정 메뉴" aria-haspopup="menu" aria-expanded="false">
           <div class="profile-img" id="profileImgContainer"></div>
           <div class="header-profile-copy">
-            <div id="profileName" class="fw700 fs16"></div>
+            <div class="header-profile-name-row">
+              <div id="profileName" class="fw700 fs16"></div>
+              <div id="profileJob" class="header-profile-job"></div>
+            </div>
             <div id="profileId" class="fw500 fs14"></div>
           </div>
+          <span class="header-profile-caret" aria-hidden="true"></span>
         </button>
         <div class="header-profile-popover" aria-label="계정 메뉴" role="menu">
           <button id="logout-btn" type="button" class="header-popover-action">
