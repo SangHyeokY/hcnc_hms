@@ -685,7 +685,9 @@
             }
 
             if (!resolvedLabels.length) {
-                otherValue += value;
+                if (isAllView) {
+                    otherValue += value;
+                }
                 return;
             }
 
@@ -714,9 +716,11 @@
         }, 0);
 
         if (skills.length > maxVisible) {
-            skills.slice(maxVisible).forEach(function (item) {
-                otherValue += item.value || 0;
-            });
+            if (isAllView) {
+                skills.slice(maxVisible).forEach(function (item) {
+                    otherValue += item.value || 0;
+                });
+            }
             skills = skills.slice(0, maxVisible);
         }
 
@@ -727,7 +731,9 @@
                 return true;
             }
 
-            otherValue += item.value || 0;
+            if (isAllView) {
+                otherValue += item.value || 0;
+            }
             return false;
         });
 
@@ -739,7 +745,7 @@
             };
         });
 
-        if (otherValue > 0) {
+        if (isAllView && otherValue > 0) {
             skills.push({
                 label: "기타",
                 value: otherValue,
@@ -1212,6 +1218,7 @@
         var listEl = byId("hr030SkillList");
         var skills = buildRegionSkillDistribution(currentRegion.skills);
         var summarySkills;
+        var summaryLabel;
         var treemapData;
         var total;
         var topSkill;
@@ -1228,41 +1235,38 @@
         }, null);
         summarySkills = skills.filter(function (item) {
             return item.label !== "기타";
-        }).slice(0, 4);
+        });
+        summaryLabel = state.skillViewMode === "top3" ? "상위 3개" : state.skillViewMode === "top5" ? "상위 5개" : "기타 제외 전체";
 
-        if (!summarySkills.length) {
-            summarySkills = skills.slice(0, 4);
+        if (listEl && !summarySkills.length) {
+            listEl.innerHTML = '<div class="hr030-empty-state">표시할 주요 기술 태그가 없습니다.</div>';
         }
 
-        if (listEl) {
-            if (!skills.length) {
-                listEl.innerHTML = '<div class="hr030-empty-state">표시할 기술 스택 데이터가 없습니다.</div>';
-            } else {
-                listEl.innerHTML = [
-                    '<div class="hr030-skill-summary-label">Top 4</div>',
-                    summarySkills.map(function (item) {
-                    var percent = total ? ((item.value / total) * 100).toFixed(1) : "0.0";
+        if (listEl && summarySkills.length) {
+            listEl.innerHTML = [
+                '<div class="hr030-skill-summary-label">' + summaryLabel + "</div>",
+                summarySkills.map(function (item) {
+                var percent = total ? ((item.value / total) * 100).toFixed(1) : "0.0";
 
-                    return [
-                        '<div class="hr030-skill-item">',
-                        '  <div class="hr030-skill-item-head">',
-                        '    <div class="hr030-skill-item-main">',
-                        '      <span class="hr030-skill-dot" style="background:' + escapeHtml(item.color) + '"></span>',
-                        '      <div class="hr030-skill-copy">',
-                        '        <strong>' + escapeHtml(item.label) + "</strong>",
-                        "      </div>",
-                        "    </div>",
-                        '    <div class="hr030-skill-side">',
-                        '      <span class="hr030-skill-count">' + formatNumber(item.value) + "명</span>",
-                        '      <strong class="hr030-skill-share">' + percent + "%</strong>",
-                        "    </div>",
-                        "  </div>",
-                        '  <span class="hr030-skill-bar"><i style="width:' + percent + '%;background:' + escapeHtml(item.color) + '"></i></span>',
-                        "</div>"
-                    ].join("");
-                }).join("")
+                return [
+                    '<div class="hr030-skill-item">',
+                    '  <div class="hr030-skill-item-head">',
+                    '    <div class="hr030-skill-item-main">',
+                    '      <span class="hr030-skill-dot" style="background:' + escapeHtml(item.color) + '"></span>',
+                    '      <div class="hr030-skill-copy">',
+                    '        <strong>' + escapeHtml(item.label) + "</strong>",
+                    "      </div>",
+                    "    </div>",
+                    '    <div class="hr030-skill-side">',
+                    '      <span class="hr030-skill-count">' + formatNumber(item.value) + "명</span>",
+                    '      <strong class="hr030-skill-share">' + percent + "%</strong>",
+                    "    </div>",
+                    "  </div>",
+                    '  <span class="hr030-skill-bar"><i style="width:' + percent + '%;background:' + escapeHtml(item.color) + '"></i></span>',
+                    "</div>"
                 ].join("");
-            }
+            }).join("")
+            ].join("");
         }
 
         destroyChart("skills");
