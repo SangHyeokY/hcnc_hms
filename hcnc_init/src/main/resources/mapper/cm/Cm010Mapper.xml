@@ -63,18 +63,26 @@
     <!-- 로그인 사용자 조회 -->
     <select id="selectLoginUser" resultType="hashmap" parameterType="string">
         SELECT
-               user_id
-             , user_nm
-             , pwd_hash
-             , lock_yn
-             , role_cd
+               u.user_id
+             , u.user_nm
+             , u.pwd_hash
+             , u.lock_yn
+             , u.role_cd
+             , u.job_cd
+             , j.cd_nm AS job_nm
              , CASE WHEN IFNULL(pwd_chg_ts, 'Y') = 'Y' THEN 'Y'
                     ELSE 'N' END pwd_chg_yn
-        FROM tb_user_info
-        WHERE user_id = #{userId}
-          AND del_yn = 'N'
-          AND use_yn = 'Y'
-          AND lock_yn = 'N'
+        FROM tb_user_info u
+        LEFT JOIN tb_cd_mst j
+               ON j.grp_cd = 'job_cd'
+              AND j.cd = u.job_cd
+              AND j.del_yn = 'N'
+              AND j.use_yn = 'Y'
+              AND j.sort_no &gt; 0
+        WHERE u.user_id = #{userId}
+          AND u.del_yn = 'N'
+          AND u.use_yn = 'Y'
+          AND u.lock_yn = 'N'
     </select>
 
     <!-- 공통코드(권한/직무/부서) 조회 -->

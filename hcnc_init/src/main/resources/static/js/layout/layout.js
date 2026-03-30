@@ -166,7 +166,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const profileMenu = document.querySelector(".header-profile-menu");
   const profileTrigger = profileMenu?.querySelector(".header-profile-trigger");
   let isProfileMenuOpen = false;
-  let suppressProfileHover = false;
 
   const syncProfileMenu = () => {
       if(!profileMenu || !profileTrigger){
@@ -174,7 +173,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       profileMenu.classList.toggle("is-open", isProfileMenuOpen);
-      profileMenu.classList.toggle("is-suppress-hover", suppressProfileHover);
       profileTrigger.setAttribute("aria-expanded", isProfileMenuOpen ? "true" : "false");
   };
 
@@ -182,23 +180,8 @@ document.addEventListener("DOMContentLoaded", () => {
       profileTrigger.addEventListener("click", (e) => {
           e.preventDefault();
           e.stopPropagation();
-
-          if(isProfileMenuOpen){
-              isProfileMenuOpen = false;
-              suppressProfileHover = true;
-          } else {
-              isProfileMenuOpen = true;
-              suppressProfileHover = false;
-          }
-
+          isProfileMenuOpen = !isProfileMenuOpen;
           syncProfileMenu();
-      });
-
-      profileMenu.addEventListener("mouseleave", () => {
-          if(!isProfileMenuOpen && suppressProfileHover){
-              suppressProfileHover = false;
-              syncProfileMenu();
-          }
       });
 
       document.addEventListener("click", (e) => {
@@ -206,9 +189,8 @@ document.addEventListener("DOMContentLoaded", () => {
               return;
           }
 
-          if(isProfileMenuOpen || suppressProfileHover){
+          if(isProfileMenuOpen){
               isProfileMenuOpen = false;
-              suppressProfileHover = false;
               syncProfileMenu();
           }
       });
@@ -218,9 +200,8 @@ document.addEventListener("DOMContentLoaded", () => {
               return;
           }
 
-          if(isProfileMenuOpen || suppressProfileHover){
+          if(isProfileMenuOpen){
               isProfileMenuOpen = false;
-              suppressProfileHover = false;
               syncProfileMenu();
               profileTrigger.blur();
           }
@@ -234,7 +215,6 @@ document.addEventListener("DOMContentLoaded", () => {
           logoutBtn.addEventListener("click", (e) => {
               if(profileMenu && profileTrigger){
                   isProfileMenuOpen = false;
-                  suppressProfileHover = false;
                   syncProfileMenu();
                   profileTrigger.blur();
               }

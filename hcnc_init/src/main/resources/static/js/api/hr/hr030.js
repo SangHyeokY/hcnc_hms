@@ -64,6 +64,8 @@
         skillCatalogRequested: false,
         skillCatalogMap: {},
         skillCatalogLabels: [],
+        skillChartEnterTimer: null,
+        skillTreemapMorphTimer: null,
         employeeTable: null,
         charts: {
             skills: null,
@@ -636,7 +638,7 @@
         var normalized = normalizeText(label);
 
         if (label === "기타") {
-            return "#94a3b8";
+            return "#909090";
         }
 
         if (normalized.indexOf("java") > -1 || normalized.indexOf("spring") > -1) {
@@ -815,6 +817,25 @@
             return grouped[key];
         }).sort(function (a, b) {
             return (b.value || 0) - (a.value || 0);
+        });
+    }
+
+    function buildSkillTreemapSeedData(treemapData) {
+        return (treemapData || []).map(function (group) {
+            var children = (group.children || []).map(function (child) {
+                return {
+                    name: child.name,
+                    value: 1,
+                    itemStyle: child.itemStyle
+                };
+            });
+
+            return {
+                name: group.name,
+                value: Math.max(children.length, 1),
+                itemStyle: group.itemStyle,
+                children: children
+            };
         });
     }
 
@@ -1164,6 +1185,27 @@
         });
     }
 
+    function replaySkillChartEntry(chartEl) {
+        var chartWrap = chartEl && chartEl.closest(".hr030-skill-chart-wrap");
+
+        if (!chartWrap) {
+            return;
+        }
+
+        chartWrap.classList.remove("is-entering");
+        void chartWrap.offsetWidth;
+        chartWrap.classList.add("is-entering");
+
+        if (state.skillChartEnterTimer) {
+            window.clearTimeout(state.skillChartEnterTimer);
+        }
+
+        state.skillChartEnterTimer = window.setTimeout(function () {
+            chartWrap.classList.remove("is-entering");
+            state.skillChartEnterTimer = null;
+        }, 820);
+    }
+
     function renderSkillDistribution() {
         var currentRegion = getCurrentRegion();
         var chartEl = byId("hr030SkillChart");
@@ -1242,8 +1284,11 @@
         treemapData = buildSkillTreemapData(skills);
         state.charts.skills = echarts.init(chartEl, null, { renderer: "svg" });
         state.charts.skills.setOption({
-            animationDuration: 500,
-            animationDurationUpdate: 300,
+            animation: true,
+            animationDuration: 240,
+            animationDurationUpdate: 900,
+            animationEasing: "quarticOut", 
+            animationEasingUpdate: "quarticOut",
             tooltip: {
                 backgroundColor: "rgba(15, 23, 42, 0.92)",
                 borderWidth: 0,
@@ -1278,7 +1323,7 @@
                 roam: false,
                 nodeClick: false,
                 breadcrumb: { show: false },
-                visibleMin: 4,
+                visibleMin: 20,
                 sort: "desc",
                 squareRatio: 1,
                 label: {
@@ -1347,9 +1392,29 @@
                         }
                     }
                 ],
-                data: treemapData
+                universalTransition: true,
+                data: buildSkillTreemapSeedData(treemapData)
             }]
         });
+        replaySkillChartEntry(chartEl);
+
+        if (state.skillTreemapMorphTimer) {
+            window.clearTimeout(state.skillTreemapMorphTimer);
+        }
+
+        state.skillTreemapMorphTimer = window.setTimeout(function () {
+            if (!state.charts.skills) {
+                return;
+            }
+
+            state.charts.skills.setOption({
+                series: [{
+                    type: "treemap",
+                    universalTransition: true,
+                    data: treemapData
+                }]
+            });
+        }, 60);
 
         requestAnimationFrame(function () {
             if (state.charts.skills && typeof state.charts.skills.resize === "function") {
