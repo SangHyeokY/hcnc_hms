@@ -46,6 +46,37 @@
     ];
 
     var skillColorPalette = ["#4f6ff7", "#1fb6a6", "#f3b44f", "#a173ff", "#eb8079", "#4cb0ff", "#33c18d"];
+    var regionMapSvgPath = "/images/common/korea-map.svg";
+    var regionProvinceMap = {
+        seoul: ["seoul"],
+        gyeonggi: ["gyeonggi"],
+        incheon: ["incheon"],
+        gangwon: ["gangwon"],
+        chungcheong: ["daejeon", "sejong", "chungbuk", "chungnam"],
+        jeolla: ["gwangju", "jeonbuk", "jeonnam"],
+        gyeongsang: ["daegu", "gyeongbuk", "gyeongnam"],
+        busan: ["busan", "ulsan"]
+    };
+    var regionBadgeOffsetMap = {
+        seoul: { dx: 16, dy: -18 },
+        gyeonggi: { dx: -12, dy: 8 },
+        incheon: { dx: -26, dy: -4 },
+        gangwon: { dx: 16, dy: -4 },
+        chungcheong: { dx: -4, dy: 10 },
+        jeolla: { dx: -10, dy: 10 },
+        gyeongsang: { dx: 10, dy: 10 },
+        busan: { dx: 24, dy: 22 }
+    };
+    var regionToneMap = {
+        seoul: { fill: "#dfe6ff", hover: "#c8d5ff", active: "#5e79f7", badge: "rgba(244, 247, 255, 0.98)", badgeStroke: "#cfd9ff" },
+        gyeonggi: { fill: "#d8f1ff", hover: "#bfe7ff", active: "#2ea4e6", badge: "rgba(242, 251, 255, 0.98)", badgeStroke: "#c4eaff" },
+        incheon: { fill: "#e7e2ff", hover: "#d8cfff", active: "#8168f3", badge: "rgba(247, 244, 255, 0.98)", badgeStroke: "#ddd2ff" },
+        gangwon: { fill: "#dff6ef", hover: "#c9eedf", active: "#22a882", badge: "rgba(244, 255, 250, 0.98)", badgeStroke: "#cfeedd" },
+        chungcheong: { fill: "#fff0dc", hover: "#ffe1b9", active: "#f0a232", badge: "rgba(255, 249, 241, 0.98)", badgeStroke: "#f4ddba" },
+        jeolla: { fill: "#ffe5eb", hover: "#ffd2dd", active: "#e86f91", badge: "rgba(255, 245, 247, 0.98)", badgeStroke: "#f3d5de" },
+        gyeongsang: { fill: "#ede5ff", hover: "#ddd0ff", active: "#8a68f0", badge: "rgba(249, 246, 255, 0.98)", badgeStroke: "#ddd3f8" },
+        busan: { fill: "#dff4ff", hover: "#c9ebff", active: "#389be0", badge: "rgba(244, 251, 255, 0.98)", badgeStroke: "#cfe7f6" }
+    };
 
     var kpiIconMap = {
         total: "users",
@@ -64,6 +95,9 @@
         skillCatalogRequested: false,
         skillCatalogMap: {},
         skillCatalogLabels: [],
+        mapSvgMarkup: "",
+        mapSvgRequested: false,
+        mapSvgFailed: false,
         skillChartEnterTimer: null,
         skillTreemapMorphTimer: null,
         employeeTable: null,
@@ -125,6 +159,77 @@
 
     function renderStatusBadge(label) {
         return '<span class="hr030-status-badge is-' + getToneClass(label) + '">' + escapeHtml(label) + "</span>";
+    }
+
+    function createSvgNode(tagName) {
+        return document.createElementNS("http://www.w3.org/2000/svg", tagName);
+    }
+
+    function formatSvgNumber(value) {
+        return String(Math.round((Number(value) || 0) * 10) / 10);
+    }
+
+    function mergeBounds(currentBounds, nextBounds) {
+        var minX;
+        var minY;
+        var maxX;
+        var maxY;
+
+        if (!nextBounds || !isFinite(nextBounds.x) || !isFinite(nextBounds.y) || !isFinite(nextBounds.width) || !isFinite(nextBounds.height)) {
+            return currentBounds;
+        }
+
+        if (!currentBounds) {
+            return {
+                x: nextBounds.x,
+                y: nextBounds.y,
+                width: nextBounds.width,
+                height: nextBounds.height
+            };
+        }
+
+        minX = Math.min(currentBounds.x, nextBounds.x);
+        minY = Math.min(currentBounds.y, nextBounds.y);
+        maxX = Math.max(currentBounds.x + currentBounds.width, nextBounds.x + nextBounds.width);
+        maxY = Math.max(currentBounds.y + currentBounds.height, nextBounds.y + nextBounds.height);
+
+        return {
+            x: minX,
+            y: minY,
+            width: maxX - minX,
+            height: maxY - minY
+        };
+    }
+
+    function getNodeBounds(node) {
+        if (!node || typeof node.getBBox !== "function") {
+            return null;
+        }
+
+        try {
+            return node.getBBox();
+        } catch (error) {
+            return null;
+        }
+    }
+
+    function getRegionToneStyle(regionId) {
+        var tone = regionToneMap[regionId] || {
+            fill: "#dfe8ff",
+            hover: "#bfd0ff",
+            active: "#4f6ff7",
+            badge: "rgba(255, 255, 255, 0.98)",
+            badgeStroke: "#d7e2f2"
+        };
+
+        return [
+            "--hr030-map-fill:" + tone.fill,
+            "--hr030-map-fill-hover:" + tone.hover,
+            "--hr030-map-fill-active:" + tone.active,
+            "--hr030-map-badge-fill:" + tone.badge,
+            "--hr030-map-badge-stroke:" + tone.badgeStroke,
+            "--hr030-map-badge-active-fill:" + tone.active
+        ].join(";");
     }
 
     function renderSectionHeader(options) {
@@ -228,6 +333,35 @@
             buildSkillCatalog(Array.isArray(res) ? res : []);
             renderDashboard();
         });
+    }
+
+    function loadRegionMapSvg() {
+        if (state.mapSvgRequested || state.mapSvgFailed || typeof window.fetch !== "function") {
+            return;
+        }
+
+        state.mapSvgRequested = true;
+
+        window.fetch(regionMapSvgPath, { credentials: "same-origin" })
+            .then(function (response) {
+                if (!response.ok) {
+                    throw new Error("SVG load failed");
+                }
+
+                return response.text();
+            })
+            .then(function (svgMarkup) {
+                state.mapSvgMarkup = svgMarkup || "";
+
+                if (!state.mapSvgMarkup) {
+                    throw new Error("SVG markup is empty");
+                }
+
+                renderDashboard();
+            })
+            .catch(function () {
+                state.mapSvgFailed = true;
+            });
     }
 
     function buildSkillCandidates(label) {
@@ -1078,11 +1212,9 @@
     }
 
     // 좌측 카드: 지역 지도와 권역 상세 렌더링
-    function renderRegionMap() {
+    function renderRegionMapFallback() {
         var container = byId("hr030RegionMap");
-        var noteEl = byId("hr030RegionMapNote");
         var selectedId = state.selectedRegionId;
-        var selectedRegion = getCurrentRegion();
         var regionsSvg = dashboardData.map.regions.map(function (region) {
             var isActive = selectedId === region.id;
 
@@ -1103,6 +1235,213 @@
             regionsSvg,
             "</svg>"
         ].join("");
+    }
+
+    function renderRegionMap() {
+        var container = byId("hr030RegionMap");
+        var noteEl = byId("hr030RegionMapNote");
+        var selectedId = state.selectedRegionId;
+        var selectedRegion = getCurrentRegion();
+        var parser;
+        var svgDoc;
+        var svgEl;
+        var provinceNodes;
+        var provinceLayer;
+        var unmappedGroup;
+        var usedProvinceIds = {};
+        var overallBounds;
+        var badgeLayouts = [];
+        var regionGroupMap = {};
+
+        if (!container) {
+            return;
+        }
+
+        if (!state.mapSvgMarkup || typeof window.DOMParser !== "function") {
+            renderRegionMapFallback();
+        } else {
+            try {
+                parser = new window.DOMParser();
+                svgDoc = parser.parseFromString(state.mapSvgMarkup, "image/svg+xml");
+                svgEl = svgDoc.documentElement;
+
+                if (!svgEl || String(svgEl.nodeName || "").toLowerCase() !== "svg") {
+                    throw new Error("Invalid SVG root");
+                }
+
+                svgEl.removeAttribute("width");
+                svgEl.removeAttribute("height");
+                svgEl.removeAttribute("enable-background");
+                svgEl.setAttribute("class", "hr030-map-svg hr030-map-svg--regional");
+                svgEl.setAttribute("preserveAspectRatio", "xMidYMid meet");
+                svgEl.setAttribute("aria-hidden", "true");
+
+                provinceNodes = Array.prototype.slice.call(svgEl.querySelectorAll("path[id], polyline[id], polygon[id]"));
+                provinceLayer = createSvgNode("g");
+                provinceLayer.setAttribute("class", "hr030-map-province-layer");
+                unmappedGroup = createSvgNode("g");
+                unmappedGroup.setAttribute("class", "hr030-map-unmapped");
+
+                dashboardData.map.regions.forEach(function (region) {
+                    var provinceIds = regionProvinceMap[region.id] || [];
+                    var regionGroup = createSvgNode("g");
+                    var regionMatched = false;
+
+                    regionGroup.setAttribute("class", "hr030-map-region" + (selectedId === region.id ? " is-active" : ""));
+                    regionGroup.setAttribute("data-region-id", region.id);
+                    regionGroup.setAttribute("role", "button");
+                    regionGroup.setAttribute("tabindex", "0");
+                    regionGroup.setAttribute("aria-label", region.name + " " + formatNumber(region.headcount) + "명");
+                    regionGroup.setAttribute("style", getRegionToneStyle(region.id));
+
+                    provinceIds.forEach(function (provinceId) {
+                        var provinceNode = svgEl.querySelector("#" + provinceId);
+
+                        if (!provinceNode) {
+                            return;
+                        }
+
+                        provinceNode.removeAttribute("style");
+                        provinceNode.removeAttribute("fill");
+                        provinceNode.removeAttribute("stroke");
+                        provinceNode.setAttribute("vector-effect", "non-scaling-stroke");
+                        provinceNode.setAttribute("class", "hr030-map-shape hr030-map-province-shape");
+                        regionGroup.appendChild(provinceNode);
+                        usedProvinceIds[provinceId] = true;
+                        regionMatched = true;
+                    });
+
+                    if (regionMatched) {
+                        provinceLayer.appendChild(regionGroup);
+                        regionGroupMap[region.id] = regionGroup;
+                    }
+                });
+
+                provinceNodes.forEach(function (provinceNode) {
+                    if (usedProvinceIds[provinceNode.id]) {
+                        return;
+                    }
+
+                    provinceNode.removeAttribute("style");
+                    provinceNode.removeAttribute("fill");
+                    provinceNode.removeAttribute("stroke");
+                    provinceNode.setAttribute("vector-effect", "non-scaling-stroke");
+                    provinceNode.setAttribute("class", "hr030-map-shape hr030-map-province-shape is-muted");
+                    unmappedGroup.appendChild(provinceNode);
+                });
+
+                if (unmappedGroup.childNodes.length) {
+                    provinceLayer.appendChild(unmappedGroup);
+                }
+
+                while (svgEl.firstChild) {
+                    svgEl.removeChild(svgEl.firstChild);
+                }
+
+                svgEl.appendChild(provinceLayer);
+
+                container.innerHTML = "";
+                container.appendChild(svgEl);
+
+                overallBounds = getNodeBounds(provinceLayer);
+
+                dashboardData.map.regions.forEach(function (region) {
+                    var regionGroup = provinceLayer.querySelector('[data-region-id="' + region.id + '"]');
+                    var regionBounds = getNodeBounds(regionGroup);
+                    var offset = regionBadgeOffsetMap[region.id] || {};
+                    var badgeWidth;
+                    var badgeHeight;
+                    var centerX;
+                    var centerY;
+                    var badgeBounds;
+
+                    if (!regionBounds) {
+                        return;
+                    }
+
+                    badgeWidth = Math.max(44, Math.min(82, region.name.length * 11 + 18));
+                    badgeHeight = 44;
+                    centerX = regionBounds.x + regionBounds.width / 2 + (offset.dx || 0);
+                    centerY = regionBounds.y + regionBounds.height / 2 + (offset.dy || 0);
+                    badgeBounds = {
+                        x: centerX - badgeWidth / 2,
+                        y: centerY - badgeHeight / 2,
+                        width: badgeWidth,
+                        height: badgeHeight
+                    };
+
+                    badgeLayouts.push({
+                        region: region,
+                        x: centerX,
+                        y: centerY,
+                        width: badgeWidth,
+                        height: badgeHeight,
+                        active: selectedId === region.id
+                    });
+                    overallBounds = mergeBounds(overallBounds, badgeBounds);
+                });
+
+                if (overallBounds) {
+                    svgEl.setAttribute("viewBox", [
+                        formatSvgNumber(overallBounds.x - 10),
+                        formatSvgNumber(overallBounds.y - 12),
+                        formatSvgNumber(overallBounds.width + 20),
+                        formatSvgNumber(overallBounds.height + 24)
+                    ].join(" "));
+                }
+
+                badgeLayouts.forEach(function (badgeLayout) {
+                    var targetRegionGroup = regionGroupMap[badgeLayout.region.id];
+                    var hitArea = createSvgNode("rect");
+                    var badgeGroup = createSvgNode("g");
+                    var badgeBody = createSvgNode("g");
+                    var badgeRect = createSvgNode("rect");
+                    var nameText = createSvgNode("text");
+                    var valueText = createSvgNode("text");
+                    var hitWidth = Math.max(66, Math.min(92, badgeLayout.width + 18));
+                    var hitHeight = Math.max(48, Math.min(62, badgeLayout.height + 18));
+
+                    hitArea.setAttribute("class", "hr030-map-hit-area");
+                    hitArea.setAttribute("x", formatSvgNumber(-hitWidth / 2));
+                    hitArea.setAttribute("y", formatSvgNumber(-hitHeight / 2));
+                    hitArea.setAttribute("width", formatSvgNumber(hitWidth));
+                    hitArea.setAttribute("height", formatSvgNumber(hitHeight));
+                    hitArea.setAttribute("rx", "20");
+
+                    badgeGroup.setAttribute("class", "hr030-map-badge" + (badgeLayout.active ? " is-active" : ""));
+                    badgeGroup.setAttribute("transform", "translate(" + formatSvgNumber(badgeLayout.x) + " " + formatSvgNumber(badgeLayout.y) + ")");
+                    badgeBody.setAttribute("class", "hr030-map-badge-body");
+
+                    badgeRect.setAttribute("x", formatSvgNumber(-badgeLayout.width / 2));
+                    badgeRect.setAttribute("y", formatSvgNumber(-badgeLayout.height / 2));
+                    badgeRect.setAttribute("width", formatSvgNumber(badgeLayout.width));
+                    badgeRect.setAttribute("height", formatSvgNumber(badgeLayout.height));
+                    badgeRect.setAttribute("rx", "15");
+
+                    nameText.setAttribute("class", "hr030-map-badge-name");
+                    nameText.setAttribute("x", "0");
+                    nameText.setAttribute("y", "-10");
+                    nameText.textContent = badgeLayout.region.name;
+
+                    valueText.setAttribute("class", "hr030-map-badge-value");
+                    valueText.setAttribute("x", "0");
+                    valueText.setAttribute("y", "14");
+                    valueText.textContent = formatNumber(badgeLayout.region.headcount);
+
+                    badgeBody.appendChild(badgeRect);
+                    badgeBody.appendChild(nameText);
+                    badgeBody.appendChild(valueText);
+                    badgeGroup.appendChild(hitArea);
+                    badgeGroup.appendChild(badgeBody);
+
+                    if (targetRegionGroup) {
+                        targetRegionGroup.appendChild(badgeGroup);
+                    }
+                });
+            } catch (error) {
+                renderRegionMapFallback();
+            }
+        }
 
         if (noteEl) {
             noteEl.innerHTML = [
@@ -1131,7 +1470,7 @@
             '<div class="hr030-region-detail-head">',
             '  <div class="hr030-region-detail-copy">',
             '    <h6>' + escapeHtml(region.name) + "</h6>",
-            '    <p>권역별 인력 운영 지표를 빠르게 비교할 수 있습니다.</p>',
+            // '    <p>권역별 인력 운영 지표를 빠르게 비교할 수 있습니다.</p>',
             "  </div>",
             '  <span class="hr030-region-detail-skill">주력 ' + escapeHtml(region.leadSkill) + "</span>",
             "</div>",
@@ -2051,6 +2390,7 @@
     // 초기 진입 시점 부트스트랩
     function initialize() {
         setStaticContent();
+        loadRegionMapSvg();
         renderDashboard();
         loadSkillCatalog();
         bindSearch();
