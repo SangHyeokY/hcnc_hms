@@ -46,6 +46,7 @@
     ];
 
     var skillColorPalette = ["#4f6ff7", "#1fb6a6", "#f3b44f", "#a173ff", "#eb8079", "#4cb0ff", "#33c18d"];
+    var dashboardFontFamily = '"Pretendard Variable", "Pretendard", "Noto Sans KR", sans-serif';
     var regionMapSvgPath = "/images/common/korea-map.svg";
     var regionProvinceMap = {
         seoul: ["seoul"],
@@ -98,6 +99,16 @@
         mapSvgMarkup: "",
         mapSvgRequested: false,
         mapSvgFailed: false,
+        mapSvgElement: null,
+        mapSvgContainer: null,
+        mapRegionGroupMap: {},
+        mapRegionBoundsMap: {},
+        mapBadgeGroupMap: {},
+        mapSelectionRipple: null,
+        mapRippleAnimationFrame: null,
+        mapRippleCleanup: null,
+        regionRatioValue: 0,
+        regionRatioAnimationFrame: null,
         skillChartEnterTimer: null,
         skillTreemapMorphTimer: null,
         employeeTable: null,
@@ -109,10 +120,12 @@
     };
 
     // 공통 포맷터와 작은 렌더링 헬퍼
+    // 아이디로 DOM 요소를 빠르게 조회한다.
     function byId(id) {
         return document.getElementById(id);
     }
 
+    // 사용자 문자열을 안전한 HTML 문자열로 변환한다.
     function escapeHtml(value) {
         return String(value == null ? "" : value)
             .replace(/&/g, "&amp;")
@@ -122,18 +135,22 @@
             .replace(/'/g, "&#39;");
     }
 
+    // 숫자를 한글 로케일 기준으로 포맷한다.
     function formatNumber(value) {
         return new Intl.NumberFormat("ko-KR").format(value || 0);
     }
 
+    // 퍼센트 값을 소수 첫째 자리까지 맞춘다.
     function formatPercent(value) {
         return (Math.round((value || 0) * 10) / 10).toFixed(1);
     }
 
+    // 비교용 문자열을 공백 제거와 소문자 기준으로 정규화한다.
     function normalizeText(value) {
         return String(value == null ? "" : value).replace(/\s+/g, "").toLowerCase();
     }
 
+    // 오늘 날짜를 상단 기준 문구용 형식으로 만든다.
     function getTodayLabel() {
         return new Intl.DateTimeFormat("ko-KR", {
             year: "numeric",
@@ -143,6 +160,7 @@
         }).format(new Date());
     }
 
+    // 프로필 아바타에 들어갈 두 글자 텍스트를 만든다.
     function getAvatarText(name) {
         var cleanName = String(name || "").trim();
 
@@ -153,22 +171,27 @@
         return cleanName.slice(-2);
     }
 
+    // 상태 라벨에 맞는 톤 클래스를 찾는다.
     function getToneClass(label) {
         return statusToneMap[label] || "slate";
     }
 
+    // 상태 라벨을 배지 마크업으로 렌더링한다.
     function renderStatusBadge(label) {
         return '<span class="hr030-status-badge is-' + getToneClass(label) + '">' + escapeHtml(label) + "</span>";
     }
 
+    // SVG 네임스페이스 기준으로 새 노드를 만든다.
     function createSvgNode(tagName) {
         return document.createElementNS("http://www.w3.org/2000/svg", tagName);
     }
 
+    // SVG 속성값에 넣기 좋은 숫자 문자열로 정리한다.
     function formatSvgNumber(value) {
         return String(Math.round((Number(value) || 0) * 10) / 10);
     }
 
+    // 여러 SVG 도형의 범위를 하나의 bounding box로 합친다.
     function mergeBounds(currentBounds, nextBounds) {
         var minX;
         var minY;
@@ -201,6 +224,7 @@
         };
     }
 
+    // SVG 노드의 안전한 bounding box를 구한다.
     function getNodeBounds(node) {
         if (!node || typeof node.getBBox !== "function") {
             return null;
@@ -213,6 +237,271 @@
         }
     }
 
+    // SVG 지도에서 클릭 좌표와 권역 범위를 계산하는 유틸
+    function getSvgPointFromEvent(svgEl, event) {
+        var point;
+        var matrix;
+
+        if (!svgEl || !event || typeof svgEl.createSVGPoint !== "function" || typeof svgEl.getScreenCTM !== "function") {
+            return null;
+        }
+
+        matrix = svgEl.getScreenCTM();
+
+        if (!matrix || typeof matrix.inverse !== "function") {
+            return null;
+        }
+
+        point = svgEl.createSVGPoint();
+        point.x = Number(event.clientX || 0);
+        point.y = Number(event.clientY || 0);
+
+        try {
+            return point.matrixTransform(matrix.inverse());
+        } catch (error) {
+            return null;
+        }
+    }
+
+    function getBoundsMaxRadius(bounds, centerX, centerY) {
+        var corners;
+
+        if (!bounds) {
+            return 0;
+        }
+
+        corners = [
+            { x: bounds.x, y: bounds.y },
+            { x: bounds.x + bounds.width, y: bounds.y },
+            { x: bounds.x, y: bounds.y + bounds.height },
+            { x: bounds.x + bounds.width, y: bounds.y + bounds.height }
+        ];
+
+        return corners.reduce(function (maxDistance, corner) {
+            var dx = corner.x - centerX;
+            var dy = corner.y - centerY;
+            var distance = Math.sqrt((dx * dx) + (dy * dy));
+
+            return Math.max(maxDistance, distance);
+        }, 0);
+    }
+
+    // 클릭 지점을 권역 내부로 보정해 리플 시작점이 튀지 않게 맞춘다
+    function clampPointToBounds(bounds, point, padding) {
+        var inset = Number(padding || 0);
+        var minX;
+        var maxX;
+        var minY;
+        var maxY;
+
+        if (!bounds || !point) {
+            return point;
+        }
+
+        minX = bounds.x + inset;
+        maxX = bounds.x + bounds.width - inset;
+        minY = bounds.y + inset;
+        maxY = bounds.y + bounds.height - inset;
+
+        if (minX > maxX) {
+            minX = bounds.x;
+            maxX = bounds.x + bounds.width;
+        }
+
+        if (minY > maxY) {
+            minY = bounds.y;
+            maxY = bounds.y + bounds.height;
+        }
+
+        return {
+            x: Math.min(Math.max(point.x, minX), maxX),
+            y: Math.min(Math.max(point.y, minY), maxY)
+        };
+    }
+
+    // 권역 선택 시 클릭 위치 기준으로 색이 퍼지는 리플을 재생한다
+    function animateMapSelectionRipple(circleNode, targetRadius, onComplete) {
+        var startTime;
+        var duration = 760;
+        var startRadius = 8;
+
+        if (!circleNode) {
+            if (typeof onComplete === "function") {
+                onComplete();
+            }
+            return;
+        }
+
+        if (state.mapRippleAnimationFrame) {
+            window.cancelAnimationFrame(state.mapRippleAnimationFrame);
+            state.mapRippleAnimationFrame = null;
+        }
+
+        // 리플 반경을 매 프레임 부드럽게 확장한다.
+        function step(timestamp) {
+            var elapsed;
+            var progress;
+            var eased;
+            var radius;
+
+            if (!startTime) {
+                startTime = timestamp;
+            }
+
+            elapsed = timestamp - startTime;
+            progress = Math.min(elapsed / duration, 1);
+            eased = progress < 0.5
+                ? 4 * Math.pow(progress, 3)
+                : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+            radius = startRadius + ((targetRadius - startRadius) * eased);
+            circleNode.setAttribute("r", formatSvgNumber(radius));
+
+            if (progress < 1) {
+                state.mapRippleAnimationFrame = window.requestAnimationFrame(step);
+                return;
+            }
+
+            state.mapRippleAnimationFrame = null;
+
+            if (typeof onComplete === "function") {
+                onComplete();
+            }
+        }
+
+        circleNode.setAttribute("r", formatSvgNumber(startRadius));
+        state.mapRippleAnimationFrame = window.requestAnimationFrame(step);
+    }
+
+    // 선택된 권역 위에 활성 색 레이어를 올려 SVG 리플 효과를 만든다
+    function playRegionSelectionRipple(svgEl, targetRegionGroup, targetBounds, rippleConfig, onComplete) {
+        var defs;
+        var clipPath;
+        var circle;
+        var overlayGroup;
+        var overlayShapeNodes;
+        var badgeGroup;
+        var clipId;
+        var targetRadius;
+        var rippleCenter;
+
+        if (!svgEl || !targetRegionGroup || !targetBounds || !rippleConfig) {
+            return;
+        }
+
+        if (typeof state.mapRippleCleanup === "function") {
+            state.mapRippleCleanup();
+            state.mapRippleCleanup = null;
+        }
+
+        defs = svgEl.querySelector("defs");
+
+        if (!defs) {
+            defs = createSvgNode("defs");
+            svgEl.insertBefore(defs, svgEl.firstChild);
+        }
+
+        rippleCenter = clampPointToBounds(targetBounds, rippleConfig, 14);
+
+        clipId = "hr030-map-ripple-" + String(Date.now()) + "-" + String(Math.floor(Math.random() * 10000));
+        clipPath = createSvgNode("clipPath");
+        clipPath.setAttribute("id", clipId);
+
+        overlayGroup = createSvgNode("g");
+        overlayGroup.setAttribute("class", "hr030-map-ripple-overlay");
+        overlayGroup.setAttribute("clip-path", "url(#" + clipId + ")");
+
+        overlayShapeNodes = Array.prototype.slice.call(targetRegionGroup.querySelectorAll(".hr030-map-province-shape"));
+        overlayShapeNodes.forEach(function (shapeNode) {
+            var clone = shapeNode.cloneNode(true);
+
+            clone.removeAttribute("class");
+            clone.removeAttribute("style");
+            clone.removeAttribute("filter");
+            clone.removeAttribute("stroke");
+            clone.removeAttribute("fill");
+            clipPath.appendChild(clone);
+        });
+        defs.appendChild(clipPath);
+
+        circle = createSvgNode("circle");
+        circle.setAttribute("class", "hr030-map-ripple-circle");
+        circle.setAttribute("cx", formatSvgNumber(rippleCenter.x));
+        circle.setAttribute("cy", formatSvgNumber(rippleCenter.y));
+        circle.setAttribute("r", "0");
+        overlayGroup.appendChild(circle);
+
+        badgeGroup = targetRegionGroup.querySelector(".hr030-map-badge");
+
+        if (badgeGroup) {
+            targetRegionGroup.insertBefore(overlayGroup, badgeGroup);
+        } else {
+            targetRegionGroup.appendChild(overlayGroup);
+        }
+
+        targetRadius = getBoundsMaxRadius(targetBounds, rippleCenter.x, rippleCenter.y) + 8;
+        state.mapRippleCleanup = function () {
+            if (overlayGroup.parentNode) {
+                overlayGroup.parentNode.removeChild(overlayGroup);
+            }
+
+            if (clipPath.parentNode) {
+                clipPath.parentNode.removeChild(clipPath);
+            }
+
+            state.mapRippleCleanup = null;
+        };
+        animateMapSelectionRipple(circle, targetRadius, function () {
+            targetRegionGroup.classList.add("is-active");
+
+            if (badgeGroup) {
+                badgeGroup.classList.add("is-active");
+            }
+
+            if (typeof state.mapRippleCleanup === "function") {
+                state.mapRippleCleanup();
+            }
+
+            if (typeof onComplete === "function") {
+                onComplete();
+            }
+        });
+    }
+
+    // SVG 지도의 활성 권역 클래스와 배지 상태만 빠르게 동기화한다.
+    function syncRegionMapSelectionState() {
+        var selectedId = state.selectedRegionId;
+        var selectionRipple = state.mapSelectionRipple;
+        var svgEl = state.mapSvgElement;
+        var regionGroupMap = state.mapRegionGroupMap || {};
+        var badgeGroupMap = state.mapBadgeGroupMap || {};
+        var regionBoundsMap = state.mapRegionBoundsMap || {};
+
+        Object.keys(regionGroupMap).forEach(function (regionId) {
+            var regionGroup = regionGroupMap[regionId];
+            var badgeGroup = badgeGroupMap[regionId];
+            var shouldAnimateSelection = selectionRipple && selectionRipple.regionId === regionId;
+            var isActive = selectedId === regionId && !shouldAnimateSelection;
+
+            if (regionGroup) {
+                regionGroup.classList.toggle("is-active", isActive);
+            }
+
+            if (badgeGroup) {
+                badgeGroup.classList.toggle("is-active", isActive);
+            }
+        });
+
+        if (selectionRipple && selectionRipple.regionId && regionGroupMap[selectionRipple.regionId] && regionBoundsMap[selectionRipple.regionId]) {
+            playRegionSelectionRipple(svgEl, regionGroupMap[selectionRipple.regionId], regionBoundsMap[selectionRipple.regionId], selectionRipple, function () {
+                state.mapSelectionRipple = null;
+            });
+            return;
+        }
+
+        state.mapSelectionRipple = null;
+    }
+
+    // 권역별 기본색과 활성색 CSS 변수를 만든다.
     function getRegionToneStyle(regionId) {
         var tone = regionToneMap[regionId] || {
             fill: "#dfe8ff",
@@ -232,6 +521,7 @@
         ].join(";");
     }
 
+    // 카드 헤더 공통 마크업을 렌더링한다.
     function renderSectionHeader(options) {
         return [
             '<div class="hr030-section-head">',
@@ -244,6 +534,7 @@
         ].join("");
     }
 
+    // 카드 헤더 우측의 공통 select 마크업을 만든다.
     function renderHeaderSelect(config) {
         var attributes = [
             'class="hr030-card-select"',
@@ -268,18 +559,21 @@
         ].join("");
     }
 
+    // 부서 문자열에서 대표 카테고리만 추출한다.
     function getPrimaryCategory(item) {
         var raw = item && item.department ? item.department : "";
 
         return String(raw).split("·")[0].trim() || "기타";
     }
 
+    // 경력 문자열에서 연차 숫자만 파싱한다.
     function parseCareerYears(position) {
         var matched = String(position || "").match(/\d+/);
 
         return matched ? Number(matched[0]) : null;
     }
 
+    // 인력 데이터를 경력 구간 메타로 매핑한다.
     function getCareerBand(item) {
         var years = parseCareerYears(item && item.position);
 
@@ -298,6 +592,7 @@
         return careerBandMeta[3];
     }
 
+    // 공통코드 기반 기술 카탈로그를 검색용 맵으로 정리한다.
     function buildSkillCatalog(items) {
         var catalogMap = {};
         var catalogLabels = [];
@@ -323,6 +618,7 @@
         state.skillCatalogLoaded = Object.keys(catalogMap).length > 0;
     }
 
+    // 공통코드 기반 실제 기술 태그 목록을 먼저 불러온다
     function loadSkillCatalog() {
         if (state.skillCatalogRequested || typeof getComCode !== "function") {
             return;
@@ -335,6 +631,7 @@
         });
     }
 
+    // 외부 SVG 대한민국 지도를 한 번만 불러와 이후 렌더에 재사용한다
     function loadRegionMapSvg() {
         if (state.mapSvgRequested || state.mapSvgFailed || typeof window.fetch !== "function") {
             return;
@@ -361,9 +658,12 @@
             })
             .catch(function () {
                 state.mapSvgFailed = true;
+                renderDashboard();
             });
     }
 
+    // 원천 기술명을 대시보드용 대표 기술 태그 집합으로 정규화한다
+    // 원천 기술명에서 대표 기술 후보군을 넓게 뽑아낸다.
     function buildSkillCandidates(label) {
         var raw = String(label || "").trim();
         var normalized = normalizeText(raw);
@@ -373,6 +673,7 @@
             return candidates;
         }
 
+        // 후보 배열에 중복 없이 기술명을 추가한다.
         function pushCandidate(value) {
             if (value && candidates.indexOf(value) === -1) {
                 candidates.push(value);
@@ -424,6 +725,7 @@
         return candidates;
     }
 
+    // 카탈로그가 없을 때 기술명을 대표 라벨로 대체한다.
     function getFallbackTechnicalSkillLabel(label) {
         var normalized = normalizeText(label);
 
@@ -452,6 +754,7 @@
         return "";
     }
 
+    // 기술 라벨을 상위 기술군 규칙으로 매핑한다.
     function getSkillFamilyRule(label) {
         var normalized = normalizeText(label);
 
@@ -504,6 +807,7 @@
         return null;
     }
 
+    // 기술군 기본 시드 라벨 집합을 반환한다.
     function getSkillFamilySeedLabels(label) {
         var normalized = normalizeText(label);
 
@@ -536,6 +840,7 @@
         return [];
     }
 
+    // 역할성 라벨인지 판단해 기술 통계에서 제외한다.
     function isRoleSkillLabel(label) {
         var normalized = normalizeText(label);
 
@@ -549,12 +854,14 @@
             normalized.indexOf("관리") > -1;
     }
 
+    // 실제 기술 통계에 포함할 기술 라벨인지 판별한다.
     function isTechnicalSkillLabel(label) {
         var familyRule = getSkillFamilyRule(label);
 
         return !!label && !isRoleSkillLabel(label) && !!familyRule;
     }
 
+    // 원천 기술명을 카탈로그 기준 대표 기술명으로 해석한다.
     function resolveTechnicalSkillLabel(label) {
         var candidates = buildSkillCandidates(label);
         var resolved = "";
@@ -581,6 +888,7 @@
         return getFallbackTechnicalSkillLabel(label);
     }
 
+    // 기술군 후보를 우선순위 기준으로 점수화한다.
     function getCatalogSkillScore(label, familyRule) {
         var normalized = normalizeText(label);
         var score = 0;
@@ -599,12 +907,14 @@
         return score;
     }
 
+    // 기술 라벨 배열에 중복 없이 값을 추가한다.
     function appendUniqueSkillLabel(target, label) {
         if (label && target.indexOf(label) === -1) {
             target.push(label);
         }
     }
 
+    // 시드 라벨을 실제 카탈로그에 있는 기술명으로 보정한다.
     function resolveCatalogSkillSeedLabel(seedLabel) {
         var normalizedSeed = normalizeText(seedLabel);
         var candidates;
@@ -639,6 +949,7 @@
         return candidates[0] || seedLabel;
     }
 
+    // 한 원천 기술값을 여러 대표 기술 라벨로 분해한다.
     function buildResolvedTechnicalSkillLabels(label) {
         var familyRule = getSkillFamilyRule(label);
         var exactMatch = resolveTechnicalSkillLabel(label);
@@ -699,6 +1010,7 @@
         return matches.slice(0, 3);
     }
 
+    // 기술 분해 시 개수에 따라 가중치 분포를 만든다.
     function getSkillDistributionWeights(size) {
         if (size <= 1) {
             return [1];
@@ -735,6 +1047,7 @@
         });
     }
 
+    // 하나의 기술 값을 여러 대표 라벨로 비율 배분한다.
     function splitSkillValue(total, labels) {
         var weights = getSkillDistributionWeights(labels.length);
         var rows = labels.map(function (label, index) {
@@ -768,6 +1081,7 @@
         });
     }
 
+    // 대표 기술 라벨에 맞는 시각 색상을 반환한다.
     function getTechnicalSkillColor(label, index) {
         var normalized = normalizeText(label);
 
@@ -800,6 +1114,7 @@
         return skillColorPalette[index % skillColorPalette.length];
     }
 
+    // 권역 기술 데이터를 treemap용 대표 기술 분포로 집계한다.
     function buildRegionSkillDistribution(regionSkills) {
         var isAllView = state.skillViewMode === "all";
         var skillMap = {};
@@ -890,6 +1205,7 @@
         return skills;
     }
 
+    // 기술 태그를 트리맵에서 쓰는 상위 카테고리 구조로 묶는다
     function getSkillCategoryMeta(label) {
         var normalized = normalizeText(label);
 
@@ -920,6 +1236,7 @@
         return { key: "other", label: "기타", color: "#94a3b8" };
     }
 
+    // 대표 기술 분포를 treemap 계층 구조로 변환한다.
     function buildSkillTreemapData(skills) {
         var grouped = {};
 
@@ -960,6 +1277,7 @@
         });
     }
 
+    // 첫 진입 시 트리맵 움직임을 보여주기 위한 균등 seed 데이터를 만든다
     function buildSkillTreemapSeedData(treemapData) {
         return (treemapData || []).map(function (group) {
             var children = (group.children || []).map(function (child) {
@@ -979,6 +1297,7 @@
         });
     }
 
+    // 도넛 차트 중앙 텍스트를 그리는 Chart.js 플러그인을 만든다.
     function buildCenterLabelPlugin(pluginId, primaryText, secondaryText) {
         return {
             id: pluginId,
@@ -1010,6 +1329,7 @@
         };
     }
 
+    // KPI 카드 한 장의 마크업을 렌더링한다.
     function renderDashboardCard(item) {
         var iconName = kpiIconMap[item.key] || "circle";
 
@@ -1041,6 +1361,7 @@
         return region || dashboardData.map.overview;
     }
 
+    // 현재 검색어와 전달된 필드들이 일치하는지 확인한다.
     function matchesSearch(fields) {
         if (!state.query) {
             return true;
@@ -1049,6 +1370,7 @@
         return normalizeText(fields.join(" ")).indexOf(normalizeText(state.query)) > -1;
     }
 
+    // 현재 필터 조건에 맞는 인력 목록만 추린다.
     function getVisibleEmployees() {
         return dashboardData.recentEmployees.filter(function (item) {
             var matchesRegion = state.selectedRegionId === "all" || item.regionId === state.selectedRegionId;
@@ -1066,6 +1388,7 @@
         });
     }
 
+    // 현재 필터 조건에 맞는 운영 이슈 목록만 추린다.
     function getVisibleIssues() {
         return dashboardData.issues.filter(function (item) {
             var matchesRegion = state.selectedRegionId === "all" || item.regionId === state.selectedRegionId;
@@ -1082,6 +1405,7 @@
         });
     }
 
+    // 검색 결과 요약 문구를 상단에 갱신한다.
     function updateSearchResultNote(employeeRows, issueRows) {
         var noteEl = byId("hr030SearchResultNote");
         var regionLabel = getCurrentRegion().name;
@@ -1100,6 +1424,7 @@
         noteEl.classList.remove("is-empty");
     }
 
+    // 날짜 문자열을 월.일 형식의 짧은 표기로 바꾼다.
     function formatShortDate(value) {
         var parts = String(value || "").split("-");
 
@@ -1126,6 +1451,7 @@
         return '<div class="hr030-status-cell">' + renderStatusBadge(cell.getValue()) + "</div>";
     }
 
+    // Tabulator가 있을 때 인력 테이블을 초기화한다.
     function initEmployeeTable(dataRows) {
         if (typeof Tabulator !== "function") {
             renderEmployeeTableFallback(dataRows);
@@ -1156,6 +1482,7 @@
         });
     }
 
+    // Tabulator가 없을 때 기본 HTML 테이블로 폴백한다.
     function renderEmployeeTableFallback(dataRows) {
         var container = byId("hr030RecentEmployeeTable");
         var rowsHtml = dataRows.map(function (item) {
@@ -1196,6 +1523,7 @@
         ].join("");
     }
 
+    // 인력 테이블 데이터를 현재 조건에 맞게 다시 그린다.
     function renderEmployeeTable(dataRows) {
         byId("hr030EmployeeTableMeta").textContent = "이름, 기술, 지역 기준으로 빠르게 인력을 확인할 수 있습니다.";
 
@@ -1212,6 +1540,7 @@
     }
 
     // 좌측 카드: 지역 지도와 권역 상세 렌더링
+    // 좌측 지도 카드의 폴백 지도를 간단한 SVG 형태로 렌더링한다
     function renderRegionMapFallback() {
         var container = byId("hr030RegionMap");
         var selectedId = state.selectedRegionId;
@@ -1237,11 +1566,21 @@
         ].join("");
     }
 
+    // SVG 지도가 준비되기 전까지 로딩 상태를 보여준다
+    function renderRegionMapLoading() {
+        var container = byId("hr030RegionMap");
+
+        if (!container) {
+            return;
+        }
+
+        container.innerHTML = '<div class="hr030-map-loading" aria-hidden="true"><span class="hr030-map-loading-dot"></span><span class="hr030-map-loading-text">지도를 불러오는 중입니다</span></div>';
+    }
+
+    // 선택 상태만 갱신하면서 지역 지도와 배지를 그린다
     function renderRegionMap() {
         var container = byId("hr030RegionMap");
         var noteEl = byId("hr030RegionMapNote");
-        var selectedId = state.selectedRegionId;
-        var selectedRegion = getCurrentRegion();
         var parser;
         var svgDoc;
         var svgEl;
@@ -1252,13 +1591,24 @@
         var overallBounds;
         var badgeLayouts = [];
         var regionGroupMap = {};
+        var regionBoundsMap = {};
+        var badgeGroupMap = {};
 
         if (!container) {
             return;
         }
 
-        if (!state.mapSvgMarkup || typeof window.DOMParser !== "function") {
+        if (!state.mapSvgMarkup && !state.mapSvgFailed) {
+            renderRegionMapLoading();
+        } else if (!state.mapSvgMarkup || typeof window.DOMParser !== "function") {
             renderRegionMapFallback();
+        } else if (state.mapSvgElement && state.mapSvgContainer === container) {
+            if (!state.mapSvgElement.isConnected) {
+                container.innerHTML = "";
+                container.appendChild(state.mapSvgElement);
+            }
+
+            syncRegionMapSelectionState();
         } else {
             try {
                 parser = new window.DOMParser();
@@ -1287,7 +1637,7 @@
                     var regionGroup = createSvgNode("g");
                     var regionMatched = false;
 
-                    regionGroup.setAttribute("class", "hr030-map-region" + (selectedId === region.id ? " is-active" : ""));
+                    regionGroup.setAttribute("class", "hr030-map-region");
                     regionGroup.setAttribute("data-region-id", region.id);
                     regionGroup.setAttribute("role", "button");
                     regionGroup.setAttribute("tabindex", "0");
@@ -1359,6 +1709,8 @@
                         return;
                     }
 
+                    regionBoundsMap[region.id] = regionBounds;
+
                     badgeWidth = Math.max(44, Math.min(82, region.name.length * 11 + 18));
                     badgeHeight = 44;
                     centerX = regionBounds.x + regionBounds.width / 2 + (offset.dx || 0);
@@ -1375,8 +1727,7 @@
                         x: centerX,
                         y: centerY,
                         width: badgeWidth,
-                        height: badgeHeight,
-                        active: selectedId === region.id
+                        height: badgeHeight
                     });
                     overallBounds = mergeBounds(overallBounds, badgeBounds);
                 });
@@ -1408,7 +1759,7 @@
                     hitArea.setAttribute("height", formatSvgNumber(hitHeight));
                     hitArea.setAttribute("rx", "20");
 
-                    badgeGroup.setAttribute("class", "hr030-map-badge" + (badgeLayout.active ? " is-active" : ""));
+                    badgeGroup.setAttribute("class", "hr030-map-badge");
                     badgeGroup.setAttribute("transform", "translate(" + formatSvgNumber(badgeLayout.x) + " " + formatSvgNumber(badgeLayout.y) + ")");
                     badgeBody.setAttribute("class", "hr030-map-badge-body");
 
@@ -1436,42 +1787,42 @@
 
                     if (targetRegionGroup) {
                         targetRegionGroup.appendChild(badgeGroup);
+                        badgeGroupMap[badgeLayout.region.id] = badgeGroup;
                     }
                 });
+
+                state.mapSvgElement = svgEl;
+                state.mapSvgContainer = container;
+                state.mapRegionGroupMap = regionGroupMap;
+                state.mapRegionBoundsMap = regionBoundsMap;
+                state.mapBadgeGroupMap = badgeGroupMap;
+
+                syncRegionMapSelectionState();
             } catch (error) {
                 renderRegionMapFallback();
             }
         }
 
         if (noteEl) {
-            noteEl.innerHTML = [
-                '<div class="hr030-region-legend">',
-                '  <span><i class="is-headcount"></i>지역별 총 인원 규모</span>',
-                '  <span><i class="is-selected"></i>선택된 지역</span>',
-                "</div>",
-                '<span class="hr030-region-selection-badge">' + escapeHtml(selectedId === "all" ? "전체" : selectedRegion.name) + "</span>"
-            ].join("");
+            noteEl.innerHTML = "";
         }
     }
 
+    // 선택한 권역의 핵심 수치와 투입 가능 비율 카드를 렌더링한다
+    // 선택한 권역의 상세 KPI와 비율 바를 렌더링한다.
     function renderRegionDetail() {
         var region = getCurrentRegion();
         var detailEl = byId("hr030RegionDetail");
         var availableRatio = region.headcount ? Math.round((region.available / region.headcount) * 100) : 0;
+        var previousRatio = Number(state.regionRatioValue || 0);
         var stats = [
             { label: "총 인원", value: formatNumber(region.headcount) + "명" },
             { label: "투입 가능", value: formatNumber(region.available) + "명" },
             { label: "현재 투입", value: formatNumber(region.active) + "명" },
             { label: "평균 경력", value: escapeHtml(region.avgCareer) }
         ];
-        var noteText = region.note || "지도를 클릭하면 우측 상세 정보가 함께 바뀌고, 같은 데이터셋을 기준으로 구성한 내용을 재사용할 수 있도록 만든 예시입니다.";
-
         detailEl.innerHTML = [
-            '<div class="hr030-region-detail-head">',
-            '  <div class="hr030-region-detail-copy">',
-            '    <h6>' + escapeHtml(region.name) + "</h6>",
-            // '    <p>권역별 인력 운영 지표를 빠르게 비교할 수 있습니다.</p>',
-            "  </div>",
+            '<div class="hr030-region-detail-head hr030-region-detail-head--compact">',
             '  <span class="hr030-region-detail-skill">주력 ' + escapeHtml(region.leadSkill) + "</span>",
             "</div>",
             '<div class="hr030-region-stat-grid">',
@@ -1489,17 +1840,44 @@
             '    <span>투입 가능 비율</span>',
             '    <div class="hr030-region-ratio-row">',
             '      <strong>' + formatNumber(availableRatio) + "%</strong>",
-            '      <div class="hr030-region-ratio-bar"><i style="width:' + escapeHtml(availableRatio) + '%"></i></div>',
+            '      <div class="hr030-region-ratio-bar"><i style="width:' + escapeHtml(previousRatio) + '%" data-target-width="' + escapeHtml(availableRatio) + '"></i></div>',
             "    </div>",
-            "  </div>",
-            '  <div class="hr030-region-summary-card hr030-region-summary-card--note">',
-            '    <p>' + escapeHtml(noteText) + "</p>",
             "  </div>",
             "</div>"
         ].join("");
+
+        animateRegionRatioBar(detailEl, availableRatio);
+    }
+
+    // 권역 상세 카드의 투입 가능 비율 바를 이전 값에서 다음 값으로 부드럽게 이동시킨다
+    function animateRegionRatioBar(detailEl, nextRatio) {
+        var ratioBarFill;
+
+        if (!detailEl) {
+            return;
+        }
+
+        ratioBarFill = detailEl.querySelector(".hr030-region-ratio-bar i");
+
+        if (!ratioBarFill) {
+            state.regionRatioValue = nextRatio;
+            return;
+        }
+
+        if (state.regionRatioAnimationFrame) {
+            window.cancelAnimationFrame(state.regionRatioAnimationFrame);
+            state.regionRatioAnimationFrame = null;
+        }
+
+        state.regionRatioAnimationFrame = window.requestAnimationFrame(function () {
+            ratioBarFill.style.width = String(nextRatio) + "%";
+            state.regionRatioValue = nextRatio;
+            state.regionRatioAnimationFrame = null;
+        });
     }
 
     // 차트 공통 설정과 중앙 카드 차트 렌더링
+    // 차트 인스턴스를 안전하게 정리해 메모리 누수를 막는다.
     function destroyChart(chartKey) {
         if (state.charts[chartKey]) {
             if (typeof state.charts[chartKey].dispose === "function") {
@@ -1511,15 +1889,61 @@
         }
     }
 
+    // 같은 DOM이면 기존 ECharts 인스턴스를 재사용하고 아니면 새로 만든다.
+    function getOrCreateEChart(chartKey, chartEl, initOptions) {
+        var chart = state.charts[chartKey];
+        var existingChart;
+
+        if (!chartEl || typeof echarts !== "object" || typeof echarts.init !== "function") {
+            return null;
+        }
+
+        if (chart && typeof chart.getDom === "function" && chart.getDom() === chartEl) {
+            return chart;
+        }
+
+        existingChart = typeof echarts.getInstanceByDom === "function" ? echarts.getInstanceByDom(chartEl) : null;
+
+        if (existingChart) {
+            state.charts[chartKey] = existingChart;
+            return existingChart;
+        }
+
+        destroyChart(chartKey);
+        chartEl.innerHTML = "";
+        state.charts[chartKey] = echarts.init(chartEl, null, initOptions || { renderer: "svg" });
+        return state.charts[chartKey];
+    }
+
+    // 같은 canvas를 쓰는 Chart.js 인스턴스를 재사용하고 아니면 새로 만든다.
+    function getOrCreateChartJs(chartKey, canvas, config) {
+        var chart = state.charts[chartKey];
+
+        if (!canvas || typeof Chart !== "function") {
+            return null;
+        }
+
+        if (chart && chart.canvas === canvas) {
+            return chart;
+        }
+
+        destroyChart(chartKey);
+        state.charts[chartKey] = new Chart(canvas, config);
+        return state.charts[chartKey];
+    }
+
+    // Chart.js 공통 폰트와 색상 기본값을 적용한다.
     function applyChartDefaults() {
         if (typeof Chart !== "function") {
             return;
         }
 
-        Chart.defaults.font.family = '"Pretendard Variable", "Pretendard", "Noto Sans KR", sans-serif';
+        Chart.defaults.font.family = dashboardFontFamily;
+        Chart.defaults.font.size = 12;
         Chart.defaults.color = "#64748b";
     }
 
+    // 브라우저 리사이즈 시 모든 차트 크기를 다시 맞춘다.
     function resizeCharts() {
         Object.keys(state.charts).forEach(function (chartKey) {
             var chart = state.charts[chartKey];
@@ -1530,6 +1954,7 @@
         });
     }
 
+    // 주력 기술 카드 진입 애니메이션 클래스를 다시 실행한다.
     function replaySkillChartEntry(chartEl) {
         var chartWrap = chartEl && chartEl.closest(".hr030-skill-chart-wrap");
 
@@ -1551,9 +1976,11 @@
         }, 820);
     }
 
+    // 중앙 카드의 주력 기술 트리맵과 우측 요약 리스트를 함께 갱신한다
     function renderSkillDistribution() {
         var currentRegion = getCurrentRegion();
         var chartEl = byId("hr030SkillChart");
+        var skillChart;
         var listEl = byId("hr030SkillList");
         var skills = buildRegionSkillDistribution(currentRegion.skills);
         var summarySkills;
@@ -1561,6 +1988,8 @@
         var treemapData;
         var total;
         var topSkill;
+        var shouldPlayEntry;
+        var baseOption;
 
         total = skills.reduce(function (sum, item) {
             return sum + (item.value || 0);
@@ -1608,13 +2037,12 @@
             ].join("");
         }
 
-        destroyChart("skills");
-
         if (!chartEl) {
             return;
         }
 
         if (!skills.length) {
+            destroyChart("skills");
             chartEl.innerHTML = '<div class="hr030-empty-state">표시할 기술 스택 데이터가 없습니다.</div>';
             return;
         }
@@ -1623,21 +2051,26 @@
             return;
         }
 
-        chartEl.innerHTML = "";
         treemapData = buildSkillTreemapData(skills);
-        state.charts.skills = echarts.init(chartEl, null, { renderer: "svg" });
-        state.charts.skills.setOption({
+        shouldPlayEntry = !(state.charts.skills && typeof state.charts.skills.getDom === "function" && state.charts.skills.getDom() === chartEl);
+        skillChart = getOrCreateEChart("skills", chartEl, { renderer: "svg" });
+
+        if (!skillChart) {
+            return;
+        }
+
+        baseOption = {
             animation: true,
             animationDuration: 240,
             animationDurationUpdate: 900,
-            animationEasing: "quarticOut", 
+            animationEasing: "quarticOut",
             animationEasingUpdate: "quarticOut",
             tooltip: {
                 backgroundColor: "rgba(15, 23, 42, 0.92)",
                 borderWidth: 0,
                 textStyle: {
                     color: "#ffffff",
-                    fontFamily: '"Pretendard Variable", "Pretendard", "Noto Sans KR", sans-serif'
+                    fontFamily: dashboardFontFamily
                 },
                 formatter: function (params) {
                     var value = Number(params.value || 0);
@@ -1646,25 +2079,29 @@
                         return item.name;
                     }).filter(Boolean).slice(1).join(" / ");
 
-                    return [
+                        return [
                         '<div style="display:grid;gap:4px;min-width:120px;">',
-                        '  <strong style="font-size:13px;font-weight:700;">' + escapeHtml(params.name || "") + "</strong>",
-                        path ? '  <span style="font-size:11px;opacity:0.78;">' + escapeHtml(path) + "</span>" : "",
-                        '  <span style="font-size:12px;">' + formatNumber(value) + "명 · " + share + "%</span>",
+                        '  <strong style="font-size:14px;font-weight:700;">' + escapeHtml(params.name || "") + "</strong>",
+                        path ? '  <span style="font-size:12px;opacity:0.78;">' + escapeHtml(path) + "</span>" : "",
+                        '  <span style="font-size:13px;">' + formatNumber(value) + "명 · " + share + "%</span>",
                         "</div>"
                     ].join("");
                 }
             },
             series: [{
                 type: "treemap",
+                cursor: "default",
                 left: 0,
                 right: 0,
-                top: 0,
+                top: 4,
                 bottom: 0,
                 width: "100%",
                 height: "100%",
                 roam: false,
                 nodeClick: false,
+                emphasis: {
+                    disabled: true
+                },
                 breadcrumb: { show: false },
                 visibleMin: 20,
                 sort: "desc",
@@ -1681,15 +2118,18 @@
                         return params.name;
                     },
                     color: "#ffffff",
-                    fontSize: 12,
+                    fontFamily: dashboardFontFamily,
+                    fontSize: 14,
                     fontWeight: 700
                 },
                 upperLabel: {
                     show: true,
-                    height: 12,
+                    height: 18,
                     color: "#334155",
-                    fontSize: 11,
-                    fontWeight: 700
+                    fontFamily: dashboardFontFamily,
+                    fontSize: 12,
+                    fontWeight: 700,
+                    lineHeight: 16
                 },
                 itemStyle: {
                     borderColor: "#ffffff",
@@ -1708,10 +2148,12 @@
                     {
                         upperLabel: {
                             show: true,
-                            height: 12,
+                            height: 18,
                             color: "#24304a",
-                            fontSize: 11,
-                            fontWeight: 700
+                            fontFamily: dashboardFontFamily,
+                            fontSize: 12,
+                            fontWeight: 700,
+                            lineHeight: 16
                         },
                         itemStyle: {
                             borderColor: "#ffffff",
@@ -1724,7 +2166,8 @@
                         label: {
                             show: true,
                             color: "#ffffff",
-                            fontSize: 12,
+                            fontFamily: dashboardFontFamily,
+                            fontSize: 14,
                             fontWeight: 700
                         },
                         itemStyle: {
@@ -1736,39 +2179,48 @@
                     }
                 ],
                 universalTransition: true,
-                data: buildSkillTreemapSeedData(treemapData)
+                data: shouldPlayEntry ? buildSkillTreemapSeedData(treemapData) : treemapData
             }]
-        });
-        replaySkillChartEntry(chartEl);
+        };
+
+        skillChart.setOption(baseOption, { notMerge: true, lazyUpdate: true });
+
+        if (shouldPlayEntry) {
+            replaySkillChartEntry(chartEl);
+        }
 
         if (state.skillTreemapMorphTimer) {
             window.clearTimeout(state.skillTreemapMorphTimer);
         }
 
-        state.skillTreemapMorphTimer = window.setTimeout(function () {
-            if (!state.charts.skills) {
-                return;
-            }
+        if (shouldPlayEntry) {
+            state.skillTreemapMorphTimer = window.setTimeout(function () {
+                if (!state.charts.skills) {
+                    return;
+                }
 
-            state.charts.skills.setOption({
-                series: [{
-                    type: "treemap",
-                    universalTransition: true,
-                    data: treemapData
-                }]
-            });
-        }, 60);
+                state.charts.skills.setOption({
+                    series: [{
+                        type: "treemap",
+                        universalTransition: true,
+                        data: treemapData
+                    }]
+                });
+            }, 60);
+        }
 
         requestAnimationFrame(function () {
-            if (state.charts.skills && typeof state.charts.skills.resize === "function") {
-                state.charts.skills.resize();
+            if (skillChart && typeof skillChart.resize === "function") {
+                skillChart.resize();
             }
         });
     }
 
     // 우측 카드: 가용 인력 요약 차트와 리스트 렌더링
+    // 우측 카드의 가용 인력 차트와 리스트를 같은 기준으로 렌더링한다
     function renderAvailabilityPanel(employeeRows) {
         var canvas = byId("hr030AvailabilityChart");
+        var availabilityChart;
         var summaryEl = byId("hr030AvailabilitySummary");
         var listEl = byId("hr030AvailabilityList");
         var availabilityStatuses = {
@@ -1842,7 +2294,10 @@
                         '    <strong>' + escapeHtml(item.name) + "</strong>",
                         '    <span>' + escapeHtml(getPrimaryCategory(item)) + " · " + escapeHtml(item.region) + " · " + escapeHtml(item.availableDate) + "</span>",
                         "  </div>",
-                        "  " + renderStatusBadge(item.status),
+                        '  <div class="hr030-person-actions">',
+                        "    " + renderStatusBadge(item.status),
+                        '    <button type="button" class="hr030-person-detail-button" data-detail-name="' + escapeHtml(item.name) + '" data-detail-region="' + escapeHtml(item.regionId || "") + '">상세보기</button>',
+                        "  </div>",
                         "</div>"
                     ].join("");
                 }).join("");
@@ -1854,15 +2309,13 @@
         }
 
         applyChartDefaults();
-        destroyChart("availability");
-
-        state.charts.availability = new Chart(canvas, {
+        availabilityChart = getOrCreateChartJs("availability", canvas, {
             type: "bar",
             data: {
-                labels: summaryData.map(function (item) { return item.label; }),
+                labels: [],
                 datasets: [{
-                    data: summaryData.map(function (item) { return item.value; }),
-                    backgroundColor: summaryData.map(function (item) { return item.color; }),
+                    data: [],
+                    backgroundColor: [],
                     borderRadius: 999,
                     borderSkipped: false,
                     borderWidth: 0,
@@ -1874,6 +2327,10 @@
                 indexAxis: "y",
                 responsive: true,
                 maintainAspectRatio: false,
+                animation: {
+                    duration: 420,
+                    easing: "easeOutCubic"
+                },
                 layout: {
                     padding: {
                         left: 2,
@@ -1886,14 +2343,7 @@
                     legend: { display: false },
                     tooltip: {
                         displayColors: false,
-                        callbacks: {
-                            label: function (context) {
-                                var value = Number(context.raw || 0);
-                                var share = total ? formatPercent((value / total) * 100) : "0.0";
-
-                                return context.label + " " + formatNumber(value) + "명 (" + share + "%)";
-                            }
-                        }
+                        callbacks: {}
                     }
                 },
                 scales: {
@@ -1908,7 +2358,8 @@
                             precision: 0,
                             color: "#8e887d",
                             font: {
-                                size: 10
+                                family: dashboardFontFamily,
+                                size: 11
                             },
                             callback: function (value) {
                                 return value + "명";
@@ -1921,7 +2372,8 @@
                         ticks: {
                             color: "#5f5b55",
                             font: {
-                                size: 11,
+                                family: dashboardFontFamily,
+                                size: 12,
                                 weight: 700
                             }
                         }
@@ -1929,10 +2381,27 @@
                 }
             }
         });
+
+        if (!availabilityChart) {
+            return;
+        }
+
+        availabilityChart.data.labels = summaryData.map(function (item) { return item.label; });
+        availabilityChart.data.datasets[0].data = summaryData.map(function (item) { return item.value; });
+        availabilityChart.data.datasets[0].backgroundColor = summaryData.map(function (item) { return item.color; });
+        availabilityChart.options.plugins.tooltip.callbacks.label = function (context) {
+            var value = Number(context.raw || 0);
+            var share = total ? formatPercent((value / total) * 100) : "0.0";
+
+            return context.label + " " + formatNumber(value) + "명 (" + share + "%)";
+        };
+        availabilityChart.update();
     }
 
+    // 경력 구간 분포 차트와 리스트를 렌더링한다.
     function renderCategoryDistribution(employeeRows) {
         var canvas = byId("hr030CategoryChart");
+        var categoryChart;
         var listEl = byId("hr030CategoryList");
         var categories = careerBandMeta.map(function (item) {
             return {
@@ -1994,19 +2463,13 @@
         }
 
         applyChartDefaults();
-        destroyChart("category");
-
-        if (!total) {
-            return;
-        }
-
-        state.charts.category = new Chart(canvas, {
+        categoryChart = getOrCreateChartJs("category", canvas, {
             type: "bar",
             data: {
-                labels: categories.map(function (item) { return item.label; }),
+                labels: [],
                 datasets: [{
-                    data: categories.map(function (item) { return item.value; }),
-                    backgroundColor: categories.map(function (item) { return item.color; }),
+                    data: [],
+                    backgroundColor: [],
                     borderRadius: 8,
                     borderSkipped: false,
                     borderWidth: 0,
@@ -2030,14 +2493,7 @@
                     legend: { display: false },
                     tooltip: {
                         displayColors: false,
-                        callbacks: {
-                            label: function (context) {
-                                var value = Number(context.raw || 0);
-                                var share = total ? formatPercent((value / total) * 100) : "0.0";
-
-                                return context.label + " " + formatNumber(value) + "명 (" + share + "%)";
-                            }
-                        }
+                        callbacks: {}
                     }
                 },
                 scales: {
@@ -2052,7 +2508,8 @@
                             precision: 0,
                             color: "#8e887d",
                             font: {
-                                size: 9
+                                family: dashboardFontFamily,
+                                size: 11
                             },
                             callback: function (value) {
                                 return value + "명";
@@ -2065,7 +2522,8 @@
                         ticks: {
                             color: "#5f5b55",
                             font: {
-                                size: 10,
+                                family: dashboardFontFamily,
+                                size: 12,
                                 weight: 700
                             }
                         }
@@ -2073,6 +2531,21 @@
                 }
             }
         });
+
+        if (!categoryChart) {
+            return;
+        }
+
+        categoryChart.data.labels = categories.map(function (item) { return item.label; });
+        categoryChart.data.datasets[0].data = categories.map(function (item) { return item.value; });
+        categoryChart.data.datasets[0].backgroundColor = categories.map(function (item) { return item.color; });
+        categoryChart.options.plugins.tooltip.callbacks.label = function (context) {
+            var value = Number(context.raw || 0);
+            var share = total ? formatPercent((value / total) * 100) : "0.0";
+
+            return context.label + " " + formatNumber(value) + "명 (" + share + "%)";
+        };
+        categoryChart.update();
     }
 
     // 예비 위젯용 운영 이슈 렌더러
@@ -2139,6 +2612,7 @@
         initializeIcons();
     }
 
+    // 화면 헤더와 카드 제목, 선택 콤보 상태를 현재 조건에 맞춰 갱신한다
     function updateHeaders(employeeRows) {
         var currentRegion = getCurrentRegion();
         var regionOptions = [{ value: "all", label: "전체" }].concat(dashboardData.map.regions.map(function (region) {
@@ -2242,6 +2716,7 @@
         }
     }
 
+    // 현재 필터 상태 기준으로 지도, 상세, 차트, 리스트를 한 번에 다시 그린다
     function renderDashboard() {
         var employeeRows = getVisibleEmployees();
         var issueRows = getVisibleIssues();
@@ -2254,7 +2729,8 @@
         renderSkillDistribution();
     }
 
-    // 사용자 상호작용 바인딩
+    // 사용자 입력과 카드 인터랙션 이벤트를 묶어서 연결한다
+    // 검색창 입력을 대시보드 재렌더와 연결한다.
     function bindSearch() {
         var searchInput = byId("hr030DashboardSearch");
 
@@ -2268,6 +2744,7 @@
         });
     }
 
+    // 상태 필터 버튼 클릭을 현재 화면 필터와 연결한다.
     function bindStatusFilter() {
         var filterGroup = byId("hr030StatusFilterGroup");
 
@@ -2296,6 +2773,7 @@
         var mapEl = byId("hr030RegionMap");
         var resetButton = byId("hr030RegionReset");
 
+        // 이벤트가 걸린 노드에서 권역 id를 거슬러 찾아낸다.
         function findRegionId(target) {
             var node = target;
 
@@ -2313,11 +2791,18 @@
         if (mapEl) {
             mapEl.addEventListener("click", function (event) {
                 var regionId = findRegionId(event.target);
+                var svgEl = mapEl.querySelector(".hr030-map-svg--regional");
+                var clickPoint = getSvgPointFromEvent(svgEl, event);
 
                 if (!regionId) {
                     return;
                 }
 
+                state.mapSelectionRipple = clickPoint ? {
+                    regionId: regionId,
+                    x: clickPoint.x,
+                    y: clickPoint.y
+                } : null;
                 state.selectedRegionId = regionId;
                 renderDashboard();
             });
@@ -2343,6 +2828,7 @@
         }
     }
 
+    // 카드별 select 변경을 공통 상태값과 동기화한다.
     function bindCardSelects() {
         var dashboard = byId("hr030-dashboard");
 
@@ -2381,6 +2867,7 @@
         });
     }
 
+    // Lucide 아이콘을 현재 DOM 기준으로 다시 그린다.
     function initializeIcons() {
         if (window.lucide && typeof window.lucide.createIcons === "function") {
             window.lucide.createIcons();
@@ -2388,6 +2875,7 @@
     }
 
     // 초기 진입 시점 부트스트랩
+    // 첫 진입 시 정적 영역, 데이터 로드, 이벤트 바인딩을 한 번에 부트스트랩한다
     function initialize() {
         setStaticContent();
         loadRegionMapSvg();
