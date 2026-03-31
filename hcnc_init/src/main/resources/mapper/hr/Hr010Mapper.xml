@@ -47,6 +47,9 @@
         <if test="dev_nm != null and dev_nm != ''">
             AND dev_nm LIKE CONCAT('%', #{dev_nm}, '%')
         </if>
+        <if test="dev_id != null and dev_id != ''">
+            AND dev_id = #{dev_id}
+        </if>
         ORDER BY score DESC, dev_id
     </select>
 

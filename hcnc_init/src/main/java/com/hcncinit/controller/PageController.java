@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -104,6 +105,21 @@ public class PageController {
         model.addAttribute("LOGIN_AUTH", auth);
         model.addAttribute("LOGIN_LOCK", lock);
         model.addAttribute("LOGIN_PW_CHG", pwchg);
+        return mv;
+    }
+
+    @GetMapping("/hr011")
+    public ModelAndView hr011(@RequestParam(value = "dev_id", required = false) String devId, HttpSession session, Model model) {
+        ModelAndView mv = new ModelAndView();
+        mv.setViewName("views/hr/hr011");
+
+        String auth = (String) session.getAttribute("LOGIN_AUTH");
+        String lock = (String) session.getAttribute("LOGIN_LOCK");
+        String pwchg = (String) session.getAttribute("LOGIN_PW_CHG");
+        model.addAttribute("LOGIN_AUTH", auth);
+        model.addAttribute("LOGIN_LOCK", lock);
+        model.addAttribute("LOGIN_PW_CHG", pwchg);
+        model.addAttribute("dev_id", devId);
         return mv;
     }
 

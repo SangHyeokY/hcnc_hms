@@ -190,15 +190,12 @@ function scheduleHr013StackRowState(row) {
 // 프로젝트 테이블 생성
 function buildHr013Table() {
     if (!document.getElementById("TABLE_HR013_A")) return;
+    var isHr011Detail = !!document.querySelector(".hr011-page");
 
-    window.hr013Table = new Tabulator("#TABLE_HR013_A", {
+    var options = {
         // layout: "fitColumns",
         layout: "fitData",
         placeholder: "데이터 없음",
-        height: "100%",
-        // 페이징 설정
-        pagination: "local",       // 로컬 데이터 기준 페이지네이션
-        paginationSize: 10,        // 한 페이지에 10개씩 표시
         selectable: false,
         // 프로젝트 테이블 데이터 로드 시 건수 반영
         dataLoaded: function () {
@@ -403,7 +400,20 @@ function buildHr013Table() {
             { title: "비고", field: "remark", editor: "input", editable: isHr013Editable, cellClick: startEditOnClick, width: 250},
         ],
         data: []
-    });
+    };
+
+    if (!isHr011Detail) {
+        options.pagination = "local";
+        options.paginationSize = 10;
+    } else {
+        options.pagination = false;
+    }
+
+    if (!isHr011Detail) {
+        options.height = "100%";
+    }
+
+    window.hr013Table = new Tabulator("#TABLE_HR013_A", options);
 }
 
 // 상세모드에서는 테이블 조작 비활성화

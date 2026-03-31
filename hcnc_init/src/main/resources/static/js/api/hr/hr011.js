@@ -231,7 +231,7 @@ function saveHr011TableData() {
         remark: $("#remark").val()
     };
 
-    $.ajax({
+    return $.ajax({
         url: "/hr011/tab1_upsert",
         type: "POST",
         contentType: "application/json",
@@ -495,4 +495,305 @@ function clampAmountCaretToEditableRange(input) {
 // editable 끝 인덱스 계산
 function getAmountEditableEndIndex(value) {
     return value ? value.length - (value.endsWith("원") ? 1 : 0) : 0;
+}
+
+// 상세 페이지 공통 상태를 초기화한다.
+window.currentMode = "update";
+window.hr010ReadOnly = false;
+window.changedTabs = window.changedTabs || { tab2: false, tab3: false, tab4: false };
+
+const hr011MainSelectMaps = {
+    devTyp: {},
+    workMd: {},
+    ctrtTyp: {},
+    kosa: {},
+    mainFld: {},
+    mainCust: {}
+};
+
+let hr011CurrentRow = null;
+
+// hr011 상세 페이지를 초기화한다.
+$(document).ready(async function () {
+    if (!$(".hr011-page").length) {
+        return;
+    }
+
+    bindHr011PageEvents();
+    $("#write_user_id").val($.trim($(".header-user__id, .header-user__meta-id").first().text() || ""));
+
+    try {
+        showLoading();
+        await initHr011DetailPage();
+    } finally {
+        hideLoading();
+    }
+});
+
+// 상세 페이지 버튼 동작을 묶는다.
+function bindHr011PageEvents() {
+    $("#hr011BackBtn").on("click", function () {
+        window.location.href = "/hr010";
+    });
+
+    $("#hr011SaveBtn").on("click", async function () {
+        await saveHr011DetailPage();
+    });
+
+    $("#hope_rate_amt")
+        .on("input", function () {
+            const raw = this.value || "";
+            const caret = Number.isFinite(this.selectionStart) ? this.selectionStart : raw.length;
+            const digitsBeforeCaret = countAmountDigitsBeforeCaret(raw, caret);
+            const inputNumber = normalizeAmountValue(raw);
+            const formatted = formatAmount(inputNumber);
+            this.value = formatted;
+            setAmountCaretByDigitIndex(this, digitsBeforeCaret);
+        })
+        .on("focus", function () {
+            moveAmountCaretToEditableEnd(this);
+        })
+        .on("click", function () {
+            const input = this;
+            setTimeout(function () {
+                clampAmountCaretToEditableRange(input);
+            }, 0);
+        });
+}
+
+// 상세 페이지의 메인 정보와 하위 섹션을 함께 초기화한다.
+async function initHr011DetailPage() {
+    const devId = getHr011TargetDevId();
+    if (!devId) {
+        await showAlert({ icon: "warning", title: "안내", text: "선택된 인력 정보가 없습니다." });
+        window.location.href = "/hr010";
+        return;
+    }
+
+    window.currentDevId = devId;
+    $("#dev_id").val(devId);
+
+    await Promise.all([
+        loadHr011MainSelect("select_dev_typ", "DEV_TYP", hr011MainSelectMaps.devTyp),
+        loadHr011MainSelect("select_work_md", "WORK_MD", hr011MainSelectMaps.workMd),
+        loadHr011MainSelect("select_ctrt_typ", "CTRT_TYP", hr011MainSelectMaps.ctrtTyp),
+        loadHr011MainSelect("select_kosa_grd_cd", "KOSA_GRD_CD", hr011MainSelectMaps.kosa),
+        loadHr011MainSelect("select_main_fld_cd", "MAIN_FLD_CD", hr011MainSelectMaps.mainFld),
+        loadHr011MainSelect("select_main_cust_cd", "MAIN_CUST_CD", hr011MainSelectMaps.mainCust)
+    ]);
+
+    await loadHr011MainDetail(devId);
+    await window.initTab1();
+    window.initTab2();
+    window.initTab3();
+    if (typeof window.initTab4 === "function") {
+        window.initTab4();
+    }
+
+    setHr011Mode("update");
+    $(document).trigger("tab:readonly", [false]);
+}
+
+// 현재 상세 페이지 대상 인력 ID를 구한다.
+function getHr011TargetDevId() {
+    const fromInput = $.trim($("#dev_id").val());
+    if (fromInput) return fromInput;
+
+    const params = new URLSearchParams(window.location.search || "");
+    return $.trim(params.get("dev_id") || "");
+}
+
+// 메인 폼용 공통코드 select를 불러온다.
+function loadHr011MainSelect(selectId, grpCd, mapRef) {
+    return new Promise((resolve) => {
+        setComCode(selectId, grpCd, "", "cd", "cd_nm", function () {
+            $("#" + selectId).find("option").each(function () {
+                if (this.value) {
+                    mapRef[this.value] = $(this).text();
+                }
+            });
+            resolve();
+        });
+    });
+}
+
+// 인적사항 메인 데이터를 한 건 불러온다.
+async function loadHr011MainDetail(devId) {
+    const response = await $.ajax({
+        url: "/hr010/list",
+        type: "GET",
+        data: { dev_id: devId }
+    });
+
+    const row = Array.isArray(response?.res) && response.res.length ? response.res[0] : null;
+    if (!row) {
+        throw new Error("상세 데이터를 찾을 수 없습니다.");
+    }
+
+    hr011CurrentRow = row;
+    fillHr011MainForm(row);
+    await fillHr011Grade(row.dev_id);
+    renderHr011Summary(row);
+}
+
+// 메인 폼 입력값을 채운다.
+function fillHr011MainForm(row) {
+    const devTypeValue = resolveHr011DevTypeValue(row);
+    $("#dev_nm").val(row.dev_nm || "");
+    $("#select_dev_typ").val(devTypeValue);
+    $("#brdt").val(row.brdt || "");
+    $("#tel").val(row.tel || "");
+    $("#email").val(row.email || "");
+    $("#region").val(row.region || "");
+    $("#avail_dt").val(row.avail_dt || "");
+    $("#select_work_md").val(row.work_md || "");
+    $("#select_ctrt_typ").val(row.ctrt_typ || "");
+    $("#select_kosa_grd_cd").val(row.kosa_grd_cd || "");
+    $("#select_main_fld_cd").val(row.main_fld_cd || "");
+    $("#select_main_cust_cd").val(row.main_cust_cd || "");
+    $("#edu_last").val(row.edu_last || "");
+    $("#exp_yr").val(formatCareerYearMonth(row.exp_yr) || "");
+    $("#hope_rate_amt").val(formatAmount(row.hope_rate_amt));
+    $("#cert_txt").val(row.cert_txt || "");
+    $("#main_lang").val(row.main_lang || "");
+    $("#main_lang_display").val(row.main_lang_nm || "");
+}
+
+// 등급 점수 정보를 별도로 채운다.
+async function fillHr011Grade(devId) {
+    try {
+        const response = await $.ajax({
+            url: "/hr010/getScore",
+            type: "GET",
+            data: { dev_id: devId }
+        });
+        const score = response?.res || {};
+        const rank = score.rank || "";
+        const total = score.score || 0;
+        $("#grade").text(rank ? rank + "등급" : "-");
+        $("#score").text(rank ? "(" + total + "점)" : "0점");
+        $("#hr011SummaryGrade").text(rank ? rank + "등급" : "등급 미정");
+    } catch (error) {
+        $("#grade").text("-");
+        $("#score").text("0점");
+        $("#hr011SummaryGrade").text("등급 미정");
+    }
+}
+
+// 상단 요약 영역을 렌더링한다.
+function renderHr011Summary(row) {
+    const employment = resolveHr011DevTypeValue(row) === "HCNC_F"
+        ? { label: "프리랜서", className: "freelancer" }
+        : { label: "직원", className: "staff" };
+
+    $("#hr011SummaryBadge")
+        .text(employment.label)
+        .removeClass("hr011-summary-badge--staff hr011-summary-badge--freelancer")
+        .addClass("hr011-summary-badge--" + employment.className);
+
+    $("#hr011SummaryName").text(row.dev_nm || "인력 정보");
+    $("#hr011SummarySub").text(row.main_lang_nm || "주개발언어 미등록");
+    $("#hr011SummaryAvail").text(row.avail_dt || "협의");
+    $("#hr011SummaryRegion").text(row.region || "-");
+    $("#hr011SummaryRate").text(formatAmount(row.hope_rate_amt));
+    $("#hr011SummaryCareer").text(formatCareerYearMonth(row.exp_yr) || "-");
+
+    const skillNames = String(row.main_lang_nm || "")
+        .split(",")
+        .map((skill) => skill.trim())
+        .filter(Boolean);
+
+    $("#hr011SummarySkills").html(
+        (skillNames.length ? skillNames.slice(0, 6) : ["미등록"])
+            .map((skill) => `<span class="hr011-summary-skill">${escapeHr011(skill)}</span>`)
+            .join("")
+    );
+
+    $("#hr011SummaryAvatar").html(getHr011AvatarMarkup(row));
+}
+
+// 프로필 이미지/이니셜 마크업을 만든다.
+function getHr011AvatarMarkup(row) {
+    if (row.img_url) {
+        return `<img src="${row.img_url}" class="profile-circle-icon" alt="${escapeHr011(row.dev_nm || "프로필")}">`;
+    }
+
+    const name = String(row.dev_nm || "?").trim();
+    const seed = name.slice(-2) || "?";
+    return `<div class="profile-circle-icon">${escapeHr011(seed)}</div>`;
+}
+
+// 직원/프리랜서 코드를 정규화한다.
+function resolveHr011DevTypeValue(row) {
+    if (String(row.dev_id || "").startsWith("HCNC_F")) return "HCNC_F";
+    if (String(row.dev_id || "").startsWith("HCNC_S")) return "HCNC_S";
+    return "";
+}
+
+// 메인 정보와 하위 섹션 저장을 한 번에 실행한다.
+async function saveHr011DetailPage() {
+    try {
+        showLoading();
+        await saveHr011MainProfile();
+        if (typeof saveHr011TableData === "function") await saveHr011TableData();
+        if (typeof saveHr012TableData === "function") await saveHr012TableData();
+        if (typeof window.saveHr013TableData === "function") window.saveHr013TableData();
+        if (typeof window.saveTab4All === "function") window.saveTab4All();
+
+        showAlert({ icon: "success", title: "완료", text: "인적사항 상세 정보가 저장되었습니다." });
+    } catch (error) {
+        console.error(error);
+        showAlert({ icon: "error", title: "오류", text: "상세 정보 저장 중 오류가 발생했습니다." });
+    } finally {
+        hideLoading();
+    }
+}
+
+// 메인 인적사항 폼을 저장한다.
+async function saveHr011MainProfile() {
+    const formData = new FormData();
+    formData.append("dev_id", $("#dev_id").val());
+    formData.append("dev_typ", $("#select_dev_typ").val());
+    formData.append("dev_nm", $("#dev_nm").val());
+    formData.append("brdt", $("#brdt").val());
+    formData.append("tel", $("#tel").val());
+    formData.append("email", $("#email").val());
+    formData.append("region", $("#region").val());
+    formData.append("main_lang", $("#main_lang").val());
+    formData.append("exp_yr", $("#exp_yr").val());
+    formData.append("edu_last", $("#edu_last").val());
+    formData.append("cert_txt", $("#cert_txt").val());
+    formData.append("work_md", $("#select_work_md").val());
+    formData.append("avail_dt", $("#avail_dt").val());
+    formData.append("ctrt_typ", $("#select_ctrt_typ").val());
+    formData.append("hope_rate_amt", normalizeAmountValue($("#hope_rate_amt").val()));
+    formData.append("kosa_grd_cd", $("#select_kosa_grd_cd").val());
+    formData.append("main_fld_cd", $("#select_main_fld_cd").val());
+    formData.append("main_cust_cd", $("#select_main_cust_cd").val());
+
+    await $.ajax({
+        url: "/hr010/upsert",
+        type: "POST",
+        processData: false,
+        contentType: false,
+        data: formData
+    });
+}
+
+// 경력 표기 문자열을 화면용으로 정리한다.
+function formatCareerYearMonth(value) {
+    const raw = String(value || "").trim();
+    if (!raw) return "";
+    if (/[년월]/.test(raw)) return raw;
+    return raw + "년";
+}
+
+// 특수문자 이스케이프.
+function escapeHr011(value) {
+    return String(value || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\"/g, "&quot;")
+        .replace(/'/g, "&#39;");
 }

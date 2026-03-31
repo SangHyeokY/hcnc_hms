@@ -98,13 +98,13 @@ function updateHr012BTitleCount() {
 
 function buildHr012TableA() {
     if (window.hr012TableA) return;
+    const isHr011Detail = !!document.querySelector(".hr011-page");
 
-    window.hr012TableA = new Tabulator("#TABLE_HR012_A", {
+    const options = {
         layout: "fitColumns",
         // 보유역량(A)은 현재 페이징 미사용. 필요 시 true/"local"로 즉시 전환 가능.
         pagination: false,
         placeholder: "데이터 없음",
-        height: "100%",
         selectable: false,     // 행 선택 비활성화
         selectableRange: false, // v5 이상이면 안전하게 추가
         resizableColumns: false,
@@ -114,7 +114,13 @@ function buildHr012TableA() {
             { title: "상세", field: "skl_id_lst", hozAlign: "left",widthGrow: 1, formatter: tagFormatter },
         ],
         data: []
-    });
+    };
+
+    if (!isHr011Detail) {
+        options.height = "100%";
+    }
+
+    window.hr012TableA = new Tabulator("#TABLE_HR012_A", options);
 }
 
 function loadHr012TableDataA() {
@@ -170,14 +176,11 @@ function radioFormatter(cell) {
 
 function buildHr012TableB() {
     if (window.hr012TableB) return;
+    const isHr011Detail = !!document.querySelector(".hr011-page");
 
-    window.hr012TableB = new Tabulator("#TABLE_HR012_B", {
+    const options = {
         layout: "fitColumns",
         placeholder: "데이터 없음",
-        height: "100%",
-        // 페이징 설정
-        pagination: "local",       // 로컬 데이터 기준 페이지네이션
-        paginationSize: 10,        // 한 페이지에 10개씩 표시
         selectableRange: false, // v5 이상이면 안전하게 추가
         resizableColumns: false,
         // 숙련도 테이블 데이터 로드 시 건수 반영
@@ -224,7 +227,20 @@ function buildHr012TableB() {
             }))
         ],
         data: []
-    });
+    };
+
+    if (!isHr011Detail) {
+        options.pagination = "local";
+        options.paginationSize = 10;
+    } else {
+        options.pagination = false;
+    }
+
+    if (!isHr011Detail) {
+        options.height = "100%";
+    }
+
+    window.hr012TableB = new Tabulator("#TABLE_HR012_B", options);
 }
 
 function loadHr012TableDataB() {

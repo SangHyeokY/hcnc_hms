@@ -65,13 +65,9 @@
                     </ul>
                 </div>
 
-                <div class="dropdown">
+                <div class="dropdown dropdown-grade">
                     <button class="dropdown-btn">등급 <span>▼</span></button>
-                    <ul class="dropdown-menu">
-                        <li>sample1</li>
-                        <li>sample2</li>
-                        <li>sample3</li>
-                    </ul>
+                    <ul class="dropdown-menu"></ul>
                 </div>
 
                 <div class="dropdown dropdown-sido-cd">
@@ -89,6 +85,16 @@
     <section class="hr010-main">
         <div class="content-title fl-sb fl-ac">
             <h4 class="page-sub-title">인적사항 목록</h4>
+            <div class="hr010-view-toggle" role="tablist" aria-label="보기 형식">
+                <button type="button" class="hr010-view-toggle-btn is-active" data-view="card" role="tab" aria-selected="true">
+                    <span class="hr010-view-toggle-btn__icon" aria-hidden="true">▦</span>
+                    <span>카드</span>
+                </button>
+                <button type="button" class="hr010-view-toggle-btn" data-view="list" role="tab" aria-selected="false">
+                    <span class="hr010-view-toggle-btn__icon" aria-hidden="true">☰</span>
+                    <span>리스트</span>
+                </button>
+            </div>
         </div>
         <!-- ================= 검색 영역 ================= -->
         <section class="search-area mg-b20">
@@ -96,14 +102,20 @@
                 <div class="fl-sb">
                     <div class="search-info">
                         <div class="search-input hr010-search-tag-wrap">
-                            <p class="fl-ac">
-                                <label for="searchKeyword" class="fw600 pd-r10">• 키워드 검색</label>
-                                <input type="text" class="hr010-search-input hr010-search-keyword-input" id="searchKeyword" name="searchKeyword" placeholder="키워드로 검색하기" />
-                            </p>
+                            <div class="hr010-search-control-row">
+                                <label for="hr010TagKeywordInput" class="hr010-search-inline-label">• 태그 검색</label>
+                                <div class="hr010-search-field-wrap">
+                                    <div class="hr010-tag-search-box">
+                                        <div id="hr010TagArea" class="hr010-tag-area" aria-live="polite"></div>
+                                        <input type="text" class="hr010-search-input hr010-search-keyword-input" id="hr010TagKeywordInput" name="searchKeyword" placeholder="이름 또는 필터값을 입력하면 추천어가 표시됩니다." />
+                                    </div>
+                                    <div id="hr010TagSuggestionBox" class="hr010-tag-suggestion-box" hidden></div>
+                                </div>
+                                <div class="search-btn-area">
+                                    <button type="button" class="btn-search hr010-btn-reset">초기화</button>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="search-btn-area">
-                        <button class="btn-search">조회</button>
                     </div>
                 </div>
             </form>
