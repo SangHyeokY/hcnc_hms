@@ -41,12 +41,11 @@
             </div>
             <div class="hr010-filter-dropdowns">
 
-                <div class="dropdown">
+                <div class="dropdown dropdown-skl-grp">
                     <button class="dropdown-btn">주개발언어 <span>▼</span></button>
+                    <select id="select_skl_grp" style="display:none"></select>
                     <ul class="dropdown-menu">
-                        <li>sample1</li>
-                        <li>sample2</li>
-                        <li>sample3</li>
+
                     </ul>
                 </div>
 
@@ -54,9 +53,7 @@
                     <button class="dropdown-btn">계약형태 <span>▼</span></button>
                     <select id="select_ctrt_typ" style="display:none;"></select>
                     <ul class="dropdown-menu">
-                        <li>sample1</li>
-                        <li>sample2</li>
-                        <li>sample3</li>
+
                     </ul>
                 </div>
 
@@ -64,9 +61,7 @@
                     <button class="dropdown-btn">근무가능형태 <span>▼</span></button>
                     <select id="select_work_md" style="display:none;"></select>
                     <ul class="dropdown-menu">
-                        <li>sample1</li>
-                        <li>sample2</li>
-                        <li>sample3</li>
+
                     </ul>
                 </div>
 
@@ -79,12 +74,11 @@
                     </ul>
                 </div>
 
-                <div class="dropdown">
+                <div class="dropdown dropdown-sido-cd">
                     <button class="dropdown-btn">거주지역 <span>▼</span></button>
+                    <select id="select_sido-cd" style="display:none;"></select>
                     <ul class="dropdown-menu">
-                        <li>sample1</li>
-                        <li>sample2</li>
-                        <li>sample3</li>
+
                     </ul>
                 </div>
 
@@ -118,8 +112,11 @@
         <!-- ================= 메인 리스트 ================= -->
         <section class="white-full">
             <div id="CARD_HR010_A"></div>
-            <input type="hidden" id="dev_id" name="dev_id" th:value="${dev_id}">
-            <input type="hidden" id="dev_nm" name="dev_nm" th:value="${dev_nm}">
+            <div class="hidden data">
+                <input type="hidden" id="dev_id" name="dev_id" th:value="${dev_id}">
+                <input type="hidden" id="dev_nm" name="dev_nm" th:value="${dev_nm}">
+                <input type="hidden" id="main_lang" name="main_lang" th:value="${main_lang}">
+            </div>
         </section>
     </section>
 

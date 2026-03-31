@@ -2452,6 +2452,7 @@ section.search-area .search-info #searchConditionKeyword { /* 새 검색어 입�
   transition: border-color 220ms ease, color 220ms ease, background-color 220ms ease;
   box-shadow: none;
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .toggle-filter-chip:hover {
@@ -2793,7 +2794,7 @@ section.search-area .search-info #searchConditionKeyword { /* 새 검색어 입�
 
 .hr010-dashboard-wrap #CARD_HR010_A {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     grid-template-rows: repeat(2, 1fr);
     gap: 20px;
     height: 600px;     /* 2행 높이 맞추기 */
@@ -2809,6 +2810,8 @@ section.search-area .search-info #searchConditionKeyword { /* 새 검색어 입�
     cursor: pointer;
     transition: 0.2s;
     border: 1px solid #eee;
+    width: 100%;
+    height: 100%;
 }
 
 /* 인적사항 카드 호버시 */
@@ -2861,6 +2864,7 @@ section.search-area .search-info #searchConditionKeyword { /* 새 검색어 입�
 
 /* 카드 정보 (인적사항) - ... 표시 */
 .hr010-dashboard-wrap .card-info div {
+    min-width: 0;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -2919,7 +2923,7 @@ section.search-area .search-info #searchConditionKeyword { /* 새 검색어 입�
 .hr010-dashboard-wrap .hr010-filter-dropdowns {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    /* gap: 10px; */
 }
 
 /* 아코디언 메뉴 버튼 */
@@ -2928,7 +2932,7 @@ section.search-area .search-info #searchConditionKeyword { /* 새 검색어 입�
     height: 60px;
     border: 1px solid #ddd;
     border-radius: 8px;
-    background: #F6F9FD;
+    background: #FFFFFF;
     padding: 0 12px;
     text-align: left;
     cursor: pointer;
@@ -2951,14 +2955,14 @@ section.search-area .search-info #searchConditionKeyword { /* 새 검색어 입�
     max-height: 0;
     overflow: hidden;
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    border-radius: 8px;
     background: #fafafa;
     margin-top: 6px;
 }
 
 /* 아코디언 메뉴 열렸을 때 */
 .hr010-dashboard-wrap .dropdown.open .dropdown-menu {
-    max-height: 200px; /* 충분히 크게 */
+    max-height: 400px !important; /* 충분히 크게 */
+    overflow-y: auto; /* 스크롤 */
 }
 
 /* 아코디언 메뉴 열렸을 때, 선택된 항목 */
@@ -2970,6 +2974,19 @@ section.search-area .search-info #searchConditionKeyword { /* 새 검색어 입�
 .hr010-dashboard-wrap .dropdown-menu li {
     padding: 10px;
     cursor: pointer;
+}
+
+/* 아코디언 하위 메뉴 맨 위 */
+.hr010-dashboard-wrap .dropdown-menu li:first-child {
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+
+/* 아코디언 하위 메뉴 맨 아래 */
+.hr010-dashboard-wrap .dropdown-menu li:last-child {
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+    margin-bottom: 6px;
 }
 
 /* 아코디언 내부 호버 */
