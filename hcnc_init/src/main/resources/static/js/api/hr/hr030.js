@@ -319,6 +319,70 @@
         };
     }
 
+    // 도형 크기에 맞춰 리플 시작점 보정 패딩을 너무 크지 않게 계산한다.
+    function getRippleClampPadding(bounds) {
+        var minSide;
+
+        if (!bounds) {
+            return 4;
+        }
+
+        minSide = Math.min(Number(bounds.width || 0), Number(bounds.height || 0));
+        return Math.max(2, Math.min(8, minSide * 0.08));
+    }
+
+    // 실제 도형 밖을 눌렀을 때 가장 가까운 도형 경계점으로 리플 시작점을 보정한다.
+    function resolveRippleStartPoint(regionGroup, point, eventTarget) {
+        var provinceNode;
+        var provinceNodes;
+        var nearestPoint = null;
+        var nearestDistance = Infinity;
+
+        if (!point) {
+            return null;
+        }
+
+        provinceNode = eventTarget && typeof eventTarget.closest === "function"
+            ? eventTarget.closest(".hr030-map-province-shape")
+            : null;
+
+        if (provinceNode) {
+            return { x: point.x, y: point.y };
+        }
+
+        if (!regionGroup) {
+            return { x: point.x, y: point.y };
+        }
+
+        provinceNodes = Array.prototype.slice.call(regionGroup.querySelectorAll(".hr030-map-province-shape"));
+
+        provinceNodes.forEach(function (shapeNode) {
+            var bounds = getNodeBounds(shapeNode);
+            var projectedX;
+            var projectedY;
+            var dx;
+            var dy;
+            var distance;
+
+            if (!bounds) {
+                return;
+            }
+
+            projectedX = Math.min(Math.max(point.x, bounds.x), bounds.x + bounds.width);
+            projectedY = Math.min(Math.max(point.y, bounds.y), bounds.y + bounds.height);
+            dx = point.x - projectedX;
+            dy = point.y - projectedY;
+            distance = Math.sqrt((dx * dx) + (dy * dy));
+
+            if (distance < nearestDistance) {
+                nearestDistance = distance;
+                nearestPoint = { x: projectedX, y: projectedY };
+            }
+        });
+
+        return nearestPoint || { x: point.x, y: point.y };
+    }
+
     // 권역 선택 시 클릭 위치 기준으로 색이 퍼지는 리플을 재생한다
     function animateMapSelectionRipple(circleNode, targetRadius, onComplete) {
         var startTime;
@@ -400,7 +464,12 @@
             svgEl.insertBefore(defs, svgEl.firstChild);
         }
 
-        rippleCenter = clampPointToBounds(targetBounds, rippleConfig, 14);
+        rippleCenter = rippleConfig && Number.isFinite(rippleConfig.x) && Number.isFinite(rippleConfig.y)
+            ? { x: rippleConfig.x, y: rippleConfig.y }
+            : {
+                x: targetBounds.x + (targetBounds.width / 2),
+                y: targetBounds.y + (targetBounds.height / 2)
+            };
 
         clipId = "hr030-map-ripple-" + String(Date.now()) + "-" + String(Math.floor(Math.random() * 10000));
         clipPath = createSvgNode("clipPath");
@@ -475,6 +544,8 @@
         var regionGroupMap = state.mapRegionGroupMap || {};
         var badgeGroupMap = state.mapBadgeGroupMap || {};
         var regionBoundsMap = state.mapRegionBoundsMap || {};
+        var targetRegionGroup;
+        var targetBounds;
 
         Object.keys(regionGroupMap).forEach(function (regionId) {
             var regionGroup = regionGroupMap[regionId];
@@ -492,7 +563,10 @@
         });
 
         if (selectionRipple && selectionRipple.regionId && regionGroupMap[selectionRipple.regionId] && regionBoundsMap[selectionRipple.regionId]) {
-            playRegionSelectionRipple(svgEl, regionGroupMap[selectionRipple.regionId], regionBoundsMap[selectionRipple.regionId], selectionRipple, function () {
+            targetRegionGroup = regionGroupMap[selectionRipple.regionId];
+            targetBounds = regionBoundsMap[selectionRipple.regionId];
+
+            playRegionSelectionRipple(svgEl, targetRegionGroup, targetBounds, selectionRipple, function () {
                 state.mapSelectionRipple = null;
             });
             return;
@@ -2793,15 +2867,17 @@
                 var regionId = findRegionId(event.target);
                 var svgEl = mapEl.querySelector(".hr030-map-svg--regional");
                 var clickPoint = getSvgPointFromEvent(svgEl, event);
+                var regionGroup = regionId ? state.mapRegionGroupMap[regionId] : null;
+                var ripplePoint = resolveRippleStartPoint(regionGroup, clickPoint, event.target);
 
                 if (!regionId) {
                     return;
                 }
 
-                state.mapSelectionRipple = clickPoint ? {
+                state.mapSelectionRipple = ripplePoint ? {
                     regionId: regionId,
-                    x: clickPoint.x,
-                    y: clickPoint.y
+                    x: ripplePoint.x,
+                    y: ripplePoint.y
                 } : null;
                 state.selectedRegionId = regionId;
                 renderDashboard();
