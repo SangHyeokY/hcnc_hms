@@ -37,9 +37,12 @@ window.initTab4 = function() {
     // if (!window.hr014TableB) buildHr014TableB();
 
     // 서버에서 항상 조회
-    loadHr014TableDataA().then(data => {
+    loadHr014TableDataA().then(function (data) {
         window.hr014TableA.setData(data);  // 초기 데이터로 덮어쓰기
         window.hr014TableA.redraw(true);
+        return loadHr014TableDataB().catch(function (err) {
+            console.warn("tab4B 초기 로드 실패", err);
+        });
     });
 
     // A/B 테이블 보여주기/숨기기
@@ -177,6 +180,7 @@ function buildHr014TableA() {
                 widthGrow: 1,
                 headerSort: false,
                 editor: "input",
+                formatter: commentTextFormatter,
                 editable: function () {
                     return !window.hr010ReadOnly;
                 },
@@ -193,9 +197,10 @@ function buildHr014TableA() {
     });
 }
 
-function loadHr014TableDataA() {
+function loadHr014TableDataA(selectedOverride) {
     const devId = window.currentDevId || $("#dev_id").val();
     if (!window.hr014TableA) return Promise.resolve(); // 기존 return 대신 완료로 처리
+    const requestedPrjId = String(selectedOverride || window.hr013_prj_nm || "").trim();
 
     return new Promise((resolve, reject) => {
         $.ajax({
@@ -203,7 +208,7 @@ function loadHr014TableDataA() {
             type: "GET",
             data: {
                 dev_id: devId,
-                dev_prj_id: window.hr013_prj_nm
+                dev_prj_id: requestedPrjId
             },
             success: function (response) {
                 if (!response.success) {
@@ -213,18 +218,41 @@ function loadHr014TableDataA() {
 
                 const dataArray = Array.isArray(response.list) ? response.list : [];
                 const projectList = Array.isArray(response.projectList) ? response.projectList : [];
+                const defaultProjectId = projectList.length ? String(projectList[0].dev_prj_id || "").trim() : "";
+                let selected = requestedPrjId;
+
+                if (!selected && defaultProjectId) {
+                    selected = defaultProjectId;
+                }
+
+                if (selected && projectList.length) {
+                    const found = projectList.some(function (item) {
+                        return String(item.dev_prj_id || "").trim() === selected;
+                    });
+                    if (!found) {
+                        selected = defaultProjectId;
+                    }
+                }
+
+                if (selected && selected !== requestedPrjId) {
+                    window.hr013_prj_nm = selected;
+                    loadHr014TableDataA(selected).then(resolve).catch(reject);
+                    return;
+                }
+
+                window.hr013_prj_nm = selected;
 
                 // 자사 프로젝트 표시
                 const $select = $(".select_prj_cd");
-                const selected = window.hr013_prj_nm;
 
                 // 항상 초기화
                 $select.empty();
 
                 projectList.forEach(function (item) {
-                    const isSelected = item.dev_prj_id == selected ? "selected" : "";
+                    const itemId = String(item.dev_prj_id || "").trim();
+                    const isSelected = itemId && itemId === selected ? "selected" : "";
                     $select.append(
-                        `<option value="${item.dev_prj_id}" ${isSelected}>${item.prj_nm}</option>`
+                        `<option value="${itemId}" ${isSelected}>${item.prj_nm}</option>`
                     );
                 });
                 $select.val(selected);
@@ -287,8 +315,13 @@ $(document).on("change", ".select_prj_cd", async function () {
 function scoreCheckboxFormatter(cell, formatterParams, onRendered) {
     const value = cell.getValue();
     const checked = value === "Y" ? "checked" : "";
-    const disabled = window.hr010ReadOnly ? "disabled" : "";
+    const isReadOnly = !!window.hr010ReadOnly;
     // 실제 점수 변경은 radio 자체가 아니라 cellClick(setScore)에서 처리한다.
+    if (isReadOnly) {
+        const scoreLabel = String(cell.getColumn().getField() || "").replace("lv", "");
+        return `<span class="hr014-readonly-score" style="display:block; width:100%; text-align:center; font-weight:700; color:#20385c;">${checked ? scoreLabel : ""}</span>`;
+    }
+    const disabled = isReadOnly ? "disabled" : "";
     return `<input type="radio" ${checked} ${disabled} />`;
 }
 
@@ -325,6 +358,13 @@ function commentInputFormatter(cell, formatterParams, onRendered) {
         };
     });
     return `<input type="text" class="hr014-comment-input" placeholder="${placeholder}" value="${safeValue}" ${disabled} style="border: none"/>`;
+}
+
+function commentTextFormatter(cell) {
+    var value = cell.getValue();
+    var safeValue = escapeHtml(value == null ? "" : String(value));
+
+    return `<div class="hr014-comment-text" style="white-space:pre-wrap; word-break:break-word; line-height:1.6; color:#20385c; font-weight:600;">${safeValue}</div>`;
 }
 
 function escapeHtml(value) {
@@ -437,18 +477,33 @@ function buildRiskList() {
     if ($list.length === 0) {
         return;
     }
-    var placeholder = window.hr010ReadOnly ? "" : "이탈이력을 구체적으로 입력하세요.";
+    var isReadOnly = !!window.hr010ReadOnly;
+    var placeholder = isReadOnly ? "" : "이탈이력을 구체적으로 입력하세요.";
     $list.empty();
-    riskKeys.forEach(function (item) {
-        var $btn = $("<div class='risk-item'></div>");
-        $btn.text(item.label);
-        $btn.attr("data-key", item.key);
-        $btn.on("click", function () {
-            // 텍스트 영역은 항상 현재 선택된 항목(riskActiveKey)과 동기화된다.
-            setRiskActive(item.key);
+
+    if (isReadOnly) {
+        riskKeys.forEach(function (item) {
+            var value = item.key === "memo_txt" ? (riskState.memo || "") : (riskState[item.key] || "");
+            var $row = $(`
+                <div class="risk-item risk-item--readonly" data-key="${item.key}" style="display:flex; flex-direction:column; gap:6px; padding:12px 0; border-bottom:1px solid #e6edf6;">
+                    <div class="risk-item-label" style="font-size:12px; font-weight:700; color:#8aa0bd;">${escapeHtml(item.label)}</div>
+                    <div class="risk-item-value" style="white-space:pre-wrap; word-break:break-word; color:#20385c; font-size:14px; font-weight:600; line-height:1.6;">${escapeHtml(value || "-")}</div>
+                </div>
+            `);
+            $list.append($row);
         });
-        $list.append($btn);
-    });
+    } else {
+        riskKeys.forEach(function (item) {
+            var $btn = $("<div class='risk-item'></div>");
+            $btn.text(item.label);
+            $btn.attr("data-key", item.key);
+            $btn.on("click", function () {
+                // 텍스트 영역은 항상 현재 선택된 항목(riskActiveKey)과 동기화된다.
+                setRiskActive(item.key);
+            });
+            $list.append($btn);
+        });
+    }
 
     $("#HR014_RISK_TEXT").prop("placeholder", placeholder)
         .off("input").on("input", function () {
@@ -464,6 +519,8 @@ function buildRiskList() {
         riskState.re_in_yn = $(this).is(":checked") ? "Y" : "N";
         riskData.set(window.hr013_prj_nm, {...riskState});
     });
+
+    renderRiskReadonlyView();
 }
 
 // 리스크 항목 선택 처리
@@ -492,6 +549,8 @@ function setRiskActive(key) {
     } else {
         $("#HR014_RISK_TEXT").val(riskState[key] || "");
     }
+
+    renderRiskReadonlyView();
 }
 
 // 탭1 저장용 payload 구성
@@ -553,16 +612,71 @@ function saveTab4All() {
 window.saveTab4All = saveTab4All;
 
 function applyTab4Readonly(isReadOnly) {
-    $("#HR014_RISK_TEXT").prop("disabled", isReadOnly);
-    $("#HR014_REIN_CHECK").prop("disabled", isReadOnly);
-    $("#TABLE_HR014_A").toggleClass("is-readonly", !!isReadOnly);
+    var locked = !!isReadOnly;
+    $(".tab4-content").toggleClass("is-readonly", locked);
+    $("#HR014_RISK_TEXT").prop("disabled", locked);
+    $("#HR014_REIN_CHECK").prop("disabled", locked);
+    $("#TABLE_HR014_A").toggleClass("is-readonly", locked);
     // tab2/tab4가 같은 id를 재사용하므로 tab4 영역으로 스코프를 제한한다.
-    $(".tab4-content .hr014-side-tabs").toggleClass("is-readonly", !!isReadOnly);
-    // select는 항상 활성화 유지
-    $(".select_prj_cd").prop("disabled", false);
+    $(".tab4-content .hr014-side-tabs").toggleClass("is-readonly", locked);
+    // 상세(view) 모드에서도 프로젝트 목록만은 선택 가능하게 유지한다.
+    $(".select_prj_cd").prop("disabled", false).prop("readonly", false);
+    $(".btn-tab4-save").prop("disabled", locked).toggle(!locked);
+    if (window.hr014TableA) {
+        window.hr014TableA.redraw(true);
+    }
+    buildRiskList();
 }
 
 window.applyTab4Readonly = applyTab4Readonly;
+
+function renderRiskReadonlyView() {
+    var $detail = $("#HR014_TAB_B .risk-detail");
+    if ($detail.length === 0) {
+        return;
+    }
+
+    var isReadOnly = !!window.hr010ReadOnly;
+    var $readonly = $detail.find("#HR014_RISK_READONLY");
+
+    if (!isReadOnly) {
+        $readonly.remove();
+        $("#HR014_RISK_LIST, #HR014_RISK_TEXT, #HR014_REIN_CHECK").show();
+        return;
+    }
+
+    if ($readonly.length === 0) {
+        $readonly = $(`
+            <div id="HR014_RISK_READONLY" style="display:flex; flex-direction:column; gap:12px;"></div>
+        `);
+        $detail.prepend($readonly);
+    }
+
+    var items = [];
+    items.push({
+        label: "재투입 가능여부",
+        value: riskState.re_in_yn === "Y" ? "가능" : "불가"
+    });
+
+    riskKeys.forEach(function (item) {
+        items.push({
+            label: item.label,
+            value: item.key === "memo_txt" ? (riskState.memo || "") : (riskState[item.key] || "")
+        });
+    });
+
+    var html = items.map(function (item) {
+        return `
+            <div style="display:flex; flex-direction:column; gap:6px; padding:12px 0; border-bottom:1px solid #e6edf6;">
+                <div style="font-size:12px; font-weight:700; color:#8aa0bd;">${escapeHtml(item.label)}</div>
+                <div style="white-space:pre-wrap; word-break:break-word; color:#20385c; font-size:14px; font-weight:600; line-height:1.6;">${escapeHtml(item.value || "-")}</div>
+            </div>
+        `;
+    }).join("");
+
+    $readonly.html(html).show();
+    $("#HR014_RISK_LIST, #HR014_RISK_TEXT, #HR014_REIN_CHECK").hide();
+}
 
 $("#HR014_RISK_TEXT").on("change", function () {
     // 텍스트 영역은 항상 현재 선택된 항목(riskActiveKey)과 동기화된다.
