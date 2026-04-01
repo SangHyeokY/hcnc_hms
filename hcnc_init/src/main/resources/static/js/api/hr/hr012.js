@@ -12,6 +12,37 @@ let hr012SkillGroupOptions = [];
 let hr012SkillOptionsLoading = false;
 let hr012SkillGroupLoading = false;
 
+function isHr011DetailView() {
+    return !!document.querySelector(".hr011-page");
+}
+
+function applyHr012DetailStackLayout() {
+    if (!isHr011DetailView() || !window.hr010ReadOnly) {
+        return;
+    }
+
+    $(".hr012-tab-btn").hide();
+    $(".hr012-toolbar-01, .hr012-toolbar-02").show();
+    $("#TABLE_HR012_A, #TABLE_HR012_B").show();
+
+    if (window.hr012TableA && typeof window.hr012TableA.redraw === "function") {
+        window.hr012TableA.redraw(true);
+    }
+    if (window.hr012TableB && typeof window.hr012TableB.redraw === "function") {
+        window.hr012TableB.redraw(true);
+    }
+}
+
+function hr012PlainSkillFormatter(cell) {
+    var value = cell && typeof cell.getValue === "function" ? cell.getValue() : null;
+    var items = normalizeTagList(value);
+    var labels = items.map(function (item) {
+        return String(item && (item.label || item.cd_nm || item.name || item.code || item.value || "")).trim();
+    }).filter(Boolean);
+    var text = labels.length ? labels.join(", ") : "-";
+    return '<span class="hr012-skill-plain-text">' + escapeHtml(text) + "</span>";
+}
+
 // hr012.js
 window.initTab2 = function() {
     $(document).off("tab:readonly.hr012").on("tab:readonly.hr012", function (_, isReadOnly) {
@@ -48,6 +79,9 @@ window.initTab2 = function() {
 
     // 탭 클릭 이벤트
     $(".hr012-tab-btn").off("click").on("click", function() {
+        if (window.hr010ReadOnly && isHr011DetailView()) {
+            return;
+        }
         const tabId = $(this).data("tab");
 
         $(".hr012-tab-btn").removeClass("active");
@@ -74,6 +108,7 @@ window.initTab2 = function() {
     });
 
     applyTab2Readonly(!!window.hr010ReadOnly);
+    applyHr012DetailStackLayout();
 };
 
 function applyTab2Readonly(isReadOnly) {
@@ -83,6 +118,7 @@ function applyTab2Readonly(isReadOnly) {
     if (isReadOnly) {
         closeHr012SkillPicker(true);
     }
+    applyHr012DetailStackLayout();
 }
 
 // 숙련도(B) 제목 옆 건수(span.hcnc-grid-count-number) 업데이트
@@ -111,7 +147,7 @@ function buildHr012TableA() {
         columns: [
             { title: "구분", field: "cd_nm", hozAlign: "left", width: 180, minWidth: 160 },
             { title: "코드", field: "cd", visible: false },
-            { title: "상세", field: "skl_id_lst", hozAlign: "left",widthGrow: 1, formatter: tagFormatter },
+            { title: "상세", field: "skl_id_lst", hozAlign: "left", widthGrow: 1, formatter: hr012PlainSkillFormatter },
         ],
         data: []
     };
@@ -170,8 +206,10 @@ function loadHr012TableDataA() {
 
 function radioFormatter(cell) {
     const checked = cell.getValue() ? "checked" : "";
-    const disabled = currentMode === "view" ? "disabled" : "";
-    return `<input type="radio" class="circle-radio" ${checked} ${disabled}>`;
+    if (currentMode === "view" || window.hr010ReadOnly) {
+        return checked ? "<span class=\"hr012-score-mark\">●</span>" : "";
+    }
+    return `<input type="radio" class="circle-radio" ${checked}>`;
 }
 
 function buildHr012TableB() {

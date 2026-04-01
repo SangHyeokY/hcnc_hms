@@ -26,6 +26,10 @@ function isHr013ProjectCodeSelectable(data) {
     return isHr013InprjYnY(data && data.inprj_yn);
 }
 
+function isHr013ProjectReadOnly() {
+    return currentMode === "view" || !!window.hr010ReadOnly;
+}
+
 // 프로젝트 탭 초기화 (버튼/콤보/태그/테이블)
 window.initTab3 = function () {
     if (!window.hr013Table) buildHr013Table();
@@ -145,6 +149,9 @@ function updateHr013ProjectPickerCount(count) {
 let jobMap = [];
 
 function updateHr013StackRowState(row) {
+    if (document.querySelector(".hr011-page")) {
+        return;
+    }
     if (!row || typeof row.getElement !== "function") {
         return;
     }
@@ -162,7 +169,12 @@ function updateHr013StackRowState(row) {
 
     rowEl.classList.remove("stack-multi-line");
 
-    var shouldExpand = stackText.scrollHeight > (stackText.clientHeight + 1);
+    var computed = window.getComputedStyle ? window.getComputedStyle(stackText) : null;
+    var lineHeight = computed ? parseFloat(computed.lineHeight) : NaN;
+    if (!lineHeight || !isFinite(lineHeight) || lineHeight <= 0) {
+        lineHeight = 18;
+    }
+    var shouldExpand = stackText.offsetHeight > (lineHeight * 1.25);
     rowEl.classList.toggle("stack-multi-line", shouldExpand);
 
     if (shouldExpand && typeof row.normalizeHeight === "function") {
@@ -171,6 +183,9 @@ function updateHr013StackRowState(row) {
 }
 
 function scheduleHr013StackRowState(row) {
+    if (document.querySelector(".hr011-page")) {
+        return;
+    }
     if (!row) {
         return;
     }
@@ -191,12 +206,13 @@ function scheduleHr013StackRowState(row) {
 function buildHr013Table() {
     if (!document.getElementById("TABLE_HR013_A")) return;
     var isHr011Detail = !!document.querySelector(".hr011-page");
+    var shouldAutoExpandRows = !isHr011Detail;
 
     var options = {
-        // layout: "fitColumns",
-        layout: "fitData",
+        layout: isHr011Detail ? "fitColumns" : "fitData",
         placeholder: "데이터 없음",
         selectable: false,
+        rowHeight: isHr011Detail ? 46 : 42,
         // 프로젝트 테이블 데이터 로드 시 건수 반영
         dataLoaded: function () {
             updateHr013TitleCount();
@@ -209,10 +225,14 @@ function buildHr013Table() {
             changedTabs.tab3 = true;
         },
         rowFormatter: function (row) {
-            scheduleHr013StackRowState(row);
+            if (shouldAutoExpandRows) {
+                scheduleHr013StackRowState(row);
+            }
         },
         rowUpdated: function (row) {
-            scheduleHr013StackRowState(row);
+            if (shouldAutoExpandRows) {
+                scheduleHr013StackRowState(row);
+            }
         },
         columns: [
             {
@@ -262,13 +282,10 @@ function buildHr013Table() {
                 formatter: function (cell) {
                     const value = cell.getValue();
                     if (!value) return "";
-                    return `<div style="
-                		text-align:left;
-                		white-space: nowrap;
-                		overflow: hidden;
-                		text-overflow: ellipsis;">
-                		${value}
-                	</div>`;
+                    if (window.hr010ReadOnly) {
+                        return `<div class="hr013-readonly-text hr013-readonly-text--wrap" title="${hr013EscapeHtml(value)}">${hr013EscapeHtml(value)}</div>`;
+                    }
+                    return `<div class="hr013-cell-ellipsis" title="${hr013EscapeHtml(value)}">${hr013EscapeHtml(value)}</div>`;
                 },
                 editable: function (cell) {
                     return isHr013Editable() && cell.getRow().getData().inprj_yn !== "Y";
@@ -289,14 +306,18 @@ function buildHr013Table() {
                 formatter: function (cell) {
                     const v = cell.getValue() ?? "";
                     const d = cell.getRow().getData();
+                    if (window.hr010ReadOnly) {
+                        return `<div class="hr013-readonly-text hr013-readonly-text--project" title="${hr013EscapeHtml(v)}">${hr013EscapeHtml(v)}</div>`;
+                    }
                     const showBtn = String(d.inprj_yn).toUpperCase() === "Y";
                     const isNew = d._isNew === true;
+                    const isReadOnly = isHr013ProjectReadOnly();
 
                     return `
                       <div class="prj-cell">
-                        ${showBtn && !isNew ? `<div><button type="button" class="btn-prj-eval">평가</button></div>` : ""}
-                        <span class="prj-text">${v}</span>
-                        ${showBtn && currentMode !== "view" ? `<div><button type="button" class="btn-prj-edit">등록</button></div>` : ""}
+                        ${showBtn && !isNew && !isReadOnly ? `<div><button type="button" class="btn-prj-eval">평가</button></div>` : ""}
+                        <span class="prj-text" title="${hr013EscapeHtml(v)}">${hr013EscapeHtml(v)}</span>
+                        ${showBtn && !isReadOnly ? `<div><button type="button" class="btn-prj-edit">등록</button></div>` : ""}
                       </div>
                     `;
                 },
@@ -418,7 +439,22 @@ function buildHr013Table() {
 
 // 상세모드에서는 테이블 조작 비활성화
 function applyTab3Readonly(isReadOnly) {
-    $("#TABLE_HR013_A").toggleClass("is-readonly", !!isReadOnly);
+    var locked = !!isReadOnly;
+    $(".tab3-content").toggleClass("is-readonly", locked);
+    $("#TABLE_HR013_A").toggleClass("is-readonly", locked);
+    if (window.hr013Table && typeof window.hr013Table.getColumn === "function") {
+        var checkedColumn = window.hr013Table.getColumn("_checked");
+        if (checkedColumn && typeof checkedColumn.hide === "function" && typeof checkedColumn.show === "function") {
+            if (locked) checkedColumn.hide();
+            else checkedColumn.show();
+        }
+    }
+    $(".btn-tab3-add, .btn-tab3-remove, #btnUpload, .btn-tab3-new, .btn-tab3-edit")
+        .prop("disabled", locked)
+        .toggle(!locked);
+    if (locked) {
+        closeHr013Modal();
+    }
     if (window.hr013Table) {
         window.hr013Table.redraw(true);
     }
@@ -428,6 +464,15 @@ window.applyTab3Readonly = applyTab3Readonly;
 
 // 프로젝트 이력 모달 열기
 function openHr013Modal(mode) {
+    if (!isHr013Editable()) {
+        showAlert({
+            icon: "info",
+            title: "안내",
+            text: "상세보기에서는 프로젝트 이력을 수정할 수 없습니다. 수정하기를 눌러주세요."
+        });
+        return;
+    }
+
     var title = mode === "edit" ? "수정" : "등록";
     $("#hr013-type").text(title);
     closeHr013SkillPicker(true);
@@ -1464,6 +1509,9 @@ function applyInprjCustomerName(inprjYn, custNm) {
 
 // 삭제 버튼
 function inprjCheckboxFormatter(cell) {
+    if (isHr013ProjectReadOnly()) {
+        return cell.getValue() === "Y" ? "Y" : "N";
+    }
     var checked = cell.getValue() === "Y" ? " checked" : "";
     var disabled = window.hr010ReadOnly ? " disabled" : "";
     return "<input type='checkbox' style='pointer-events:none;'" + checked + disabled + " />";
@@ -1740,9 +1788,11 @@ function normalizeDateForSave(value) {
 }
 
 function rowSelectFormatter(cell) {
+    if (window.hr010ReadOnly) {
+        return "";
+    }
     var checked = cell.getValue() ? " checked" : "";
-    var disabled = window.hr010ReadOnly ? " disabled" : "";
-    return "<input type='checkbox' class='row-check'" + checked + disabled + " />";
+    return "<input type='checkbox' class='row-check'" + checked + " />";
 }
 
 // 체크박스 UI 동기화
@@ -1788,7 +1838,7 @@ function hr013TableSkillFormatter(cell) {
 
 // 기술스택 표기가 너무 길어져서 별도의 팝업으로 분리
     if (window.hr010ReadOnly) {
-        return `<span class="hr013-stack-text">` + textHtml + `</span>`;
+        return `<span class="hr013-stack-text hr013-stack-text--readonly">` + textHtml + `</span>`;
     }
     return `<div class="hr013-stack-cell">` +
         `<span class="hr013-stack-text" style="white-space: nowrap; padding-right: 15px;">` + textHtml + `</span>` +

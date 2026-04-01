@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout/layout}">
+    layout:decorate="~{layout/layout}">
 
 <th:block th:fragment="tab2Content">
     <div class="content tab2-content">
@@ -15,24 +15,26 @@
                     </button>
                 </div>
                 <div class="hr012-toolbar-01 fl-sb">
-                    <p class="tool-title">보유역량 목록</p>
+                    <p class="tool-title">보유역량 목록<span id="hr012b-count" class="hcnc-grid-count hcnc-grid-count-title"
+                            data-grid-for="TABLE_HR012_B">
+                            총 <span class="hcnc-grid-count-number">0</span>건
+                        </span>
+                    </p>
+
                     <div class="btn-area">
                         <button type="button" class="btn btn-add-skill" id="btn_hr012_skill_picker">
                             <img src="./images/common/btn_search_outlined.png" alt="기술 선택">기술 선택
                         </button>
                     </div>
                 </div>
-                <div class="hr012-toolbar-02 page-sub-title fl-sb" style="display: none;">
-                    <p class="tool-title">숙련도 평가
-                        <span id="hr012b-count" class="hcnc-grid-count hcnc-grid-count-title" data-grid-for="TABLE_HR012_B">
-                            총 <span class="hcnc-grid-count-number">0</span>건
-                        </span>
-                    </p>
-                </div>
+
                 <div class="scroll-body">
                     <div class="content-body">
                         <!-- Tabulator 테이블 div -->
                         <div id="TABLE_HR012_A" class="th-effect"></div>
+                        <div class="hr012-toolbar-02 page-sub-title fl-sb" style="display: none;">
+                            <p class="tool-title">숙련도 평가</p>
+                        </div>
                         <!-- Tabulator 테이블 div -->
                         <div id="TABLE_HR012_B" class="th-effect" style="display:none;"></div>
                     </div>
