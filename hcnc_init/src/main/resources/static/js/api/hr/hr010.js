@@ -251,13 +251,18 @@ async function loadUserTableData() {
         // 점수 병렬 조회
         const scoreMap = await fetchAllScores(list);
 
-        list = list.map(row => ({
-            ...row,
-            grade: scoreMap[row.dev_id]?.rank || "",
-            score: scoreMap[row.dev_id]?.score || 0,
-            img_url: row.dev_img_base64 ? `data:image/png;base64,${row.dev_img_base64}` : "",
-            has_img: Boolean(row.dev_img_base64)
-        }));
+        list = list.map(row => {
+            const imgUrl = row.img_url || (row.dev_img_base64 ? `data:image/png;base64,${row.dev_img_base64}` : "");
+            const hasImg = Boolean(imgUrl);
+
+            return {
+                ...row,
+                grade: scoreMap[row.dev_id]?.rank || "",
+                score: scoreMap[row.dev_id]?.score || 0,
+                img_url: imgUrl,
+                has_img: hasImg
+            };
+        });
 
         // 이미지 preload
         await preloadImages(list);
@@ -1018,7 +1023,8 @@ function renderUserCards(list) {
 function createUserCard(row) {
     const employment = getEmploymentMeta(row);
     const profile = getProfileMarkup(row);
-    const skillChips = getSkillChipMarkup(row, 2);
+    const primarySkill = getPrimarySkillLabel(row);
+    const skillChips = getSkillChipMarkup(row);
 
     return `
     <article class="user-card" data-id="${row.dev_id}" tabindex="0" title="더블클릭하여 상세 보기">
@@ -1028,7 +1034,7 @@ function createUserCard(row) {
         <div class="user-card__profile">
             <div class="user-card__avatar">${profile}</div>
             <div class="user-card__name">${escapeHtml(row.dev_nm || "-")}</div>
-            <div class="user-card__subtitle">${escapeHtml(getPrimarySkillLabel(row))}</div>
+            <div class="user-card__subtitle">${escapeHtml(primarySkill ? `주개발언어 · ${primarySkill}` : "주개발언어 미등록")}</div>
             <div class="user-card__skills">${skillChips}</div>
         </div>
         <div class="user-card__info-panel">
@@ -1085,7 +1091,7 @@ function createUserListRow(row) {
             <div class="user-list-row__cell">
                 <span class="user-card__badge user-card__badge--${employment.className}">${employment.label}</span>
             </div>
-            <div class="user-list-row__cell">${escapeHtml(getSkillSummaryLabel(row, 3))}</div>
+            <div class="user-list-row__cell user-list-row__skill-cell">${getSkillSummaryMarkup(row, 3)}</div>
             <div class="user-list-row__cell">${escapeHtml(formatGradeLabel(row.grade, row.score) || "-")}<br><span class="user-list-row__sub">${escapeHtml(getKosaLabel(row))}</span></div>
             <div class="user-list-row__cell">${escapeHtml(row.region || "-")}<br><span class="user-list-row__sub">${escapeHtml(getWorkModeLabel(row))}</span></div>
             <div class="user-list-row__cell">${escapeHtml(getAvailabilityLabel(row))}</div>
@@ -1096,8 +1102,9 @@ function createUserListRow(row) {
 
 // 프로필 이미지/이니셜 마크업
 function getProfileMarkup(row) {
-    if (row.has_img && row.img_url) {
-        return `<img src="${row.img_url}" class="profile-circle-icon" alt="${escapeHtml(row.dev_nm || "프로필")}"/>`;
+    const imgUrl = row.img_url || (row.dev_img_base64 ? `data:image/png;base64,${row.dev_img_base64}` : "");
+    if (imgUrl) {
+        return `<img src="${imgUrl}" class="profile-circle-icon" alt="${escapeHtml(row.dev_nm || "프로필")}"/>`;
     }
     return makeProfileCircle(row.dev_nm);
 }
@@ -1115,35 +1122,64 @@ function getEmploymentMeta(row) {
 
 // 주개발언어 대표 라벨
 function getPrimarySkillLabel(row) {
-    const skills = getSkillNameList(row);
-    if (!skills.length) return "주개발언어 미등록";
-    return skills[0];
+    const skillParts = getSkillDisplayParts(row);
+    if (!skillParts.primary) return "주개발언어 미등록";
+    return skillParts.primary;
 }
 
 // 주개발언어 표시용 요약
-function getSkillSummaryLabel(row, limit = 2) {
+function getSkillSummaryLabel(row) {
+    const skillParts = getSkillDisplayParts(row);
+    if (!skillParts.skills.length) return "-";
+    return `주개발언어: ${skillParts.skills.join(", ")}`;
+}
+
+// 리스트형 기술 요약 마크업
+function getSkillSummaryMarkup(row) {
+    const skillParts = getSkillDisplayParts(row);
+    if (!skillParts.skills.length) {
+        return `<span class="user-list-row__skill-empty">-</span>`;
+    }
+
+    const chips = skillParts.skills.map((skill, idx) => `
+        <span class="user-card__skill-chip ${idx === 0 ? "user-card__skill-chip--main" : ""}">${escapeHtml(skill)}</span>
+    `).join("");
+
+    return `
+        <div class="user-list-row__skill-stack">
+            <div class="user-list-row__skill-line user-list-row__skill-line--main">
+                <span class="user-list-row__skill-line-label">주개발언어</span>
+                <div class="user-list-row__skill-line-chips">${chips}</div>
+            </div>
+        </div>
+    `;
+}
+
+// 주개발언어 표시용 파싱
+function getSkillDisplayParts(row) {
     const skills = getSkillNameList(row);
-    if (!skills.length) return "-";
-    const visible = skills.slice(0, limit);
-    const remain = skills.length - visible.length;
-    return remain > 0 ? `${visible.join(", ")} 외 ${remain}` : visible.join(", ");
+    const primary = skills[0] || "";
+    return {
+        skills,
+        primary
+    };
 }
 
 // 카드형 기술 칩
-function getSkillChipMarkup(row, limit = 2) {
-    const skills = getSkillNameList(row);
-    if (!skills.length) {
-        return `<span class="user-card__skill-chip is-muted">미등록</span>`;
-    }
+function getSkillChipMarkup(row) {
+    const skillParts = getSkillDisplayParts(row);
+    const chips = skillParts.skills.length
+        ? skillParts.skills.map((skill, idx) => `
+            <span class="user-card__skill-chip ${idx === 0 ? "user-card__skill-chip--main" : ""}">${escapeHtml(skill)}</span>
+        `).join("")
+        : `<span class="user-card__skill-chip is-muted">미등록</span>`;
 
-    const visible = skills.slice(0, limit).map(skill => `
-        <span class="user-card__skill-chip">${escapeHtml(skill)}</span>
-    `).join("");
-
-    const remain = skills.length - limit;
-    const more = remain > 0 ? `<span class="user-card__skill-chip is-muted">+${remain}</span>` : "";
-
-    return `${visible}${more}`;
+    return [
+        `<div class="user-card__skill-group user-card__skill-group--main">`,
+        `<span class="user-card__skill-group-label">주개발언어</span>`,
+        `<div class="user-card__skill-group-chips">${chips}</div>`,
+        `</div>`
+    ].join("");
 }
 
 // main_lang_nm 문자열 분해
