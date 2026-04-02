@@ -2995,7 +2995,7 @@ section.search-area .search-info #searchConditionKeyword { /* 새 검색어 입�
 .contents-wrap.hr010-dashboard-wrap > section.white-full.hr010-dashboard-shell { display: flex; flex-direction: column; height: 100%; min-height: 0; padding: 0; border: 0; border-radius: 0; box-shadow: none; overflow: hidden; background: linear-gradient(180deg, #ffffff 0%, #ffffff 42%, #fbfcff 100%); }
 .contents-wrap.hr010-dashboard-wrap > section.white-full.hr010-dashboard-shell > .content-body { flex: 1 1 auto; height: 100%; min-height: 0; overflow: hidden; padding: 0; background: transparent; display: flex; flex-direction: row; gap: 20px; }
 
-.hr010-dashboard-wrap #CARD_HR010_A {display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:12px; flex:0 0 auto; min-height:0; height:auto; padding-right:2px; padding-bottom:8px; overflow:visible; position:relative; align-content:start;}
+.hr010-dashboard-wrap #CARD_HR010_A {display:grid; grid-template-columns:repeat(auto-fill, minmax(235px, 1fr)); gap:12px; flex:0 0 auto; min-height:0; height:auto; padding-right:2px; padding-bottom:8px; overflow:visible; position:relative; align-content:start; align-items:stretch; --hr010-card-fixed-h:510px; grid-auto-rows:var(--hr010-card-fixed-h);}
 .hr010-dashboard-wrap #CARD_HR010_A[data-view="list"] {display:block;}
 .hr010-dashboard-wrap .hr010-view-toggle {display:inline-flex; align-items:center; padding:4px; border:1px solid #d7e2f0; border-radius:999px; background:#f7faff; gap:4px;}
 .hr010-dashboard-wrap .hr010-view-toggle-btn {display:inline-flex; align-items:center; gap:8px; min-width:92px; padding:10px 14px; border:none; border-radius:999px; background:transparent; color:#6b7f99; font-size:14px; font-weight:700; cursor:pointer; transition:background-color .18s ease, color .18s ease, box-shadow .18s ease;}
@@ -3004,7 +3004,7 @@ section.search-area .search-info #searchConditionKeyword { /* 새 검색어 입�
 
 .hr010-dashboard-wrap .user-card,
 .hr010-dashboard-wrap .user-list-row {position:relative; cursor:pointer; transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;}
-.hr010-dashboard-wrap .user-card {display:flex; flex-direction:column; gap:8px; padding:10px; border:1px solid #dde7f3; border-radius:14px; background:#ffffff; box-shadow:0 10px 20px rgba(18, 38, 81, 0.06); min-height:0; height:auto; overflow:hidden !important;}
+.hr010-dashboard-wrap .user-card {display:flex; flex-direction:column; gap:8px; padding:10px; border:1px solid #dde7f3; border-radius:14px; background:#ffffff; box-shadow:0 10px 20px rgba(18, 38, 81, 0.06); min-height:0; height:var(--hr010-card-fixed-h); box-sizing:border-box; overflow:hidden !important;}
 .hr010-dashboard-wrap .user-card:hover,
 .hr010-dashboard-wrap .user-list-row:hover {transform:translateY(-3px); box-shadow:0 16px 28px rgba(18, 38, 81, 0.10);}
 .hr010-dashboard-wrap .user-card.selected,
@@ -3019,7 +3019,7 @@ section.search-area .search-info #searchConditionKeyword { /* 새 검색어 입�
 .hr010-dashboard-wrap .user-card__name {font-size:16px; font-weight:800; color:#1f304a; letter-spacing:-0.02em; line-height:1.15;}
 .hr010-dashboard-wrap .user-card__subtitle {display:none !important;}
 .hr010-dashboard-wrap .user-card__subtitle {font-size:12px; font-weight:700; color:#8696ad;}
-.hr010-dashboard-wrap .user-card__skills {display:grid; gap:8px; width:100%; min-width:0;}
+.hr010-dashboard-wrap .user-card__skills {display:grid; gap:8px; width:100%; min-width:0; min-height:0; overflow:hidden; height:var(--hr010-skl-area-h, 84px);}
 .hr010-dashboard-wrap .user-card__skill-group {display:grid; gap:5px; width:100%; min-width:0;}
 .hr010-dashboard-wrap .user-card__skill-group--project {padding-top:6px; border-top:1px dashed #e2eaf4;}
 .hr010-dashboard-wrap .user-card__skill-group--main .user-card__skill-group-label {color:#637da1;}
@@ -3037,10 +3037,33 @@ section.search-area .search-info #searchConditionKeyword { /* 새 검색어 입�
 .hr010-dashboard-wrap .user-card__info-value {font-size:12px; font-weight:800; color:#26364f; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
 .hr010-dashboard-wrap .user-card__meta-row {display:flex; flex-wrap:wrap; gap:8px;}
 .hr010-dashboard-wrap .user-card__meta-pill {display:inline-flex; align-items:center; justify-content:center; padding:5px 8px; border-radius:999px; background:#ffffff; color:#526984; font-size:10px; font-weight:700; border:1px solid #e2eaf5;}
-.hr010-dashboard-wrap .user-card__footer {display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:6px;}
+.hr010-dashboard-wrap .user-card__footer {display:grid; grid-template-columns:minmax(0, 1.35fr) minmax(0, 0.65fr); gap:6px; margin-top:auto;}
 .hr010-dashboard-wrap .user-card__footer-item {display:flex; flex-direction:column; gap:3px; padding:8px 10px; border-radius:12px; background:#f8fbff; border:1px solid #e5edf7; overflow:visible !important;}
 .hr010-dashboard-wrap .user-card__footer-label {font-size:11px; font-weight:700; color:#90a0b6;}
 .hr010-dashboard-wrap .user-card__footer-value {font-size:13px; font-weight:800; color:#23344d; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+
+/* 고정 카드 높이에서 내부 정렬 안정화 */
+.hr010-dashboard-wrap .user-card__info-panel {overflow:hidden !important;}
+
+/* 반응형: 카드 컬럼/높이 조절 */
+@media (max-width: 1280px) {
+    .hr010-dashboard-wrap #CARD_HR010_A {grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); --hr010-card-fixed-h:520px;}
+    .hr010-dashboard-wrap .user-card__skills {--hr010-skl-area-h: 80px;}
+}
+
+@media (max-width: 980px) {
+    .hr010-dashboard-wrap #CARD_HR010_A {grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); --hr010-card-fixed-h:480px;}
+    .hr010-dashboard-wrap .user-card {padding:10px;}
+    .hr010-dashboard-wrap .user-card__avatar .profile-circle-icon {width:120px; height:120px; font-size:15px;}
+    .hr010-dashboard-wrap .user-card__skills {--hr010-skl-area-h: 96px;}
+}
+
+@media (max-width: 720px) {
+    .hr010-dashboard-wrap #CARD_HR010_A {grid-template-columns:repeat(auto-fill, minmax(170px, 1fr)); --hr010-card-fixed-h:440px;}
+    .hr010-dashboard-wrap .user-card__avatar .profile-circle-icon {width:104px; height:104px; font-size:14px;}
+    .hr010-dashboard-wrap .user-card__skill-group-chips {gap:5px;}
+    .hr010-dashboard-wrap .user-card__skills {--hr010-skl-area-h: 112px;}
+}
 
 .hr010-dashboard-wrap .hr010-list-view {display:flex; flex-direction:column; gap:14px;}
 .hr010-dashboard-wrap .hr010-list-header,

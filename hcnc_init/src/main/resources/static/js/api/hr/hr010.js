@@ -1135,21 +1135,26 @@ function getSkillSummaryLabel(row) {
 }
 
 // 리스트형 기술 요약 마크업
-function getSkillSummaryMarkup(row) {
+function getSkillSummaryMarkup(row, maxChips = 3) {
     const skillParts = getSkillDisplayParts(row);
     if (!skillParts.skills.length) {
         return `<span class="user-list-row__skill-empty">-</span>`;
     }
 
-    const chips = skillParts.skills.map((skill, idx) => `
+    const hasMore = skillParts.skills.length > maxChips;
+    const visibleSkills = skillParts.skills.slice(0, maxChips);
+
+    const chips = visibleSkills.map((skill, idx) => `
         <span class="user-card__skill-chip ${idx === 0 ? "user-card__skill-chip--main" : ""}">${escapeHtml(skill)}</span>
     `).join("");
+
+    const moreChip = hasMore ? `<span class="user-card__skill-chip is-muted">...</span>` : "";
 
     return `
         <div class="user-list-row__skill-stack">
             <div class="user-list-row__skill-line user-list-row__skill-line--main">
                 <span class="user-list-row__skill-line-label">주개발언어</span>
-                <div class="user-list-row__skill-line-chips">${chips}</div>
+                <div class="user-list-row__skill-line-chips">${chips}${moreChip}</div>
             </div>
         </div>
     `;
@@ -1166,18 +1171,31 @@ function getSkillDisplayParts(row) {
 }
 
 // 카드형 기술 칩
-function getSkillChipMarkup(row) {
+function getSkillChipMarkup(row, maxChips = 6) {
     const skillParts = getSkillDisplayParts(row);
-    const chips = skillParts.skills.length
-        ? skillParts.skills.map((skill, idx) => `
-            <span class="user-card__skill-chip ${idx === 0 ? "user-card__skill-chip--main" : ""}">${escapeHtml(skill)}</span>
-        `).join("")
-        : `<span class="user-card__skill-chip is-muted">미등록</span>`;
+
+    if (!skillParts.skills.length) {
+        const chips = `<span class="user-card__skill-chip is-muted">미등록</span>`;
+        return [
+            `<div class="user-card__skill-group user-card__skill-group--main">`,
+            `<span class="user-card__skill-group-label">주개발언어</span>`,
+            `<div class="user-card__skill-group-chips">${chips}</div>`,
+            `</div>`
+        ].join("");
+    }
+
+    const hasMore = skillParts.skills.length > maxChips;
+    const visibleSkills = skillParts.skills.slice(0, maxChips);
+    const chips = visibleSkills.map((skill, idx) => `
+        <span class="user-card__skill-chip ${idx === 0 ? "user-card__skill-chip--main" : ""}">${escapeHtml(skill)}</span>
+    `).join("");
+
+    const moreChip = hasMore ? `<span class="user-card__skill-chip is-muted">...</span>` : "";
 
     return [
         `<div class="user-card__skill-group user-card__skill-group--main">`,
         `<span class="user-card__skill-group-label">주개발언어</span>`,
-        `<div class="user-card__skill-group-chips">${chips}</div>`,
+        `<div class="user-card__skill-group-chips">${chips}${moreChip}</div>`,
         `</div>`
     ].join("");
 }
