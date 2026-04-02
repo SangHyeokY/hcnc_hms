@@ -583,6 +583,11 @@ let hr011SummaryRadarRows = [];
 let hr011SummaryRadarProjectCount = 0;
 let hr011SummaryRadarChart = null;
 let hr011SummaryRadarResizeBound = false;
+let hr011RefSkillCategoryRows = [];
+let hr011RefProjectRows = [];
+let hr011RefSkillGaugeChart = null;
+let hr011RefRadarChart = null;
+let hr011RefCurrentView = "overview";
 
 function syncHr011ReadOnlyTextareas() {
     const isViewMode = $(".hr011-page").hasClass("is-view-mode");
@@ -792,6 +797,15 @@ function bindHr011PageEvents() {
                 clampAmountCaretToEditableRange(input);
             }, 0);
         });
+
+    $(document).on("click", ".hr011-ref-link-btn, .hr011-ref-detail-btn[data-ref-view]", function () {
+        const view = String($(this).data("refView") || "overview");
+        switchHr011RefView(view);
+    });
+
+    $("#hr011RefDetailEditBtn").on("click", function () {
+        $("#hr011EditBtn").trigger("click");
+    });
 }
 
 // 상세 페이지의 메인 정보와 하위 섹션을 함께 초기화한다.
@@ -873,10 +887,15 @@ async function loadHr011MainDetail(devId) {
     await Promise.all([
         fillHr011Grade(row.dev_id),
         loadHr011SkillSummary(row.dev_id),
-        loadHr011RadarSummary(row.dev_id)
+        loadHr011RadarSummary(row.dev_id),
+        loadHr011SkillCategorySummary(row.dev_id),
+        loadHr011ProjectSummary(row.dev_id)
     ]);
     renderHr011Summary(row);
     renderHr011RadarChart();
+    renderHr011ReferenceDashboard(row);
+    renderHr011RefSkillGaugeChart("hr011RefSkillGauge");
+    renderHr011RefRadarChart();
     scheduleHr011ReadOnlyTextareas();
 }
 
@@ -945,7 +964,430 @@ function renderHr011Summary(row) {
 
     $("#hr011SummarySkills").html(buildHr011SkillSummaryMarkup(row));
 
-    $("#imgUrl").html(getHr011AvatarMarkup(row));
+    $("#hr011SummaryAvatar").html(getHr011AvatarMarkup(row));
+}
+
+async function loadHr011SkillCategorySummary(devId) {
+    hr011RefSkillCategoryRows = [];
+    if (!devId) return;
+
+    try {
+        const response = await $.ajax({
+            url: "/hr012/tab2",
+            type: "GET",
+            data: { dev_id: devId }
+        });
+        const rows = Array.isArray(response) ? response : response?.res;
+        if (!Array.isArray(rows)) return;
+
+        hr011RefSkillCategoryRows = rows.map(function (row) {
+            const values = parseHr011SkillList(row.skl_id_lst);
+            return {
+                name: row.cd_nm || row.cd || "-",
+                value: normalizeHr011SkillCategoryValue(row.skl_id_lst),
+                valueList: values
+            };
+        });
+    } catch (error) {
+        console.warn("hr011 skill category summary load failed", error);
+    }
+}
+
+async function loadHr011ProjectSummary(devId) {
+    hr011RefProjectRows = [];
+    if (!devId) return;
+
+    try {
+        const response = await $.ajax({
+            url: "/hr013/tab3",
+            type: "GET",
+            data: { dev_id: devId }
+        });
+        const rows = Array.isArray(response?.list) ? response.list : [];
+        hr011RefProjectRows = rows;
+    } catch (error) {
+        console.warn("hr011 project summary load failed", error);
+    }
+}
+
+function normalizeHr011SkillCategoryValue(raw) {
+    const parsed = parseHr011SkillList(raw);
+    if (parsed.length) {
+        return parsed.join(", ");
+    }
+
+    if (Array.isArray(raw)) {
+        const values = raw.map(function (item) {
+            if (typeof item === "string") return item.trim();
+            if (item && typeof item === "object") {
+                return String(item.cd_nm || item.label || item.value || item.cd || "").trim();
+            }
+            return "";
+        }).filter(Boolean);
+        return values.length ? values.join(", ") : "-";
+    }
+    const text = $.trim(String(raw || ""));
+    return text || "-";
+}
+
+function parseHr011SkillList(raw) {
+    if (Array.isArray(raw)) {
+        return raw.map(function (item) {
+            if (typeof item === "string") return $.trim(item);
+            if (item && typeof item === "object") {
+                return $.trim(String(item.label || item.cd_nm || item.value || item.cd || ""));
+            }
+            return "";
+        }).filter(Boolean);
+    }
+
+    const text = $.trim(String(raw || ""));
+    if (!text) return [];
+
+    if (text.charAt(0) === "[" && text.charAt(text.length - 1) === "]") {
+        try {
+            const parsed = JSON.parse(text);
+            if (Array.isArray(parsed)) {
+                return parsed.map(function (item) {
+                    if (typeof item === "string") return $.trim(item);
+                    if (item && typeof item === "object") {
+                        return $.trim(String(item.label || item.cd_nm || item.value || item.cd || ""));
+                    }
+                    return "";
+                }).filter(Boolean);
+            }
+        } catch (e) {
+            // ignore parse error and fallback to plain text split
+        }
+    }
+
+    return text.split(",").map(function (item) { return $.trim(item); }).filter(Boolean);
+}
+
+function renderHr011ReferenceDashboard(row) {
+    if (!row) return;
+
+    const devTypeValue = resolveHr011DevTypeValue(row);
+    const devTypeLabel = devTypeValue === "HCNC_F" ? "프리랜서" : "직원";
+    const mainLangParts = splitHr011MainLang(row);
+    const gradeText = $.trim($("#grade").text() || "-");
+    const scoreText = $.trim($("#score").text() || "");
+    const projectCountText = `${hr011RefProjectRows.length || 0}회`;
+    const mainLangSkills = mainLangParts.skills.slice(0, 6);
+    const hasMoreMainLang = mainLangParts.skills.length > 6;
+
+    $("#hr011RefAvatar").html(getHr011AvatarMarkup(row));
+    $("#hr011RefName").text(row.dev_nm || "-");
+    $("#hr011RefMainLang").html(
+        (mainLangSkills.length ? mainLangSkills : ["미등록"]).map(function (skill) {
+            return `<span class="chip">${escapeHr011(skill)}</span>`;
+        }).join("") + (hasMoreMainLang ? `<span class="chip">...</span>` : "")
+    );
+    $("#hr011RefCertTxt").text($.trim(row.cert_txt || "") || "-");
+
+    $("#hr011RefDevType").text(devTypeLabel);
+    $("#hr011RefBrdt").text($.trim(row.brdt || "") || "-");
+    $("#hr011RefTel").text($.trim(row.tel || "") || "-");
+    $("#hr011RefEmail").text($.trim(row.email || "") || "-");
+    $("#hr011RefWorkMd").text(hr011MainSelectMaps.workMd[row.work_md] || row.work_md || "-");
+    $("#hr011RefCtrtTyp").text(hr011MainSelectMaps.ctrtTyp[row.ctrt_typ] || row.ctrt_typ || "-");
+    $("#hr011RefRegion").text($.trim(row.region || "") || "-");
+    $("#hr011RefEdu").text($.trim(row.edu_last || "") || "-");
+    $("#hr011RefKosa").text(hr011MainSelectMaps.kosa[row.kosa_grd_cd] || row.kosa_grd_cd || "-");
+    $("#hr011RefMainFld").text(hr011MainSelectMaps.mainFld[row.main_fld_cd] || row.main_fld_cd || "-");
+
+    $("#hr011RefGrade").text(`${gradeText}${scoreText ? ` ${scoreText}` : ""}`);
+    $("#hr011RefKosaTop").text(hr011MainSelectMaps.kosa[row.kosa_grd_cd] || row.kosa_grd_cd || "-");
+    $("#hr011RefProjectCount").text(projectCountText);
+
+    const categoryList = hr011RefSkillCategoryRows.length
+        ? hr011RefSkillCategoryRows
+        : [{ name: "기타", value: "보유역량 미등록" }];
+    $("#hr011RefSkillCategoryList").html(categoryList.map(function (item) {
+        const values = Array.isArray(item.valueList) && item.valueList.length
+            ? item.valueList
+            : parseHr011SkillList(item.value || "");
+        const renderedValues = values.length
+            ? values.join(", ")
+            : (item.value || "-");
+        return `<div class="hr011-ref-skill-row"><div class="cat">${escapeHr011(item.name)}</div><div class="val">${escapeHr011(renderedValues)}</div></div>`;
+    }).join(""));
+
+    const projects = (hr011RefProjectRows || []).slice(0, 3);
+    $("#hr011RefProjectList").html(projects.length ? projects.map(function (item) {
+        const rateText = item.rate_amt ? formatAmount(item.rate_amt) : "-";
+        const allocText = item.alloc_pct ? `${item.alloc_pct}%` : "-";
+        const stacks = parseHr011SkillList(item.stack_txt_nm || item.stack_txt);
+        return [
+            `<article class="hr011-ref-project-item">`,
+            `<div class="top"><span class="corp">${escapeHr011(item.cust_nm || "HCNC")}</span><span class="role">${escapeHr011(item.role_nm || "-")}</span></div>`,
+            `<div class="name">${escapeHr011(item.prj_nm || "-")}</div>`,
+            `<div class="meta">계약단가 ${escapeHr011(rateText)} · 투입률 ${escapeHr011(allocText)}</div>`,
+            `<div class="stack">${(stacks.length ? stacks.slice(0, 6) : ["-"]).map(function (stack) { return `<span class="chip">${escapeHr011(stack)}</span>`; }).join("")}</div>`,
+            `</article>`
+        ].join("");
+    }).join("") : `<article class="hr011-ref-project-item"><div class="name">프로젝트 이력이 없습니다.</div></article>`);
+
+    switchHr011RefView(hr011RefCurrentView, { force: true });
+}
+
+function switchHr011RefView(view, options) {
+    const normalized = ["overview", "skills", "project", "profile"].includes(view) ? view : "overview";
+    const force = !!(options && options.force);
+    if (!force && hr011RefCurrentView === normalized) return;
+    hr011RefCurrentView = normalized;
+
+    const overviewEl = document.getElementById("hr011RefOverview");
+    const detailEl = document.getElementById("hr011RefDetail");
+    const detailTitleEl = document.getElementById("hr011RefDetailTitle");
+    const detailBodyEl = document.getElementById("hr011RefDetailBody");
+    if (!overviewEl || !detailEl || !detailTitleEl || !detailBodyEl) return;
+
+    if (normalized === "overview") {
+        overviewEl.hidden = false;
+        detailEl.hidden = true;
+        return;
+    }
+
+    overviewEl.hidden = true;
+    detailEl.hidden = false;
+
+    if (normalized === "skills") {
+        detailTitleEl.textContent = "보유 역량 및 숙련도";
+        detailBodyEl.innerHTML = buildHr011SkillsDetailMarkup();
+        renderHr011RefSkillGaugeChart("hr011RefSkillGaugeDetail");
+        return;
+    }
+
+    if (normalized === "project") {
+        detailTitleEl.textContent = "프로젝트 이력";
+        detailBodyEl.innerHTML = buildHr011ProjectDetailMarkup();
+        return;
+    }
+
+    detailTitleEl.textContent = "인적사항";
+    detailBodyEl.innerHTML = buildHr011ProfileDetailMarkup();
+}
+
+function buildHr011ProfileDetailMarkup() {
+    const row = hr011CurrentRow || {};
+    const contract = window.hr011Data || {};
+    const basicRows = [
+        ["성명", row.dev_nm || "-"],
+        ["구분", resolveHr011DevTypeValue(row) === "HCNC_F" ? "프리랜서" : "직원"],
+        ["생년월일", row.brdt || "-"],
+        ["연락처", row.tel || "-"],
+        ["이메일", row.email || "-"],
+        ["근무가능형태", hr011MainSelectMaps.workMd[row.work_md] || row.work_md || "-"],
+        ["계약형태", hr011MainSelectMaps.ctrtTyp[row.ctrt_typ] || row.ctrt_typ || "-"],
+        ["KOSA 등급", hr011MainSelectMaps.kosa[row.kosa_grd_cd] || row.kosa_grd_cd || "-"],
+        ["주요 분야", hr011MainSelectMaps.mainFld[row.main_fld_cd] || row.main_fld_cd || "-"],
+        ["주요 고객사", hr011MainSelectMaps.mainCust[row.main_cust_cd] || row.main_cust_cd || "-"],
+        ["보유 자격증", row.cert_txt || "-"],
+        ["등급", `${$.trim($("#grade").text() || "-")} ${$.trim($("#score").text() || "")}`.trim()]
+    ];
+
+    return [
+        `<article class="hr011-ref-detail-card">`,
+        `<h6>기본 인적사항</h6>`,
+        `<div class="hr011-ref-simple-grid">`,
+        basicRows.map(function (item) {
+            return `<div class="hr011-ref-simple-item"><span>${escapeHr011(item[0])}</span><strong>${escapeHr011(item[1])}</strong></div>`;
+        }).join(""),
+        `</div>`,
+        `</article>`,
+        `<article class="hr011-ref-detail-card">`,
+        `<h6>소속 및 계약정보</h6>`,
+        `<table class="hr011-ref-contract-table">`,
+        `<tbody>`,
+        `<tr><th>소속사</th><td>${escapeHr011(contract.org_nm || "-")}</td><th>사업자유형</th><td>${escapeHr011(bizTypMap[contract.biz_typ] || contract.biz_typ || "-")}</td></tr>`,
+        `<tr><th>계약시작일</th><td>${escapeHr011(contract.st_dt || "-")}</td><th>계약종료일</th><td>${escapeHr011(contract.ed_dt || "-")}</td></tr>`,
+        `<tr><th>계약금액</th><td>${escapeHr011(formatAmount(contract.amt))}</td><th>비고</th><td>${escapeHr011(contract.remark || "-")}</td></tr>`,
+        `</tbody>`,
+        `</table>`,
+        `</article>`
+    ].join("");
+}
+
+function buildHr011SkillsDetailMarkup() {
+    const rows = hr011SummarySkillRows || [];
+    return [
+        `<article class="hr011-ref-detail-card hr011-ref-skill-detail">`,
+        `<div class="hr011-ref-skill-gauge-wrap"><div class="hr011-ref-skill-gauge" id="hr011RefSkillGaugeDetail"></div></div>`,
+        `<div>`,
+        `<table class="hr011-ref-score-table">`,
+        `<thead><tr><th>기술</th><th>숙련도</th></tr></thead>`,
+        `<tbody>`,
+        (rows.length ? rows : [{ name: "미등록", level: 0 }]).map(function (item) {
+            const level = Number(item.level) || 0;
+            const stars = [1, 2, 3, 4, 5].map(function (idx) {
+                return `<span class="hr011-star ${idx <= level ? "is-on" : ""}">★</span>`;
+            }).join("");
+            return [
+                `<tr>`,
+                `<td class="label">${escapeHr011(item.name)}</td>`,
+                `<td><div class="hr011-stars-wrap">${stars}<span class="hr011-stars-score">${level}/5</span></div></td>`,
+                `</tr>`
+            ].join("");
+        }).join(""),
+        `</tbody>`,
+        `</table>`,
+        `</div>`,
+        `</article>`
+    ].join("");
+}
+
+function buildHr011ProjectDetailMarkup() {
+    const rows = hr011RefProjectRows || [];
+    if (!rows.length) {
+        return `<article class="hr011-ref-detail-card"><h6>프로젝트이력</h6><p>등록된 프로젝트가 없습니다.</p></article>`;
+    }
+
+    return [
+        `<div class="hr011-ref-project-detail-list">`,
+        rows.map(function (item) {
+            const stacks = parseHr011SkillList(item.stack_txt_nm || item.stack_txt);
+            return [
+                `<article class="hr011-ref-project-detail-item">`,
+                `<div class="hr011-ref-project-detail-main">`,
+                `<div class="hr011-ref-project-detail-title">${escapeHr011(item.prj_nm || "-")}</div>`,
+                `<div class="hr011-ref-project-detail-meta">${escapeHr011(item.role_nm || "-")} · 투입률 ${escapeHr011(item.alloc_pct ? `${item.alloc_pct}%` : "-")} · 계약단가 ${escapeHr011(item.rate_amt ? formatAmount(item.rate_amt) : "-")}</div>`,
+                `<div class="hr011-ref-project-detail-stack">${(stacks.length ? stacks : ["-"]).slice(0, 8).map(function (stack) { return `<span class="chip">${escapeHr011(stack)}</span>`; }).join("")}</div>`,
+                `</div>`,
+                `</article>`
+            ].join("");
+        }).join(""),
+        `</div>`
+    ].join("");
+}
+
+function renderHr011RefSkillGaugeChart(targetId) {
+    const gaugeEl = document.getElementById(targetId || "hr011RefSkillGauge");
+    if (!gaugeEl || typeof echarts !== "object" || typeof echarts.init !== "function") return;
+
+    const palette = ["#24b4e3", "#4d8dff", "#57d7c8", "#7a6dff", "#95d95c", "#ff9f43", "#ff6b6b"];
+    const pieRows = (hr011RefSkillCategoryRows || []).map(function (row, idx) {
+        const count = parseHr011SkillList(row.value).length;
+        return {
+            name: row.name || `역량${idx + 1}`,
+            value: count,
+            itemStyle: { color: palette[idx % palette.length] }
+        };
+    }).filter(function (row) { return row.value > 0; });
+    const pieData = pieRows.length ? pieRows : [{ name: "미등록", value: 1, itemStyle: { color: "#d7e2f2" } }];
+    const totalValue = pieData.reduce(function (sum, row) { return sum + (Number(row.value) || 0); }, 0) || 1;
+
+    if (!hr011RefSkillGaugeChart) {
+        hr011RefSkillGaugeChart = typeof echarts.getInstanceByDom === "function"
+            ? echarts.getInstanceByDom(gaugeEl)
+            : null;
+        if (!hr011RefSkillGaugeChart) {
+            hr011RefSkillGaugeChart = echarts.init(gaugeEl, null, { renderer: "svg" });
+        }
+    }
+
+    hr011RefSkillGaugeChart.setOption({
+        animation: true,
+        tooltip: {
+            trigger: "item",
+            formatter: function (params) {
+                const ratio = Math.round(((Number(params.value) || 0) / totalValue) * 100);
+                return `${escapeHr011(params.name)}: ${params.value} (${ratio}%)`;
+            }
+        },
+        legend: {
+            orient: "vertical",
+            left: 8,
+            top: "middle",
+            itemWidth: 10,
+            itemHeight: 10,
+            textStyle: {
+                color: "#446082",
+                fontSize: 11,
+                fontWeight: 700
+            },
+            formatter: function (name) {
+                const row = pieData.find(function (item) { return item.name === name; });
+                const value = row ? Number(row.value) || 0 : 0;
+                const ratio = Math.round((value / totalValue) * 100);
+                return `${name} ${value} (${ratio}%)`;
+            }
+        },
+        series: [{
+            type: "pie",
+            radius: "80%",
+            center: ["72%", "48%"],
+            label: {
+                show: true,
+                position: "inside",
+                color: "#ffffff",
+                fontSize: 10,
+                fontWeight: 800,
+                formatter: function (params) {
+                    return `${Math.round(params.percent)}%`;
+                }
+            },
+            data: pieData
+        }]
+    }, true);
+}
+
+function renderHr011RefRadarChart() {
+    const chartEl = document.getElementById("hr011RefRadarChart");
+    if (!chartEl || typeof echarts !== "object" || typeof echarts.init !== "function") return;
+    if (!Array.isArray(hr011SummaryRadarRows) || !hr011SummaryRadarRows.length) return;
+
+    if (!hr011RefRadarChart) {
+        hr011RefRadarChart = typeof echarts.getInstanceByDom === "function"
+            ? echarts.getInstanceByDom(chartEl)
+            : null;
+        if (!hr011RefRadarChart) {
+            hr011RefRadarChart = echarts.init(chartEl, null, { renderer: "svg" });
+        }
+    }
+
+    hr011RefRadarChart.setOption({
+        radar: {
+            center: ["50%", "54%"],
+            radius: "74%",
+            splitNumber: 5,
+            indicator: hr011SummaryRadarRows.map(function (row) {
+                const valueText = Number(row.value || 0).toFixed(1);
+                return { name: `${row.label} ${valueText}`, max: 5 };
+            }),
+            axisName: { color: "#6f86a4", fontSize: 11, fontWeight: 700 }
+        },
+        series: [{
+            type: "radar",
+            symbol: "circle",
+            symbolSize: 6,
+            lineStyle: { width: 2, color: "#cf64ff" },
+            itemStyle: { color: "#cf64ff" },
+            areaStyle: { color: "rgba(207, 100, 255, 0.2)" },
+            data: [{ value: hr011SummaryRadarRows.map(function (row) { return row.value; }) }]
+        }]
+    }, true);
+}
+
+function buildHr011StarSuffix(skillName) {
+    const normalized = String(skillName || "").trim().toLowerCase();
+    if (!normalized) return "";
+
+    const skill = (hr011SummarySkillRows || []).find(function (item) {
+        return String(item.name || "").trim().toLowerCase() === normalized;
+    });
+    const level = Math.max(0, Math.min(5, Number(skill?.level || 0)));
+    if (!level) return "";
+    return `(${buildHr011Stars(level)})`;
+}
+
+function buildHr011Stars(level) {
+    const clamped = Math.max(0, Math.min(5, Number(level) || 0));
+    let text = "";
+    for (let i = 1; i <= 5; i += 1) {
+        text += i <= clamped ? "★" : "☆";
+    }
+    return text;
 }
 
 // 주개발언어 문자열을 분해해 요약에 사용할 값을 만든다.
@@ -1180,7 +1622,8 @@ function renderHr011RadarChart() {
             radius: "78%",
             splitNumber: 5,
             indicator: hr011SummaryRadarRows.map(function (row) {
-                return { name: row.label, max: 5 };
+                const valueText = Number(row.value || 0).toFixed(1);
+                return { name: `${row.label} ${valueText}`, max: 5 };
             }),
             axisName: {
                 color: "#6f86a4",
@@ -1237,6 +1680,12 @@ function bindHr011RadarResize() {
     $(window).on("resize.hr011Radar", function () {
         if (hr011SummaryRadarChart && typeof hr011SummaryRadarChart.resize === "function") {
             hr011SummaryRadarChart.resize();
+        }
+        if (hr011RefRadarChart && typeof hr011RefRadarChart.resize === "function") {
+            hr011RefRadarChart.resize();
+        }
+        if (hr011RefSkillGaugeChart && typeof hr011RefSkillGaugeChart.resize === "function") {
+            hr011RefSkillGaugeChart.resize();
         }
     });
 }
