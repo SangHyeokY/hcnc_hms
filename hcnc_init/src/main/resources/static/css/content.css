@@ -4050,6 +4050,12 @@ section.search-area .search-info #searchConditionKeyword { /* 새 검색어 입�
   width: 100%;
 }
 
+.hr011-detail-wrap #TABLE_HR012_A,
+.hr011-detail-wrap #TABLE_HR012_B {
+  overflow-x: hidden !important;
+}
+
+
 .hr011-detail-wrap .hr012-toolbar-01 p.tool-title .hcnc-grid-count-title {
   display: inline-flex;
   align-items: center;

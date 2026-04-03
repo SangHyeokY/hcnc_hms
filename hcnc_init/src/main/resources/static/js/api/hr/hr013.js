@@ -1045,7 +1045,7 @@ async function saveHr013ProjectCode() {
     const confirmResult = await showAlert({
         icon: "warning",
         title: "확인",
-        text: "\"" + cdNm + "\" 프로젝트를 등록하시겠습니까?",
+        html: `<strong>cdNm</strong>&nbsp;프로젝트를 등록하시겠습니까?`,
         showCancelButton: true,
         confirmText: "등록",
         cancelText: "취소",
