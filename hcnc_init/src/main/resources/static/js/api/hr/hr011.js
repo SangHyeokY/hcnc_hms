@@ -444,7 +444,7 @@ function validateHr011Form() {
         return false;
     }
 
-    if (!bizTyp || bizTyp == null) {
+    if (!bizTyp) {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
@@ -1106,7 +1106,7 @@ function fillHr011MainForm(row) {
     $("#select_main_fld_cd").val(row.main_fld_cd || "");
     $("#select_main_cust_cd").val(row.main_cust_cd || "");
     $("#edu_last").val(row.edu_last || "");
-    $("#exp_yr").val(formatCareerYearMonth(row.exp_yr) || "");
+    setCareerSpinInputs(row.exp_yr);
     $("#hope_rate_amt").val(formatAmount(row.hope_rate_amt));
     $("#cert_txt").val(row.cert_txt || "");
     $("#main_lang").val(row.main_lang || "");
@@ -2931,14 +2931,6 @@ async function saveHr011MainProfile() {
     }
 }
 
-// 경력 표기 문자열을 화면용으로 정리한다.
-// function formatCareerYearMonth(value) {
-//     const raw = String(value || "").trim();
-//     if (!raw) return "";
-//     if (/[년월]/.test(raw)) return raw;
-//     return raw + "년";
-// }
-
 // 특수문자 이스케이프.
 function escapeHr011(value) {
     return String(value || "")
@@ -3086,46 +3078,59 @@ function normalizeCareerSpinInputs() {
     syncCareerExpValue();
 }
 
-function parseCareerExpValue(value) {
-    if (value === null || value === undefined || value === "") {
-        return { years: 0, months: 0 };
-    }
-
-    var raw = String(value).trim();
-    if (!raw) {
-        return { years: 0, months: 0 };
-    }
-
-    if (/^\d+(\.\d+)?$/.test(raw)) {
-        var parts = raw.split(".");
-        var years = clampCareerYearValue(parts[0]);
-        var months = 0;
-        if (parts.length > 1) {
-            var monthText = String(parts[1] || "").replace(/[^\d]/g, "");
-            months = clampCareerMonthValue(monthText || 0);
-        }
-        return { years: years, months: months };
-    }
-
-    var yearMatch = raw.match(/(\d+)\s*년/);
-    var monthMatch = raw.match(/(\d+)\s*개?월/);
-    return {
-        years: clampCareerYearValue(yearMatch ? yearMatch[1] : 0),
-        months: clampCareerMonthValue(monthMatch ? monthMatch[1] : 0)
-    };
-}
-
-// function setCareerSpinInputs(value) {
-//     var parsed = parseCareerExpValue(value);
-//     $("#exp_yr_year").val(parsed.years);
-//     $("#exp_yr_month").val(parsed.months);
-//     normalizeCareerSpinInputs();
-//     //    if ($("#exp_yr_text").length === 0) {
-//     //        $(".career-spin-wrap").closest("td").append('<span id="exp_yr_text" class="career-exp-text"></span>');
-//     //    }
-//     // 빈값으로 들어와도 정규화된 표시값(예: 0개월)이 유지되도록 현재 입력값 기준으로 표시
-//     syncCareerExpText(composeCareerExpValue());
+// function parseCareerExpValue(value) {
+//     if (value === null || value === undefined || value === "") {
+//         return { years: 0, months: 0 };
+//     }
+//
+//     var raw = String(value).trim();
+//     if (!raw) {
+//         return { years: 0, months: 0 };
+//     }
+//
+//     if (/^\d+(\.\d+)?$/.test(raw)) {
+//         var parts = raw.split(".");
+//         var years = clampCareerYearValue(parts[0]);
+//         var months = 0;
+//         if (parts.length > 1) {
+//             var monthText = String(parts[1] || "").replace(/[^\d]/g, "");
+//             months = clampCareerMonthValue(monthText || 0);
+//         }
+//         return { years: years, months: months };
+//     }
+//
+//     var yearMatch = raw.match(/(\d+)\s*년/);
+//     var monthMatch = raw.match(/(\d+)\s*개?월/);
+//     return {
+//         years: clampCareerYearValue(yearMatch ? yearMatch[1] : 0),
+//         months: clampCareerMonthValue(monthMatch ? monthMatch[1] : 0)
+//     };
 // }
+
+function setCareerSpinInputs(value) {
+    if (!value) {
+        $("#exp_yr_year").val(0);
+        $("#exp_yr_month").val(0);
+        syncCareerExpValue();
+        return;
+    }
+
+    const num = parseFloat(value);
+    if (isNaN(num)) {
+        $("#exp_yr_year").val(0);
+        $("#exp_yr_month").val(0);
+        syncCareerExpValue();
+        return;
+    }
+
+    const years = Math.floor(num);
+    const months = Math.round((num - years) * 12);
+
+    $("#exp_yr_year").val(years);
+    $("#exp_yr_month").val(months);
+
+    syncCareerExpValue(); // hidden 값 동기화
+}
 
 function composeCareerExpValue() {
     var years = clampCareerYearValue($("#exp_yr_year").val());
@@ -3138,16 +3143,16 @@ function composeCareerExpValue() {
 
 function syncCareerExpValue() {
     $("#exp_yr").val(composeCareerExpValue());
-    // syncCareerExpText();
+    syncCareerExpText();
 }
 
-// function syncCareerExpText(value) {
-//     var source = value;
-//     if (source === undefined || source === 0) {
-//         source = $("#exp_yr").val();
-//     }
-//     $("#exp_yr_text").text(formatCareerYearMonth(source));
-// }
+function syncCareerExpText(value) {
+    var source = value;
+    if (source === undefined || source === 0) {
+        source = $("#exp_yr").val();
+    }
+    // $("#exp_yr_text").text(formatCareerYearMonth(source));
+}
 
 function formatCareerYearMonth(value) {
     if (value === null || value === undefined || value === "") {
