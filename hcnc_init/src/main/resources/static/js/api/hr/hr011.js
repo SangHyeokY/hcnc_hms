@@ -1,5 +1,8 @@
 // 사용자 관리 - 소속 및 계약 정보 hr011.js (hcnc_hms)
 
+// 모달
+var $modal = $("#view-user-area");
+
 // view일 때는 수정 불가, update일 때는 수정 가능
 $(document).on("tab:readonly.hr011", function (_, isReadOnly) {
     if (isReadOnly) {
@@ -8,6 +11,13 @@ $(document).on("tab:readonly.hr011", function (_, isReadOnly) {
         return;
     }
     setHr011Mode(window.hr011EditUnlocked ? "update" : "view", { silent: true });
+
+    // ESC 누르면 모달 닫힘
+    $(document).on("keydown", function (event) {
+        if (event.key === "Escape") {
+            closeUserViewModal();
+        }
+    });
 });
 
 // mode 초기값 : view, 테이블 데이터 초기값 : null
@@ -2810,4 +2820,47 @@ function escapeHr011(value) {
         .replace(/>/g, "&gt;")
         .replace(/\"/g, "&quot;")
         .replace(/'/g, "&#39;");
+}
+
+// 전화번호 자동변환
+$(document).on("input", "#tel", function () {
+    let val = $(this).val().replace(/[^0-9]/g, "");
+
+    if (val.length < 4) {
+        $(this).val(val);
+    } else if (val.length < 8) {
+        $(this).val(val.replace(/(\d{3})(\d+)/, "$1-$2"));
+    } else {
+        $(this).val(val.replace(/(\d{3})(\d{4})(\d+)/, "$1-$2-$3"));
+    }
+});
+
+// 모달 닫기
+async function closeUserViewModal() {
+    console.log("changedTabs:", changedTabs);
+    console.log("currentMode:", currentMode);
+
+    // 공통 닫기 처리
+    const closeAll = () => {
+        // mainLangPicker?.close(true);
+        closeHr012SkillPicker?.(true);
+        closeHr013SkillPicker?.(true);
+
+        $modal.removeClass("show");
+
+        setTimeout(() => {
+            $modal.hide();
+            savedTabs = [];
+            Object.keys(changedTabs).forEach(k => changedTabs[k] = false);
+        }, 250);
+    };
+
+    // view 모드는 바로 종료
+    if (currentMode === "view") {
+        closeAll();
+        return;
+    }
+
+    // (여기 나중에 confirm 필요하면 추가)
+    closeAll();
 }
