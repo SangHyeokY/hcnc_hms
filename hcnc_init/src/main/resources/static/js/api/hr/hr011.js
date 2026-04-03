@@ -113,14 +113,17 @@ function setHr011Mode(mode, options) {
     hr011Mode = mode;
     const isView = mode === "view"; // view일 때는 수정불가능
     const isEditable = !isView && (mode === "insert" || mode === "update"); // insert와 update는 수정가능
+    const isInsert = mode === "insert";
     window.currentMode = mode;
     window.hr010ReadOnly = !isEditable;
     if (isView) {
         window.hr011EditUnlocked = false;
     }
     $(".hr011-page").toggleClass("is-edit-mode", isEditable);
-    $("#hr011PageTitleText").text(isView ? "인적사항 상세" : "인적사항 수정");
+    $("#hr011PageTitleText").text(isView ? "인적사항 상세" : isInsert ? "인적사항 등록" : "인적사항 수정");
     $("#modal-title").text(isView ? "상세" : mode === "insert" ? "등록" : "수정");
+    $("#hr011CancelBtn, #hr011CancelBtnView").text(isInsert ? "등록취소" : "수정취소");
+    $("#hr011SaveBtn, #hr011SaveBtnView").text(isInsert ? "등록" : "저장");
     $("#hr011EditBtn").toggle(isView);
     $("#hr011CancelBtn").toggle(!isView);
     $("#hr011SaveBtn").prop("hidden", isView).toggle(!isView);
@@ -810,13 +813,14 @@ function bindHr011PageEvents() {
     });
 
     $("#hr011CancelBtn").on("click", async function () {
+        const isInsert = hr011Mode === "insert";
         const result = await showAlert({
             icon: "question",
-            title: "수정 취소",
-            text: "수정을 취소하고 상세 모드로 돌아가시겠습니까?",
-            confirmText: "취소하기",
+            title: isInsert ? "등록 취소" : "수정 취소",
+            text: isInsert ? "등록을 취소하고 목록으로 돌아가시겠습니까?" : "수정을 취소하고 상세 모드로 돌아가시겠습니까?",
+            confirmText: isInsert ? "등록취소" : "취소하기",
             showCancelButton: true,
-            cancelText: "계속 수정"
+            cancelText: isInsert ? "계속 등록" : "계속 수정"
         });
         if (!result.isConfirmed) return;
         const devId = window.currentDevId || getHr011TargetDevId();
@@ -828,11 +832,12 @@ function bindHr011PageEvents() {
     });
 
     $("#hr011SaveBtn").on("click", async function () {
+        const isInsert = hr011Mode === "insert";
         const result = await showAlert({
             icon: "question",
-            title: "저장 확인",
-            text: "수정 내용을 저장하시겠습니까?",
-            confirmText: "저장",
+            title: isInsert ? "등록 확인" : "저장 확인",
+            text: isInsert ? "입력한 내용을 등록하시겠습니까?" : "수정 내용을 저장하시겠습니까?",
+            confirmText: isInsert ? "등록" : "저장",
             showCancelButton: true,
             cancelText: "취소"
         });
@@ -925,14 +930,15 @@ function bindHr011PageEvents() {
 // 상세 페이지의 메인 정보와 하위 섹션을 함께 초기화한다.
 async function initHr011DetailPage() {
     const devId = getHr011TargetDevId();
-    if (!devId) {
+    const isInsertRequest = isHr011InsertModeRequest();
+    if (!devId && !isInsertRequest) {
         await showAlert({ icon: "warning", title: "안내", text: "선택된 인력 정보가 없습니다." });
         window.location.href = "/hr010";
         return;
     }
 
-    window.currentDevId = devId;
-    $("#dev_id").val(devId);
+    window.currentDevId = devId || "";
+    $("#dev_id").val(devId || "");
     window.hr011EditUnlocked = false;
     setHr011Mode("view", { silent: true });
 
@@ -944,6 +950,23 @@ async function initHr011DetailPage() {
         loadHr011MainSelect("select_main_fld_cd", "MAIN_FLD_CD", hr011MainSelectMaps.mainFld),
         loadHr011MainSelect("select_main_cust_cd", "MAIN_CUST_CD", hr011MainSelectMaps.mainCust)
     ]);
+
+    if (!devId && isInsertRequest) {
+        applyHr011InsertDefaults();
+        await window.initTab1();
+        window.initTab2();
+        window.initTab3();
+        if (typeof window.initTab4 === "function") {
+            window.initTab4();
+        }
+
+        window.hr011EditUnlocked = true;
+        setHr011Mode("insert");
+        scheduleHr011ReadOnlyTextareas();
+        scheduleHr011ReadOnlyFields();
+        scheduleHr011LegacyReadonlyTable();
+        return;
+    }
 
     await loadHr011MainDetail(devId);
     await window.initTab1();
@@ -967,6 +990,50 @@ function getHr011TargetDevId() {
 
     const params = new URLSearchParams(window.location.search || "");
     return $.trim(params.get("dev_id") || "");
+}
+
+function isHr011InsertModeRequest() {
+    const params = new URLSearchParams(window.location.search || "");
+    const mode = String(params.get("mode") || "").trim().toLowerCase();
+    const isNew = String(params.get("new") || "").trim().toUpperCase();
+    return mode === "insert" || isNew === "Y";
+}
+
+function applyHr011InsertDefaults() {
+    const defaultDevTyp = $("#select_dev_typ option").filter(function () {
+        return !!String(this.value || "").trim();
+    }).first().val() || "";
+
+    $("#dev_id").val("");
+    $("#dev_nm").val("");
+    $("#select_dev_typ").val(defaultDevTyp);
+    $("#brdt").val("");
+    $("#tel").val("");
+    $("#email").val("");
+    $("#region").val("");
+    $("#avail_dt").val("");
+    $("#select_work_md").val("");
+    $("#select_ctrt_typ").val("");
+    $("#select_kosa_grd_cd").val("");
+    $("#select_main_fld_cd").val("");
+    $("#select_main_cust_cd").val("");
+    $("#edu_last").val("");
+    $("#exp_yr").val("");
+    $("#hope_rate_amt").val(formatAmount(""));
+    $("#cert_txt").val("");
+    $("#main_lang").val("");
+
+    hr011CurrentRow = null;
+    window.hr011Data = null;
+    hr011SummarySkillRows = [];
+    hr011SummaryRadarRows = [];
+    hr011SummaryRadarProjectCount = 0;
+    hr011RefSkillCategoryRows = [];
+    hr011RefProjectRows = [];
+    hr011RefProjectEvalCache.clear();
+    clearHr011Form();
+
+    scheduleHr011ReadOnlyFields();
 }
 
 // 메인 폼용 공통코드 select를 불러온다.
@@ -2774,6 +2841,7 @@ async function saveHr011DetailPage() {
         return;
     }
 
+    const wasInsertMode = hr011Mode === "insert";
     try {
         showLoading();
         await saveHr011MainProfile();
@@ -2783,7 +2851,13 @@ async function saveHr011DetailPage() {
         if (typeof window.saveTab4All === "function") window.saveTab4All();
         await saveHr011ProjectEvaluationAll();
 
-        showAlert({ icon: "success", title: "완료", text: "인적사항 상세 정보가 저장되었습니다." });
+        await showAlert({ icon: "success", title: "완료", text: "인적사항 상세 정보가 저장되었습니다." });
+        const savedDevId = $.trim(window.currentDevId || $("#dev_id").val());
+        if (wasInsertMode && savedDevId) {
+            window.hr011EditUnlocked = false;
+            window.location.href = "/hr011?dev_id=" + encodeURIComponent(savedDevId);
+            return;
+        }
         window.hr011EditUnlocked = false;
         setHr011Mode("view");
     } catch (error) {
@@ -2816,13 +2890,19 @@ async function saveHr011MainProfile() {
     formData.append("main_fld_cd", $("#select_main_fld_cd").val());
     formData.append("main_cust_cd", $("#select_main_cust_cd").val());
 
-    await $.ajax({
+    const response = await $.ajax({
         url: "/hr010/upsert",
         type: "POST",
         processData: false,
         contentType: false,
         data: formData
     });
+
+    const savedDevId = $.trim(response?.dev_id || "");
+    if (savedDevId) {
+        window.currentDevId = savedDevId;
+        $("#dev_id").val(savedDevId);
+    }
 }
 
 // 경력 표기 문자열을 화면용으로 정리한다.

@@ -54,6 +54,10 @@ $(document).ready(async function () {
 // 이벤트 바인딩
 // ==============================
 function bindEvents() {
+    $("#hr010CreateBtn").on("click", function () {
+        window.location.href = "/hr011?mode=insert";
+    });
+
     // 직원 / 프리랜서 토글
     $(".toggle-filter-chip").on("click", function () {
         const nextType = String($(this).data("userType") || "staff");

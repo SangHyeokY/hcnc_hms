@@ -85,15 +85,18 @@
     <section class="hr010-main">
         <div class="content-title fl-sb fl-ac">
             <h4 class="page-sub-title">인적사항 목록</h4>
-            <div class="hr010-view-toggle" role="tablist" aria-label="보기 형식">
-                <button type="button" class="hr010-view-toggle-btn is-active" data-view="card" role="tab" aria-selected="true">
-                    <span class="hr010-view-toggle-btn__icon" aria-hidden="true">▦</span>
-                    <span>카드</span>
-                </button>
-                <button type="button" class="hr010-view-toggle-btn" data-view="list" role="tab" aria-selected="false">
-                    <span class="hr010-view-toggle-btn__icon" aria-hidden="true">☰</span>
-                    <span>리스트</span>
-                </button>
+            <div class="hr010-main-actions">
+                <button type="button" class="btn hr010-create-btn" id="hr010CreateBtn">등록하기</button>
+                <div class="hr010-view-toggle" role="tablist" aria-label="보기 형식">
+                    <button type="button" class="hr010-view-toggle-btn is-active" data-view="card" role="tab" aria-selected="true">
+                        <span class="hr010-view-toggle-btn__icon" aria-hidden="true">▦</span>
+                        <span>카드</span>
+                    </button>
+                    <button type="button" class="hr010-view-toggle-btn" data-view="list" role="tab" aria-selected="false">
+                        <span class="hr010-view-toggle-btn__icon" aria-hidden="true">☰</span>
+                        <span>리스트</span>
+                    </button>
+                </div>
             </div>
         </div>
         <!-- ================= 검색 영역 ================= -->

@@ -2996,6 +2996,9 @@ section.search-area .search-info #searchConditionKeyword { /* 새 검색어 입�
 
 .hr010-dashboard-wrap #CARD_HR010_A {display:grid; grid-template-columns:repeat(auto-fill, minmax(235px, 1fr)); gap:12px; flex:0 0 auto; min-height:0; height:auto; padding-right:2px; padding-bottom:8px; overflow:visible; position:relative; align-content:start; align-items:stretch; --hr010-card-fixed-h:510px; grid-auto-rows:var(--hr010-card-fixed-h);}
 .hr010-dashboard-wrap #CARD_HR010_A[data-view="list"] {display:block;}
+.hr010-dashboard-wrap .hr010-main-actions {display:flex; align-items:center; gap:10px;}
+.hr010-dashboard-wrap .hr010-create-btn {display:inline-flex; align-items:center; justify-content:center; min-width:98px; height:42px; padding:0 16px; border-radius:10px; border:1px solid #1f2f45; background:#1f2f45; color:#fff; font-size:14px; font-weight:700; line-height:1; cursor:pointer; transition:background-color .18s ease, border-color .18s ease, box-shadow .18s ease;}
+.hr010-dashboard-wrap .hr010-create-btn:hover {background:#253a56; border-color:#253a56; box-shadow:0 8px 16px rgba(25, 43, 69, 0.18);}
 .hr010-dashboard-wrap .hr010-view-toggle {display:inline-flex; align-items:center; padding:4px; border:1px solid #d7e2f0; border-radius:999px; background:#f7faff; gap:4px;}
 .hr010-dashboard-wrap .hr010-view-toggle-btn {display:inline-flex; align-items:center; gap:8px; min-width:92px; padding:10px 14px; border:none; border-radius:999px; background:transparent; color:#6b7f99; font-size:14px; font-weight:700; cursor:pointer; transition:background-color .18s ease, color .18s ease, box-shadow .18s ease;}
 .hr010-dashboard-wrap .hr010-view-toggle-btn__icon {font-size:14px; line-height:1;}
