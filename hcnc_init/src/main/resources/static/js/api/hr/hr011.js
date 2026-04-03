@@ -558,7 +558,13 @@ $("#amt")
 
 // 문자열 가공
 function normalizeAmountValue(str) {
-    return String(str || "").replace(/[^\d]/g, "");
+    let cleaned = String(str || "").replace(/[^\d.]/g, "");
+    // 소수점 여러 개 방지
+    const parts = cleaned.split(".");
+    if (parts.length > 2) {
+        cleaned = parts[0] + "." + parts.slice(1).join("");
+    }
+    return cleaned;
 }
 
 function formatAmount(num) {
@@ -879,13 +885,21 @@ function bindHr011PageEvents() {
     });
 
     $("#hope_rate_amt")
+        .on("keydown", function (e) {
+            const allowKeys = ["Backspace", "Delete", "ArrowLeft", "ArrowRight", "Tab"];
+            if (allowKeys.includes(e.key)) return;
+            if (!/^\d$/.test(e.key)) e.preventDefault();
+        })
         .on("input", function () {
-            const raw = this.value || "";
+            const raw = (this.value || "").replace(/[^\d]/g, "");
             const caret = Number.isFinite(this.selectionStart) ? this.selectionStart : raw.length;
+
             const digitsBeforeCaret = countAmountDigitsBeforeCaret(raw, caret);
-            const inputNumber = normalizeAmountValue(raw);
-            const formatted = formatAmount(inputNumber);
-            this.value = formatted;
+
+            // 숫자 변환 + 최대값 제한
+            let inputNumber = clampAmount(raw);
+
+            this.value = formatAmount(inputNumber);
             setAmountCaretByDigitIndex(this, digitsBeforeCaret);
         })
         .on("focus", function () {
@@ -3297,7 +3311,8 @@ async function saveHr011MainProfile() {
     formData.append("work_md", $("#select_work_md").val());
     formData.append("avail_dt", $("#avail_dt").val());
     formData.append("ctrt_typ", $("#select_ctrt_typ").val());
-    formData.append("hope_rate_amt", $("#hope_rate_amt").val().replace(/[^0-9]/g, ""));
+    let numeric = normalizeAmountValue($("#hope_rate_amt").val());
+    formData.append("hope_rate_amt", numeric);
     formData.append("kosa_grd_cd", $("#select_kosa_grd_cd").val());
     formData.append("main_fld_cd", $("#select_main_fld_cd").val());
     formData.append("main_cust_cd", $("#select_main_cust_cd").val());
@@ -3579,4 +3594,11 @@ function formatCareerYearMonth(value) {
         return years + "년";
     }
     return years + "년 " + months + "개월";
+}
+
+function clampAmount(value) {
+    if (!value) return 0;
+    const num = Number(value);
+    if (!Number.isFinite(num)) return 0;
+    return Math.min(num, 999999999999.99);
 }
