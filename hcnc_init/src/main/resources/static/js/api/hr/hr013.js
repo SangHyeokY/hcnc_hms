@@ -27,6 +27,8 @@ function isHr013ProjectCodeSelectable(data) {
 }
 
 function isHr013ProjectReadOnly() {
+    const isHr011EditMode = !!document.querySelector(".hr011-page.is-edit-mode");
+    if (isHr011EditMode) return false;
     return currentMode === "view" || !!window.hr010ReadOnly;
 }
 
@@ -73,6 +75,9 @@ window.initTab3 = function () {
     $(".btn-tab3-add").off("click").on("click", function () {
         addHr013Row();
     });
+
+    // Tabulator cellClick이 환경에 따라 누락되는 경우를 대비한 버튼 fallback
+    bindHr013CellButtonFallback();
 
     $("#write_hr013_inprj_yn").off("change").on("change", function () {
         applyInprjCustomerName($(this).val(), $("#write_hr013_cust_nm").val());
@@ -129,6 +134,81 @@ window.initTab3 = function () {
         syncHr013SkillPickerUi(true);
     });
 };
+
+function getHr013RowComponentFromTarget(target) {
+    if (!window.hr013Table || !target) return null;
+    const rowEl = target.closest ? target.closest(".tabulator-row") : null;
+    if (!rowEl) return null;
+    const rows = typeof window.hr013Table.getRows === "function" ? window.hr013Table.getRows() : [];
+    for (let i = 0; i < rows.length; i += 1) {
+        const rowComp = rows[i];
+        if (rowComp && typeof rowComp.getElement === "function" && rowComp.getElement() === rowEl) {
+            return rowComp;
+        }
+    }
+    return null;
+}
+
+function getHr013RowComponentFromButtonMeta(target) {
+    if (!window.hr013Table || !target || typeof window.hr013Table.getRows !== "function") return null;
+    const btn = target.closest ? target.closest(".btn-prj-skl, .btn-prj-edit, .btn-prj-eval") : null;
+    if (!btn) return null;
+    const devPrjId = String(btn.getAttribute("data-dev-prj-id") || "").trim();
+    const prjNm = String(btn.getAttribute("data-prj-nm") || "").trim();
+    const rows = window.hr013Table.getRows() || [];
+    for (let i = 0; i < rows.length; i += 1) {
+        const rowComp = rows[i];
+        if (!rowComp || typeof rowComp.getData !== "function") continue;
+        const rowData = rowComp.getData() || {};
+        if (devPrjId && String(rowData.dev_prj_id || "").trim() === devPrjId) {
+            return rowComp;
+        }
+        if (!devPrjId && prjNm && String(rowData.prj_nm || "").trim() === prjNm) {
+            return rowComp;
+        }
+    }
+    return null;
+}
+
+function triggerHr013RowAction(target, action) {
+    if (window.hr010ReadOnly && !document.querySelector(".hr011-page.is-edit-mode")) return;
+    const rowComp = getHr013RowComponentFromTarget(target) || getHr013RowComponentFromButtonMeta(target);
+    if (!rowComp) return;
+    const rowData = typeof rowComp.getData === "function" ? rowComp.getData() : {};
+
+    if (action === "skill") {
+        openHr013SkillPicker("grid", rowComp);
+        return;
+    }
+    if (action === "edit") {
+        openHr013ProjectPicker(rowComp);
+        return;
+    }
+    if (action === "eval") {
+        window.currentDevId = rowData.dev_id;
+        window.hr013_prj_nm = rowData.dev_prj_id;
+        $(".tab-btn").last().click();
+        reloadTab4(rowData.dev_prj_id).then(function () {
+            $(document).trigger("hr013:focusEvaluation", [rowData.dev_prj_id]);
+        });
+    }
+}
+
+window.hr013HandleRowAction = function (btn, action) {
+    triggerHr013RowAction(btn, action);
+    return false;
+};
+
+function bindHr013CellButtonFallback() {
+    $(document).off("click.hr013CellFallback");
+    $(document).on("click.hr013CellFallback", "#TABLE_HR013_A .btn-prj-skl, #TABLE_HR013_A .btn-prj-edit, #TABLE_HR013_A .btn-prj-eval", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        if ($(e.target).closest(".btn-prj-skl").length) triggerHr013RowAction(e.target, "skill");
+        if ($(e.target).closest(".btn-prj-edit").length) triggerHr013RowAction(e.target, "edit");
+        if ($(e.target).closest(".btn-prj-eval").length) triggerHr013RowAction(e.target, "eval");
+    });
+}
 
 // 프로젝트 제목 옆 건수(span.hcnc-grid-count-number) 업데이트
 function updateHr013TitleCount() {
@@ -306,6 +386,8 @@ function buildHr013Table() {
                 formatter: function (cell) {
                     const v = cell.getValue() ?? "";
                     const d = cell.getRow().getData();
+                    const devPrjIdAttr = hr013EscapeHtml(d.dev_prj_id || "");
+                    const prjNmAttr = hr013EscapeHtml(v || d.prj_nm || "");
                     if (window.hr010ReadOnly) {
                         return `<div class="hr013-readonly-text hr013-readonly-text--project" title="${hr013EscapeHtml(v)}">${hr013EscapeHtml(v)}</div>`;
                     }
@@ -315,9 +397,9 @@ function buildHr013Table() {
 
                     return `
                       <div class="prj-cell">
-                        ${showBtn && !isNew && !isReadOnly ? `<div><button type="button" class="btn-prj-eval">평가</button></div>` : ""}
+                        ${showBtn && !isNew && !isReadOnly ? `<div><button type="button" class="btn-prj-eval" data-dev-prj-id="${devPrjIdAttr}" data-prj-nm="${prjNmAttr}" onclick="return window.hr013HandleRowAction && window.hr013HandleRowAction(this,'eval');">평가</button></div>` : ""}
                         <span class="prj-text" title="${hr013EscapeHtml(v)}">${hr013EscapeHtml(v)}</span>
-                        ${showBtn && !isReadOnly ? `<div><button type="button" class="btn-prj-edit">등록</button></div>` : ""}
+                        ${showBtn && !isReadOnly ? `<div><button type="button" class="btn-prj-edit" data-dev-prj-id="${devPrjIdAttr}" data-prj-nm="${prjNmAttr}" onclick="return window.hr013HandleRowAction && window.hr013HandleRowAction(this,'edit');">등록</button></div>` : ""}
                       </div>
                     `;
                 },
@@ -348,6 +430,7 @@ function buildHr013Table() {
                         $(".tab-btn").last().click();
 
                         await reloadTab4(rowData.dev_prj_id);
+                        $(document).trigger("hr013:focusEvaluation", [rowData.dev_prj_id]);
                         return;
                     }
                     // 등록 버튼 클릭 처리(새 요구사항)
@@ -588,7 +671,7 @@ function bindHr013SkillPickerEvents() {
 
 // sourceType(modal/grid)에 따라 선택 원본을 분기해서 팝업을 연다.
 function openHr013SkillPicker(sourceType, row) {
-    if (currentMode === "view" || window.hr010ReadOnly) {
+    if (!isHr013Editable()) {
         return;
     }
     initHr013SkillPicker();
@@ -1681,6 +1764,8 @@ function toggleInprjValue(cell) {
 
 // 상세 모드 여부
 function isHr013Editable() {
+    const isHr011EditMode = !!document.querySelector(".hr011-page.is-edit-mode");
+    if (isHr011EditMode) return true;
     return !window.hr010ReadOnly;
 }
 
@@ -1835,6 +1920,8 @@ function hr013TableSkillFormatter(cell) {
     var rowData = cell.getRow() ? cell.getRow().getData() : {};
     var labelText = getHr013SkillLabelText(value, rowData ? rowData.stack_txt : "");
     var textHtml = labelText ? hr013EscapeHtml(labelText) : "-";
+    var devPrjIdAttr = hr013EscapeHtml(rowData && rowData.dev_prj_id ? rowData.dev_prj_id : "");
+    var prjNmAttr = hr013EscapeHtml(rowData && rowData.prj_nm ? rowData.prj_nm : "");
 
 // 기술스택 표기가 너무 길어져서 별도의 팝업으로 분리
     if (window.hr010ReadOnly) {
@@ -1842,7 +1929,7 @@ function hr013TableSkillFormatter(cell) {
     }
     return `<div class="hr013-stack-cell">` +
         `<span class="hr013-stack-text" style="white-space: nowrap; padding-right: 15px;">` + textHtml + `</span>` +
-        `<button type="button" class="btn-prj-skl">기술 선택</button>` + `</div>`;
+        `<button type="button" class="btn-prj-skl" data-dev-prj-id="${devPrjIdAttr}" data-prj-nm="${prjNmAttr}" onclick="return window.hr013HandleRowAction && window.hr013HandleRowAction(this,'skill');">기술 선택</button>` + `</div>`;
 }
 
 function hr013TableSkillCellClick(e, cell) {

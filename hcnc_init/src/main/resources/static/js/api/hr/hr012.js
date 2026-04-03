@@ -17,7 +17,8 @@ function isHr011DetailView() {
 }
 
 function applyHr012DetailStackLayout() {
-    if (!isHr011DetailView() || !window.hr010ReadOnly) {
+    const isHr011EditMode = !!document.querySelector(".hr011-page.is-edit-mode");
+    if (!isHr011DetailView() || (!window.hr010ReadOnly && !isHr011EditMode)) {
         return;
     }
 
@@ -112,10 +113,12 @@ window.initTab2 = function() {
 };
 
 function applyTab2Readonly(isReadOnly) {
-    $(".tab2-content .hr014-side-tabs").toggleClass("is-readonly", !!isReadOnly);
+    const isHr011EditMode = !!document.querySelector(".hr011-page.is-edit-mode");
+    const locked = isHr011EditMode ? false : !!isReadOnly;
+    $(".tab2-content .hr014-side-tabs").toggleClass("is-readonly", locked);
     $("#TABLE_HR012_A, #TABLE_HR012_B").toggleClass("is-readonly", !!isReadOnly);
-    $("#btn_hr012_skill_picker").toggle(!isReadOnly && $(".hr012-tab-btn.active").data("tab") === "tab2-A");
-    if (isReadOnly) {
+    $("#btn_hr012_skill_picker").toggle(!locked && ($(".hr012-tab-btn.active").data("tab") === "tab2-A" || isHr011EditMode));
+    if (locked) {
         closeHr012SkillPicker(true);
     }
     applyHr012DetailStackLayout();
@@ -597,7 +600,8 @@ function bindHr012SkillPickerEvents() {
 
     $(document).on("click", "#btn_hr012_skill_picker", function (e) {
         e.preventDefault();
-        if (currentMode === "view") {
+        const isHr011EditMode = !!document.querySelector(".hr011-page.is-edit-mode");
+        if (currentMode === "view" && !isHr011EditMode) {
             return;
         }
         openHr012SkillPicker();
@@ -702,7 +706,8 @@ function ensureHr012SkillPickerOptionsLoaded() {
 }
 
 function openHr012SkillPicker() {
-    if (currentMode === "view") {
+    const isHr011EditMode = !!document.querySelector(".hr011-page.is-edit-mode");
+    if (currentMode === "view" && !isHr011EditMode) {
         return;
     }
     ensureHr012SkillPickerOptionsLoaded();
