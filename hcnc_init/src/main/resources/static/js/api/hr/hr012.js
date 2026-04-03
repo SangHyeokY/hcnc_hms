@@ -182,11 +182,47 @@ function loadHr012TableDataA() {
                 return;
             }
 
-            const tableData = dataArray.map(item => ({
+            let tableData = dataArray.map(item => ({
                 cd: String(item.cd || "").toUpperCase(),
                 cd_nm: item.cd_nm,
                 skl_id_lst: parseSklList(item.skl_id_lst)
             }));
+
+            if (!tableData.length) {
+                const applyEmptyGroupRows = function () {
+                    const fallbackRows = (hr012SkillGroupOptions || []).map(function (group) {
+                        return {
+                            cd: String(group.cd || "").toUpperCase(),
+                            cd_nm: group.cd_nm || group.cd || "",
+                            skl_id_lst: []
+                        };
+                    });
+
+                    hr012RowTags.clear();
+                    fallbackRows.forEach(function (row) {
+                        if (!row.cd) return;
+                        hr012RowTags.set(row.cd, []);
+                    });
+                    tableData_old = cloneTableData(fallbackRows);
+                    window.hr012TableA.setData(fallbackRows);
+                    hr012TableAReady = true;
+                    syncHr012SkillPickerUi();
+                };
+
+                if (!hr012SkillGroupOptions.length && !hr012SkillGroupLoading) {
+                    hr012SkillGroupLoading = true;
+                    getComCode("skl_grp", "", function (res) {
+                        hr012SkillGroupOptions = Array.isArray(res) ? res : [];
+                        hr012SkillGroupLoading = false;
+                        applyEmptyGroupRows();
+                    });
+                    return;
+                }
+
+                applyEmptyGroupRows();
+                return;
+            }
+
             tableData.forEach(row => {
                 const key = row.cd || row.grp_cd || row.cd_nm;
                 if (!key) return;
