@@ -1188,6 +1188,14 @@ function parseHr011SkillList(raw) {
     return text.split(",").map(function (item) { return $.trim(item); }).filter(Boolean);
 }
 
+function buildHr011ChipListMarkup(raw, emptyLabel) {
+    const values = parseHr011SkillList(raw);
+    const items = values.length ? values : [emptyLabel || "-"];
+    return items.map(function (item) {
+        return `<span class="chip">${escapeHr011(item)}</span>`;
+    }).join("");
+}
+
 function renderHr011ReferenceDashboard(row) {
     if (!row) return;
 
@@ -1207,7 +1215,7 @@ function renderHr011ReferenceDashboard(row) {
             return `<span class="chip">${escapeHr011(skill)}</span>`;
         }).join("") + (hasMoreMainLang ? `<span class="chip">...</span>` : "")
     );
-    $("#hr011RefCertTxt").text($.trim(row.cert_txt || "") || "-");
+    $("#hr011RefCertTxt").html(buildHr011ChipListMarkup(row.cert_txt, "미등록"));
 
     $("#hr011RefDevType").text(devTypeLabel);
     $("#hr011RefBrdt").text($.trim(row.brdt || "") || "-");
@@ -1240,15 +1248,28 @@ function renderHr011ReferenceDashboard(row) {
 
     const projects = (hr011RefProjectRows || []).slice(0, 3);
     $("#hr011RefProjectList").html(projects.length ? projects.map(function (item) {
+        const company = item.org_nm || item.cust_nm || item.cli_nm || "-";
+        const isInternal = isHr011InternalProject(item);
         const stacks = parseHr011SkillList(item.stack_txt_nm || item.stack_txt);
+        const stackMarkup = (stacks.length ? stacks.slice(0, 5) : ["미등록"]).map(function (stack) {
+            return `<span class="chip">${escapeHr011(stack)}</span>`;
+        }).join("");
         return [
             `<article class="hr011-ref-project-item">`,
-            `<div class="top"><span class="corp">${escapeHr011(item.cust_nm || "HCNC")}</span></div>`,
-            `<div class="name">${escapeHr011(item.prj_nm || "-")}</div>`,
-            `<div class="stack">${(stacks.length ? stacks.slice(0, 6) : ["-"]).map(function (stack) { return `<span class="chip">${escapeHr011(stack)}</span>`; }).join("")}</div>`,
+            `<div class="hr011-ref-project-item-badge">${buildHr011ProjectBadgeMarkup(company, isInternal)}</div>`,
+            `<div class="hr011-ref-project-item-body">`,
+            `<div class="hr011-ref-project-item-field">`,
+            `<span class="label">프로젝트명</span>`,
+            `<div class="value">${escapeHr011(item.prj_nm || "-")}</div>`,
+            `</div>`,
+            `<div class="hr011-ref-project-item-field">`,
+            `<span class="label">주개발언어</span>`,
+            `<div class="stack">${stackMarkup}</div>`,
+            `</div>`,
+            `</div>`,
             `</article>`
         ].join("");
-    }).join("") : `<article class="hr011-ref-project-item"><div class="name">프로젝트 이력이 없습니다.</div></article>`);
+    }).join("") : `<article class="hr011-ref-project-item hr011-ref-project-item--empty"><div class="name">프로젝트 이력이 없습니다.</div></article>`);
 
     switchHr011RefView(hr011RefCurrentView, { force: true });
 }
@@ -1267,8 +1288,8 @@ function switchHr011RefView(view, options) {
     if (!overviewEl || !detailEl || !detailTitleEl || !detailBodyEl) return;
 
     if (leftProfileLinkEl) {
-        // 스킬/프로젝트 상세에서는 좌측 "회원상세 >상세보기" 버튼을 숨긴다.
-        leftProfileLinkEl.hidden = normalized === "skills" || normalized === "project";
+        // 프로필/스킬/프로젝트 상세에서는 좌측 >상세보기 버튼을 숨긴다.
+        leftProfileLinkEl.hidden = normalized === "skills" || normalized === "project" || normalized === "profile";
     }
 
     if (normalized === "overview") {
@@ -1659,9 +1680,7 @@ function buildHr011ProjectCompanyBadge(item, companyName, isInternal) {
     if (isInternal) {
         return [
             `<div class="hr011-ref-project-company-wrap">`,
-            `<span class="hr011-ref-project-company-badge hr011-ref-project-company-badge--internal" aria-hidden="true">`,
-            `<img src="/images/common/header-logo.png" alt="HCNC 로고">`,
-            `</span>`,
+            buildHr011ProjectBadgeMarkup(company, true),
             `<span class="hr011-ref-project-detail-company">${escapeHr011(company)}</span>`,
             `</div>`
         ].join("");
@@ -1669,10 +1688,22 @@ function buildHr011ProjectCompanyBadge(item, companyName, isInternal) {
 
     return [
         `<div class="hr011-ref-project-company-wrap">`,
-        `<span class="hr011-ref-project-company-badge hr011-ref-project-company-badge--external" aria-hidden="true">${escapeHr011(getHr011ExternalCompanyBadgeText(company))}</span>`,
+        buildHr011ProjectBadgeMarkup(company, false),
         `<span class="hr011-ref-project-detail-company">${escapeHr011(company)}</span>`,
         `</div>`
     ].join("");
+}
+
+function buildHr011ProjectBadgeMarkup(companyName, isInternal) {
+    if (isInternal) {
+        return [
+            `<span class="hr011-ref-project-company-badge hr011-ref-project-company-badge--internal" aria-hidden="true">`,
+            `<img src="/images/common/header-logo.png" alt="HCNC 로고">`,
+            `</span>`
+        ].join("");
+    }
+
+    return `<span class="hr011-ref-project-company-badge hr011-ref-project-company-badge--external" aria-hidden="true">${escapeHr011(getHr011ExternalCompanyBadgeText(companyName))}</span>`;
 }
 
 function isHr011InternalProject(item) {
