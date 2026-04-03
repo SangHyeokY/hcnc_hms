@@ -2862,7 +2862,6 @@ async function saveHr011DetailPage() {
         if (typeof window.saveTab4All === "function") await window.saveTab4All();
         await saveHr011ProjectEvaluationAll();
 
-        await showAlert({ icon: "success", title: "완료", text: "인적사항 상세 정보가 저장되었습니다." });
         const savedDevId = $.trim(window.currentDevId || $("#dev_id").val());
         if (wasInsertMode && savedDevId) {
             window.hr011EditUnlocked = false;
@@ -2872,9 +2871,8 @@ async function saveHr011DetailPage() {
         window.hr011EditUnlocked = false;
         setHr011Mode("view");
 
-        // 화면 새로 불러오기
-        let devId = window.currentDevId;
-        await loadHr011MainDetail(devId);
+        // 최신 데이터 다시 조회
+        await loadHr011MainDetail(savedDevId);
 
         hideLoading(); // 먼저 로딩 끝
 
