@@ -338,7 +338,7 @@ function saveHr011TableData() {
         bizTyp: $("#select_biz_typ").val(),
         stDt: $("#st_dt").val(),
         edDt: $("#ed_dt").val(),
-        amt: normalizeAmountValue($("#amt").val()),
+        amt: $("#amt").val().replace(/[^0-9]/g, ""),
         remark: $("#remark").val()
     };
 
@@ -1917,7 +1917,7 @@ function buildHr011ProfileDetailMarkup() {
     const sideRows = [
         ["투입 가능", row.avail_dt || "-"],
         ["희망단가", row.hope_rate_amt ? formatAmount(row.hope_rate_amt) : "-"],
-        ["경력", row.exp_yr || "-"]
+        ["경력", row.exp_yr ? formatCareerYearMonth(row.exp_yr) : "-"]
     ];
     const basicRows = [
         ["성명", row.dev_nm || "-"],
@@ -3240,14 +3240,14 @@ async function saveHr011DetailPage() {
     const wasInsertMode = hr011Mode === "insert";
     try {
         showLoading();
+
         await saveHr011MainProfile();
         if (typeof saveHr011TableData === "function") await saveHr011TableData();
         if (typeof saveHr012TableData === "function") await saveHr012TableData();
         if (typeof window.saveHr013TableData === "function") window.saveHr013TableData();
-        if (typeof window.saveTab4All === "function") window.saveTab4All();
+        if (typeof window.saveTab4All === "function") await window.saveTab4All();
         await saveHr011ProjectEvaluationAll();
 
-        await showAlert({ icon: "success", title: "완료", text: "인적사항 상세 정보가 저장되었습니다." });
         const savedDevId = $.trim(window.currentDevId || $("#dev_id").val());
         if (wasInsertMode && savedDevId) {
             window.hr011EditUnlocked = false;
@@ -3256,11 +3256,27 @@ async function saveHr011DetailPage() {
         }
         window.hr011EditUnlocked = false;
         setHr011Mode("view");
+
+        // 최신 데이터 다시 조회
+        await loadHr011MainDetail(savedDevId);
+
+        hideLoading(); // 먼저 로딩 끝
+
+        showAlert({
+            icon: "success",
+            title: "완료",
+            text: "인적사항 상세 정보가 저장되었습니다."
+        });
+
     } catch (error) {
         console.error(error);
-        showAlert({ icon: "error", title: "오류", text: "상세 정보 저장 중 오류가 발생했습니다." });
-    } finally {
         hideLoading();
+
+        showAlert({
+            icon: "error",
+            title: "오류",
+            text: "상세 정보 저장 중 오류가 발생했습니다."
+        });
     }
 }
 
@@ -3275,13 +3291,13 @@ async function saveHr011MainProfile() {
     formData.append("email", $("#email").val());
     formData.append("region", $("#region").val());
     formData.append("main_lang", $("#main_lang").val());
-    formData.append("exp_yr", $("#exp_yr").val());
+    formData.append("exp_yr", String(composeCareerExpValue()));
     formData.append("edu_last", $("#edu_last").val());
     formData.append("cert_txt", $("#cert_txt").val());
     formData.append("work_md", $("#select_work_md").val());
     formData.append("avail_dt", $("#avail_dt").val());
     formData.append("ctrt_typ", $("#select_ctrt_typ").val());
-    formData.append("hope_rate_amt", normalizeAmountValue($("#hope_rate_amt").val()));
+    formData.append("hope_rate_amt", $("#hope_rate_amt").val().replace(/[^0-9]/g, ""));
     formData.append("kosa_grd_cd", $("#select_kosa_grd_cd").val());
     formData.append("main_fld_cd", $("#select_main_fld_cd").val());
     formData.append("main_cust_cd", $("#select_main_cust_cd").val());
@@ -3302,12 +3318,12 @@ async function saveHr011MainProfile() {
 }
 
 // 경력 표기 문자열을 화면용으로 정리한다.
-function formatCareerYearMonth(value) {
-    const raw = String(value || "").trim();
-    if (!raw) return "";
-    if (/[년월]/.test(raw)) return raw;
-    return raw + "년";
-}
+// function formatCareerYearMonth(value) {
+//     const raw = String(value || "").trim();
+//     if (!raw) return "";
+//     if (/[년월]/.test(raw)) return raw;
+//     return raw + "년";
+// }
 
 // 특수문자 이스케이프.
 function escapeHr011(value) {
@@ -3360,4 +3376,202 @@ async function closeUserViewModal() {
 
     // (여기 나중에 confirm 필요하면 추가)
     closeAll();
+}
+
+// 경력연차 커스텀 스핀 버튼(+/-)
+$(document).on("click", ".career-spin-btn", function () {
+    var targetSelector = $(this).data("target");
+    var step = parseInt($(this).data("step"), 10) || 0;
+    if (!targetSelector || step === 0) {
+        return;
+    }
+
+    var $target = $(targetSelector);
+    if (!$target.length || $target.prop("disabled")) {
+        return;
+    }
+
+    var currentYear = clampCareerYearValue($("#exp_yr_year").val());
+    var currentMonth = clampCareerMonthValue($("#exp_yr_month").val());
+
+    if (targetSelector === "#exp_yr_month") {
+        if (step > 0) {
+            if (currentYear >= 99 && currentMonth >= 12) {
+                currentYear = 0;
+                currentMonth = 0;
+            } else
+            if (currentMonth >= 12) {
+                currentMonth = 0;
+                currentYear = clampCareerYearValue(currentYear + 1);
+            } else {
+                currentMonth = clampCareerMonthValue(currentMonth + 1);
+            }
+        } else {
+            if (currentMonth <= 0 && currentYear > 0) {
+                currentYear = clampCareerYearValue(currentYear - 1);
+                currentMonth = 12;
+            } else {
+                currentMonth = clampCareerMonthValue(currentMonth - 1);
+            }
+        }
+    } else {
+        if (step > 0 && currentYear >= 99 && currentMonth >= 12) {
+            currentYear = 0;
+            currentMonth = 0;
+        } else {
+            currentYear = clampCareerYearValue(currentYear + step);
+        }
+    }
+
+    $("#exp_yr_year").val(currentYear);
+    $("#exp_yr_month").val(currentMonth);
+    normalizeCareerSpinInputs();
+});
+
+// 경력 타입 형태 맞추기
+function clampCareerYearValue(value) {
+    var num = parseInt(value, 10);
+    if (!Number.isFinite(num) || isNaN(num)) {
+        return 0;
+    }
+    if (num < 0) return 0;
+    if (num > 99) return 99;
+    return num;
+}
+
+function clampCareerMonthValue(value) {
+    var num = parseInt(value, 10);
+    if (!Number.isFinite(num) || isNaN(num)) {
+        return 0;
+    }
+    if (num < 0) return 0;
+    if (num > 12) return 12;
+    return num;
+}
+
+function normalizeCareerSpinInputs() {
+    var years = clampCareerYearValue($("#exp_yr_year").val());
+    var monthsRaw = parseInt($("#exp_yr_month").val(), 10);
+    var months = Number.isFinite(monthsRaw) && !isNaN(monthsRaw) ? monthsRaw : 0;
+
+    if (months < 0) {
+        months = 0;
+    }
+    if (months > 12) {
+        years = clampCareerYearValue(years + Math.floor(months / 12));
+        months = months % 12;
+    }
+    if (years >= 99 && months > 12) {
+        months = 12;
+    }
+
+    months = clampCareerMonthValue(months);
+
+    $("#exp_yr_year").val(years);
+    $("#exp_yr_month").val(months);
+    syncCareerExpValue();
+}
+
+function parseCareerExpValue(value) {
+    if (value === null || value === undefined || value === "") {
+        return { years: 0, months: 0 };
+    }
+
+    var raw = String(value).trim();
+    if (!raw) {
+        return { years: 0, months: 0 };
+    }
+
+    if (/^\d+(\.\d+)?$/.test(raw)) {
+        var parts = raw.split(".");
+        var years = clampCareerYearValue(parts[0]);
+        var months = 0;
+        if (parts.length > 1) {
+            var monthText = String(parts[1] || "").replace(/[^\d]/g, "");
+            months = clampCareerMonthValue(monthText || 0);
+        }
+        return { years: years, months: months };
+    }
+
+    var yearMatch = raw.match(/(\d+)\s*년/);
+    var monthMatch = raw.match(/(\d+)\s*개?월/);
+    return {
+        years: clampCareerYearValue(yearMatch ? yearMatch[1] : 0),
+        months: clampCareerMonthValue(monthMatch ? monthMatch[1] : 0)
+    };
+}
+
+// function setCareerSpinInputs(value) {
+//     var parsed = parseCareerExpValue(value);
+//     $("#exp_yr_year").val(parsed.years);
+//     $("#exp_yr_month").val(parsed.months);
+//     normalizeCareerSpinInputs();
+//     //    if ($("#exp_yr_text").length === 0) {
+//     //        $(".career-spin-wrap").closest("td").append('<span id="exp_yr_text" class="career-exp-text"></span>');
+//     //    }
+//     // 빈값으로 들어와도 정규화된 표시값(예: 0개월)이 유지되도록 현재 입력값 기준으로 표시
+//     syncCareerExpText(composeCareerExpValue());
+// }
+
+function composeCareerExpValue() {
+    var years = clampCareerYearValue($("#exp_yr_year").val());
+    var months = clampCareerMonthValue($("#exp_yr_month").val());
+    if (months === 0) {
+        return String(years);
+    }
+    return years + "." + months;
+}
+
+function syncCareerExpValue() {
+    $("#exp_yr").val(composeCareerExpValue());
+    // syncCareerExpText();
+}
+
+// function syncCareerExpText(value) {
+//     var source = value;
+//     if (source === undefined || source === 0) {
+//         source = $("#exp_yr").val();
+//     }
+//     $("#exp_yr_text").text(formatCareerYearMonth(source));
+// }
+
+function formatCareerYearMonth(value) {
+    if (value === null || value === undefined || value === "") {
+        return "";
+    }
+
+    var raw = String(value).trim();
+    if (!raw) {
+        return "";
+    }
+
+    if (!/^\d+(\.\d+)?$/.test(raw)) {
+        return raw;
+    }
+
+    var parts = raw.split(".");
+    var years = parseInt(parts[0], 10) || 0;
+    if (parts.length === 1) {
+        if (years === 0) {
+            return "0개월";
+        }
+        return years + "년";
+    }
+
+    var monthsRaw = String(parts[1] || "");
+    if (!monthsRaw || /^0+$/.test(monthsRaw)) {
+        if (years === 0) {
+            return "0개월";
+        }
+        return years + "년";
+    }
+
+    var months = parseInt(monthsRaw, 10);
+    if (!months) {
+        if (years === 0) {
+            return "0개월";
+        }
+        return years + "년";
+    }
+    return years + "년 " + months + "개월";
 }

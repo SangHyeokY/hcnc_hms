@@ -2238,7 +2238,7 @@ display: flex; width: fit-content; align-items: center; text-align: center; marg
     line-height: 1;
 }
 .career-spin-btn:first-child {
-    margin-bottom: 2px;
+    margin-bottom: 4px;
     border-radius: 0 6px 0 0;
 }
 
