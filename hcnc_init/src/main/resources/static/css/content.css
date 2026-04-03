@@ -3419,12 +3419,13 @@ section.search-area .search-info #searchConditionKeyword { /* 새 검색어 입�
 .hr011-detail-wrap .hr011-ref-avatar .profile-circle-icon--fallback {display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg, #e6eefc 0%, #d7e3fa 100%); color:#5e7599;}
 .hr011-detail-wrap .hr011-ref-avatar .profile-circle-icon--fallback svg {width:66%; height:66%; fill:none; stroke:currentColor; stroke-width:3.5; stroke-linecap:round; stroke-linejoin:round;}
 .hr011-detail-wrap .hr011-ref-name {font-size:clamp(1.9rem, 2.1vw, 2.35rem); font-weight:800; text-align:center; color:#192c47; line-height:1.05;}
-.hr011-detail-wrap .hr011-ref-block {display:grid; gap:8px;}
+.hr011-detail-wrap .hr011-ref-block {display:grid; gap:11px; padding-bottom:15px;}
 .hr011-detail-wrap .hr011-ref-block h6 {font-size:16px; font-weight:800; color:#1f2f47;}
 .hr011-detail-wrap .hr011-ref-mainlang {display:flex; flex-wrap:wrap; gap:6px;}
-.hr011-detail-wrap .hr011-ref-mainlang .chip {display:inline-flex; align-items:center; padding:2px 7px; border-radius:999px; background:#eef3fb; border:1px solid #d7e2f3; color:#2e476a; font-size:11px; font-weight:700;}
-.hr011-detail-wrap .hr011-ref-cert {font-size:13px; font-weight:700; color:#24374f; line-height:1.35; max-height:34px; overflow:hidden;}
-.hr011-detail-wrap .hr011-ref-info-grid {display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:12px 10px; margin-top:auto;}
+.hr011-detail-wrap .hr011-ref-cert {display:flex; flex-wrap:wrap; gap:6px;}
+.hr011-detail-wrap .hr011-ref-mainlang .chip,
+.hr011-detail-wrap .hr011-ref-cert .chip {display:inline-flex; align-items:center; padding:2px 7px; border-radius:999px; background:#eef3fb; border:1px solid #d7e2f3; color:#2e476a; font-size:11px; font-weight:700;}
+.hr011-detail-wrap .hr011-ref-info-grid {display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:25px 10px; margin-top:auto;}
 .hr011-detail-wrap .hr011-ref-info-item {display:grid; gap:4px;}
 .hr011-detail-wrap .hr011-ref-info-item span {font-size:11px; color:#8296b1; font-weight:700;}
 .hr011-detail-wrap .hr011-ref-info-item strong {font-size:14px; color:#22364f; font-weight:800; line-height:1.25; word-break:break-word;}
@@ -3452,17 +3453,16 @@ section.search-area .search-info #searchConditionKeyword { /* 새 검색어 입�
 .hr011-detail-wrap .hr011-ref-radar {height:100%; min-height:clamp(12.8rem, 25vh, 17rem); border:1px solid #e1e8f4; border-radius:10px; background:#fbfdff;}
 .hr011-detail-wrap .hr011-ref-project-card {height:100%;}
 .hr011-detail-wrap .hr011-ref-project-list {display:grid; grid-auto-rows:max-content; gap:clamp(0.5rem, 0.75vw, 0.8rem); max-height:100%; min-height:0; height:100%; flex:1 1 auto; overflow-y:auto; overflow-x:hidden; overscroll-behavior:contain; padding-right:0.2rem;}
-.hr011-detail-wrap .hr011-ref-project-item {border:1px solid #e1e8f4; border-radius:10px; padding:6px 8px; background:#ffffff;}
-.hr011-detail-wrap .hr011-ref-project-item .top {display:flex; align-items:center; justify-content:flex-start; gap:8px; margin-bottom:6px;}
-.hr011-detail-wrap .hr011-ref-project-item .corp {font-size:14px; color:#7c8fa9; font-weight:800;}
-.hr011-detail-wrap .hr011-ref-project-item .role {font-size:12px; color:#6f85a5; font-weight:700;}
-.hr011-detail-wrap .hr011-ref-project-item .name {font-size:16px; font-weight:800; color:#1e324f; margin-bottom:4px; line-height:1.2;}
-.hr011-detail-wrap .hr011-ref-project-item .meta {font-size:12px; color:#506784; font-weight:700; margin-bottom:6px;}
-.hr011-detail-wrap .hr011-ref-project-item .meta-row {display:flex; flex-wrap:wrap; gap:6px 10px; margin-bottom:6px;}
-.hr011-detail-wrap .hr011-ref-project-item .meta-item {display:inline-flex; align-items:center; gap:4px; font-size:12px; color:#4f6788; font-weight:700;}
-.hr011-detail-wrap .hr011-ref-project-item .meta-item em {display:inline-block; font-style:normal; color:#7b8fa9; font-weight:800;}
+.hr011-detail-wrap .hr011-ref-project-item {border:1px solid #e1e8f4; border-radius:12px; padding:10px 12px; background:#ffffff; display:grid; grid-template-columns:58px minmax(0, 1fr); gap:12px; align-items:start; box-shadow:0 4px 10px rgba(41, 68, 104, 0.05);}
+.hr011-detail-wrap .hr011-ref-project-item--empty {grid-template-columns:1fr; align-items:center; min-height:86px;}
+.hr011-detail-wrap .hr011-ref-project-item-badge {display:flex; align-items:flex-start; justify-content:center; padding-top:1px;}
+.hr011-detail-wrap .hr011-ref-project-item-body {display:grid; gap:9px; min-width:0; align-content:start;}
+.hr011-detail-wrap .hr011-ref-project-item-field {display:grid; gap:4px; min-width:0;}
+.hr011-detail-wrap .hr011-ref-project-item-field .label {font-size:12px; color:#7b8ea7; font-weight:900; letter-spacing:-0.01em; line-height:1;}
+.hr011-detail-wrap .hr011-ref-project-item-field .value {font-size:16px; font-weight:900; color:#1e324f; line-height:1.2; word-break:break-word;}
+.hr011-detail-wrap .hr011-ref-project-item .name {font-size:16px; font-weight:800; color:#1e324f; line-height:1.2; text-align:center;}
 .hr011-detail-wrap .hr011-ref-project-item .stack {display:flex; flex-wrap:wrap; gap:6px;}
-.hr011-detail-wrap .hr011-ref-project-item .stack .chip {display:inline-flex; padding:3px 8px; border-radius:999px; background:#eef8de; color:#3f6d1b; font-size:11px; font-weight:800;}
+.hr011-detail-wrap .hr011-ref-project-item .stack .chip {display:inline-flex; padding:3px 8px; border-radius:999px; background:#ecf7dc; color:#3f6d1b; font-size:11px; font-weight:800;}
 .hr011-detail-wrap .hr011-ref-detail {display:grid; grid-template-rows:auto minmax(0, 1fr); gap:12px; min-height:0; height:100%; grid-row:1 / -1;}
 .hr011-detail-wrap .hr011-ref-detail-head {display:flex; align-items:center; justify-content:space-between; gap:10px; padding:2px 2px; min-height:var(--hr011-action-btn-h);}
 .hr011-detail-wrap .hr011-ref-detail-head h5 {margin:0; font-size:24px; font-weight:800; color:#1c2f49; letter-spacing:-0.02em; line-height:1;}
@@ -3611,18 +3611,17 @@ section.search-area .search-info #searchConditionKeyword { /* 새 검색어 입�
 .hr011-detail-wrap .hr011-ref-simple-item strong,
 .hr011-detail-wrap .hr011-ref-detail-card h6 {font-size:18px;}
 
+.hr011-detail-wrap .hr011-ref-project-item .value,
 .hr011-detail-wrap .hr011-ref-project-item .name {font-size:20px;}
 
 .hr011-detail-wrap .hr011-ref-link-btn,
 .hr011-detail-wrap .hr011-ref-mainlang .chip,
-.hr011-detail-wrap .hr011-ref-cert,
 .hr011-detail-wrap .hr011-ref-info-item span,
 .hr011-detail-wrap .hr011-ref-info-item strong,
 .hr011-detail-wrap .hr011-ref-skill-row .cat,
 .hr011-detail-wrap .hr011-ref-skill-row .val,
-.hr011-detail-wrap .hr011-ref-project-item .corp,
-.hr011-detail-wrap .hr011-ref-project-item .role,
-.hr011-detail-wrap .hr011-ref-project-item .meta,
+.hr011-detail-wrap .hr011-ref-project-item .label,
+.hr011-detail-wrap .hr011-ref-project-item .value,
 .hr011-detail-wrap .hr011-ref-project-item .stack .chip,
 .hr011-detail-wrap .hr011-ref-detail-btn,
 .hr011-detail-wrap .hr011-ref-simple-item span,
