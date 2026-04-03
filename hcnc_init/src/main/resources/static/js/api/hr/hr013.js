@@ -289,7 +289,7 @@ function buildHr013Table() {
     var shouldAutoExpandRows = !isHr011Detail;
 
     var options = {
-        layout: isHr011Detail ? "fitColumns" : "fitData",
+        layout: isHr011Detail ? "fitDataTable" : "fitData",
         placeholder: "데이터 없음",
         selectable: false,
         rowHeight: isHr011Detail ? 46 : 42,
@@ -377,7 +377,7 @@ function buildHr013Table() {
                         row.update({ _prev_cust_nm: cell.getValue() || "" });
                     }
                 },
-                cellClick: startEditOnClick, width: 120
+                cellClick: startEditOnClick, width: 180, minWidth: 160
             },
             {
                 title: "프로젝트명",
@@ -447,7 +447,7 @@ function buildHr013Table() {
                 cellEdited: function (cell) {
                     requestAnimationFrame(() => cell.getRow().reformat());
                 },
-                width: 250
+                width: 360, minWidth: 320
             },
             {
                 title: "역할",
@@ -463,7 +463,7 @@ function buildHr013Table() {
                         cell.setValue(value, true);
                     }
                 },
-                cellClick: startEditOnClick, width: 80
+                cellClick: startEditOnClick, width: 110, minWidth: 100
             },
             {
                 title: "계약단가",
@@ -480,7 +480,9 @@ function buildHr013Table() {
                 field: "skl_id_lst",
                 formatter: hr013TableSkillFormatter,
                 editable: false,
-                cellClick: hr013TableSkillCellClick
+                cellClick: hr013TableSkillCellClick,
+                width: 360,
+                minWidth: 320
             },
             {
                 title: "시작일",
@@ -500,8 +502,8 @@ function buildHr013Table() {
                 editable: isHr013Editable,
                 cellClick: startEditOnClick, width: 155
             },
-            { title: "투입률", field: "alloc_pct", hozAlign: "center", formatter: percentageFormatter, width: 66, editor: "input", editable: isHr013Editable, cellClick: startEditOnClick },
-            { title: "비고", field: "remark", editor: "input", editable: isHr013Editable, cellClick: startEditOnClick, width: 250},
+            { title: "투입률", field: "alloc_pct", hozAlign: "center", formatter: percentageFormatter, width: 92, minWidth: 86, editor: "input", editable: isHr013Editable, cellClick: startEditOnClick },
+            { title: "비고", field: "remark", editor: "input", editable: isHr013Editable, cellClick: startEditOnClick, width: 320, minWidth: 280},
         ],
         data: []
     };
@@ -1721,14 +1723,14 @@ function addHr013Row() {
     if (!window.hr013Table) {
         return;
     }
-    window.hr013Table.addRow({
+    const rowAddResult = window.hr013Table.addRow({
         dev_prj_id: "",
         dev_id: window.currentDevId || $("#dev_id").val(),
         _checked: false,
-        inprj_yn: "N",
+        inprj_yn: "Y",
         st_dt: "",
         ed_dt: "",
-        cust_nm: "",
+        cust_nm: "HCNC",
         _prev_cust_nm: "",
         prj_nm: "",
         rate_amt: "",
@@ -1743,6 +1745,22 @@ function addHr013Row() {
     changedTabs.tab3 = true;
     // 행 추가 후 제목 건수 갱신
     updateHr013TitleCount();
+
+    if (rowAddResult && typeof rowAddResult.then === "function") {
+        rowAddResult.then(function (rowComp) {
+            if (rowComp && typeof openHr013ProjectPicker === "function") {
+                openHr013ProjectPicker(rowComp);
+            }
+        });
+        return;
+    }
+
+    if (typeof openHr013ProjectPicker === "function" && window.hr013Table && typeof window.hr013Table.getRows === "function") {
+        const rows = window.hr013Table.getRows() || [];
+        if (rows.length) {
+            openHr013ProjectPicker(rows[0]);
+        }
+    }
 }
 
 function toggleInprjValue(cell) {

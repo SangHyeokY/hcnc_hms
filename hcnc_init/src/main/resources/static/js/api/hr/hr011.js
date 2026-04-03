@@ -10,7 +10,12 @@ $(document).on("tab:readonly.hr011", function (_, isReadOnly) {
         setHr011Mode("view", { silent: true });
         return;
     }
-    setHr011Mode(window.hr011EditUnlocked ? "update" : "view", { silent: true });
+    const keepInsert = hr011Mode === "insert" || (window.hr011EditUnlocked && !$.trim(window.currentDevId || $("#dev_id").val()));
+    if (keepInsert) {
+        setHr011Mode("insert", { silent: true });
+    } else {
+        setHr011Mode(window.hr011EditUnlocked ? "update" : "view", { silent: true });
+    }
 
     // ESC 누르면 모달 닫힘
     $(document).on("keydown", function (event) {
@@ -124,12 +129,17 @@ function setHr011Mode(mode, options) {
     const isView = mode === "view"; // view일 때는 수정불가능
     const isEditable = !isView && (mode === "insert" || mode === "update"); // insert와 update는 수정가능
     const isInsert = mode === "insert";
+    const isUpdate = mode === "update";
     window.currentMode = mode;
     window.hr010ReadOnly = !isEditable;
     if (isView) {
         window.hr011EditUnlocked = false;
     }
-    $(".hr011-page").toggleClass("is-edit-mode", isEditable);
+    $(".hr011-page")
+        .toggleClass("is-edit-mode", isEditable)
+        .toggleClass("is-view-mode", isView)
+        .toggleClass("is-insert-mode", isInsert)
+        .toggleClass("is-update-mode", isUpdate);
     $("#hr011PageTitleText").text(isView ? "인적사항 상세" : isInsert ? "인적사항 등록" : "인적사항 수정");
     $("#modal-title").text(isView ? "상세" : mode === "insert" ? "등록" : "수정");
     $("#hr011CancelBtn, #hr011CancelBtnView").text(isInsert ? "등록취소" : "수정취소");
@@ -208,6 +218,13 @@ function setHr011Mode(mode, options) {
         if (!state || !state.expanded) return;
         renderHr011ProjectEvaluationContent(projectKey);
     });
+    // 일부 탭 초기화가 버튼 라벨을 덮는 경우가 있어 모드 기준으로 한 번 더 보정한다.
+    setTimeout(function () {
+        const isInsertMode = hr011Mode === "insert";
+        $("#hr011CancelBtn, #hr011CancelBtnView").text(isInsertMode ? "등록취소" : "수정취소");
+        $("#hr011SaveBtn, #hr011SaveBtnView").text(isInsertMode ? "등록" : "저장");
+        renderHr011EditMiniProfile();
+    }, 0);
 
 //    if (isEditable) { // insert, update mode일 때
 //        $fields
@@ -541,7 +558,7 @@ $("#amt")
 
 // 문자열 가공
 function normalizeAmountValue(str) {
-    return str ? str.replace(/,/g, "") : "";
+    return String(str || "").replace(/[^\d]/g, "");
 }
 
 function formatAmount(num) {
@@ -654,6 +671,12 @@ let hr011RefProjectRows = [];
 let hr011RefSkillGaugeChart = null;
 let hr011RefSkillGaugeDetailChart = null;
 let hr011RefRadarChart = null;
+const HR011_EDIT_STEP_KEYS = ["profile", "contract", "skill", "project", "eval-risk"];
+let hr011CurrentEditStepKey = HR011_EDIT_STEP_KEYS[0];
+let hr011EditStepScrollBound = false;
+let hr011EditStepRafId = null;
+let hr011EditStepExtraScrollBound = false;
+const HR011_EDIT_STEP_ACTIVE_OFFSET = 56;
 let hr011RefCurrentView = "overview";
 let hr011RefProjectEvalCache = new Map();
 let hr011RefProjectRadarCharts = new Map();
@@ -897,14 +920,38 @@ function bindHr011PageEvents() {
         $("#hr011SaveBtn").trigger("click");
     });
 
+    $("#hr011QuickAddProjectBtn").on("click", function () {
+        if (!$(".hr011-page").hasClass("is-edit-mode")) return;
+        goHr011EditStep("project");
+        if (typeof window.addHr013Row === "function") {
+            window.addHr013Row();
+            if (window.hr013Table && typeof window.hr013Table.redraw === "function") {
+                window.hr013Table.redraw(true);
+            }
+            return;
+        }
+        const addBtn = document.querySelector(".tab3-content .btn-tab3-add");
+        if (addBtn) addBtn.click();
+    });
+    $("#hr011QuickRemoveProjectBtn").on("click", function () {
+        if (!$(".hr011-page").hasClass("is-edit-mode")) return;
+        goHr011EditStep("project");
+        if (typeof window.removeHr013SelectedRows === "function") {
+            window.removeHr013SelectedRows();
+            return;
+        }
+        const removeBtn = document.querySelector(".tab3-content .btn-tab3-remove");
+        if (removeBtn) removeBtn.click();
+    });
+
     $(document).on("click", ".hr011-ref-project-eval-toggle", async function () {
         const projectKey = String($(this).data("projectKey") || "");
         if (!projectKey) return;
         await toggleHr011ProjectEvaluationPanel(projectKey);
     });
 
-    $(document).off("hr013:focusEvaluation.hr011").on("hr013:focusEvaluation.hr011", function () {
-        scrollHr011ToEvalRiskSection();
+    $(document).off("hr013:focusEvaluation.hr011").on("hr013:focusEvaluation.hr011", function (_e, selectedProjectId) {
+        scrollHr011ToEvalRiskSection(selectedProjectId);
     });
 
     $(document).on("click", ".hr011-ref-eval-score-btn", function () {
@@ -933,6 +980,12 @@ function bindHr011PageEvents() {
         const projectKey = String($(this).data("projectKey") || "");
         if (!projectKey) return;
         updateHr011ProjectRiskField(projectKey, "re_in_yn", $(this).is(":checked") ? "Y" : "N");
+    });
+
+    $(document).on("input change", ".hr011-page input, .hr011-page select, .hr011-page textarea", function () {
+        if (!$(".hr011-page").hasClass("is-edit-mode")) return;
+        syncHr011EditStepStatus();
+        renderHr011EditMiniProfile();
     });
 
 }
@@ -975,6 +1028,7 @@ async function initHr011DetailPage() {
         scheduleHr011ReadOnlyTextareas();
         scheduleHr011ReadOnlyFields();
         scheduleHr011LegacyReadonlyTable();
+        scheduleHr011StepStatusSync();
         return;
     }
 
@@ -1032,6 +1086,8 @@ function applyHr011InsertDefaults() {
     $("#hope_rate_amt").val(formatAmount(""));
     $("#cert_txt").val("");
     $("#main_lang").val("");
+    $("#hr011CancelBtn, #hr011CancelBtnView").text("등록취소");
+    $("#hr011SaveBtn, #hr011SaveBtnView").text("등록");
 
     hr011CurrentRow = null;
     window.hr011Data = null;
@@ -1044,6 +1100,7 @@ function applyHr011InsertDefaults() {
     clearHr011Form();
 
     scheduleHr011ReadOnlyFields();
+    renderHr011EditMiniProfile();
 }
 
 // 메인 폼용 공통코드 select를 불러온다.
@@ -1111,6 +1168,7 @@ function fillHr011MainForm(row) {
     $("#cert_txt").val(row.cert_txt || "");
     $("#main_lang").val(row.main_lang || "");
     scheduleHr011ReadOnlyFields();
+    renderHr011EditMiniProfile();
 }
 
 // 등급 점수 정보를 별도로 채운다.
@@ -1465,15 +1523,296 @@ function animateHr011EditDashboard() {
     });
 }
 
+function setHr011ActiveEditStep(stepKey) {
+    const visibleStepKeys = getHr011VisibleStepKeys();
+    const normalized = visibleStepKeys.includes(stepKey) ? stepKey : (visibleStepKeys[0] || HR011_EDIT_STEP_KEYS[0]);
+    hr011CurrentEditStepKey = normalized;
+    const buttons = document.querySelectorAll(".hr011-edit-stepper .hr011-edit-step-btn");
+
+    buttons.forEach(function (btn) {
+        const key = String(btn.getAttribute("data-step-target") || "");
+        const isVisible = visibleStepKeys.includes(key);
+        btn.classList.toggle("is-active", key === normalized);
+        btn.toggleAttribute("hidden", !isVisible);
+    });
+
+    const idx = Math.max(0, visibleStepKeys.indexOf(normalized));
+    const currentEl = document.getElementById("hr011EditStepCurrent");
+    const totalEl = document.getElementById("hr011EditStepTotal");
+    if (currentEl) currentEl.textContent = String(idx + 1);
+    if (totalEl) totalEl.textContent = String(visibleStepKeys.length || HR011_EDIT_STEP_KEYS.length);
+
+    syncHr011EditStepStatus();
+}
+
+function getHr011StepIndex(stepKey) {
+    const idx = getHr011VisibleStepKeys().indexOf(String(stepKey || ""));
+    return idx < 0 ? 0 : idx;
+}
+
+function getHr011CurrentStepIndex() {
+    return getHr011StepIndex(hr011CurrentEditStepKey);
+}
+
+function goHr011EditStep(stepKey) {
+    setHr011ActiveEditStep(stepKey);
+    const section = document.querySelector(`.hr011-page.is-edit-mode .hr011-dashboard-grid .hr011-section[data-edit-step="${stepKey}"]`);
+    if (section) {
+        scrollHr011SectionIntoView(section);
+    }
+    refreshHr011StepContent(stepKey);
+}
+
+function scrollHr011SectionIntoView(section) {
+    if (!section) return;
+    const header = document.querySelector(".hr011-page.is-edit-mode .hr011-page-actions--bottom");
+    const headerRect = header ? header.getBoundingClientRect() : null;
+    const headerHeight = headerRect ? Math.max(headerRect.height, 64) : 64;
+    const offset = headerHeight + 18;
+    const currentY = window.pageYOffset || window.scrollY || 0;
+    const targetY = Math.max(0, section.getBoundingClientRect().top + currentY - offset);
+    window.scrollTo({ top: targetY, behavior: "smooth" });
+}
+
+function getHr011VisibleStepKeys() {
+    if (hr011Mode === "insert") {
+        return HR011_EDIT_STEP_KEYS.filter(function (key) {
+            return key !== "eval-risk";
+        });
+    }
+    return HR011_EDIT_STEP_KEYS.slice();
+}
+
+function syncHr011ActiveStepByScroll() {
+    const visibleStepKeys = getHr011VisibleStepKeys();
+    const sections = Array.from(document.querySelectorAll(".hr011-page.is-edit-mode .hr011-dashboard-grid .hr011-section[data-edit-step]"))
+        .filter(function (section) {
+            const key = String(section.getAttribute("data-edit-step") || "");
+            return visibleStepKeys.includes(key) && section.offsetParent !== null;
+        });
+    if (!sections.length) return;
+    const header = document.querySelector(".hr011-page.is-edit-mode .hr011-page-actions--bottom");
+    const headerRect = header ? header.getBoundingClientRect() : null;
+    const anchorY = (headerRect ? headerRect.bottom : 0) + HR011_EDIT_STEP_ACTIVE_OFFSET;
+    let active = sections[0];
+    sections.forEach(function (section) {
+        const top = section.getBoundingClientRect().top;
+        if (top <= anchorY) {
+            active = section;
+        }
+    });
+    const key = String(active.getAttribute("data-edit-step") || visibleStepKeys[0] || HR011_EDIT_STEP_KEYS[0]);
+    setHr011ActiveEditStep(key);
+}
+
+function requestHr011ActiveStepSync() {
+    if (hr011EditStepRafId != null) return;
+    const raf = window.requestAnimationFrame || function (fn) { return setTimeout(fn, 16); };
+    hr011EditStepRafId = raf(function () {
+        hr011EditStepRafId = null;
+        syncHr011ActiveStepByScroll();
+    });
+}
+
+function isHr011ProfileStepFilled() {
+    return !!($.trim($("#dev_nm").val()) && $.trim($("#select_dev_typ").val()));
+}
+
+function isHr011ContractStepFilled() {
+    const amt = normalizeAmountValue($("#amt").val());
+    return !!(
+        $.trim($("#org_nm").val()) &&
+        $.trim($("#st_dt").val()) &&
+        $.trim($("#ed_dt").val()) &&
+        $.trim($("#select_biz_typ").val()) &&
+        Number(amt) > 0
+    );
+}
+
+function isHr011SkillStepFilled() {
+    if (!window.hr012TableA || typeof window.hr012TableA.getData !== "function") return false;
+    const rows = window.hr012TableA.getData() || [];
+    return rows.some(function (row) {
+        const list = parseHr011SkillList(row && row.skl_id_lst);
+        return list.length > 0;
+    });
+}
+
+function isHr011ProjectStepFilled() {
+    if (!window.hr013Table || typeof window.hr013Table.getData !== "function") return false;
+    const rows = window.hr013Table.getData() || [];
+    return rows.some(function (row) {
+        return !!($.trim(String((row && (row.prj_nm || row.dev_prj_id)) || "")));
+    });
+}
+
+function isHr011EvalRiskStepFilled() {
+    if (!Array.isArray(hr011RefProjectRows) || hr011RefProjectRows.length === 0) return true;
+    if (!(hr011RefProjectEvalCache instanceof Map) || !hr011RefProjectEvalCache.size) return false;
+    let hasValue = false;
+    hr011RefProjectEvalCache.forEach(function (state) {
+        if (hasValue || !state) return;
+        const evalRows = Array.isArray(state.evalRows) ? state.evalRows : [];
+        const risk = state.risk || {};
+        if (evalRows.length) {
+            hasValue = true;
+            return;
+        }
+        const keys = ["leave_txt", "claim_txt", "sec_txt", "memo"];
+        hasValue = keys.some(function (k) { return !!$.trim(String(risk[k] || "")); }) || String(risk.re_in_yn || "N") === "Y";
+    });
+    return hasValue;
+}
+
+function scheduleHr011StepStatusSync() {
+    const delays = [0, 180, 480, 900];
+    delays.forEach(function (delay) {
+        setTimeout(function () {
+            if (!$(".hr011-page").hasClass("is-edit-mode")) return;
+            syncHr011EditStepStatus();
+            requestHr011ActiveStepSync();
+        }, delay);
+    });
+}
+
+function getHr011StepState(stepKey) {
+    if (stepKey === "profile") return isHr011ProfileStepFilled() ? "done" : "pending";
+    if (stepKey === "contract") return isHr011ContractStepFilled() ? "done" : "pending";
+    if (stepKey === "skill") return isHr011SkillStepFilled() ? "done" : "pending";
+    if (stepKey === "project") return isHr011ProjectStepFilled() ? "done" : "pending";
+    if (stepKey === "eval-risk") return isHr011EvalRiskStepFilled() ? "done" : "pending";
+    return "pending";
+}
+
+function syncHr011EditStepStatus() {
+    const buttons = document.querySelectorAll(".hr011-edit-stepper .hr011-edit-step-btn");
+    const visibleStepKeys = getHr011VisibleStepKeys();
+    buttons.forEach(function (btn) {
+        const key = String(btn.getAttribute("data-step-target") || "");
+        if (!visibleStepKeys.includes(key)) {
+            btn.setAttribute("hidden", "hidden");
+            return;
+        }
+        btn.removeAttribute("hidden");
+        btn.removeAttribute("data-step-state");
+    });
+}
+
+function markHr011StepError(stepKey) {
+    return;
+}
+
+function syncHr011EditWizardButtons() {
+    const prevBtn = document.getElementById("hr011StepPrevBtn");
+    const nextBtn = document.getElementById("hr011StepNextBtn");
+    if (!prevBtn || !nextBtn) return;
+    const idx = getHr011CurrentStepIndex();
+    const isLast = idx >= HR011_EDIT_STEP_KEYS.length - 1;
+    prevBtn.disabled = idx <= 0;
+    nextBtn.textContent = isLast ? (hr011Mode === "insert" ? "등록" : "저장") : "다음";
+}
+
+function validateHr011StepBeforeNext(stepKey) {
+    if (stepKey === "profile") {
+        const devNm = $.trim($("#dev_nm").val());
+        const devTyp = $.trim($("#select_dev_typ").val());
+        if (!devNm) {
+            showAlert({ icon: "warning", title: "경고", html: "<strong>성명</strong>을(를) 입력해주세요." });
+            $("#dev_nm").focus();
+            markHr011StepError("profile");
+            return false;
+        }
+        if (!devTyp) {
+            showAlert({ icon: "warning", title: "경고", html: "<strong>구분</strong>을(를) 선택해주세요." });
+            $("#select_dev_typ").focus();
+            markHr011StepError("profile");
+            return false;
+        }
+        return true;
+    }
+    if (stepKey === "contract") {
+        const ok = validateHr011Form();
+        if (!ok) {
+            markHr011StepError("contract");
+        }
+        return ok;
+    }
+    return true;
+}
+
+function refreshHr011StepContent(stepKey) {
+    setTimeout(function () {
+        if (stepKey === "skill") {
+            if (window.hr012TableA && typeof window.hr012TableA.redraw === "function") window.hr012TableA.redraw(true);
+            if (window.hr012TableB && typeof window.hr012TableB.redraw === "function") window.hr012TableB.redraw(true);
+            applyHr011Tab2DualPane(true);
+        } else if (stepKey === "project") {
+            if (window.hr013Table && typeof window.hr013Table.redraw === "function") window.hr013Table.redraw(true);
+        } else if (stepKey === "eval-risk") {
+            if (window.hr014TableA && typeof window.hr014TableA.redraw === "function") window.hr014TableA.redraw(true);
+            applyHr011Tab4DualPane(true);
+        }
+    }, 30);
+}
+
+function initHr011EditStepNavigation(isEditable) {
+    const flow = document.querySelector(".hr011-page .hr011-edit-flow");
+    if (!flow) return;
+
+    if (!isEditable) {
+        setHr011ActiveEditStep("");
+        return;
+    }
+
+    const stepper = document.querySelector(".hr011-page.is-edit-mode .hr011-edit-stepper");
+    if (!stepper) return;
+
+    if (!stepper.dataset.bound) {
+        stepper.dataset.bound = "Y";
+        stepper.addEventListener("click", function (e) {
+            const btn = e.target.closest(".hr011-edit-step-btn");
+            if (!btn) return;
+            const targetKey = String(btn.getAttribute("data-step-target") || "");
+            if (!targetKey) return;
+            goHr011EditStep(targetKey);
+        });
+    }
+
+    if (!hr011EditStepScrollBound) {
+        hr011EditStepScrollBound = true;
+        window.addEventListener("scroll", requestHr011ActiveStepSync, { passive: true });
+        window.addEventListener("resize", requestHr011ActiveStepSync);
+    }
+    if (!hr011EditStepExtraScrollBound) {
+        hr011EditStepExtraScrollBound = true;
+        const candidates = [
+            document.querySelector(".contents-wrap.hr011-detail-wrap"),
+            document.querySelector(".container-wrap .container")
+        ].filter(Boolean);
+        candidates.forEach(function (el) {
+            el.addEventListener("scroll", requestHr011ActiveStepSync, { passive: true });
+        });
+    }
+
+    const totalEl = document.getElementById("hr011EditStepTotal");
+    const visibleStepKeys = getHr011VisibleStepKeys();
+    if (totalEl) totalEl.textContent = String(visibleStepKeys.length || HR011_EDIT_STEP_KEYS.length);
+    setTimeout(syncHr011ActiveStepByScroll, 0);
+    setTimeout(syncHr011ActiveStepByScroll, 180);
+    scheduleHr011StepStatusSync();
+}
+
 function syncHr011EditIntegrations(isEditable, wasEditable) {
     applyHr011Tab2DualPane(isEditable);
     applyHr011Tab4DualPane(isEditable);
+    initHr011EditStepNavigation(isEditable);
     if (!isEditable) {
         return;
     }
     if (wasEditable) {
         if (typeof window.applyTab2Readonly === "function") window.applyTab2Readonly(false);
         if (typeof window.applyTab4Readonly === "function") window.applyTab4Readonly(false);
+        scheduleHr011StepStatusSync();
         return;
     }
 
@@ -1490,6 +1829,15 @@ function syncHr011EditIntegrations(isEditable, wasEditable) {
     if (typeof window.initTab4 === "function") window.initTab4();
     if (typeof window.applyTab4Readonly === "function") window.applyTab4Readonly(false);
     applyHr011Tab4DualPane(true);
+    const quickProjectBtn = document.getElementById("hr011QuickAddProjectBtn");
+    if (quickProjectBtn) {
+        quickProjectBtn.disabled = !isEditable;
+    }
+    const quickProjectRemoveBtn = document.getElementById("hr011QuickRemoveProjectBtn");
+    if (quickProjectRemoveBtn) {
+        quickProjectRemoveBtn.disabled = !isEditable;
+    }
+    scheduleHr011StepStatusSync();
 }
 
 function applyHr011Tab2DualPane(enable) {
@@ -1532,12 +1880,35 @@ function applyHr011Tab4DualPane(enable) {
     shell.classList.remove("hr011-dual-pane");
 }
 
-function scrollHr011ToEvalRiskSection() {
+function scrollHr011ToEvalRiskSection(selectedProjectId) {
+    const projectId = String(selectedProjectId || "").trim();
+    if ($(".hr011-page").hasClass("is-edit-mode")) {
+        goHr011EditStep("eval-risk");
+        if (projectId) {
+            setTimeout(function () {
+                window.hr013_prj_nm = projectId;
+                const $select = $(".tab4-content .select_prj_cd");
+                if ($select.length) {
+                    $select.val(projectId);
+                }
+                if (typeof window.reloadTab4 === "function") {
+                    window.reloadTab4(projectId).catch(function () {});
+                }
+            }, 220);
+        }
+        return;
+    }
     const targetPanel = document.getElementById("HR014_TAB_A");
     if (!targetPanel) return;
     const section = targetPanel.closest(".hr011-section");
     if (!section) return;
-    section.scrollIntoView({ behavior: "smooth", block: "start" });
+    scrollHr011SectionIntoView(section);
+    if (projectId && typeof window.reloadTab4 === "function") {
+        window.hr013_prj_nm = projectId;
+        setTimeout(function () {
+            window.reloadTab4(projectId).catch(function () {});
+        }, 220);
+    }
 }
 
 function buildHr011ProfileDetailMarkup() {
@@ -2836,6 +3207,21 @@ function getHr011AvatarMarkup(row) {
         `</svg>`,
         `</div>`
     ].join("");
+}
+
+function renderHr011EditMiniProfile() {
+    const root = document.getElementById("hr011EditMiniProfile");
+    const avatarEl = document.getElementById("hr011EditMiniAvatar");
+    const nameEl = document.getElementById("hr011EditMiniName");
+    const subEl = document.getElementById("hr011EditMiniSub");
+    if (!root || !avatarEl || !nameEl || !subEl) return;
+
+    const row = hr011CurrentRow || {};
+    const name = $.trim($("#dev_nm").val()) || row.dev_nm || "신규 인력";
+    const avatarRow = Object.assign({}, row, { dev_nm: name });
+    avatarEl.innerHTML = getHr011AvatarMarkup(avatarRow);
+    nameEl.textContent = name;
+    subEl.textContent = hr011Mode === "insert" ? "인적사항 정보 등록" : "인적사항 정보 수정";
 }
 
 // 직원/프리랜서 코드를 정규화한다.
