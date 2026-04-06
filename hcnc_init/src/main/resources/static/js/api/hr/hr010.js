@@ -49,7 +49,7 @@ $(document).ready(async function () {
     refreshTagSuggestions();
     hideLoading();
 
-    console.log(hr010SourceRows[0]);
+    // console.log(hr010SourceRows[0]);
 });
 
 // ==============================

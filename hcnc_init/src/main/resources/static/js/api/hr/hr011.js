@@ -1,5 +1,7 @@
 // 사용자 관리 - 소속 및 계약 정보 hr011.js (hcnc_hms)
 
+// Tab1에 대한 유효성 검사 validateHr011Form만 존재함.
+
 // 모달
 var $modal = $("#view-user-area");
 
@@ -289,16 +291,18 @@ function saveHr011TableData() {
         contentType: "application/json",
         data: JSON.stringify(param),
         success: () => {
-            // alert("저장되었습니다.");
-            // setHr011Mode("view");
+            console.log("[Tab1] 저장 완료");
             loadHr011TableData(window.currentDevId);
         },
-        error: () =>
-            showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
-                 icon: 'error',
-                 title: '오류',
-                 html: `<strong>소속 및 계약정보</strong>&nbsp;저장 중 오류가 발생했습니다.`
-            })
+        error: (err) => {
+            console.error("[Tab1] 저장 실패", err);
+
+            showAlert({
+                icon: 'error',
+                title: '오류',
+                html: `<strong>소속 및 계약정보</strong>&nbsp;저장 중 오류가 발생했습니다.`
+            });
+        }
     });
 }
 
@@ -3233,8 +3237,10 @@ async function saveHr011DetailPage() {
         await saveHr011MainProfile();
 
         // tab1 저장
-        if (typeof saveHr011TableData === "function") {
+        if (changedTabs.tab1 && typeof saveHr011TableData === "function") {
             await saveHr011TableData();
+        } else {
+            console.log("[Tab1] 저장할 계약 데이터 없음 → [Skip]");
         }
 
         // tab2 저장
@@ -3310,18 +3316,28 @@ async function saveHr011MainProfile() {
     formData.append("main_fld_cd", $("#select_main_fld_cd").val());
     formData.append("main_cust_cd", $("#select_main_cust_cd").val());
 
-    const response = await $.ajax({
-        url: "/hr010/upsert",
-        type: "POST",
-        processData: false,
-        contentType: false,
-        data: formData
-    });
+    try {
+        const response = await $.ajax({
+            url: "/hr010/upsert",
+            type: "POST",
+            processData: false,
+            contentType: false,
+            data: formData
+        });
 
-    const savedDevId = $.trim(response?.dev_id || "");
-    if (savedDevId) {
-        window.currentDevId = savedDevId;
-        $("#dev_id").val(savedDevId);
+        const savedDevId = $.trim(response?.dev_id || "");
+        if (savedDevId) {
+            window.currentDevId = savedDevId;
+            $("#dev_id").val(savedDevId);
+        }
+
+        console.log("[Main] 저장 완료", response);
+
+        return response; // (상위 await용)
+    } catch (error) {
+        console.error("[Main] 저장 실패", error); // 실패 로그
+
+        throw error; // (상위에서 catch 가능하게)
     }
 }
 
