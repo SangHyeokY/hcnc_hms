@@ -302,8 +302,14 @@ function loadHr011TableData(devId) {
 // '소속 및 계약정보' 테이블 데이터 수정, 저장
 function saveHr011TableData() {
     if (!validateHr011Form()) {
-        return;
+        return Promise.reject("validation fail"); // 프로미스로 반환해야 유효성 검사 제대로 진행됨
     }
+
+    changedTabs.tab1 = true;
+
+    // 문자열에서 숫자로 가공
+    const rawAmt = $("#amt").val();
+    const amtNumber = normalizeAmountValue(rawAmt);
 
     const param = {
         ctrtId: hr011Mode === "update" ? window.hr011Data?.ctrt_id : null,
@@ -312,7 +318,7 @@ function saveHr011TableData() {
         bizTyp: $("#select_biz_typ").val(),
         stDt: $("#st_dt").val(),
         edDt: $("#ed_dt").val(),
-        amt: $("#amt").val().replace(/[^0-9]/g, ""),
+        amt: amtNumber,
         remark: $("#remark").val()
     };
 
@@ -326,11 +332,12 @@ function saveHr011TableData() {
             // setHr011Mode("view");
             loadHr011TableData(window.currentDevId);
         },
-        error: () => showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
-                         icon: 'error',
-                         title: '오류',
-                         html: `<strong>소속 및 계약정보</strong>&nbsp;저장 중 오류가 발생했습니다.`
-                     })
+        error: () =>
+            showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+                 icon: 'error',
+                 title: '오류',
+                 html: `<strong>소속 및 계약정보</strong>&nbsp;저장 중 오류가 발생했습니다.`
+            })
     });
 }
 
@@ -372,11 +379,12 @@ async function deleteHr011() {
             });
             loadHr011TableData(window.currentDevId);
         },
-        error: () => showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
-                                 icon: 'error',
-                                 title: '오류',
-                                 html: `<strong>소속 및 계약정보</strong>&nbsp;데이터를 삭제하는 중 오류가 발생했습니다.`
-                             })
+        error: () =>
+            showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+                 icon: 'error',
+                 title: '오류',
+                 html: `<strong>소속 및 계약정보</strong>&nbsp;데이터를 삭제하는 중 오류가 발생했습니다.`
+            })
     });
 }
 
@@ -393,7 +401,7 @@ function validateHr011Form() {
     const amtRaw  = normalizeAmountValue($("#amt").val());   // 계약 금액
 
     // 최대 입력 가능 숫자
-    const MAX_AMT = 999999999;
+    // const MAX_AMT = 999999999999.99;
 
     if (!orgNm) {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
@@ -465,15 +473,15 @@ function validateHr011Form() {
         return false;
     }
 
-    if (Number(amtRaw) > MAX_AMT) {
-        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
-            icon: 'warning',
-            title: '경고',
-            html: `<strong>계약금액</strong>은(는) 최대 999,999,999원까지 입력 가능합니다.`
-        });
-        $("#amt").focus();
-        return false;
-    }
+    // if (Number(amtRaw) > MAX_AMT) {
+    //     showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+    //         icon: 'warning',
+    //         title: '경고',
+    //         html: `<strong>계약금액</strong>은(는) 최대 ${MAX_AMT}원까지 입력 가능합니다.`
+    //     });
+    //     $("#amt").focus();
+    //     return false;
+    // }
 
     return true;
 }
@@ -488,25 +496,16 @@ function formatNumber(num) {
 
 // 숫자만 입력
 $("#amt")
-    .on("input", function () {
-        const raw = this.value || "";
-        const caret = Number.isFinite(this.selectionStart) ? this.selectionStart : raw.length;
-        const digitsBeforeCaret = countAmountDigitsBeforeCaret(raw, caret);
-        const inputNumber = normalizeAmountValue(raw);
-        const formatted = formatAmount(inputNumber);
-        this.value = formatted;
-        setAmountCaretByDigitIndex(this, digitsBeforeCaret);
-    })
-    .on("focus", function () {
-        moveAmountCaretToEditableEnd(this);
-    })
-    .on("click", function () {
-        const input = this;
-        setTimeout(function () {
-            clampAmountCaretToEditableRange(input);
-        }, 0);
-    })
     .on("keydown", function (e) {
+        const allowKeys = ["Backspace", "Delete", "ArrowLeft", "ArrowRight", "Tab"];
+        if (allowKeys.includes(e.key)) return;
+
+        // 숫자만 허용
+        if (!/^\d$/.test(e.key)) {
+            e.preventDefault();
+            return;
+        }
+
         const value = this.value || "";
         const suffixIndex = getAmountEditableEndIndex(value);
         const start = Number.isFinite(this.selectionStart) ? this.selectionStart : suffixIndex;
@@ -526,19 +525,41 @@ $("#amt")
 
         if (e.key === "Delete" && start === end && start >= suffixIndex) {
             e.preventDefault();
-            return;
         }
+    })
+
+    .on("input", function () {
+        const raw = (this.value || "").replace(/[^\d]/g, ""); // 숫자만 추출
+        const caret = Number.isFinite(this.selectionStart) ? this.selectionStart : raw.length;
+
+        const digitsBeforeCaret = countAmountDigitsBeforeCaret(raw, caret);
+
+        // clamp 추가
+        let inputNumber = clampAmount(raw);
+
+        this.value = formatAmount(inputNumber);
+
+        setAmountCaretByDigitIndex(this, digitsBeforeCaret);
+    })
+
+    .on("focus", function () {
+        moveAmountCaretToEditableEnd(this);
+    })
+
+    .on("click", function () {
+        const input = this;
+        setTimeout(function () {
+            clampAmountCaretToEditableRange(input);
+        }, 0);
     });
 
 // 문자열 가공
 function normalizeAmountValue(str) {
-    let cleaned = String(str || "").replace(/[^\d.]/g, "");
-    // 소수점 여러 개 방지
-    const parts = cleaned.split(".");
-    if (parts.length > 2) {
-        cleaned = parts[0] + "." + parts.slice(1).join("");
-    }
-    return cleaned;
+    if (!str) return "0.00";
+    const num = Number(str.replace(/[^0-9.]/g, ""));
+    if (!Number.isFinite(num)) return "0.00";
+    const clamped = Math.min(num, 999999999999.99);
+    return clamped.toFixed(2); // 문자열로 반환
 }
 
 function formatAmount(num) {
@@ -629,7 +650,7 @@ function getAmountEditableEndIndex(value) {
 // 상세 페이지 공통 상태를 초기화한다.
 window.currentMode = "view";
 window.hr010ReadOnly = true;
-window.changedTabs = window.changedTabs || { tab2: false, tab3: false, tab4: false };
+window.changedTabs = window.changedTabs || { tab1: false, tab2: false, tab3: false, tab4: false };
 
 const hr011MainSelectMaps = {
     devTyp: {},
@@ -808,10 +829,13 @@ $(document).ready(async function () {
 
 // 상세 페이지 버튼 동작을 묶는다.
 function bindHr011PageEvents() {
+
+    // 목록으로
     $("#hr011BackBtn").on("click", function () {
         window.location.href = "/hr010";
     });
 
+    // 수정 모드 진입
     $("#hr011EditBtn").on("click", async function () {
         const result = await showAlert({
             icon: "question",
@@ -826,6 +850,7 @@ function bindHr011PageEvents() {
         setHr011Mode("update");
     });
 
+    // 수정 취소
     $("#hr011CancelBtn").on("click", async function () {
         const isInsert = hr011Mode === "insert";
         const result = await showAlert({
@@ -845,6 +870,7 @@ function bindHr011PageEvents() {
         window.location.href = "/hr011?dev_id=" + encodeURIComponent(devId);
     });
 
+    // 저장
     $("#hr011SaveBtn").on("click", async function () {
         const isInsert = hr011Mode === "insert";
         const result = await showAlert({
@@ -1121,6 +1147,7 @@ async function loadHr011MainDetail(devId) {
     }
 
     hr011CurrentRow = row;
+
     fillHr011MainForm(row);
     await Promise.all([
         fillHr011Grade(row.dev_id),
@@ -1145,12 +1172,12 @@ function fillHr011MainForm(row) {
     $("#brdt").val(row.brdt || "");
     $("#tel").val(row.tel || "");
     $("#email").val(row.email || "");
-    $("#select_sido_cd").val(row.sido_cd || "");
+    $("#select_sido_cd").val(row.sido_cd || ""); // 거주지역
     $("#avail_dt").val(row.avail_dt || "");
     $("#select_work_md").val(row.work_md || "");
     $("#select_ctrt_typ").val(row.ctrt_typ || "");
     $("#select_kosa_grd_cd").val(row.kosa_grd_cd || "");
-    $("#select_main_fld_cd").val(row.main_fld_cd || "");
+    $("#select_main_fld_cd").val(row.main_fld_cd || ""); // 주요분야
     $("#select_main_cust_cd").val(row.main_cust_cd || "");
     $("#edu_last").val(row.edu_last || "");
     setCareerSpinInputs(row.exp_yr);
@@ -1336,15 +1363,17 @@ function renderHr011ReferenceDashboard(row) {
     $("#hr011RefBrdt").text($.trim(row.brdt || "") || "-");
     $("#hr011RefTel").text($.trim(row.tel || "") || "-");
     $("#hr011RefEmail").text($.trim(row.email || "") || "-");
+    $("#hr011RefEdu").text($.trim(row.edu_last || "") || "-");
+
+    // 공통코드 데이터
+    $("#hr011RefKosa").text(hr011MainSelectMaps.kosa[row.kosa_grd_cd] || row.kosa_grd_cd || "-");
+    $("#hr011RefMainFld").text(hr011MainSelectMaps.mainFld[row.main_fld_cd] || row.main_fld_cd || "-");
     $("#hr011RefWorkMd").text(hr011MainSelectMaps.workMd[row.work_md] || row.work_md || "-");
     $("#hr011RefCtrtTyp").text(hr011MainSelectMaps.ctrtTyp[row.ctrt_typ] || row.ctrt_typ || "-");
     $("#hr011RefRegion").text(hr011MainSelectMaps.sido[row.sido_cd] || row.sido_cd || "-");
-    $("#hr011RefEdu").text($.trim(row.edu_last || "") || "-");
-    $("#hr011RefKosa").text(hr011MainSelectMaps.kosa[row.kosa_grd_cd] || row.kosa_grd_cd || "-");
-    $("#hr011RefMainFld").text(hr011MainSelectMaps.mainFld[row.main_fld_cd] || row.main_fld_cd || "-");
+    $("#hr011RefKosaTop").text(hr011MainSelectMaps.kosa[row.kosa_grd_cd] || row.kosa_grd_cd || "-");
 
     $("#hr011RefGrade").text(`${gradeText}${scoreText ? ` ${scoreText}` : ""}`);
-    $("#hr011RefKosaTop").text(hr011MainSelectMaps.kosa[row.kosa_grd_cd] || row.kosa_grd_cd || "-");
     $("#hr011RefProjectCount").text(projectCountText);
 
     const categoryList = hr011RefSkillCategoryRows.length
@@ -1535,14 +1564,14 @@ function setHr011ActiveEditStep(stepKey) {
     syncHr011EditStepStatus();
 }
 
-function getHr011StepIndex(stepKey) {
-    const idx = getHr011VisibleStepKeys().indexOf(String(stepKey || ""));
-    return idx < 0 ? 0 : idx;
-}
+// function getHr011StepIndex(stepKey) {
+//     const idx = getHr011VisibleStepKeys().indexOf(String(stepKey || ""));
+//     return idx < 0 ? 0 : idx;
+// }
 
-function getHr011CurrentStepIndex() {
-    return getHr011StepIndex(hr011CurrentEditStepKey);
-}
+// function getHr011CurrentStepIndex() {
+//     return getHr011StepIndex(hr011CurrentEditStepKey);
+// }
 
 function goHr011EditStep(stepKey) {
     setHr011ActiveEditStep(stepKey);
@@ -1604,55 +1633,55 @@ function requestHr011ActiveStepSync() {
     });
 }
 
-function isHr011ProfileStepFilled() {
-    return !!($.trim($("#dev_nm").val()) && $.trim($("#select_dev_typ").val()));
-}
+// function isHr011ProfileStepFilled() {
+//     return !!($.trim($("#dev_nm").val()) && $.trim($("#select_dev_typ").val()));
+// }
 
-function isHr011ContractStepFilled() {
-    const amt = normalizeAmountValue($("#amt").val());
-    return !!(
-        $.trim($("#org_nm").val()) &&
-        $.trim($("#st_dt").val()) &&
-        $.trim($("#ed_dt").val()) &&
-        $.trim($("#select_biz_typ").val()) &&
-        Number(amt) > 0
-    );
-}
+// function isHr011ContractStepFilled() {
+//     const amt = normalizeAmountValue($("#amt").val());
+//     return !!(
+//         $.trim($("#org_nm").val()) &&
+//         $.trim($("#st_dt").val()) &&
+//         $.trim($("#ed_dt").val()) &&
+//         $.trim($("#select_biz_typ").val()) &&
+//         Number(amt) > 0
+//     );
+// }
 
-function isHr011SkillStepFilled() {
-    if (!window.hr012TableA || typeof window.hr012TableA.getData !== "function") return false;
-    const rows = window.hr012TableA.getData() || [];
-    return rows.some(function (row) {
-        const list = parseHr011SkillList(row && row.skl_id_lst);
-        return list.length > 0;
-    });
-}
+// function isHr011SkillStepFilled() {
+//     if (!window.hr012TableA || typeof window.hr012TableA.getData !== "function") return false;
+//     const rows = window.hr012TableA.getData() || [];
+//     return rows.some(function (row) {
+//         const list = parseHr011SkillList(row && row.skl_id_lst);
+//         return list.length > 0;
+//     });
+// }
 
-function isHr011ProjectStepFilled() {
-    if (!window.hr013Table || typeof window.hr013Table.getData !== "function") return false;
-    const rows = window.hr013Table.getData() || [];
-    return rows.some(function (row) {
-        return !!($.trim(String((row && (row.prj_nm || row.dev_prj_id)) || "")));
-    });
-}
+// function isHr011ProjectStepFilled() {
+//     if (!window.hr013Table || typeof window.hr013Table.getData !== "function") return false;
+//     const rows = window.hr013Table.getData() || [];
+//     return rows.some(function (row) {
+//         return !!($.trim(String((row && (row.prj_nm || row.dev_prj_id)) || "")));
+//     });
+// }
 
-function isHr011EvalRiskStepFilled() {
-    if (!Array.isArray(hr011RefProjectRows) || hr011RefProjectRows.length === 0) return true;
-    if (!(hr011RefProjectEvalCache instanceof Map) || !hr011RefProjectEvalCache.size) return false;
-    let hasValue = false;
-    hr011RefProjectEvalCache.forEach(function (state) {
-        if (hasValue || !state) return;
-        const evalRows = Array.isArray(state.evalRows) ? state.evalRows : [];
-        const risk = state.risk || {};
-        if (evalRows.length) {
-            hasValue = true;
-            return;
-        }
-        const keys = ["leave_txt", "claim_txt", "sec_txt", "memo"];
-        hasValue = keys.some(function (k) { return !!$.trim(String(risk[k] || "")); }) || String(risk.re_in_yn || "N") === "Y";
-    });
-    return hasValue;
-}
+// function isHr011EvalRiskStepFilled() {
+//     if (!Array.isArray(hr011RefProjectRows) || hr011RefProjectRows.length === 0) return true;
+//     if (!(hr011RefProjectEvalCache instanceof Map) || !hr011RefProjectEvalCache.size) return false;
+//     let hasValue = false;
+//     hr011RefProjectEvalCache.forEach(function (state) {
+//         if (hasValue || !state) return;
+//         const evalRows = Array.isArray(state.evalRows) ? state.evalRows : [];
+//         const risk = state.risk || {};
+//         if (evalRows.length) {
+//             hasValue = true;
+//             return;
+//         }
+//         const keys = ["leave_txt", "claim_txt", "sec_txt", "memo"];
+//         hasValue = keys.some(function (k) { return !!$.trim(String(risk[k] || "")); }) || String(risk.re_in_yn || "N") === "Y";
+//     });
+//     return hasValue;
+// }
 
 function scheduleHr011StepStatusSync() {
     const delays = [0, 180, 480, 900];
@@ -1665,14 +1694,14 @@ function scheduleHr011StepStatusSync() {
     });
 }
 
-function getHr011StepState(stepKey) {
-    if (stepKey === "profile") return isHr011ProfileStepFilled() ? "done" : "pending";
-    if (stepKey === "contract") return isHr011ContractStepFilled() ? "done" : "pending";
-    if (stepKey === "skill") return isHr011SkillStepFilled() ? "done" : "pending";
-    if (stepKey === "project") return isHr011ProjectStepFilled() ? "done" : "pending";
-    if (stepKey === "eval-risk") return isHr011EvalRiskStepFilled() ? "done" : "pending";
-    return "pending";
-}
+// function getHr011StepState(stepKey) {
+//     if (stepKey === "profile") return isHr011ProfileStepFilled() ? "done" : "pending";
+//     if (stepKey === "contract") return isHr011ContractStepFilled() ? "done" : "pending";
+//     if (stepKey === "skill") return isHr011SkillStepFilled() ? "done" : "pending";
+//     if (stepKey === "project") return isHr011ProjectStepFilled() ? "done" : "pending";
+//     if (stepKey === "eval-risk") return isHr011EvalRiskStepFilled() ? "done" : "pending";
+//     return "pending";
+// }
 
 function syncHr011EditStepStatus() {
     const buttons = document.querySelectorAll(".hr011-edit-stepper .hr011-edit-step-btn");
@@ -1688,19 +1717,19 @@ function syncHr011EditStepStatus() {
     });
 }
 
-function markHr011StepError(stepKey) {
-    return;
-}
+// function markHr011StepError(stepKey) {
+//     return;
+// }
 
-function syncHr011EditWizardButtons() {
-    const prevBtn = document.getElementById("hr011StepPrevBtn");
-    const nextBtn = document.getElementById("hr011StepNextBtn");
-    if (!prevBtn || !nextBtn) return;
-    const idx = getHr011CurrentStepIndex();
-    const isLast = idx >= HR011_EDIT_STEP_KEYS.length - 1;
-    prevBtn.disabled = idx <= 0;
-    nextBtn.textContent = isLast ? (hr011Mode === "insert" ? "등록" : "저장") : "다음";
-}
+// function syncHr011EditWizardButtons() {
+//     const prevBtn = document.getElementById("hr011StepPrevBtn");
+//     const nextBtn = document.getElementById("hr011StepNextBtn");
+//     if (!prevBtn || !nextBtn) return;
+//     const idx = getHr011CurrentStepIndex();
+//     const isLast = idx >= HR011_EDIT_STEP_KEYS.length - 1;
+//     prevBtn.disabled = idx <= 0;
+//     nextBtn.textContent = isLast ? (hr011Mode === "insert" ? "등록" : "저장") : "다음";
+// }
 
 // function validateHr011StepBeforeNext(stepKey) {
 //     if (stepKey === "profile") {
@@ -1807,15 +1836,20 @@ function syncHr011EditIntegrations(isEditable, wasEditable) {
     }
 
     // 수정모드 진입 직후 탭별 이벤트/편집 상태를 다시 동기화한다.
+
+    // tab2
     if (typeof window.initTab2 === "function") window.initTab2();
     if (typeof window.applyTab2Readonly === "function") window.applyTab2Readonly(false);
     applyHr011Tab2DualPane(true);
+
+    // tab3
     if (typeof window.initTab3 === "function") window.initTab3();
     if (typeof window.applyTab3Readonly === "function") window.applyTab3Readonly(false);
     if (window.hr013Table && typeof window.hr013Table.redraw === "function") {
         window.hr013Table.redraw(true);
     }
 
+    // tab4
     if (typeof window.initTab4 === "function") window.initTab4();
     if (typeof window.applyTab4Readonly === "function") window.applyTab4Readonly(false);
     applyHr011Tab4DualPane(true);
@@ -1901,6 +1935,7 @@ function scrollHr011ToEvalRiskSection(selectedProjectId) {
     }
 }
 
+// 인적사항 정보 > 상세보기
 function buildHr011ProfileDetailMarkup() {
     const row = hr011CurrentRow || {};
     const contract = window.hr011Data || {};
@@ -2042,7 +2077,7 @@ function buildHr011ProjectDetailMarkup() {
                     ].join("")
                     : [
                         `<aside class="hr011-ref-project-eval-side hr011-ref-project-eval-side--readonly">`,
-                        `<div class="hr011-ref-project-eval-external">외부프로젝트</div>`,
+                        `<div class="hr011-ref-project-eval-external">외부 프로젝트</div>`,
                         `</aside>`
                     ].join(""),
                 `</div>`,
@@ -2241,7 +2276,7 @@ function renderHr011ProjectEvalSummary(projectKey) {
     if (metaEl) {
         const scores = state.evalRows.map(function (row) { return resolveHr011EvalLevelFromRow(row); }).filter(function (v) { return v > 0; });
         if (!scores.length) {
-            metaEl.textContent = "개인 평가 데이터가 없습니다.";
+            metaEl.textContent = "개인평가 데이터가 없습니다.";
         } else {
             const avg = scores.reduce(function (sum, v) { return sum + v; }, 0) / scores.length;
             metaEl.textContent = `개인평가 평균 ${avg.toFixed(1)}점 (5점 만점)`;
@@ -2533,59 +2568,59 @@ function updateHr011ProjectRiskField(projectKey, field, value) {
     state.risk[field] = String(value || "");
 }
 
-async function saveHr011ProjectEvaluation(projectKey) {
-    const state = hr011RefProjectEvalCache.get(projectKey);
-    if (!state || !state.projectId) return;
-    const devId = window.currentDevId || (hr011CurrentRow && hr011CurrentRow.dev_id) || $("#dev_id").val();
-    if (!devId) {
-        await showAlert({ icon: "warning", title: "안내", text: "평가 저장 대상 인력 정보가 없습니다." });
-        return;
-    }
-
-    const evalRows = (state.evalRows || [])
-        .map(function (row) {
-            return {
-                dev_prj_id: state.projectId,
-                eval_id: row.eval_id,
-                lvl: resolveHr011EvalLevelFromRow(row),
-                cmt: row.cmt || ""
-            };
-        })
-        .filter(function (row) {
-            return row.eval_id && row.lvl > 0;
-        });
-
-    const riskRow = [{
-        dev_prj_id: state.projectId,
-        leave_txt: state.risk.leave_txt || "",
-        claim_txt: state.risk.claim_txt || "",
-        sec_txt: state.risk.sec_txt || "",
-        re_in_yn: state.risk.re_in_yn || "N",
-        memo: state.risk.memo || ""
-    }];
-
-    try {
-        await $.ajax({
-            url: "/hr014/a/save",
-            type: "POST",
-            data: {
-                dev_id: devId,
-                rows: JSON.stringify(evalRows)
-            }
-        });
-        await $.ajax({
-            url: "/hr014/b/save",
-            type: "POST",
-            data: {
-                dev_id: devId,
-                rows: JSON.stringify(riskRow)
-            }
-        });
-        renderHr011ProjectEvalSummary(projectKey);
-    } catch (error) {
-        throw error;
-    }
-}
+// async function saveHr011ProjectEvaluation(projectKey) {
+//     const state = hr011RefProjectEvalCache.get(projectKey);
+//     if (!state || !state.projectId) return;
+//     const devId = window.currentDevId || (hr011CurrentRow && hr011CurrentRow.dev_id) || $("#dev_id").val();
+//     if (!devId) {
+//         await showAlert({ icon: "warning", title: "안내", text: "평가 저장 대상 인력 정보가 없습니다." });
+//         return;
+//     }
+//
+//     const evalRows = (state.evalRows || [])
+//         .map(function (row) {
+//             return {
+//                 dev_prj_id: state.projectId,
+//                 eval_id: row.eval_id,
+//                 lvl: resolveHr011EvalLevelFromRow(row),
+//                 cmt: row.cmt || ""
+//             };
+//         })
+//         .filter(function (row) {
+//             return row.eval_id && row.lvl > 0;
+//         });
+//
+//     const riskRow = [{
+//         dev_prj_id: state.projectId,
+//         leave_txt: state.risk.leave_txt || "",
+//         claim_txt: state.risk.claim_txt || "",
+//         sec_txt: state.risk.sec_txt || "",
+//         re_in_yn: state.risk.re_in_yn || "N",
+//         memo: state.risk.memo || ""
+//     }];
+//
+//     try {
+//         await $.ajax({
+//             url: "/hr014/a/save",
+//             type: "POST",
+//             data: {
+//                 dev_id: devId,
+//                 rows: JSON.stringify(evalRows)
+//             }
+//         });
+//         await $.ajax({
+//             url: "/hr014/b/save",
+//             type: "POST",
+//             data: {
+//                 dev_id: devId,
+//                 rows: JSON.stringify(riskRow)
+//             }
+//         });
+//         renderHr011ProjectEvalSummary(projectKey);
+//     } catch (error) {
+//         throw error;
+//     }
+// }
 
 async function saveHr011ProjectEvaluationAll() {
     const keys = Array.from(hr011RefProjectEvalCache.keys());
@@ -2593,7 +2628,7 @@ async function saveHr011ProjectEvaluationAll() {
         const projectKey = keys[i];
         const state = hr011RefProjectEvalCache.get(projectKey);
         if (!state || !state.isInternal || !state.projectId || !state.loaded) continue;
-        await saveHr011ProjectEvaluation(projectKey);
+        // await saveHr011ProjectEvaluation(projectKey);
     }
 }
 
@@ -2795,26 +2830,26 @@ function renderHr011RefRadarChart() {
     }, true);
 }
 
-function buildHr011StarSuffix(skillName) {
-    const normalized = String(skillName || "").trim().toLowerCase();
-    if (!normalized) return "";
+// function buildHr011StarSuffix(skillName) {
+//     const normalized = String(skillName || "").trim().toLowerCase();
+//     if (!normalized) return "";
+//
+//     const skill = (hr011SummarySkillRows || []).find(function (item) {
+//         return String(item.name || "").trim().toLowerCase() === normalized;
+//     });
+//     const level = Math.max(0, Math.min(5, Number(skill?.level || 0)));
+//     if (!level) return "";
+//     return `(${buildHr011Stars(level)})`;
+// }
 
-    const skill = (hr011SummarySkillRows || []).find(function (item) {
-        return String(item.name || "").trim().toLowerCase() === normalized;
-    });
-    const level = Math.max(0, Math.min(5, Number(skill?.level || 0)));
-    if (!level) return "";
-    return `(${buildHr011Stars(level)})`;
-}
-
-function buildHr011Stars(level) {
-    const clamped = Math.max(0, Math.min(5, Number(level) || 0));
-    let text = "";
-    for (let i = 1; i <= 5; i += 1) {
-        text += i <= clamped ? "★" : "☆";
-    }
-    return text;
-}
+// function buildHr011Stars(level) {
+//     const clamped = Math.max(0, Math.min(5, Number(level) || 0));
+//     let text = "";
+//     for (let i = 1; i <= 5; i += 1) {
+//         text += i <= clamped ? "★" : "☆";
+//     }
+//     return text;
+// }
 
 // 주개발언어 문자열을 분해해 요약에 사용할 값을 만든다.
 function splitHr011MainLang(row) {
@@ -3227,15 +3262,36 @@ async function saveHr011DetailPage() {
         return;
     }
 
+    if (!validateHr011Form()) return;
+
     const wasInsertMode = hr011Mode === "insert";
     try {
         showLoading();
 
+        // main 저장
         await saveHr011MainProfile();
-        if (typeof saveHr011TableData === "function") await saveHr011TableData();
-        if (typeof saveHr012TableData === "function") await saveHr012TableData();
-        if (typeof window.saveHr013TableData === "function") window.saveHr013TableData();
-        if (typeof window.saveTab4All === "function") await window.saveTab4All();
+
+        // tab1 저장
+        if (typeof saveHr011TableData === "function") {
+            await saveHr011TableData();
+        }
+
+        // tab2 저장
+        if (typeof saveHr012TableData === "function") {
+            await saveHr012TableData();
+        }
+
+        // tab3 저장
+        if (typeof window.saveHr013TableData === "function") {
+            window.saveHr013TableData();
+        }
+
+        // tab4 저장
+        if (typeof window.saveTab4All === "function") {
+            await window.saveTab4All();
+        }
+
+        // 평가 저장
         await saveHr011ProjectEvaluationAll();
 
         const savedDevId = $.trim(window.currentDevId || $("#dev_id").val());
@@ -3279,7 +3335,7 @@ async function saveHr011MainProfile() {
     formData.append("brdt", $("#brdt").val());
     formData.append("tel", $("#tel").val());
     formData.append("email", $("#email").val());
-    formData.append("region", $("#select_sido_cd").val());
+    formData.append("sido_cd", $("#select_sido_cd").val());
     formData.append("main_lang", $("#main_lang").val());
     formData.append("exp_yr", String(composeCareerExpValue()));
     formData.append("edu_last", $("#edu_last").val());

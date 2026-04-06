@@ -331,7 +331,7 @@ function buildPrjTable() {
             },
             {
                 title: "거주지역",
-                field: "region",
+                field: "sido_cd",
                 widthGrow: 2,
                 formatter: function (cell) {
                     const value = cell.getValue();
