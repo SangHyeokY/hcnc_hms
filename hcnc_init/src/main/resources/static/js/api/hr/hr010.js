@@ -57,6 +57,8 @@ $(document).ready(async function () {
     renderSelectedTags();
     refreshTagSuggestions();
     hideLoading();
+
+    // console.log(hr010SourceRows[0]);
 });
 
 // ==============================
@@ -119,38 +121,41 @@ function bindEvents() {
     });
 
     $("#hr010TagKeywordInput").on("keydown", function (e) {
-        if (e.key === "ArrowDown") {
-            e.preventDefault();
-            flushHr010TagSuggestions(this.value);
-            moveTagSuggestion(1);
-            return;
-        }
+        const value = this.value.trim();
 
-        if (e.key === "ArrowUp") {
-            e.preventDefault();
-            flushHr010TagSuggestions(this.value);
-            moveTagSuggestion(-1);
-            return;
-        }
+        switch (e.key) {
+            case "ArrowDown":
+                e.preventDefault();
+                flushHr010TagSuggestions(this.value);
+                moveTagSuggestion(1);
+                break;
 
-        if (e.key === "Enter" || e.key === ",") {
-            e.preventDefault();
-            flushHr010TagSuggestions(this.value);
-            commitSuggestionFromInput();
-            return;
-        }
+            case "ArrowUp":
+                e.preventDefault();
+                flushHr010TagSuggestions(this.value);
+                moveTagSuggestion(-1);
+                break;
 
-        if (e.key === "Escape") {
-            window.clearTimeout(hr010SuggestionInputTimer);
-            hideTagSuggestions();
-            return;
-        }
+            case "Enter":
+            case ",":
+                e.preventDefault();
+                flushHr010TagSuggestions(this.value);
+                commitSuggestionFromInput();
+                break;
 
-        if (e.key === "Backspace" && !this.value.trim() && keywordTags.length) {
-            e.preventDefault();
-            keywordTags.pop();
-            renderSelectedTags();
-            applyFiltersAndRender();
+            case "Escape":
+                window.clearTimeout(hr010SuggestionInputTimer);
+                hideTagSuggestions();
+                break;
+
+            case "Backspace":
+                if (!value && keywordTags.length) {
+                    e.preventDefault();
+                    keywordTags.pop();
+                    renderSelectedTags();
+                    applyFiltersAndRender();
+                }
+                break;
         }
     });
 
@@ -546,59 +551,51 @@ function getSkillCodes(row) {
 
 // 거주지역 문자열을 시도코드 기준으로 비교
 function matchesRegionCode(row, code) {
-    if (String(row.sido_cd || "") === String(code)) {
-        return true;
-    }
-
-    const regionValue = normalizeRegionText(row.region || row.region_nm || "");
-    if (!regionValue) return false;
-
-    return getRegionTextCandidates(code).some(candidate =>
-        candidate && (regionValue === candidate || regionValue.includes(candidate) || candidate.includes(regionValue))
-    );
+    const value = row.sido_cd;
+    return String(value) === String(code);
 }
 
 // 시도 코드에 대응되는 비교용 지역명 후보
-function getRegionTextCandidates(code) {
-    const label = getDropdownOptionLabel("sido_cd", code);
-    const normalizedLabel = normalizeRegionText(label);
-    const shortLabel = normalizeRegionText(toShortRegionName(label));
-
-    return [...new Set([normalizedLabel, shortLabel].filter(Boolean))];
-}
+// function getRegionTextCandidates(code) {
+//     const label = getDropdownOptionLabel("sido_cd", code);
+//     const normalizedLabel = normalizeRegionText(label);
+//     const shortLabel = normalizeRegionText(toShortRegionName(label));
+//
+//     return [...new Set([normalizedLabel, shortLabel].filter(Boolean))];
+// }
 
 // 지역명 비교용 정규화
-function normalizeRegionText(value) {
-    return String(value || "")
-        .replace(/\s+/g, "")
-        .replace(/특별자치도|특별자치시|특별시|광역시|자치도|도|시/g, "")
-        .trim();
-}
+// function normalizeRegionText(value) {
+//     return String(value || "")
+//         .replace(/\s+/g, "")
+//         .replace(/특별자치도|특별자치시|특별시|광역시|자치도|도|시/g, "")
+//         .trim();
+// }
 
 // 전체 지역명 -> 짧은 표기명
-function toShortRegionName(label) {
-    const map = {
-        "서울특별시": "서울",
-        "부산광역시": "부산",
-        "대구광역시": "대구",
-        "인천광역시": "인천",
-        "광주광역시": "광주",
-        "대전광역시": "대전",
-        "울산광역시": "울산",
-        "세종특별자치시": "세종",
-        "경기도": "경기",
-        "강원특별자치도": "강원",
-        "충청북도": "충북",
-        "충청남도": "충남",
-        "전북특별자치도": "전북",
-        "전라남도": "전남",
-        "경상북도": "경북",
-        "경상남도": "경남",
-        "제주특별자치도": "제주"
-    };
-
-    return map[label] || label;
-}
+// function toShortRegionName(label) {
+//     const map = {
+//         "서울특별시": "서울",
+//         "부산광역시": "부산",
+//         "대구광역시": "대구",
+//         "인천광역시": "인천",
+//         "광주광역시": "광주",
+//         "대전광역시": "대전",
+//         "울산광역시": "울산",
+//         "세종특별자치시": "세종",
+//         "경기도": "경기",
+//         "강원특별자치도": "강원",
+//         "충청북도": "충북",
+//         "충청남도": "충남",
+//         "전북특별자치도": "전북",
+//         "전라남도": "전남",
+//         "경상북도": "경북",
+//         "경상남도": "경남",
+//         "제주특별자치도": "제주"
+//     };
+//
+//     return map[label] || label;
+// }
 
 // 선택값에 맞는 드롭다운 표시명 조회
 function getDropdownOptionLabel(key, code) {
@@ -858,6 +855,18 @@ function buildFilterSuggestionSource() {
             meta: "등급 · KOSA",
             kind: "필터",
             matchText: `${option.cd_nm} KOSA 등급`
+        });
+    });
+
+    (dropdownFilters.sido_cd.options || []).forEach(option => {
+        sources.push({
+            type: "filter",
+            key: "sido_cd",
+            value: option.cd,
+            label: option.cd_nm,
+            meta: "거주지역",
+            kind: "필터",
+            matchText: `${option.cd_nm} 거주지역`
         });
     });
 
@@ -1182,9 +1191,9 @@ function updateHr010ResultCount(count) {
 }
 
 // ==============================
-// 카드 생성
-// ==============================
-function createUserCard(row) {
+    // 카드 생성
+    // ==============================
+    function createUserCard(row) {
     const employment = getEmploymentMeta(row);
     const profile = getProfileMarkup(row);
     const skillChips = getSkillChipMarkup(row);
@@ -1225,9 +1234,62 @@ function createUserCard(row) {
         </div>
     </article>`;
 }
+function createUserCard(row) {
+    const employment = getEmploymentMeta(row);
+    const profile = getProfileMarkup(row);
+    const primarySkill = getPrimarySkillLabel(row);
+    const skillChips = getSkillChipMarkup(row);
 
-// 리스트형 행 생성
-function createUserListRow(row) {
+    return `
+    <article class="user-card" data-id="${row.dev_id}" tabindex="0" title="더블클릭하여 상세 보기">
+        <div class="user-card__top">
+            <span class="user-card__badge user-card__badge--${employment.className}">${employment.label}</span>
+        </div>
+        <div class="user-card__profile">
+            <div class="user-card__avatar">${profile}</div>
+            <div class="user-card__name">${escapeHtml(row.dev_nm || "-")}</div>
+            <div class="user-card__subtitle">${escapeHtml(primarySkill ? `주개발언어 · ${primarySkill}` : "주개발언어 미등록")}</div>
+            <div class="user-card__skills">${skillChips}</div>
+        </div>
+        <div class="user-card__info-panel">
+            <div class="user-card__info-grid">
+                <div class="user-card__info-item">
+                    <span class="user-card__info-label">등급</span>
+                    <strong class="user-card__info-value">${escapeHtml(formatGradeLabel(row.grade, row.score) || "-")}</strong>
+                </div>
+                <div class="user-card__info-item">
+                    <span class="user-card__info-label">KOSA</span>
+                    <strong class="user-card__info-value">${escapeHtml(getKosaLabel(row))}</strong>
+                </div>
+                <div class="user-card__info-item">
+                    <span class="user-card__info-label">거주지역</span>
+                    <strong class="user-card__info-value">${escapeHtml(getSidoLabel(row))}</strong>
+                </div>
+                <div class="user-card__info-item">
+                    <span class="user-card__info-label">투입 가능</span>
+                    <strong class="user-card__info-value">${escapeHtml(getAvailabilityLabel(row))}</strong>
+                </div>
+            </div>
+            <div class="user-card__meta-row">
+                <span class="user-card__meta-pill">${escapeHtml(getWorkModeLabel(row))}</span>
+                <span class="user-card__meta-pill">${escapeHtml(getContractTypeLabel(row))}</span>
+            </div>
+        </div>
+        <div class="user-card__footer">
+            <div class="user-card__footer-item">
+                <span class="user-card__footer-label">희망단가</span>
+                <strong class="user-card__footer-value">${escapeHtml(amountFormatter(row.hope_rate_amt) || "-")}</strong>
+            </div>
+            <div class="user-card__footer-item">
+                <span class="user-card__footer-label">경력</span>
+                <strong class="user-card__footer-value">${escapeHtml(formatCareerYearMonth(row.exp_yr) || "-")}</strong>
+            </div>
+        </div>
+    </article>`;
+}
+
+    // 리스트형 행 생성
+    function createUserListRow(row) {
     const employment = getEmploymentMeta(row);
     const profile = getProfileMarkup(row);
 
@@ -1288,11 +1350,11 @@ function getPrimarySkillLabel(row) {
 }
 
 // 주개발언어 표시용 요약
-function getSkillSummaryLabel(row) {
-    const skillParts = getSkillDisplayParts(row);
-    if (!skillParts.skills.length) return "-";
-    return `주개발언어: ${skillParts.skills.join(", ")}`;
-}
+// function getSkillSummaryLabel(row) {
+//     const skillParts = getSkillDisplayParts(row);
+//     if (!skillParts.skills.length) return "-";
+//     return `주개발언어: ${skillParts.skills.join(", ")}`;
+// }
 
 // 리스트형 기술 요약 마크업
 function getSkillSummaryMarkup(row, maxChips = 3) {
@@ -1436,6 +1498,11 @@ function getAvailabilityLabel(row) {
     return row.avail_dt;
 }
 
+// 거주지역 표시명
+function getSidoLabel(row) {
+    return getDropdownOptionLabel("sido_cd", row.sido_cd) || row.sido_cd || "-";
+}
+
 // ==============================
 // 이벤트 위임 (핵심)
 // ==============================
@@ -1492,7 +1559,7 @@ const dropdownFilters = {
         label: "계약형태"
     },
     sido_cd: { // 거주지역
-        selectId: "select_sido-cd",
+        selectId: "select_sido_cd",
         code: "SIDO_CD",
         options: [],
         map: {},
@@ -1516,7 +1583,7 @@ const dropdownFilters = {
         container: ".dropdown-grade",
         label: "등급"
     },
-    kosa_grd_cd: {
+    kosa_grd_cd: { // KOSA 등급
         selectId: "",
         code: "KOSA_GRD_CD",
         options: [],

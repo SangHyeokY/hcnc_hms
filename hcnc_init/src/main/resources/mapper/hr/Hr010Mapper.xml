@@ -9,7 +9,7 @@
             , DATE_FORMAT(brdt, '%Y-%m-%d') AS brdt -- 생년월일
             , tel -- 연락처
             , email -- 이메일
-            , region -- 거주지역
+            , region AS sido_cd -- 거주지역
             , main_lang -- 주 개발언어 코드
             , fn_get_cm_lst('skl_id', main_lang) AS main_lang_nm -- 주 개발언어 라벨
             , exp_yr -- 경력연차
@@ -96,7 +96,7 @@
             #{dev_nm},
             #{tel},
             #{email},
-            #{region},
+            #{sido_cd},
             #{main_lang},
             #{exp_yr},
             #{edu_last},
@@ -122,7 +122,7 @@
             dev_nm = #{dev_nm},
             tel = #{tel},
             email = #{email},
-            region = #{region},
+            region = #{sido_cd},
             main_lang = #{main_lang},
             exp_yr = #{exp_yr},
             edu_last = #{edu_last},

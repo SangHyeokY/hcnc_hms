@@ -289,7 +289,7 @@ function buildHr013Table() {
     var shouldAutoExpandRows = !isHr011Detail;
 
     var options = {
-        layout: isHr011Detail ? "fitDataTable" : "fitData",
+        layout: "fitData",
         placeholder: "데이터 없음",
         selectable: false,
         rowHeight: isHr011Detail ? 46 : 42,
@@ -1648,74 +1648,100 @@ async function removeHr013SelectedRows() {
 // 프로젝트 탭 통합 저장용
 // 통합 저장 버튼에서 호출
 window.saveHr013TableData = function () {
-    saveHr013InlineRows();
+    return saveHr013InlineRows();
 };
 
 // 테이블 내용을 서버에 저장/삭제 반영
 function saveHr013InlineRows() {
-    if (!window.hr013Table) {
-        return;
+    if (!window.hr013Table || !changedTabs.tab3) {
+        console.log("[Tab3] 저장할 프로젝트 데이터 없음 → [Skip]");
+        return Promise.resolve();
     }
+
     var devId = window.currentDevId || $("#dev_id").val();
     var rows = window.hr013Table.getData();
 
-    // 수정 행 저장 + 삭제 큐(hr013DeletedIds) 반영을 하나의 비동기 묶음으로 처리한다.
     var requests = [];
 
+    // ======================
+    // 저장 요청
+    // ======================
     rows.forEach(function (row) {
-        // 필수 키가 비어 있는 임시 행은 저장 요청에서 제외한다.
+
+        // 필수값 없는 행 제외
         if (!row.inprj_yn || !row.st_dt) {
             return;
         }
+
         var stackCsv = getHr013SkillCsvForSave(row.skl_id_lst, row.stack_txt);
         var rateAmt = parseHr013RateAmountValue(row.rate_amt);
         var custNm = row.cust_nm || "";
+
         if (row.inprj_yn === "Y") {
             custNm = "HCNC";
         }
 
-        requests.push($.ajax({
-            url: "/hr013/tab3_save",
-            type: "POST",
-            data: {
-                dev_id: devId,
-                dev_prj_id: row.dev_prj_id,
-                inprj_yn: row.inprj_yn,
-                st_dt: normalizeDateForSave(row.st_dt),
-                ed_dt: normalizeDateForSave(row.ed_dt),
-                cust_nm: custNm,
-                prj_nm: row.prj_nm || "",
-                rate_amt: rateAmt || "",
-                job_cd: row.job_cd || "",
-                stack_txt: stackCsv,
-                alloc_pct: row.alloc_pct || "",
-                remark: row.remark || ""
-            }
-        }));
+        requests.push(
+            $.ajax({
+                url: "/hr013/tab3_save",
+                type: "POST",
+                data: {
+                    dev_id: devId,
+                    dev_prj_id: row.dev_prj_id,
+                    inprj_yn: row.inprj_yn,
+                    st_dt: normalizeDateForSave(row.st_dt),
+                    ed_dt: normalizeDateForSave(row.ed_dt),
+                    cust_nm: custNm,
+                    prj_nm: row.prj_nm || "",
+                    rate_amt: rateAmt || "",
+                    job_cd: row.job_cd || "",
+                    stack_txt: stackCsv,
+                    alloc_pct: row.alloc_pct || "",
+                    remark: row.remark || ""
+                }
+            })
+        );
     });
 
+    // ======================
+    // 삭제 요청
+    // ======================
     hr013DeletedIds.forEach(function (id) {
-        requests.push($.ajax({
-            url: "/hr013/tab3_delete",
-            type: "POST",
-            data: { dev_prj_id: id, dev_id: devId }
-        }));
+        requests.push(
+            $.ajax({
+                url: "/hr013/tab3_delete",
+                type: "POST",
+                data: { dev_prj_id: id, dev_id: devId }
+            })
+        );
     });
 
+    // 요청 없으면 바로 성공 처리
     if (requests.length === 0) {
-        return;
+        console.log("hr013 저장할 데이터 없음");
+        return Promise.resolve();
     }
 
-    $.when.apply($, requests).done(function () {
-        hr013DeletedIds = [];
-        loadHr013TableData();
-    }).fail(function () {
-        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
-            icon: 'error',
-            title: '오류',
-            text: `"프로젝트" 저장 중 오류가 발생했습니다.`
+    // ======================
+    // 전체 요청 실행
+    // ======================
+    return $.when.apply($, requests)
+        .then(function () {
+            hr013DeletedIds = [];
+            console.log("[Tab3] 저장 완료");
+
+            loadHr013TableData();
+        })
+        .catch(function (err) {
+            console.error("Tab3 저장 실패", err);
+
+            showAlert({
+                icon: 'error',
+                title: '오류',
+                text: `"프로젝트" 저장 중 오류가 발생했습니다.`
+            });
+            return Promise.reject(err);
         });
-    });
 }
 
 // 행 추가
@@ -2469,9 +2495,9 @@ $('#excelFile').on('change', function (e) {
 });
 
 // 보유역량 기술 테이블 정렬 순서
-function getPriority(text) {
-    if (/^[a-zA-Z]/.test(text)) return 1;   // 영문 (1번째)
-    if (/^[0-9]/.test(text)) return 2;      // 숫자 (2번째)
-    if (/^[ㄱ-ㅎ가-힣]/.test(text)) return 3; // 한글 (3번째)
-    return 4;                               // 기타 (4번째)
-}
+// function getPriority(text) {
+//     if (/^[a-zA-Z]/.test(text)) return 1;   // 영문 (1번째)
+//     if (/^[0-9]/.test(text)) return 2;      // 숫자 (2번째)
+//     if (/^[ㄱ-ㅎ가-힣]/.test(text)) return 3; // 한글 (3번째)
+//     return 4;                               // 기타 (4번째)
+// }

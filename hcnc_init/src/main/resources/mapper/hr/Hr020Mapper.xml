@@ -6,7 +6,7 @@
     <select id="select_hr020" parameterType="map" resultType="map">
         SELECT dev.dev_id
             , dev.dev_nm -- 성명
-            , dev.region -- 거주지역
+            , dev.region AS sido_cd -- 거주지역
             , dev.exp_yr -- 경력연차
             , prj.cust_nm -- 고객사
             , prj.prj_nm -- 프로젝트명

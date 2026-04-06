@@ -358,9 +358,14 @@ function validateHr012Form() {
     return true;
 }
 
+// 저장하기
 function saveHr012TableData() {
     return new Promise((resolve, reject) => {
-        if (!changedTabs.tab2) return resolve(); // 수정사항 없으면 바로 종료
+        if (!changedTabs.tab2) {
+            console.log("[Tab2] 저장할 역량 데이터 없음 → [Skip]");
+            return resolve(); // 수정사항 없으면 바로 종료
+        }
+
         const devId = window.currentDevId;
         if (!devId) {
             return reject("dev_id 없음");
@@ -405,9 +410,9 @@ function saveHr012TableData() {
                 type: "POST",
                 contentType: "application/json",
                 data: JSON.stringify(param),
-                success: () => {
+                success: (response) => {
                     loadHr012TableDataA();  // 새로고침
-                    resolveA();
+                    resolveA(response);
                 },
                 error: () => rejectA("보유역량 저장 실패")
             });
@@ -430,9 +435,9 @@ function saveHr012TableData() {
                 type: "POST",
                 contentType: "application/json; charset=utf-8",
                 data: JSON.stringify(saveList),
-                success: () => {
+                success: (response) => {
                     loadHr012TableDataB(); // 새로고침
-                    resolveB();
+                    resolveB(response);
                 },
                 error: () => rejectB("숙련도 저장 실패")
             });
@@ -440,9 +445,17 @@ function saveHr012TableData() {
 
         // --- A/B 순차 저장 ---
         saveA()
-            .then(() => saveB())
-            .then(() => {
+            .then((resA) => {
+                return saveB().then((resB) => {
+                    return { resA, resB }; // 결과 묶어서 넘김
+                });
+            })
+            .then(({ resA, resB }) => {
                 changedTabs.tab2 = false;
+                console.log("[Tab2] 저장 완료", {
+                    tab2A: resA,
+                    tab2B: resB
+                });
                 resolve();
             })
             .catch(err => reject(err));

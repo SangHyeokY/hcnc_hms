@@ -10,6 +10,7 @@ var riskState = {
     re_in_yn: "N",
     memo: ""
 };
+
 var riskKeys = [
     { key: "leave_txt", label: "이탈이력" },
     { key: "claim_txt", label: "클레임" },
@@ -412,19 +413,32 @@ function loadHr014TableDataB() {
 // ================================================================================= //
 
 // 탭1 평가 저장
-function saveTableA(alertFlag, returnPromise) {
-    if (!window.hr014TableA) return Promise.resolve();
+function saveTableA(alertFlag) {
+    if (!window.hr014TableA) return Promise.resolve("skip");
 
     const eval = [];
 
     evalData.forEach((valueArray, key) => {
+
+        // 프로젝트 ID 없으면 스킵
+        if (!key || key === "") {
+            console.warn("[Tab4] dev_prj_id 없음 → [Skip]", valueArray);
+            return;
+        }
+
         valueArray.forEach(item => {
             eval.push({
                 ...item,
-                dev_prj_id: String(key)
+                dev_prj_id: Number(key) // 숫자로 변환
             });
         });
     });
+
+    // 저장할 데이터 없으면 API 호출 안함
+    if (eval.length === 0) {
+        console.log("[Tab4] 저장할 평가 데이터 없음 → [Skip]");
+        return Promise.resolve("skip");
+    }
 
     return $.ajax({
         url: "/hr014/a/save",
@@ -437,6 +451,7 @@ function saveTableA(alertFlag, returnPromise) {
         if (response.success) {
             loadHr014TableDataA();
             if (alertFlag) console.log("Tab4-a 저장되었습니다.");
+            return "success";
         } else {
             return Promise.reject("A 저장 실패");
         }
@@ -444,15 +459,28 @@ function saveTableA(alertFlag, returnPromise) {
 }
 
 // 탭2 리스크 저장
-function saveTableB(alertFlag, returnPromise) {
+function saveTableB(alertFlag) {
     const risk = [];
 
     riskData.forEach((valueArray, key) => {
+
+        // 프로젝트 ID 없으면 스킵
+        if (!key || key === "") {
+            console.warn("[Tab4] dev_prj_id 없음 → [Skip]", valueArray);
+            return;
+        }
+
         risk.push({
             ...valueArray,
-            dev_prj_id: String(key)
+            dev_prj_id: Number(key) // 가능하면 숫자로
         });
     });
+
+    // 저장할 데이터 자체가 없으면 서버 호출 안함
+    if (risk.length === 0) {
+        console.log("[Tab4] 저장할 리스크 데이터 없음 → [Skip]");
+        return Promise.resolve("skip");
+    }
 
     return $.ajax({
         url: "/hr014/b/save",
@@ -465,6 +493,7 @@ function saveTableB(alertFlag, returnPromise) {
         if (response.success) {
             loadHr014TableDataB();
             if (alertFlag) console.log("Tab4-b 저장되었습니다.");
+            return "success";
         } else {
             return Promise.reject("B 저장 실패");
         }
@@ -597,16 +626,23 @@ function saveTab4Active() {
 
 // 탭4 전체 저장 (평가 + 리스크)
 function saveTab4All() {
-    Promise.all([
-        saveTableA(false, true),
-        saveTableB(false, true)
+    return Promise.all([
+        saveTableA(false),
+        saveTableB(false)
     ])
-    .then(() => {
-        console.log("Tab4 전체 저장 완료");
-    })
-    .catch(() => {
-        alert("저장 중 일부 실패");
-    });
+        .then(([aResult, bResult]) => {
+
+            // console.log("A 결과:", aResult);
+            // console.log("B 결과:", bResult);
+
+            // 둘 다 성공했을 때만
+            if (aResult === "success" && bResult === "success") {
+                console.log("[Tab4] 저장 완료");
+            }
+        })
+        .catch(() => {
+            alert("저장 중 일부 실패");
+        });
 }
 
 window.saveTab4All = saveTab4All;
