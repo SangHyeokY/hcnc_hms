@@ -130,31 +130,6 @@ function initSelectDefault(selectId, placeholderText) {
     }
 }
 
-// 역할 값이 객체로 와도 문자열로 정규화
-function normalizeJobValue(value) {
-    if (value == null) {
-        return "";
-    }
-    if (typeof value === "object") {
-        var current = value;
-        var guard = 0;
-        while (current && typeof current === "object" && guard < 4) {
-            var candidate = current.cd || current.value || current.label || current.cd_nm || current.name || current.nm || current.id;
-            if (candidate && typeof candidate !== "object") {
-                return String(candidate);
-            }
-            if (candidate && typeof candidate === "object") {
-                current = candidate;
-                guard += 1;
-                continue;
-            }
-            break;
-        }
-        return "";
-    }
-    return String(value);
-}
-
 // ============================================================================== //
 
 // 모드 제어 함수
@@ -234,8 +209,9 @@ function setHr011Mode(mode, options) {
 
     // 직원/프리랜서 구분은 상세에서 수정하지 못하도록 항상 고정한다.
     $("#select_dev_typ")
-        .prop("disabled", true)
-        .addClass("is-readonly is-fixed-field");
+        .prop("disabled", !isInsert)
+        .toggleClass("is-readonly", !isInsert)
+        .toggleClass("is-fixed-field", !isInsert);
 
     $("#main_lang_display").prop("readonly", true).addClass("is-readonly");
 
@@ -257,6 +233,7 @@ function setHr011Mode(mode, options) {
         if (!state || !state.expanded) return;
         renderHr011ProjectEvaluationContent(projectKey);
     });
+
     // 일부 탭 초기화가 버튼 라벨을 덮는 경우가 있어 모드 기준으로 한 번 더 보정한다.
     setTimeout(function () {
         const isInsertMode = hr011Mode === "insert";
@@ -264,50 +241,6 @@ function setHr011Mode(mode, options) {
         $("#hr011SaveBtn, #hr011SaveBtnView").text(isInsertMode ? "등록" : "저장");
         renderHr011EditMiniProfile();
     }, 0);
-
-//    if (isEditable) { // insert, update mode일 때
-//        $fields
-//            .prop("disabled", false)
-//            .prop("readonly", false)
-//            .removeAttr("disabled")
-//            .removeAttr("readonly")
-//            .removeClass("is-readonly");
-//    } else { // view mode일 때
-//        $fields
-//            .prop("disabled", true)
-//            .prop("readonly", true)
-//            .addClass("is-readonly");
-//    }
-}
-
-// Tab1 조회할 시, 데이터 표시
-function openHr011(mode) {
-    // 수정 mode
-    if (mode === "update") {
-        if (!window.hr011Data) {
-            showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
-                icon: 'error',
-                title: '오류',
-                html: `<strong>소속 및 계약정보</strong>&nbsp;데이터가 존재하지 않습니다.`
-            });
-            return;
-        }
-        window.hr011EditUnlocked = true;
-        setHr011Mode("update");
-        return;
-    }
-
-    // 신규 등록(insert) 시 최초 입력을 위한 초기화
-    if (mode === "insert") {
-        clearHr011Form();
-        window.hr011Data = null;
-        window.hr011EditUnlocked = true;
-        setHr011Mode("insert");
-        return;
-    }
-
-    // 해당 조건이 모두 아니라면 view mode
-    setHr011Mode("view");
 }
 
 // Tab1에 데이터 채워넣기
@@ -1994,7 +1927,7 @@ function buildHr011ProfileDetailMarkup() {
     return [
         `<div class="hr011-ref-profile-detail-wrap">`,
         `<article class="hr011-ref-detail-card">`,
-        `<h6>인적정보</h6>`,
+        // `<h6>인적정보</h6>`,
         `<div class="hr011-ref-profile-layout">`,
         `<div class="hr011-ref-simple-grid hr011-ref-simple-grid--profile">`,
         basicRows.map(function (item) {

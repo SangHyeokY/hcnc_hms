@@ -3696,7 +3696,7 @@ section.search-area .search-info #searchConditionKeyword { /* 새 검색어 입�
 .hr011-detail-wrap .hr011-ref-mainlang {display:flex; flex-wrap:wrap; gap:6px;}
 .hr011-detail-wrap .hr011-ref-cert {display:flex; flex-wrap:wrap; gap:6px;}
 .hr011-detail-wrap .hr011-ref-mainlang .chip,
-.hr011-detail-wrap .hr011-ref-cert .chip {display:inline-flex; align-items:center; padding:2px 7px; border-radius:999px; background:#eef3fb; border:1px solid #d7e2f3; color:#2e476a; font-size:11px; font-weight:700;}
+.hr011-detail-wrap .hr011-ref-cert .chip {display:inline-flex; align-items:center; padding:2px 7px; border-radius:999px; background:#eef3fb; border:1px solid #d7e2f3; color:#2e476a; font-weight:700;}
 .hr011-detail-wrap .hr011-ref-info-grid {display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:25px 10px; margin-top:auto;}
 .hr011-detail-wrap .hr011-ref-info-item {display:grid; gap:4px;}
 .hr011-detail-wrap .hr011-ref-info-item span {font-size:11px; color:#8296b1; font-weight:700;}

@@ -507,7 +507,7 @@
         var tableId = tableEl ? tableEl.id : ""; // 테이블 id 저장
 
         if (viewTableId && viewTableId !== tableId) {
-            console.log("조회 중인 테이블이 바뀌었습니다 : 기존 테이블 => " + viewTableId + ", 새 테이블 => " + tableId);
+            // console.log("조회 중인 테이블이 바뀌었습니다 : 기존 테이블 => " + viewTableId + ", 새 테이블 => " + tableId);
             return new OriginalTabulator(element, withDefaultPaging(options)); // 그냥 생성만
         }
         var instance = new OriginalTabulator(element, withDefaultPaging(options));
