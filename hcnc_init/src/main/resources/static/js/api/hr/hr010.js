@@ -86,43 +86,42 @@ function bindEvents() {
     });
 
     // 검색어 추천/선택
-    $("#hr010TagKeywordInput").on("input", function () {
-        refreshTagSuggestions(this.value);
-    });
-
-    $("#hr010TagKeywordInput").on("focus", function () {
+    $("#hr010TagKeywordInput").on("input focus", function () {
         refreshTagSuggestions(this.value);
     });
 
     $("#hr010TagKeywordInput").on("keydown", function (e) {
-        if (e.key === "ArrowDown") {
-            e.preventDefault();
-            moveTagSuggestion(1);
-            return;
-        }
+        const value = this.value.trim();
 
-        if (e.key === "ArrowUp") {
-            e.preventDefault();
-            moveTagSuggestion(-1);
-            return;
-        }
+        switch (e.key) {
+            case "ArrowDown":
+                e.preventDefault();
+                moveTagSuggestion(1);
+                break;
 
-        if (e.key === "Enter" || e.key === ",") {
-            e.preventDefault();
-            commitSuggestionFromInput();
-            return;
-        }
+            case "ArrowUp":
+                e.preventDefault();
+                moveTagSuggestion(-1);
+                break;
 
-        if (e.key === "Escape") {
-            hideTagSuggestions();
-            return;
-        }
+            case "Enter":
+            case ",":
+                e.preventDefault();
+                commitSuggestionFromInput();
+                break;
 
-        if (e.key === "Backspace" && !this.value.trim() && keywordTags.length) {
-            e.preventDefault();
-            keywordTags.pop();
-            renderSelectedTags();
-            applyFiltersAndRender();
+            case "Escape":
+                hideTagSuggestions();
+                break;
+
+            case "Backspace":
+                if (!value && keywordTags.length) {
+                    e.preventDefault();
+                    keywordTags.pop();
+                    renderSelectedTags();
+                    applyFiltersAndRender();
+                }
+                break;
         }
     });
 
@@ -722,6 +721,18 @@ function buildFilterSuggestionSource() {
         });
     });
 
+    (dropdownFilters.sido_cd.options || []).forEach(option => {
+        sources.push({
+            type: "filter",
+            key: "sido_cd",
+            value: option.cd,
+            label: option.cd_nm,
+            meta: "거주지역",
+            kind: "필터",
+            matchText: `${option.cd_nm} 거주지역`
+        });
+    });
+
     return sources;
 }
 
@@ -1126,11 +1137,11 @@ function getPrimarySkillLabel(row) {
 }
 
 // 주개발언어 표시용 요약
-function getSkillSummaryLabel(row) {
-    const skillParts = getSkillDisplayParts(row);
-    if (!skillParts.skills.length) return "-";
-    return `주개발언어: ${skillParts.skills.join(", ")}`;
-}
+// function getSkillSummaryLabel(row) {
+//     const skillParts = getSkillDisplayParts(row);
+//     if (!skillParts.skills.length) return "-";
+//     return `주개발언어: ${skillParts.skills.join(", ")}`;
+// }
 
 // 리스트형 기술 요약 마크업
 function getSkillSummaryMarkup(row, maxChips = 3) {
@@ -1312,7 +1323,7 @@ const dropdownFilters = {
         container: ".dropdown-grade",
         label: "등급"
     },
-    kosa_grd_cd: {
+    kosa_grd_cd: { // KOSA 등급
         selectId: "",
         code: "KOSA_GRD_CD",
         options: [],

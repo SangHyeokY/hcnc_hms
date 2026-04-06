@@ -36,10 +36,6 @@ window.hr011EditUnlocked = false;
 let bizTypMap = [];
 let bizTypOptions = [];
 
-// 거주지역 공통코드
-let sidoMap = [];
-let sidoOptions = [];
-
 // ============================================================================== //
 
 // Tab1 초기값 설정
@@ -54,21 +50,6 @@ window.initTab1 = function () {
 
           initSelectDefault("select_biz_typ", "개인/개인사업자/법인");
           bizTypMap = getBizTypMap();
-
-          // AJAX 끝날 때까지 기다림
-          await loadHr011TableData(window.currentDevId);
-
-          resolve();
-      });
-
-      setComCode("select_sido_cd", "SIDO_CD", "", "cd", "cd_nm", async function () {
-
-          sidoOptions = $("#select_sido_cd option").map(function () {
-              return { cd: this.value, cd_nm: $(this).text() };
-          }).get();
-
-          initSelectDefault("select_sido_cd", "거주지역 선택");
-          sidoMap = getSidoMap();
 
           // AJAX 끝날 때까지 기다림
           await loadHr011TableData(window.currentDevId);
@@ -90,26 +71,6 @@ function getBizTypMap() {
         return map;
     }
     $("#select_biz_typ option").each(function () {
-        var val = this.value;
-        if (val) {
-            map[val] = $(this).text();
-        }
-    });
-    return map;
-}
-
-// 역할 코드 -> 라벨 맵 생성 (거주지역)
-function getSidoMap() {
-    var map = {};
-    if (sidoOptions && sidoOptions.length) {
-        sidoOptions.forEach(function (item) {
-            if (item.cd) {
-                map[item.cd] = item.cd_nm || item.cd;
-            }
-        });
-        return map;
-    }
-    $("#select_sido_cd option").each(function () {
         var val = this.value;
         if (val) {
             map[val] = $(this).text();
@@ -3467,7 +3428,7 @@ $(document).on("click", ".career-spin-btn", function () {
     normalizeCareerSpinInputs();
 });
 
-// 경력 타입 형태 맞추기
+// 경력 타입 형태 맞추기 (년도)
 function clampCareerYearValue(value) {
     var num = parseInt(value, 10);
     if (!Number.isFinite(num) || isNaN(num)) {
@@ -3478,6 +3439,7 @@ function clampCareerYearValue(value) {
     return num;
 }
 
+// 경력 타입 형태 맞추기 (월)
 function clampCareerMonthValue(value) {
     var num = parseInt(value, 10);
     if (!Number.isFinite(num) || isNaN(num)) {
