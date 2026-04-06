@@ -25,97 +25,101 @@
         })();
     </script>
 
-    <section class="hr010-smart-filter">
-        <div class="content-title fl-sb fl-ac">
-            <h4 class="page-sub-title">스마트 필터</h4>
-        </div>
-        <div class="smart-filter">
-            <div class="hr010-user-type-tabs mg-b15" role="tablist" aria-label="인력 구분">
-                <div class="toggle-filter-block">
-                    <div class="toggle-group" id="togglePerspectiveGroup">
-                        <button type="button" class="toggle-filter-chip is-active" data-user-type="all">전체</button>
-                        <button type="button" class="toggle-filter-chip" data-user-type="staff">직원</button>
-                        <button type="button" class="toggle-filter-chip" data-user-type="freelancer">프리랜서</button>
+    <section class="hr010-smart-filter" id="hr010SmartFilter">
+        <div class="hr010-smart-filter__expanded">
+            <div class="content-title fl-sb fl-ac hr010-smart-filter__head">
+                <h4 class="page-sub-title">스마트 필터</h4>
+                <div class="hr010-smart-filter__head-actions">
+                    <button type="button" class="hr010-filter-toggle-btn hr010-filter-toggle-btn--refresh" id="hr010FilterRefreshBtn" aria-label="스마트 필터 초기화"></button>
+                    <button type="button" class="hr010-filter-toggle-btn hr010-filter-toggle-btn--collapse" id="hr010FilterCollapseBtn" aria-controls="hr010SmartFilterBody" aria-expanded="true" aria-label="스마트 필터 접기"></button>
+                </div>
+            </div>
+            <div class="smart-filter" id="hr010SmartFilterBody">
+                <div class="hr010-user-type-tabs mg-b15" role="tablist" aria-label="인력 구분">
+                    <div class="toggle-filter-block">
+                        <div class="toggle-group" id="togglePerspectiveGroup">
+                            <button type="button" class="toggle-filter-chip is-active" data-user-type="all">전체</button>
+                            <button type="button" class="toggle-filter-chip" data-user-type="staff">직원</button>
+                            <button type="button" class="toggle-filter-chip" data-user-type="freelancer">프리랜서</button>
+                        </div>
                     </div>
                 </div>
+                <div class="hr010-filter-dropdowns">
+
+                    <div class="dropdown dropdown-skl-grp">
+                        <button class="dropdown-btn">주개발언어 <span>▼</span></button>
+                        <select id="select_skl_grp" style="display:none"></select>
+                        <ul class="dropdown-menu">
+
+                        </ul>
+                    </div>
+
+                    <div class="dropdown dropdown-ctrt-typ">
+                        <button class="dropdown-btn">계약형태 <span>▼</span></button>
+                        <select id="select_ctrt_typ" style="display:none;"></select>
+                        <ul class="dropdown-menu">
+
+                        </ul>
+                    </div>
+
+                    <div class="dropdown dropdown-work-md">
+                        <button class="dropdown-btn">근무가능형태 <span>▼</span></button>
+                        <select id="select_work_md" style="display:none;"></select>
+                        <ul class="dropdown-menu">
+
+                        </ul>
+                    </div>
+
+                    <div class="dropdown dropdown-grade">
+                        <button class="dropdown-btn">등급 <span>▼</span></button>
+                        <ul class="dropdown-menu"></ul>
+                    </div>
+
+                    <div class="dropdown dropdown-sido-cd">
+                        <button class="dropdown-btn">거주지역 <span>▼</span></button>
+                        <select id="select_sido-cd" style="display:none;"></select>
+                        <ul class="dropdown-menu">
+
+                        </ul>
+                    </div>
+
+                </div>
             </div>
-            <div class="hr010-filter-dropdowns">
-
-                <div class="dropdown dropdown-skl-grp">
-                    <button class="dropdown-btn">주개발언어 <span>▼</span></button>
-                    <select id="select_skl_grp" style="display:none"></select>
-                    <ul class="dropdown-menu">
-
-                    </ul>
-                </div>
-
-                <div class="dropdown dropdown-ctrt-typ">
-                    <button class="dropdown-btn">계약형태 <span>▼</span></button>
-                    <select id="select_ctrt_typ" style="display:none;"></select>
-                    <ul class="dropdown-menu">
-
-                    </ul>
-                </div>
-
-                <div class="dropdown dropdown-work-md">
-                    <button class="dropdown-btn">근무가능형태 <span>▼</span></button>
-                    <select id="select_work_md" style="display:none;"></select>
-                    <ul class="dropdown-menu">
-
-                    </ul>
-                </div>
-
-                <div class="dropdown dropdown-grade">
-                    <button class="dropdown-btn">등급 <span>▼</span></button>
-                    <ul class="dropdown-menu"></ul>
-                </div>
-
-                <div class="dropdown dropdown-sido-cd">
-                    <button class="dropdown-btn">거주지역 <span>▼</span></button>
-                    <select id="select_sido-cd" style="display:none;"></select>
-                    <ul class="dropdown-menu">
-
-                    </ul>
-                </div>
-
-            </div>
+        </div>
+        <div class="hr010-smart-filter__collapsed">
+            <button type="button" class="hr010-filter-toggle-btn hr010-filter-toggle-btn--expand" id="hr010FilterExpandBtn" aria-controls="hr010SmartFilterBody" aria-expanded="false" aria-label="스마트 필터 펼치기"></button>
+            <span class="hr010-smart-filter__collapsed-text">
+                <span>스마트</span>
+                <span>필터</span>
+            </span>
         </div>
     </section>
 
     <section class="hr010-main">
-        <div class="content-title fl-sb fl-ac">
+        <div class="content-title fl-sb fl-ac hr010-main-titlebar">
             <h4 class="page-sub-title">인적사항 목록</h4>
             <div class="hr010-main-actions">
                 <button type="button" class="btn hr010-create-btn" id="hr010CreateBtn">등록하기</button>
-                <div class="hr010-view-toggle" role="tablist" aria-label="보기 형식">
-                    <button type="button" class="hr010-view-toggle-btn is-active" data-view="card" role="tab" aria-selected="true">
-                        <span class="hr010-view-toggle-btn__icon" aria-hidden="true">▦</span>
-                        <span>카드</span>
-                    </button>
-                    <button type="button" class="hr010-view-toggle-btn" data-view="list" role="tab" aria-selected="false">
-                        <span class="hr010-view-toggle-btn__icon" aria-hidden="true">☰</span>
-                        <span>리스트</span>
-                    </button>
-                </div>
             </div>
         </div>
         <!-- ================= 검색 영역 ================= -->
-        <section class="search-area mg-b20">
+        <section class="search-area mg-b20 hr010-search-area">
             <form action="">
                 <div class="fl-sb">
                     <div class="search-info">
                         <div class="search-input hr010-search-tag-wrap">
                             <div class="hr010-search-control-row">
-                                <label for="hr010TagKeywordInput" class="hr010-search-inline-label">• 태그 검색</label>
                                 <div class="hr010-search-field-wrap">
                                     <div class="hr010-tag-search-box">
                                         <div id="hr010TagArea" class="hr010-tag-area" aria-live="polite"></div>
                                         <input type="text" class="hr010-search-input hr010-search-keyword-input" id="hr010TagKeywordInput" name="searchKeyword" placeholder="이름 또는 필터값을 입력하면 추천어가 표시됩니다." />
+                                        <div class="hr010-search-action-group">
+                                            <button type="button" class="hr010-search-icon-btn hr010-search-icon-btn--search" id="hr010SearchTrigger" aria-label="검색"></button>
+                                            <span class="hr010-search-action-divider" aria-hidden="true"></span>
+                                            <button type="button" class="hr010-search-icon-btn hr010-search-icon-btn--reset btn-search" aria-label="초기화"></button>
+                                        </div>
                                     </div>
                                     <div id="hr010TagSuggestionBox" class="hr010-tag-suggestion-box" hidden></div>
-                                </div>
-                                <div class="search-btn-area">
-                                    <button type="button" class="btn-search hr010-btn-reset">초기화</button>
                                 </div>
                             </div>
                         </div>
@@ -123,6 +127,19 @@
                 </div>
             </form>
         </section>
+        <div class="hr010-result-bar">
+            <p class="hr010-result-count">검색결과 <strong id="hr010ResultCount">0</strong>건</p>
+            <div class="hr010-view-toggle" role="tablist" aria-label="보기 형식">
+                <button type="button" class="hr010-view-toggle-btn is-active" data-view="list" role="tab" aria-selected="false">
+                    <span class="hr010-view-toggle-btn__icon" aria-hidden="true"></span>
+                    <span>LIST</span>
+                </button>
+                <button type="button" class="hr010-view-toggle-btn" data-view="card" role="tab" aria-selected="true">
+                    <span class="hr010-view-toggle-btn__icon" aria-hidden="true"></span>
+                    <span>CARD</span>
+                </button>
+            </div>
+        </div>
 
         <!-- ================= 메인 리스트 ================= -->
         <section class="white-full">

@@ -5,11 +5,14 @@
 // 상태
 let currentHr010UserTypeTab = "all";
 let currentHr010ViewMode = "card";
+let hr010FilterCollapsed = false;
 let hr010SourceRows = [];
 let hr010LastRenderedRows = [];
 let keywordTags = [];
 let hr010TagSuggestions = [];
 let hr010ActiveSuggestionIndex = -1;
+let hr010SuggestionHideTimer = null;
+let hr010SuggestionInputTimer = null;
 const selectedFilters = {
     skl_grp: [],
     ctrt_typ: [],
@@ -20,6 +23,9 @@ const selectedFilters = {
 };
 const hr010FilterOrder = ["skl_grp", "ctrt_typ", "work_md", "grade", "kosa_grd_cd", "sido_cd"];
 const hr010GradeOrder = ["S", "A", "B", "C"];
+const HR010_SUGGESTION_TRANSITION_MS = 220;
+const HR010_SUGGESTION_INPUT_DEBOUNCE_MS = 260;
+const HR010_LIST_ENTER_STAGGER_MS = 48;
 
 try {
     currentHr010ViewMode = window.localStorage.getItem("hr010ViewMode") || "card";
@@ -27,12 +33,15 @@ try {
     currentHr010ViewMode = "card";
 }
 
+hr010FilterCollapsed = false;
+
 // ==============================
 // 초기화
 // ==============================
 $(document).ready(async function () {
     bindEvents();
     syncHr010ViewToggle();
+    syncHr010FilterSidebar();
     showLoading();
 
     // 스마트 필터 공통코드 초기화
@@ -56,6 +65,14 @@ $(document).ready(async function () {
 function bindEvents() {
     $("#hr010CreateBtn").on("click", function () {
         window.location.href = "/hr011?mode=insert";
+    });
+
+    $("#hr010FilterCollapseBtn, #hr010FilterExpandBtn").on("click", function () {
+        setHr010FilterCollapsed(!hr010FilterCollapsed);
+    });
+
+    $("#hr010FilterRefreshBtn").on("click", function () {
+        resetHr010Filters();
     });
 
     // 직원 / 프리랜서 토글
@@ -83,35 +100,48 @@ function bindEvents() {
         resetHr010Filters();
     });
 
+    $("#hr010SearchTrigger").on("click", function (e) {
+        e.preventDefault();
+        const committed = commitSuggestionFromInput();
+        if (!committed) {
+            refreshTagSuggestions($("#hr010TagKeywordInput").val());
+            $("#hr010TagKeywordInput").trigger("focus");
+        }
+    });
+
     // 검색어 추천/선택
     $("#hr010TagKeywordInput").on("input", function () {
-        refreshTagSuggestions(this.value);
+        scheduleHr010TagSuggestions(this.value);
     });
 
     $("#hr010TagKeywordInput").on("focus", function () {
-        refreshTagSuggestions(this.value);
+        scheduleHr010TagSuggestions(this.value, 120);
     });
 
     $("#hr010TagKeywordInput").on("keydown", function (e) {
         if (e.key === "ArrowDown") {
             e.preventDefault();
+            flushHr010TagSuggestions(this.value);
             moveTagSuggestion(1);
             return;
         }
 
         if (e.key === "ArrowUp") {
             e.preventDefault();
+            flushHr010TagSuggestions(this.value);
             moveTagSuggestion(-1);
             return;
         }
 
         if (e.key === "Enter" || e.key === ",") {
             e.preventDefault();
+            flushHr010TagSuggestions(this.value);
             commitSuggestionFromInput();
             return;
         }
 
         if (e.key === "Escape") {
+            window.clearTimeout(hr010SuggestionInputTimer);
             hideTagSuggestions();
             return;
         }
@@ -157,6 +187,7 @@ function bindEvents() {
     // 추천어 선택
     $(document).on("mousedown", ".hr010-tag-suggestion-item", function (e) {
         e.preventDefault();
+        window.clearTimeout(hr010SuggestionInputTimer);
         const index = Number($(this).data("index"));
         const suggestion = hr010TagSuggestions[index];
         if (!suggestion) return;
@@ -217,6 +248,55 @@ function bindEvents() {
 function syncHr010ViewToggle() {
     $(".hr010-view-toggle-btn").removeClass("is-active").attr("aria-selected", "false");
     $(`.hr010-view-toggle-btn[data-view="${currentHr010ViewMode}"]`).addClass("is-active").attr("aria-selected", "true");
+}
+
+function syncHr010FilterSidebar() {
+    const shell = document.querySelector(".contents-wrap.hr010-dashboard-wrap");
+    const filterEl = document.getElementById("hr010SmartFilter");
+    const collapseBtn = document.getElementById("hr010FilterCollapseBtn");
+    const expandBtn = document.getElementById("hr010FilterExpandBtn");
+    if (!filterEl) return;
+
+    filterEl.classList.toggle("is-collapsed", !!hr010FilterCollapsed);
+    if (shell) {
+        shell.classList.toggle("is-filter-collapsed", !!hr010FilterCollapsed);
+    }
+    if (collapseBtn) {
+        collapseBtn.setAttribute("aria-expanded", hr010FilterCollapsed ? "false" : "true");
+    }
+    if (expandBtn) {
+        expandBtn.setAttribute("aria-expanded", hr010FilterCollapsed ? "true" : "false");
+    }
+}
+
+function setHr010FilterCollapsed(nextCollapsed) {
+    const shell = document.querySelector(".contents-wrap.hr010-dashboard-wrap");
+    const filterEl = document.getElementById("hr010SmartFilter");
+    const collapseBtn = document.getElementById("hr010FilterCollapseBtn");
+    const expandBtn = document.getElementById("hr010FilterExpandBtn");
+
+    if (!filterEl || hr010FilterCollapsed === !!nextCollapsed) {
+        return;
+    }
+
+    hr010FilterCollapsed = !!nextCollapsed;
+    try {
+        window.localStorage.setItem("hr010FilterCollapsed", String(hr010FilterCollapsed));
+    } catch (error) {
+        // localStorage 사용 불가 시 무시
+    }
+    $(".dropdown").removeClass("open");
+    if (collapseBtn) {
+        collapseBtn.setAttribute("aria-expanded", hr010FilterCollapsed ? "false" : "true");
+    }
+    if (expandBtn) {
+        expandBtn.setAttribute("aria-expanded", hr010FilterCollapsed ? "true" : "false");
+    }
+
+    filterEl.classList.toggle("is-collapsed", hr010FilterCollapsed);
+    if (shell) {
+        shell.classList.toggle("is-filter-collapsed", hr010FilterCollapsed);
+    }
 }
 
 // 카드/리스트 보기 전환
@@ -577,17 +657,36 @@ function refreshTagSuggestions(rawKeyword = "") {
     renderTagSuggestions();
 }
 
+function scheduleHr010TagSuggestions(rawKeyword = "", delay = HR010_SUGGESTION_INPUT_DEBOUNCE_MS) {
+    window.clearTimeout(hr010SuggestionInputTimer);
+
+    const keyword = String(rawKeyword || "");
+    if (!keyword.trim()) {
+        hideTagSuggestions();
+        return;
+    }
+
+    hr010SuggestionInputTimer = window.setTimeout(() => {
+        refreshTagSuggestions(keyword);
+    }, Math.max(0, Number(delay) || 0));
+}
+
+function flushHr010TagSuggestions(rawKeyword = "") {
+    window.clearTimeout(hr010SuggestionInputTimer);
+    refreshTagSuggestions(rawKeyword);
+}
+
 // 추천어 목록 렌더링
 function renderTagSuggestions() {
     const box = document.getElementById("hr010TagSuggestionBox");
     if (!box) return;
 
     if (!hr010TagSuggestions.length) {
-        box.hidden = true;
-        box.innerHTML = "";
+        hideTagSuggestions();
         return;
     }
 
+    window.clearTimeout(hr010SuggestionHideTimer);
     box.hidden = false;
     box.innerHTML = hr010TagSuggestions.map((suggestion, index) => `
         <button type="button" class="hr010-tag-suggestion-item ${index === hr010ActiveSuggestionIndex ? "is-active" : ""}" data-index="${index}">
@@ -598,6 +697,11 @@ function renderTagSuggestions() {
             <span class="hr010-tag-suggestion-kind">${escapeHtml(suggestion.kind)}</span>
         </button>
     `).join("");
+
+    window.requestAnimationFrame(() => {
+        box.classList.add("is-visible");
+        syncTagSuggestionLayout();
+    });
 }
 
 // 추천어 이동
@@ -631,11 +735,40 @@ function scrollActiveSuggestionIntoView() {
 function hideTagSuggestions() {
     hr010TagSuggestions = [];
     hr010ActiveSuggestionIndex = -1;
+    window.clearTimeout(hr010SuggestionInputTimer);
 
     const box = document.getElementById("hr010TagSuggestionBox");
     if (!box) return;
-    box.hidden = true;
-    box.innerHTML = "";
+
+    window.clearTimeout(hr010SuggestionHideTimer);
+    box.classList.remove("is-visible");
+    syncTagSuggestionLayout();
+
+    hr010SuggestionHideTimer = window.setTimeout(() => {
+        if (box.classList.contains("is-visible")) return;
+        box.hidden = true;
+        box.innerHTML = "";
+    }, HR010_SUGGESTION_TRANSITION_MS);
+}
+
+function syncTagSuggestionLayout() {
+    const searchArea = document.querySelector(".hr010-search-area");
+    const box = document.getElementById("hr010TagSuggestionBox");
+
+    if (!searchArea || !box || box.hidden || !box.childElementCount || !box.classList.contains("is-visible")) {
+        if (searchArea) {
+            searchArea.classList.remove("is-suggesting");
+            searchArea.style.removeProperty("--hr010-suggestion-space");
+        }
+        return;
+    }
+
+    window.requestAnimationFrame(() => {
+        const maxSuggestionHeight = 240;
+        const suggestionHeight = Math.min(box.scrollHeight, maxSuggestionHeight);
+        searchArea.classList.add("is-suggesting");
+        searchArea.style.setProperty("--hr010-suggestion-space", `${suggestionHeight + 18}px`);
+    });
 }
 
 // 입력값 기준 추천어 생성
@@ -975,6 +1108,7 @@ function renderUserCards(list) {
     if (!container) return;
     hr010LastRenderedRows = Array.isArray(list) ? list.slice() : [];
     container.dataset.view = currentHr010ViewMode;
+    updateHr010ResultCount(hr010LastRenderedRows.length);
 
     if (!list || !list.length) {
         container.innerHTML = `
@@ -1018,7 +1152,33 @@ function renderUserCards(list) {
 
     container.innerHTML = "";
     container.appendChild(fragment);
+    animateHr010RenderedItems(container);
     bindCardEvents(container, list);
+}
+
+function animateHr010RenderedItems(container) {
+    if (!container) return;
+
+    const items = Array.from(container.querySelectorAll(".hr010-list-header, .user-card, .user-list-row"));
+    if (!items.length) return;
+
+    items.forEach((item, index) => {
+        item.classList.remove("is-visible");
+        item.classList.add("hr010-enter-item");
+        item.style.setProperty("--hr010-enter-delay", `${Math.min(index, 10) * HR010_LIST_ENTER_STAGGER_MS}ms`);
+    });
+
+    window.requestAnimationFrame(() => {
+        window.requestAnimationFrame(() => {
+            items.forEach(item => item.classList.add("is-visible"));
+        });
+    });
+}
+
+function updateHr010ResultCount(count) {
+    const countEl = document.getElementById("hr010ResultCount");
+    if (!countEl) return;
+    countEl.textContent = String(Number(count) || 0);
 }
 
 // ==============================
@@ -1027,7 +1187,6 @@ function renderUserCards(list) {
 function createUserCard(row) {
     const employment = getEmploymentMeta(row);
     const profile = getProfileMarkup(row);
-    const primarySkill = getPrimarySkillLabel(row);
     const skillChips = getSkillChipMarkup(row);
 
     return `
@@ -1038,41 +1197,30 @@ function createUserCard(row) {
         <div class="user-card__profile">
             <div class="user-card__avatar">${profile}</div>
             <div class="user-card__name">${escapeHtml(row.dev_nm || "-")}</div>
-            <div class="user-card__subtitle">${escapeHtml(primarySkill ? `주개발언어 · ${primarySkill}` : "주개발언어 미등록")}</div>
+            <div class="user-card__meta-summary">
+                <span class="user-card__meta-summary-text">${getProfileMetaSummary(row)}</span>
+                ${getKosaStarMarkup(row)}
+            </div>
             <div class="user-card__skills">${skillChips}</div>
         </div>
-        <div class="user-card__info-panel">
-            <div class="user-card__info-grid">
+        <div class="user-card__info-panel user-card__info-panel--summary">
+            <div class="user-card__info-grid user-card__info-grid--summary">
                 <div class="user-card__info-item">
                     <span class="user-card__info-label">등급</span>
                     <strong class="user-card__info-value">${escapeHtml(formatGradeLabel(row.grade, row.score) || "-")}</strong>
                 </div>
                 <div class="user-card__info-item">
-                    <span class="user-card__info-label">KOSA</span>
-                    <strong class="user-card__info-value">${escapeHtml(getKosaLabel(row))}</strong>
+                    <span class="user-card__info-label">지역 / 근무</span>
+                    <div class="user-card__info-inline-value">${getRegionWorkInlineMarkup(row)}</div>
                 </div>
                 <div class="user-card__info-item">
-                    <span class="user-card__info-label">거주지역</span>
-                    <strong class="user-card__info-value">${escapeHtml(row.region || "-")}</strong>
-                </div>
-                <div class="user-card__info-item">
-                    <span class="user-card__info-label">투입 가능</span>
+                    <span class="user-card__info-label">투입 가능일</span>
                     <strong class="user-card__info-value">${escapeHtml(getAvailabilityLabel(row))}</strong>
                 </div>
-            </div>
-            <div class="user-card__meta-row">
-                <span class="user-card__meta-pill">${escapeHtml(getWorkModeLabel(row))}</span>
-                <span class="user-card__meta-pill">${escapeHtml(getContractTypeLabel(row))}</span>
-            </div>
-        </div>
-        <div class="user-card__footer">
-            <div class="user-card__footer-item">
-                <span class="user-card__footer-label">희망단가</span>
-                <strong class="user-card__footer-value">${escapeHtml(amountFormatter(row.hope_rate_amt) || "-")}</strong>
-            </div>
-            <div class="user-card__footer-item">
-                <span class="user-card__footer-label">경력</span>
-                <strong class="user-card__footer-value">${escapeHtml(formatCareerYearMonth(row.exp_yr) || "-")}</strong>
+                <div class="user-card__info-item">
+                    <span class="user-card__info-label">희망 단가</span>
+                    <strong class="user-card__info-value">${escapeHtml(amountFormatter(row.hope_rate_amt) || "-")}</strong>
+                </div>
             </div>
         </div>
     </article>`;
@@ -1096,8 +1244,16 @@ function createUserListRow(row) {
                 <span class="user-card__badge user-card__badge--${employment.className}">${employment.label}</span>
             </div>
             <div class="user-list-row__cell user-list-row__skill-cell">${getSkillSummaryMarkup(row, 3)}</div>
-            <div class="user-list-row__cell">${escapeHtml(formatGradeLabel(row.grade, row.score) || "-")}<br><span class="user-list-row__sub">${escapeHtml(getKosaLabel(row))}</span></div>
-            <div class="user-list-row__cell">${escapeHtml(row.region || "-")}<br><span class="user-list-row__sub">${escapeHtml(getWorkModeLabel(row))}</span></div>
+            <div class="user-list-row__cell user-list-row__grade-cell">
+                <div class="user-list-row__grade-main">${escapeHtml(formatGradeLabel(row.grade, row.score) || "-")}</div>
+                <div class="user-list-row__grade-sub">
+                    <span>${escapeHtml(getKosaLabel(row))}</span>
+                    ${getKosaStarMarkup(row, "user-kosa-stars--inline")}
+                </div>
+            </div>
+            <div class="user-list-row__cell user-list-row__region-cell">
+                ${getRegionWorkInlineMarkup(row)}
+            </div>
             <div class="user-list-row__cell">${escapeHtml(getAvailabilityLabel(row))}</div>
             <div class="user-list-row__cell user-list-row__rate">${escapeHtml(amountFormatter(row.hope_rate_amt) || "-")}</div>
         </article>
@@ -1225,6 +1381,53 @@ function getContractTypeLabel(row) {
 // KOSA 표시명
 function getKosaLabel(row) {
     return getDropdownOptionLabel("kosa_grd_cd", row.kosa_grd_cd) || row.kosa_grd_cd || "-";
+}
+
+function getProfileMetaSummary(row) {
+    const career = formatCareerYearMonth(row.exp_yr) || "-";
+    const contract = getContractTypeLabel(row);
+    const kosa = getKosaLabel(row);
+    return `${escapeHtml(career)} · ${escapeHtml(contract)} · ${escapeHtml(kosa)}`;
+}
+
+function getKosaStarCount(row) {
+    const label = String(getKosaLabel(row) || "").replace(/\s/g, "");
+    if (!label || label === "-") return 0;
+    if (label.includes("특")) return 5;
+    if (label.includes("고")) return 3;
+    if (label.includes("중")) return 2;
+    if (label.includes("초")) return 1;
+    return 0;
+}
+
+function getKosaStarMarkup(row, extraClass = "") {
+    const count = getKosaStarCount(row);
+    if (!count) return "";
+    const className = ["user-kosa-stars", extraClass].filter(Boolean).join(" ");
+    const stars = Array.from({ length: count }, () => `<span class="user-kosa-stars__star">★</span>`).join("");
+    return `<span class="${className}">${stars}</span>`;
+}
+
+function getWorkModeBadgeMeta(row) {
+    const label = getWorkModeLabel(row);
+    const normalized = String(label || "").replace(/\s/g, "");
+
+    if (normalized.includes("상주")) return { label, className: "onsite" };
+    if (normalized.includes("재택") || normalized.includes("원격")) return { label, className: "remote" };
+    if (normalized.includes("병행") || normalized.includes("혼합")) return { label, className: "hybrid" };
+    return { label, className: "default" };
+}
+
+function getWorkModeBadgeMarkup(row) {
+    const meta = getWorkModeBadgeMeta(row);
+    return `<span class="work-mode-badge work-mode-badge--${meta.className}">${escapeHtml(meta.label || "-")}</span>`;
+}
+
+function getRegionWorkInlineMarkup(row) {
+    return [
+        `<span class="user-card__info-inline-text">${escapeHtml(row.region || "-")}</span>`,
+        getWorkModeBadgeMarkup(row)
+    ].join("");
 }
 
 // 투입 가능 표시명
