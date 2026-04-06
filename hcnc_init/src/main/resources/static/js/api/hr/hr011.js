@@ -1105,7 +1105,15 @@ function bindHr011PageEvents() {
             }, 0);
         });
 
-    $(document).on("click", ".hr011-ref-link-btn, .hr011-ref-detail-btn[data-ref-view]", function () {
+    $(document).on("click", ".hr011-ref-link-btn, .hr011-ref-detail-btn[data-ref-view], .hr011-ref-skill-mini-card[data-ref-view]", function () {
+        const view = String($(this).data("refView") || "overview");
+        switchHr011RefView(view);
+    });
+
+    $(document).on("keydown", ".hr011-ref-skill-mini-card[data-ref-view]", function (event) {
+        const key = String(event.key || "").toLowerCase();
+        if (key !== "enter" && key !== " ") return;
+        event.preventDefault();
         const view = String($(this).data("refView") || "overview");
         switchHr011RefView(view);
     });
@@ -1351,7 +1359,7 @@ async function loadHr011MainDetail(devId) {
     renderHr011Summary(row);
     renderHr011RadarChart();
     renderHr011ReferenceDashboard(row);
-    renderHr011RefSkillGaugeChart("hr011RefSkillGauge");
+    renderHr011RefSkillCards("hr011RefSkillGauge");
     renderHr011RefRadarChart();
     scheduleHr011ReadOnlyTextareas();
 }
@@ -1530,6 +1538,174 @@ function buildHr011ChipListMarkup(raw, emptyLabel) {
     }).join("");
 }
 
+function collectHr011OwnedSkills(row) {
+    const ownedSkills = [];
+    const seen = new Set();
+
+    function pushSkill(rawSkill) {
+        const skill = $.trim(String(rawSkill || ""));
+        if (!skill) return;
+        const key = skill.toLowerCase();
+        if (seen.has(key)) return;
+        seen.add(key);
+        ownedSkills.push(skill);
+    }
+
+    (hr011SummarySkillRows || []).forEach(function (item) {
+        pushSkill(item && item.name);
+    });
+
+    splitHr011MainLang(row).skills.forEach(pushSkill);
+
+    (hr011RefSkillCategoryRows || []).forEach(function (item) {
+        const values = Array.isArray(item?.valueList) && item.valueList.length
+            ? item.valueList
+            : parseHr011SkillList(item && item.value);
+        values.forEach(pushSkill);
+    });
+
+    return ownedSkills;
+}
+
+function normalizeHr011SkillKey(rawSkill) {
+    return $.trim(String(rawSkill || "")).toLowerCase();
+}
+
+function resolveHr011SkillCategoryClass(rawCategory) {
+    const category = $.trim(String(rawCategory || "")).toLowerCase();
+    if (!category) return "neutral";
+    if (category.includes("backend") || category.includes("백엔드")) return "backend";
+    if (category.includes("frontend") || category.includes("프론트")) return "frontend";
+    if (category.includes("devops")) return "devops";
+    if (category.includes("infra") || category.includes("인프라")) return "infra";
+    if (category.includes("mobile") || category.includes("모바일")) return "mobile";
+    if (category.includes("db")) return "db";
+    if (category.includes("erp") || category.includes("mes")) return "erp";
+    return "neutral";
+}
+
+function buildHr011SkillCardRows(row) {
+    const skillMap = new Map();
+    const categoryMap = new Map();
+    const projectCountMap = new Map();
+
+    function upsertSkill(rawSkill, level) {
+        const skill = $.trim(String(rawSkill || ""));
+        if (!skill) return;
+        const key = normalizeHr011SkillKey(skill);
+        if (!key) return;
+
+        const current = skillMap.get(key) || {
+            key,
+            name: skill,
+            level: 0
+        };
+
+        current.name = current.name || skill;
+        current.level = Math.max(current.level, Math.max(0, Math.min(5, Number(level) || 0)));
+        skillMap.set(key, current);
+    }
+
+    (hr011SummarySkillRows || []).forEach(function (item) {
+        upsertSkill(item && item.name, item && item.level);
+    });
+
+    collectHr011OwnedSkills(row).forEach(function (skill) {
+        upsertSkill(skill, 0);
+    });
+
+    (hr011RefSkillCategoryRows || []).forEach(function (item) {
+        const categoryName = $.trim(String(item && item.name || "")) || "기타";
+        const values = Array.isArray(item && item.valueList) && item.valueList.length
+            ? item.valueList
+            : parseHr011SkillList(item && item.value);
+
+        values.forEach(function (skill) {
+            const key = normalizeHr011SkillKey(skill);
+            if (!key) return;
+            const current = categoryMap.get(key) || [];
+            if (!current.includes(categoryName)) {
+                current.push(categoryName);
+                categoryMap.set(key, current);
+            }
+        });
+    });
+
+    (hr011RefProjectRows || []).forEach(function (project) {
+        const seen = new Set();
+        parseHr011SkillList(project && (project.stack_txt_nm || project.stack_txt)).forEach(function (skill) {
+            const key = normalizeHr011SkillKey(skill);
+            if (!key || seen.has(key)) return;
+            seen.add(key);
+            projectCountMap.set(key, (projectCountMap.get(key) || 0) + 1);
+        });
+    });
+
+    return Array.from(skillMap.values())
+        .map(function (item) {
+            const categories = (categoryMap.get(item.key) || []).slice(0, 2);
+            const projectCount = projectCountMap.get(item.key) || 0;
+            return {
+                key: item.key,
+                name: item.name,
+                level: item.level,
+                meta: resolveHr011SkillLevelMeta(item.level),
+                categories,
+                projectCount
+            };
+        })
+        .sort(function (a, b) {
+            if (b.level !== a.level) return b.level - a.level;
+            if (b.projectCount !== a.projectCount) return b.projectCount - a.projectCount;
+            return a.name.localeCompare(b.name, "ko");
+        });
+}
+
+function buildHr011SkillCardsMarkup(row, options) {
+    const opts = options || {};
+    const emptyLabel = opts.emptyLabel || "보유 기술 정보가 없습니다.";
+    const limit = Number(opts.limit) || 0;
+    const sourceRows = buildHr011SkillCardRows(row);
+    const visibleRows = limit > 0 ? sourceRows.slice(0, limit) : sourceRows;
+    const moreCount = limit > 0 && sourceRows.length > visibleRows.length
+        ? sourceRows.length - visibleRows.length
+        : 0;
+
+    if (!visibleRows.length) {
+        return `<article class="hr011-ref-skill-mini-card hr011-ref-skill-mini-card--empty">${escapeHr011(emptyLabel)}</article>`;
+    }
+
+    return visibleRows.map(function (item) {
+        const stars = Array.from({ length: 5 }, function (_, idx) {
+            return `<span class="hr011-ref-skill-mini-card__star ${idx < item.level ? "is-on" : ""}">★</span>`;
+        }).join("");
+        const categoryMarkup = item.categories.length
+            ? item.categories.map(function (category) {
+                const tone = resolveHr011SkillCategoryClass(category);
+                return `<span class="hr011-ref-skill-mini-card__tag hr011-ref-skill-mini-card__tag--${tone}">${escapeHr011(category)}</span>`;
+            }).join("")
+            : `<span class="hr011-ref-skill-mini-card__tag hr011-ref-skill-mini-card__tag--neutral">미분류</span>`;
+
+        return [
+            `<article class="hr011-ref-skill-mini-card hr011-ref-skill-mini-card--${item.meta.className} hr011-skill-stagger-item">`,
+            `<div class="hr011-ref-skill-mini-card__title">`,
+            `<strong>${escapeHr011(item.name)}</strong>`,
+            `<div class="hr011-ref-skill-mini-card__tags">${categoryMarkup}</div>`,
+            `</div>`,
+            `<div class="hr011-ref-skill-mini-card__level">`,
+            `<div class="hr011-ref-skill-mini-card__stars" title="${escapeHr011(item.name)} ${escapeHr011(item.meta.label)} ${escapeHr011(item.meta.scoreText)}">${stars}</div>`,
+            `<span class="hr011-ref-skill-mini-card__score">${escapeHr011(item.meta.scoreText)}</span>`,
+            `</div>`,
+            `<div class="hr011-ref-skill-mini-card__footer">`,
+            `<span class="hr011-ref-skill-mini-card__meta">${escapeHr011(item.meta.label)} · ${item.projectCount > 0 ? `프로젝트 ${escapeHr011(String(item.projectCount))}건` : "프로젝트 이력 없음"}</span>`,
+            `</div>`,
+            `</article>`
+        ].join("");
+    }).join("") + (moreCount > 0
+        ? `<article class="hr011-ref-skill-mini-card hr011-ref-skill-mini-card--more hr011-skill-stagger-item" data-ref-view="skills" role="button" tabindex="0" aria-label="보유 기술 상세보기"><strong>+${moreCount}</strong><span>추가 기술</span></article>`
+        : "");
+}
+
 function renderHr011ReferenceDashboard(row) {
     if (!row) return;
 
@@ -1539,6 +1715,7 @@ function renderHr011ReferenceDashboard(row) {
     const gradeText = $.trim($("#grade").text() || "-");
     const scoreText = $.trim($("#score").text() || "");
     const projectCountText = `${hr011RefProjectRows.length || 0}회`;
+    const skillCardRows = buildHr011SkillCardRows(row);
     const mainLangSkills = mainLangParts.skills.slice(0, 6);
     const hasMoreMainLang = mainLangParts.skills.length > 6;
 
@@ -1555,32 +1732,15 @@ function renderHr011ReferenceDashboard(row) {
     $("#hr011RefBrdt").text($.trim(row.brdt || "") || "-");
     $("#hr011RefTel").text($.trim(row.tel || "") || "-");
     $("#hr011RefEmail").text($.trim(row.email || "") || "-");
-    $("#hr011RefEdu").text($.trim(row.edu_last || "") || "-");
 
     // 공통코드 데이터
     $("#hr011RefKosa").text(hr011MainSelectMaps.kosa[row.kosa_grd_cd] || row.kosa_grd_cd || "-");
     $("#hr011RefMainFld").text(hr011MainSelectMaps.mainFld[row.main_fld_cd] || row.main_fld_cd || "-");
     $("#hr011RefWorkMd").text(hr011MainSelectMaps.workMd[row.work_md] || row.work_md || "-");
-    $("#hr011RefCtrtTyp").text(hr011MainSelectMaps.ctrtTyp[row.ctrt_typ] || row.ctrt_typ || "-");
     $("#hr011RefRegion").text(hr011MainSelectMaps.sido[row.sido_cd] || row.sido_cd || "-");
-    $("#hr011RefKosaTop").text(hr011MainSelectMaps.kosa[row.kosa_grd_cd] || row.kosa_grd_cd || "-");
-
-    $("#hr011RefGrade").text(`${gradeText}${scoreText ? ` ${scoreText}` : ""}`);
-    $("#hr011RefProjectCount").text(projectCountText);
-
-    const categoryList = hr011RefSkillCategoryRows.length
-        ? hr011RefSkillCategoryRows
-        : [{ name: "기타", value: "보유역량 미등록" }];
-    $("#hr011RefSkillCategoryList").html(categoryList.map(function (item, idx) {
-        const values = Array.isArray(item.valueList) && item.valueList.length
-            ? item.valueList
-            : parseHr011SkillList(item.value || "");
-        const renderedValues = values.length
-            ? values.join(", ")
-            : (item.value || "-");
-        const color = getHr011SkillCategoryColor(idx);
-        return `<div class="hr011-ref-skill-row hr011-skill-stagger-item" style="--hr011-skill-cat-color:${color};"><div class="cat">${escapeHr011(item.name)}</div><div class="val">${escapeHr011(renderedValues)}</div></div>`;
-    }).join(""));
+    $("#hr011RefGradeInfo").text(`${gradeText}${scoreText ? ` ${scoreText}` : ""}`);
+    $("#hr011RefProjectInfo").text(projectCountText);
+    $("#hr011RefSkillCardMeta").text(skillCardRows.length ? `${skillCardRows.length}개 스킬` : "0개 스킬");
 
     const projects = (hr011RefProjectRows || []).slice(0, 3);
     $("#hr011RefProjectList").html(projects.length ? projects.map(function (item) {
@@ -1633,8 +1793,8 @@ function switchHr011RefView(view, options) {
         detailEl.hidden = true;
         requestAnimationFrame(function () {
             animateHr011RefEntrance(document.getElementById("hr011RefLayout"));
-            // 상세 -> 메인 복귀 시 개요 차트 애니메이션을 다시 재생한다.
-            renderHr011RefSkillGaugeChart("hr011RefSkillGauge");
+            // 상세 -> 메인 복귀 시 스킬 카드/레이더 애니메이션을 다시 재생한다.
+            renderHr011RefSkillCards("hr011RefSkillGauge");
             renderHr011RefRadarChart();
             animateHr011SkillSection(overviewEl);
         });
@@ -1645,9 +1805,9 @@ function switchHr011RefView(view, options) {
     detailEl.hidden = false;
 
     if (normalized === "skills") {
-        detailTitleEl.textContent = "보유 역량 및 숙련도";
+        detailTitleEl.textContent = "보유 기술 상세";
         detailBodyEl.innerHTML = buildHr011SkillsDetailMarkup();
-        renderHr011RefSkillGaugeChart("hr011RefSkillGaugeDetail");
+        renderHr011RefSkillCards("hr011RefSkillGaugeDetail");
         requestAnimationFrame(function () {
             animateHr011RefEntrance(detailEl);
             animateHr011SkillSection(detailEl);
@@ -1676,7 +1836,7 @@ function animateHr011RefEntrance(rootEl) {
     if (!rootEl) return;
     const targets = rootEl.querySelectorAll([
         ".hr011-ref-left-card",
-        ".hr011-ref-kpi",
+        ".hr011-ref-actions-row",
         ".hr011-ref-skill-card",
         ".hr011-ref-radar-card",
         ".hr011-ref-project-card",
@@ -1688,7 +1848,7 @@ function animateHr011RefEntrance(rootEl) {
     ].join(","));
 
     targets.forEach(function (el, idx) {
-        const hasChartHost = !!el.querySelector(".hr011-ref-skill-gauge, .hr011-ref-radar, .hr011-ref-project-eval-radar");
+        const hasChartHost = !!el.querySelector(".hr011-ref-skill-card-grid, .hr011-ref-radar, .hr011-ref-project-eval-radar");
         const allowChartCardMotion = el.matches(".hr011-ref-project-detail-item, .hr011-ref-project-eval-side");
         const delay = Math.min(idx * 42, 360);
         el.style.setProperty("--hr011-enter-delay", `${delay}ms`);
@@ -1704,7 +1864,7 @@ function animateHr011RefEntrance(rootEl) {
 
 function animateHr011SkillSection(rootEl) {
     if (!rootEl) return;
-    const chartWraps = rootEl.querySelectorAll(".hr011-ref-skill-gauge-wrap");
+    const chartWraps = rootEl.querySelectorAll(".hr011-ref-skill-grid-wrap");
     chartWraps.forEach(function (el) {
         el.classList.remove("is-skill-animated");
         void el.offsetWidth;
@@ -2183,44 +2343,18 @@ function buildHr011ProfileDetailMarkup() {
 }
 
 function buildHr011SkillsDetailMarkup() {
-    const rows = hr011SummarySkillRows || [];
-    const categoryRows = (hr011RefSkillCategoryRows || []).map(function (row, idx) {
-        const values = parseHr011SkillList(row.value);
-        return {
-            name: row.name || "-",
-            text: values.length ? values.join(", ") : "-",
-            color: getHr011SkillCategoryColor(idx)
-        };
-    });
+    const row = hr011CurrentRow || {};
+    const skillCardRows = buildHr011SkillCardRows(row);
     return [
-        `<article class="hr011-ref-detail-card hr011-ref-skill-detail">`,
-        `<div class="hr011-ref-skill-detail-left">`,
-        `<div class="hr011-ref-skill-gauge-wrap"><div class="hr011-ref-skill-gauge" id="hr011RefSkillGaugeDetail"></div></div>`,
-        `<div class="hr011-ref-skill-list hr011-ref-skill-list--detail">`,
-        (categoryRows.length ? categoryRows : [{ name: "미등록", text: "-", color: getHr011SkillCategoryColor(0) }]).map(function (item) {
-            return `<div class="hr011-ref-skill-row hr011-skill-stagger-item" style="--hr011-skill-cat-color:${item.color};"><div class="cat">${escapeHr011(item.name)}</div><div class="val">${escapeHr011(item.text)}</div></div>`;
-        }).join(""),
+        `<article class="hr011-ref-detail-card hr011-ref-skill-detail-card">`,
+        `<div class="hr011-ref-skill-detail-head">`,
+        `<div class="hr011-ref-card-headline">`,
+        `<h6>기술 카드</h6>`,
+        `<p>숙련도와 프로젝트 활용 이력을 한눈에 봅니다.</p>`,
         `</div>`,
+        `<span class="hr011-ref-skill-card-meta">총 ${skillCardRows.length}개</span>`,
         `</div>`,
-        `<div class="hr011-ref-skill-detail-right">`,
-        `<table class="hr011-ref-score-table">`,
-        `<thead><tr><th>기술</th><th>숙련도</th></tr></thead>`,
-        `<tbody>`,
-        (rows.length ? rows : [{ name: "미등록", level: 0 }]).map(function (item) {
-            const level = Number(item.level) || 0;
-            const stars = [1, 2, 3, 4, 5].map(function (idx) {
-                return `<span class="hr011-star ${idx <= level ? "is-on" : ""}">★</span>`;
-            }).join("");
-            return [
-                `<tr class="hr011-skill-score-row">`,
-                `<td class="label">${escapeHr011(item.name)}</td>`,
-                `<td><div class="hr011-stars-wrap">${stars}<span class="hr011-stars-score">${level}/5</span></div></td>`,
-                `</tr>`
-            ].join("");
-        }).join(""),
-        `</tbody>`,
-        `</table>`,
-        `</div>`,
+        `<div class="hr011-ref-skill-grid-wrap hr011-ref-skill-grid-wrap--detail"><div class="hr011-ref-skill-card-grid hr011-ref-skill-card-grid--detail" id="hr011RefSkillGaugeDetail"></div></div>`,
         `</article>`
     ].join("");
 }
@@ -2824,140 +2958,29 @@ async function saveHr011ProjectEvaluationAll() {
     }
 }
 
-function renderHr011RefSkillGaugeChart(targetId) {
+function renderHr011RefSkillCards(targetId) {
     const gaugeEl = document.getElementById(targetId || "hr011RefSkillGauge");
-    if (!gaugeEl || typeof echarts !== "object" || typeof echarts.init !== "function") return;
-    if ((gaugeEl.clientWidth <= 0 || gaugeEl.clientHeight <= 0)) {
-        const retry = Number(gaugeEl.dataset.animRetry || 0);
-        if (retry < 3) {
-            gaugeEl.dataset.animRetry = String(retry + 1);
-            requestAnimationFrame(function () {
-                setTimeout(function () {
-                    renderHr011RefSkillGaugeChart(targetId);
-                }, 60);
-            });
+    if (!gaugeEl) return;
+
+    if (typeof echarts === "object" && typeof echarts.getInstanceByDom === "function") {
+        const prevInstance = echarts.getInstanceByDom(gaugeEl);
+        if (prevInstance && typeof prevInstance.dispose === "function") {
+            prevInstance.dispose();
         }
-        return;
     }
-    delete gaugeEl.dataset.animRetry;
+
     const isDetailChart = String(targetId || "").toLowerCase().includes("detail");
-    const showSideLegend = !isDetailChart;
+    const markup = buildHr011SkillCardsMarkup(hr011CurrentRow || {}, {
+        limit: isDetailChart ? 0 : 8,
+        emptyLabel: "보유 기술 정보가 없습니다."
+    });
 
-    const pieRows = (hr011RefSkillCategoryRows || []).map(function (row, idx) {
-        const count = parseHr011SkillList(row.value).length;
-        return {
-            name: row.name || `역량${idx + 1}`,
-            value: count,
-            itemStyle: { color: getHr011SkillCategoryColor(idx) }
-        };
-    }).filter(function (row) { return row.value > 0; });
-    const pieData = pieRows.length ? pieRows : [{ name: "미등록", value: 1, itemStyle: { color: "#d7e2f2" } }];
-    const totalValue = pieData.reduce(function (sum, row) { return sum + (Number(row.value) || 0); }, 0) || 1;
+    gaugeEl.innerHTML = markup;
 
-    let chartInstance = isDetailChart ? hr011RefSkillGaugeDetailChart : hr011RefSkillGaugeChart;
-    if (!chartInstance || (typeof chartInstance.getDom === "function" && chartInstance.getDom() !== gaugeEl)) {
-        if (chartInstance && typeof chartInstance.dispose === "function") {
-            chartInstance.dispose();
-        }
-        chartInstance = typeof echarts.getInstanceByDom === "function"
-            ? echarts.getInstanceByDom(gaugeEl)
-            : null;
-        if (!chartInstance) {
-            chartInstance = echarts.init(gaugeEl, null, { renderer: "svg" });
-        }
-    }
     if (isDetailChart) {
-        hr011RefSkillGaugeDetailChart = chartInstance;
+        hr011RefSkillGaugeDetailChart = null;
     } else {
-        hr011RefSkillGaugeChart = chartInstance;
-    }
-    if (typeof chartInstance.clear === "function") {
-        chartInstance.clear();
-    }
-
-    chartInstance.setOption({
-        animation: true,
-        animationType: "expansion",
-        animationDuration: 920,
-        animationEasing: "quarticOut",
-        animationDurationUpdate: 560,
-        animationEasingUpdate: "cubicInOut",
-        animationDelay: function (idx) { return idx * 54; },
-        tooltip: {
-            trigger: "item",
-            formatter: function (params) {
-                const ratio = Math.round(((Number(params.value) || 0) / totalValue) * 100);
-                return `${escapeHr011(params.name)}: ${params.value} (${ratio}%)`;
-            }
-        },
-        legend: {
-            show: showSideLegend,
-            type: "scroll",
-            orient: "vertical",
-            right: 4,
-            top: "middle",
-            bottom: 12,
-            itemWidth: 16,
-            itemHeight: 12,
-            icon: "roundRect",
-            pageIconColor: "#4f78d2",
-            pageIconInactiveColor: "#b6c6df",
-            pageTextStyle: {
-                color: "#6d86a8",
-                fontSize: 12,
-                fontWeight: 700
-            },
-            textStyle: {
-                color: "#2e466c",
-                fontSize: 14,
-                fontWeight: 700
-            },
-            formatter: function (name) {
-                return escapeHr011(name);
-            }
-        },
-        series: [{
-            type: "pie",
-            animation: true,
-            animationType: "expansion",
-            animationDuration: 920,
-            animationEasing: "quarticOut",
-            animationDurationUpdate: 560,
-            animationEasingUpdate: "cubicInOut",
-            animationDelay: function (idx) { return idx * 54; },
-            radius: showSideLegend ? ["48%", "73%"] : ["48%", "74%"],
-            center: showSideLegend ? ["32%", "53%"] : ["50%", "53%"],
-            avoidLabelOverlap: false,
-            padAngle: 3,
-            itemStyle: {
-                borderRadius: 10,
-                borderColor: "#f5f8fc",
-                borderWidth: 3
-            },
-            label: {
-                show: true,
-                position: "outside",
-                color: "#2c4469",
-                fontSize: showSideLegend ? 12 : 14,
-                fontWeight: 700,
-                formatter: function (params) {
-                    return `${params.name} ${Math.round(params.percent)}%`;
-                }
-            },
-            labelLine: {
-                show: true,
-                length: showSideLegend ? 10 : 14,
-                length2: showSideLegend ? 8 : 10,
-                smooth: 0.25
-            },
-            data: pieData
-        }]
-    }, true);
-
-    if (typeof chartInstance.resize === "function") {
-        requestAnimationFrame(function () {
-            chartInstance.resize();
-        });
+        hr011RefSkillGaugeChart = null;
     }
 }
 
@@ -3060,15 +3083,20 @@ function buildHr011SkillSummaryMarkup(row) {
     const mainLangParts = splitHr011MainLang(row);
 
     if (Array.isArray(hr011SummarySkillRows) && hr011SummarySkillRows.length) {
-        return hr011SummarySkillRows.map(function (skill) {
+        const previewRows = hr011SummarySkillRows.slice(0, 6);
+        const moreCount = Math.max(0, hr011SummarySkillRows.length - previewRows.length);
+
+        return previewRows.map(function (skill) {
             const level = resolveHr011SkillLevelMeta(skill.level);
             return [
                 `<span class="hr011-summary-skill hr011-summary-skill--${level.className}">`,
                 `<span class="hr011-summary-skill__label">${escapeHr011(skill.name)}</span>`,
-                `<span class="hr011-summary-skill__level">${escapeHr011(level.label)}</span>`,
+                `<span class="hr011-summary-skill__level">${escapeHr011(level.label)} · ${escapeHr011(level.scoreText)}</span>`,
                 `</span>`
             ].join("");
-        }).join("");
+        }).join("") + (moreCount > 0
+            ? `<span class="hr011-summary-skill hr011-summary-skill--more"><span class="hr011-summary-skill__label">+${moreCount}</span></span>`
+            : "");
     }
 
     const skillNames = mainLangParts.skills.length
@@ -3114,8 +3142,7 @@ async function loadHr011SkillSummary(devId) {
             .sort(function (a, b) {
                 if (b.level !== a.level) return b.level - a.level;
                 return a.name.localeCompare(b.name, "ko");
-            })
-            .slice(0, 10);
+            });
     } catch (error) {
         console.warn("hr011 skill summary load failed", error);
     }
@@ -3377,16 +3404,17 @@ function bindHr011RadarResize() {
 
 // 숙련도 원본 값을 점수 표기와 스타일 단계로 변환한다.
 function resolveHr011SkillLevelMeta(level) {
-    if (level >= 4) {
-        return { label: `${level}점`, className: "advanced" };
+    const score = Math.max(0, Math.min(5, Number(level) || 0));
+    if (score >= 4) {
+        return { label: "고급", className: "advanced", scoreText: `${score}/5` };
     }
-    if (level === 3) {
-        return { label: `${level}점`, className: "mid" };
+    if (score === 3) {
+        return { label: "중급", className: "mid", scoreText: `${score}/5` };
     }
-    if (level > 0) {
-        return { label: `${level}점`, className: "basic" };
+    if (score > 0) {
+        return { label: "초급", className: "basic", scoreText: `${score}/5` };
     }
-    return { label: "0점", className: "basic" };
+    return { label: "미평가", className: "pending", scoreText: "0/5" };
 }
 
 // 숙련도 조회 응답의 lv1~lv5 플래그를 숫자 단계로 정규화한다.

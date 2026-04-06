@@ -50,7 +50,7 @@
                 <section class="hr011-ref-layout" id="hr011RefLayout">
                     <div class="hr011-ref-left-card">
                         <div class="hr011-ref-left-head">
-                            <button type="button" class="hr011-ref-link-btn" data-ref-view="profile">&gt;상세보기</button>
+                            <button type="button" class="hr011-ref-link-btn" data-ref-view="profile">상세보기</button>
                         </div>
                         <div class="hr011-ref-avatar-wrap">
                             <div class="hr011-ref-avatar" id="hr011RefAvatar" aria-hidden="true"></div>
@@ -73,9 +73,9 @@
                             <div class="hr011-ref-info-item"><span>연락처</span><strong id="hr011RefTel">-</strong></div>
                             <div class="hr011-ref-info-item"><span>이메일</span><strong id="hr011RefEmail">-</strong></div>
                             <div class="hr011-ref-info-item"><span>근무가능형태</span><strong id="hr011RefWorkMd">-</strong></div>
-                            <div class="hr011-ref-info-item"><span>계약형태</span><strong id="hr011RefCtrtTyp">-</strong></div>
+                            <div class="hr011-ref-info-item"><span>등급</span><strong id="hr011RefGradeInfo">-</strong></div>
                             <div class="hr011-ref-info-item"><span>거주지역</span><strong id="hr011RefRegion">-</strong></div>
-                            <div class="hr011-ref-info-item"><span>최종학력</span><strong id="hr011RefEdu">-</strong></div>
+                            <div class="hr011-ref-info-item"><span>프로젝트</span><strong id="hr011RefProjectInfo">0회</strong></div>
                             <div class="hr011-ref-info-item"><span>KOSA등급</span><strong id="hr011RefKosa">-</strong></div>
                             <div class="hr011-ref-info-item"><span>주요 분야</span><strong id="hr011RefMainFld">-</strong></div>
                         </div>
@@ -83,10 +83,8 @@
 
                     <div class="hr011-ref-right">
                         <div class="hr011-ref-overview" id="hr011RefOverview">
-                            <div class="hr011-ref-kpi-row">
-                                <div class="hr011-ref-kpi"><span>등급</span><strong id="hr011RefGrade">-</strong></div>
-                                <div class="hr011-ref-kpi"><span>KOSA등급</span><strong id="hr011RefKosaTop">-</strong></div>
-                                <div class="hr011-ref-kpi"><span>프로젝트</span><strong id="hr011RefProjectCount">0회</strong></div>
+                            <div class="hr011-ref-actions-row">
+                                <div class="hr011-ref-overview-summary" id="hr011RefOverviewSummary">보유 역량 요약</div>
                                 <div class="hr011-ref-actions-inline">
                                     <button type="button" class="btn hr011-page-btn hr011-page-btn--ghost" id="hr011BackBtnView">목록으로</button>
                                     <button type="button" class="btn hr011-page-btn hr011-page-btn--ghost" id="hr011CancelBtnView" hidden>등록취소</button>
@@ -96,15 +94,18 @@
                             </div>
 
                             <div class="hr011-ref-skill-card">
-                                <div class="hr011-ref-card-head">
-                                    <h5>보유 역량 및 숙련도</h5>
-                                    <button type="button" class="hr011-ref-link-btn" data-ref-view="skills">&gt;상세보기</button>
-                                </div>
-                                <div class="hr011-ref-skill-body">
-                                    <div class="hr011-ref-skill-gauge-wrap">
-                                        <div class="hr011-ref-skill-gauge" id="hr011RefSkillGauge"></div>
+                                <div class="hr011-ref-card-head hr011-ref-card-head--skill">
+                                    <div class="hr011-ref-card-headline">
+                                        <h5>보유 기술 상세</h5>
+                                        <p>기술 카드에서 숙련도와 프로젝트 활용 빈도를 한눈에 확인할 수 있습니다.</p>
                                     </div>
-                                    <div class="hr011-ref-skill-list" id="hr011RefSkillCategoryList"></div>
+                                    <div class="hr011-ref-card-head-actions">
+                                        <span class="hr011-ref-skill-card-meta" id="hr011RefSkillCardMeta">0개 스킬</span>
+                                        <button type="button" class="hr011-ref-link-btn" data-ref-view="skills">상세보기</button>
+                                    </div>
+                                </div>
+                                <div class="hr011-ref-skill-grid-wrap">
+                                    <div class="hr011-ref-skill-card-grid" id="hr011RefSkillGauge"></div>
                                 </div>
                             </div>
 
@@ -118,7 +119,7 @@
                                 <div class="hr011-ref-project-card">
                                     <div class="hr011-ref-card-head">
                                         <h5>프로젝트 이력</h5>
-                                        <button type="button" class="hr011-ref-link-btn" data-ref-view="project">&gt;상세보기</button>
+                                        <button type="button" class="hr011-ref-link-btn" data-ref-view="project">상세보기</button>
                                     </div>
                                     <div class="hr011-ref-project-list" id="hr011RefProjectList"></div>
                                 </div>
