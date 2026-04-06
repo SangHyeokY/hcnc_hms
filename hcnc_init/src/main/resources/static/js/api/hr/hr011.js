@@ -33,8 +33,12 @@ window.hr011EditUnlocked = false;
 // const HR011_FIELDS = "#org_nm, #select_biz_typ, #st_dt, #ed_dt, #amt, #remark"; // 데이터 담을 상수
 
 // 사업자 유형 공통코드
-var bizTypMap = [];
-var bizTypOptions = [];
+let bizTypMap = [];
+let bizTypOptions = [];
+
+// 거주지역 공통코드
+let sidoMap = [];
+let sidoOptions = [];
 
 // ============================================================================== //
 
@@ -56,6 +60,21 @@ window.initTab1 = function () {
 
           resolve();
       });
+
+      setComCode("select_sido_cd", "SIDO_CD", "", "cd", "cd_nm", async function () {
+
+          sidoOptions = $("#select_sido_cd option").map(function () {
+              return { cd: this.value, cd_nm: $(this).text() };
+          }).get();
+
+          initSelectDefault("select_sido_cd", "거주지역 선택");
+          sidoMap = getSidoMap();
+
+          // AJAX 끝날 때까지 기다림
+          await loadHr011TableData(window.currentDevId);
+
+          resolve();
+      });
   });
 };
 
@@ -71,6 +90,26 @@ function getBizTypMap() {
         return map;
     }
     $("#select_biz_typ option").each(function () {
+        var val = this.value;
+        if (val) {
+            map[val] = $(this).text();
+        }
+    });
+    return map;
+}
+
+// 역할 코드 -> 라벨 맵 생성 (거주지역)
+function getSidoMap() {
+    var map = {};
+    if (sidoOptions && sidoOptions.length) {
+        sidoOptions.forEach(function (item) {
+            if (item.cd) {
+                map[item.cd] = item.cd_nm || item.cd;
+            }
+        });
+        return map;
+    }
+    $("#select_sido_cd option").each(function () {
         var val = this.value;
         if (val) {
             map[val] = $(this).text();
@@ -163,7 +202,7 @@ function setHr011Mode(mode, options) {
         "#brdt",
         "#tel",
         "#email",
-        "#region",
+        "#select_sido_cd",
         "#avail_dt",
         "#select_work_md",
         "#select_ctrt_typ",
@@ -329,7 +368,9 @@ function loadHr011TableData(devId) {
 
 // '소속 및 계약정보' 테이블 데이터 수정, 저장
 function saveHr011TableData() {
-    // if (!validateHr011Form()) return; // hr010.js로 이관
+    if (!validateHr011Form()) {
+        return;
+    }
 
     const param = {
         ctrtId: hr011Mode === "update" ? window.hr011Data?.ctrt_id : null,
@@ -663,7 +704,8 @@ const hr011MainSelectMaps = {
     ctrtTyp: {},
     kosa: {},
     mainFld: {},
-    mainCust: {}
+    mainCust: {},
+    sido: {}
 };
 
 let hr011CurrentRow = null;
@@ -1025,7 +1067,8 @@ async function initHr011DetailPage() {
         loadHr011MainSelect("select_ctrt_typ", "CTRT_TYP", hr011MainSelectMaps.ctrtTyp),
         loadHr011MainSelect("select_kosa_grd_cd", "KOSA_GRD_CD", hr011MainSelectMaps.kosa),
         loadHr011MainSelect("select_main_fld_cd", "MAIN_FLD_CD", hr011MainSelectMaps.mainFld),
-        loadHr011MainSelect("select_main_cust_cd", "MAIN_CUST_CD", hr011MainSelectMaps.mainCust)
+        loadHr011MainSelect("select_main_cust_cd", "MAIN_CUST_CD", hr011MainSelectMaps.mainCust),
+        loadHr011MainSelect("select_sido_cd", "SIDO_CD", hr011MainSelectMaps.sido)
     ]);
 
     if (!devId && isInsertRequest) {
@@ -1088,7 +1131,7 @@ function applyHr011InsertDefaults() {
     $("#brdt").val("");
     $("#tel").val("");
     $("#email").val("");
-    $("#region").val("");
+    $("#select_sido_cd").val("");
     $("#avail_dt").val("");
     $("#select_work_md").val("");
     $("#select_ctrt_typ").val("");
@@ -1169,7 +1212,7 @@ function fillHr011MainForm(row) {
     $("#brdt").val(row.brdt || "");
     $("#tel").val(row.tel || "");
     $("#email").val(row.email || "");
-    $("#region").val(row.region || "");
+    $("#select_sido_cd").val(row.sido_cd || "");
     $("#avail_dt").val(row.avail_dt || "");
     $("#select_work_md").val(row.work_md || "");
     $("#select_ctrt_typ").val(row.ctrt_typ || "");
@@ -1221,7 +1264,7 @@ function renderHr011Summary(row) {
     $("#hr011SummaryName").text(row.dev_nm || "인력 정보");
     $("#hr011SummarySub").text(mainLangParts.skills.length ? "주개발언어" : "주개발언어 미등록");
     $("#hr011SummaryAvail").text(row.avail_dt || "협의");
-    $("#hr011SummaryRegion").text(row.region || "-");
+    $("#hr011SummaryRegion").text(row.sido_cd || "-");
     $("#hr011SummaryRate").text(formatAmount(row.hope_rate_amt));
     $("#hr011SummaryCareer").text(formatCareerYearMonth(row.exp_yr) || "-");
 
@@ -1362,7 +1405,7 @@ function renderHr011ReferenceDashboard(row) {
     $("#hr011RefEmail").text($.trim(row.email || "") || "-");
     $("#hr011RefWorkMd").text(hr011MainSelectMaps.workMd[row.work_md] || row.work_md || "-");
     $("#hr011RefCtrtTyp").text(hr011MainSelectMaps.ctrtTyp[row.ctrt_typ] || row.ctrt_typ || "-");
-    $("#hr011RefRegion").text($.trim(row.region || "") || "-");
+    $("#hr011RefRegion").text(hr011MainSelectMaps.sido[row.sido_cd] || row.sido_cd || "-");
     $("#hr011RefEdu").text($.trim(row.edu_last || "") || "-");
     $("#hr011RefKosa").text(hr011MainSelectMaps.kosa[row.kosa_grd_cd] || row.kosa_grd_cd || "-");
     $("#hr011RefMainFld").text(hr011MainSelectMaps.mainFld[row.main_fld_cd] || row.main_fld_cd || "-");
@@ -1726,33 +1769,33 @@ function syncHr011EditWizardButtons() {
     nextBtn.textContent = isLast ? (hr011Mode === "insert" ? "등록" : "저장") : "다음";
 }
 
-function validateHr011StepBeforeNext(stepKey) {
-    if (stepKey === "profile") {
-        const devNm = $.trim($("#dev_nm").val());
-        const devTyp = $.trim($("#select_dev_typ").val());
-        if (!devNm) {
-            showAlert({ icon: "warning", title: "경고", html: "<strong>성명</strong>을(를) 입력해주세요." });
-            $("#dev_nm").focus();
-            markHr011StepError("profile");
-            return false;
-        }
-        if (!devTyp) {
-            showAlert({ icon: "warning", title: "경고", html: "<strong>구분</strong>을(를) 선택해주세요." });
-            $("#select_dev_typ").focus();
-            markHr011StepError("profile");
-            return false;
-        }
-        return true;
-    }
-    if (stepKey === "contract") {
-        const ok = validateHr011Form();
-        if (!ok) {
-            markHr011StepError("contract");
-        }
-        return ok;
-    }
-    return true;
-}
+// function validateHr011StepBeforeNext(stepKey) {
+//     if (stepKey === "profile") {
+//         const devNm = $.trim($("#dev_nm").val());
+//         const devTyp = $.trim($("#select_dev_typ").val());
+//         if (!devNm) {
+//             showAlert({ icon: "warning", title: "경고", html: "<strong>성명</strong>을(를) 입력해주세요." });
+//             $("#dev_nm").focus();
+//             markHr011StepError("profile");
+//             return false;
+//         }
+//         if (!devTyp) {
+//             showAlert({ icon: "warning", title: "경고", html: "<strong>구분</strong>을(를) 선택해주세요." });
+//             $("#select_dev_typ").focus();
+//             markHr011StepError("profile");
+//             return false;
+//         }
+//         return true;
+//     }
+//     if (stepKey === "contract") {
+//         const ok = validateHr011Form();
+//         if (!ok) {
+//             markHr011StepError("contract");
+//         }
+//         return ok;
+//     }
+//     return true;
+// }
 
 function refreshHr011StepContent(stepKey) {
     setTimeout(function () {
@@ -3303,7 +3346,7 @@ async function saveHr011MainProfile() {
     formData.append("brdt", $("#brdt").val());
     formData.append("tel", $("#tel").val());
     formData.append("email", $("#email").val());
-    formData.append("region", $("#region").val());
+    formData.append("region", $("#select_sido_cd").val());
     formData.append("main_lang", $("#main_lang").val());
     formData.append("exp_yr", String(composeCareerExpValue()));
     formData.append("edu_last", $("#edu_last").val());
@@ -3478,35 +3521,6 @@ function normalizeCareerSpinInputs() {
     $("#exp_yr_month").val(months);
     syncCareerExpValue();
 }
-
-// function parseCareerExpValue(value) {
-//     if (value === null || value === undefined || value === "") {
-//         return { years: 0, months: 0 };
-//     }
-//
-//     var raw = String(value).trim();
-//     if (!raw) {
-//         return { years: 0, months: 0 };
-//     }
-//
-//     if (/^\d+(\.\d+)?$/.test(raw)) {
-//         var parts = raw.split(".");
-//         var years = clampCareerYearValue(parts[0]);
-//         var months = 0;
-//         if (parts.length > 1) {
-//             var monthText = String(parts[1] || "").replace(/[^\d]/g, "");
-//             months = clampCareerMonthValue(monthText || 0);
-//         }
-//         return { years: years, months: months };
-//     }
-//
-//     var yearMatch = raw.match(/(\d+)\s*년/);
-//     var monthMatch = raw.match(/(\d+)\s*개?월/);
-//     return {
-//         years: clampCareerYearValue(yearMatch ? yearMatch[1] : 0),
-//         months: clampCareerMonthValue(monthMatch ? monthMatch[1] : 0)
-//     };
-// }
 
 function setCareerSpinInputs(value) {
     if (!value) {

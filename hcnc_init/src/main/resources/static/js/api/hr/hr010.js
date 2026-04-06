@@ -48,6 +48,8 @@ $(document).ready(async function () {
     renderSelectedTags();
     refreshTagSuggestions();
     hideLoading();
+
+    console.log(hr010SourceRows[0]);
 });
 
 // ==============================
@@ -466,16 +468,8 @@ function getSkillCodes(row) {
 
 // 거주지역 문자열을 시도코드 기준으로 비교
 function matchesRegionCode(row, code) {
-    if (String(row.sido_cd || "") === String(code)) {
-        return true;
-    }
-
-    const regionValue = normalizeRegionText(row.region || row.region_nm || "");
-    if (!regionValue) return false;
-
-    return getRegionTextCandidates(code).some(candidate =>
-        candidate && (regionValue === candidate || regionValue.includes(candidate) || candidate.includes(regionValue))
-    );
+    const value = row.sido_cd || row.region;
+    return String(value) === String(code);
 }
 
 // 시도 코드에 대응되는 비교용 지역명 후보
@@ -1053,7 +1047,7 @@ function createUserCard(row) {
                 </div>
                 <div class="user-card__info-item">
                     <span class="user-card__info-label">거주지역</span>
-                    <strong class="user-card__info-value">${escapeHtml(row.region || "-")}</strong>
+                    <strong class="user-card__info-value">${escapeHtml(getSidoLabel(row))}</strong>
                 </div>
                 <div class="user-card__info-item">
                     <span class="user-card__info-label">투입 가능</span>
@@ -1097,7 +1091,7 @@ function createUserListRow(row) {
             </div>
             <div class="user-list-row__cell user-list-row__skill-cell">${getSkillSummaryMarkup(row, 3)}</div>
             <div class="user-list-row__cell">${escapeHtml(formatGradeLabel(row.grade, row.score) || "-")}<br><span class="user-list-row__sub">${escapeHtml(getKosaLabel(row))}</span></div>
-            <div class="user-list-row__cell">${escapeHtml(row.region || "-")}<br><span class="user-list-row__sub">${escapeHtml(getWorkModeLabel(row))}</span></div>
+            <div class="user-list-row__cell">${escapeHtml(getSidoLabel(row))}<br><span class="user-list-row__sub">${escapeHtml(getWorkModeLabel(row))}</span></div>
             <div class="user-list-row__cell">${escapeHtml(getAvailabilityLabel(row))}</div>
             <div class="user-list-row__cell user-list-row__rate">${escapeHtml(amountFormatter(row.hope_rate_amt) || "-")}</div>
         </article>
@@ -1233,6 +1227,11 @@ function getAvailabilityLabel(row) {
     return row.avail_dt;
 }
 
+// 거주지역 표시명
+function getSidoLabel(row) {
+    return getDropdownOptionLabel("sido_cd", row.sido_cd) || row.sido_cd || "-";
+}
+
 // ==============================
 // 이벤트 위임 (핵심)
 // ==============================
@@ -1289,7 +1288,7 @@ const dropdownFilters = {
         label: "계약형태"
     },
     sido_cd: { // 거주지역
-        selectId: "select_sido-cd",
+        selectId: "select_sido_cd",
         code: "SIDO_CD",
         options: [],
         map: {},

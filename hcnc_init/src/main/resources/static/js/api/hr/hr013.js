@@ -289,7 +289,7 @@ function buildHr013Table() {
     var shouldAutoExpandRows = !isHr011Detail;
 
     var options = {
-        layout: isHr011Detail ? "fitDataTable" : "fitData",
+        layout: "fitData",
         placeholder: "데이터 없음",
         selectable: false,
         rowHeight: isHr011Detail ? 46 : 42,
