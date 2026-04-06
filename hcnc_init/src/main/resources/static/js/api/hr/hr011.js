@@ -355,7 +355,234 @@ async function deleteHr011() {
 
 // ============================================================================== //
 
-// 유효성 검사
+// 데이터 유효성 검사
+function validateUserForm() {
+
+    // 값 가져오기
+    const dev_nm = ($("#dev_nm").val() || "").trim();            // 성명
+    const devTyp = ($("#select_dev_typ").val() || "").trim();    // 소속 구분 (dev_id에서 S: 직원, F: 프리랜서)
+    const brdt = ($("#brdt").val() || "").trim();                // 생년월일
+    const tel = ($("#tel").val() || "").trim();                  // 연락처
+    const email = ($("#email").val() || "").trim();              // 이메일
+    const workMd = ($("#select_work_md").val() || "").trim();    // 근무 가능형태 (01: 상주, 02: 재택, 03: 혼합)
+    const availDt = ($("#avail_dt").val() || "").trim();         // 투입 가능일
+    const eduLast = ($("#edu_last").val() || "").trim();         // 최종학력
+    const hopeRaw = normalizeAmountValue($("#hope_rate_amt").val()); // 희망단가 금액
+    const kosaGrd = ($("#select_kosa_grd_cd").val() || "").trim(); // KOSA등급 (01: 초급, 02: 중급, 03: 고급, 04: 특급)
+    const expYrYear = ($("#exp_yr_year").val() || "").trim();    // 경력연차(년)
+    const expYrMonth = ($("#exp_yr_month").val() || "").trim();  // 경력연차(개월)
+    const mainFld = ($("#select_main_fld_cd").val() || "").trim() // 주요분야 (01: 공공, 02: 공공/금융, 03: 제조, 04: 공공/제조)
+    const ctrtTyp = ($("#select_ctrt_typ").val() || "").trim();  // 계약 형태 (01: 개인, 02: 법인)
+    const mainCust = ($("#select_main_cust_cd").val() || "").trim(); // 주요고객사
+
+    // ↓ 데이터 입력 순서대로 작성할 것
+
+    // 개발자 이름(성명)
+    if (!dev_nm) {
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'warning',
+            title: '경고',
+            html: `<strong>성명</strong>을(를) 입력하세요.`
+        });
+        $("#dev_nm").focus();
+        return false;
+    }
+
+    // 소속 구분
+    if (!devTyp || devTyp == "") {
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'warning',
+            title: '경고',
+            html: `<strong>소속구분</strong>을(를) 선택해주세요.`
+        });
+        $("#select_dev_typ").focus();
+        return false;
+    }
+
+    // 생년월일
+    if (!brdt) {
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'warning',
+            title: '경고',
+            html: `<strong>생년월일</strong>을(를) 입력하세요.`
+        });
+        $("#brdt").focus();
+        return false;
+    }
+
+    // 전화번호
+    if (!tel) {
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'warning',
+            title: '경고',
+            html: `<strong>연락처</strong>을(를) 입력하세요.`
+        });
+        $("#tel").focus();
+        return false;
+    }
+
+    // 전화번호 (숫자만 입력)
+    if (!/^[0-9\-]+$/.test(tel)) {
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'warning',
+            title: '경고',
+            html: `<strong>연락처</strong>&nbsp;형식이 올바르지 않습니다.`
+        });
+        $("#tel").focus();
+        return false;
+    }
+
+    // 이메일
+    if (!email) {
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'warning',
+            title: '경고',
+            html: `<strong>이메일</strong>을(를) 입력하세요.`
+        });
+        $("#email").focus();
+        return false;
+    }
+
+    const emailRegex =
+        /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+
+    if (!emailRegex.test(email)) {
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'warning',
+            title: '경고',
+            html: `<strong>이메일</strong>&nbsp;형식이 올바르지 않습니다.`
+        });
+        $("#email").focus();
+        return false;
+    }
+
+    // 근무 가능 형태
+    if (!workMd || workMd === "") {
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'warning',
+            title: '경고',
+            html: `<strong>근무가능형태</strong>을(를) 선택해주세요.`
+        });
+        $("#select_work_md").focus();
+        return false;
+    }
+
+    // 투입 가능일
+    if (!availDt) {
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'warning',
+            title: '경고',
+            html: `<strong>투입가능시점</strong>을(를) 입력하세요.`
+        });
+        $("#avail_dt").focus();
+        return false;
+    }
+
+    // 최종학력
+    if (!eduLast) {
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'warning',
+            title: '경고',
+            html: `<strong>최종학력</strong>을(를) 입력하세요.`
+        });
+        $("#edu_last").focus();
+        return false;
+    }
+
+    // 희망단가
+    if (!hopeRaw) {
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'warning',
+            title: '경고',
+            html: `<strong>단가</strong>을(를) 입력해주세요.`
+        });
+        $("#hope_rate_amt").focus();
+        return false;
+    }
+
+    // KOSA등급
+    if (!kosaGrd || kosaGrd == "") {
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'warning',
+            title: '경고',
+            html: `<strong>KOSA등급</strong>을(를) 선택해주세요.`
+        });
+        $("#select_kosa_grd_cd").focus();
+        return false;
+    }
+
+    // 경력연차
+    if (expYrYear === "" || expYrMonth === "") {
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'warning',
+            title: '경고',
+            html: `<strong>경력연차(년/개월)</strong>을(를) 입력하세요.`
+        });
+        if (expYrYear === "") {
+            $("#exp_yr_year").focus();
+        } else {
+            $("#exp_yr_month").focus();
+        }
+        return false;
+    }
+    if (!/^\d+$/.test(expYrYear) || !/^\d+$/.test(expYrMonth)) {
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'warning',
+            title: '경고',
+            html: `<strong>경력연차(년/개월)</strong>을(를) 입력하세요.`
+        });
+        $("#exp_yr_year").focus();
+        return false;
+    }
+    var expYearNum = Number(expYrYear);
+    var expMonthNum = Number(expYrMonth);
+    if (expYearNum < 0 || expYearNum > 99 || expMonthNum < 0 || expMonthNum > 12) {
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'warning',
+            title: '경고',
+            html: `<strong>경력연차</strong>은(는) 년(0~99), 개월(0~12) 범위 내에서 입력해주세요.`
+        });
+        $("#exp_yr_year").focus();
+        return false;
+    }
+    syncCareerExpValue();
+
+    // 주요분야
+    if (!mainFld || mainFld == "") {
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'warning',
+            title: '경고',
+            html: `<strong>주요분야</strong>을(를) 선택해주세요.`
+        });
+        $("#select_main_fld_cd").focus();
+        return false;
+    }
+
+    // 계약 형태
+    if (!ctrtTyp || ctrtTyp == "") {
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'warning',
+            title: '경고',
+            html: `<strong>계약형태</strong>을(를) 선택해주세요.`
+        });
+        $("#select_ctrt_typ").focus();
+        return false;
+    }
+
+    // 주요고객사
+    if (!mainCust || mainCust == "") {
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'warning',
+            title: '경고',
+            html: `<strong>주요고객사</strong>을(를) 선택해주세요.`
+        });
+        $("#select_main_cust_cd").focus();
+        return false;
+    }
+    return true;
+}
+
+// Tab1 유효성 검사
 function validateHr011Form() {
 
     // 값 가져오기
@@ -3227,33 +3454,50 @@ async function saveHr011DetailPage() {
         return;
     }
 
-    if (!validateHr011Form()) return;
+    // Main 유효성 검사
+    if (!validateUserForm()) {
+        console.log("[Main] 유효성 실패 → [Skip]");
+        return;
+    }
+
+    // Tab1 유효성 검사
+    if (changedTabs.tab1) {
+        if (!validateHr011Form()) {
+            console.log("[Tab1] 유효성 실패 → [Skip]");
+            return;
+        }
+    }
 
     const wasInsertMode = hr011Mode === "insert";
+
     try {
         showLoading();
 
-        // main 저장
+        // =========================
+        // 저장 로직
+        // =========================
+
+        // Main 저장
         await saveHr011MainProfile();
 
-        // tab1 저장
+        // Tab1 저장
         if (changedTabs.tab1 && typeof saveHr011TableData === "function") {
             await saveHr011TableData();
         } else {
             console.log("[Tab1] 저장할 계약 데이터 없음 → [Skip]");
         }
 
-        // tab2 저장
+        // Tab2 저장
         if (typeof saveHr012TableData === "function") {
             await saveHr012TableData();
         }
 
-        // tab3 저장
+        // Tab3 저장
         if (typeof window.saveHr013TableData === "function") {
             window.saveHr013TableData();
         }
 
-        // tab4 저장
+        // Tab4 저장
         if (typeof window.saveTab4All === "function") {
             await window.saveTab4All();
         }

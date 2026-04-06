@@ -81,6 +81,7 @@
  .btn-prj-eval:hover,
  .btn-prj-skl:hover {
     background-color:#eef3fb;
+    color: #333;
  }
  .btn-area button:disabled,
  .btn-area .btn:disabled{opacity:0.5; cursor:not-allowed;}
