@@ -128,6 +128,7 @@ function setHr011Mode(mode, options) {
     $("#hr011EditBtnView").toggle(isView);
     $("#hr011CancelBtnView").toggle(!isView);
     $("#hr011SaveBtnView").prop("hidden", isView).toggle(!isView);
+    $("#btn-excel").toggle(isView);
     if (isEditable && !wasEditable) {
         requestAnimationFrame(function () {
             animateHr011EditDashboard();
@@ -1338,6 +1339,7 @@ async function loadHr011MainDetail(devId) {
         throw new Error("상세 데이터를 찾을 수 없습니다.");
     }
 
+    console.log("조회된 데이터 : " ,response.res);
     hr011CurrentRow = row;
 
     fillHr011MainForm(row);
@@ -3826,4 +3828,23 @@ function clampAmount(value) {
     const num = Number(value);
     if (!Number.isFinite(num)) return 0;
     return Math.min(num, 999999999999.99);
+}
+
+// 엑셀 다운로드 처리
+const excelBtn = document.getElementById("btn-excel");
+if (excelBtn) {
+    excelBtn.addEventListener("click", function () {
+        const devId = document.getElementById("dev_id").value;
+        const devNm = document.getElementById("dev_nm").value;
+        if (!devId) {
+            showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+                icon: 'error',
+                title: '오류',
+                html: `<strong>개발자ID</strong>가 없습니다.`
+            });
+            return;
+        }
+        location.href =
+            `/common/getExcel?dev_id=${encodeURIComponent(devId)}&dev_nm=${encodeURIComponent(devNm)}`;
+    });
 }
