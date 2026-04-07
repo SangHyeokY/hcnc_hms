@@ -3773,19 +3773,22 @@ section.search-area .search-info #searchConditionKeyword { /* 새 검색어 입�
 .hr011-detail-wrap .hr011-ref-right {height:calc(100dvh - 11.2rem);}
 .hr011-detail-wrap .hr011-ref-right {display:flex; flex-direction:column; gap:clamp(0.8rem, 1.1vw, 1.3rem); min-height:0; overflow:visible;}
 .hr011-detail-wrap .hr011-ref-overview {display:grid; grid-template-rows:auto minmax(0, 1.02fr) minmax(0, 0.98fr); gap:clamp(0.8rem, 1.1vw, 1.3rem); min-height:0; height:auto; flex:1 1 auto; overflow:visible;}
-.hr011-detail-wrap .hr011-ref-actions-row {display:flex; align-items:center; justify-content:space-between; gap:12px; min-width:0; flex:0 0 auto;}
+.hr011-detail-wrap .hr011-ref-actions-row {display:flex; align-items:center; justify-content:end; gap:12px; min-width:0; flex:0 0 auto;}
 .hr011-detail-wrap .hr011-ref-overview-summary {display:inline-flex; align-items:center; min-height:30px; padding:0 12px; border-radius:999px; border:1px solid #dce7f6; background:#f4f8ff; color:#355889; font-size:13px; font-weight:800; line-height:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; flex:1 1 auto; max-width:calc(100% - 250px);}
 .hr011-detail-wrap .hr011-ref-actions-inline {display:flex; align-items:center; justify-content:flex-end; gap:10px; min-width:0; align-self:stretch; flex:0 0 auto;}
 .hr011-detail-wrap .hr011-ref-actions-inline .hr011-page-btn {height:36px; min-width:80px; padding:0 11px;}
 .hr011-detail-wrap .hr011-ref-skill-card {padding:clamp(0.85rem, 1vw, 1.1rem); min-height:0; display:flex; flex-direction:column;}
 .hr011-detail-wrap .hr011-ref-card-head--skill,
-.hr011-detail-wrap .hr011-ref-skill-detail-head {display:flex; align-items:flex-start; justify-content:space-between; gap:14px; margin-bottom:12px;}
+.hr011-detail-wrap .hr011-ref-skill-detail-head {display:flex; align-items:center; justify-content:space-between; gap:14px; margin-bottom:12px;}
 .hr011-detail-wrap .hr011-ref-card-headline {display:grid; gap:4px; min-width:0;}
+.hr011-detail-wrap .hr011-ref-card-headline-row {display:inline-flex; align-items:center; gap:8px; flex-wrap:nowrap; min-width:0; width:fit-content;}
 .hr011-detail-wrap .hr011-ref-card-head--skill h5,
 .hr011-detail-wrap .hr011-ref-skill-detail-head h6 {margin-bottom:0;}
+.hr011-detail-wrap .hr011-ref-card-headline-row h5,
+.hr011-detail-wrap .hr011-ref-card-headline-row h6 {margin:0; line-height:1.12;}
 .hr011-detail-wrap .hr011-ref-card-headline p {margin:0; font-size:13px; color:#7186a5; font-weight:700; line-height:1.45;}
 .hr011-detail-wrap .hr011-ref-card-head-actions {display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:flex-end;}
-.hr011-detail-wrap .hr011-ref-skill-card-meta {display:inline-flex; align-items:center; min-height:30px; padding:0 10px; border-radius:999px; background:#eef4ff; color:#2f5388; font-size:12px; font-weight:900; white-space:nowrap;}
+.hr011-detail-wrap .hr011-ref-skill-card-meta {display:inline-flex; align-items:center; min-height:30px; padding:0 10px; border-radius:999px; background:#eef4ff; color:#2f5388; font-size:14px; font-weight:900; white-space:nowrap;}
 .hr011-detail-wrap .hr011-ref-skill-grid-wrap {flex:1 1 auto; min-height:0; overflow:auto; padding-right:4px;}
 .hr011-detail-wrap .hr011-ref-skill-grid-wrap--detail {padding-right:0;}
 .hr011-detail-wrap .hr011-ref-skill-card-grid {display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:12px; align-content:start; align-items:stretch; grid-auto-rows:minmax(168px, auto);}
