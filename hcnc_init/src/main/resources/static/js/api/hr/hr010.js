@@ -5,7 +5,6 @@
 // 상태
 let currentHr010UserTypeTab = "all";
 let currentHr010ViewMode = "card";
-let hr010FilterCollapsed = false;
 let hr010SourceRows = [];
 let hr010LastRenderedRows = [];
 let keywordTags = [];
@@ -13,6 +12,10 @@ let hr010TagSuggestions = [];
 let hr010ActiveSuggestionIndex = -1;
 let hr010SuggestionHideTimer = null;
 let hr010SuggestionInputTimer = null;
+let hr010DropdownSectionState = {
+    skl_grp: {},
+    grade: {}
+};
 const selectedFilters = {
     skl_grp: [],
     ctrt_typ: [],
@@ -32,8 +35,6 @@ try {
 } catch (error) {
     currentHr010ViewMode = "card";
 }
-
-hr010FilterCollapsed = false;
 
 // ==============================
 // 초기화
@@ -67,10 +68,6 @@ $(document).ready(async function () {
 function bindEvents() {
     $("#hr010CreateBtn").on("click", function () {
         window.location.href = "/hr011?mode=insert";
-    });
-
-    $("#hr010FilterCollapseBtn, #hr010FilterExpandBtn").on("click", function () {
-        setHr010FilterCollapsed(!hr010FilterCollapsed);
     });
 
     $("#hr010FilterRefreshBtn").on("click", function () {
@@ -208,6 +205,25 @@ function bindEvents() {
     });
 
     // 아코디언 항목 선택
+    $(document).on("click", ".dropdown-menu__section", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const $dropdown = $(this).closest(".dropdown");
+        const sectionKey = String($(this).data("sectionKey") || "").trim();
+        if (!$dropdown.length || !sectionKey) return;
+
+        if ($dropdown.hasClass("dropdown-skl-grp")) {
+            toggleHr010DropdownSection("skl_grp", sectionKey);
+            return;
+        }
+
+        if ($dropdown.hasClass("dropdown-grade")) {
+            toggleHr010DropdownSection("grade", sectionKey);
+        }
+    });
+
+    // 아코디언 항목 선택
     $(document).on("click", ".dropdown-menu li", function (e) {
         e.stopPropagation();
         const dropdown = $(this).closest(".dropdown");
@@ -258,50 +274,12 @@ function syncHr010ViewToggle() {
 function syncHr010FilterSidebar() {
     const shell = document.querySelector(".contents-wrap.hr010-dashboard-wrap");
     const filterEl = document.getElementById("hr010SmartFilter");
-    const collapseBtn = document.getElementById("hr010FilterCollapseBtn");
-    const expandBtn = document.getElementById("hr010FilterExpandBtn");
     if (!filterEl) return;
 
-    filterEl.classList.toggle("is-collapsed", !!hr010FilterCollapsed);
     if (shell) {
-        shell.classList.toggle("is-filter-collapsed", !!hr010FilterCollapsed);
+        shell.classList.remove("is-filter-collapsed");
     }
-    if (collapseBtn) {
-        collapseBtn.setAttribute("aria-expanded", hr010FilterCollapsed ? "false" : "true");
-    }
-    if (expandBtn) {
-        expandBtn.setAttribute("aria-expanded", hr010FilterCollapsed ? "true" : "false");
-    }
-}
-
-function setHr010FilterCollapsed(nextCollapsed) {
-    const shell = document.querySelector(".contents-wrap.hr010-dashboard-wrap");
-    const filterEl = document.getElementById("hr010SmartFilter");
-    const collapseBtn = document.getElementById("hr010FilterCollapseBtn");
-    const expandBtn = document.getElementById("hr010FilterExpandBtn");
-
-    if (!filterEl || hr010FilterCollapsed === !!nextCollapsed) {
-        return;
-    }
-
-    hr010FilterCollapsed = !!nextCollapsed;
-    try {
-        window.localStorage.setItem("hr010FilterCollapsed", String(hr010FilterCollapsed));
-    } catch (error) {
-        // localStorage 사용 불가 시 무시
-    }
-    $(".dropdown").removeClass("open");
-    if (collapseBtn) {
-        collapseBtn.setAttribute("aria-expanded", hr010FilterCollapsed ? "false" : "true");
-    }
-    if (expandBtn) {
-        expandBtn.setAttribute("aria-expanded", hr010FilterCollapsed ? "true" : "false");
-    }
-
-    filterEl.classList.toggle("is-collapsed", hr010FilterCollapsed);
-    if (shell) {
-        shell.classList.toggle("is-filter-collapsed", hr010FilterCollapsed);
-    }
+    filterEl.classList.remove("is-collapsed");
 }
 
 // 카드/리스트 보기 전환
@@ -498,11 +476,17 @@ function resetHr010Filters() {
     $(".toggle-filter-chip").removeClass("is-active");
     $('.toggle-filter-chip[data-user-type="all"]').addClass("is-active");
 
+    hr010DropdownSectionState = {
+        skl_grp: {},
+        grade: {}
+    };
+
     renderSelectedTags();
     Object.keys(dropdownFilters).forEach(key => {
         if (key === "kosa_grd_cd") return;
         renderDropdown(key);
     });
+    $(".dropdown-skl-grp").addClass("open");
     applyFiltersAndRender();
 }
 
@@ -1715,6 +1699,39 @@ function renderDropdown(key) {
     updateDropdownButtonLabel(key);
 }
 
+function ensureHr010DropdownSectionState(groupKey, sectionKeys) {
+    if (!groupKey) return;
+
+    const groupState = hr010DropdownSectionState[groupKey] || (hr010DropdownSectionState[groupKey] = {});
+    const nextKeys = new Set((Array.isArray(sectionKeys) ? sectionKeys : []).map(value => String(value)));
+
+    Object.keys(groupState).forEach(existingKey => {
+        if (!nextKeys.has(existingKey)) {
+            delete groupState[existingKey];
+        }
+    });
+
+    nextKeys.forEach(sectionKey => {
+        if (typeof groupState[sectionKey] === "undefined") {
+            groupState[sectionKey] = true;
+        }
+    });
+}
+
+function isHr010DropdownSectionOpen(groupKey, sectionKey) {
+    const groupState = hr010DropdownSectionState[groupKey] || {};
+    return groupState[String(sectionKey)] !== false;
+}
+
+function toggleHr010DropdownSection(groupKey, sectionKey) {
+    if (!groupKey || !sectionKey) return;
+
+    const groupState = hr010DropdownSectionState[groupKey] || (hr010DropdownSectionState[groupKey] = {});
+    const normalizedKey = String(sectionKey);
+    groupState[normalizedKey] = !isHr010DropdownSectionOpen(groupKey, normalizedKey);
+    renderDropdown(groupKey);
+}
+
 // 일반 단일 레벨 드롭다운 렌더링
 function renderFlatDropdown($menu, key) {
     const config = dropdownFilters[key];
@@ -1741,6 +1758,9 @@ function renderFlatDropdown($menu, key) {
 function renderSkillDropdown($menu) {
     const config = dropdownFilters.skl_grp;
     const selectedValues = selectedFilters.skl_grp || [];
+    const sectionKeys = (config.sections || []).map(section => String(section.cd || section.cd_nm || ""));
+
+    ensureHr010DropdownSectionState("skl_grp", sectionKeys);
 
     $menu.append(`
         <li data-key="skl_grp" data-cd="" class="${selectedValues.length ? "" : "active"}">
@@ -1749,16 +1769,27 @@ function renderSkillDropdown($menu) {
     `);
 
     config.sections.forEach(section => {
-        $menu.append(`<li class="dropdown-menu__section is-disabled">${section.cd_nm}</li>`);
+        const sectionKey = String(section.cd || section.cd_nm || "");
+        if (!sectionKey) return;
+        const isOpen = isHr010DropdownSectionOpen("skl_grp", sectionKey);
+        const itemMarkup = section.items.map(item => `
+            <li data-key="skl_grp" data-cd="${item.cd}" class="dropdown-menu__child ${selectedValues.includes(item.cd) ? "active" : ""}">
+                <span class="dropdown-menu__indent">ㄴ</span>
+                <span>${escapeHtml(item.cd_nm || "")}</span>
+            </li>
+        `).join("");
 
-        section.items.forEach(item => {
-            $menu.append(`
-                <li data-key="skl_grp" data-cd="${item.cd}" class="dropdown-menu__child ${selectedValues.includes(item.cd) ? "active" : ""}">
-                    <span class="dropdown-menu__indent">ㄴ</span>
-                    <span>${item.cd_nm}</span>
-                </li>
-            `);
-        });
+        $menu.append(`
+            <li class="dropdown-menu__section-group ${isOpen ? "is-open" : "is-collapsed"}" data-section-key="${escapeHtml(sectionKey)}">
+                <button type="button" class="dropdown-menu__section" data-section-key="${escapeHtml(sectionKey)}" aria-expanded="${isOpen ? "true" : "false"}">
+                    <span class="dropdown-menu__section-label">${escapeHtml(section.cd_nm || "")}</span>
+                    <span class="dropdown-menu__section-arrow" aria-hidden="true"></span>
+                </button>
+                <ul class="dropdown-menu__section-list" aria-hidden="${isOpen ? "false" : "true"}">
+                    ${itemMarkup}
+                </ul>
+            </li>
+        `);
     });
 }
 
@@ -1767,6 +1798,9 @@ function renderGradeDropdown($menu) {
     const gradeValues = selectedFilters.grade || [];
     const kosaValues = selectedFilters.kosa_grd_cd || [];
     const totalSelected = gradeValues.length + kosaValues.length;
+    const sectionKeys = ["grade", "kosa"];
+
+    ensureHr010DropdownSectionState("grade", sectionKeys);
 
     $menu.append(`
         <li data-key="grade_all" data-cd="" class="${totalSelected ? "" : "active"}">
@@ -1774,25 +1808,46 @@ function renderGradeDropdown($menu) {
         </li>
     `);
 
-    $menu.append(`<li class="dropdown-menu__section is-disabled">등급</li>`);
-    dropdownFilters.grade.options.forEach(option => {
-        $menu.append(`
-            <li data-key="grade" data-cd="${option.cd}" class="dropdown-menu__child ${gradeValues.includes(option.cd) ? "active" : ""}">
-                <span class="dropdown-menu__indent">ㄴ</span>
-                <span>${option.cd_nm}</span>
-            </li>
-        `);
-    });
+    const gradeOpen = isHr010DropdownSectionOpen("grade", "grade");
+    const kosaOpen = isHr010DropdownSectionOpen("grade", "kosa");
 
-    $menu.append(`<li class="dropdown-menu__section is-disabled">KOSA</li>`);
-    dropdownFilters.kosa_grd_cd.options.forEach(option => {
-        $menu.append(`
-            <li data-key="kosa_grd_cd" data-cd="${option.cd}" class="dropdown-menu__child ${kosaValues.includes(option.cd) ? "active" : ""}">
-                <span class="dropdown-menu__indent">ㄴ</span>
-                <span>${option.cd_nm}</span>
-            </li>
-        `);
-    });
+    const gradeMarkup = (dropdownFilters.grade.options || []).map(option => `
+        <li data-key="grade" data-cd="${option.cd}" class="dropdown-menu__child ${gradeValues.includes(option.cd) ? "active" : ""}">
+            <span class="dropdown-menu__indent">ㄴ</span>
+            <span>${escapeHtml(option.cd_nm || "")}</span>
+        </li>
+    `).join("");
+
+    const kosaMarkup = (dropdownFilters.kosa_grd_cd.options || []).map(option => `
+        <li data-key="kosa_grd_cd" data-cd="${option.cd}" class="dropdown-menu__child ${kosaValues.includes(option.cd) ? "active" : ""}">
+            <span class="dropdown-menu__indent">ㄴ</span>
+            <span>${escapeHtml(option.cd_nm || "")}</span>
+        </li>
+    `).join("");
+
+    $menu.append(`
+        <li class="dropdown-menu__section-group ${gradeOpen ? "is-open" : "is-collapsed"}" data-section-key="grade">
+            <button type="button" class="dropdown-menu__section" data-section-key="grade" aria-expanded="${gradeOpen ? "true" : "false"}">
+                <span class="dropdown-menu__section-label">등급</span>
+                <span class="dropdown-menu__section-arrow" aria-hidden="true"></span>
+            </button>
+            <ul class="dropdown-menu__section-list" aria-hidden="${gradeOpen ? "false" : "true"}">
+                ${gradeMarkup}
+            </ul>
+        </li>
+    `);
+
+    $menu.append(`
+        <li class="dropdown-menu__section-group ${kosaOpen ? "is-open" : "is-collapsed"}" data-section-key="kosa">
+            <button type="button" class="dropdown-menu__section" data-section-key="kosa" aria-expanded="${kosaOpen ? "true" : "false"}">
+                <span class="dropdown-menu__section-label">KOSA</span>
+                <span class="dropdown-menu__section-arrow" aria-hidden="true"></span>
+            </button>
+            <ul class="dropdown-menu__section-list" aria-hidden="${kosaOpen ? "false" : "true"}">
+                ${kosaMarkup}
+            </ul>
+        </li>
+    `);
 }
 
 // 선택 개수에 맞춰 드롭다운 버튼 문구 갱신
@@ -1809,7 +1864,10 @@ function updateDropdownButtonLabel(key) {
         ? `${config.label} (${selectedValues.length})`
         : config.label;
 
-    $button.html(`${label} <span>▼</span>`);
+    $button.html(`
+        <span class="dropdown-btn__label">${label}</span>
+        <span class="dropdown-btn__arrow" aria-hidden="true"></span>
+    `);
 }
 
 // 연관된 드롭다운 렌더링 갱신

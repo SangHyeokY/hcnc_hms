@@ -14,6 +14,8 @@
   --hcnc-shell-primary: #4f6ff7;
   --hcnc-shell-primary-strong: #3f5ed8;
   --hcnc-shell-shadow: 0 18px 42px rgba(44, 36, 24, 0.08);
+  --hcnc-font-display: "Paperlogy", "Paperlogy-7Bold", "Paperlogy-7", "Paperlogy-5Medium", "Pretendard Variable", "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif;
+  --hcnc-font-body: "Inter", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif;
 }
 
 /*=================================================================================
@@ -25,7 +27,7 @@
 body {background: var(--hcnc-shell-bg); color: var(--hcnc-shell-text);}
 
 .container-wrap {
-  --hcnc-header-height: 78px;
+  --hcnc-header-height: 72px;
   --hcnc-sidebar-width: 88px;
   --hcnc-lnb-width: var(--hcnc-sidebar-width);
   --hcnc-contents-pad: 28px;
@@ -43,7 +45,7 @@ body {background: var(--hcnc-shell-bg); color: var(--hcnc-shell-text);}
 
 .container-wrap .container .contents-wrap {
   min-height: 100vh;
-  padding: calc(var(--hcnc-header-height) + 28px) var(--hcnc-contents-pad) var(--hcnc-contents-pad);
+  padding: calc(var(--hcnc-header-height) + 24px) var(--hcnc-contents-pad) var(--hcnc-contents-pad);
   display:grid;
   gap:20px;
   grid-auto-rows: 36px auto;
@@ -123,7 +125,7 @@ header .header-topbar {
   left: 0;
   right: 0;
   height: var(--hcnc-header-height);
-  padding: 0 28px 0 24px;
+  padding: 0 24px 0 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -131,38 +133,29 @@ header .header-topbar {
   background: #ffffff;
   backdrop-filter: none;
   border-bottom: 1px solid var(--hcnc-shell-line);
-  box-shadow: 0 8px 22px rgba(44, 36, 24, 0.04);
+  box-shadow: none;
   z-index: 310;
 }
 header .header-brand {
   min-width: 0;
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
 }
 header .header-brand .logo a {
   height: auto;
 }
 header .header-brand .logo a img {
-  height: 34px;
+  height: 32px;
   margin: 0;
 }
 header .logo-sub {display: flex; align-items: center;}
-header .logo-sub .sub-box {
-  display: inline-flex;
-  align-items: center;
-  color: var(--hcnc-shell-text);
-  padding: 0;
-  font-weight: 700;
-  margin-top: 0;
-  font-size: 28px;
-  letter-spacing: -0.04em;
-}
+header .logo-sub .sub-box {display:inline-flex; align-items:center; color:var(--hcnc-shell-text); padding:0; font-family:var(--hcnc-font-display); font-weight:700; margin-top:0; font-size:26px; line-height:1; letter-spacing:-0.02em; color:#000000;}
 header .header-tools {
   margin-left: auto;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 header .header-tools .is-hidden {
   display: none !important;
@@ -278,11 +271,11 @@ footer {width:100%; height:30px; line-height: 30px; padding:0 20px; display: fle
   left: 0;
   bottom: 0;
   width: var(--hcnc-sidebar-width);
-  padding: 22px 10px 16px;
+  padding: 18px 0 16px;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.97);
+  background: #ffffff;
   border-right: 1px solid var(--hcnc-shell-line);
-  box-shadow: 14px 0 28px rgba(44, 36, 24, 0.06);
+  box-shadow: none;
   transition: transform 0.28s cubic-bezier(0.22,1,0.36,1), box-shadow 0.28s ease;
   z-index: 280;
 }
@@ -291,7 +284,7 @@ footer {width:100%; height:30px; line-height: 30px; padding:0 20px; display: fle
   height: 100%;
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 0;
   opacity: 1;
   transition: opacity 0.18s ease;
 }
@@ -480,7 +473,7 @@ footer {width:100%; height:30px; line-height: 30px; padding:0 20px; display: fle
 .profile-area .alarm .bell-btn{padding:12px; background:#EDEFF5; border:none; border-radius: 8px;}
 .profile-area .alarm .bell-btn .ico-bell{display:inline-block; width:20px; height:20px; background:url('../icons/lnb-ico-alarm.png')center center no-repeat; background-size:contain;}
 
-.left-menu {width:100%; padding: 4px 0 0; min-height: 0; flex: 1 1 auto;}
+.left-menu {width:100%; padding: 0; min-height: 0; flex: 1 1 auto;}
 .left-menu .nav {height:100%;overflow:auto;}
 /*.lnb-menu span {font-size: 18px;}*/
 .app-sidebar.left-menu .app-nav.nav {opacity: 1; transform: translateX(0); transition: opacity 0.24s ease, transform 0.28s cubic-bezier(0.22,1,0.36,1);}
@@ -504,8 +497,9 @@ footer {width:100%; height:30px; line-height: 30px; padding:0 20px; display: fle
   gap: 8px;
   padding: 8px 4px 10px;
   min-height: 86px;
+  font-family: var(--hcnc-font-body);
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 500;
   color: var(--hcnc-shell-text);
   border: 0;
   border-radius: 18px;
@@ -542,8 +536,11 @@ footer {width:100%; height:30px; line-height: 30px; padding:0 20px; display: fle
   display: block;
   max-width: 84px;
   min-height: 30px;
+  font-family: var(--hcnc-font-body);
   font-size: 12px;
-  line-height: 1.35;
+  font-weight: 500;
+  line-height: 1.33;
+  letter-spacing: -0.01em;
   text-align: center;
   white-space: normal;
   word-break: keep-all;
@@ -563,7 +560,7 @@ footer {width:100%; height:30px; line-height: 30px; padding:0 20px; display: fle
 .left-menu .nav .lnb-menu .dep1 > li > a[data-icon="employee"]:hover .menu-icon::before,
 .left-menu .nav .lnb-menu .dep1 > li.on > a[data-icon="employee"] .menu-icon::before {filter: brightness(0) invert(1);}
 
-.left-menu .nav .lnb-menu .dep1 > li.on > a {background-color: transparent !important; color:var(--hcnc-shell-text); font-weight: 800;}
+.left-menu .nav .lnb-menu .dep1 > li.on > a {background-color: transparent !important; color:var(--hcnc-shell-text); font-weight: 600;}
 .left-menu .nav .lnb-menu .dep1 > li.on > a .menu-icon {
   background-color: var(--hcnc-shell-primary);
   box-shadow: 0 14px 24px rgba(79, 111, 247, 0.22);
