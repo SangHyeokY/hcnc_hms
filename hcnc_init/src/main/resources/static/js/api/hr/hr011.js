@@ -2309,18 +2309,21 @@ function buildHr011ProfileDetailMarkup() {
         ["경력", row.exp_yr ? formatCareerYearMonth(row.exp_yr) : "-"]
     ];
     const basicRows = [
-        ["성명", row.dev_nm || "-"],
-        ["구분", resolveHr011DevTypeValue(row) === "HCNC_F" ? "프리랜서" : "직원"],
-        ["생년월일", row.brdt || "-"],
-        ["연락처", row.tel || "-"],
-        ["이메일", row.email || "-"],
-        ["근무가능형태", hr011MainSelectMaps.workMd[row.work_md] || row.work_md || "-"],
+        // ["성명", row.dev_nm || "-"],
+        // ["구분", resolveHr011DevTypeValue(row) === "HCNC_F" ? "프리랜서" : "직원"],
+        // ["연락처", row.tel || "-"],
+        // ["이메일", row.email || "-"],
+        // ["근무가능형태", hr011MainSelectMaps.workMd[row.work_md] || row.work_md || "-"],
+        ["개발자 ID", row.dev_id],
         ["계약형태", hr011MainSelectMaps.ctrtTyp[row.ctrt_typ] || row.ctrt_typ || "-"],
-        ["KOSA 등급", hr011MainSelectMaps.kosa[row.kosa_grd_cd] || row.kosa_grd_cd || "-"],
-        ["주요 분야", hr011MainSelectMaps.mainFld[row.main_fld_cd] || row.main_fld_cd || "-"],
+        // ["KOSA 등급", hr011MainSelectMaps.kosa[row.kosa_grd_cd] || row.kosa_grd_cd || "-"],
+        // ["주요 분야", hr011MainSelectMaps.mainFld[row.main_fld_cd] || row.main_fld_cd || "-"],
         ["주요 고객사", hr011MainSelectMaps.mainCust[row.main_cust_cd] || row.main_cust_cd || "-"],
-        ["보유 자격증", row.cert_txt || "-"],
-        ["등급", `${$.trim($("#grade").text() || "-")} ${$.trim($("#score").text() || "")}`.trim()]
+        // ["보유 자격증", row.cert_txt || "-"],
+        // ["등급", `${$.trim($("#grade").text() || "-")} ${$.trim($("#score").text() || "")}`.trim()]
+        ["거주지역", hr011MainSelectMaps.sido[row.sido_cd] || row.sido_cd || "-"],
+        ["생년월일", row.brdt || "-"],
+        ["최종학력", row.edu_last || "-"]
     ];
 
     return [
