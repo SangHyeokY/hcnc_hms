@@ -3324,6 +3324,10 @@ section.search-area .search-info #searchConditionKeyword { /* 새 검색어 입�
   border-bottom-left-radius:0;
   box-shadow:0 14px 24px rgba(24, 46, 82, 0.09);
 }
+.hr011-detail-wrap .hr011-page.is-insert-mode .hr011-edit-mini-profile {
+  visibility:hidden;
+  pointer-events:none;
+}
 .hr011-detail-wrap .hr011-page-action-buttons {display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:flex-end;}
 .hr011-detail-wrap .hr011-edit-mini-profile {display:flex; align-items:center; gap:10px; min-width:0;}
 .hr011-detail-wrap .hr011-edit-mini-profile .avatar {
@@ -3352,7 +3356,8 @@ section.search-area .search-info #searchConditionKeyword { /* 새 검색어 입�
 }
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-dashboard-grid {
   grid-template-columns:minmax(0, 1fr);
-  gap:52px;
+  gap:86px;
+  padding-bottom:120px;
 }
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-sector--full {grid-column:1 / -1;}
 .hr011-detail-wrap .hr011-dashboard-columns {
@@ -3561,6 +3566,7 @@ section.search-area .search-info #searchConditionKeyword { /* 새 검색어 입�
   align-items:center;
   justify-content:space-between;
   gap:12px;
+  scroll-margin-top:126px;
 }
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section-head > div:first-child {min-width:0;}
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section {
@@ -3569,6 +3575,7 @@ section.search-area .search-info #searchConditionKeyword { /* 새 검색어 입�
   border:1px solid #d7e2f4;
   background:linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
   box-shadow:0 12px 24px rgba(24, 46, 82, 0.07), inset 0 1px 0 rgba(255,255,255,0.88);
+  scroll-margin-top:126px;
 }
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-dashboard-grid {
   margin-left:312px;
@@ -3691,8 +3698,11 @@ section.search-area .search-info #searchConditionKeyword { /* 새 검색어 입�
   min-height:42px;
   font-size:15px;
 }
-.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section[data-edit-step="skill"] {margin-bottom:16px;}
-.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section[data-edit-step="project"] {margin-top:16px;}
+.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section[data-edit-step="skill"] {
+  margin-bottom:220px;
+  min-height:320px;
+}
+.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section[data-edit-step="project"] {margin-top:0;}
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-profile-section .hr011-field-card input:focus,
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-profile-section .hr011-field-card select:focus,
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-profile-section .hr011-field-card textarea:focus {
@@ -4066,6 +4076,7 @@ section.search-area .search-info #searchConditionKeyword { /* 새 검색어 입�
   .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-dashboard-grid {margin-left:0; gap:30px;}
   .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section[data-edit-step="skill"],
   .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section[data-edit-step="project"] {margin-top:0; margin-bottom:0;}
+  .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section[data-edit-step="skill"] {min-height:280px;}
   .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section[data-edit-step="project"] {margin-left:0; margin-right:0;}
   .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section[data-edit-step="project"] #TABLE_HR013_A .tabulator-table {min-width:1360px !important;}
   .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section-body .tab4-content .hr014-toolbar-01 .hr014-title-wrap {flex-wrap:wrap;}

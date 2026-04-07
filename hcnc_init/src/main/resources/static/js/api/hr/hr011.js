@@ -881,7 +881,7 @@ let hr011CurrentEditStepKey = HR011_EDIT_STEP_KEYS[0];
 let hr011EditStepScrollBound = false;
 let hr011EditStepRafId = null;
 let hr011EditStepExtraScrollBound = false;
-const HR011_EDIT_STEP_ACTIVE_OFFSET = 56;
+const HR011_EDIT_STEP_ACTIVE_OFFSET = 96;
 let hr011RefCurrentView = "overview";
 let hr011RefProjectEvalCache = new Map();
 let hr011RefProjectRadarCharts = new Map();
@@ -1926,6 +1926,7 @@ function setHr011ActiveEditStep(stepKey) {
     if (totalEl) totalEl.textContent = String(visibleStepKeys.length || HR011_EDIT_STEP_KEYS.length);
 
     syncHr011EditStepStatus();
+    ensureHr011ActiveStepButtonVisible(normalized);
 }
 
 // function getHr011StepIndex(stepKey) {
@@ -1950,11 +1951,69 @@ function scrollHr011SectionIntoView(section) {
     if (!section) return;
     const header = document.querySelector(".hr011-page.is-edit-mode .hr011-page-actions--bottom");
     const headerRect = header ? header.getBoundingClientRect() : null;
-    const headerHeight = headerRect ? Math.max(headerRect.height, 64) : 64;
-    const offset = headerHeight + 18;
+    const headerBottom = headerRect ? headerRect.bottom : 0;
+    const offset = Math.max(headerBottom + 24, 148);
     const currentY = window.pageYOffset || window.scrollY || 0;
     const targetY = Math.max(0, section.getBoundingClientRect().top + currentY - offset);
     window.scrollTo({ top: targetY, behavior: "smooth" });
+}
+
+function ensureHr011ActiveStepButtonVisible(stepKey) {
+    const stepper = document.querySelector(".hr011-page.is-edit-mode .hr011-edit-stepper");
+    if (!stepper) return;
+    const btn = stepper.querySelector(`.hr011-edit-step-btn[data-step-target="${stepKey}"]`);
+    if (!btn || btn.hidden) return;
+
+    const btnTop = btn.offsetTop;
+    const btnBottom = btnTop + btn.offsetHeight;
+    const viewTop = stepper.scrollTop;
+    const viewBottom = viewTop + stepper.clientHeight;
+    const pad = 12;
+
+    if (btnTop < viewTop + pad) {
+        stepper.scrollTo({ top: Math.max(0, btnTop - pad), behavior: "smooth" });
+    } else if (btnBottom > viewBottom - pad) {
+        stepper.scrollTo({ top: Math.max(0, btnBottom - stepper.clientHeight + pad), behavior: "smooth" });
+    }
+}
+
+function getHr011EditScrollRoots(stepper) {
+    const roots = [];
+    const seen = new Set();
+    const pushRoot = function (root) {
+        if (!root || seen.has(root)) return;
+        seen.add(root);
+        roots.push(root);
+    };
+
+    pushRoot(window);
+    pushRoot(document.scrollingElement || document.documentElement);
+
+    let node = stepper ? stepper.parentElement : null;
+    while (node && node !== document.body && node !== document.documentElement) {
+        const style = window.getComputedStyle(node);
+        const overflowY = String(style.overflowY || style.overflow || "");
+        const canScroll = /(auto|scroll|overlay)/.test(overflowY) && node.scrollHeight > node.clientHeight + 4;
+        if (canScroll) {
+            pushRoot(node);
+        }
+        node = node.parentElement;
+    }
+
+    const extras = [
+        document.querySelector(".contents-wrap.hr011-detail-wrap"),
+        document.querySelector(".container-wrap .container")
+    ];
+    extras.forEach(function (el) {
+        if (!el) return;
+        const style = window.getComputedStyle(el);
+        const overflowY = String(style.overflowY || style.overflow || "");
+        if (/(auto|scroll|overlay)/.test(overflowY) || el.scrollHeight > el.clientHeight + 4) {
+            pushRoot(el);
+        }
+    });
+
+    return roots;
 }
 
 function getHr011VisibleStepKeys() {
@@ -1976,11 +2035,32 @@ function syncHr011ActiveStepByScroll() {
     if (!sections.length) return;
     const header = document.querySelector(".hr011-page.is-edit-mode .hr011-page-actions--bottom");
     const headerRect = header ? header.getBoundingClientRect() : null;
-    const anchorY = (headerRect ? headerRect.bottom : 0) + HR011_EDIT_STEP_ACTIVE_OFFSET;
+    const anchorY = Math.max(
+        (headerRect ? headerRect.bottom : 0) + HR011_EDIT_STEP_ACTIVE_OFFSET,
+        Math.round(window.innerHeight * 0.30)
+    );
+
+    if (hr011Mode === "insert") {
+        const skillSection = sections.find(function (section) {
+            return String(section.getAttribute("data-edit-step") || "") === "skill";
+        });
+        const projectSection = sections.find(function (section) {
+            return String(section.getAttribute("data-edit-step") || "") === "project";
+        });
+        if (skillSection && projectSection) {
+            const skillHead = skillSection.querySelector(".hr011-section-head") || skillSection;
+            const skillHeadRect = skillHead.getBoundingClientRect();
+            if (skillHeadRect.bottom <= anchorY) {
+                setHr011ActiveEditStep("project");
+                return;
+            }
+        }
+    }
+
     let active = sections[0];
     sections.forEach(function (section) {
-        const top = section.getBoundingClientRect().top;
-        if (top <= anchorY) {
+        const rect = section.getBoundingClientRect();
+        if (rect.top <= anchorY) {
             active = section;
         }
     });
@@ -2168,12 +2248,13 @@ function initHr011EditStepNavigation(isEditable) {
     }
     if (!hr011EditStepExtraScrollBound) {
         hr011EditStepExtraScrollBound = true;
-        const candidates = [
-            document.querySelector(".contents-wrap.hr011-detail-wrap"),
-            document.querySelector(".container-wrap .container")
-        ].filter(Boolean);
-        candidates.forEach(function (el) {
-            el.addEventListener("scroll", requestHr011ActiveStepSync, { passive: true });
+        const scrollRoots = getHr011EditScrollRoots(stepper);
+        scrollRoots.forEach(function (root) {
+            if (root === window) {
+                window.addEventListener("scroll", requestHr011ActiveStepSync, { passive: true });
+                return;
+            }
+            root.addEventListener("scroll", requestHr011ActiveStepSync, { passive: true });
         });
     }
 
