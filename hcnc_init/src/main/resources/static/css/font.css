@@ -1,3 +1,7 @@
+@font-face {font-family:'Paperlogy'; src:local('Paperlogy-5Medium'), local('Paperlogy Medium'), local('Paperlogy'); font-weight:500; font-style:normal; font-display:swap;}
+@font-face {font-family:'Paperlogy'; src:local('Paperlogy-7Bold'), local('Paperlogy Bold'), local('Paperlogy'); font-weight:700; font-style:normal; font-display:swap;}
+@font-face {font-family:'Paperlogy-5Medium'; src:local('Paperlogy-5Medium'), local('Paperlogy Medium'), local('Paperlogy'); font-weight:500; font-style:normal; font-display:swap;}
+@font-face {font-family:'Paperlogy-7Bold'; src:local('Paperlogy-7Bold'), local('Paperlogy Bold'), local('Paperlogy'); font-weight:700; font-style:normal; font-display:swap;}
 @font-face {
   font-family: 'Inter';
   src: url('/font/Inter/Inter_18pt-Thin.ttf') format('truetype');
