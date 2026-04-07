@@ -5,6 +5,13 @@
 // 모달
 var $modal = $("#view-user-area");
 
+// 주 개발언어 태그 입력 공통 모듈
+var mainLangTagInput = null;
+var pendingMainLangValue = "";
+var mainLangPicker = null;
+var mainLangSkillOptions = [];
+var mainLangGroupOptions = [];
+
 // view일 때는 수정 불가, update일 때는 수정 가능
 $(document).on("tab:readonly.hr011", function (_, isReadOnly) {
     if (isReadOnly) {
@@ -18,6 +25,9 @@ $(document).on("tab:readonly.hr011", function (_, isReadOnly) {
     } else {
         setHr011Mode(window.hr011EditUnlocked ? "update" : "view", { silent: true });
     }
+    
+    // 주개발 초기화
+    initMainLangTags();
 
     // ESC 누르면 모달 닫힘
     $(document).on("keydown", function (event) {
@@ -128,6 +138,7 @@ function setHr011Mode(mode, options) {
     $("#hr011EditBtnView").toggle(isView);
     $("#hr011CancelBtnView").toggle(!isView);
     $("#hr011SaveBtnView").prop("hidden", isView).toggle(!isView);
+    $("#btn-excel").toggle(isView);
     if (isEditable && !wasEditable) {
         requestAnimationFrame(function () {
             animateHr011EditDashboard();
@@ -256,7 +267,7 @@ function loadHr011TableData(devId) {
                 console.log("데이터 조회 실패");
                 clearHr011Form();
                 setHr011Mode("insert");
-                resolve(); // 에러여도 resolve
+                resolve();
             }
         });
     });
@@ -1346,6 +1357,7 @@ async function loadHr011MainDetail(devId) {
         throw new Error("상세 데이터를 찾을 수 없습니다.");
     }
 
+    console.log("조회된 데이터 : " ,response.res);
     hr011CurrentRow = row;
 
     fillHr011MainForm(row);
@@ -3045,26 +3057,105 @@ function renderHr011RefRadarChart() {
     }, true);
 }
 
-// function buildHr011StarSuffix(skillName) {
-//     const normalized = String(skillName || "").trim().toLowerCase();
-//     if (!normalized) return "";
-//
-//     const skill = (hr011SummarySkillRows || []).find(function (item) {
-//         return String(item.name || "").trim().toLowerCase() === normalized;
-//     });
-//     const level = Math.max(0, Math.min(5, Number(skill?.level || 0)));
-//     if (!level) return "";
-//     return `(${buildHr011Stars(level)})`;
-// }
+// 주 개발언어 태그/팝업 초기화
+function initMainLangTags() {
+    if (!mainLangTagInput) {
+        mainLangTagInput = createTagInput({
+            inputSelector: "#main_lang_input",
+            listSelector: "#mainLangTagList",
+            hiddenSelector: "#main_lang",
+            getValue: function (item) { return item.cd; },
+            getLabel: function (item) { return item.cd_nm; },
+            matchMode: "prefix",
+            // 주개발언어는 x 삭제가 아닌 기술선택 팝업에서만 변경한다.
+            removable: false,
+            onTagChange: function () {
+                syncMainLangPickerUi();
+            }
+        });
+        initMainLangPicker();
+        bindMainLangPickerEvents();
+    }
 
-// function buildHr011Stars(level) {
-//     const clamped = Math.max(0, Math.min(5, Number(level) || 0));
-//     let text = "";
-//     for (let i = 1; i <= 5; i += 1) {
-//         text += i <= clamped ? "★" : "☆";
-//     }
-//     return text;
-// }
+    setComCode("main_lang_select", "skl_id", "", "cd", "cd_nm", function (res) {
+        mainLangSkillOptions = Array.isArray(res) ? res : [];
+        mainLangTagInput.setOptions(mainLangSkillOptions);
+        mainLangTagInput.setFromValue(pendingMainLangValue || $("#main_lang").val());
+        pendingMainLangValue = $("#main_lang").val() || pendingMainLangValue;
+        syncMainLangPickerUi(true);
+    });
+
+    getComCode("skl_grp", "", function (res) {
+        mainLangGroupOptions = Array.isArray(res) ? res : [];
+        syncMainLangPickerUi(true);
+    });
+}
+
+// 공통 팩토리 기반 주개발언어 선택 팝업 초기화
+function initMainLangPicker() {
+    if (mainLangPicker || typeof createGroupedSkillPicker !== "function") {
+        return;
+    }
+    mainLangPicker = createGroupedSkillPicker({
+        namespace: "main_lang",
+        pickerAreaSelector: "#main-lang-picker-area",
+        openTriggerSelector: "#main_lang_input, #btn_main_lang_picker",
+        applyTriggerSelector: "#btn_main_lang_picker_apply",
+        closeTriggerSelector: "#btn_main_lang_picker_close_x",
+        tableSelector: "#TABLE_MAIN_LANG_PICKER",
+        searchInputSelector: "#main-lang-picker-search",
+        searchWrapSelector: ".main-lang-picker-search-wrap",
+        suggestListSelector: "#main-lang-picker-suggest",
+        metaSelector: "#main-lang-picker-meta",
+        chipClass: "main-lang-skill-chip",
+        chipWrapClass: "main-lang-skill-chip-wrap",
+        suggestItemClass: "main-lang-suggest-item",
+        flashClass: "is-flash",
+        groupColumnWidth: 180,
+        getSkillOptions: function () {
+            return mainLangSkillOptions || [];
+        },
+        getGroupOptions: function () {
+            return mainLangGroupOptions || [];
+        },
+        getSelectedCodes: function () {
+            var set = new Set();
+            String($("#main_lang").val() || "")
+                .split(",")
+                .forEach(function (item) {
+                    var code = $.trim(item);
+                    if (code) {
+                        set.add(code);
+                    }
+                });
+            return set;
+        },
+        isReadonly: function () {
+            return currentMode === "view";
+        },
+        onApply: function (payload) {
+            if (mainLangTagInput) {
+                mainLangTagInput.setFromValue(payload.csv || "");
+            }
+            pendingMainLangValue = payload.csv || "";
+        }
+    });
+}
+
+// 팝업 이벤트는 공통 유틸이 네임스페이스로 1회만 등록한다.
+function bindMainLangPickerEvents() {
+    initMainLangPicker();
+    if (mainLangPicker) {
+        mainLangPicker.bindEvents();
+    }
+}
+
+function syncMainLangPickerUi(forceRebuild) {
+    if (!mainLangPicker) {
+        return;
+    }
+    mainLangPicker.sync(forceRebuild);
+}
 
 // 주개발언어 문자열을 분해해 요약에 사용할 값을 만든다.
 function splitHr011MainLang(row) {
@@ -3854,4 +3945,23 @@ function clampAmount(value) {
     const num = Number(value);
     if (!Number.isFinite(num)) return 0;
     return Math.min(num, 999999999999.99);
+}
+
+// 엑셀 다운로드 처리
+const excelBtn = document.getElementById("btn-excel");
+if (excelBtn) {
+    excelBtn.addEventListener("click", function () {
+        const devId = document.getElementById("dev_id").value;
+        const devNm = document.getElementById("dev_nm").value;
+        if (!devId) {
+            showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+                icon: 'error',
+                title: '오류',
+                html: `<strong>개발자ID</strong>가 없습니다.`
+            });
+            return;
+        }
+        location.href =
+            `/common/getExcel?dev_id=${encodeURIComponent(devId)}&dev_nm=${encodeURIComponent(devNm)}`;
+    });
 }

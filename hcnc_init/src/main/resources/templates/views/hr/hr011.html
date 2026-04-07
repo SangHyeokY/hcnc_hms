@@ -87,6 +87,7 @@
                                 <div class="hr011-ref-overview-summary" id="hr011RefOverviewSummary">보유 역량 요약</div>
                                 <div class="hr011-ref-actions-inline">
                                     <button type="button" class="btn hr011-page-btn hr011-page-btn--ghost" id="hr011BackBtnView">목록으로</button>
+                                    <button type="button" class="btn hr011-page-btn hr011-page-btn--ghost" id="btn-excel" onclick="location.href='/common/getExcel'">엑셀 다운로드</button>
                                     <button type="button" class="btn hr011-page-btn hr011-page-btn--ghost" id="hr011CancelBtnView" hidden>등록취소</button>
                                     <button type="button" class="btn hr011-page-btn hr011-page-btn--ghost" id="hr011EditBtnView">수정하기</button>
                                     <button type="button" class="btn hr011-page-btn hr011-page-btn--primary" id="hr011SaveBtnView" hidden>저장</button>
@@ -264,6 +265,22 @@
                             <label for="edu_last">최종학력</label>
                             <input type="text" id="edu_last" class="wp100">
                         </div>
+                        <!-- 주 개발언어 영역 -->
+                        <div class="hr011-field-card hr011-field-card--span2">
+                            <div style="display: flex; align-items: center; justify-content: space-between;">
+                                <label for="main_lang">주 개발언어</label>
+                                <span style="width: auto;">
+                                <button type="button" class="btn btn-add-skill btn-main-lang-picker" id="btn_main_lang_picker">
+                                    <img src="./images/common/btn_search_outlined.png" alt="기술 선택">
+                                    기술 선택
+                                </button>
+                            </span>
+                            </div>
+                            <div class="tag-input-box">
+                                <div class="tag-help"></div>
+                                <ul class="tag-list" id="mainLangTagList" style="flex-wrap: nowrap;"></ul>
+                            </div>
+                        </div>
                         <div class="hr011-field-card hr011-field-card--span2">
                             <label for="cert_txt">보유 자격증</label>
                             <textarea id="cert_txt" rows="3" class="wp100"></textarea>
@@ -362,7 +379,7 @@
     <div class="modal-wrap" id="main-lang-picker-area" style="display:none">
         <div class="modal-container main-lang-picker-container">
             <div class="header">
-                <h3 class="sub-title">주개발언어<span>선택</span></h3>
+                <h3 class="sub-title">주 개발언어<span>선택</span></h3>
                 <div class="btn-area">
                     <button class="close-btn" type="button" id="btn_main_lang_picker_close_x">
                         <img src="./icons/Icon-close.png" alt="" />
