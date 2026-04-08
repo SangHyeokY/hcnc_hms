@@ -642,12 +642,12 @@ option {
 }
 
 /* 프로젝트 탭, 평가 및 리스크 input 높이 */
-#TABLE_HR013_A input[type="date"],
-#TABLE_HR013_A input[type="text"],
-#TABLE_HR014_A input[type="text"] {
-  height: 30px !important;
-  line-height: normal;
-}
+/*#TABLE_HR013_A input[type="date"],*/
+/*#TABLE_HR013_A input[type="text"],*/
+/*#TABLE_HR014_A input[type="text"] {*/
+/*  height: 30px !important;*/
+/*  line-height: normal;*/
+/*}*/
 
 #TABLE_HR013_A input[type="date"] {
   width: 100% !important;
@@ -665,37 +665,36 @@ option {
   cursor: pointer;
 }
 
-#TABLE_HR013_A .tabulator-cell[data-field="job_cd"].tabulator-editing {
-  height: 44px;
-  overflow: hidden;
-  padding-top: 2px;
-  padding-bottom: 2px;
-  cursor: pointer;
-}
+/*#TABLE_HR013_A .tabulator-cell[data-field="job_cd"].tabulator-editing {*/
+/*  height: 44px;*/
+/*  overflow: hidden;*/
+/*  padding-top: 2px;*/
+/*  padding-bottom: 2px;*/
+/*  cursor: pointer;*/
+/*}*/
 
-#TABLE_HR013_A .tabulator-cell[data-field="job_cd"] select {
-  height: 35px;
-  line-height: 30px;
-  margin: 0;
+/*#TABLE_HR013_A .tabulator-cell[data-field="job_cd"] select {*/
+/*  height: 35px;*/
+/*  line-height: 30px;*/
+/*  margin: 0;*/
+/*}*/
 
-}
-
-#TABLE_HR013_A .tabulator-row .tabulator-cell[tabulator-field="cust_nm"],
-#TABLE_HR013_A .tabulator-row .tabulator-cell[tabulator-field="prj_nm"],
-#TABLE_HR013_A .tabulator-row .tabulator-cell[tabulator-field="skl_id_lst"],
-#TABLE_HR013_A .tabulator-row .tabulator-cell[data-field="cust_nm"],
-#TABLE_HR013_A .tabulator-row .tabulator-cell[data-field="prj_nm"],
-#TABLE_HR013_A .tabulator-row .tabulator-cell[data-field="skl_id_lst"] {
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  min-width: 0 !important;
-  height: auto !important;
-  line-height: 1.45 !important;
-  padding-top: 8px !important;
-  padding-bottom: 8px !important;
-  text-overflow: ellipsis !important;
-  word-break: normal !important;
-}
+/*#TABLE_HR013_A .tabulator-row .tabulator-cell[tabulator-field="cust_nm"],*/
+/*#TABLE_HR013_A .tabulator-row .tabulator-cell[tabulator-field="prj_nm"],*/
+/*#TABLE_HR013_A .tabulator-row .tabulator-cell[tabulator-field="skl_id_lst"],*/
+/*#TABLE_HR013_A .tabulator-row .tabulator-cell[data-field="cust_nm"],*/
+/*#TABLE_HR013_A .tabulator-row .tabulator-cell[data-field="prj_nm"],*/
+/*#TABLE_HR013_A .tabulator-row .tabulator-cell[data-field="skl_id_lst"] {*/
+/*  white-space: nowrap !important;*/
+/*  overflow: hidden !important;*/
+/*  min-width: 0 !important;*/
+/*  height: auto !important;*/
+/*  line-height: 1.45 !important;*/
+/*  padding-top: 8px !important;*/
+/*  padding-bottom: 8px !important;*/
+/*  text-overflow: ellipsis !important;*/
+/*  word-break: normal !important;*/
+/*}*/
 
 #TABLE_HR013_A.is-readonly .row-check,
 #TABLE_HR013_A.is-readonly .tabulator-cell input[type="checkbox"] {
@@ -754,72 +753,72 @@ option {
   word-break: normal;
 }
 
-#TABLE_HR013_A .hr013-stack-text--readonly {
-  display: block;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  word-break: normal;
-  line-height: 1.45;
-  width: 100%;
-}
+/*#TABLE_HR013_A .hr013-stack-text--readonly {*/
+/*  display: block;*/
+/*  overflow: hidden;*/
+/*  text-overflow: ellipsis;*/
+/*  white-space: nowrap;*/
+/*  word-break: normal;*/
+/*  line-height: 1.45;*/
+/*  width: 100%;*/
+/*}*/
 
-#TABLE_HR013_A .hr013-cell-ellipsis {
-  display: block;
-  min-width: 0;
-  width: 100%;
-  max-width: 100%;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  word-break: normal;
-}
+/*#TABLE_HR013_A .hr013-cell-ellipsis {*/
+/*  display: block;*/
+/*  min-width: 0;*/
+/*  width: 100%;*/
+/*  max-width: 100%;*/
+/*  overflow: hidden;*/
+/*  white-space: nowrap;*/
+/*  text-overflow: ellipsis;*/
+/*  word-break: normal;*/
+/*}*/
 
-#TABLE_HR013_A .hr013-readonly-text,
-#TABLE_HR013_A .prj-cell--readonly {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  min-width: 0;
-}
+/*#TABLE_HR013_A .hr013-readonly-text,*/
+/*#TABLE_HR013_A .prj-cell--readonly {*/
+/*  display: flex;*/
+/*  align-items: center;*/
+/*  width: 100%;*/
+/*  min-width: 0;*/
+/*}*/
 
-#TABLE_HR013_A .hr013-readonly-text--wrap {
-  display: block;
-  min-width: 0;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  word-break: normal;
-  line-height: 1.45;
-  color: #20385c;
-  font-size: 14px;
-  font-weight: 600;
-}
+/*#TABLE_HR013_A .hr013-readonly-text--wrap {*/
+/*  display: block;*/
+/*  min-width: 0;*/
+/*  overflow: hidden;*/
+/*  white-space: nowrap;*/
+/*  text-overflow: ellipsis;*/
+/*  word-break: normal;*/
+/*  line-height: 1.45;*/
+/*  color: #20385c;*/
+/*  font-size: 14px;*/
+/*  font-weight: 600;*/
+/*}*/
 
-#TABLE_HR013_A .hr013-readonly-text--project {
-  display: block;
-  min-width: 0;
-  width: 100%;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  word-break: normal;
-  line-height: 1.45;
-  color: #20385c;
-  font-size: 14px;
-  font-weight: 600;
-}
+/*#TABLE_HR013_A .hr013-readonly-text--project {*/
+/*  display: block;*/
+/*  min-width: 0;*/
+/*  width: 100%;*/
+/*  overflow: hidden;*/
+/*  white-space: nowrap;*/
+/*  text-overflow: ellipsis;*/
+/*  word-break: normal;*/
+/*  line-height: 1.45;*/
+/*  color: #20385c;*/
+/*  font-size: 14px;*/
+/*  font-weight: 600;*/
+/*}*/
 
-#TABLE_HR013_A .prj-text--readonly {
-  display: block;
-  min-width: 0;
-  width: 100%;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  word-break: normal;
-  line-height: 1.45;
-}
+/*#TABLE_HR013_A .prj-text--readonly {*/
+/*  display: block;*/
+/*  min-width: 0;*/
+/*  width: 100%;*/
+/*  overflow: hidden;*/
+/*  white-space: nowrap;*/
+/*  text-overflow: ellipsis;*/
+/*  word-break: normal;*/
+/*  line-height: 1.45;*/
+/*}*/
 
 #TABLE_HR013_A .btn-hr013-cell-skill-picker {
   flex: 0 0 auto;
@@ -939,17 +938,17 @@ button.btn.btn-add-skill:hover,
   gap: 0;
 }
 
-#TABLE_HR013_A.is-readonly .tabulator-cell[data-field="skl_id_lst"] .tag-item,
-#TABLE_HR013_A.is-readonly .tabulator-cell[tabulator-field="skl_id_lst"] .tag-item {
-  background: transparent !important;
-  color: #333 !important;
-  border-radius: 0 !important;
-  padding: 0 !important;
-  height: auto !important;
-  font-size: 14px !important;
-  font-weight: 400 !important;
-  line-height: 1.5 !important;
-}
+/*#TABLE_HR013_A.is-readonly .tabulator-cell[data-field="skl_id_lst"] .tag-item,*/
+/*#TABLE_HR013_A.is-readonly .tabulator-cell[tabulator-field="skl_id_lst"] .tag-item {*/
+/*  background: transparent !important;*/
+/*  color: #333 !important;*/
+/*  border-radius: 0 !important;*/
+/*  padding: 0 !important;*/
+/*  height: auto !important;*/
+/*  font-size: 14px !important;*/
+/*  font-weight: 400 !important;*/
+/*  line-height: 1.5 !important;*/
+/*}*/
 
 #TABLE_HR013_A.is-readonly .tabulator-cell[data-field="skl_id_lst"] .tag-item::after,
 #TABLE_HR013_A.is-readonly .tabulator-cell[tabulator-field="skl_id_lst"] .tag-item::after {
@@ -986,29 +985,29 @@ button.btn.btn-add-skill:hover,
   width: 100%;
 }
 
-#TABLE_HR013_A.is-readonly .tabulator-row .tabulator-cell[tabulator-field="skl_id_lst"],
-#TABLE_HR013_A.is-readonly .tabulator-row .tabulator-cell[data-field="skl_id_lst"] {
-  padding-top: 8px !important;
-  padding-bottom: 8px !important;
-}
+/*#TABLE_HR013_A.is-readonly .tabulator-row .tabulator-cell[tabulator-field="skl_id_lst"],*/
+/*#TABLE_HR013_A.is-readonly .tabulator-row .tabulator-cell[data-field="skl_id_lst"] {*/
+/*  padding-top: 8px !important;*/
+/*  padding-bottom: 8px !important;*/
+/*}*/
 
-#TABLE_HR013_A.is-readonly .tabulator-row.stack-multi-line,
-#TABLE_HR013_A.is-readonly .tabulator-row.stack-multi-line .tabulator-cell {
-  height: auto !important;
-  min-height: 55px !important;
-}
+/*#TABLE_HR013_A.is-readonly .tabulator-row.stack-multi-line,*/
+/*#TABLE_HR013_A.is-readonly .tabulator-row.stack-multi-line .tabulator-cell {*/
+/*  height: auto !important;*/
+/*  min-height: 55px !important;*/
+/*}*/
 
-#TABLE_HR013_A.is-readonly .tabulator-row.stack-multi-line .tabulator-cell {
-  line-height: 1.55 !important;
-}
+/*#TABLE_HR013_A.is-readonly .tabulator-row.stack-multi-line .tabulator-cell {*/
+/*  line-height: 1.55 !important;*/
+/*}*/
 
-#TABLE_HR013_A.is-readonly .prj-text {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  word-break: normal;
-  line-height: 1.55;
-}
+/*#TABLE_HR013_A.is-readonly .prj-text {*/
+/*  white-space: nowrap;*/
+/*  overflow: hidden;*/
+/*  text-overflow: ellipsis;*/
+/*  word-break: normal;*/
+/*  line-height: 1.55;*/
+/*}*/
 
 /*===============================================================================
   HR014 - risk memo
@@ -3814,12 +3813,12 @@ section.search-area .search-info #searchConditionKeyword {
   min-height: 45px !important;
 }
 
-#TABLE_HR013_A .tabulator-row.stack-multi-line .tabulator-cell {
-  line-height: 1.4 !important;
-  padding-top: 8px !important;
-  padding-bottom: 8px !important;
-  align-content: flex-start;
-}
+/*#TABLE_HR013_A .tabulator-row.stack-multi-line .tabulator-cell {*/
+/*  line-height: 1.4 !important;*/
+/*  padding-top: 8px !important;*/
+/*  padding-bottom: 8px !important;*/
+/*  align-content: flex-start;*/
+/*}*/
 
 #TABLE_HR013_A .tabulator-row.stack-multi-line .hr013-stack-cell {
   align-items: flex-start;
@@ -6893,15 +6892,15 @@ section.search-area .search-info #searchConditionKeyword {
   margin-right: -12px;
 }
 
-.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section[data-edit-step="project"] #TABLE_HR013_A .tabulator-table {
-  min-width: 1680px !important;
-}
+/*.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section[data-edit-step="project"] #TABLE_HR013_A .tabulator-table {*/
+/*  min-width: 1680px !important;*/
+/*}*/
 
-.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section[data-edit-step="project"] #TABLE_HR013_A .tabulator-tableHolder,
-.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section[data-edit-step="project"] #TABLE_HR013_A .tabulator-tableholder {
-  overflow-x: auto !important;
-  overflow-y: hidden !important;
-}
+/*.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section[data-edit-step="project"] #TABLE_HR013_A .tabulator-tableHolder,*/
+/*.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section[data-edit-step="project"] #TABLE_HR013_A .tabulator-tableholder {*/
+/*  overflow-x: auto !important;*/
+/*  overflow-y: hidden !important;*/
+/*}*/
 
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section-head h5 {
   font-size: 20px;
