@@ -3693,13 +3693,13 @@ async function saveHr011DetailPage() {
         }
 
         // Tab2 저장
-        if (typeof saveHr012TableData === "function") {
-            await saveHr012TableData();
+        if (typeof window.saveHr012TableData === "function") {
+            await window.saveHr012TableData();
         }
 
         // Tab3 저장
         if (typeof window.saveHr013TableData === "function") {
-            window.saveHr013TableData();
+            await window.saveHr013TableData();
         }
 
         // Tab4 저장
@@ -3731,6 +3731,12 @@ async function saveHr011DetailPage() {
         });
 
     } catch (error) {
+
+        if (error === "validation failed") {
+            hideLoading();
+            return;
+        }
+
         console.error(error);
         hideLoading();
 

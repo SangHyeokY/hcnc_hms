@@ -1099,6 +1099,7 @@ function filterHr010RowsByType(list) {
 function renderUserCards(list) {
     const container = document.getElementById("CARD_HR010_A");
     if (!container) return;
+
     hr010LastRenderedRows = Array.isArray(list) ? list.slice() : [];
     container.dataset.view = currentHr010ViewMode;
     updateHr010ResultCount(hr010LastRenderedRows.length);
@@ -1120,6 +1121,7 @@ function renderUserCards(list) {
     if (currentHr010ViewMode === "list") {
         const wrapper = document.createElement("div");
         wrapper.className = "hr010-list-view";
+
         wrapper.innerHTML = `
             <div class="hr010-list-header">
                 <div>인력 정보</div>
@@ -1131,20 +1133,22 @@ function renderUserCards(list) {
                 <div>희망단가</div>
             </div>
             <div class="hr010-list-body">
-                ${list.map(row => createUserListRow(row)).join("")}
+                ${list.map(row => createUserCard(row, "list")).join("")}
             </div>
         `;
+
         fragment.appendChild(wrapper);
     } else {
         list.forEach(row => {
             const div = document.createElement("div");
-            div.innerHTML = createUserCard(row);
+            div.innerHTML = createUserCard(row, "card");
             fragment.appendChild(div.firstElementChild);
         });
     }
 
     container.innerHTML = "";
     container.appendChild(fragment);
+
     animateHr010RenderedItems(container);
     bindCardEvents(container, list);
 }
@@ -1173,87 +1177,119 @@ function updateHr010ResultCount(count) {
     if (!countEl) return;
     countEl.textContent = String(Number(count) || 0);
 }
-
 // ==============================
-// 카드 생성
+// 카드 / 리스트 생성
 // ==============================
-function createUserCard(row) {
-    const employment = getEmploymentMeta(row);
-    const profile = getProfileMarkup(row);
-    const skillChips = getSkillChipMarkup(row);
+function createUserCard(row, viewType = "card") {
 
+    // 공통 데이터 가공 (중복 제거 핵심)
+    const vm = {
+        id: row.dev_id,
+        name: escapeHtml(row.dev_nm || "-"),
+        profile: getProfileMarkup(row),
+        employment: getEmploymentMeta(row),
+
+        primarySkill: getPrimarySkillLabel(row),
+        skills: getSkillChipMarkup(row),
+
+        grade: escapeHtml(formatGradeLabel(row.grade, row.score) || "-"),
+        kosa: escapeHtml(getKosaLabel(row)),
+        kosaStars: getKosaStarMarkup(row, "user-kosa-stars--inline"),
+
+        regionWork: getRegionWorkInlineMarkup(row),
+        availability: escapeHtml(getAvailabilityLabel(row)),
+        rate: escapeHtml(amountFormatter(row.hope_rate_amt) || "-"),
+        career: escapeHtml(formatCareerYearMonth(row.exp_yr) || "-"),
+
+        contractType: escapeHtml(getContractTypeLabel(row)),
+        workMode: escapeHtml(getWorkModeLabel(row))
+    };
+
+    // ==============================
+    // 리스트형
+    // ==============================
+    if (viewType === "list") {
+        return `
+        <article class="user-list-row" data-id="${vm.id}" tabindex="0" title="더블클릭하여 상세 보기">
+            <div class="user-list-row__profile">
+                <div class="user-list-row__avatar">${vm.profile}</div>
+                <div class="user-list-row__text">
+                    <div class="user-list-row__name">${vm.name}</div>
+                    <div class="user-list-row__sub">${vm.career} · ${vm.contractType}</div>
+                </div>
+            </div>
+
+            <div class="user-list-row__cell">
+                <span class="user-card__badge user-card__badge--${vm.employment.className}">
+                    ${vm.employment.label}
+                </span>
+            </div>
+
+            <div class="user-list-row__cell user-list-row__skill-cell">
+                ${getSkillSummaryMarkup(row, 3)}
+            </div>
+
+            <div class="user-list-row__cell user-list-row__grade-cell">
+                <div class="user-list-row__grade-main">${vm.grade}</div>
+                <div class="user-list-row__grade-sub">
+                    <span>${vm.kosa}</span>
+                    ${vm.kosaStars}
+                </div>
+            </div>
+
+            <div class="user-list-row__cell user-list-row__region-cell">
+                ${vm.regionWork}
+            </div>
+
+            <div class="user-list-row__cell">${vm.availability}</div>
+
+            <div class="user-list-row__cell user-list-row__rate">${vm.rate}</div>
+        </article>`;
+    }
+
+    // ==============================
+    // 카드형
+    // ==============================
     return `
-    <article class="user-card" data-id="${row.dev_id}" tabindex="0" title="더블클릭하여 상세 보기">
+    <article class="user-card" data-id="${vm.id}" tabindex="0" title="더블클릭하여 상세 보기">
         <div class="user-card__top">
-            <span class="user-card__badge user-card__badge--${employment.className}">${employment.label}</span>
+            <span class="user-card__badge user-card__badge--${vm.employment.className}">
+                ${vm.employment.label}
+            </span>
         </div>
+
         <div class="user-card__profile">
-            <div class="user-card__avatar">${profile}</div>
-            <div class="user-card__name">${escapeHtml(row.dev_nm || "-")}</div>
-            <div class="user-card__meta-summary">
-                <span class="user-card__meta-summary-text">${getProfileMetaSummary(row)}</span>
-                ${getKosaStarMarkup(row)}
+            <div class="user-card__avatar">${vm.profile}</div>
+            <div class="user-card__name">${vm.name}</div>
+            <div class="user-list-row__sub">${vm.career} · ${vm.contractType} · ${vm.kosa} ${vm.kosaStars}</div>
+            <div class="user-card__subtitle">
+                ${vm.primarySkill ? `주개발언어 · ${vm.primarySkill}` : "주개발언어 미등록"}
             </div>
         </div>
-        <div class="user-card__skills">${skillChips}</div>
+        <div class="user-card__skills">${vm.skills}</div>
         <div class="user-card__info-panel user-card__info-panel--summary">
-            <div class="user-card__info-grid user-card__info-grid--summary">
-                <div class="user-card__info-item">
-                    <span class="user-card__info-label">등급</span>
-                    <strong class="user-card__info-value">${escapeHtml(formatGradeLabel(row.grade, row.score) || "-")}</strong>
-                </div>
-                <div class="user-card__info-item">
-                    <span class="user-card__info-label">지역 / 근무</span>
-                    <div class="user-card__info-inline-value">${getRegionWorkInlineMarkup(row)}</div>
-                </div>
-                <div class="user-card__info-item">
-                    <span class="user-card__info-label">투입 가능일</span>
-                    <strong class="user-card__info-value">${escapeHtml(getAvailabilityLabel(row))}</strong>
-                </div>
-                <div class="user-card__info-item">
-                    <span class="user-card__info-label">희망 단가</span>
-                    <strong class="user-card__info-value">${escapeHtml(amountFormatter(row.hope_rate_amt) || "-")}</strong>
-                </div>
-            </div>
-        </div>
+             <div class="user-card__info-grid user-card__info-grid--summary">
+                 <div class="user-card__info-item">
+                     <span class="user-card__info-label">등급</span>
+                     <strong class="user-card__info-value">${escapeHtml(formatGradeLabel(row.grade, row.score) || "-")}</strong>
+                 </div>
+                 <div class="user-card__info-item">
+                     <span class="user-card__info-label">지역 / 근무</span>
+                     <div class="user-card__info-inline-value">${getRegionWorkInlineMarkup(row)}</div>
+                 </div>
+                 <div class="user-card__info-item">
+                     <span class="user-card__info-label">투입 가능일</span>
+                     <strong class="user-card__info-value">${escapeHtml(getAvailabilityLabel(row))}</strong>
+                 </div>
+                 <div class="user-card__info-item">
+                     <span class="user-card__info-label">희망 단가</span>
+                     <strong class="user-card__info-value">${escapeHtml(amountFormatter(row.hope_rate_amt) || "-")}</strong>
+                 </div>
+             </div>
+         </div>
     </article>`;
 }
 
-    // 리스트형 행 생성
-    function createUserListRow(row) {
-    const employment = getEmploymentMeta(row);
-    const profile = getProfileMarkup(row);
-
-    return `
-        <article class="user-list-row" data-id="${row.dev_id}" tabindex="0" title="더블클릭하여 상세 보기">
-            <div class="user-list-row__profile">
-                <div class="user-list-row__avatar">${profile}</div>
-                <div class="user-list-row__text">
-                    <div class="user-list-row__name">${escapeHtml(row.dev_nm || "-")}</div>
-                    <div class="user-list-row__sub">${escapeHtml(formatCareerYearMonth(row.exp_yr) || "-")} · ${escapeHtml(getContractTypeLabel(row))}</div>
-                </div>
-            </div>
-            <div class="user-list-row__cell">
-                <span class="user-card__badge user-card__badge--${employment.className}">${employment.label}</span>
-            </div>
-            <div class="user-list-row__cell user-list-row__skill-cell">${getSkillSummaryMarkup(row, 3)}</div>
-            <div class="user-list-row__cell user-list-row__grade-cell">
-                <div class="user-list-row__grade-main">${escapeHtml(formatGradeLabel(row.grade, row.score) || "-")}</div>
-                <div class="user-list-row__grade-sub">
-                    <span>${escapeHtml(getKosaLabel(row))}</span>
-                    ${getKosaStarMarkup(row, "user-kosa-stars--inline")}
-                </div>
-            </div>
-            <div class="user-list-row__cell user-list-row__region-cell">
-                ${getRegionWorkInlineMarkup(row)}
-            </div>
-            <div class="user-list-row__cell">${escapeHtml(getAvailabilityLabel(row))}</div>
-            <div class="user-list-row__cell user-list-row__rate">${escapeHtml(amountFormatter(row.hope_rate_amt) || "-")}</div>
-        </article>
-    `;
-}
-
-// 프로필 이미지/이니셜 마크업
 function getProfileMarkup(row) {
     const imgUrl = row.img_url || (row.dev_img_base64 ? `data:image/png;base64,${row.dev_img_base64}` : "");
     if (imgUrl) {
@@ -1262,32 +1298,20 @@ function getProfileMarkup(row) {
     return makeProfileCircle(row.dev_nm);
 }
 
-// 직원/프리랜서 배지 메타
 function getEmploymentMeta(row) {
     const type = resolveUserType(row);
-
     if (type === "freelancer") {
         return { label: "프리랜서", className: "freelancer" };
     }
-
     return { label: "직원", className: "staff" };
 }
 
-// 주개발언어 대표 라벨
 function getPrimarySkillLabel(row) {
     const skillParts = getSkillDisplayParts(row);
     if (!skillParts.primary) return "주개발언어 미등록";
     return skillParts.primary;
 }
 
-// 주개발언어 표시용 요약
-// function getSkillSummaryLabel(row) {
-//     const skillParts = getSkillDisplayParts(row);
-//     if (!skillParts.skills.length) return "-";
-//     return `주개발언어: ${skillParts.skills.join(", ")}`;
-// }
-
-// 리스트형 기술 요약 마크업
 function getSkillSummaryMarkup(row, maxChips = 3) {
     const skillParts = getSkillDisplayParts(row);
     if (!skillParts.skills.length) {
@@ -1296,82 +1320,45 @@ function getSkillSummaryMarkup(row, maxChips = 3) {
 
     const hasMore = skillParts.skills.length > maxChips;
     const visibleSkills = skillParts.skills.slice(0, maxChips);
-
-    const chips = visibleSkills.map((skill, idx) => `
-        <span class="user-card__skill-chip ${idx === 0 ? "user-card__skill-chip--main" : ""}">${escapeHtml(skill)}</span>
-    `).join("");
-
+    const chips = visibleSkills.map((skill, idx) => `<span class="user-card__skill-chip ${idx === 0 ? "user-card__skill-chip--main" : ""}">${escapeHtml(skill)}</span>`).join("");
     const moreChip = hasMore ? `<span class="user-card__skill-chip is-muted">...</span>` : "";
 
-    return `
-        <div class="user-list-row__skill-stack">
-            <div class="user-list-row__skill-line user-list-row__skill-line--main">
-                <span class="user-list-row__skill-line-label">주개발언어</span>
-                <div class="user-list-row__skill-line-chips">${chips}${moreChip}</div>
-            </div>
-        </div>
-    `;
+    return `<div class="user-list-row__skill-stack"><div class="user-list-row__skill-line user-list-row__skill-line--main"><span class="user-list-row__skill-line-label">주개발언어</span><div class="user-list-row__skill-line-chips">${chips}${moreChip}</div></div></div>`;
 }
 
-// 주개발언어 표시용 파싱
 function getSkillDisplayParts(row) {
     const skills = getSkillNameList(row);
     const primary = skills[0] || "";
-    return {
-        skills,
-        primary
-    };
+    return { skills, primary };
 }
 
-// 카드형 기술 칩
 function getSkillChipMarkup(row, maxChips = 5) {
     const skillParts = getSkillDisplayParts(row);
-
     if (!skillParts.skills.length) {
         const chips = `<span class="user-card__skill-chip is-muted">미등록</span>`;
-        return [
-            `<div class="user-card__skill-group user-card__skill-group--main">`,
-            `<span class="user-card__skill-group-label">주개발언어</span>`,
-            `<div class="user-card__skill-group-chips">${chips}</div>`,
-            `</div>`
-        ].join("");
+        return `<div class="user-card__skill-group user-card__skill-group--main"><span class="user-card__skill-group-label">주개발언어</span><div class="user-card__skill-group-chips">${chips}</div></div>`;
     }
 
     const hasMore = skillParts.skills.length > maxChips;
     const visibleSkills = skillParts.skills.slice(0, maxChips);
-    const chips = visibleSkills.map((skill, idx) => `
-        <span class="user-card__skill-chip ${idx === 0 ? "user-card__skill-chip--main" : ""}">${escapeHtml(skill)}</span>
-    `).join("");
-
+    const chips = visibleSkills.map((skill, idx) => `<span class="user-card__skill-chip ${idx === 0 ? "user-card__skill-chip--main" : ""}">${escapeHtml(skill)}</span>`).join("");
     const moreChip = hasMore ? `<span class="user-card__skill-chip is-muted">...</span>` : "";
 
-    return [
-        `<div class="user-card__skill-group user-card__skill-group--main">`,
-        `<span class="user-card__skill-group-label">주개발언어</span>`,
-        `<div class="user-card__skill-group-chips">${chips}${moreChip}</div>`,
-        `</div>`
-    ].join("");
+    return `<div class="user-card__skill-group user-card__skill-group--main"><span class="user-card__skill-group-label">주개발언어</span><div class="user-card__skill-group-chips">${chips}${moreChip}</div></div>`;
 }
 
-// main_lang_nm 문자열 분해
 function getSkillNameList(row) {
-    return String(row.main_lang_nm || "")
-        .split(",")
-        .map(skill => skill.trim())
-        .filter(Boolean);
+    return String(row.main_lang_nm || "").split(",").map(skill => skill.trim()).filter(Boolean);
 }
 
-// 근무형태 표시명
 function getWorkModeLabel(row) {
     return getDropdownOptionLabel("work_md", row.work_md) || row.work_md || "근무형태 미정";
 }
 
-// 계약형태 표시명
 function getContractTypeLabel(row) {
     return getDropdownOptionLabel("ctrt_typ", row.ctrt_typ) || row.ctrt_typ || "계약형태 미정";
 }
 
-// KOSA 표시명
 function getKosaLabel(row) {
     return getDropdownOptionLabel("kosa_grd_cd", row.kosa_grd_cd) || row.kosa_grd_cd || "-";
 }
@@ -1418,7 +1405,7 @@ function getWorkModeBadgeMarkup(row) {
 
 function getRegionWorkInlineMarkup(row) {
     return [
-        `<span class="user-card__info-inline-text">${escapeHtml(row.region || "-")}</span>`,
+        `<span class="user-card__info-inline-text">${escapeHtml(getSidoLabel(row) || "-")}</span>`,
         getWorkModeBadgeMarkup(row)
     ].join("");
 }
