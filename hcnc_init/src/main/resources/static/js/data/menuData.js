@@ -7,7 +7,7 @@ export const menuData = [
     type: "A"
   },
   {
-    title: "인적사항",
+    title: "인사정보",
     path: "/hr010",
     icon: "employee",
     visible: true,

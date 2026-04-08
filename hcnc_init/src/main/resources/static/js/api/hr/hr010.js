@@ -1175,9 +1175,9 @@ function updateHr010ResultCount(count) {
 }
 
 // ==============================
-    // 카드 생성
-    // ==============================
-    function createUserCard(row) {
+// 카드 생성
+// ==============================
+function createUserCard(row) {
     const employment = getEmploymentMeta(row);
     const profile = getProfileMarkup(row);
     const skillChips = getSkillChipMarkup(row);
@@ -1194,8 +1194,8 @@ function updateHr010ResultCount(count) {
                 <span class="user-card__meta-summary-text">${getProfileMetaSummary(row)}</span>
                 ${getKosaStarMarkup(row)}
             </div>
-            <div class="user-card__skills">${skillChips}</div>
         </div>
+        <div class="user-card__skills">${skillChips}</div>
         <div class="user-card__info-panel user-card__info-panel--summary">
             <div class="user-card__info-grid user-card__info-grid--summary">
                 <div class="user-card__info-item">
@@ -1214,59 +1214,6 @@ function updateHr010ResultCount(count) {
                     <span class="user-card__info-label">희망 단가</span>
                     <strong class="user-card__info-value">${escapeHtml(amountFormatter(row.hope_rate_amt) || "-")}</strong>
                 </div>
-            </div>
-        </div>
-    </article>`;
-}
-function createUserCard(row) {
-    const employment = getEmploymentMeta(row);
-    const profile = getProfileMarkup(row);
-    const primarySkill = getPrimarySkillLabel(row);
-    const skillChips = getSkillChipMarkup(row);
-
-    return `
-    <article class="user-card" data-id="${row.dev_id}" tabindex="0" title="더블클릭하여 상세 보기">
-        <div class="user-card__top">
-            <span class="user-card__badge user-card__badge--${employment.className}">${employment.label}</span>
-        </div>
-        <div class="user-card__profile">
-            <div class="user-card__avatar">${profile}</div>
-            <div class="user-card__name">${escapeHtml(row.dev_nm || "-")}</div>
-            <div class="user-card__subtitle">${escapeHtml(primarySkill ? `주개발언어 · ${primarySkill}` : "주개발언어 미등록")}</div>
-            <div class="user-card__skills">${skillChips}</div>
-        </div>
-        <div class="user-card__info-panel">
-            <div class="user-card__info-grid">
-                <div class="user-card__info-item">
-                    <span class="user-card__info-label">등급</span>
-                    <strong class="user-card__info-value">${escapeHtml(formatGradeLabel(row.grade, row.score) || "-")}</strong>
-                </div>
-                <div class="user-card__info-item">
-                    <span class="user-card__info-label">KOSA</span>
-                    <strong class="user-card__info-value">${escapeHtml(getKosaLabel(row))}</strong>
-                </div>
-                <div class="user-card__info-item">
-                    <span class="user-card__info-label">거주지역</span>
-                    <strong class="user-card__info-value">${escapeHtml(getSidoLabel(row))}</strong>
-                </div>
-                <div class="user-card__info-item">
-                    <span class="user-card__info-label">투입 가능</span>
-                    <strong class="user-card__info-value">${escapeHtml(getAvailabilityLabel(row))}</strong>
-                </div>
-            </div>
-            <div class="user-card__meta-row">
-                <span class="user-card__meta-pill">${escapeHtml(getWorkModeLabel(row))}</span>
-                <span class="user-card__meta-pill">${escapeHtml(getContractTypeLabel(row))}</span>
-            </div>
-        </div>
-        <div class="user-card__footer">
-            <div class="user-card__footer-item">
-                <span class="user-card__footer-label">희망단가</span>
-                <strong class="user-card__footer-value">${escapeHtml(amountFormatter(row.hope_rate_amt) || "-")}</strong>
-            </div>
-            <div class="user-card__footer-item">
-                <span class="user-card__footer-label">경력</span>
-                <strong class="user-card__footer-value">${escapeHtml(formatCareerYearMonth(row.exp_yr) || "-")}</strong>
             </div>
         </div>
     </article>`;
@@ -1377,7 +1324,7 @@ function getSkillDisplayParts(row) {
 }
 
 // 카드형 기술 칩
-function getSkillChipMarkup(row, maxChips = 6) {
+function getSkillChipMarkup(row, maxChips = 5) {
     const skillParts = getSkillDisplayParts(row);
 
     if (!skillParts.skills.length) {

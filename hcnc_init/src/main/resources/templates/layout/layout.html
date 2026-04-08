@@ -105,30 +105,9 @@
 
     // lnb에 프로필 이미지 표시하기
     function setUserProfile(devId, devName, devImgBase64, devJob) {
-        const $container = $("#profileImgContainer");
-        const $job = $("#profileJob");
-        $container.empty(); // 기존 내용 제거
-
-        if (devImgBase64) {
-            // Base64 이미지 사용
-            const $img = $("<img>")
-                .attr("src", devImgBase64)
-                .addClass("profile-circle-icon-img"); // CSS 클래스
-            $container.append($img);
-        } else {
-            // 이미지 없으면 이니셜 아이콘 생성
-            const iconHtml = makeProfileBigCircle(devName);
-            $container.append(iconHtml);
-        }
-
-        // 이름/아이디 세팅
-        $("#profileName").text(devName);
-        if (devJob) {
-            $job.text(devJob).removeClass("is-empty");
-        } else {
-            $job.text("").addClass("is-empty");
-        }
-        $("#profileId").text(`${devId}`);
+        const badgeText = getProfileBadgeText(devName);
+        $("#profileBadgeText").text(badgeText);
+        $(".header-profile-trigger").attr("aria-label", `${badgeText} 계정 메뉴`);
     }
 
     // 이름에서 뒤 2글자 추출하기
@@ -142,6 +121,11 @@
         }
 
         return name;
+    }
+
+    function getProfileBadgeText(name) {
+        const fallback = getProfileText(name);
+        return fallback || "사용";
     }
 
     // 이니셜 아이콘을 만들기 위한 색상표
