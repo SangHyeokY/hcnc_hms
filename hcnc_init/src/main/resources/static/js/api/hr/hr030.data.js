@@ -27,7 +27,7 @@ window.HR030_DASHBOARD_DATA = {
         },
         {
             key: "available",
-            label: "즉시 투입 가능 인원",
+            label: "즉시 투입 가능 (직원 + 프리랜서)",
             value: 34,
             delta: "+2",
             deltaTone: "up",
