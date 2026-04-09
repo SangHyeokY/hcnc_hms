@@ -19,7 +19,9 @@ $(document).on("tab:readonly.hr011", function (_, isReadOnly) {
         setHr011Mode("view", { silent: true });
         return;
     }
+
     const keepInsert = hr011Mode === "insert" || (window.hr011EditUnlocked && !$.trim(window.currentDevId || $("#dev_id").val()));
+
     if (keepInsert) {
         setHr011Mode("insert", { silent: true });
     } else {
@@ -28,6 +30,27 @@ $(document).on("tab:readonly.hr011", function (_, isReadOnly) {
     
     // 주개발 초기화
     initMainLangTags();
+
+    // 프로필 이미지 표시
+    if (hr011Mode === "insert" || hr011Mode === "update") {
+
+        $("#fileProfile").off("change").on("change", function (e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            // 이미지 파일만 허용
+            if (!file.type.startsWith("image/")) {
+                showAlert({
+                    icon: 'info',
+                    title: '알림',
+                    html: `<strong>이미지 파일</strong>만 선택 가능합니다.`,
+                });
+                $(this).val(""); // 선택 초기화
+            }
+            $("#dev_img").show(); // 사진 표시
+            $("#dev_img")[0].src = URL.createObjectURL(file);
+        });
+    }
 
     // ESC 누르면 모달 닫힘
     $(document).on("keydown", function (event) {
@@ -1359,6 +1382,21 @@ async function loadHr011MainDetail(devId) {
 
     console.log("조회된 데이터 : " ,response.res);
     hr011CurrentRow = row;
+
+    // 수정/등록 폼에 프로필 이미지 표시
+    const $img = $("#dev_img");
+    var $form = $(".hr011-dashboard-grid");
+    const $reUploadProfile = $form.find(".re-upload-image");
+    const hasImage = row && row.img_url;
+
+    // 프로필 이미지 처리
+    if (hasImage) {
+        $img.attr("src", row.img_url).addClass("has-img").show();
+        $reUploadProfile.show();
+    }
+    else {
+        $img.attr("src", "").removeClass("has-img");
+    }
 
     fillHr011MainForm(row);
     await Promise.all([
@@ -3770,6 +3808,10 @@ async function saveHr011MainProfile() {
     formData.append("kosa_grd_cd", $("#select_kosa_grd_cd").val());
     formData.append("main_fld_cd", $("#select_main_fld_cd").val());
     formData.append("main_cust_cd", $("#select_main_cust_cd").val());
+    const file = $("#fileProfile")[0].files[0];
+    if (file) {
+        formData.append("dev_img", file);
+    }
 
     try {
         const response = await $.ajax({
