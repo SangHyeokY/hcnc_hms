@@ -11,7 +11,7 @@ window.HR030_DASHBOARD_DATA = {
         },
         {
             key: "employee",
-            label: "직원 수",
+            label: "직원",
             value: 92,
             delta: "37.1%",
             deltaTone: "neutral",
@@ -19,7 +19,7 @@ window.HR030_DASHBOARD_DATA = {
         },
         {
             key: "freelancer",
-            label: "프리랜서 수",
+            label: "프리랜서",
             value: 156,
             delta: "62.9%",
             deltaTone: "neutral",

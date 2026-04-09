@@ -121,6 +121,9 @@
         }
     };
 
+    const today = new Date();
+    document.getElementById("todayDate").textContent = `${today.getFullYear()}년 ${today.getMonth() + 1}월 ${today.getDate()}일 기준`;
+
     // 공통 포맷터와 작은 렌더링 헬퍼
     // 아이디로 DOM 요소를 빠르게 조회한다.
     function byId(id) {
