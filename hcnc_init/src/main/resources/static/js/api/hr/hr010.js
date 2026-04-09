@@ -1363,17 +1363,18 @@ function getKosaLabel(row) {
     return getDropdownOptionLabel("kosa_grd_cd", row.kosa_grd_cd) || row.kosa_grd_cd || "-";
 }
 
-function getProfileMetaSummary(row) {
-    const career = formatCareerYearMonth(row.exp_yr) || "-";
-    const contract = getContractTypeLabel(row);
-    const kosa = getKosaLabel(row);
-    return `${escapeHtml(career)} · ${escapeHtml(contract)} · ${escapeHtml(kosa)}`;
-}
+// function getProfileMetaSummary(row) {
+//     const career = formatCareerYearMonth(row.exp_yr) || "-";
+//     const contract = getContractTypeLabel(row);
+//     const kosa = getKosaLabel(row);
+//     return `${escapeHtml(career)} · ${escapeHtml(contract)} · ${escapeHtml(kosa)}`;
+// }
 
+// 표기되는 별 갯수가 매칭이 안되는데...
 function getKosaStarCount(row) {
     const label = String(getKosaLabel(row) || "").replace(/\s/g, "");
     if (!label || label === "-") return 0;
-    if (label.includes("특")) return 5;
+    if (label.includes("특")) return 4;
     if (label.includes("고")) return 3;
     if (label.includes("중")) return 2;
     if (label.includes("초")) return 1;

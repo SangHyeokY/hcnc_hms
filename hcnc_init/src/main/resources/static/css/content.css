@@ -6536,8 +6536,8 @@ section.search-area .search-info #searchConditionKeyword {
 
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-dashboard-grid {
   grid-template-columns: minmax(0, 1fr);
-  gap: 86px;
-  padding-bottom: 120px;
+  gap: 120px;
+  /*padding-bottom: 120px;*/
 }
 
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-sector--full {
@@ -6705,8 +6705,9 @@ section.search-area .search-info #searchConditionKeyword {
   border-radius: 0 0 18px 18px;
   background: linear-gradient(180deg, #f8fbff 0%, #f2f7ff 100%);
   box-shadow: 0 18px 34px rgba(24, 46, 82, 0.10);
-  min-height: calc(100dvh - 176px);
-  max-height: calc(100dvh - 176px);
+  /*min-height: calc(100dvh - 176px);*/
+  /*max-height: calc(100dvh - 176px);*/
+  height: 100%;
   overflow-y: auto;
   align-self: start;
 }
@@ -6921,10 +6922,10 @@ section.search-area .search-info #searchConditionKeyword {
   margin-left: 312px;
 }
 
-.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section[data-edit-step="project"] {
-  margin-left: -12px;
-  margin-right: -12px;
-}
+/*.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section[data-edit-step="project"] {*/
+/*  margin-left: -12px;*/
+/*  margin-right: -12px;*/
+/*}*/
 
 /*.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section[data-edit-step="project"] #TABLE_HR013_A .tabulator-table {*/
 /*  min-width: 1680px !important;*/
@@ -7078,7 +7079,7 @@ section.search-area .search-info #searchConditionKeyword {
 }
 
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section[data-edit-step="skill"] {
-  margin-bottom: 220px;
+  /*margin-bottom: 220px;*/
   min-height: 320px;
 }
 

@@ -2102,6 +2102,22 @@ function syncHr011ActiveStepByScroll() {
             active = section;
         }
     });
+
+    const scrollTop = window.scrollY || document.documentElement.scrollTop;
+    const scrollHeight = document.documentElement.scrollHeight;
+    const clientHeight = document.documentElement.clientHeight;
+
+    const isBottom = scrollTop + clientHeight >= scrollHeight - 2;
+
+    if (isBottom) {
+        const lastSection = sections[sections.length - 1];
+        if (lastSection) {
+            const lastKey = lastSection.getAttribute("data-edit-step");
+            setHr011ActiveEditStep(lastKey);
+            return; // 기존 로직 막기
+        }
+    }
+
     const key = String(active.getAttribute("data-edit-step") || visibleStepKeys[0] || HR011_EDIT_STEP_KEYS[0]);
     setHr011ActiveEditStep(key);
 }
