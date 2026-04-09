@@ -4292,7 +4292,7 @@ section.search-area .search-info #searchConditionKeyword {
 
 #hr030-dashboard.hr030-saas-dashboard .hr030-kpi-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 14px;
 }
 
@@ -4319,20 +4319,34 @@ section.search-area .search-info #searchConditionKeyword {
   pointer-events: none;
 }
 
+/* 전체 인원 수 */
 #hr030-dashboard.hr030-saas-dashboard .hr030-kpi-card[data-kpi-key="total"] {
   background: #ffe2c8;
 }
 
+/* 직원 수 */
 #hr030-dashboard.hr030-saas-dashboard .hr030-kpi-card[data-kpi-key="employee"] {
   background: #d9e8ff;
 }
 
+/* 프리랜서 수 */
 #hr030-dashboard.hr030-saas-dashboard .hr030-kpi-card[data-kpi-key="freelancer"] {
   background: #e8dbff;
 }
 
+/* 즉시 투입 가능 (총 인원) */
 #hr030-dashboard.hr030-saas-dashboard .hr030-kpi-card[data-kpi-key="available"] {
   background: #dbf5ea;
+}
+
+/* 즉시 투입 가능 (직원) */
+#hr030-dashboard.hr030-saas-dashboard .hr030-kpi-card[data-kpi-key="available_s"] {
+  background: #e4e9ff;
+}
+
+/* 즉시 투입 가능 (프리랜서) */
+#hr030-dashboard.hr030-saas-dashboard .hr030-kpi-card[data-kpi-key="available_f"] {
+  background: #ffe4ef;
 }
 
 #hr030-dashboard.hr030-saas-dashboard .hr030-kpi-icon {
@@ -4354,20 +4368,34 @@ section.search-area .search-info #searchConditionKeyword {
   stroke-width: 2.2;
 }
 
+/* 전체 인원 수 아이콘 */
 #hr030-dashboard.hr030-saas-dashboard .hr030-kpi-card[data-kpi-key="total"] .hr030-kpi-icon {
   background: #f47f2c;
 }
 
+/* 직원 수 아이콘 */
 #hr030-dashboard.hr030-saas-dashboard .hr030-kpi-card[data-kpi-key="employee"] .hr030-kpi-icon {
   background: #2f7ff7;
 }
 
+/* 프리랜서 수 아이콘 */
 #hr030-dashboard.hr030-saas-dashboard .hr030-kpi-card[data-kpi-key="freelancer"] .hr030-kpi-icon {
   background: #9b5cf7;
 }
 
+/* 즉시 투입 가능 (총 인원) 아이콘 */
 #hr030-dashboard.hr030-saas-dashboard .hr030-kpi-card[data-kpi-key="available"] .hr030-kpi-icon {
   background: #27b87a;
+}
+
+/* 즉시 투입 가능 (직원) 아이콘 */
+#hr030-dashboard.hr030-saas-dashboard .hr030-kpi-card[data-kpi-key="available_s"] .hr030-kpi-icon {
+  background: #5a6ff0;
+}
+
+/* 즉시 투입 가능 (직원) 아이콘 */
+#hr030-dashboard.hr030-saas-dashboard .hr030-kpi-card[data-kpi-key="available_f"] .hr030-kpi-icon {
+  background: #f25590;
 }
 
 #hr030-dashboard.hr030-saas-dashboard .hr030-kpi-copy {

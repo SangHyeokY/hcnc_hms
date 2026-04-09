@@ -83,7 +83,9 @@
         total: "users",
         employee: "user",
         freelancer: "briefcase",
-        available: "zap"
+        available: "zap",
+        available_s: "user-check",
+        available_f: "user-pen"
     };
 
     var state = {

@@ -27,11 +27,27 @@ window.HR030_DASHBOARD_DATA = {
         },
         {
             key: "available",
-            label: "즉시 투입 가능",
+            label: "즉시 투입 가능 인원",
             value: 34,
             delta: "+2",
             deltaTone: "up",
-            description: "즉시 제안 또는 재배치 가능 기준"
+            description: "직원 + 프리랜서 운영, 즉시 제안 또는 재배치 가능 기준"
+        },
+        {
+            key: "available_s",
+            label: "즉시 투입 가능 (직원)",
+            value: 20,
+            delta: "+2",
+            deltaTone: "up",
+            description: "직원 운영, 즉시 제안 또는 재배치 가능 기준"
+        },
+        {
+            key: "available_f",
+            label: "즉시 투입 가능 (프리랜서)",
+            value: 14,
+            delta: "+2",
+            deltaTone: "up",
+            description: "프리랜서 운영, 즉시 제안 또는 재배치 가능 기준"
         }
     ],
     map: {
