@@ -388,37 +388,57 @@ footer {width:100%; height:30px; line-height: 30px; padding:0 20px; display: fle
 .left-menu .nav .lnb-menu ul .on {display: block;}
 .left-menu .nav .lnb-menu .dep1.no-bg a {background:none;}
 .left-menu .nav .lnb-menu .dep1 > li {position:relative; width:100%; margin-bottom: 0; overflow: visible;}
-.left-menu .nav .lnb-menu .dep1 > li > a {position:relative; width:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; padding:0 6px; min-height:78px; font-family:var(--hcnc-font-body); font-size:13px; font-weight:500; color:var(--hcnc-shell-text); border:0; border-radius:0; background:transparent !important; transition:background-color 0.24s ease, color 0.24s ease, border-color 0.24s ease;}
-.left-menu .nav .lnb-menu .dep1 > li > a:hover {
-  background-color: transparent !important;
-}
-.left-menu .nav .lnb-menu .dep1 > li > a .menu-icon {width:46px; height:46px; flex:0 0 auto; display:inline-flex; align-items:center; justify-content:center; border-radius:14px; background-color:transparent; opacity:0.88; transition:background-color 0.24s ease, box-shadow 0.24s ease, opacity 0.24s ease;}
-.left-menu .nav .lnb-menu .dep1 > li > a .menu-icon::before {
-  content: "";
-  width: 20px;
-  height: 20px;
-  display: block;
-  background-image: var(--menu-icon-image);
-  background-position: center center;
-  background-repeat: no-repeat;
-  background-size: contain;
-  transition: filter 0.24s ease, opacity 0.24s ease;
-}
-.left-menu .nav .lnb-menu .dep1 > li > a .menu-title {display:block; max-width:76px; min-height:34px; font-family:var(--hcnc-font-body); font-size:13px; font-weight:500; line-height:1.28; letter-spacing:-0.01em; text-align:center; white-space:normal; word-break:keep-all; transform:none; color:#222222;}
+.left-menu .nav .lnb-menu .dep1 > li > a {position:relative; width:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; padding:0 6px; min-height:78px; font-family:var(--hcnc-font-body); font-size:14px; font-weight:500; color:var(--hcnc-shell-text); border:0; border-radius:0; background:transparent !important; transition:background-color 0.24s ease, color 0.24s ease, border-color 0.24s ease;}
+.left-menu .nav .lnb-menu .dep1 > li > a:hover {background-color: transparent !important;}
+.left-menu .nav .lnb-menu .dep1 > li > a .menu-title {display:block; max-width:76px; min-height:34px; font-family:var(--hcnc-font-body); font-size:13px; font-weight:500; line-height:1.28; letter-spacing:-0.01em; text-align:center; white-space:normal; word-break:keep-all; transform:none; color:#000000;}
 .left-menu .nav .lnb-menu .dep1 > li > a:hover .menu-icon {background-color:#eaf1ff; box-shadow:none; opacity:1;}
+
+/*=================================================================================================*/
+/* lnb 대시보드 */
 .left-menu .nav .lnb-menu .dep1 > li > a[data-icon="dashboard"] .menu-icon {--menu-icon-image: url('../icons/lnb-icon-dash.png');}
+
+/* lnb 인적사항 */
+.left-menu .nav .lnb-menu .dep1 > li > a[data-icon="employee"] .menu-icon::before {height: 15px; width: 16px;}
 .left-menu .nav .lnb-menu .dep1 > li > a[data-icon="employee"] .menu-icon {--menu-icon-image: url('../icons/lnb-icon-hr-wh.png');}
-.left-menu .nav .lnb-menu .dep1 > li > a[data-icon="project"] .menu-icon {--menu-icon-image: url('../images/common/lnb-three.png');}
-.left-menu .nav .lnb-menu .dep1 > li > a[data-icon="code"] .menu-icon {--menu-icon-image: url('../icons/lnb-icon-code.png');}
-.left-menu .nav .lnb-menu .dep1 > li > a[data-icon="users"] .menu-icon {--menu-icon-image: url('../icons/lnb-icon-User.png');}
 .left-menu .nav .lnb-menu .dep1 > li > a[data-icon="employee"] .menu-icon::before {filter: brightness(0) saturate(100%);}
-.left-menu .nav .lnb-menu .dep1 > li > a[data-icon="employee"]:hover .menu-icon::before,
+/*.left-menu .nav .lnb-menu .dep1 > li > a[data-icon="employee"]:hover .menu-icon::before,*/
 .left-menu .nav .lnb-menu .dep1 > li.on > a[data-icon="employee"] .menu-icon::before {filter: brightness(0) invert(1);}
 
+/* lnb 프로젝트 */
+.left-menu .nav .lnb-menu .dep1 > li > a[data-icon="project"] .menu-icon {--menu-icon-image: url('../icons/lnb-icon-project.png');}
+
+/* lnb 코드관리 */
+.left-menu .nav .lnb-menu .dep1 > li > a[data-icon="code"] .menu-icon {--menu-icon-image: url('../icons/lnb-icon-code.png');}
+
+/* lnb 사용자 관리 */
+.left-menu .nav .lnb-menu .dep1 > li > a[data-icon="users"] .menu-icon::before {height: 24px; width: 24px;}
+.left-menu .nav .lnb-menu .dep1 > li > a[data-icon="users"] .menu-icon {--menu-icon-image: url('../icons/lnb-icon-user.png');}
+/*=================================================================================================*/
+
+.left-menu .nav .lnb-menu .dep1 > li > a .menu-icon {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    transition: background-color 0.24s ease, box-shadow 0.24s ease, opacity 0.24s ease;
+}
+.left-menu .nav .lnb-menu .dep1 > li > a .menu-icon::before {
+    content: "";
+    width: 20px;
+    height: 20px;
+    display: block;
+    background-image: var(--menu-icon-image);
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: contain;
+    transition: filter 0.24s ease, opacity 0.24s ease;
+}
+
 .left-menu .nav .lnb-menu .dep1 > li.on > a {background-color:transparent !important; color:var(--hcnc-shell-text); font-weight:600;}
-.left-menu .nav .lnb-menu .dep1 > li.on > a .menu-icon {width:48px; height:48px; background-color:var(--hcnc-shell-primary); box-shadow:none; opacity:1;}
+.left-menu .nav .lnb-menu .dep1 > li.on > a .menu-icon {width:48px; height:48px; background-color:var(--hcnc-shell-primary); box-shadow: 0 0 15px 0 #4093FF4D; opacity:1;}
 .left-menu .nav .lnb-menu .dep1 > li.on > a .menu-icon::before {filter:brightness(0) invert(1); opacity:1;}
-.left-menu .nav .lnb-menu .dep1 > li.on > a .menu-title {font-weight:600; color:#111827;}
+/*.left-menu .nav .lnb-menu .dep1 > li.on > a .menu-title {font-weight:600; color:#111827;}*/
 .left-menu .nav .lnb-menu .dep1 > li.on > a:hover {background-color: transparent !important;}
 .left-menu .nav .lnb-menu .dep1 > li.on > a:hover .menu-icon {background-color: var(--hcnc-shell-primary); box-shadow:none;}
 .left-menu .nav .lnb-menu .dep1 > li.on > a:hover .menu-icon::before {filter: brightness(0) invert(1);}
