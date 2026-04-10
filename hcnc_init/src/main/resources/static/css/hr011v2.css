@@ -497,7 +497,7 @@
   padding: 16px;
   border: 1px solid rgba(134, 151, 171, 0.14);
   border-radius: 20px;
-  background: rgba(249, 252, 253, 0.9);
+  background: rgb(255, 255, 255);
 }
 
 .hr011v2-workspace-board {

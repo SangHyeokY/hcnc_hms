@@ -321,7 +321,8 @@ const Menu = {
     // 특정 페이지는 같은 묶음으로 처리
     const pageMap = {
       "hr011": "hr010",
-      "hr012": "hr010"
+      "hr012": "hr010",
+      "hr011v2": "hr010" // 임시로 추가... 추후 삭제
     };
     if (pageMap[pageCode]) {
       return pageMap[pageCode];
