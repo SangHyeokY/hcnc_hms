@@ -410,6 +410,8 @@ function loadHr014TableDataB() {
     });
 }
 
+window.loadHr014RiskData = loadHr014TableDataB;
+
 // ================================================================================= //
 
 // 탭1 평가 저장

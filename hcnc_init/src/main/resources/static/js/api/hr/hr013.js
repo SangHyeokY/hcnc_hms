@@ -81,12 +81,17 @@ window.initTab3 = function () {
 
     $("#write_hr013_inprj_yn").off("change").on("change", function () {
         applyInprjCustomerName($(this).val(), $("#write_hr013_cust_nm").val());
+        syncHr013ProjectLinkUi($(this).val());
     });
 
     $("#write_hr013_cust_nm").off("input").on("input", function () {
         if ($("#write_hr013_inprj_yn").val() !== "Y") {
             lastNonInprjCustNm = $(this).val();
         }
+    });
+
+    $("#btn_hr013_project_link").off("click.hr013projectlink").on("click.hr013projectlink", function () {
+        openHr013ProjectPicker(null);
     });
 
     // 역할/기술스택 공통코드는 테이블 formatter/editor에서 재사용하므로 캐시해 둔다.
@@ -181,7 +186,7 @@ function triggerHr013RowAction(target, action) {
         return;
     }
     if (action === "edit") {
-        openHr013ProjectPicker(rowComp);
+        openHr013RowEditor(rowComp);
         return;
     }
     if (action === "eval") {
@@ -400,12 +405,13 @@ function buildHr013Table() {
                     const showBtn = String(d.inprj_yn).toUpperCase() === "Y";
                     const isNew = d._isNew === true;
                     const isReadOnly = isHr013ProjectReadOnly();
+                    const showEditBtn = !isReadOnly;
 
                     return `
                       <div class="prj-cell">
                         ${showBtn && !isNew && !isReadOnly ? `<div><button type="button" class="btn-prj-eval" data-dev-prj-id="${devPrjIdAttr}" data-prj-nm="${prjNmAttr}" onclick="return window.hr013HandleRowAction && window.hr013HandleRowAction(this,'eval');">평가</button></div>` : ""}
                         <span class="prj-text" title="${hr013EscapeHtml(v)}">${hr013EscapeHtml(v)}</span>
-                        ${showBtn && !isReadOnly ? `<div><button type="button" class="btn-prj-edit" data-dev-prj-id="${devPrjIdAttr}" data-prj-nm="${prjNmAttr}" onclick="return window.hr013HandleRowAction && window.hr013HandleRowAction(this,'edit');">등록</button></div>` : ""}
+                        ${showEditBtn ? `<div><button type="button" class="btn-prj-edit" data-dev-prj-id="${devPrjIdAttr}" data-prj-nm="${prjNmAttr}" onclick="return window.hr013HandleRowAction && window.hr013HandleRowAction(this,'edit');">수정</button></div>` : ""}
                       </div>
                     `;
                 },
@@ -443,7 +449,7 @@ function buildHr013Table() {
                     const regBtn = e?.target?.closest(".btn-prj-edit");
                     if (regBtn) {
                         e.stopPropagation();
-                        openHr013ProjectPicker(cell.getRow()); // 내부에서 로딩 처리함
+                        openHr013RowEditor(cell.getRow());
                         return;
                     }
                 },
@@ -579,6 +585,24 @@ function openHr013Modal(mode) {
             });
             return;
         }
+        fillHr013Form(rowData);
+    } else {
+        clearHr013Form();
+    }
+
+    $("#write-hr013-area").show();
+}
+
+function openHr013RowEditor(row) {
+    if (!isHr013Editable()) {
+        return;
+    }
+
+    var rowData = row && typeof row.getData === "function" ? row.getData() : null;
+    $("#hr013-type").text(rowData && rowData.dev_prj_id ? "수정" : "등록");
+    closeHr013SkillPicker(true);
+
+    if (rowData) {
         fillHr013Form(rowData);
     } else {
         clearHr013Form();
@@ -785,7 +809,8 @@ async function openHr013ProjectPicker(row) {
     if (!isHr013Editable()) return;
 
     var rowData = row && typeof row.getData === "function" ? row.getData() : null;
-    if (rowData && !isHr013InprjYnY(rowData.inprj_yn)) {
+    var currentInprjYn = rowData ? rowData.inprj_yn : $("#write_hr013_inprj_yn").val();
+    if (!isHr013InprjYnY(currentInprjYn)) {
         showAlert({
             icon: "info",
             title: "알림",
@@ -1012,7 +1037,7 @@ function applyHr013ProjectPickerSelection() {
         }
     }
 
-    if (!hr013ProjectPickerContextRow || !hr013SelectedProjectCode) {
+    if (!hr013SelectedProjectCode) {
         showAlert({
             icon: "info", title: "알림", text: "프로젝트를 선택해주세요."
         })
@@ -1030,10 +1055,14 @@ function applyHr013ProjectPickerSelection() {
         return;
     }
 
-    // 실제 저장 컬럼은 기존 설계대로 prj_nm(프로젝트명)만 우선 반영한다.
-    hr013ProjectPickerContextRow.update({
-        prj_nm: selectedName
-    });
+    if (hr013ProjectPickerContextRow && typeof hr013ProjectPickerContextRow.update === "function") {
+        // 실제 저장 컬럼은 기존 설계대로 prj_nm(프로젝트명)만 우선 반영한다.
+        hr013ProjectPickerContextRow.update({
+            prj_nm: selectedName
+        });
+    } else {
+        $("#write_hr013_prj_nm").val(selectedName);
+    }
 
     changedTabs.tab3 = true;
     closeHr013ProjectPicker(false);
@@ -1399,10 +1428,16 @@ function loadHr013TableData() {
             normalizeJobCodes();
             syncStackLabelsFromCodes();
             window.hr013Table.redraw();
+            $(document).trigger("hr013:dataLoaded", [normalized]);
         },
-        error: function () { console.log("Tab3 데이터 로드 실패"); }
+        error: function () {
+            console.log("Tab3 데이터 로드 실패");
+            $(document).trigger("hr013:dataLoaded", [[]]);
+        }
     });
 }
+
+window.loadHr013TableData = loadHr013TableData;
 
 // 선택 행 가져오기
 function getHr013SelectedRow() {
@@ -1410,6 +1445,12 @@ function getHr013SelectedRow() {
         return null;
     }
     var rows = window.hr013Table.getSelectedRows();
+    if (!rows || rows.length === 0) {
+        rows = window.hr013Table.getRows().filter(function (row) {
+            var data = row && typeof row.getData === "function" ? row.getData() : null;
+            return !!(data && data._checked);
+        });
+    }
     if (!rows || rows.length === 0) {
         return null;
     }
@@ -1426,6 +1467,7 @@ function fillHr013Form(data) {
     $("#write_hr013_ed_dt").val(toDateInput(data.ed_dt));
     lastNonInprjCustNm = data.inprj_yn === "Y" ? "" : (data.cust_nm || "");
     applyInprjCustomerName(data.inprj_yn, data.cust_nm);
+    syncHr013ProjectLinkUi(data.inprj_yn);
     $("#write_hr013_prj_nm").val(data.prj_nm || "");
     $("#write_hr013_rate_amt").val(formatNumberInput(parseHr013RateAmountValue(data.rate_amt)));
     $("#write_hr013_job_cd").val(data.job_cd || "");
@@ -1449,6 +1491,7 @@ function clearHr013Form() {
     $("#write_hr013_ed_dt").val("");
     lastNonInprjCustNm = "";
     applyInprjCustomerName("N", "");
+    syncHr013ProjectLinkUi("N");
     $("#write_hr013_prj_nm").val("");
     $("#write_hr013_rate_amt").val("");
     $("#write_hr013_job_cd").val("");
@@ -1595,6 +1638,16 @@ function applyInprjCustomerName(inprjYn, custNm) {
     }
     var nextValue = lastNonInprjCustNm || (custNm && custNm !== "HCNC" ? custNm : "") || "";
     $("#write_hr013_cust_nm").val(nextValue).prop("disabled", false);
+}
+
+function syncHr013ProjectLinkUi(inprjYn) {
+    var isInternal = isHr013InprjYnY(inprjYn);
+    $("#btn_hr013_project_link").prop("disabled", !isInternal);
+    $("#hr013ProjectLinkHelp").text(
+        isInternal
+            ? "당사 프로젝트는 필요할 때만 검색 연결할 수 있습니다."
+            : "외부 프로젝트는 프로젝트명을 직접 입력하세요."
+    );
 }
 
 // 삭제 버튼
@@ -1784,47 +1837,7 @@ function warnAlert(label) {
 
 // 행 추가
 function addHr013Row() {
-    if (!window.hr013Table) {
-        return;
-    }
-    const rowAddResult = window.hr013Table.addRow({
-        dev_prj_id: "",
-        dev_id: window.currentDevId || $("#dev_id").val(),
-        _checked: false,
-        inprj_yn: "Y",
-        st_dt: "",
-        ed_dt: "",
-        cust_nm: "HCNC",
-        _prev_cust_nm: "",
-        prj_nm: "",
-        rate_amt: "",
-        job_cd: "",
-        skl_id_lst: [],
-        stack_txt: "",
-        alloc_pct: "",
-        remark: "",
-        _isNew: true
-    }, true);
-
-    changedTabs.tab3 = true;
-    // 행 추가 후 제목 건수 갱신
-    updateHr013TitleCount();
-
-    if (rowAddResult && typeof rowAddResult.then === "function") {
-        rowAddResult.then(function (rowComp) {
-            if (rowComp && typeof openHr013ProjectPicker === "function") {
-                openHr013ProjectPicker(rowComp);
-            }
-        });
-        return;
-    }
-
-    if (typeof openHr013ProjectPicker === "function" && window.hr013Table && typeof window.hr013Table.getRows === "function") {
-        const rows = window.hr013Table.getRows() || [];
-        if (rows.length) {
-            openHr013ProjectPicker(rows[0]);
-        }
-    }
+    openHr013Modal("new");
 }
 
 function toggleInprjValue(cell) {
