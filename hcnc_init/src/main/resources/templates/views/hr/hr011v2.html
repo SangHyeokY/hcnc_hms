@@ -19,13 +19,13 @@
         })();
     </script>
 
-    <section class="hr011v2-page" id="hr011v2Page">
+    <section class="hr011v2-page" id="hr011v2Page" style="padding-top: 0;">
         <input type="hidden" id="hr011v2DevId" th:value="${dev_id}">
         <input type="hidden" id="dev_id" th:value="${dev_id}">
         <input type="hidden" id="hr011v2CtrtId">
         <input type="hidden" id="hr011v2MainLangRaw">
 
-        <header class="hr011v2-hero">
+        <header class="hr011v2-hero" style="display: none;">
             <div class="hr011v2-hero__copy">
                 <div class="hr011v2-eyebrow">
                     <span class="hr011v2-chip hr011v2-chip--accent">HR010 V2</span>
@@ -82,24 +82,24 @@
         <div class="hr011v2-body">
             <aside class="hr011v2-side">
                 <section class="hr011v2-side-card">
-                    <p class="hr011v2-side-card__label">섹션 이동</p>
+                    <p class="hr011v2-side-card__label">작성 단계</p>
                     <div class="hr011v2-nav">
-                        <button type="button" class="hr011v2-nav-btn is-active" data-target="hr011v2SectionProfile">기본 프로필</button>
-                        <button type="button" class="hr011v2-nav-btn" data-target="hr011v2SectionWork">업무 조건</button>
-                        <button type="button" class="hr011v2-nav-btn" data-target="hr011v2SectionContract">소속/계약</button>
-                        <button type="button" class="hr011v2-nav-btn" data-target="hr011v2SectionProject">프로젝트 워크스페이스</button>
+                        <button type="button" class="hr011v2-nav-btn is-active" data-target="hr011v2SectionProfile">1. 기본 프로필</button>
+                        <button type="button" class="hr011v2-nav-btn" data-target="hr011v2SectionWork">2. 업무 조건 및 전문성</button>
+                        <button type="button" class="hr011v2-nav-btn" data-target="hr011v2SectionContract">3. 소속 및 계약</button>
+                        <button type="button" class="hr011v2-nav-btn" data-target="hr011v2SectionProject">4. 프로젝트 평가</button>
                     </div>
                 </section>
 
                 <section class="hr011v2-side-card">
-                    <p class="hr011v2-side-card__label">입력 상태</p>
+                    <p class="hr011v2-side-card__label">작성 상태</p>
                     <div class="hr011v2-status-list">
                         <div class="hr011v2-status-item">
                             <strong>기본 프로필</strong>
                             <span id="hr011v2StatusProfile">0 / 6</span>
                         </div>
                         <div class="hr011v2-status-item">
-                            <strong>업무 조건</strong>
+                            <strong>업무 조건 및 전문성</strong>
                             <span id="hr011v2StatusWork">0 / 8</span>
                         </div>
                         <div class="hr011v2-status-item">
@@ -107,14 +107,14 @@
                             <span id="hr011v2StatusContract">선택 입력</span>
                         </div>
                         <div class="hr011v2-status-item">
-                            <strong>프로젝트 워크스페이스</strong>
+                            <strong>프로젝트 평가</strong>
                             <span id="hr011v2StatusProjectWorkspace">0건 · 선택 대기</span>
                         </div>
                     </div>
                 </section>
 
                 <section class="hr011v2-side-card hr011v2-side-card--actions">
-                    <p class="hr011v2-side-card__label">작업</p>
+                    <p class="hr011v2-side-card__label">작업바</p>
                     <button type="button" class="btn hr011v2-btn hr011v2-btn--ghost" id="hr011v2BackBtn">목록으로</button>
                     <button type="button" class="btn hr011v2-btn hr011v2-btn--ghost" id="hr011v2LegacyBtn">기존 화면 보기</button>
                     <button type="button" class="btn hr011v2-btn hr011v2-btn--ghost" id="hr011v2ResetBtn">다시 불러오기</button>
@@ -129,7 +129,7 @@
                             <p class="hr011v2-panel__eyebrow">Profile</p>
                             <h3>기본 프로필</h3>
                         </div>
-                        <p class="hr011v2-panel__desc">수정 가능한 기본 정보는 이 영역에서 바로 입력합니다.</p>
+<!--                        <p class="hr011v2-panel__desc">수정 가능한 기본 정보는 이 영역에서 바로 입력합니다.</p>-->
                     </div>
                     <div class="hr011v2-grid hr011v2-grid--profile">
                         <div class="hr011v2-field hr011v2-field--media">
@@ -192,7 +192,7 @@
                             <p class="hr011v2-panel__eyebrow">Work Setup</p>
                             <h3>업무 조건 및 전문성</h3>
                         </div>
-                        <p class="hr011v2-panel__desc">투입 가능일, 계약 형태, 경력, 단가를 한 묶음으로 정리했습니다.</p>
+<!--                        <p class="hr011v2-panel__desc">투입 가능일, 계약 형태, 경력, 단가를 한 묶음으로 정리했습니다.</p>-->
                     </div>
                     <div class="hr011v2-grid hr011v2-grid--work">
                         <label class="hr011v2-field">
@@ -256,9 +256,9 @@
                     <div class="hr011v2-panel__head">
                         <div>
                             <p class="hr011v2-panel__eyebrow">Contract</p>
-                            <h3>소속 및 계약정보</h3>
+                            <h3>소속 및 계약</h3>
                         </div>
-                        <p class="hr011v2-panel__desc">필수는 아니지만, 작성하면 우측 상단 카드와 개요 지표에 바로 반영됩니다.</p>
+<!--                        <p class="hr011v2-panel__desc">필수는 아니지만, 작성하면 우측 상단 카드와 개요 지표에 바로 반영됩니다.</p>-->
                     </div>
                     <div class="hr011v2-grid hr011v2-grid--contract">
                         <label class="hr011v2-field">
@@ -296,18 +296,18 @@
                 <section class="hr011v2-panel hr011v2-panel--workspace" id="hr011v2SectionProject">
                     <div class="hr011v2-panel__head">
                         <div>
-                            <p class="hr011v2-panel__eyebrow">Project Workspace</p>
-                            <h3>프로젝트 타임라인 + 작업영역</h3>
+                            <p class="hr011v2-panel__eyebrow">Project Evaluation</p>
+                            <h3>프로젝트 평가</h3>
                         </div>
-                        <p class="hr011v2-panel__desc">왼쪽에서는 프로젝트 흐름을 빠르게 훑고, 오른쪽에서는 선택한 프로젝트의 평가와 리스크를 바로 관리하는 구조입니다.</p>
+<!--                        <p class="hr011v2-panel__desc">왼쪽에서는 프로젝트 흐름을 빠르게 훑고, 오른쪽에서는 선택한 프로젝트의 평가와 리스크를 바로 관리하는 구조입니다.</p>-->
                     </div>
-                    <div class="hr011v2-project-workspace">
+                    <div class="hr011v2-project-workspace" style="height: 560px;">
                         <section class="hr011v2-project-column hr011v2-project-column--list">
                             <div class="hr011v2-project-column__head">
                                 <div>
-                                    <p class="hr011v2-panel__eyebrow">Timeline</p>
+                                    <p class="hr011v2-panel__eyebrow">PROJECT LIST</p>
                                     <h4>프로젝트 목록</h4>
-                                    <p>미니카드를 눌러 우측 절반 작업영역을 바로 엽니다.</p>
+<!--                                    <p>미니카드를 눌러 우측 절반 작업영역을 바로 엽니다.</p>-->
                                 </div>
                                 <div class="hr011v2-project-rail-actions">
                                     <button type="button" class="btn hr011v2-inline-btn" id="hr011v2ProjectAddBtn" disabled>새 프로젝트</button>
@@ -319,7 +319,7 @@
                                 <strong id="hr011v2ProjectTimelineCount">0건</strong>
                                 <p id="hr011v2ProjectTimelineSummary">등록된 프로젝트가 없습니다. 새 프로젝트를 추가해 주세요.</p>
                             </div>
-
+                            
                             <div class="hr011v2-project-timeline" id="hr011v2ProjectTimeline">
                                 <div class="hr011v2-project-empty">
                                     <strong>아직 프로젝트가 없습니다.</strong>
@@ -327,15 +327,15 @@
                                 </div>
                             </div>
 
-                            <div class="hr011v2-project-ghost hr011v2-legacy-body hr011v2-legacy-body--project" aria-hidden="true">
+                            <div class="hr011v2-project-ghost hr011v2-legacy-body hr011v2-legacy-body--project" aria-hidden="true" style="display:none;">
                                 <th:block th:replace="~{views/hr/hr013 :: tab3Content}"></th:block>
                             </div>
                         </section>
 
-                        <section class="hr011v2-project-column hr011v2-project-column--detail">
+                        <section class="hr011v2-project-column hr011v2-project-column--detail" style="border-color: rgba(19, 122, 113, 0.28); background: linear-gradient(180deg, rgba(244, 251, 249, 0.99), rgba(236, 246, 244, 0.96))">
                             <div class="hr011v2-project-column__head hr011v2-project-column__head--detail">
                                 <div>
-                                    <p class="hr011v2-panel__eyebrow">Focus Project</p>
+                                    <p class="hr011v2-panel__eyebrow">Project Detail</p>
                                     <h4 id="hr011v2ProjectFocusTitle">프로젝트를 선택해 주세요</h4>
                                     <p id="hr011v2ProjectFocusDesc">왼쪽 목록에서 프로젝트를 선택하면 우측 절반에 상세와 평가/리스크 작업영역이 바로 열립니다.</p>
                                 </div>
@@ -379,34 +379,35 @@
                             </div>
 
                             <div class="hr011v2-project-column__divider"></div>
-
-                            <div class="hr011v2-workspace-board">
-                                <div class="hr011v2-workspace-board__head">
-                                    <div>
-                                        <p class="hr011v2-panel__eyebrow">Evaluation Board</p>
-                                        <h4>평가 및 리스크 작업영역</h4>
-                                    </div>
-                                    <p>우측 절반 안에서 상세 확인과 평가/리스크 입력이 끊기지 않도록 한 영역으로 묶었습니다.</p>
-                                </div>
-
-                                <div class="hr011v2-project-empty hr011v2-project-empty--inline" id="hr011v2ProjectEvalEmpty">
-                                    <strong>저장된 프로젝트를 선택하면 작업영역이 열립니다.</strong>
-                                    <p>신규 행은 먼저 프로젝트명과 기본 정보를 저장한 뒤 평가와 리스크를 입력할 수 있습니다.</p>
-                                </div>
-
-                                <div class="hr011v2-project-empty hr011v2-project-empty--inline hr011v2-project-empty--warning" id="hr011v2ProjectEvalLocked" hidden>
-                                    <strong>외부 프로젝트는 관리자 평가 대상이 아닙니다.</strong>
-                                    <p>외부 프로젝트는 리스크 관리만 바로 작성할 수 있습니다.</p>
-                                </div>
-
-                                <div class="hr011v2-legacy-body hr011v2-legacy-body--eval" id="hr011v2ProjectEvalBoard">
-                                    <div id="tab4">
-                                        <th:block th:replace="~{views/hr/hr014 :: tab4Content}"></th:block>
-                                    </div>
-                                </div>
-                            </div>
                         </section>
                     </div>
+                    <section style="margin-top: 18px;">
+                        <div class="hr011v2-workspace-board">
+                            <div class="hr011v2-workspace-board__head">
+                                <div>
+                                    <p class="hr011v2-panel__eyebrow">Evaluation Board</p>
+                                    <h4>평가 및 리스크 작업영역</h4>
+                                </div>
+                                <!--                                    <p>우측 절반 안에서 상세 확인과 평가/리스크 입력이 끊기지 않도록 한 영역으로 묶었습니다.</p>-->
+                            </div>
+
+                            <div class="hr011v2-project-empty hr011v2-project-empty--inline" id="hr011v2ProjectEvalEmpty">
+                                <strong>저장된 프로젝트를 선택하면 작업영역이 열립니다.</strong>
+                                <p>신규 행은 먼저 프로젝트명과 기본 정보를 저장한 뒤 평가와 리스크를 입력할 수 있습니다.</p>
+                            </div>
+
+                            <div class="hr011v2-project-empty hr011v2-project-empty--inline hr011v2-project-empty--warning" id="hr011v2ProjectEvalLocked" hidden>
+                                <strong>외부 프로젝트는 관리자 평가 대상이 아닙니다.</strong>
+                                <p>외부 프로젝트는 리스크 관리만 바로 작성할 수 있습니다.</p>
+                            </div>
+
+                            <div class="hr011v2-legacy-body hr011v2-legacy-body--eval" id="hr011v2ProjectEvalBoard">
+                                <div id="tab4">
+                                    <th:block th:replace="~{views/hr/hr014 :: tab4Content}"></th:block>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
                 </section>
 
             </div>

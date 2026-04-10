@@ -6658,9 +6658,9 @@ section.search-area .search-info #searchConditionKeyword {
   overflow: hidden;
 }
 
-.hr011-detail-wrap .hr011-page:not(.is-edit-mode) .hr011-page-header-compact {
-  display: none;
-}
+/*.hr011-detail-wrap .hr011-page:not(.is-edit-mode) .hr011-page-header-compact {*/
+/*  display: none;*/
+/*}*/
 
 .hr011-detail-wrap .hr011-page:not(.is-edit-mode) .content-title {
   margin-bottom: 0;
@@ -6992,10 +6992,11 @@ section.search-area .search-info #searchConditionKeyword {
   box-shadow: none;
 }
 
-.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-basic-grid {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px 12px;
-}
+/* 소속 및 계약정보 그리드 */
+/*.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-basic-grid {*/
+/*  grid-template-columns: repeat(2, minmax(0, 1fr));*/
+/*  gap: 10px 12px;*/
+/*}*/
 
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-field-card--span2,
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-field-card--readonly {
@@ -7036,7 +7037,7 @@ section.search-area .search-info #searchConditionKeyword {
 }
 
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-profile-section .hr011-field-card {
-  grid-column: span 4;
+  grid-column: span 2;
   background: #ffffff;
   backdrop-filter: none;
   border: 1px solid #dce7f8;
@@ -7071,11 +7072,11 @@ section.search-area .search-info #searchConditionKeyword {
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-profile-section .hr011-field-card input,
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-profile-section .hr011-field-card select,
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-profile-section .hr011-field-card textarea {
-  border-radius: 11px;
+  border-radius: 12px;
   border: 1px solid #d3e1f4;
-  background: linear-gradient(180deg, #ffffff 0%, #f9fbff 100%);
-  min-height: 42px;
-  font-size: 15px;
+  /*background: linear-gradient(180deg, #ffffff 0%, #f9fbff 100%);*/
+  /*min-height: 42px;*/
+  font-size: 16px;
 }
 
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section[data-edit-step="skill"] {
@@ -9513,6 +9514,8 @@ section.search-area .search-info #searchConditionKeyword {
   justify-content: space-between;
   gap: 16px;
   margin-bottom: 16px;
+  border-bottom: 1px solid #ebf1fa;
+  padding-bottom: 6px;
 }
 
 .hr011-detail-wrap .hr011-section-head h5 {
@@ -9564,7 +9567,7 @@ section.search-area .search-info #searchConditionKeyword {
   padding: 0 12px;
   border: 1px solid #d7e3f3;
   border-radius: 12px;
-  background: #ffffff;
+  /*background: #ffffff;*/
   color: #20385c;
   font-size: 15px;
   font-weight: 600;
@@ -9697,8 +9700,8 @@ section.search-area .search-info #searchConditionKeyword {
   display: flex;
   align-items: baseline;
   gap: 8px;
-  min-height: 46px;
-  padding: 10px 0 6px;
+  /*min-height: 46px;*/
+  padding: 6px 0;
 }
 
 .hr011-detail-wrap .hr011-readonly-value strong {
