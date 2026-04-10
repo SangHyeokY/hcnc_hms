@@ -294,7 +294,7 @@ function buildHr013Table() {
     // var shouldAutoExpandRows = !isHr011Detail;
 
     var options = {
-        layout: "fitData",
+        layout: "fitColumns",
         placeholder: "데이터 없음",
         selectable: false,
         rowHeight: isHr011Detail ? 46 : 42,
@@ -515,7 +515,7 @@ function buildHr013Table() {
                 cellClick: startEditOnClick, width: 155
             },
             { title: "투입률", field: "alloc_pct", hozAlign: "center", formatter: percentageFormatter, width: 92, minWidth: 86, editor: "input", editable: isHr013Editable, cellClick: startEditOnClick },
-            { title: "비고", field: "remark", editor: "input", editable: isHr013Editable, cellClick: startEditOnClick, width: 320, minWidth: 280},
+            { title: "비고", field: "remark", editor: "input", editable: isHr013Editable, cellClick: startEditOnClick}
         ],
         data: []
     };

@@ -21,7 +21,7 @@ export const menuData = [
     type: "A"
   },
   {
-    title: "코드관리",
+    title: "코드 관리",
     path: "/cm040",
     icon: "code",
     visible: true,

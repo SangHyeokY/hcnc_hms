@@ -317,6 +317,16 @@ const Menu = {
   },
 
   findParentPage(pageCode) {
+    if (!pageCode) return null;
+    // 특정 페이지는 같은 묶음으로 처리
+    const pageMap = {
+      "hr011": "hr010",
+      "hr012": "hr010"
+    };
+    if (pageMap[pageCode]) {
+      return pageMap[pageCode];
+    }
+
     if (!pageCode || pageCode.length <= 2) return null;
 
     const secondChar = pageCode.charAt(1).toUpperCase();

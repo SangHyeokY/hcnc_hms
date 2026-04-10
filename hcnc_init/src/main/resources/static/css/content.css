@@ -2390,18 +2390,20 @@ button.btn.btn-add-skill:hover,
   width: 16px;
 }
 
+/*======= 인적사항 프로필 이미지 첨부 ======*/
 .modal-human-area .pic-area {
-  height: 100%;
-  width: 100%;
+  position: relative;
+  width: 240px;
+  margin: 0 auto;
 }
 
 .modal-human-area .pic-area .profile-area {
   position: relative;
-  height: 240px;
   width: 100%;
+  aspect-ratio: 1 / 1;
   border: 1px solid #DEE2E7;
-  border-radius: 12px;
-  background: url("../images/common/bg-userimg.png")center center no-repeat #ECECEE;
+  border-radius: 50%;
+  background: url(../images/common/bg-userimg.png) center center no-repeat #ECECEE;
   background-size: contain;
   overflow: hidden;
 }
@@ -2412,48 +2414,42 @@ button.btn.btn-add-skill:hover,
   object-fit: cover;
 }
 
-.modal-human-area .pic-area .profile-area .re-upload-image {
+.modal-human-area .pic-area .re-upload-image {
   position: absolute;
-  bottom: 7px;
-  right: 7px;
-  width: 40px;
-  height: 40px;
-  border-radius: 20px;
-  background-color: #E50019 !important;
-  background: url("../icons/ico-setting.png") center center no-repeat;
+  bottom: 8px;
+  right: 8px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: #E50019;
   display: none;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  z-index: 20;
 }
 
-.modal-human-area .upload {
-  width: 100%;
-  height: 100%;
-  padding-top: 15px;
+.modal-human-area .pic-area .re-upload-image::before {
+  content: "";
   position: absolute;
-  top: 0;
-  left: 0;
-  cursor: pointer;
+  inset: 0;
+  background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLWNhbWVyYS1pY29uIGx1Y2lkZS1jYW1lcmEiPjxwYXRoIGQ9Ik0xMy45OTcgNGEyIDIgMCAwIDEgMS43NiAxLjA1bC40ODYuOUEyIDIgMCAwIDAgMTguMDAzIDdIMjBhMiAyIDAgMCAxIDIgMnY5YTIgMiAwIDAgMS0yIDJINGEyIDIgMCAwIDEtMi0yVjlhMiAyIDAgMCAxIDItMmgxLjk5N2EyIDIgMCAwIDAgMS43NTktMS4wNDhsLjQ4OS0uOTA0QTIgMiAwIDAgMSAxMC4wMDQgNHoiLz48Y2lyY2xlIGN4PSIxMiIgY3k9IjEzIiByPSIzIi8+PC9zdmc+");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 36px;
+  filter: brightness(0) invert(1);
 }
 
-.insert .main-human-modal .modal-human-area .upload {
-  padding-top: 15px;
+.modal-human-area .file {
   position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 10;
-}
-
-.modal-human-area .upload .file {
-  width: 100%;
-  height: 100%;
-  position: absolute;
-  top: 0;
-  left: 0;
+  top: -5px;
+  left: -5px;
+  width: calc(100% + 10px);
+  height: calc(100% + 10px);
   opacity: 0;
-  z-index: 1;
   cursor: pointer;
+  z-index: 30;
 }
 
-.modal-human-area .upload .file:disabled {
+.modal-human-area .file:disabled {
   cursor: default !important;
 }
 
@@ -2461,6 +2457,7 @@ button.btn.btn-add-skill:hover,
   background: url("../images/common/bg-userimg-none.png") center center no-repeat #ECECEE;
   background-size: contain;
 }
+/*=====================================*/
 
 .modal-human-area .upload .showingbtn {
   width: 100%;
@@ -6539,8 +6536,8 @@ section.search-area .search-info #searchConditionKeyword {
 
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-dashboard-grid {
   grid-template-columns: minmax(0, 1fr);
-  gap: 86px;
-  padding-bottom: 120px;
+  gap: 120px;
+  /*padding-bottom: 120px;*/
 }
 
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-sector--full {
@@ -6708,8 +6705,9 @@ section.search-area .search-info #searchConditionKeyword {
   border-radius: 0 0 18px 18px;
   background: linear-gradient(180deg, #f8fbff 0%, #f2f7ff 100%);
   box-shadow: 0 18px 34px rgba(24, 46, 82, 0.10);
-  min-height: calc(100dvh - 176px);
-  max-height: calc(100dvh - 176px);
+  /*min-height: calc(100dvh - 176px);*/
+  /*max-height: calc(100dvh - 176px);*/
+  height: 100%;
   overflow-y: auto;
   align-self: start;
 }
@@ -6924,10 +6922,10 @@ section.search-area .search-info #searchConditionKeyword {
   margin-left: 312px;
 }
 
-.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section[data-edit-step="project"] {
-  margin-left: -12px;
-  margin-right: -12px;
-}
+/*.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section[data-edit-step="project"] {*/
+/*  margin-left: -12px;*/
+/*  margin-right: -12px;*/
+/*}*/
 
 /*.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section[data-edit-step="project"] #TABLE_HR013_A .tabulator-table {*/
 /*  min-width: 1680px !important;*/
@@ -7081,7 +7079,7 @@ section.search-area .search-info #searchConditionKeyword {
 }
 
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section[data-edit-step="skill"] {
-  margin-bottom: 220px;
+  /*margin-bottom: 220px;*/
   min-height: 320px;
 }
 
