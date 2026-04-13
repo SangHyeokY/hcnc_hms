@@ -267,7 +267,7 @@ function buildPrjTable() {
                 field: "dev_nm",
                 headerSort: true,
                 resizable: false,
-                width: 140,
+                width: 200,
                 formatter: function (cell) {
                     const row = cell.getRow().getData();
                     const name = row.dev_nm || "";

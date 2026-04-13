@@ -597,10 +597,18 @@ option {
   object-fit: cover;
 }
 
+#TABLE_HR020_A .profile-circle-icon,
 #TABLE_USER .profile-circle-icon {
   width: 35px;
   height: 35px;
   font-size: 13px;
+}
+
+#TABLE_USER .tabulator-tableHolder {
+  overflow: hidden;
+  min-height: calc(100% - 94px) !important;
+  height: calc(100% - 94px) !important;
+  max-height: calc(100% - 94px) !important;
 }
 
 .profile-circle-bigIcon {
@@ -3756,12 +3764,12 @@ section.search-area .search-info #searchConditionKeyword {
   max-width: 100%;
 }
 
-.prj-text {
+.prj-text, .remark-ellipsis {
   display: block;
   min-width: 0;
   width: 100%;
   overflow: hidden;
-  white-space: nowrap;
+  white-space: nowrap !important;
   text-overflow: ellipsis;
 }
 
@@ -3796,7 +3804,7 @@ section.search-area .search-info #searchConditionKeyword {
   border-radius: 0;
   box-shadow: none;
   overflow: hidden;
-  background: linear-gradient(180deg, #ffffff 0%, #ffffff 42%, #fbfcff 100%);
+  background: transparent !important;
 }
 
 .contents-wrap.hr030-dashboard-wrap>section.white-full.hr030-dashboard-shell>.content-body {
@@ -6088,7 +6096,7 @@ minmax(142px, 1.02fr); gap:10px; align-items:stretch;}
 .hr010-dashboard-wrap .hr010-search-control-row {display:grid; grid-template-columns:minmax(0, 1fr); align-items:stretch; gap:12px; width:100%;}
 .hr010-dashboard-wrap .hr010-search-field-wrap {position:relative; z-index:21; min-width:0;}
 .hr010-dashboard-wrap .hr010-search-control-row .hr010-tag-search-box {width:100%; min-width:0;}
-.hr010-dashboard-wrap .hr010-tag-search-box {display:flex; flex-wrap:wrap; align-items:center; gap:8px; min-height:58px; padding:12px 0 12px 18px; border:1.5px solid #2C80FF; border-radius:12px; background:#fff; box-shadow:none; overflow:hidden;}
+.hr010-dashboard-wrap .hr010-tag-search-box {display:flex; flex-wrap:wrap; align-items:center; gap:18px; min-height:58px; padding:12px 0 12px 18px; border:1.5px solid #2C80FF; border-radius:12px; background:#fff; box-shadow:none; overflow:hidden;}
 .hr010-dashboard-wrap .hr010-tag-area {display:flex; flex-wrap:wrap; gap:8px;}
 .hr010-dashboard-wrap .hr010-tag-area.is-empty {display:none;}
 

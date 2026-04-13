@@ -1,7 +1,7 @@
 @charset "utf-8";
 
 :root {
-  --hcnc-shell-bg: #f7f9fc;
+  --hcnc-shell-bg: #F5F6FA;
   --hcnc-shell-surface: #ffffff;
   --hcnc-shell-panel: #ffffff;
   --hcnc-shell-line: #e8edf5;
@@ -32,7 +32,6 @@ body {background: var(--hcnc-shell-bg); color: var(--hcnc-shell-text);}
   --hcnc-lnb-width: var(--hcnc-sidebar-width);
   --hcnc-contents-pad: 25px;
   min-height: 100vh;
-  background: #f7f9fc;
   position: relative;
 }
 
