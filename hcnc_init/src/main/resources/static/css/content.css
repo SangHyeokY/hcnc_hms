@@ -6173,7 +6173,7 @@ section.search-area .search-info #searchConditionKeyword {
 .hr010-dashboard-wrap .hr010-create-btn a {padding: 0 4px;}
 .hr010-dashboard-wrap .hr010-result-bar {display:flex; align-items:center; justify-content:space-between; gap:15px;}
 .hr010-dashboard-wrap .hr010-result-count {display:inline-flex; align-items:center; gap:3px; margin:0; color:#5F666E; font-family:var(--hcnc-font-body); font-size:13px; font-weight:400; line-height:1.4;}
-.hr010-dashboard-wrap .hr010-result-count strong {display:inline-flex; align-items:center; position:relative; top:-1px; color:#000000; font-family:var(--hcnc-font-body); font-size:18px; font-weight:700;}
+.hr010-dashboard-wrap .hr010-result-count strong {display:inline-flex; align-items:center; position:relative; color:#000000; font-family:var(--hcnc-font-body); font-size:18px; font-weight:700;} /*top:-1px; */
 .hr010-dashboard-wrap .hr010-view-toggle {display:inline-flex; align-items:center; width:240px; height:40px; padding:4px; border:0; border-radius:12px; background:#E2E6ED; gap:0; box-shadow:none;}
 .hr010-dashboard-wrap .hr010-view-toggle-btn {display:inline-flex; align-items:center; justify-content:center; gap:10px; flex:1 1 0; min-width:0; height:32px; padding:8px 12px; border:none; border-radius:12px; background:transparent; color:#71727A; font-family:var(--hcnc-font-body); font-size:13px; font-weight:700; line-height:1; cursor:pointer; transition:background-color .18s ease, color .18s ease, box-shadow .18s ease; letter-spacing:0;}
 .hr010-dashboard-wrap .hr010-view-toggle-btn__icon {display:inline-flex; width:11px; height:11px; flex:0 0 13px; background-repeat:no-repeat; background-position:center; background-size:13px 13px; line-height:1; opacity:0.72; transition:opacity .18s ease, filter .18s ease;}
@@ -6313,7 +6313,7 @@ minmax(142px, 1.02fr); gap:10px; align-items:stretch;}
 .hr010-dashboard-wrap .hr010-search-control-row {display:grid; grid-template-columns:minmax(0, 1fr); align-items:stretch; gap:12px; width:100%;}
 .hr010-dashboard-wrap .hr010-search-field-wrap {position:relative; z-index:21; min-width:0;}
 .hr010-dashboard-wrap .hr010-search-control-row .hr010-tag-search-box {width:100%; min-width:0;}
-.hr010-dashboard-wrap .hr010-tag-search-box {display:flex; flex-wrap:wrap; align-items:center; gap:8px; min-height:58px; padding:12px 0 12px 10px; border:1.5px solid #2C80FF; border-radius:12px; background:#fff; box-shadow:none; overflow:hidden;}
+.hr010-dashboard-wrap .hr010-tag-search-box {display:flex; flex-wrap:wrap; align-items:center; gap:8px; min-height:58px; padding:12px 0 12px 18px; border:1.5px solid #2C80FF; border-radius:12px; background:#fff; box-shadow:none; overflow:hidden;}
 .hr010-dashboard-wrap .hr010-tag-area {display:flex; flex-wrap:wrap; gap:8px;}
 .hr010-dashboard-wrap .hr010-tag-area.is-empty {display:none;}
 
@@ -6321,7 +6321,7 @@ minmax(142px, 1.02fr); gap:10px; align-items:stretch;}
 .hr010-dashboard-wrap .hr010-tag-chip:hover, .hr010-dashboard-wrap .hr010-tag-chip:hover .hr010-tag-remove {border: 1px solid #000000; color: #000000;}
 .hr010-dashboard-wrap .hr010-tag-chip__label {display:inline-flex; align-items:center;}
 .hr010-dashboard-wrap .hr010-tag-remove {display:inline-flex; align-items:center; justify-content:center; color:#A4A9B1; cursor:pointer; border: none !important;}
-.hr010-dashboard-wrap .hr010-search-keyword-input {flex:1 1 220px; min-width:220px; height:21px; border:none; background:transparent; font-family:var(--hcnc-font-body); font-size:15px; font-weight:400; line-height: 20px; letter-spacing: 0; color:#3A3C40;}
+.hr010-dashboard-wrap .hr010-search-keyword-input {flex:1 1 220px; min-width:220px; height:21px; border:none; background:transparent; font-family:var(--hcnc-font-body); font-size:15px; font-weight:400; line-height: 20px; letter-spacing: 0; color:#3A3C40; padding: 0;}
 .hr010-dashboard-wrap .hr010-search-keyword-input::placeholder {color:#8F9098;}
 .hr010-dashboard-wrap .hr010-search-keyword-input:focus {outline:none !important; border-color: transparent !important; box-shadow: none !important;}
 .hr010-dashboard-wrap .hr010-search-keyword-input:hover {outline:none !important; border-color: transparent !important; box-shadow: none !important;}
