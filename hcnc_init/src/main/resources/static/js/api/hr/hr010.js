@@ -456,7 +456,7 @@ function renderSelectedTags() {
     area.innerHTML = tags.map(tag => `
         <button type="button" class="hr010-tag-chip" data-type="${tag.type}" data-key="${tag.key}" data-value="${escapeHtml(tag.value)}">
             <span class="hr010-tag-chip__label">${escapeHtml(tag.label)}</span>
-            <span class="hr010-tag-remove" data-type="${tag.type}" data-key="${tag.key}" data-value="${escapeHtml(tag.value)}" aria-label="태그 삭제">×</span>
+            <span class="hr010-tag-remove" data-type="${tag.type}" data-key="${tag.key}" data-value="${escapeHtml(tag.value)}" aria-label="태그 삭제">✖</span>
         </button>
     `).join("");
 }
