@@ -60,6 +60,8 @@ $(document).ready(function () {
     $("#btn-user-save").on("click", function () {
         upsertUserBtn();
     });
+
+    $(".main-titlebar").addClass("cm010-main-titlebar");
 });
 
 function showModalWithTransition(modal) {

@@ -30,7 +30,7 @@ body {background: var(--hcnc-shell-bg); color: var(--hcnc-shell-text);}
   --hcnc-header-height: 70px;
   --hcnc-sidebar-width: 88px;
   --hcnc-lnb-width: var(--hcnc-sidebar-width);
-  --hcnc-contents-pad: 28px;
+  --hcnc-contents-pad: 25px;
   min-height: 100vh;
   background: #f7f9fc;
   position: relative;
@@ -45,7 +45,7 @@ body {background: var(--hcnc-shell-bg); color: var(--hcnc-shell-text);}
 
 .container-wrap .container .contents-wrap {
   min-height: 100vh;
-  padding: calc(var(--hcnc-header-height) + 24px) var(--hcnc-contents-pad) var(--hcnc-contents-pad);
+  padding: calc(var(--hcnc-header-height) + var(--hcnc-contents-pad)) var(--hcnc-contents-pad) var(--hcnc-contents-pad);
   display:grid;
   gap:20px;
   grid-auto-rows: 36px auto;

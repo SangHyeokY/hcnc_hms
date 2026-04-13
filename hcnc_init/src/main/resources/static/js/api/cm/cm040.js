@@ -98,6 +98,8 @@ $(document).ready(function () {
 
     /* DETAIL 정렬 저장 */
     $(".btn-detail-sort-save").on("click", saveDetailSort);
+
+    $(".main-titlebar").addClass("cm040-main-titlebar");
 });
 
 
