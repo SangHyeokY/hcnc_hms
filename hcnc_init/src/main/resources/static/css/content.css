@@ -178,11 +178,12 @@ option {
 }
 
 .container-wrap .content-title .page-sub-title,
-.content-body .content-title .page-sub-title {
+.content-body .content-title .page-sub-title,
+.hr011-ref-page-title .page-sub-title {
   position:relative;
   display:flex;
   align-items:center;
-  font-family:var(--hcnc-font-display);
+  font-family:var(--hcnc-font-display) !important;
   font-size:24px;
   font-weight:700;
   line-height:1;
@@ -203,7 +204,8 @@ option {
 }
 
 /* 2. 인적사항 텍스트 앞 아이콘 */
-.hr010-main-titlebar .page-sub-title::before {
+.hr010-main-titlebar .page-sub-title::before,
+.hr011-detail-wrap .hr011-ref-page-title__icon::before {
   content: "";
   display: inline-block;
   width: 22px;
@@ -8981,7 +8983,7 @@ minmax(142px, 1.02fr); gap:10px; align-items:stretch;}
 
 .hr011-detail-wrap .hr011-ref-page-head {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
   flex: 0 0 auto;
@@ -9001,28 +9003,6 @@ minmax(142px, 1.02fr); gap:10px; align-items:stretch;}
   width: 22px;
   height: 22px;
   flex: 0 0 auto;
-}
-
-.hr011-detail-wrap .hr011-ref-page-title__icon::before {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 16px;
-  height: 15px;
-  background: url("../icons/lnb-icon-hr-wh.png") center center no-repeat;
-  background-size: contain;
-  filter: brightness(0) saturate(100%);
-  transform: translate(-50%, -50%);
-}
-
-.hr011-detail-wrap .hr011-ref-page-title h4 {
-  margin: 0;
-  font-family: "Paperlogy", "Pretendard Variable", "Pretendard", sans-serif;
-  font-size: 24px;
-  font-weight: 700;
-  color: #222222;
-  letter-spacing: -0.02em;
 }
 
 .hr011-detail-wrap .hr011-ref-dashboard {
