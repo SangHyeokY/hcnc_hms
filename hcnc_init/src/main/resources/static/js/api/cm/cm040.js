@@ -98,6 +98,8 @@ $(document).ready(function () {
 
     /* DETAIL 정렬 저장 */
     $(".btn-detail-sort-save").on("click", saveDetailSort);
+
+    $(".main-titlebar").addClass("cm040-main-titlebar");
 });
 
 
@@ -266,15 +268,15 @@ function buildTables() {
                 download: false,
                 resizable: false
             },
-            { title: "코드", field: "cd", hozAlign: "center", widthGrow:1}, /* width: detailBaseWidths.cd  */
+            { title: "코드", field: "cd", hozAlign: "center", width: 82}, /* width: detailBaseWidths.cd  */
             { title: "코드명", field: "cd_nm", widthGrow:1},
-            { title: "정렬순서", field: "sort_no", hozAlign: "center", widthGrow:1}, /* width: detailBaseWidths.sort_no */
+            { title: "정렬순서", field: "sort_no", hozAlign: "center", width: 82}, /* width: detailBaseWidths.sort_no */
             { title: "부가정보1", field: "adinfo_01", formatter: amountFormatter, widthGrow:1},
             { title: "부가정보2", field: "adinfo_02", formatter: amountFormatter, widthGrow:1},
             { title: "부가정보3", field: "adinfo_03", formatter: amountFormatter, widthGrow:1},
             { title: "부가정보4", field: "adinfo_04", formatter: amountFormatter, widthGrow:1},
             { title: "부가정보5", field: "adinfo_05", formatter: amountFormatter, widthGrow:1},
-            { title: "사용여부", field: "use_yn", hozAlign: "center", widthGrow:1} /* width: detailBaseWidths.use_yn,  */
+            { title: "사용여부", field: "use_yn", hozAlign: "center", width: 82} /* width: detailBaseWidths.use_yn,  */
         ],
         rowSelected: r => syncRowCheckbox(r, true),
         rowDeselected: r => syncRowCheckbox(r, false),

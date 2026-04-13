@@ -60,6 +60,8 @@ $(document).ready(function () {
     $("#btn-user-save").on("click", function () {
         upsertUserBtn();
     });
+
+    $(".main-titlebar").addClass("cm010-main-titlebar");
 });
 
 function showModalWithTransition(modal) {
@@ -225,7 +227,16 @@ function buildUserTable() {
                 },
                 widthGrow: 1
             },
-            { title: "비고", field: "remark", hozAlign: "center", widthGrow: 3 }
+            {
+                title: "비고",
+                field: "remark",
+                hozAlign: "left",
+                width: 300,
+                formatter: function (cell) {
+                    const value = cell.getValue() || "";
+                    return `<div class="remark-ellipsis" title="${value}">${value}</div>`;
+                }
+            }
         ],
         data: [],
         rowSelected: function (row) {

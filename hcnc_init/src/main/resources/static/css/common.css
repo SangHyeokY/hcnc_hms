@@ -21,10 +21,7 @@ button {
 }
 a{color:#333;word-wrap:break-word; outline:none; cursor:pointer;}
 body:focus{outline:#3D7FE1 solid 1px;}
-/* body input[type="text"]:-webkit-autofill, body input[type="text"]:-webkit-autofill:hover, body input[type="text"]:-webkit-autofill:focus, body input[type="text"]:-webkit-autofill:active, body input[type="text"]:-webkit-autofill:focus-within, body input[type="text"]:-webkit-autofill:visited {-webkit-box-shadow:0 0 0 1000px #3D7FE1 inset !important; -webkit-text-fill-color:#3D7FE1 !important;} */
-
 ::-ms-clear{display:none;}
-
 .readonly {background-color:#f5f5f5 !important;}
 
 /*=================================================================================

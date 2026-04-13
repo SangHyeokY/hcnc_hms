@@ -84,11 +84,6 @@ table a.btn {padding:3px 10px;}
   background-color: #FFF8F8 !important;
 }
 
-/* 헤더에 border 넣을 경우 활성화 */
-/*.tabulator .tabulator-header .tabulator-col:last-child {
-  border-right: none;
-}*/
-
 .tabulator .tabulator-header .tabulator-col .tabulator-col-content {
   height: 45px !important;
   min-height: 45px !important;
@@ -111,10 +106,6 @@ table a.btn {padding:3px 10px;}
   border-right: 0 !important;
 }
 
-/*.tabulator-row .tabulator-cell,
-.tabulator-row .tabulator-cell + .tabulator-cell {
-  border-left: 0 !important;
-}*/
 .tabulator .tabulator-cell,
 .tabulator .tabulator-col {
   box-sizing: border-box;

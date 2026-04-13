@@ -41,6 +41,9 @@ $(document).ready(async function () {
 
     // 테이블 로딩이 끝날 때 까지 로딩바 표시
     showLoading();
+
+    $(".main-titlebar").addClass("hr020-main-titlebar");
+
     await new Promise(resolve => {
         setComCode("write_hr020_job_cd", "job_cd", "", "cd", "cd_nm", function (list) {
             jobCdMap = {};
@@ -264,7 +267,7 @@ function buildPrjTable() {
                 field: "dev_nm",
                 headerSort: true,
                 resizable: false,
-                width: 140,
+                width: 200,
                 formatter: function (cell) {
                     const row = cell.getRow().getData();
                     const name = row.dev_nm || "";

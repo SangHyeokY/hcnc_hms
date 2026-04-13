@@ -1308,7 +1308,7 @@
             ? "선택 대기"
             : evalReady
                 ? "평가 가능"
-                : "리스크만";
+                : "리스크";
 
         const statusText = projectCount
             ? `${projectCount || 0}건 · ${statusLabel}`
