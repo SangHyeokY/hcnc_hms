@@ -45,7 +45,7 @@ body {background: var(--hcnc-shell-bg); color: var(--hcnc-shell-text);}
 
 .container-wrap .container .contents-wrap {
   min-height: 100vh;
-  padding: calc(var(--hcnc-header-height) + 24px) var(--hcnc-contents-pad) var(--hcnc-contents-pad);
+  padding: calc(var(--hcnc-header-height) + 25px) var(--hcnc-contents-pad) var(--hcnc-contents-pad);
   display:grid;
   gap:20px;
   grid-auto-rows: 36px auto;

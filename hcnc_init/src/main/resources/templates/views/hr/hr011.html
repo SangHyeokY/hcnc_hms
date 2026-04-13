@@ -15,6 +15,7 @@
 
             if (whiteFull) {
                 whiteFull.classList.add("hr011-detail-shell");
+                whiteFull.classList.add("no-white");
             }
         })();
     </script>
@@ -48,105 +49,166 @@
                 </div>
 
                 <section class="hr011-ref-layout" id="hr011RefLayout">
-                    <div class="hr011-ref-left-card">
-                        <div class="hr011-ref-left-head">
-                            <button type="button" class="hr011-ref-link-btn" data-ref-view="profile">상세보기</button>
+                    <div class="hr011-ref-page-head hr011-ref-actions-row">
+                        <div class="hr011-ref-page-title">
+                            <span class="hr011-ref-page-title__icon" aria-hidden="true"></span>
+                            <h4>인적사항</h4>
                         </div>
-                        <div class="hr011-ref-avatar-wrap">
-                            <div class="hr011-ref-avatar" id="hr011RefAvatar" aria-hidden="true"></div>
-                        </div>
-                        <div class="hr011-ref-name" id="hr011RefName">-</div>
-
-                        <div class="hr011-ref-block">
-                            <h6>주개발 언어</h6>
-                            <div class="hr011-ref-mainlang" id="hr011RefMainLang"></div>
-                        </div>
-
-                        <div class="hr011-ref-block">
-                            <h6>보유 자격증</h6>
-                            <div class="hr011-ref-cert" id="hr011RefCertTxt"></div>
-                        </div>
-
-                        <div class="hr011-ref-info-grid">
-
-                            <div class="hr011-ref-info-item"><span>등급</span><strong id="hr011RefGradeInfo">-</strong></div>
-                            <div class="hr011-ref-info-item"><span>KOSA등급</span><strong id="hr011RefKosa">-</strong></div>
-
-                            <div class="hr011-ref-info-item"><span>구분</span><strong id="hr011RefDevType">-</strong></div>
-                            <div class="hr011-ref-info-item"><span>프로젝트 참여횟수</span><strong id="hr011RefProjectInfo">0회</strong></div>
-
-                            <div class="hr011-ref-info-item"><span>연락처</span><strong id="hr011RefTel">-</strong></div>
-                            <div class="hr011-ref-info-item"><span>이메일</span><strong id="hr011RefEmail">-</strong></div>
-
-                            <div class="hr011-ref-info-item"><span>주요 분야</span><strong id="hr011RefMainFld">-</strong></div>
-                            <div class="hr011-ref-info-item"><span>근무가능형태</span><strong id="hr011RefWorkMd">-</strong></div>
-
-<!--                            <div class="hr011-ref-info-item"><span>거주지역</span><strong id="hr011RefRegion">-</strong></div>-->
-<!--                            <div class="hr011-ref-info-item"><span>생년월일</span><strong id="hr011RefBrdt">-</strong></div>-->
-
+                        <div class="hr011-ref-actions-inline">
+                            <button type="button" class="btn hr011-page-btn hr011-page-btn--ghost" id="btn-excel" onclick="location.href='/common/getExcel'">엑셀 다운로드</button>
+                            <button type="button" class="btn hr011-page-btn hr011-page-btn--ghost" id="hr011EditBtnView">수정</button>
+                            <button type="button" class="btn hr011-page-btn hr011-page-btn--ghost" id="hr011BackBtnView">목록</button>
+                            <button type="button" class="btn hr011-page-btn hr011-page-btn--ghost" id="hr011CancelBtnView" hidden>등록취소</button>
+                            <button type="button" class="btn hr011-page-btn hr011-page-btn--primary" id="hr011SaveBtnView" hidden>저장</button>
                         </div>
                     </div>
 
-                    <div class="hr011-ref-right">
-                        <div class="hr011-ref-overview" id="hr011RefOverview">
-                            <div class="hr011-ref-actions-row">
-                                <div class="hr011-ref-actions-inline">
-                                    <button type="button" class="btn hr011-page-btn hr011-page-btn--ghost" id="hr011BackBtnView">목록으로</button>
-                                    <button type="button" class="btn hr011-page-btn hr011-page-btn--ghost" id="btn-excel" onclick="location.href='/common/getExcel'">엑셀 다운로드</button>
-                                    <button type="button" class="btn hr011-page-btn hr011-page-btn--ghost" id="hr011CancelBtnView" hidden>등록취소</button>
-                                    <button type="button" class="btn hr011-page-btn hr011-page-btn--ghost" id="hr011EditBtnView">수정하기</button>
-                                    <button type="button" class="btn hr011-page-btn hr011-page-btn--primary" id="hr011SaveBtnView" hidden>저장</button>
-                                </div>
+                    <div class="hr011-ref-dashboard">
+                        <div class="hr011-ref-left-card">
+                            <div class="hr011-ref-left-head">
+                                <h5>프로필</h5>
+                                <button type="button" class="hr011-ref-link-btn hr011-ref-link-btn--icon" data-ref-view="profile" aria-label="인적사항 상세보기">
+                                    <span class="hr011-visually-hidden">상세보기</span>
+                                </button>
                             </div>
 
-                            <div class="hr011-ref-skill-card">
-                                <div class="hr011-ref-card-head hr011-ref-card-head--skill">
-                                    <div class="hr011-ref-card-headline">
-                                        <div class="hr011-ref-card-headline-row">
-                                            <h5>보유 기술 상세</h5>
-                                            <span class="hr011-ref-skill-card-meta" id="hr011RefSkillCardMeta">0개 스킬</span>
+                                <div class="hr011-ref-profile-hero">
+                                    <div class="hr011-ref-avatar-wrap">
+                                        <div class="hr011-ref-avatar" id="hr011RefAvatar" aria-hidden="true"></div>
+                                    </div>
+                                    <div class="hr011-ref-identity">
+                                        <div class="hr011-ref-name-row">
+                                            <div class="hr011-ref-name" id="hr011RefName">-</div>
+                                            <span class="hr011-ref-type-chip" id="hr011RefDevType">-</span>
+                                        </div>
+                                        <div class="hr011-ref-meta-row">
+                                            <span id="hr011RefCareer">0개월</span>
+                                            <span class="hr011-ref-meta-dot">·</span>
+                                            <span id="hr011RefDevTypeMeta">-</span>
+                                            <span class="hr011-ref-meta-dot">·</span>
+                                            <span id="hr011RefKosaMeta">-</span>
+                                            <span class="hr011-ref-kosa-stars" id="hr011RefKosaStars" aria-hidden="true"></span>
                                         </div>
                                     </div>
-                                    <div class="hr011-ref-card-head-actions">
-                                        <button type="button" class="hr011-ref-link-btn" data-ref-view="skills">상세보기</button>
+                                </div>
+
+                                <div class="hr011-ref-divider" aria-hidden="true"></div>
+
+                                <div class="hr011-ref-stack-panel">
+                                    <div class="hr011-ref-block">
+                                        <h6>주 개발언어</h6>
+                                        <div class="hr011-ref-mainlang" id="hr011RefMainLang"></div>
+                                    </div>
+
+                                    <div class="hr011-ref-block">
+                                        <h6>보유 자격증</h6>
+                                        <div class="hr011-ref-cert" id="hr011RefCertTxt"></div>
                                     </div>
                                 </div>
-                                <div class="hr011-ref-skill-grid-wrap">
-                                    <div class="hr011-ref-skill-card-grid" id="hr011RefSkillGauge"></div>
+
+                                <div class="hr011-ref-detail-list">
+                                    <div class="hr011-ref-detail-row">
+                                        <span>등급</span>
+                                        <strong id="hr011RefGradeInfo">-</strong>
+                                    </div>
+                                    <div class="hr011-ref-detail-row">
+                                        <span>KOSA 등급</span>
+                                        <strong id="hr011RefKosa">-</strong>
+                                    </div>
+                                    <div class="hr011-ref-detail-row">
+                                        <span>근무 형태</span>
+                                        <strong class="hr011-ref-work-inline">
+                                            <span id="hr011RefRegion">-</span>
+                                            <em class="hr011-ref-work-badge" id="hr011RefWorkMd">-</em>
+                                        </strong>
+                                    </div>
+                                    <div class="hr011-ref-detail-row">
+                                        <span>연락처</span>
+                                        <strong id="hr011RefTel">-</strong>
+                                    </div>
+                                    <div class="hr011-ref-detail-row">
+                                        <span>이메일</span>
+                                        <strong id="hr011RefEmail">-</strong>
+                                    </div>
+                                    <div class="hr011-ref-detail-row">
+                                        <span>주요 분야</span>
+                                        <strong id="hr011RefMainFld">-</strong>
+                                    </div>
+                                    <div hidden>
+                                        <span id="hr011RefProjectInfo">0회</span>
+                                        <span id="hr011RefBrdt">-</span>
+                                    </div>
                                 </div>
                             </div>
 
-                            <div class="hr011-ref-bottom">
-                                <div class="hr011-ref-radar-card">
-                                    <div class="hr011-ref-card-head">
-                                        <h5>프로젝트 평균 평가</h5>
-                                    </div>
-                                    <div class="hr011-ref-radar" id="hr011RefRadarChart"></div>
-                                </div>
-                                <div class="hr011-ref-project-card">
-                                    <div class="hr011-ref-card-head">
-                                        <h5>프로젝트 이력</h5>
-                                        <button type="button" class="hr011-ref-link-btn" data-ref-view="project">상세보기</button>
-                                    </div>
-                                    <div class="hr011-ref-project-list" id="hr011RefProjectList"></div>
-                                </div>
-                            </div>
-                        </div>
+                            <div class="hr011-ref-right">
+                                <div class="hr011-ref-overview" id="hr011RefOverview">
+                                    <div class="hr011-ref-top">
+                                        <div class="hr011-ref-radar-card">
+                                            <div class="hr011-ref-card-head">
+                                                <h5>프로젝트 평균 평가</h5>
+                                                <div class="hr011-ref-head-stat">
+                                                    <span>평균 점수</span>
+                                                    <strong id="hr011RefRadarAverage">-</strong>
+                                                </div>
+                                            </div>
+                                            <div class="hr011-ref-radar-surface">
+                                                <div class="hr011-ref-radar" id="hr011RefRadarChart"></div>
+                                            </div>
+                                        </div>
 
-                        <div class="hr011-ref-detail" id="hr011RefDetail" hidden>
-                            <div class="hr011-ref-detail-head">
-                                <h5 id="hr011RefDetailTitle">상세</h5>
-                                <div class="hr011-ref-detail-actions">
-                                    <button type="button" class="hr011-ref-detail-btn" data-ref-view="overview">메인으로</button>
-                                    <button type="button" class="hr011-ref-detail-btn" id="hr011RefDetailEditBtn">수정</button>
+                                        <div class="hr011-ref-project-card">
+                                            <div class="hr011-ref-card-head">
+                                                <h5>프로젝트 이력</h5>
+                                                <div class="hr011-ref-card-head-actions">
+                                                    <div class="hr011-ref-head-stat">
+                                                        <span>참여 횟수</span>
+                                                        <strong id="hr011RefProjectInfoHead">0회</strong>
+                                                    </div>
+                                                    <button type="button" class="hr011-ref-link-btn hr011-ref-link-btn--icon" data-ref-view="project" aria-label="프로젝트 이력 상세보기">
+                                                        <span class="hr011-visually-hidden">상세보기</span>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="hr011-ref-project-list" id="hr011RefProjectList"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="hr011-ref-skill-card">
+                                        <div class="hr011-ref-card-head hr011-ref-card-head--skill">
+                                            <h5>보유 기술 상세</h5>
+                                            <div class="hr011-ref-card-head-actions">
+                                                <div class="hr011-ref-head-stat">
+                                                    <span>보유 기술</span>
+                                                    <strong id="hr011RefSkillCardMeta">0개</strong>
+                                                </div>
+                                                <button type="button" class="hr011-ref-link-btn hr011-ref-link-btn--icon" data-ref-view="skills" aria-label="보유 기술 상세보기">
+                                                    <span class="hr011-visually-hidden">상세보기</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="hr011-ref-skill-grid-wrap">
+                                            <div class="hr011-ref-skill-card-grid" id="hr011RefSkillGauge"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="hr011-ref-detail" id="hr011RefDetail" hidden>
+                                    <div class="hr011-ref-detail-head">
+                                        <h5 id="hr011RefDetailTitle">상세</h5>
+                                        <div class="hr011-ref-detail-actions">
+                                            <button type="button" class="hr011-ref-detail-btn" data-ref-view="overview">메인으로</button>
+                                            <button type="button" class="hr011-ref-detail-btn" id="hr011RefDetailEditBtn">수정</button>
+                                        </div>
+                                    </div>
+                                    <div class="hr011-ref-detail-body" id="hr011RefDetailBody"></div>
                                 </div>
                             </div>
-                            <div class="hr011-ref-detail-body" id="hr011RefDetailBody"></div>
                         </div>
                     </div>
                 </section>
 
-                <div class="hr011-edit-flow">
+                <div class="hr011-edit-flow" style="display:none;">
                     <aside class="hr011-edit-stepper" aria-label="인력 등록/수정 단계">
                         <p class="hr011-edit-stepper-title">입력 단계</p>
                         <button type="button" class="hr011-edit-step-btn hr011-edit-step-btn--profile is-active" data-step-target="profile">
@@ -249,7 +311,7 @@
                                             <img src="/icons/ico-support.png" alt="" aria-hidden="true">
                                             <span class="hr011-grade-help__tooltip" role="tooltip">
                                                 평가 점수 기준으로 등급이 산정됩니다.<br>
-                                                보유기술 40점, 업무태도 30점, 재계약의사 20점, 단가경쟁력 10점입니다.
+                                                보유 기술 40점, 업무 태도 30점, 재계약 의사 20점, 단가 경쟁력 10점입니다.
                                             </span>
                                         </button>
                                     </div>
