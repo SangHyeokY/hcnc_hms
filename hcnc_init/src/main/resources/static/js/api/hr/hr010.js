@@ -539,23 +539,6 @@ function matchesRegionCode(row, code) {
     return String(value) === String(code);
 }
 
-// // 시도 코드에 대응되는 비교용 지역명 후보
-// function getRegionTextCandidates(code) {
-//     const label = getDropdownOptionLabel("sido_cd", code);
-//     const normalizedLabel = normalizeRegionText(label);
-//     const shortLabel = normalizeRegionText(toShortRegionName(label));
-//
-//     return [...new Set([normalizedLabel, shortLabel].filter(Boolean))];
-// }
-//
-// // 지역명 비교용 정규화
-// function normalizeRegionText(value) {
-//     return String(value || "")
-//         .replace(/\s+/g, "")
-//         .replace(/특별자치도|특별자치시|특별시|광역시|자치도|도|시/g, "")
-//         .trim();
-// }
-
 // 전체 지역명 -> 짧은 표기명
 function toShortRegionName(label) {
     const map = {
@@ -1126,11 +1109,11 @@ function renderUserCards(list) {
             <div class="hr010-list-header">
                 <div>인력 정보</div>
                 <div>구분</div>
-                <div>주개발언어</div>
+                <div>주 개발언어</div>
                 <div>등급 / KOSA</div>
                 <div>지역 / 근무</div>
                 <div>투입 가능</div>
-                <div>희망단가</div>
+                <div>희망 단가</div>
             </div>
             <div class="hr010-list-body">
                 ${list.map(row => createUserCard(row, "list")).join("")}
@@ -1226,7 +1209,7 @@ function createUserCard(row, viewType = "card") {
             </div>
 
             <div class="user-list-row__cell user-list-row__skill-cell">
-                ${getSkillSummaryMarkup(row, 3)}
+                ${getSkillSummaryMarkup(row, 5)}
             </div>
 
             <div class="user-list-row__cell user-list-row__grade-cell">
@@ -1370,7 +1353,7 @@ function getKosaLabel(row) {
 //     return `${escapeHtml(career)} · ${escapeHtml(contract)} · ${escapeHtml(kosa)}`;
 // }
 
-// 표기되는 별 갯수가 매칭이 안되는데...
+// 표기되는 별 갯수가 매칭이 안되는데...(최대 4개로 축소)
 function getKosaStarCount(row) {
     const label = String(getKosaLabel(row) || "").replace(/\s/g, "");
     if (!label || label === "-") return 0;
