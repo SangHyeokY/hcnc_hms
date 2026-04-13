@@ -11,6 +11,9 @@ var hr020SourceRows = [];
 // 역할 공통코드
 var jobCdMap = {};
 
+// 거주지역 공통코드
+var sidoMap = [];
+
 // 개발자ID
 window.currentDevId = null;
 
@@ -50,6 +53,15 @@ $(document).ready(async function () {
             (list || []).forEach(function (item) {
                 if (item.cd) {
                     jobCdMap[item.cd] = item.cd_nm;
+                }
+            });
+            resolve();
+        });
+        setComCode("write_sido_cd", "sido_cd", "", "cd", "cd_nm", function (list) {
+            sidoMap = {};
+            (list || []).forEach(function (item) {
+                if (item.cd) {
+                    sidoMap[item.cd] = item.cd_nm;
                 }
             });
             resolve();
@@ -123,6 +135,14 @@ function jobCodeFormatter(cell) {
     if (!raw) return "-";
 
     return jobCdMap[raw] || raw;
+}
+
+// 거주지역 표시용 라벨 변환
+function sidoFormatter(cell) {
+    var raw = normalizeJobValue(cell.getValue());
+    if (!raw) return "-";
+
+    return sidoMap[raw] || raw;
 }
 
 // 역할 값이 객체로 와도 문자열로 정규화
@@ -335,18 +355,11 @@ function buildPrjTable() {
             {
                 title: "거주지역",
                 field: "sido_cd",
-                widthGrow: 2,
-                formatter: function (cell) {
-                    const value = cell.getValue();
-                    if (!value) return "";
-                    return `<div style="
-                        text-align:center;
-                        white-space: nowrap;
-                        overflow: hidden;
-                        text-overflow: ellipsis;">
-                        ${value}
-                    </div>`;
-                }
+                hozAlign: "center",
+                formatter: sidoFormatter,
+                editor: false,
+                editable: false,
+                widthGrow: 3
             },
             {
                 title: "경력연차",
