@@ -56,7 +56,6 @@ body {background: var(--hcnc-shell-bg); color: var(--hcnc-shell-text);}
 
 /* 좌측 lnb 토글 버튼 */
 .lnb-toggle-handle {
-  display: none;
   position: fixed;
   top: calc(var(--hcnc-header-height) + 26px);
   left: calc(var(--hcnc-lnb-width) - 1px);
@@ -473,6 +472,7 @@ footer {width:100%; height:30px; line-height: 30px; padding:0 20px; display: fle
 .left-menu .nav .lnb-menu .dep2 li.no-children.on > a {color: var(--hcnc-shell-accent); font-weight: 700;}
 .left-menu .nav .lnb-menu .dep2 li.no-children > a {transition: transform 0.18s ease; transform-origin: left center;}
 .left-menu .nav .lnb-menu .dep2 li.no-children > a:hover {transform: scale(1.02) translateX(2px); font-weight: 600; color: var(--hcnc-shell-text);}
+
 /* 주석사유 : 앞에 선으로 표시하던 효과삭제 */
 /* .left-menu .nav .lnb-menu .dep1 > li > .dep2 > li:before{
   content: "";
