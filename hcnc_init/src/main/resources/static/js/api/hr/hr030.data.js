@@ -1,55 +1,6 @@
 window.HR030_DASHBOARD_DATA = {
     alertCount: 4,
-    kpis: [
-        {
-            key: "total",
-            label: "전체 인원",
-            value: 248,
-            delta: "+4",
-            deltaTone: "up",
-            description: "직원 + 프리랜서 운영 풀 기준"
-        },
-        {
-            key: "employee",
-            label: "직원",
-            value: 92,
-            delta: "37.1%",
-            deltaTone: "neutral",
-            description: "내부 인력 운영 기준"
-        },
-        {
-            key: "freelancer",
-            label: "프리랜서",
-            value: 156,
-            delta: "62.9%",
-            deltaTone: "neutral",
-            description: "외부 투입 가능 인력 풀 기준"
-        },
-        {
-            key: "available",
-            label: "즉시 투입 가능 (직원 + 프리랜서)",
-            value: 34,
-            delta: "+2",
-            deltaTone: "up",
-            description: "직원 + 프리랜서 운영, 즉시 제안 또는 재배치 가능 기준"
-        },
-        {
-            key: "available_s",
-            label: "즉시 투입 가능 (직원)",
-            value: 20,
-            delta: "+2",
-            deltaTone: "up",
-            description: "직원 운영, 즉시 제안 또는 재배치 가능 기준"
-        },
-        {
-            key: "available_f",
-            label: "즉시 투입 가능 (프리랜서)",
-            value: 14,
-            delta: "+2",
-            deltaTone: "up",
-            description: "프리랜서 운영, 즉시 제안 또는 재배치 가능 기준"
-        }
-    ],
+    kpis: [], // 초기 kpi 안전값
     map: {
         defaultRegionId: "all",
         overview: {
