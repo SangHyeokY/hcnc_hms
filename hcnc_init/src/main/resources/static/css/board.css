@@ -25,8 +25,8 @@
  .grid-btn li a {display: block; background-color:#F2F5F9; border:1px solid #78889C; color:#5B6F88; padding:8px 15px 6px 15px; border-radius: 5px; font-size: 15px; font-weight: 600;}
  
  /* filter box */
-.filter-box{ display: flex; align-items:center; flex-flow: row wrap; margin:0 auto 20px; padding:10px 25px 0px 25px; border:1px solid #c5c8cc; border-radius:10px; background-color:#e9ebef;}
-.filter-box dl{display:flex; align-items:center; gap:15px; margin: 0px 30px 10px 0;}
+.filter-box{ display: flex; align-items:center; flex-flow: row wrap; margin:0 auto 20px; padding:10px 25px 0 25px; border:1px solid #c5c8cc; border-radius:10px; background-color:#e9ebef;}
+.filter-box dl{display:flex; align-items:center; gap:15px; margin: 0 30px 10px 0;}
 .filter-box dl dt::before{content:''; width:4px; height:16px; margin-right:9px; transform:translateY(3px); display:inline-block; background-color:#B3BFC7; border-radius: 2px;}
 .filter-box input[type="text"] {width: 160px;}
 .filter-box input[type="text"], .filter-box select{min-width: 50px;}
@@ -55,7 +55,7 @@ th.sum {background-color: #ffedef !important;}
 .board-srch {margin-right:10px;}
 .board-srch ul{display:flex;}
 .board-srch ul li {margin-right:20px; display:flex;}
-.board-srch ul li:last-child {margin-right:0px;}
+.board-srch ul li:last-child {margin-right:0;}
 
 /* Table > Button */
 table a.btn {padding:3px 10px;}

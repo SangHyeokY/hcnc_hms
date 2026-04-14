@@ -35,7 +35,7 @@ body:focus{outline:#3D7FE1 solid 1px;}
 .mobile-hide {display:block !important;}
 /* .clear{*zoom:1;} */
 .clear:after{content: ""; display: block; clear: both;}
-.hearing {position: absolute;left: -10000px;top: 0px;}
+.hearing {position: absolute;left: -10000px; top: 0;}
 .foot-strong {color:#fffc00!important;font-weight:500;}
 .thumb{position:relative;}
 .thumb.full{text-align:center;}
@@ -55,7 +55,7 @@ a.disable {background-color:#bababa !important; pointer-events: none;/*이벤트
 /* Float - 사용 비추천 */
 .fl {float:left !important;}
 .fr {float:right !important;}
-.cb {clear:both !important; font-size:0px !important;}
+.cb {clear:both !important; font-size:0 !important;}
 
 /* Flex */
 .flex{display:flex;}
@@ -398,7 +398,7 @@ a.disable {background-color:#bababa !important; pointer-events: none;/*이벤트
  =================================================================================*/
 /* Margin */
 .mg-auto {margin:auto;}
-.mg0    {margin:0px !important;}
+.mg0    {margin:0 !important;}
 .mg6    {margin:6px !important;}
 .mg10   {margin:10px !important;}
 .mg-t2  {margin-top:2px !important;}
@@ -416,7 +416,7 @@ a.disable {background-color:#bababa !important; pointer-events: none;/*이벤트
 .mg-t50 {margin-top:50px !important;}
 .mg-t100 {margin-top:100px !important;}
     
-.mg-r0  {margin-right:0px !important;}
+.mg-r0  {margin-right:0 !important;}
 .mg-r3  {margin-right:3px !important;}
 .mg-r5  {margin-right:5px !important;}
 .mg-r10 {margin-right:10px !important;}
@@ -427,7 +427,7 @@ a.disable {background-color:#bababa !important; pointer-events: none;/*이벤트
 .mg-r70 {margin-right:70px !important;}
 .mg-r75 {margin-right:75px !important;}
 
-.mg-b0  {margin-bottom:0px !important;}
+.mg-b0  {margin-bottom:0 !important;}
 .mg-b3  {margin-bottom:3px !important;}
 .mg-b5  {margin-bottom:5px !important;}
 .mg-b10 {margin-bottom:10px !important;}
@@ -457,7 +457,7 @@ a.disable {background-color:#bababa !important; pointer-events: none;/*이벤트
 .mg-l55 {margin-left:55px !important;}
 
 /* Padding */
-.pd0  {padding:0px !important;}
+.pd0  {padding:0 !important;}
 .pd1  {padding:1px !important;}
 .pd5  {padding:5px !important;}
 .pd8  {padding:8px !important;}
@@ -488,7 +488,7 @@ a.disable {background-color:#bababa !important; pointer-events: none;/*이벤트
 .pd-r45 {padding-right:45px !important;}
 .pd-r50 {padding-right:50px !important;}
 
-.pd-b0  {padding-bottom: 0px !important;}
+.pd-b0  {padding-bottom: 0 !important;}
 .pd-b2  {padding-bottom: 2px !important;}
 .pd-b5  {padding-bottom: 5px !important;}
 .pd-b10 {padding-bottom:10px !important;}

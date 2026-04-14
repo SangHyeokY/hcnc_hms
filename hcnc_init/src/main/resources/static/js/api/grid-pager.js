@@ -396,7 +396,7 @@
         enforcePaginatorSymbols(table);
         // counterEl.textContent = "총 데이터 수 " + getGridCount(table) + "건";
         var count = getGridCount(table);
-        counterEl.innerHTML = '총 <span class="hcnc-grid-count-number">'
+        counterEl.innerHTML = '검색결과 <span class="hcnc-grid-count-number">'
                                 + count +
                               '</span>건';
 
