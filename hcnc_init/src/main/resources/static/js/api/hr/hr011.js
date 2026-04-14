@@ -27,7 +27,7 @@ $(document).on("tab:readonly.hr011", function (_, isReadOnly) {
     } else {
         setHr011Mode(window.hr011EditUnlocked ? "update" : "view", { silent: true });
     }
-    
+
     // 주개발 초기화
     initMainLangTags();
 
@@ -75,23 +75,23 @@ let bizTypOptions = [];
 
 // Tab1 초기값 설정
 window.initTab1 = function () {
-  return new Promise((resolve) => {
+    return new Promise((resolve) => {
 
-      setComCode("select_biz_typ", "BIZ_TYP", "", "cd", "cd_nm", async function () {
+        setComCode("select_biz_typ", "BIZ_TYP", "", "cd", "cd_nm", async function () {
 
-          bizTypOptions = $("#select_biz_typ option").map(function () {
-              return { cd: this.value, cd_nm: $(this).text() };
-          }).get();
+            bizTypOptions = $("#select_biz_typ option").map(function () {
+                return { cd: this.value, cd_nm: $(this).text() };
+            }).get();
 
-          initSelectDefault("select_biz_typ", "개인/개인사업자/법인");
-          bizTypMap = getBizTypMap();
+            initSelectDefault("select_biz_typ", "개인/개인사업자/법인");
+            bizTypMap = getBizTypMap();
 
-          // AJAX 끝날 때까지 기다림
-          await loadHr011TableData(window.currentDevId);
+            // AJAX 끝날 때까지 기다림
+            await loadHr011TableData(window.currentDevId);
 
-          resolve();
-      });
-  });
+            resolve();
+        });
+    });
 };
 
 // 역할 코드 -> 라벨 맵 생성 (사업자 유형 : 개인/개인사업자/법인)
@@ -380,9 +380,9 @@ async function deleteHr011() {
         },
         error: () =>
             showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
-                 icon: 'error',
-                 title: '오류',
-                 html: `<strong>소속 및 계약정보</strong>&nbsp;데이터를 삭제하는 중 오류가 발생했습니다.`
+                icon: 'error',
+                title: '오류',
+                html: `<strong>소속 및 계약정보</strong>&nbsp;데이터를 삭제하는 중 오류가 발생했습니다.`
             })
     });
 }
@@ -620,11 +620,11 @@ function validateUserForm() {
 function validateHr011Form() {
 
     // 값 가져오기
-    const orgNm   = $("#org_nm").val().trim();         // 소속사
-    const stDt    = $("#st_dt").val();                 // 계약 시작일
-    const edDt    = $("#ed_dt").val();                 // 계약 종료일
-    const bizTyp  = $("#select_biz_typ").val().trim(); // 사업자 유형
-    const amtRaw  = normalizeAmountValue($("#amt").val());   // 계약 금액
+    const orgNm = $("#org_nm").val().trim();         // 소속사
+    const stDt = $("#st_dt").val();                 // 계약 시작일
+    const edDt = $("#ed_dt").val();                 // 계약 종료일
+    const bizTyp = $("#select_biz_typ").val().trim(); // 사업자 유형
+    const amtRaw = normalizeAmountValue($("#amt").val());   // 계약 금액
 
     // 최대 입력 가능 숫자
     // const MAX_AMT = 999999999999.99;
@@ -690,7 +690,7 @@ function validateHr011Form() {
     }
 
     if (isNaN(amtRaw) || Number(amtRaw) <= 0) {
-         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
             html: `<strong>계약금액</strong>은(는) 0보다 큰 숫자여야 합니다.`
@@ -1380,7 +1380,7 @@ async function loadHr011MainDetail(devId) {
         throw new Error("상세 데이터를 찾을 수 없습니다.");
     }
 
-    console.log("조회된 데이터 : " ,response.res);
+    console.log("조회된 데이터 : ", response.res);
     hr011CurrentRow = row;
 
     // 수정/등록 폼에 프로필 이미지 표시
@@ -1588,13 +1588,20 @@ function buildHr011ChipListMarkup(raw, emptyLabel) {
     }).join("");
 }
 
+function isHr011PlaceholderSkillName(rawSkill) {
+    const text = $.trim(String(rawSkill || ""));
+    if (!text) return true;
+    const normalized = text.replace(/\s+/g, "").toLowerCase();
+    return normalized === "-" || normalized === "미등록" || normalized === "미평가" || normalized === "없음" || normalized === "none" || normalized === "null" || normalized === "na" || normalized === "n/a" || normalized === "sk";
+}
+
 function collectHr011OwnedSkills(row) {
     const ownedSkills = [];
     const seen = new Set();
 
     function pushSkill(rawSkill) {
         const skill = $.trim(String(rawSkill || ""));
-        if (!skill) return;
+        if (!skill || isHr011PlaceholderSkillName(skill)) return;
         const key = skill.toLowerCase();
         if (seen.has(key)) return;
         seen.add(key);
@@ -1648,7 +1655,7 @@ function buildHr011KosaStarsMarkup(rawLabel) {
     const count = resolveHr011KosaStarCount(rawLabel);
     if (!count) return "";
     return Array.from({ length: count }, function () {
-        return `<span class="hr011-ref-kosa-stars__star">★</span>`;
+        return `<span class="hr011-ref-kosa-stars__star is-on" aria-hidden="true"></span>`;
     }).join("");
 }
 
@@ -1761,9 +1768,9 @@ function buildHr011ProjectBadgePlaceholderMarkup() {
     return [
         `<span class="hr011-ref-project-company-badge__placeholder" aria-hidden="true">`,
         `<svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">`,
-        `<path d="M5 6.5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-11Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>`,
-        `<path d="M8.3 14.8 11 12l2.1 2.1 2.7-3.1 1.9 2.7" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>`,
-        `<circle cx="9.2" cy="9.2" r="1.3" fill="currentColor"/>`,
+        `<rect x="4" y="5" width="16" height="14" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/>`,
+        `<circle cx="9" cy="9" r="1.4" fill="currentColor"/>`,
+        `<path d="M5.2 16.7 9.3 12.7 12.4 15.7 15 13.8 18.8 16.7" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>`,
         `</svg>`,
         `</span>`
     ].join("");
@@ -1776,7 +1783,7 @@ function buildHr011SkillCardRows(row) {
 
     function upsertSkill(rawSkill, level) {
         const skill = $.trim(String(rawSkill || ""));
-        if (!skill) return;
+        if (!skill || isHr011PlaceholderSkillName(skill)) return;
         const key = normalizeHr011SkillKey(skill);
         if (!key) return;
 
@@ -1862,7 +1869,7 @@ function buildHr011SkillCardsMarkup(row, options) {
 
     return visibleRows.map(function (item) {
         const stars = Array.from({ length: 5 }, function (_, idx) {
-            return `<span class="hr011-ref-skill-mini-card__star ${idx < item.level ? "is-on" : ""}">★</span>`;
+            return `<span class="hr011-ref-skill-mini-card__star ${idx < item.level ? "is-on" : ""}" aria-hidden="true"></span>`;
         }).join("");
         const categoryMarkup = item.categories.length
             ? item.categories.map(function (category) {
@@ -2590,7 +2597,7 @@ function scrollHr011ToEvalRiskSection(selectedProjectId) {
                     $select.val(projectId);
                 }
                 if (typeof window.reloadTab4 === "function") {
-                    window.reloadTab4(projectId).catch(function () {});
+                    window.reloadTab4(projectId).catch(function () { });
                 }
             }, 220);
         }
@@ -2604,7 +2611,7 @@ function scrollHr011ToEvalRiskSection(selectedProjectId) {
     if (projectId && typeof window.reloadTab4 === "function") {
         window.hr013_prj_nm = projectId;
         setTimeout(function () {
-            window.reloadTab4(projectId).catch(function () {});
+            window.reloadTab4(projectId).catch(function () { });
         }, 220);
     }
 }
@@ -3364,25 +3371,32 @@ function renderHr011RefRadarChart() {
         animationDurationUpdate: 520,
         animationEasingUpdate: "cubicInOut",
         animationDelay: function (idx) { return idx * 52; },
+        textStyle: {
+            fontFamily: "Inter, sans-serif"
+        },
         graphic: [{
             type: "text",
             left: 14,
-            top: 10,
+            top: 0,
             style: {
                 text: "5점 만점",
-                fill: "#82868c",
+                fill: "#727272",
+                fontFamily: "Inter, sans-serif",
                 fontSize: 13,
-                fontWeight: 500
+                fontWeight: 400,
+                lineHeight: 16
             }
         }],
         radar: {
             center: ["50%", "55%"],
-            radius: "62%",
+            radius: "78%",
+            bottom: 0,
             splitNumber: 5,
             startAngle: 90,
             indicator: indicators,
             axisName: {
                 color: "#727272",
+                fontFamily: "Inter, sans-serif",
                 fontSize: 13,
                 fontWeight: 400,
                 lineHeight: 16,
@@ -3392,6 +3406,7 @@ function renderHr011RefRadarChart() {
                 rich: {
                     label: {
                         color: "#727272",
+                        fontFamily: "Inter, sans-serif",
                         fontSize: 13,
                         fontWeight: 400,
                         lineHeight: 16,
@@ -3399,6 +3414,7 @@ function renderHr011RefRadarChart() {
                     },
                     value: {
                         color: "#000000",
+                        fontFamily: "Inter, sans-serif",
                         fontSize: 18,
                         fontWeight: 600,
                         lineHeight: 22,
@@ -3609,6 +3625,9 @@ async function loadHr011SkillSummary(devId) {
                     name: row.cd_nm || row.skl_id || "",
                     level: resolveHr011SkillLevelValue(row)
                 };
+            })
+            .filter(function (row) {
+                return row.name && !isHr011PlaceholderSkillName(row.name);
             })
             .filter(function (row) {
                 return row.name;
@@ -3879,16 +3898,11 @@ function bindHr011RadarResize() {
 // 숙련도 원본 값을 점수 표기와 스타일 단계로 변환한다.
 function resolveHr011SkillLevelMeta(level) {
     const score = Math.max(0, Math.min(5, Number(level) || 0));
-    if (score >= 4) {
-        return { label: "고급", className: "advanced", scoreText: `${score}/5` };
-    }
-    if (score === 3) {
-        return { label: "중급", className: "mid", scoreText: `${score}/5` };
-    }
-    if (score > 0) {
-        return { label: "초급", className: "basic", scoreText: `${score}/5` };
-    }
-    return { label: "미평가", className: "pending", scoreText: "0/5" };
+    return {
+        label: score === 0 ? "미평가" : String(score),
+        className: score === 0 ? "pending" : `lv-${score}`,
+        scoreText: `${score}/5`
+    };
 }
 
 // 숙련도 조회 응답의 lv1~lv5 플래그를 숫자 단계로 정규화한다.
@@ -4172,12 +4186,12 @@ $(document).on("click", ".career-spin-btn", function () {
                 currentYear = 0;
                 currentMonth = 0;
             } else
-            if (currentMonth >= 12) {
-                currentMonth = 0;
-                currentYear = clampCareerYearValue(currentYear + 1);
-            } else {
-                currentMonth = clampCareerMonthValue(currentMonth + 1);
-            }
+                if (currentMonth >= 12) {
+                    currentMonth = 0;
+                    currentYear = clampCareerYearValue(currentYear + 1);
+                } else {
+                    currentMonth = clampCareerMonthValue(currentMonth + 1);
+                }
         } else {
             if (currentMonth <= 0 && currentYear > 0) {
                 currentYear = clampCareerYearValue(currentYear - 1);
