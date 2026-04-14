@@ -4024,12 +4024,15 @@ section.search-area .search-info #searchConditionKeyword {
   letter-spacing: -0.01em;
 }
 
+/* kpi 그리드 */
 #hr030-dashboard.hr030-saas-dashboard .hr030-kpi-grid {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 15px;
+  transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
+/* kpi 카드 */
 #hr030-dashboard.hr030-saas-dashboard .hr030-kpi-card {
   position: relative;
   display: grid;
@@ -4042,6 +4045,21 @@ section.search-area .search-info #searchConditionKeyword {
   border-radius: 18px;
   box-shadow: 0 10px 24px rgba(20, 32, 52, 0.06);
   overflow: hidden;
+  opacity: 0;
+  transform: translateY(10px);
+  animation: hr030FadeUp 0.4s ease forwards;
+}
+
+/* kpi 등장 효과 */
+@keyframes hr030FadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 #hr030-dashboard.hr030-saas-dashboard .hr030-kpi-card::after {

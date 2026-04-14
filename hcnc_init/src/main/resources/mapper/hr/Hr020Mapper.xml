@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.hcncinit.Hr020Mapper">
 
-    <!-- 인력관리 > 진행 프로젝트 조회 -->
+    <!-- [프로젝트] 인력관리 > 진행 프로젝트 조회 -->
     <select id="select_hr020" parameterType="map" resultType="map">
         SELECT dev.dev_id
             , dev.dev_nm -- 성명

@@ -36,7 +36,18 @@
                 </div>
             </div>
 
-            <div class="hr030-kpi-grid" id="hr030KpiGrid" aria-label="핵심 인력 현황"></div>
+            <template id="kpi-skeleton-template">
+                <article class="hr030-kpi-card skeleton">
+                    <span class="hr030-kpi-icon"></span>
+                    <div class="hr030-kpi-copy">
+                        <span class="hr030-kpi-label"></span>
+                        <strong class="hr030-kpi-value"></strong>
+                        <span class="hr030-kpi-description"></span>
+                    </div>
+                </article>
+            </template>
+
+            <div class="hr030-kpi-grid" id="hr030KpiGrid"></div>
 
             <div class="hr030-main-grid">
                 <article class="hr030-panel hr030-panel--region">

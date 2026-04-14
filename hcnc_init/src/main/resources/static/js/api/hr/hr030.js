@@ -1408,6 +1408,55 @@
         };
     }
 
+    // kpi 데이터 가져오기
+    function loadKpiData() {
+        $.ajax({
+            url: "/hr030/kpi",
+            type: "GET",
+            success: function (data) {
+                const kpi = data.res[0];
+
+                dashboardData.kpis = [
+                    {
+                        key: "total",
+                        label: "전체 인원",
+                        value: kpi.total_cnt
+                    },
+                    {
+                        key: "employee",
+                        label: "직원",
+                        value: kpi.total_s_cnt
+                    },
+                    {
+                        key: "freelancer",
+                        label: "프리랜서",
+                        value: kpi.total_f_cnt
+                    },
+                    {
+                        key: "available",
+                        label: "즉시 투입 가능",
+                        value: kpi.avail_cnt
+                    },
+                    {
+                        key: "available_s",
+                        label: "즉시 투입 가능 (직원)",
+                        value: kpi.avail_s_cnt
+                    },
+                    {
+                        key: "available_f",
+                        label: "즉시 투입 가능 (프리랜서)",
+                        value: kpi.avail_f_cnt
+                    }
+                ];
+
+                setStaticContent();
+            },
+            error: function (err) {
+                console.error(err);
+            }
+        });
+    }
+
     // KPI 카드 한 장의 마크업을 렌더링한다.
     function renderDashboardCard(item) {
         var iconName = kpiIconMap[item.key] || "circle";
@@ -1422,6 +1471,18 @@
             "  </div>",
             "</article>"
         ].join("");
+    }
+
+    // KPI 카드 한 장의 마크업을 미리 렌더링한다.
+    function renderSkeleton(count = 6) {
+        const grid = byId("hr030KpiGrid");
+        const template = document.getElementById("kpi-skeleton-template");
+
+        grid.innerHTML = "";
+
+        for (let i = 0; i < count; i++) {
+            grid.appendChild(template.content.cloneNode(true));
+        }
     }
 
     // 현재 화면 조건에 맞는 데이터 가공
@@ -2687,8 +2748,19 @@
             alertButton.setAttribute("aria-label", alertCount > 0 ? "알림 " + alertCount + "건" : "알림");
         }
 
-        byId("hr030KpiGrid").innerHTML = dashboardData.kpis.map(renderDashboardCard).join("");
-        initializeIcons();
+        const grid = byId("hr030KpiGrid");
+        grid.innerHTML = "";
+
+        dashboardData.kpis.forEach((item, index) => {
+            setTimeout(() => {
+                grid.insertAdjacentHTML(
+                    "beforeend",
+                    renderDashboardCard(item)
+                );
+            }, index * 80); // 카드 순차 등장
+        });
+
+        setTimeout(() => initializeIcons(), 500);
     }
 
     // 화면 헤더와 카드 제목, 선택 콤보 상태를 현재 조건에 맞춰 갱신한다
@@ -2958,7 +3030,8 @@
     // 초기 진입 시점 부트스트랩
     // 첫 진입 시 정적 영역, 데이터 로드, 이벤트 바인딩을 한 번에 부트스트랩한다
     function initialize() {
-        setStaticContent();
+        renderSkeleton(); // kpi값 불러오기 전에 먼저 카드 띄우기
+        loadKpiData();  // kpi값 불러오기
         loadRegionMapSvg();
         renderDashboard();
         loadSkillCatalog();

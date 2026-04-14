@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hcncinit.Hr030Mapper">
+
+    <!-- [대시보드] KPI 데이터 조회 -->
+    <select id="select_kpi" parameterType="map" resultType="map">
+        SELECT
+            COUNT(*) AS total_cnt, -- 전체 인원
+            SUM(CASE WHEN dev_id LIKE 'HCNC_S%' THEN 1 ELSE 0 END) AS total_s_cnt, -- 직원 수 (HCNC_S)
+            SUM(CASE WHEN dev_id LIKE 'HCNC_F%' THEN 1 ELSE 0 END) AS total_f_cnt, -- 프리랜서 수 (HCNC_F)
+            SUM(CASE
+            WHEN <![CDATA[ avail_dt < CURDATE() + INTERVAL 1 DAY ]]>
+            THEN 1 ELSE 0
+            END) AS avail_cnt, -- 즉시 투입 가능 (전체)
+            SUM(CASE
+            WHEN dev_id LIKE 'HCNC_S%'
+            AND <![CDATA[ avail_dt < CURDATE() + INTERVAL 1 DAY ]]>
+            THEN 1 ELSE 0
+            END) AS avail_s_cnt, -- 즉시 투입 가능 (직원)
+            SUM(CASE
+            WHEN dev_id LIKE 'HCNC_F%'
+            AND <![CDATA[ avail_dt < CURDATE() + INTERVAL 1 DAY ]]>
+            THEN 1 ELSE 0
+            END) AS avail_f_cnt -- 즉시 투입 가능 (프리랜서)
+        FROM tb_dev_info
+        WHERE del_yn='N'
+        AND use_yn='Y';
+    </select>
+
+</mapper>
