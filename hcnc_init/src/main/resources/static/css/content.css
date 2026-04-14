@@ -3857,7 +3857,6 @@ section.search-area .search-info #searchConditionKeyword {
   --hr030-slate-soft: #f3f0ea;
   --hr030-shadow: 0 18px 40px rgba(44, 36, 24, 0.08);
   --hr030-inner-card-shadow: 0 8px 20px rgba(44, 36, 24, 0.04);
-  --hr030-font-family: "Pretendard Variable", "Pretendard", "Noto Sans KR", sans-serif;
   --hr030-fs-kicker: 12px;
   --hr030-fs-caption: 13px;
   --hr030-fs-body: 14px;
@@ -3869,7 +3868,6 @@ section.search-area .search-info #searchConditionKeyword {
   min-height: 0;
   background: var(--hr030-app-bg);
   color: var(--hr030-text-main);
-  font-family: var(--hr030-font-family);
 }
 
 #hr030-dashboard.hr030-saas-dashboard button,
@@ -4979,7 +4977,6 @@ section.search-area .search-info #searchConditionKeyword {
 
 #hr030-dashboard.hr030-saas-dashboard .hr030-map-badge-name {
   fill: #34415d;
-  font-family: var(--hr030-font-family);
   font-size: 13px;
   font-weight: 700;
   letter-spacing: -0.02em;
@@ -4988,7 +4985,6 @@ section.search-area .search-info #searchConditionKeyword {
 
 #hr030-dashboard.hr030-saas-dashboard .hr030-map-badge-value {
   fill: #52627e;
-  font-family: var(--hr030-font-family);
   font-size: 20px;
   font-weight: 800;
   transition: font-size 180ms ease;
@@ -6857,10 +6853,11 @@ minmax(142px, 1.02fr); gap:10px; align-items:stretch;}
   display: none;
 }
 
-.hr011-detail-wrap .hr011-ref-layout,
+/* Pretendard 폰트 대신 inter 폰트 사용 */
+/*.hr011-detail-wrap .hr011-ref-layout,
 .hr011-detail-wrap .hr011-ref-layout * {
   font-family: "Pretendard Variable", "Pretendard", "Noto Sans KR", sans-serif;
-}
+}*/
 
 .hr011-detail-wrap .hr011-ref-layout {
   --hr011-action-btn-h: 36px;
