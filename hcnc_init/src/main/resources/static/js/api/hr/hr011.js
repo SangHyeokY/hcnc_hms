@@ -2003,6 +2003,7 @@ function switchHr011RefView(view, options) {
     if (!force && hr011RefCurrentView === normalized) return;
     hr011RefCurrentView = normalized;
 
+    const layoutEl = document.getElementById("hr011RefLayout");
     const overviewEl = document.getElementById("hr011RefOverview");
     const detailEl = document.getElementById("hr011RefDetail");
     const detailTitleEl = document.getElementById("hr011RefDetailTitle");
@@ -2010,12 +2011,18 @@ function switchHr011RefView(view, options) {
     const leftProfileLinkEl = document.querySelector('.hr011-ref-left-head .hr011-ref-link-btn[data-ref-view="profile"]');
     if (!overviewEl || !detailEl || !detailTitleEl || !detailBodyEl) return;
 
+    if (layoutEl) {
+        layoutEl.dataset.refView = normalized;
+    }
+    detailEl.dataset.detailView = normalized;
+
     if (leftProfileLinkEl) {
         // 프로필/스킬/프로젝트 상세에서는 좌측 >상세보기 버튼을 숨긴다.
-        leftProfileLinkEl.hidden = normalized === "skills" || normalized === "project" || normalized === "profile";
+        leftProfileLinkEl.hidden = normalized === "skills" || normalized === "project";
     }
 
     if (normalized === "overview") {
+        detailTitleEl.textContent = "상세";
         overviewEl.hidden = false;
         detailEl.hidden = true;
         requestAnimationFrame(function () {
@@ -2052,7 +2059,12 @@ function switchHr011RefView(view, options) {
         return;
     }
 
-    detailTitleEl.textContent = "인적사항";
+    detailTitleEl.innerHTML = [
+        `<button type="button" class="hr011-ref-detail-btn hr011-ref-detail-back" data-ref-view="overview" aria-label="메인으로">`,
+        `<span class="hr011-visually-hidden">메인으로</span>`,
+        `</button>`,
+        `<span>프로필</span>`
+    ].join("");
     detailBodyEl.innerHTML = buildHr011ProfileDetailMarkup();
     requestAnimationFrame(function () {
         animateHr011RefEntrance(detailEl);
@@ -2620,53 +2632,46 @@ function scrollHr011ToEvalRiskSection(selectedProjectId) {
 function buildHr011ProfileDetailMarkup() {
     const row = hr011CurrentRow || {};
     const contract = window.hr011Data || {};
-    const sideRows = [
-        ["투입 가능", row.avail_dt || "-"],
-        ["희망단가", row.hope_rate_amt ? formatAmount(row.hope_rate_amt) : "-"],
-        ["경력", row.exp_yr ? formatCareerYearMonth(row.exp_yr) : "-"]
-    ];
-    const basicRows = [
-        // ["성명", row.dev_nm || "-"],
-        // ["구분", resolveHr011DevTypeValue(row) === "HCNC_F" ? "프리랜서" : "직원"],
-        // ["연락처", row.tel || "-"],
-        // ["이메일", row.email || "-"],
-        // ["근무가능형태", hr011MainSelectMaps.workMd[row.work_md] || row.work_md || "-"],
-        ["개발자 ID", row.dev_id],
-        ["계약형태", hr011MainSelectMaps.ctrtTyp[row.ctrt_typ] || row.ctrt_typ || "-"],
-        // ["KOSA 등급", hr011MainSelectMaps.kosa[row.kosa_grd_cd] || row.kosa_grd_cd || "-"],
-        // ["주요 분야", hr011MainSelectMaps.mainFld[row.main_fld_cd] || row.main_fld_cd || "-"],
-        ["주요 고객사", hr011MainSelectMaps.mainCust[row.main_cust_cd] || row.main_cust_cd || "-"],
-        // ["보유 자격증", row.cert_txt || "-"],
-        // ["등급", `${$.trim($("#grade").text() || "-")} ${$.trim($("#score").text() || "")}`.trim()]
-        ["거주지역", hr011MainSelectMaps.sido[row.sido_cd] || row.sido_cd || "-"],
-        ["생년월일", row.brdt || "-"],
-        ["최종학력", row.edu_last || "-"]
-    ];
+    const profileRemark = $.trim(String(row.remark || contract.remark || "-")) || "-";
+    const contractRemark = $.trim(String(contract.remark || row.remark || "-")) || "-";
+    const contractAmount = contract.amt
+        ? $.trim(formatAmount(contract.amt).replace(/원$/, " 원")) || "-"
+        : "-";
 
     return [
         `<div class="hr011-ref-profile-detail-wrap">`,
-        `<article class="hr011-ref-detail-card">`,
-        // `<h6>인적정보</h6>`,
-        `<div class="hr011-ref-profile-layout">`,
-        `<div class="hr011-ref-simple-grid hr011-ref-simple-grid--profile">`,
-        basicRows.map(function (item) {
-            return `<div class="hr011-ref-simple-item"><span>${escapeHr011(item[0])}</span><strong>${escapeHr011(item[1])}</strong></div>`;
-        }).join(""),
-        `</div>`,
-        `<aside class="hr011-ref-profile-side">`,
-        sideRows.map(function (item) {
-            return `<div class="hr011-ref-profile-side-item"><span>${escapeHr011(item[0])}</span><strong>${escapeHr011(item[1])}</strong></div>`;
-        }).join(""),
-        `</aside>`,
-        `</div>`,
-        `</article>`,
-        `<article class="hr011-ref-detail-card">`,
-        `<h6>소속 및 계약정보</h6>`,
-        `<table class="hr011-ref-contract-table">`,
+        `<article class="hr011-ref-detail-card hr011-ref-profile-detail-card hr011-ref-profile-detail-card--info">`,
+        `<h6>상세 정보</h6>`,
+        `<table class="hr011-ref-profile-table hr011-ref-profile-table--info">`,
+        `<colgroup>`,
+        `<col style="width:170px">`,
+        `<col style="width:458.5px">`,
+        `<col style="width:170px">`,
+        `<col style="width:458.5px">`,
+        `</colgroup>`,
         `<tbody>`,
-        `<tr><th>소속사</th><td>${escapeHr011(contract.org_nm || "-")}</td><th>사업자유형</th><td>${escapeHr011(bizTypMap[contract.biz_typ] || contract.biz_typ || "-")}</td></tr>`,
-        `<tr><th>계약시작일</th><td>${escapeHr011(formatHr011Date(contract.st_dt))}</td><th>계약종료일</th><td>${escapeHr011(formatHr011Date(contract.ed_dt))}</td></tr>`,
-        `<tr><th>계약금액</th><td>${escapeHr011(formatAmount(contract.amt))}</td><th>비고</th><td>${escapeHr011(contract.remark || "-")}</td></tr>`,
+        `<tr class="hr011-ref-profile-table-row"><th>개발자 ID</th><td>${escapeHr011(row.dev_id || "-")}</td><th>계약형태</th><td>${escapeHr011(hr011MainSelectMaps.ctrtTyp[row.ctrt_typ] || row.ctrt_typ || "-")}</td></tr>`,
+        `<tr class="hr011-ref-profile-table-row"><th>주요 고객사</th><td>${escapeHr011(hr011MainSelectMaps.mainCust[row.main_cust_cd] || row.main_cust_cd || "-")}</td><th>투입 가능일</th><td>${escapeHr011(formatHr011Date(row.avail_dt))}</td></tr>`,
+        `<tr class="hr011-ref-profile-table-row"><th>거주 지역</th><td>${escapeHr011(hr011MainSelectMaps.sido[row.sido_cd] || row.sido_cd || "-")}</td><th>생년월일</th><td>${escapeHr011(formatHr011Date(row.brdt))}</td></tr>`,
+        `<tr class="hr011-ref-profile-table-row"><th>최종학력</th><td>${escapeHr011(row.edu_last || "-")}</td><th>경력</th><td>${escapeHr011(row.exp_yr ? formatCareerYearMonth(row.exp_yr) : "-")}</td></tr>`,
+        `<tr class="hr011-ref-profile-table-row hr011-ref-profile-table-row--note hr011-ref-profile-table-row--note-short"><th>비고</th><td colspan="3">${escapeHr011(profileRemark)}</td></tr>`,
+        `</tbody>`,
+        `</table>`,
+        `</article>`,
+        `<article class="hr011-ref-detail-card hr011-ref-profile-detail-card hr011-ref-profile-detail-card--contract">`,
+        `<h6>소속 및 계약 정보</h6>`,
+        `<table class="hr011-ref-profile-table hr011-ref-profile-table--contract">`,
+        `<colgroup>`,
+        `<col style="width:170px">`,
+        `<col style="width:458.5px">`,
+        `<col style="width:170px">`,
+        `<col style="width:458.5px">`,
+        `</colgroup>`,
+        `<tbody>`,
+        `<tr class="hr011-ref-profile-table-row"><th>소속사</th><td>${escapeHr011(contract.org_nm || "-")}</td><th>사업자 유형</th><td>${escapeHr011(bizTypMap[contract.biz_typ] || contract.biz_typ || "-")}</td></tr>`,
+        `<tr class="hr011-ref-profile-table-row"><th>계약 시작일</th><td>${escapeHr011(formatHr011Date(contract.st_dt))}</td><th>계약 종료일</th><td>${escapeHr011(formatHr011Date(contract.ed_dt))}</td></tr>`,
+        `<tr class="hr011-ref-profile-table-row hr011-ref-profile-table-row--wide"><th>계약 금액</th><td class="hr011-ref-profile-table-value--amount" colspan="3">${escapeHr011(contractAmount)}</td></tr>`,
+        `<tr class="hr011-ref-profile-table-row hr011-ref-profile-table-row--note hr011-ref-profile-table-row--note-tall"><th>비고</th><td colspan="3">${escapeHr011(contractRemark)}</td></tr>`,
         `</tbody>`,
         `</table>`,
         `</article>`,
@@ -3454,6 +3459,13 @@ function renderHr011RefRadarChart() {
             data: [{ value: hr011SummaryRadarRows.map(function (row) { return row.value; }) }]
         }]
     }, true);
+
+    const raf = window.requestAnimationFrame || function (fn) { return setTimeout(fn, 16); };
+    raf(function () {
+        if (hr011RefRadarChart && typeof hr011RefRadarChart.resize === "function") {
+            hr011RefRadarChart.resize();
+        }
+    });
 }
 
 // 주 개발언어 태그/팝업 초기화
