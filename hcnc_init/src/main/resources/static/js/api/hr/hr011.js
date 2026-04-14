@@ -2008,6 +2008,7 @@ function switchHr011RefView(view, options) {
     const detailEl = document.getElementById("hr011RefDetail");
     const detailTitleEl = document.getElementById("hr011RefDetailTitle");
     const detailBodyEl = document.getElementById("hr011RefDetailBody");
+    const leftProfileHeadEl = document.querySelector('.hr011-ref-left-head');
     const leftProfileLinkEl = document.querySelector('.hr011-ref-left-head .hr011-ref-link-btn[data-ref-view="profile"]');
     if (!overviewEl || !detailEl || !detailTitleEl || !detailBodyEl) return;
 
@@ -2019,6 +2020,11 @@ function switchHr011RefView(view, options) {
     if (leftProfileLinkEl) {
         // 프로필/스킬/프로젝트 상세에서는 좌측 >상세보기 버튼을 숨긴다.
         leftProfileLinkEl.hidden = normalized === "skills" || normalized === "project";
+    }
+
+    if (leftProfileHeadEl) {
+        leftProfileHeadEl.hidden = false;
+        leftProfileHeadEl.setAttribute("aria-hidden", normalized === "profile" ? "true" : "false");
     }
 
     if (normalized === "overview") {
@@ -2088,7 +2094,7 @@ function animateHr011RefEntrance(rootEl) {
 
     targets.forEach(function (el, idx) {
         const hasChartHost = !!el.querySelector(".hr011-ref-skill-card-grid, .hr011-ref-radar, .hr011-ref-project-eval-radar");
-        const allowChartCardMotion = el.matches(".hr011-ref-project-detail-item, .hr011-ref-project-eval-side");
+        const allowChartCardMotion = el.matches(".hr011-ref-project-detail-item, .hr011-ref-project-eval-side, .hr011-ref-radar-card, .hr011-ref-skill-card");
         const delay = Math.min(idx * 42, 360);
         el.style.setProperty("--hr011-enter-delay", `${delay}ms`);
         el.classList.remove("hr011-enter-motion");
@@ -2645,9 +2651,9 @@ function buildHr011ProfileDetailMarkup() {
         `<table class="hr011-ref-profile-table hr011-ref-profile-table--info">`,
         `<colgroup>`,
         `<col style="width:170px">`,
-        `<col style="width:458.5px">`,
+        `<col style="width:458px">`,
         `<col style="width:170px">`,
-        `<col style="width:458.5px">`,
+        `<col style="width:457px">`,
         `</colgroup>`,
         `<tbody>`,
         `<tr class="hr011-ref-profile-table-row"><th>개발자 ID</th><td>${escapeHr011(row.dev_id || "-")}</td><th>계약형태</th><td>${escapeHr011(hr011MainSelectMaps.ctrtTyp[row.ctrt_typ] || row.ctrt_typ || "-")}</td></tr>`,
@@ -2663,9 +2669,9 @@ function buildHr011ProfileDetailMarkup() {
         `<table class="hr011-ref-profile-table hr011-ref-profile-table--contract">`,
         `<colgroup>`,
         `<col style="width:170px">`,
-        `<col style="width:458.5px">`,
+        `<col style="width:458px">`,
         `<col style="width:170px">`,
-        `<col style="width:458.5px">`,
+        `<col style="width:457px">`,
         `</colgroup>`,
         `<tbody>`,
         `<tr class="hr011-ref-profile-table-row"><th>소속사</th><td>${escapeHr011(contract.org_nm || "-")}</td><th>사업자 유형</th><td>${escapeHr011(bizTypMap[contract.biz_typ] || contract.biz_typ || "-")}</td></tr>`,
