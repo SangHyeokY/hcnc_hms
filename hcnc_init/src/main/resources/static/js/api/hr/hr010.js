@@ -55,8 +55,11 @@ $(document).ready(async function () {
     ]);
 
     await loadUserTableData();
+
     renderSelectedTags();
     refreshTagSuggestions();
+    document.querySelector(".hr010-tag-search-box").classList.add("is-ready");
+
     hideLoading();
 
     // console.log(hr010SourceRows[0]);

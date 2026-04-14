@@ -631,37 +631,39 @@ option {
 .page-sub-title .hcnc-grid-count-title {
   display: inline-flex;
   align-items: center;
-  margin-left: 15px;
-  font-family: "Inter", sans-serif;
-  font-style: normal;
-  font-size: 16px;
+  gap: 3px;
+  margin: 0 0 0 15px;
+  color: #5F666E;
+  font-family: var(--hcnc-font-body);
+  font-size: 13px;
   font-weight: 400;
-  line-height: 140%;
-  letter-spacing: 0;
-  white-space: nowrap;
-  pointer-events: none;
+  line-height: 1.4;
 }
 
-.page-sub-title .hcnc-grid-count-title:before {
-  content: "";
-  display: inline-block;
-  width: 6px;
-  height: 24px;
-  border-radius: 6px;
-  background: #E50019;
-  margin-right: 8px;
-}
+/*.page-sub-title .hcnc-grid-count-title:before {*/
+/*  content: "";*/
+/*  display: inline-block;*/
+/*  width: 6px;*/
+/*  height: 24px;*/
+/*  border-radius: 6px;*/
+/*  background: #E50019;*/
+/*  margin-right: 8px;*/
+/*}*/
 
-.tab-content .page-sub-title .hcnc-grid-count-title:before {
-  height: 18px !important;
-  width: 4px !important;
-}
+/*.tab-content .page-sub-title .hcnc-grid-count-title:before {*/
+/*  height: 18px !important;*/
+/*  width: 4px !important;*/
+/*}*/
 
 /* 총 데이터 수 색상 */
 .hcnc-grid-count-number {
-  color: #1D232D;
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+  color: #000000;
+  font-family: var(--hcnc-font-body);
+  font-size: 18px;
   font-weight: 700;
-  margin-left: 4px;
 }
 
 /* 2중 팝업 내의 데이터 수 색상 */
@@ -2085,7 +2087,7 @@ button.btn.btn-add-skill:hover,
   border: 1px solid #E50019;
 }
 
-.modal-content top-article {
+.modal-content .top-article {
   padding-bottom: 10px;
 }
 
@@ -2134,35 +2136,35 @@ button.btn.btn-add-skill:hover,
   margin-left: 15px;
 }
 
-.modal-btn .btn {
-  padding: 8px 20px;
-  border-radius: 8px;
-  background-color: #fff;
-  border: 1px solid #E50019;
-  color: #E50019;
-  font-weight: 500;
-}
+/*.modal-btn .btn {*/
+/*  padding: 8px 20px;*/
+/*  border-radius: 8px;*/
+/*  background-color: #fff;*/
+/*  border: 1px solid #E50019;*/
+/*  color: #E50019;*/
+/*  font-weight: 500;*/
+/*}*/
 
-.modal-btn #btn-user-save,
-.modal-btn #btn-main-save,
-.modal-btn #btn-detail-save,
-.modal-btn #btn_main_lang_picker_apply,
-.modal-btn #btn_hr012_skill_picker_apply,
-.modal-btn #btn_hr013_skill_picker_apply {
-  background: #E50019;
-  border-color: #E50019;
-  color: #fff;
-}
+/*.modal-btn #btn-user-save,*/
+/*.modal-btn #btn-main-save,*/
+/*.modal-btn #btn-detail-save,*/
+/*.modal-btn #btn_main_lang_picker_apply,*/
+/*.modal-btn #btn_hr012_skill_picker_apply,*/
+/*.modal-btn #btn_hr013_skill_picker_apply {*/
+/*  background: #E50019;*/
+/*  border-color: #E50019;*/
+/*  color: #fff;*/
+/*}*/
 
-.modal-btn #btn-user-save:hover,
-.modal-btn #btn-main-save:hover,
-.modal-btn #btn-detail-save:hover,
-.modal-btn #btn_main_lang_picker_apply:hover,
-.modal-btn #btn_hr012_skill_picker_apply:hover,
-.modal-btn #btn_hr013_skill_picker_apply:hover {
-  background: #C40016;
-  border-color: #C40016;
-}
+/*.modal-btn #btn-user-save:hover,*/
+/*.modal-btn #btn-main-save:hover,*/
+/*.modal-btn #btn-detail-save:hover,*/
+/*.modal-btn #btn_main_lang_picker_apply:hover,*/
+/*.modal-btn #btn_hr012_skill_picker_apply:hover,*/
+/*.modal-btn #btn_hr013_skill_picker_apply:hover {*/
+/*  background: #C40016;*/
+/*  border-color: #C40016;*/
+/*}*/
 
 .modal-wrap #view-user-area .modal-btn ul {
   flex-direction: row-reverse;
@@ -2383,7 +2385,7 @@ button.btn.btn-add-skill:hover,
   display: flex;
   width: 100%;
   margin-bottom: 10px;
-  gap: 0px;
+  gap: 0;
   box-sizing: border-box;
 }
 
@@ -2942,8 +2944,8 @@ button.btn.btn-add-skill:hover,
 
 /* 기본 인적사항 / 사용자 정보 테이블 마지막 행 둥근 테두리 무력화 */
 .full-table.tabulator .tabulator-tableHolder .tabulator-row:last-child .tabulator-cell {
-  border-bottom-left-radius: 0px;
-  border-bottom-right-radius: 0px;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
 }
 
 /* ====================================================================================================== */
@@ -3709,11 +3711,6 @@ section.search-area .search-info #searchConditionKeyword {
 .white-full>.content-body {
   display: flex;
   flex-direction: column;
-}
-
-.btn-area button,
-.btn-area .btn {
-  font-weight: 700;
 }
 
 .btn-area.prj-save {
@@ -5892,13 +5889,15 @@ section.search-area .search-info #searchConditionKeyword {
 }
 
 /* ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ 인적사항(HR010) 화면 css (작업 중) ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ */
+/* 인적사항 - 왼쪽 고정 영역 */
 .container-wrap .container .contents-wrap.hr010-dashboard-wrap {
   box-sizing: border-box;
   height: 100%;
   min-height: 0;
   grid-auto-rows: initial;
   gap: 0;
-  overflow: hidden;
+  overflow: visible;
+  padding:var(--hcnc-header-height) 0 0 0 !important;
 }
 
 .contents-wrap.hr010-dashboard-wrap>.page-common, .contents-wrap.hr010-dashboard-wrap>.page-common {display:none;}
@@ -5910,10 +5909,9 @@ section.search-area .search-info #searchConditionKeyword {
 .hr010-dashboard-wrap #CARD_HR010_A[data-view="list"] .hr010-list-body {margin-top:15px;}
 .hr010-dashboard-wrap #CARD_HR010_A:not([data-view="list"]) {margin-top:10px;}
 .hr010-dashboard-wrap .hr010-main-actions {display:flex; align-items:center; justify-content:flex-end; gap:10px;}
-.hr010-dashboard-wrap .hr010-create-btn {display:inline-flex; align-items:center; justify-content:center; min-width:74px; height:40px; padding:10px 12px; border-radius:8px; border:1px solid #C5CCD5; background:#FFFFFF; color:#000000; font-size:14px; font-weight:700; line-height:1.4; letter-spacing: 0; cursor:pointer; transition:background-color .18s ease, border-color .18s ease, box-shadow .18s ease;}
-.hr010-dashboard-wrap .hr010-create-btn:hover {background:#DEEDFF; box-shadow: 0px 0px 10px 0px #0000000D;}
+.hr010-dashboard-wrap .hr010-create-btn {display:inline-flex; align-items:center; justify-content:center; min-width:74px; height:40px; padding:10px 12px; border-radius:8px; border:1px solid #C5CCD5; background:#FFFFFF; color:#000000; font-size:14px; font-weight:700; line-height:1.4; letter-spacing: 0; cursor:pointer; transition:background-color .18s ease, border-color .18s ease, box-shadow .18s ease; gap: 4px;}
+.hr010-dashboard-wrap .hr010-create-btn:hover {background:#DEEDFF; box-shadow: 0 0 10px 0 #0000000D;}
 .hr010-dashboard-wrap .hr010-create-btn img {width: 12px; height: 12px; filter: brightness(0);}
-.hr010-dashboard-wrap .hr010-create-btn a {padding: 0 4px;}
 .hr010-dashboard-wrap .hr010-result-bar {display:flex; align-items:center; justify-content:space-between; gap:15px;}
 .hr010-dashboard-wrap .hr010-result-count {display:inline-flex; align-items:center; gap:3px; margin:0; color:#5F666E; font-family:var(--hcnc-font-body); font-size:13px; font-weight:400; line-height:1.4;}
 .hr010-dashboard-wrap .hr010-result-count strong {display:inline-flex; align-items:center; position:relative; color:#000000; font-family:var(--hcnc-font-body); font-size:18px; font-weight:700;} /*top:-1px; */
@@ -6021,17 +6019,14 @@ minmax(142px, 1.02fr); gap:10px; align-items:stretch;}
 .hr010-dashboard-wrap .hr010-enter-item.is-visible {opacity:1; transform:translateY(0) scale(1);}
 .hr010-dashboard-wrap .hr010-list-header.hr010-enter-item {transform:translateY(12px);}
 @media (prefers-reduced-motion: reduce) {.hr010-dashboard-wrap .hr010-enter-item, .hr010-dashboard-wrap .hr010-enter-item.is-visible {opacity:1; transform:none; transition:none;}}
-.hr010-dashboard-wrap .no-data-wrap {position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:transparent; border-radius:12px;}
+.hr010-dashboard-wrap .no-data-wrap {position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:#ffffff; border-radius:14px; border: 1px solid #DEE2E7; margin-top: 10px;}
 .hr010-dashboard-wrap .no-data-box {text-align:center; color:#333333;}
 .hr010-dashboard-wrap .no-data-icon {font-size:48px; margin-bottom:10px; opacity:0.7;}
 .hr010-dashboard-wrap .no-data-text {font-size:16px; font-weight:500;}
 
-/* 인적사항 - 왼쪽 고정 영역 */
-.contents-wrap.hr010-dashboard-wrap {--hcnc-contents-pad:20px; padding:var(--hcnc-header-height) 0 0 0 !important; background:1598;}
-
 .contents-wrap.hr010-dashboard-wrap>section.white-full.hr010-dashboard-shell {display:flex; flex-direction:column; height:100%; min-height:calc(100vh - var(--hcnc-header-height)); padding:0; border:0; border-radius:0; box-shadow:none; overflow:visible; background:#ffffff;}
 .contents-wrap.hr010-dashboard-wrap>section.white-full.hr010-dashboard-shell>.content-body {display:flex; flex-direction:row; align-items:stretch; gap:0; min-height:calc(100vh - var(--hcnc-header-height));}
-.hr010-dashboard-wrap .hr010-smart-filter {width:274px; min-height:calc(100vh - var(--hcnc-header-height)); flex:0 0 274px; position:sticky; top:0; align-self:stretch; height:auto; border-radius:0; padding:25px; box-shadow:none; border-right:1px solid #DEE2E7; overflow:visible; will-change:auto; transition:none;}
+.hr010-dashboard-wrap .hr010-smart-filter {width:274px; min-height:calc(100vh - var(--hcnc-header-height)); flex:0 0 274px; position:sticky; top: var(--hcnc-header-height); align-self:flex-start; height:auto; border-radius:0; padding:25px; box-shadow:none; border-right:1px solid #DEE2E7; overflow:visible; will-change:auto; transition:none;}
 .hr010-dashboard-wrap .hr010-smart-filter__head {margin-bottom:5px;}
 .hr010-dashboard-wrap .hr010-smart-filter__head-actions {display:inline-flex; align-items:center; gap:10px;}
 .hr010-dashboard-wrap .content-body .content-title {align-items: flex-start !important;}
@@ -6056,15 +6051,16 @@ minmax(142px, 1.02fr); gap:10px; align-items:stretch;}
 .hr010-dashboard-wrap .hr010-search-control-row {display:grid; grid-template-columns:minmax(0, 1fr); align-items:stretch; gap:12px; width:100%;}
 .hr010-dashboard-wrap .hr010-search-field-wrap {position:relative; z-index:21; min-width:0;}
 .hr010-dashboard-wrap .hr010-search-control-row .hr010-tag-search-box {width:100%; min-width:0;}
-.hr010-dashboard-wrap .hr010-tag-search-box {display:flex; flex-wrap:wrap; align-items:center; gap:18px; min-height:58px; padding:12px 0 12px 18px; border:1.5px solid #2C80FF; border-radius:12px; background:#fff; box-shadow:none; overflow:hidden;}
-.hr010-dashboard-wrap .hr010-tag-area {display:flex; flex-wrap:wrap; gap:8px;}
+.hr010-dashboard-wrap .hr010-tag-search-box {display:flex; flex-wrap:wrap; align-items:center; justify-content: space-between; gap:18px; min-height:58px; padding:12px 0 12px 18px; border:1.5px solid #2C80FF; border-radius:12px; background:#fff; box-shadow:none;opacity: 0; transition: opacity 0.2s ease;}
+.hr010-dashboard-wrap .hr010-tag-search-box.is-ready {opacity: 1;}
+.hr010-dashboard-wrap .hr010-tag-area {display:flex; flex-wrap:wrap; flex: 1; gap:8px;}
 .hr010-dashboard-wrap .hr010-tag-area.is-empty {display:none;}
 
 .hr010-dashboard-wrap .hr010-tag-chip {display: inline-flex; align-items: center; gap: 6px; padding: 0 12px; border: 1px solid #C5CCD5; border-radius: 16px; background: #ffffff; color: #000000; font-family: var(--hcnc-font-body); font-size: 12px; font-weight: 500; line-height: 1.4; cursor: default; height: 28px;}
 .hr010-dashboard-wrap .hr010-tag-chip:hover, .hr010-dashboard-wrap .hr010-tag-chip:hover .hr010-tag-remove {border: 1px solid #000000; color: #000000;}
 .hr010-dashboard-wrap .hr010-tag-chip__label {display:inline-flex; align-items:center;}
 .hr010-dashboard-wrap .hr010-tag-remove {display:inline-flex; align-items:center; justify-content:center; color:#A4A9B1; cursor:pointer; border: none !important;}
-.hr010-dashboard-wrap .hr010-search-keyword-input {flex:1 1 220px; min-width:220px; height:21px; border:none; background:transparent; font-family:var(--hcnc-font-body); font-size:15px; font-weight:400; line-height: 20px; letter-spacing: 0; color:#3A3C40; padding: 0;}
+.hr010-dashboard-wrap .hr010-search-keyword-input {flex: 0 1 330px; min-width:220px; height:21px; border:none; background:transparent; font-family:var(--hcnc-font-body); font-size:15px; font-weight:400; line-height: 20px; letter-spacing: 0; color:#3A3C40; padding: 0;}
 .hr010-dashboard-wrap .hr010-search-keyword-input::placeholder {color:#8F9098;}
 .hr010-dashboard-wrap .hr010-search-keyword-input:focus {outline:none !important; border-color: transparent !important; box-shadow: none !important;}
 .hr010-dashboard-wrap .hr010-search-keyword-input:hover {outline:none !important; border-color: transparent !important; box-shadow: none !important;}
