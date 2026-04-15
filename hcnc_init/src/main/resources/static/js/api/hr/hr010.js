@@ -18,7 +18,7 @@ let hr010DropdownSectionState = {
 };
 let hr010Paging = {
     page: 1,
-    size: 5,
+    size: 20,
     total: 0
 };
 const selectedFilters = {
@@ -1087,17 +1087,52 @@ function filterHr010RowsByType(list) {
 // ==============================
 // 카드 렌더링
 // ==============================
+
+// 페이지 나누기
 function getPagedList(list) {
-    const start = (hr010Paging.page - 1) * hr010Paging.size;
-    return list.slice(start, start + hr010Paging.size);
+    let size = hr010Paging.size;
+    // if (currentHr010ViewMode === "card") {
+    //     size = getCardPageSize();
+    // }
+    const start = (hr010Paging.page - 1) * size;
+    return list.slice(start, start + size);
 }
+
+// 카드 나누기 (cardView)
+// function getCardColumns() {
+//     const container = document.getElementById("CARD_HR010_A");
+//     if (!container) return 4;
+//
+//     const card = container.querySelector(".user-card");
+//     if (!card) return 4;
+//
+//     const containerWidth = container.clientWidth;
+//     const cardWidth = card.offsetWidth;
+//
+//     return Math.max(1, Math.floor(containerWidth / cardWidth));
+// }
+
+// cardView로 보여줄 최대 row 설정
+// function getCardPageSize() {
+//     const cols = getCardColumns();
+//     const rows = 3; // 한 페이지에 보여줄 줄 수 있는 row
+//     return cols * rows;
+// }
+
+// 페이지 렌더링
 function renderHr010Pager() {
-    const container = document.getElementById("CARD_HR010_A");
-    if (!container) return;
+    const pagerRoot = document.getElementById("HR010_PAGER");
+    if (!pagerRoot) return;
 
-    let pager = container.querySelector(".hr010-pager");
+    let pager = pagerRoot.querySelector(".hr010-pager");
 
-    const totalPage = Math.ceil(hr010Paging.total / hr010Paging.size);
+    // const size = currentHr010ViewMode === "card"
+    //     ? getCardPageSize()
+    //     : hr010Paging.size;
+
+    const size = hr010Paging.size;
+    const totalPage = Math.ceil(hr010Paging.total / size);
+
     if (totalPage <= 1) {
         if (pager) pager.remove();
         return;
@@ -1106,7 +1141,7 @@ function renderHr010Pager() {
     if (!pager) {
         pager = document.createElement("div");
         pager.className = "hr010-pager";
-        container.appendChild(pager);
+        pagerRoot.appendChild(pager);
     }
 
     let html = `
@@ -1146,6 +1181,7 @@ function renderHr010Pager() {
     });
 }
 
+// 카드 렌더링
 function renderUserCards(list) {
     const container = document.getElementById("CARD_HR010_A");
     if (!container) return;
@@ -1193,7 +1229,7 @@ function renderUserCards(list) {
 
         fragment.appendChild(wrapper);
     } else {
-        list.forEach(row => {
+        pagedList.forEach(row => {
             const div = document.createElement("div");
             div.innerHTML = createUserCard(row, "card");
             fragment.appendChild(div.firstElementChild);

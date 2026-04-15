@@ -5897,7 +5897,7 @@ section.search-area .search-info #searchConditionKeyword {
 }
 
 /* 인적사항 페이징 css - 영역 */ /* tabulator 테이블에서 작업했던 페이징 css와 동일 */
-.container-wrap .container .contents-wrap.hr010-dashboard-wrap .hr010-pager {display: flex;justify-content: center;align-items: center;padding: 5px 10px;}
+.container-wrap .container .contents-wrap.hr010-dashboard-wrap .hr010-pager {display: flex;justify-content: center;align-items: center;padding: 5px 10px;margin-bottom: 10px;}
 
 /* 인적사항 페이징 css - 버튼 */
 .container-wrap .container .contents-wrap.hr010-dashboard-wrap .hr010-pager button {min-width: 24px;height: 24px;line-height: 24px;border-radius: 0;border: none;background: transparent;color: #5F666E;font-size: 14px;font-weight: 400;padding: 0;}
@@ -5939,8 +5939,7 @@ section.search-area .search-info #searchConditionKeyword {
 .contents-wrap.hr010-dashboard-wrap>.page-common, .contents-wrap.hr010-dashboard-wrap>.page-common {display:none;}
 .contents-wrap.hr010-dashboard-wrap>.page-common, .contents-wrap.hr010-dashboard-wrap>section.search-area {display:none;}
 .contents-wrap.hr010-dashboard-wrap>section.white-full.hr010-dashboard-shell {display:flex; flex-direction:column; height:100%; min-height:0; padding:0; border:0; border-radius:0; box-shadow:none; overflow:visible; background:linear-gradient(180deg, #ffffff 0%, #ffffff 42%, #fbfcff 100%);}
-.contents-wrap.hr010-dashboard-wrap>section.white-full.hr010-dashboard-shell>.content-body {flex:1 1 auto; height:100%; min-height:0; overflow:visible; padding:0; background:transparent; display:flex; flex-direction:row; gap:20px; transition:gap .32s cubic-bezier(0.22, 1, 0.36, 1), padding-left .32s cubic-bezier(0.22, 1, 0.36, 1);}
-.hr010-dashboard-wrap #CARD_HR010_A {display:grid; grid-template-columns:repeat(auto-fill, minmax(312px, 1fr)); gap:24px; flex:0 0 auto; min-height:0; height: 100%; padding-right:2px; padding-bottom:8px; overflow:visible; position:relative; align-content:start; align-items:stretch; --hr010-card-fixed-h:415px; grid-auto-rows:var(--hr010-card-fixed-h);}
+.hr010-dashboard-wrap #CARD_HR010_A {display:grid; grid-template-columns:repeat(auto-fill, minmax(312px, 1fr)); gap:24px; flex:0 0 auto; min-height:0; padding-bottom:10px; overflow:visible; position:relative; align-content:start; align-items:stretch; --hr010-card-fixed-h:415px; grid-auto-rows:var(--hr010-card-fixed-h);}
 .hr010-dashboard-wrap #CARD_HR010_A[data-view="list"] {display:block;}
 .hr010-dashboard-wrap #CARD_HR010_A[data-view="list"] .hr010-list-body {margin-top:15px;}
 .hr010-dashboard-wrap #CARD_HR010_A:not([data-view="list"]) {margin-top:10px;}
@@ -6061,7 +6060,7 @@ minmax(142px, 1.02fr); gap:10px; align-items:stretch;}
 .hr010-dashboard-wrap .no-data-text {font-size:16px; font-weight:500;}
 
 .contents-wrap.hr010-dashboard-wrap>section.white-full.hr010-dashboard-shell {display:flex; flex-direction:column; height:100%; min-height:calc(100vh - var(--hcnc-header-height)); padding:0; border:0; border-radius:0; box-shadow:none; overflow:visible; background:#ffffff;}
-.contents-wrap.hr010-dashboard-wrap>section.white-full.hr010-dashboard-shell>.content-body {display:flex; flex-direction:row; align-items:stretch; gap:0; min-height:calc(100vh - var(--hcnc-header-height));}
+.contents-wrap.hr010-dashboard-wrap>section.white-full.hr010-dashboard-shell>.content-body {display:flex; flex: 1 1 auto; flex-direction:row; align-items:stretch; gap:0; padding: 0; height: auto; min-height:calc(100vh - var(--hcnc-header-height)); overflow: visible; transition: gap .32s cubic-bezier(0.22, 1, 0.36, 1), padding-left .32s cubic-bezier(0.22, 1, 0.36, 1);}
 .hr010-dashboard-wrap .hr010-smart-filter {width:274px; min-height:calc(100vh - var(--hcnc-header-height)); flex:0 0 274px; position:sticky; top: var(--hcnc-header-height); align-self:flex-start; height:auto; border-radius:0; padding:25px; box-shadow:none; border-right:1px solid #DEE2E7; overflow:visible; will-change:auto; transition:none;}
 .hr010-dashboard-wrap .hr010-smart-filter__head {margin-bottom:5px;}
 .hr010-dashboard-wrap .hr010-smart-filter__head-actions {display:inline-flex; align-items:center; gap:10px;}
