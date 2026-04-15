@@ -2008,6 +2008,7 @@ function switchHr011RefView(view, options) {
     const detailEl = document.getElementById("hr011RefDetail");
     const detailTitleEl = document.getElementById("hr011RefDetailTitle");
     const detailBodyEl = document.getElementById("hr011RefDetailBody");
+    const detailActionsEl = detailEl ? detailEl.querySelector(".hr011-ref-detail-actions") : null;
     const leftProfileHeadEl = document.querySelector('.hr011-ref-left-head');
     const leftProfileLinkEl = document.querySelector('.hr011-ref-left-head .hr011-ref-link-btn[data-ref-view="profile"]');
     if (!overviewEl || !detailEl || !detailTitleEl || !detailBodyEl) return;
@@ -2016,6 +2017,9 @@ function switchHr011RefView(view, options) {
         layoutEl.dataset.refView = normalized;
     }
     detailEl.dataset.detailView = normalized;
+    if (detailActionsEl) {
+        detailActionsEl.hidden = normalized !== "overview";
+    }
 
     if (leftProfileLinkEl) {
         // 프로필/스킬/프로젝트 상세에서는 좌측 >상세보기 버튼을 숨긴다.
@@ -2031,6 +2035,9 @@ function switchHr011RefView(view, options) {
         detailTitleEl.textContent = "상세";
         overviewEl.hidden = false;
         detailEl.hidden = true;
+        if (detailActionsEl) {
+            detailActionsEl.hidden = false;
+        }
         requestAnimationFrame(function () {
             animateHr011RefEntrance(document.getElementById("hr011RefLayout"));
             // 상세 -> 메인 복귀 시 스킬 카드/레이더 애니메이션을 다시 재생한다.
@@ -2045,7 +2052,7 @@ function switchHr011RefView(view, options) {
     detailEl.hidden = false;
 
     if (normalized === "skills") {
-        detailTitleEl.textContent = "보유 기술 상세";
+        detailTitleEl.innerHTML = buildHr011DetailHeaderMarkup("보유 기술 상세");
         detailBodyEl.innerHTML = buildHr011SkillsDetailMarkup();
         renderHr011RefSkillCards("hr011RefSkillGaugeDetail");
         requestAnimationFrame(function () {
@@ -2056,7 +2063,7 @@ function switchHr011RefView(view, options) {
     }
 
     if (normalized === "project") {
-        detailTitleEl.textContent = "프로젝트 이력";
+        detailTitleEl.innerHTML = buildHr011DetailHeaderMarkup("프로젝트 이력");
         detailBodyEl.innerHTML = buildHr011ProjectDetailMarkup();
         initializeHr011ProjectDetailEvaluations();
         requestAnimationFrame(function () {
@@ -2065,12 +2072,7 @@ function switchHr011RefView(view, options) {
         return;
     }
 
-    detailTitleEl.innerHTML = [
-        `<button type="button" class="hr011-ref-detail-btn hr011-ref-detail-back" data-ref-view="overview" aria-label="메인으로">`,
-        `<span class="hr011-visually-hidden">메인으로</span>`,
-        `</button>`,
-        `<span>프로필</span>`
-    ].join("");
+    detailTitleEl.innerHTML = buildHr011DetailHeaderMarkup("프로필");
     detailBodyEl.innerHTML = buildHr011ProfileDetailMarkup();
     requestAnimationFrame(function () {
         animateHr011RefEntrance(detailEl);
@@ -2685,6 +2687,15 @@ function buildHr011ProfileDetailMarkup() {
     ].join("");
 }
 
+function buildHr011DetailHeaderMarkup(titleText) {
+    return [
+        `<button type="button" class="hr011-ref-detail-btn hr011-ref-detail-back" data-ref-view="overview" aria-label="메인으로">`,
+        `<span class="hr011-visually-hidden">메인으로</span>`,
+        `</button>`,
+        `<span>${escapeHr011(titleText || "")}</span>`
+    ].join("");
+}
+
 function buildHr011SkillsDetailMarkup() {
     const row = hr011CurrentRow || {};
     const skillCardRows = buildHr011SkillCardRows(row);
@@ -3035,16 +3046,16 @@ function renderHr011ProjectEvalRadar(projectKey) {
             style: {
                 text: "5점 만점",
                 fill: "#6f84a3",
-                fontSize: 11,
+                fontSize: 13,
                 fontWeight: 700
             }
         }],
         radar: {
-            center: ["50%", "54%"],
-            radius: "66%",
+            center: ["50%", "53%"],
+            radius: "60%",
             splitNumber: 5,
             indicator: indicators,
-            axisName: { color: "#6b84a7", fontSize: 12, fontWeight: 700 },
+            axisName: { color: "#6b84a7", fontSize: 11, fontWeight: 700 },
             splitArea: { areaStyle: { color: ["#ffffff", "#f7faff"] } },
             splitLine: { lineStyle: { color: "#dfE7f4" } },
             axisLine: { lineStyle: { color: "#dfE7f4" } }
@@ -3354,6 +3365,15 @@ function renderHr011RefRadarChart() {
     const sanitizeRadarLabel = function (text) {
         return String(text || "").replace(/[{}|]/g, "");
     };
+    const formatRadarAxisLabel = function (text) {
+        const label = sanitizeRadarLabel(text);
+        const chars = Array.from(label);
+        if (chars.length <= 5) {
+            return label;
+        }
+        const splitIndex = Math.ceil(chars.length / 2);
+        return `${chars.slice(0, splitIndex).join("")}\n${chars.slice(splitIndex).join("")}`;
+    };
     const formatRadarScoreText = function (value) {
         const numeric = Number(value || 0);
         if (!Number.isFinite(numeric)) {
@@ -3387,8 +3407,8 @@ function renderHr011RefRadarChart() {
         },
         graphic: [{
             type: "text",
-            left: 14,
-            top: 0,
+            left: 0,
+            top: 3,
             style: {
                 text: "5점 만점",
                 fill: "#727272",
@@ -3399,40 +3419,13 @@ function renderHr011RefRadarChart() {
             }
         }],
         radar: {
-            center: ["50%", "55%"],
+            center: ["50%", "58%"],
             radius: "78%",
             bottom: 0,
             splitNumber: 5,
             startAngle: 90,
             indicator: indicators,
-            axisName: {
-                color: "#727272",
-                fontFamily: "Inter, sans-serif",
-                fontSize: 13,
-                fontWeight: 400,
-                lineHeight: 16,
-                formatter: function (name) {
-                    return `{label|${name}}\n{value|${radarScoreMap[name] || "0점"}}`;
-                },
-                rich: {
-                    label: {
-                        color: "#727272",
-                        fontFamily: "Inter, sans-serif",
-                        fontSize: 13,
-                        fontWeight: 400,
-                        lineHeight: 16,
-                        align: "center"
-                    },
-                    value: {
-                        color: "#000000",
-                        fontFamily: "Inter, sans-serif",
-                        fontSize: 18,
-                        fontWeight: 600,
-                        lineHeight: 22,
-                        align: "center"
-                    }
-                }
-            },
+            axisName: { color: "#727272", fontFamily: "Inter, sans-serif", fontSize: 13, fontWeight: 400, lineHeight: 14, distance: 0, formatter: function (name) { return `{label|${formatRadarAxisLabel(name)}}\n{value|${radarScoreMap[name] || "0점"}}`; }, rich: { label: { color: "#727272", fontFamily: "Inter, sans-serif", fontSize: 13, fontWeight: 400, lineHeight: 14, align: "center", padding: [0, 0, 15, 0] }, value: { color: "#000000", fontFamily: "Inter, sans-serif", fontSize: 18, fontWeight: 600, lineHeight: 18, align: "center", padding: [0, 0, 0, 0] } } },
             axisLine: {
                 lineStyle: {
                     color: "#cfd7e4",
