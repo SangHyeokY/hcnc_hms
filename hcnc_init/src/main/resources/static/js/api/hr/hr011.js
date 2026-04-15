@@ -2008,6 +2008,7 @@ function switchHr011RefView(view, options) {
     const detailEl = document.getElementById("hr011RefDetail");
     const detailTitleEl = document.getElementById("hr011RefDetailTitle");
     const detailBodyEl = document.getElementById("hr011RefDetailBody");
+    const pageEl = detailEl ? detailEl.closest(".hr011-page") : null;
     const detailActionsEl = detailEl ? detailEl.querySelector(".hr011-ref-detail-actions") : null;
     const leftProfileHeadEl = document.querySelector('.hr011-ref-left-head');
     const leftProfileLinkEl = document.querySelector('.hr011-ref-left-head .hr011-ref-link-btn[data-ref-view="profile"]');
@@ -2016,10 +2017,14 @@ function switchHr011RefView(view, options) {
     if (layoutEl) {
         layoutEl.dataset.refView = normalized;
     }
+    if (pageEl) {
+        pageEl.dataset.refView = normalized;
+    }
     detailEl.dataset.detailView = normalized;
     if (detailActionsEl) {
         detailActionsEl.hidden = normalized !== "overview";
     }
+    setHr011SkillsDetailGridMode(detailBodyEl, normalized === "skills");
 
     if (leftProfileLinkEl) {
         // 프로필/스킬/프로젝트 상세에서는 좌측 >상세보기 버튼을 숨긴다.
@@ -2052,9 +2057,13 @@ function switchHr011RefView(view, options) {
     detailEl.hidden = false;
 
     if (normalized === "skills") {
-        detailTitleEl.innerHTML = buildHr011DetailHeaderMarkup("보유 기술 상세");
-        detailBodyEl.innerHTML = buildHr011SkillsDetailMarkup();
-        renderHr011RefSkillCards("hr011RefSkillGaugeDetail");
+        const skillCardRows = buildHr011SkillCardRows(hr011CurrentRow || {});
+        detailTitleEl.innerHTML = buildHr011DetailHeaderMarkup("보유 기술 상세", {
+            rightLabel: "보유기술",
+            rightValue: `${skillCardRows.length}개`
+        });
+        detailBodyEl.innerHTML = "";
+        renderHr011RefSkillCards("hr011RefDetailBody");
         requestAnimationFrame(function () {
             animateHr011RefEntrance(detailEl);
             animateHr011SkillSection(detailEl);
@@ -2111,7 +2120,7 @@ function animateHr011RefEntrance(rootEl) {
 
 function animateHr011SkillSection(rootEl) {
     if (!rootEl) return;
-    const chartWraps = rootEl.querySelectorAll(".hr011-ref-skill-grid-wrap");
+    const chartWraps = rootEl.querySelectorAll(".hr011-ref-skill-grid-wrap, .hr011-ref-skill-card-grid--detail");
     chartWraps.forEach(function (el) {
         el.classList.remove("is-skill-animated");
         void el.offsetWidth;
@@ -2687,32 +2696,32 @@ function buildHr011ProfileDetailMarkup() {
     ].join("");
 }
 
-function buildHr011DetailHeaderMarkup(titleText) {
+function buildHr011DetailHeaderMarkup(titleText, options) {
+    const meta = options || {};
+    const rightLabel = $.trim(String(meta.rightLabel || ""));
+    const rightValue = $.trim(String(meta.rightValue || ""));
+    const rightMarkup = rightLabel && rightValue
+        ? [
+            `<span class="hr011-ref-detail-stat">`,
+            `<span class="hr011-ref-detail-stat__label">${escapeHr011(rightLabel)}</span>`,
+            `<strong class="hr011-ref-detail-stat__value">${escapeHr011(rightValue)}</strong>`,
+            `</span>`
+        ].join("")
+        : "";
+
     return [
         `<button type="button" class="hr011-ref-detail-btn hr011-ref-detail-back" data-ref-view="overview" aria-label="메인으로">`,
         `<span class="hr011-visually-hidden">메인으로</span>`,
         `</button>`,
-        `<span>${escapeHr011(titleText || "")}</span>`
+        `<span class="hr011-ref-detail-title">${escapeHr011(titleText || "")}</span>`,
+        rightMarkup
     ].join("");
 }
 
-function buildHr011SkillsDetailMarkup() {
-    const row = hr011CurrentRow || {};
-    const skillCardRows = buildHr011SkillCardRows(row);
-    return [
-        `<article class="hr011-ref-detail-card hr011-ref-skill-detail-card">`,
-        `<div class="hr011-ref-skill-detail-head">`,
-        `<div class="hr011-ref-card-headline">`,
-        `<div class="hr011-ref-card-headline-row">`,
-        `<h6>보유 기술 상세</h6>`,
-        `<span class="hr011-ref-skill-card-meta">총 ${skillCardRows.length}개 스킬</span>`,
-        `</div>`,
-        // `<p>숙련도와 프로젝트 활용 이력을 한눈에 봅니다.</p>`,
-        `</div>`,
-        `</div>`,
-        `<div class="hr011-ref-skill-grid-wrap hr011-ref-skill-grid-wrap--detail"><div class="hr011-ref-skill-card-grid hr011-ref-skill-card-grid--detail" id="hr011RefSkillGaugeDetail"></div></div>`,
-        `</article>`
-    ].join("");
+function setHr011SkillsDetailGridMode(detailBodyEl, enabled) {
+    if (!detailBodyEl) return;
+    detailBodyEl.classList.toggle("hr011-ref-skill-card-grid", !!enabled);
+    detailBodyEl.classList.toggle("hr011-ref-skill-card-grid--detail", !!enabled);
 }
 
 function buildHr011ProjectDetailMarkup() {
