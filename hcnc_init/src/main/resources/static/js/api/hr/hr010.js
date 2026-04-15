@@ -378,6 +378,8 @@ function applyFiltersAndRender() {
         );
     });
 
+    hr010Paging.page = 1;
+
     renderUserCards(filtered);
 }
 
@@ -1188,6 +1190,13 @@ function renderUserCards(list) {
 
     hr010LastRenderedRows = Array.isArray(list) ? list.slice() : [];
     hr010Paging.total = hr010LastRenderedRows.length;
+
+    // 페이지 범위 보정
+    const totalPage = Math.ceil(hr010Paging.total / hr010Paging.size);
+    if (hr010Paging.page > totalPage) {
+        hr010Paging.page = totalPage || 1;
+    }
+
     const pagedList = getPagedList(hr010LastRenderedRows);
 
     container.dataset.view = currentHr010ViewMode;
