@@ -1,12 +1,12 @@
 @charset "UTF-8";
 
-.contents-wrap.hr011v2-wrap {
-  background:
-    radial-gradient(circle at top left, rgba(19, 122, 113, 0.12), transparent 30%),
-    radial-gradient(circle at top right, rgba(56, 114, 175, 0.1), transparent 26%),
-    linear-gradient(180deg, #f5f8fb 0%, #eef3f8 100%);
-  overflow-x: clip;
-}
+/*.contents-wrap.hr011v2-wrap {*/
+/*  background:*/
+/*    radial-gradient(circle at top left, rgba(19, 122, 113, 0.12), transparent 30%),*/
+/*    radial-gradient(circle at top right, rgba(56, 114, 175, 0.1), transparent 26%),*/
+/*    linear-gradient(180deg, #f5f8fb 0%, #eef3f8 100%);*/
+/*  overflow-x: clip;*/
+/*}*/
 
 .contents-wrap.hr011v2-wrap > section.search-area,
 .contents-wrap.hr011v2-wrap > .page-common {
@@ -800,7 +800,7 @@
 
 .hr011v2-legacy-body--eval .hr014-tab-panels {
   display: grid !important;
-  grid-template-columns: minmax(0, 1.08fr) minmax(320px, 0.92fr);
+  /*grid-template-columns: minmax(0, 1.08fr) minmax(320px, 0.92fr);*/
   gap: 14px;
 }
 

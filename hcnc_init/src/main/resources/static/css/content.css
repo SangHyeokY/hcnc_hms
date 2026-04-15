@@ -11421,7 +11421,7 @@ minmax(142px, 1.02fr); gap:10px; align-items:stretch;}
   .hr011-detail-wrap .hr011-ref-layout[data-ref-view="project"] .hr011-ref-detail-head h5 {
     display: inline-flex !important;
     align-items: center !important;
-    gap: 17.33px !important;
+    gap: 8px !important;
     margin: 0 !important;
     font-family: "Paperlogy", "Pretendard Variable", "Pretendard", sans-serif !important;
     font-size: 22px !important;
