@@ -525,7 +525,7 @@ option {
   min-width: 32px;
   width: 32px;
   height: 32px;
-  border: 2px solid #DEE2E7;
+  border: 2px solid #2C80FF;
   border-radius: 50%;
   background: #EFF1F6;
   padding: 0;
@@ -5896,6 +5896,46 @@ section.search-area .search-info #searchConditionKeyword {
   padding:var(--hcnc-header-height) 0 0 0 !important;
 }
 
+/* 인적사항 페이징 css - 영역 */ /* tabulator 테이블에서 작업했던 페이징 css와 동일 */
+.container-wrap .container .contents-wrap.hr010-dashboard-wrap .hr010-pager {display: flex;justify-content: center;align-items: center;padding: 5px 10px;}
+
+/* 인적사항 페이징 css - 버튼 */
+.container-wrap .container .contents-wrap.hr010-dashboard-wrap .hr010-pager button {min-width: 24px;height: 24px;line-height: 24px;border-radius: 0;border: none;background: transparent;color: #5F666E;font-size: 14px;font-weight: 400;padding: 0;}
+
+/* 인적사항 페이징 css - 선택 불가 */
+.container-wrap .container .contents-wrap.hr010-dashboard-wrap .hr010-pager button:disabled {opacity: .5;}
+
+/* 인적사항 페이징 css - 현재 페이지 */
+.container-wrap .container .contents-wrap.hr010-dashboard-wrap .hr010-pager button.active {font-weight: 500;color: #000;}
+
+/* 인적사항 페이징 css - 이전, 다음 페이지 버튼 */
+.container-wrap .container .contents-wrap.hr010-dashboard-wrap .hr010-pager button[data-page="first"],
+.container-wrap .container .contents-wrap.hr010-dashboard-wrap .hr010-pager button[data-page="prev"],
+.container-wrap .container .contents-wrap.hr010-dashboard-wrap .hr010-pager button[data-page="next"],
+.container-wrap .container .contents-wrap.hr010-dashboard-wrap .hr010-pager button[data-page="last"] {min-width: 32px;width: 32px;height: 32px;border: 2px solid #2C80FF;border-radius: 50%;background: #EFF1F6;padding: 0;color: #232d3d;font-size: 18px;font-weight: 500;}
+/* === */
+.container-wrap .container .contents-wrap.hr010-dashboard-wrap .hr010-pager button[data-page="first"],
+.container-wrap .container .contents-wrap.hr010-dashboard-wrap .hr010-pager button[data-page="next"] {margin-right: 8px;}
+/* === */
+.container-wrap .container .contents-wrap.hr010-dashboard-wrap .hr010-pager button[data-page="prev"],
+.container-wrap .container .contents-wrap.hr010-dashboard-wrap .hr010-pager button[data-page="next"] {margin-right: 15px;}
+/* === */
+.container-wrap .container .contents-wrap.hr010-dashboard-wrap .hr010-pager button:not([data-page="first"]),
+.container-wrap .container .contents-wrap.hr010-dashboard-wrap .hr010-pager button:not([data-page="prev"]),
+.container-wrap .container .contents-wrap.hr010-dashboard-wrap .hr010-pager button:not([data-page="next"]),
+.container-wrap .container .contents-wrap.hr010-dashboard-wrap .hr010-pager button:not([data-page="last"]) {margin: 0 6px;}
+
+.container-wrap .container .contents-wrap.hr010-dashboard-wrap .hr010-pager button:not(.disabled):hover {
+  color: #333;
+}
+
+/* 인적사항 페이징 css - 이전, 다음 페이지 버튼 호버 */
+.container-wrap .container .contents-wrap.hr010-dashboard-wrap .hr010-pager button[data-page="first"]:hover,
+.container-wrap .container .contents-wrap.hr010-dashboard-wrap .hr010-pager button[data-page="prev"]:hover,
+.container-wrap .container .contents-wrap.hr010-dashboard-wrap .hr010-pager button[data-page="next"]:hover,
+.container-wrap .container .contents-wrap.hr010-dashboard-wrap .hr010-pager button[data-page="last"]:hover {cursor : pointer;background: rgba(0, 0, 0, .2);}
+
+
 .contents-wrap.hr010-dashboard-wrap>.page-common, .contents-wrap.hr010-dashboard-wrap>.page-common {display:none;}
 .contents-wrap.hr010-dashboard-wrap>.page-common, .contents-wrap.hr010-dashboard-wrap>section.search-area {display:none;}
 .contents-wrap.hr010-dashboard-wrap>section.white-full.hr010-dashboard-shell {display:flex; flex-direction:column; height:100%; min-height:0; padding:0; border:0; border-radius:0; box-shadow:none; overflow:visible; background:linear-gradient(180deg, #ffffff 0%, #ffffff 42%, #fbfcff 100%);}
@@ -6011,10 +6051,10 @@ minmax(142px, 1.02fr); gap:10px; align-items:stretch;}
 .hr010-dashboard-wrap .user-list-row > div:nth-child(6) {padding-left:40px;}
 .hr010-dashboard-wrap .user-list-row > div:nth-child(7) {justify-content:flex-end;}
 .hr010-dashboard-wrap .user-list-row__rate {width:100%; padding-right:8px; font-size:15px; font-weight:500; color:#3A3C40; text-align:right; justify-self:end;}
-.hr010-dashboard-wrap .hr010-enter-item {opacity:0; transform:translateY(18px) scale(0.985); transition:opacity .42s ease, transform .48s cubic-bezier(0.22, 1, 0.36, 1); transition-delay:var(--hr010-enter-delay, 0ms); will-change:opacity, transform;}
+.hr010-dashboard-wrap .hr010-enter-item {opacity:0; transform: translateY(12px) scale(0.99); transition: opacity .25s ease, transform .28s cubic-bezier(0.22, 1, 0.36, 1); transition-delay:var(--hr010-enter-delay, 0ms); will-change:opacity, transform;} /* cardView, listView 등장 애니메이션 */
 .hr010-dashboard-wrap .hr010-enter-item.is-visible {opacity:1; transform:translateY(0) scale(1);}
 /*.hr010-dashboard-wrap .hr010-list-header.hr010-enter-item {transform:translateY(12px);}*/
-@media (prefers-reduced-motion: reduce) {.hr010-dashboard-wrap .hr010-enter-item, .hr010-dashboard-wrap .hr010-enter-item.is-visible {opacity:1; transform:none; transition:none;}}
+@media (prefers-reduced-motion: reduce) {.hr010-dashboard-wrap .list-view.hr010-enter-item, .hr010-dashboard-wrap .list-view.hr010-enter-item.is-visible {opacity:1; transform:none; transition:none;}}
 .hr010-dashboard-wrap .no-data-wrap {position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:#ffffff; border-radius:14px; border: 1px solid #DEE2E7; margin-top: 10px;}
 .hr010-dashboard-wrap .no-data-box {text-align:center; color:#333333;}
 .hr010-dashboard-wrap .no-data-icon {font-size:48px; margin-bottom:10px; opacity:0.7;}

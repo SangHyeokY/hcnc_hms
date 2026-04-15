@@ -16,6 +16,11 @@ let hr010DropdownSectionState = {
     skl_grp: {},
     grade: {}
 };
+let hr010Paging = {
+    page: 1,
+    size: 5,
+    total: 0
+};
 const selectedFilters = {
     skl_grp: [],
     ctrt_typ: [],
@@ -1082,15 +1087,77 @@ function filterHr010RowsByType(list) {
 // ==============================
 // 카드 렌더링
 // ==============================
+function getPagedList(list) {
+    const start = (hr010Paging.page - 1) * hr010Paging.size;
+    return list.slice(start, start + hr010Paging.size);
+}
+function renderHr010Pager() {
+    const container = document.getElementById("CARD_HR010_A");
+    if (!container) return;
+
+    let pager = container.querySelector(".hr010-pager");
+
+    const totalPage = Math.ceil(hr010Paging.total / hr010Paging.size);
+    if (totalPage <= 1) {
+        if (pager) pager.remove();
+        return;
+    }
+
+    if (!pager) {
+        pager = document.createElement("div");
+        pager.className = "hr010-pager";
+        container.appendChild(pager);
+    }
+
+    let html = `
+        <button data-page="first" ${hr010Paging.page === 1 ? "disabled" : ""}>«</button>
+        <button data-page="prev" ${hr010Paging.page === 1 ? "disabled" : ""}>‹</button>
+    `;
+
+    for (let i = 1; i <= totalPage; i++) {
+        html += `
+            <button class="${i === hr010Paging.page ? "active" : ""}" data-page="${i}">
+                ${i}
+            </button>
+        `;
+    }
+
+    html += `
+        <button data-page="next" ${hr010Paging.page === totalPage ? "disabled" : ""}>›</button>
+        <button data-page="last" ${hr010Paging.page === totalPage ? "disabled" : ""}>»</button>
+    `;
+
+    pager.innerHTML = html;
+
+    pager.querySelectorAll("button").forEach(btn => {
+        btn.onclick = function () {
+            if (this.disabled) return;
+
+            const type = this.dataset.page;
+
+            if (type === "first") hr010Paging.page = 1;
+            else if (type === "last") hr010Paging.page = totalPage;
+            else if (type === "prev") hr010Paging.page = Math.max(1, hr010Paging.page - 1);
+            else if (type === "next") hr010Paging.page = Math.min(totalPage, hr010Paging.page + 1);
+            else hr010Paging.page = Number(type);
+
+            renderUserCards(hr010LastRenderedRows);
+        };
+    });
+}
+
 function renderUserCards(list) {
     const container = document.getElementById("CARD_HR010_A");
     if (!container) return;
 
     hr010LastRenderedRows = Array.isArray(list) ? list.slice() : [];
+    hr010Paging.total = hr010LastRenderedRows.length;
+    const pagedList = getPagedList(hr010LastRenderedRows);
+
     container.dataset.view = currentHr010ViewMode;
     updateHr010ResultCount(hr010LastRenderedRows.length);
 
-    if (!list || !list.length) {
+    if (!pagedList || !pagedList.length) {
         container.innerHTML = `
             <div class="no-data-wrap">
                 <div class="no-data-box">
@@ -1099,6 +1166,7 @@ function renderUserCards(list) {
                 </div>
             </div>
         `;
+        renderHr010Pager();
         return;
     }
 
@@ -1109,7 +1177,7 @@ function renderUserCards(list) {
         wrapper.className = "hr010-list-view";
 
         wrapper.innerHTML = `
-            <div class="hr010-list-header">
+            <div class="hr010-list-header list-view">
                 <div>인력 정보</div>
                 <div>구분</div>
                 <div>주 개발언어</div>
@@ -1119,7 +1187,7 @@ function renderUserCards(list) {
                 <div>희망 단가</div>
             </div>
             <div class="hr010-list-body">
-                ${list.map(row => createUserCard(row, "list")).join("")}
+                ${pagedList.map(row => createUserCard(row, "list")).join("")}
             </div>
         `;
 
@@ -1135,8 +1203,10 @@ function renderUserCards(list) {
     container.innerHTML = "";
     container.appendChild(fragment);
 
+    renderHr010Pager();
+
     animateHr010RenderedItems(container);
-    bindCardEvents(container, list);
+    bindCardEvents(container, pagedList);
 }
 
 function animateHr010RenderedItems(container) {

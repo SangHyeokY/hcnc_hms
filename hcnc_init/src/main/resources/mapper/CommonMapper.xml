@@ -22,7 +22,7 @@
              , 	dev.brdt -- 생년월일
              , 	dev.tel -- 연락처
              , 	dev.email -- 이메일
-             , 	dev.region -- 거주지역
+             , 	fn_get_cm('sido_cd', dev.region) region -- 거주지역
              , 	fn_get_cm_lst('skl_id', dev.main_lang) main_lang -- 주 개발언어
              , 	dev.exp_yr -- 경력연차
              , 	dev.edu_last -- 최종학력
