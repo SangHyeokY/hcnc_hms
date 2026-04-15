@@ -1569,3 +1569,62 @@
         return escapeHtml(value);
     }
 })(jQuery);
+
+// 공통 팩토리 기반 주개발언어 선택 팝업 초기화
+function initMainLangPicker() {
+    if (mainLangPicker || typeof createGroupedSkillPicker !== "function") {
+        return;
+    }
+    mainLangPicker = createGroupedSkillPicker({
+        namespace: "main_lang",
+        pickerAreaSelector: "#main-lang-picker-area",
+        openTriggerSelector: "#main_lang_input, #btn_main_lang_picker",
+        applyTriggerSelector: "#btn_main_lang_picker_apply",
+        closeTriggerSelector: "#btn_main_lang_picker_close_x",
+        tableSelector: "#TABLE_MAIN_LANG_PICKER",
+        searchInputSelector: "#main-lang-picker-search",
+        searchWrapSelector: ".main-lang-picker-search-wrap",
+        suggestListSelector: "#main-lang-picker-suggest",
+        metaSelector: "#main-lang-picker-meta",
+        chipClass: "main-lang-skill-chip",
+        chipWrapClass: "main-lang-skill-chip-wrap",
+        suggestItemClass: "main-lang-suggest-item",
+        flashClass: "is-flash",
+        groupColumnWidth: 180,
+        getSkillOptions: function () {
+            return mainLangSkillOptions || [];
+        },
+        getGroupOptions: function () {
+            return mainLangGroupOptions || [];
+        },
+        getSelectedCodes: function () {
+            var set = new Set();
+            String($("#main_lang").val() || "")
+                .split(",")
+                .forEach(function (item) {
+                    var code = $.trim(item);
+                    if (code) {
+                        set.add(code);
+                    }
+                });
+            return set;
+        },
+        isReadonly: function () {
+            return currentMode === "view";
+        },
+        onApply: function (payload) {
+            if (mainLangTagInput) {
+                mainLangTagInput.setFromValue(payload.csv || "");
+            }
+            pendingMainLangValue = payload.csv || "";
+        }
+    });
+}
+
+// 팝업 이벤트는 공통 유틸이 네임스페이스로 1회만 등록한다.
+function bindMainLangPickerEvents() {
+    initMainLangPicker();
+    if (mainLangPicker) {
+        mainLangPicker.bindEvents();
+    }
+}
