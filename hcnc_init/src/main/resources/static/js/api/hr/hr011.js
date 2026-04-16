@@ -226,10 +226,9 @@ function setHr011Mode(mode, options) {
     scheduleHr011ReadOnlyTextareas();
     scheduleHr011ReadOnlyFields();
     scheduleHr011LegacyReadonlyTable();
-    hr011RefProjectEvalCache.forEach(function (state, projectKey) {
-        if (!state || !state.expanded) return;
-        renderHr011ProjectEvaluationContent(projectKey);
-    });
+    if (hr011ProjectEvalModalProjectKey) {
+        renderHr011ProjectEvaluationContent(hr011ProjectEvalModalProjectKey);
+    }
 
     // 일부 탭 초기화가 버튼 라벨을 덮는 경우가 있어 모드 기준으로 한 번 더 보정한다.
     setTimeout(function () {
@@ -908,7 +907,24 @@ const HR011_EDIT_STEP_ACTIVE_OFFSET = 96;
 let hr011RefCurrentView = "overview";
 let hr011RefProjectEvalCache = new Map();
 let hr011RefProjectRadarCharts = new Map();
+let hr011RefProjectExpandedKey = "";
+let hr011RefProjectAnimateOpenKey = "";
+let hr011ProjectEvalModalProjectKey = "";
+let hr011ProjectEvalModalLastFocus = null;
+let hr011ProjectEvalModalClosing = false;
 const HR011_SKILL_CHART_PALETTE = ["#24b4e3", "#4d8dff", "#57d7c8", "#7a6dff", "#95d95c", "#ff9f43", "#ff6b6b"];
+
+if (!window.hr011ProjectEvalModalEscBound) {
+    window.hr011ProjectEvalModalEscBound = true;
+    document.addEventListener("keydown", function (event) {
+        if (event.key !== "Escape") return;
+        const modalEl = document.getElementById("hr011ProjectEvalModal");
+        if (!modalEl || modalEl.hidden || !modalEl.classList.contains("is-open")) return;
+        event.preventDefault();
+        event.stopPropagation();
+        closeHr011ProjectEvaluationModal();
+    }, true);
+}
 
 function getHr011SkillCategoryColor(index) {
     const idx = Math.max(0, Number(index) || 0);
@@ -1196,7 +1212,24 @@ function bindHr011PageEvents() {
     $(document).on("click", ".hr011-ref-project-eval-toggle", async function () {
         const projectKey = String($(this).data("projectKey") || "");
         if (!projectKey) return;
-        await toggleHr011ProjectEvaluationPanel(projectKey);
+        await openHr011ProjectEvaluationModal(projectKey);
+    });
+
+    $(document).on("click", ".hr011-ref-project-detail-summary[data-project-key]", function () {
+        const projectKey = String($(this).data("projectKey") || "");
+        toggleHr011ProjectDetailExpanded(projectKey);
+    });
+
+    $(document).on("keydown", ".hr011-ref-project-detail-summary[data-project-key]", function (event) {
+        const key = String(event.key || "").toLowerCase();
+        if (key !== "enter" && key !== " ") return;
+        event.preventDefault();
+        const projectKey = String($(this).data("projectKey") || "");
+        toggleHr011ProjectDetailExpanded(projectKey);
+    });
+
+    $(document).on("click", "[data-hr011-project-eval-close]", function () {
+        closeHr011ProjectEvaluationModal();
     });
 
     $(document).off("hr013:focusEvaluation.hr011").on("hr013:focusEvaluation.hr011", function (_e, selectedProjectId) {
@@ -2072,7 +2105,11 @@ function switchHr011RefView(view, options) {
     }
 
     if (normalized === "project") {
-        detailTitleEl.innerHTML = buildHr011DetailHeaderMarkup("프로젝트 이력");
+        resetHr011ProjectEvaluationState();
+        detailTitleEl.innerHTML = buildHr011DetailHeaderMarkup("프로젝트 이력", {
+            rightLabel: "참여회수",
+            rightValue: `${hr011RefProjectRows.length || 0}회`
+        });
         detailBodyEl.innerHTML = buildHr011ProjectDetailMarkup();
         initializeHr011ProjectDetailEvaluations();
         requestAnimationFrame(function () {
@@ -2099,8 +2136,7 @@ function animateHr011RefEntrance(rootEl) {
         ".hr011-ref-project-item",
         ".hr011-ref-detail-card",
         ".hr011-ref-project-detail-item",
-        ".hr011-ref-project-eval-side",
-        ".hr011-ref-project-eval-panel"
+        ".hr011-ref-project-eval-side"
     ].join(","));
 
     targets.forEach(function (el, idx) {
@@ -2718,6 +2754,165 @@ function buildHr011DetailHeaderMarkup(titleText, options) {
     ].join("");
 }
 
+function getHr011ProjectDetailItemKey(item, idx) {
+    const raw = item && (item.dev_prj_id || item.prj_nm || item.org_nm || item.cust_nm || item.cli_nm || "");
+    return String(raw || `row-${idx}`).trim();
+}
+
+function getHr011ProjectDetailDefaultExpandedKey(rows) {
+    const list = Array.isArray(rows) ? rows : [];
+    if (!list.length) return "";
+    const internalRow = list.find(function (item) {
+        return isHr011InternalProject(item);
+    });
+    const target = internalRow || list[0];
+    const targetIndex = list.indexOf(target);
+    return getHr011ProjectDetailItemKey(target, targetIndex < 0 ? 0 : targetIndex);
+}
+
+function formatHr011ProjectDateText(value) {
+    const raw = $.trim(value == null ? "" : String(value));
+    if (!raw) return "-";
+
+    if (/^\d{8}$/.test(raw)) {
+        return `${raw.slice(0, 4)}.${raw.slice(4, 6)}.${raw.slice(6, 8)}`;
+    }
+
+    if (/^\d{4}-\d{2}-\d{2}/.test(raw)) {
+        return raw.slice(0, 10).replace(/-/g, ".");
+    }
+
+    const parsed = new Date(raw);
+    if (!Number.isNaN(parsed.getTime())) {
+        const y = parsed.getFullYear();
+        const m = String(parsed.getMonth() + 1).padStart(2, "0");
+        const d = String(parsed.getDate()).padStart(2, "0");
+        return `${y}.${m}.${d}`;
+    }
+
+    return raw;
+}
+
+function formatHr011ProjectPeriodText(stDt, edDt) {
+    return `${formatHr011ProjectDateText(stDt)} ~ ${formatHr011ProjectDateText(edDt)}`;
+}
+
+function formatHr011ProjectAmountText(value) {
+    const raw = $.trim(String(value == null ? "" : value)).replace(/[^\d.]/g, "");
+    if (!raw) return "-";
+    const num = Number(raw);
+    if (!Number.isFinite(num)) return "-";
+    const rounded = Math.round(num);
+    return `${rounded === 0 ? "0" : formatNumber(rounded)} 원`;
+}
+
+function formatHr011ProjectPercentText(value) {
+    const raw = $.trim(String(value == null ? "" : value)).replace(/[^\d.]/g, "");
+    if (!raw) return "-";
+    return `${raw} %`;
+}
+
+function buildHr011ProjectDetailStarsMarkup(score) {
+    const count = Math.max(0, Math.min(5, Number(score) || 0));
+    return Array.from({ length: 5 }, function (_item, idx) {
+        return `<span class="hr011-ref-project-detail-star ${idx < count ? "is-on" : ""}" aria-hidden="true">★</span>`;
+    }).join("");
+}
+
+function buildHr011ProjectDetailRowMarkup(label, value, className) {
+    return [
+        `<div class="hr011-ref-project-detail-row ${className || ""}">`,
+        `<span class="label">${escapeHr011(label)}</span>`,
+        `<strong>${escapeHr011(value)}</strong>`,
+        `</div>`
+    ].join("");
+}
+
+function buildHr011ProjectDetailOpenBodyMarkup(item, state, projectKey, domId, isInternal) {
+    const avgScore = getHr011ProjectEvalAverageScore(state);
+    const avgRounded = avgScore == null ? null : Math.round(avgScore);
+    const avgValueText = avgRounded == null ? "-" : `${avgRounded}점`;
+    const avgStarsMarkup = avgRounded == null ? "" : buildHr011ProjectDetailStarsMarkup(avgRounded);
+    const evalRadarId = `hr011RefProjectEvalRadar-${domId}`;
+    const summaryValueId = `hr011RefProjectEvalSummaryValue-${domId}`;
+    const summaryStarsId = `hr011RefProjectEvalSummaryStars-${domId}`;
+
+    return [
+        `<div class="hr011-ref-project-detail-open-wrap">`,
+        `<div class="hr011-ref-project-detail-open-grid">`,
+        `<section class="hr011-ref-project-detail-panel hr011-ref-project-detail-panel--info">`,
+        `<div class="hr011-ref-project-detail-rows">`,
+        buildHr011ProjectDetailRowMarkup("역할", item.role_nm || "-", ""),
+        buildHr011ProjectDetailRowMarkup("기간", formatHr011ProjectPeriodText(item.st_dt, item.ed_dt), ""),
+        buildHr011ProjectDetailRowMarkup("단가", formatHr011ProjectAmountText(item.rate_amt), ""),
+        buildHr011ProjectDetailRowMarkup("투입률", formatHr011ProjectPercentText(item.alloc_pct), ""),
+        `<div class="hr011-ref-project-detail-row hr011-ref-project-detail-row--score">`,
+        `<span class="label">프로젝트 개인평가 평균 점수</span>`,
+        `<div class="hr011-ref-project-detail-score" id="hr011RefProjectEvalSummary-${domId}">`,
+        `<span class="hr011-ref-project-detail-stars" id="${summaryStarsId}">${avgStarsMarkup}</span>`,
+        `<strong class="hr011-ref-project-detail-score-value" id="${summaryValueId}">${escapeHr011(avgValueText)}</strong>`,
+        `</div>`,
+        `</div>`,
+        `</div>`,
+        `</section>`,
+        isInternal
+            ? [
+                `<aside class="hr011-ref-project-eval-side hr011-ref-project-detail-panel hr011-ref-project-detail-panel--chart">`,
+                `<div class="hr011-ref-project-eval-radar" id="${evalRadarId}"></div>`,
+                `<button type="button" class="hr011-ref-project-eval-toggle" data-project-key="${escapeHr011(projectKey)}">평가 상세 보기</button>`,
+                `</aside>`
+            ].join("")
+            : [
+                `<aside class="hr011-ref-project-eval-side hr011-ref-project-detail-panel hr011-ref-project-detail-panel--chart hr011-ref-project-eval-side--readonly">`,
+                `<div class="hr011-ref-project-eval-external">외부 프로젝트</div>`,
+                `</aside>`
+            ].join(""),
+        `</div>`,
+        `</div>`
+    ].join("");
+}
+
+function activateHr011ProjectDetailOpenAnimation(rootEl) {
+    const animateKey = String(hr011RefProjectAnimateOpenKey || "");
+    hr011RefProjectAnimateOpenKey = "";
+    if (!rootEl || !animateKey) return;
+
+    const openItem = Array.from(rootEl.querySelectorAll(".hr011-ref-project-detail-item.is-open.is-opening")).find(function (itemEl) {
+        return String(itemEl.dataset.projectKey || "") === animateKey;
+    });
+    if (!openItem) return;
+
+    requestAnimationFrame(function () {
+        requestAnimationFrame(function () {
+            openItem.classList.add("is-open-active");
+            window.setTimeout(function () {
+                openItem.classList.remove("is-opening", "is-open-active");
+            }, 420);
+        });
+    });
+}
+
+function renderHr011ProjectDetailView() {
+    const detailBodyEl = document.getElementById("hr011RefDetailBody");
+    const detailEl = document.getElementById("hr011RefDetail");
+    if (!detailBodyEl) return;
+    detailBodyEl.innerHTML = buildHr011ProjectDetailMarkup();
+    initializeHr011ProjectDetailEvaluations();
+    activateHr011ProjectDetailOpenAnimation(detailBodyEl);
+    requestAnimationFrame(function () {
+        animateHr011RefEntrance(detailEl || detailBodyEl);
+    });
+}
+
+function toggleHr011ProjectDetailExpanded(projectKey) {
+    const key = String(projectKey || "");
+    if (!key || hr011RefProjectExpandedKey === key) return;
+    hr011RefProjectExpandedKey = key;
+    hr011RefProjectAnimateOpenKey = key;
+    if (hr011RefCurrentView !== "project") return;
+    renderHr011ProjectDetailView();
+}
+
 function setHr011SkillsDetailGridMode(detailBodyEl, enabled) {
     if (!detailBodyEl) return;
     detailBodyEl.classList.toggle("hr011-ref-skill-card-grid", !!enabled);
@@ -2725,62 +2920,49 @@ function setHr011SkillsDetailGridMode(detailBodyEl, enabled) {
 }
 
 function buildHr011ProjectDetailMarkup() {
-    resetHr011ProjectEvaluationState();
     const rows = hr011RefProjectRows || [];
     if (!rows.length) {
-        return `<article class="hr011-ref-detail-card"><h6>프로젝트이력</h6><p>등록된 프로젝트가 없습니다.</p></article>`;
+        return `<article class="hr011-ref-detail-card hr011-ref-project-detail-empty"><h6>프로젝트 이력</h6><p>등록된 프로젝트가 없습니다.</p></article>`;
+    }
+
+    if (!hr011RefProjectExpandedKey || !rows.some(function (item, idx) {
+        return getHr011ProjectDetailItemKey(item, idx) === hr011RefProjectExpandedKey;
+    })) {
+        hr011RefProjectExpandedKey = getHr011ProjectDetailDefaultExpandedKey(rows);
     }
 
     return [
         `<div class="hr011-ref-project-detail-list">`,
         rows.map(function (item, idx) {
             const stacks = parseHr011SkillList(item.stack_txt_nm || item.stack_txt);
-            const company = item.org_nm || item.cust_nm || item.cli_nm || "-";
-            const period = formatHr011Period(item.st_dt, item.ed_dt);
-            const projectKey = String(item.dev_prj_id || `row-${idx}`);
+            const projectKey = getHr011ProjectDetailItemKey(item, idx);
             const projectDomId = makeHr011SafeDomId(projectKey);
             const isInternal = isHr011InternalProject(item);
-            hr011RefProjectEvalCache.set(projectKey, createHr011ProjectEvalState(item, projectKey, projectDomId));
+            if (!hr011RefProjectEvalCache.has(projectKey)) {
+                hr011RefProjectEvalCache.set(projectKey, createHr011ProjectEvalState(item, projectKey, projectDomId));
+            }
+            const state = hr011RefProjectEvalCache.get(projectKey);
+            const isExpanded = hr011RefProjectExpandedKey === projectKey;
+            const isAnimatingOpen = isExpanded && hr011RefProjectAnimateOpenKey === projectKey;
+            const stackMarkup = (stacks.length ? stacks : ["-"]).slice(0, 4).map(function (stack) {
+                return `<span class="chip">${escapeHr011(stack)}</span>`;
+            }).join("");
             return [
-                `<article class="hr011-ref-project-detail-item" data-project-key="${escapeHr011(projectKey)}" data-internal="${isInternal ? "Y" : "N"}">`,
-                `<div class="hr011-ref-project-detail-summary">`,
-                `<div class="hr011-ref-project-detail-main">`,
-                `<div class="hr011-ref-project-detail-headline">`,
-                buildHr011ProjectCompanyBadge(item, company, isInternal),
-                `<div class="hr011-ref-project-detail-role">${escapeHr011(item.role_nm || "-")}</div>`,
-                `</div>`,
+                `<article class="hr011-ref-project-detail-item ${isExpanded ? "is-open" : "is-closed"} ${isAnimatingOpen ? "is-opening" : ""}" data-project-key="${escapeHr011(projectKey)}" data-internal="${isInternal ? "Y" : "N"}">`,
+                `<div class="hr011-ref-project-detail-summary" role="button" tabindex="0" aria-expanded="${isExpanded ? "true" : "false"}" data-project-key="${escapeHr011(projectKey)}">`,
+                `<div class="hr011-ref-project-detail-summary-main">`,
+                buildHr011ProjectBadgeMarkup(item.org_nm || item.cust_nm || item.cli_nm || "-", isInternal),
+                `<div class="hr011-ref-project-detail-summary-copy">`,
                 `<div class="hr011-ref-project-detail-title">${escapeHr011(item.prj_nm || "-")}</div>`,
-                `<div class="hr011-ref-project-detail-meta">`,
-                `<span class="meta-pill meta-pill--period"><i class="meta-ico meta-ico--period" aria-hidden="true"></i><em class="meta-key">기간</em><strong>${escapeHr011(period)}</strong></span>`,
-                `<span class="meta-pill"><i class="meta-ico meta-ico--amount" aria-hidden="true"></i><em class="meta-key">단가</em><strong>${escapeHr011(item.rate_amt ? formatAmount(item.rate_amt) : "-")}</strong></span>`,
-                `<span class="meta-pill"><i class="meta-ico meta-ico--alloc" aria-hidden="true"></i><em class="meta-key">투입률</em><strong>${escapeHr011(item.alloc_pct ? `${item.alloc_pct}%` : "-")}</strong></span>`,
+                `<div class="hr011-ref-project-detail-stack-row">`,
+                `<span class="label">주 개발언어</span>`,
+                `<div class="stack">${stackMarkup || `<span class="chip chip--empty">-</span>`}</div>`,
                 `</div>`,
-                `<div class="hr011-ref-project-detail-stack">${(stacks.length ? stacks : ["-"]).slice(0, 10).map(function (stack) { return `<span class="chip">${escapeHr011(stack)}</span>`; }).join("")}</div>`,
                 `</div>`,
-                isInternal
-                    ? [
-                        `<aside class="hr011-ref-project-eval-side">`,
-                        `<div class="hr011-ref-project-eval-side-title">프로젝트 개인 평가</div>`,
-                        `<div class="hr011-ref-project-eval-radar" id="hr011RefProjectEvalRadar-${projectDomId}"></div>`,
-                        `<div class="hr011-ref-project-eval-meta" id="hr011RefProjectEvalMeta-${projectDomId}">평가 데이터 확인 중...</div>`,
-                        `<button type="button" class="hr011-ref-project-eval-toggle" data-project-key="${escapeHr011(projectKey)}">평가 보기</button>`,
-                        `</aside>`
-                    ].join("")
-                    : [
-                        `<aside class="hr011-ref-project-eval-side hr011-ref-project-eval-side--readonly">`,
-                        `<div class="hr011-ref-project-eval-external">외부 프로젝트</div>`,
-                        `</aside>`
-                    ].join(""),
                 `</div>`,
-                isInternal
-                    ? [
-                        `<section class="hr011-ref-project-eval-panel" id="hr011RefProjectEvalPanel-${projectDomId}" hidden>`,
-                        `<div class="hr011-ref-project-eval-content" id="hr011RefProjectEvalContent-${projectDomId}">`,
-                        `<div class="hr011-ref-project-eval-loading">평가 데이터를 불러오는 중입니다.</div>`,
-                        `</div>`,
-                        `</section>`
-                    ].join("")
-                    : "",
+                `<span class="hr011-ref-project-detail-chevron" aria-hidden="true"></span>`,
+                `</div>`,
+                isExpanded ? buildHr011ProjectDetailOpenBodyMarkup(item, state || createHr011ProjectEvalState(item, projectKey, projectDomId), projectKey, projectDomId, isInternal) : "",
                 `</article>`
             ].join("");
         }).join(""),
@@ -2790,6 +2972,8 @@ function buildHr011ProjectDetailMarkup() {
 
 function resetHr011ProjectEvaluationState() {
     hr011RefProjectEvalCache = new Map();
+    hr011RefProjectExpandedKey = "";
+    hr011RefProjectAnimateOpenKey = "";
     if (hr011RefProjectRadarCharts && typeof hr011RefProjectRadarCharts.forEach === "function") {
         hr011RefProjectRadarCharts.forEach(function (chart) {
             if (chart && typeof chart.dispose === "function") chart.dispose();
@@ -2968,6 +3152,8 @@ function renderHr011ProjectEvalSummary(projectKey) {
     if (!state) return;
 
     const metaEl = document.getElementById(`hr011RefProjectEvalMeta-${state.domId}`);
+    const summaryValueEl = document.getElementById(`hr011RefProjectEvalSummaryValue-${state.domId}`);
+    const summaryStarsEl = document.getElementById(`hr011RefProjectEvalSummaryStars-${state.domId}`);
     if (metaEl) {
         const scores = state.evalRows.map(function (row) { return resolveHr011EvalLevelFromRow(row); }).filter(function (v) { return v > 0; });
         if (!scores.length) {
@@ -2975,6 +3161,16 @@ function renderHr011ProjectEvalSummary(projectKey) {
         } else {
             const avg = scores.reduce(function (sum, v) { return sum + v; }, 0) / scores.length;
             metaEl.textContent = `개인평가 평균 ${avg.toFixed(1)}점 (5점 만점)`;
+        }
+    }
+    if (summaryValueEl || summaryStarsEl) {
+        const avg = getHr011ProjectEvalAverageScore(state);
+        const avgRounded = avg == null ? null : Math.round(avg);
+        if (summaryStarsEl) {
+            summaryStarsEl.innerHTML = avgRounded == null ? "" : buildHr011ProjectDetailStarsMarkup(avgRounded);
+        }
+        if (summaryValueEl) {
+            summaryValueEl.textContent = avgRounded == null ? "-" : `${avgRounded}점`;
         }
     }
     renderHr011ProjectEvalRadar(projectKey);
@@ -3032,10 +3228,27 @@ function renderHr011ProjectEvalRadar(projectKey) {
         chart.clear();
     }
 
+    const sanitizeRadarLabel = function (text) {
+        return $.trim(String(text == null ? "" : text)).replace(/\s+/g, " ") || "-";
+    };
+    const formatRadarAxisLabel = function (text) {
+        const label = sanitizeRadarLabel(text);
+        if (label === "문제해결능력") return "문제해결력";
+        if (label.length <= 7) return label;
+        const midpoint = Math.ceil(label.length / 2);
+        return `${label.slice(0, midpoint)}\n${label.slice(midpoint)}`;
+    };
+    const formatRadarScoreText = function (value) {
+        const num = Number(value);
+        if (!Number.isFinite(num) || num <= 0) return "0 점";
+        return `${Math.round(num)} 점`;
+    };
+    const radarScoreMap = {};
     const indicators = rows.map(function (row) {
-        const scoreText = Number(resolveHr011EvalLevelFromRow(row) || 0).toFixed(1);
+        const label = sanitizeRadarLabel(row.cd_nm || row.eval_id || "-");
+        radarScoreMap[label] = formatRadarScoreText(resolveHr011EvalLevelFromRow(row));
         return {
-            name: `${row.cd_nm || row.eval_id || "-"} ${scoreText}점`,
+            name: label,
             max: 5
         };
     });
@@ -3048,26 +3261,64 @@ function renderHr011ProjectEvalRadar(projectKey) {
         animationDurationUpdate: 560,
         animationEasingUpdate: "cubicInOut",
         animationDelay: function (idx) { return idx * 54; },
-        graphic: [{
-            type: "text",
-            left: 8,
-            top: 6,
-            style: {
-                text: "5점 만점",
-                fill: "#6f84a3",
-                fontSize: 13,
-                fontWeight: 700
-            }
-        }],
+        textStyle: {
+            fontFamily: "Inter, sans-serif"
+        },
         radar: {
             center: ["50%", "53%"],
-            radius: "60%",
-            splitNumber: 5,
+            radius: "62%",
+            splitNumber: 4,
             indicator: indicators,
-            axisName: { color: "#6b84a7", fontSize: 11, fontWeight: 700 },
-            splitArea: { areaStyle: { color: ["#ffffff", "#f7faff"] } },
-            splitLine: { lineStyle: { color: "#dfE7f4" } },
-            axisLine: { lineStyle: { color: "#dfE7f4" } }
+            axisName: {
+                color: "#727272",
+                fontFamily: "Inter, sans-serif",
+                fontSize: 12,
+                fontWeight: 400,
+                lineHeight: 15,
+                distance: 0,
+                formatter: function (name) {
+                    return `{label|${formatRadarAxisLabel(name)}}\n{value|${radarScoreMap[name] || "0 점"}}`;
+                },
+                rich: {
+                    label: {
+                        color: "#727272",
+                        fontFamily: "Inter, sans-serif",
+                        fontSize: 12,
+                        fontWeight: 400,
+                        lineHeight: 15,
+                        align: "center",
+                        padding: [0, 0, 5, 0]
+                    },
+                    value: {
+                        color: "#000000",
+                        fontFamily: "Inter, sans-serif",
+                        fontSize: 15,
+                        fontWeight: 600,
+                        lineHeight: 18,
+                        align: "center",
+                        padding: [0, 0, 0, 0]
+                    }
+                }
+            },
+            splitArea: {
+                areaStyle: {
+                    color: ["#ffffff", "#f8fafd"]
+                }
+            },
+            splitLine: {
+                lineStyle: {
+                    color: "#b0b7c4",
+                    width: 1,
+                    type: "dashed"
+                }
+            },
+            axisLine: {
+                lineStyle: {
+                    color: "#b0b7c4",
+                    width: 1,
+                    type: "dashed"
+                }
+            }
         },
         series: [{
             type: "radar",
@@ -3093,60 +3344,347 @@ function renderHr011ProjectEvalRadar(projectKey) {
     }
 }
 
-async function toggleHr011ProjectEvaluationPanel(projectKey) {
+function getHr011ProjectEvalModalEl() {
+    return document.getElementById("hr011ProjectEvalModal");
+}
+
+function getHr011ProjectEvalModalBodyEl() {
+    return document.getElementById("hr011ProjectEvalModalBody");
+}
+
+function getHr011ProjectEvalAverageScore(state) {
+    const scores = (state && Array.isArray(state.evalRows) ? state.evalRows : [])
+        .map(function (row) { return resolveHr011EvalLevelFromRow(row); })
+        .filter(function (value) { return value > 0; });
+    if (!scores.length) return null;
+    return scores.reduce(function (sum, value) { return sum + value; }, 0) / scores.length;
+}
+
+function buildHr011ProjectEvalPopupMemoText(rows) {
+    const items = (Array.isArray(rows) ? rows : [])
+        .map(function (row) {
+            return {
+                label: $.trim(String(row && row.cd_nm ? row.cd_nm : "")),
+                memo: $.trim(String(row && row.cmt ? row.cmt : ""))
+            };
+        })
+        .filter(function (item) { return item.memo; });
+
+    if (!items.length) {
+        return "등록된 평가 메모가 없습니다.";
+    }
+
+    if (items.length === 1) {
+        return items[0].memo;
+    }
+
+    return items.map(function (item) {
+        return `${item.label || "-"}: ${item.memo}`;
+    }).join("\n");
+}
+
+function buildHr011ProjectEvalPopupViewMarkup(projectKey, state) {
+    const rows = Array.isArray(state.evalRows) && state.evalRows.length
+        ? state.evalRows
+        : [{ eval_id: "", cd_nm: "평가 항목 미등록", lv1: "N", lv2: "N", lv3: "N", lv4: "N", lv5: "N", cmt: "" }];
+    const avg = getHr011ProjectEvalAverageScore(state);
+    const avgText = avg == null ? "-" : avg.toFixed(1);
+    const memoText = buildHr011ProjectEvalPopupMemoText(rows);
+    return [
+        `<div class="hr011-ref-project-eval-popup-view">`,
+        `<section class="hr011-ref-project-eval-popup-section hr011-ref-project-eval-popup-section--capability">`,
+        `<div class="hr011-ref-project-eval-popup-section-head">`,
+        `<h6>역량 평가</h6>`,
+        `<div class="hr011-ref-project-eval-popup-average"><span>평균 점수</span><strong>${escapeHr011(avgText)}</strong></div>`,
+        `</div>`,
+        `<div class="hr011-ref-project-eval-popup-radar-box">`,
+        `<div class="hr011-ref-project-eval-popup-radar" id="hr011ProjectEvalModalRadar-${makeHr011SafeDomId(projectKey)}"></div>`,
+        `</div>`,
+        `</section>`,
+        `<section class="hr011-ref-project-eval-popup-section hr011-ref-project-eval-popup-section--memo">`,
+        `<div class="hr011-ref-project-eval-popup-field-label">평가 메모</div>`,
+        `<div class="hr011-ref-project-eval-popup-textfield">${escapeHr011(memoText)}</div>`,
+        `</section>`,
+        `<section class="hr011-ref-project-eval-popup-section hr011-ref-project-eval-popup-section--risk">`,
+        `<h6>리스크 평가</h6>`,
+        `<div class="hr011-ref-project-eval-popup-risk-list">`,
+        `<div class="item"><span>이탈이력</span><strong>${escapeHr011(state.risk && state.risk.leave_txt ? state.risk.leave_txt : "없음")}</strong></div>`,
+        `<div class="item"><span>클레임</span><strong>${escapeHr011(state.risk && state.risk.claim_txt ? state.risk.claim_txt : "없음")}</strong></div>`,
+        `<div class="item"><span>보안이슈</span><strong>${escapeHr011(state.risk && state.risk.sec_txt ? state.risk.sec_txt : "없음")}</strong></div>`,
+        `<div class="item"><span>관리메모</span><strong>${escapeHr011(state.risk && state.risk.memo ? state.risk.memo : "없음")}</strong></div>`,
+        `<div class="item"><span>재투입 가능 여부</span><strong>${String((state.risk && state.risk.re_in_yn) || "N") === "Y" ? "가능" : "불가"}</strong></div>`,
+        `</div>`,
+        `</section>`,
+        `</div>`
+    ].join("");
+}
+
+function renderHr011ProjectEvalPopupRadar(projectKey) {
     const state = hr011RefProjectEvalCache.get(projectKey);
     if (!state) return;
-    const panelEl = document.getElementById(`hr011RefProjectEvalPanel-${state.domId}`);
-    const toggleBtn = Array.from(document.querySelectorAll(".hr011-ref-project-eval-toggle")).find(function (el) {
-        return String(el.getAttribute("data-project-key") || "") === projectKey;
-    });
-    if (!panelEl) return;
-
-    state.expanded = !state.expanded;
-    if (toggleBtn) {
-        toggleBtn.textContent = state.expanded ? "평가 닫기" : "평가 보기";
-    }
-    if (state.expanded) {
-        panelEl.hidden = false;
-        requestAnimationFrame(function () {
-            panelEl.classList.add("is-open");
-        });
-        const contentEl = document.getElementById(`hr011RefProjectEvalContent-${state.domId}`);
-        if (contentEl && !state.loaded) {
-            contentEl.innerHTML = `<div class="hr011-ref-project-eval-loading">평가 데이터를 불러오는 중입니다.</div>`;
+    const chartEl = document.getElementById(`hr011ProjectEvalModalRadar-${makeHr011SafeDomId(projectKey)}`);
+    if (!chartEl || typeof echarts !== "object" || typeof echarts.init !== "function") return;
+    if ((chartEl.clientWidth <= 0 || chartEl.clientHeight <= 0)) {
+        const retry = Number(chartEl.dataset.animRetry || 0);
+        if (retry < 10) {
+            chartEl.dataset.animRetry = String(retry + 1);
+            requestAnimationFrame(function () {
+                setTimeout(function () {
+                    renderHr011ProjectEvalPopupRadar(projectKey);
+                }, 60);
+            });
         }
-        await loadHr011ProjectEvaluationState(projectKey);
-        renderHr011ProjectEvaluationContent(projectKey);
-        // 패널 확장 애니메이션 완료 이후(높이 확보 후) 레이더를 한 번 더 렌더한다.
-        setTimeout(function () {
-            renderHr011ProjectEvalSummary(projectKey);
-        }, 360);
-    } else {
-        panelEl.classList.remove("is-open");
-        setTimeout(function () {
-            if (!state.expanded) panelEl.hidden = true;
-        }, 280);
+        return;
+    }
+    delete chartEl.dataset.animRetry;
+
+    const rows = Array.isArray(state.evalRows) ? state.evalRows : [];
+    const hasData = rows.some(function (row) { return resolveHr011EvalLevelFromRow(row) > 0; });
+    let chart = echarts.getInstanceByDom(chartEl);
+
+    if (!hasData) {
+        if (chart && typeof chart.dispose === "function") {
+            chart.dispose();
+        }
+        chartEl.innerHTML = `<div class="hr011-ref-project-eval-empty">평가 없음</div>`;
+        return;
     }
 
+    if (!chart) {
+        chart = echarts.init(chartEl, null, { renderer: "svg" });
+    }
+    if (typeof chart.clear === "function") {
+        chart.clear();
+    }
+
+    const sanitizeRadarLabel = function (text) {
+        return String(text || "").replace(/[{}|]/g, "");
+    };
+    const formatRadarAxisLabel = function (text) {
+        const label = sanitizeRadarLabel(text);
+        const chars = Array.from(label);
+        if (chars.length <= 5) {
+            return label;
+        }
+        const splitIndex = Math.ceil(chars.length / 2);
+        return `${chars.slice(0, splitIndex).join("")}\n${chars.slice(splitIndex).join("")}`;
+    };
+    const formatRadarScoreText = function (value) {
+        const numeric = Number(value || 0);
+        if (!Number.isFinite(numeric)) {
+            return "0점";
+        }
+        const rounded = Math.round(numeric);
+        const scoreText = Math.abs(numeric - rounded) < 0.001
+            ? String(rounded)
+            : numeric.toFixed(1);
+        return `${scoreText}점`;
+    };
+    const radarScoreMap = {};
+    const indicators = rows.map(function (row) {
+        const label = sanitizeRadarLabel(row.cd_nm || row.eval_id || "-");
+        radarScoreMap[label] = formatRadarScoreText(resolveHr011EvalLevelFromRow(row));
+        return {
+            name: label,
+            max: 5
+        };
+    });
+    const values = rows.map(function (row) { return resolveHr011EvalLevelFromRow(row); });
+
+    chart.setOption({
+        animation: true,
+        animationDuration: 880,
+        animationEasing: "quarticOut",
+        animationDurationUpdate: 560,
+        animationEasingUpdate: "cubicInOut",
+        animationDelay: function (idx) { return idx * 48; },
+        textStyle: {
+            fontFamily: "Inter, sans-serif"
+        },
+        graphic: [{
+            type: "text",
+            left: 0,
+            top: 2,
+            style: {
+                text: "5점 만점",
+                fill: "#6f84a3",
+                fontFamily: "Inter, sans-serif",
+                fontSize: 13,
+                fontWeight: 700,
+                lineHeight: 16
+            }
+        }],
+        radar: {
+            center: ["50%", "54%"],
+            radius: "72%",
+            startAngle: 90,
+            splitNumber: 5,
+            indicator: indicators,
+            axisName: {
+                color: "#727272",
+                fontFamily: "Inter, sans-serif",
+                fontSize: 13,
+                fontWeight: 400,
+                lineHeight: 14,
+                distance: 0,
+                formatter: function (name) {
+                    return `{label|${formatRadarAxisLabel(name)}}\n{value|${radarScoreMap[name] || "0점"}}`;
+                },
+                rich: {
+                    label: {
+                        color: "#727272",
+                        fontFamily: "Inter, sans-serif",
+                        fontSize: 13,
+                        fontWeight: 400,
+                        lineHeight: 14,
+                        align: "center",
+                        padding: [0, 0, 8, 0]
+                    },
+                    value: {
+                        color: "#000000",
+                        fontFamily: "Inter, sans-serif",
+                        fontSize: 18,
+                        fontWeight: 700,
+                        lineHeight: 20,
+                        align: "center",
+                        padding: [0, 0, 0, 0]
+                    }
+                }
+            },
+            axisLine: {
+                lineStyle: {
+                    color: "#d7dfeb",
+                    width: 1
+                }
+            },
+            splitLine: {
+                lineStyle: {
+                    color: "#d7dfeb",
+                    width: 1,
+                    type: "dashed"
+                }
+            },
+            splitArea: {
+                areaStyle: {
+                    color: ["#ffffff", "#f7faff"]
+                }
+            }
+        },
+        series: [{
+            type: "radar",
+            symbol: "circle",
+            symbolSize: 6,
+            animation: true,
+            animationDuration: 880,
+            animationEasing: "quarticOut",
+            lineStyle: { width: 2, color: "#2c80ff" },
+            itemStyle: { color: "#2c80ff" },
+            areaStyle: { color: "rgba(44, 128, 255, 0.22)" },
+            data: [{ value: values }]
+        }]
+    }, true);
+
+    if (typeof chart.resize === "function") {
+        requestAnimationFrame(function () {
+            chart.resize();
+            setTimeout(function () {
+                chart.resize();
+            }, 120);
+        });
+    }
+}
+
+async function openHr011ProjectEvaluationModal(projectKey) {
+    const state = hr011RefProjectEvalCache.get(projectKey);
+    if (!state) return;
+    const modalEl = getHr011ProjectEvalModalEl();
+    const bodyEl = getHr011ProjectEvalModalBodyEl();
+    if (!modalEl || !bodyEl) return;
+
+    hr011ProjectEvalModalProjectKey = projectKey;
+    hr011ProjectEvalModalLastFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    hr011ProjectEvalModalClosing = false;
+    modalEl.hidden = false;
+    bodyEl.innerHTML = `<div class="hr011-ref-project-eval-loading">평가 데이터를 불러오는 중입니다.</div>`;
+    document.body.classList.add("hr011-project-eval-modal-open");
+    requestAnimationFrame(function () {
+        modalEl.classList.add("is-open");
+    });
+
+    const loadPromise = loadHr011ProjectEvaluationState(projectKey);
+    renderHr011ProjectEvaluationContent(projectKey);
+    await loadPromise;
     renderHr011ProjectEvalSummary(projectKey);
     requestAnimationFrame(function () {
-        const chart = hr011RefProjectRadarCharts.get(projectKey);
-        if (chart && typeof chart.resize === "function") {
-            chart.resize();
-        }
+        renderHr011ProjectEvaluationContent(projectKey);
+        renderHr011ProjectEvalPopupRadar(projectKey);
     });
+}
+
+function closeHr011ProjectEvaluationModal() {
+    if (hr011ProjectEvalModalClosing) return;
+    const modalEl = getHr011ProjectEvalModalEl();
+    if (!modalEl) return;
+    hr011ProjectEvalModalClosing = true;
+    hr011ProjectEvalModalProjectKey = "";
+    modalEl.classList.remove("is-open");
+    document.body.classList.remove("hr011-project-eval-modal-open");
+
+    const focusEl = hr011ProjectEvalModalLastFocus;
+    hr011ProjectEvalModalLastFocus = null;
+
+    setTimeout(function () {
+        if (modalEl.classList.contains("is-open")) {
+            hr011ProjectEvalModalClosing = false;
+            return;
+        }
+        modalEl.hidden = true;
+        const bodyEl = getHr011ProjectEvalModalBodyEl();
+        if (bodyEl) {
+            bodyEl.innerHTML = "";
+        }
+        const chartEl = document.querySelector('[id^="hr011ProjectEvalModalRadar-"]');
+        if (chartEl && typeof echarts === "object" && typeof echarts.getInstanceByDom === "function") {
+            const chart = echarts.getInstanceByDom(chartEl);
+            if (chart && typeof chart.dispose === "function") {
+                chart.dispose();
+            }
+        }
+        hr011ProjectEvalModalClosing = false;
+    }, 280);
+
+    if (focusEl && typeof focusEl.focus === "function") {
+        focusEl.focus();
+    }
 }
 
 function renderHr011ProjectEvaluationContent(projectKey) {
     const state = hr011RefProjectEvalCache.get(projectKey);
     if (!state) return;
-    const contentEl = document.getElementById(`hr011RefProjectEvalContent-${state.domId}`);
+    const contentEl = getHr011ProjectEvalModalBodyEl();
     if (!contentEl) return;
-    const isEditable = hr011Mode === "update";
 
-    const capabilityPane = buildHr011ProjectCapabilityPane(projectKey, state, isEditable);
-    const riskPane = buildHr011ProjectRiskPane(projectKey, state, isEditable);
-    contentEl.innerHTML = `<div class="hr011-ref-project-eval-split">${capabilityPane}${riskPane}</div>`;
+    const prevChartEl = contentEl.querySelector('[id^="hr011ProjectEvalModalRadar-"]');
+    if (prevChartEl && typeof echarts === "object" && typeof echarts.getInstanceByDom === "function") {
+        const prevChart = echarts.getInstanceByDom(prevChartEl);
+        if (prevChart && typeof prevChart.dispose === "function") {
+            prevChart.dispose();
+        }
+    }
+
+    if (state.loading && !state.loaded) {
+        contentEl.innerHTML = `<div class="hr011-ref-project-eval-loading">평가 데이터를 불러오는 중입니다.</div>`;
+        return;
+    }
+
+    if (hr011Mode === "update") {
+        const capabilityPane = buildHr011ProjectCapabilityPane(projectKey, state, true);
+        const riskPane = buildHr011ProjectRiskPane(projectKey, state, true);
+        contentEl.innerHTML = `<div class="hr011-ref-project-eval-split">${capabilityPane}${riskPane}</div>`;
+        return;
+    }
+
+    contentEl.innerHTML = buildHr011ProjectEvalPopupViewMarkup(projectKey, state);
 }
 
 function buildHr011ProjectCapabilityPane(projectKey, state) {
