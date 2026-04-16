@@ -1925,10 +1925,10 @@ button.btn.btn-add-skill:hover,
 .modal-wrap.show {opacity: 1; transform: translateY(0); pointer-events: auto;} /* 모달 - 뒷 배경 가림해제 */
 
 /* 모달 - 전체 영역 */
-.modal-container {display: flex; flex-direction: column; max-height: 90vh; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); min-width: 560px; max-width: calc(100% - 32px); background: #fff; border-radius: 12px; box-sizing: border-box;}
+.modal-container {display: flex; flex-direction: column; max-height: 95vh; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); min-width: 560px; max-width: calc(100% - 32px); background: #F5F6FA; border-radius: 12px; box-sizing: border-box;}
 
 /* 모달 - 헤더 영역 */
-.modal-wrap .header {display: flex; align-items: center; justify-content: space-between; padding: 15px 20px; border-bottom: 2px solid #EAECF0;}
+.modal-wrap .header {display: flex; align-items: center; justify-content: space-between; padding: 15px 20px;     border: 2px solid #EAECF0; border-radius: 12px 12px 0 0;}
 
 /* 모달 - 타이틀(hr020) */
 .pill-title--modal {margin: 0;}
@@ -1945,32 +1945,49 @@ button.btn.btn-add-skill:hover,
 .pill-title span, .sub-title span {font-size: 16px; font-weight: 600; color: #E50019; background: #ED24551F; padding: 4px 15px; border-radius: 46px; margin-left: 10px; font-family: var(--hcnc-font-body) !important;}
 
 /* 모달 - 섹션 제목 */
-.modal-container .section-title {font-size: 20px; font-weight: 700; font-family: var(--hcnc-font-display) !important; margin-bottom: 10px;}
+.modal-container .section-title {font-size: 20px; font-weight: 700; font-family: var(--hcnc-font-display) !important; margin-bottom: 15px;}
 
 /* 모달 - 그리드 형식 */
-.modal-container .form-grid {display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 30px;}
+.modal-container .form-grid {display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;}
 
 /* 모달 - 내부 컨텐츠 */
-.modal-content {flex: 1; min-height: 0; gap: 20px; padding: 20px 20px 5px 20px; overflow: auto;}
+.modal-container .modal-content {flex: 1; min-height: 0; gap: 20px; padding: 20px; overflow: auto; background: #FFFFFF;}
+
+/* 모달 - 섹션 내 간격 */
+.modal-container .section + .section {margin-top: 40px;}
 
 /* 모달 - 입력란 폼 */
 .modal-container .form-group {display: flex; flex-direction: column; gap: 6px;}
 
 /* 모달 - input, select 위 라벨 */
-.modal-container .form-group label {color: var(--hr011v2-ink); font-size: 13px; font-weight: 600; margin-left: 4px;}
+.modal-container .form-group label {
+  min-height: 24px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: #E7E8F5;
+  color: #5B6281;
+  font-family: var(--hcnc-font-body);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 16px;
+  border: none;
+  width: fit-content;
+}
 
-/* 모달 - input, select css */
+/* 모달 - input, select, textarea css */
 .modal-container .form-group input, .modal-container .form-group select {font-size: 14px;}
-.modal-container .form-group input:disabled, .modal-container .form-group select:disabled {background: #DEEDFF;}
-
-/* 모달 - 비고(textarea) */
+.modal-container .form-group input:disabled,
+.modal-container .form-group select:disabled,
+.modal-container .form-group textarea:disabled,
+.modal-container .form-group input:read-only,
+.modal-container .form-group textarea:read-only {background: #DEEDFF; box-shadow: none; border: 1px solid #D9D9D9; cursor: default;}
 .modal-container .form-group textarea {width: 100%; min-width: 0; border-radius: 6px; border: 1px solid #D9D9D9; font-size: 14px;}
 
 /* 모달 - 비고 full */
 .modal-container .section.full-modal-row .form-group {grid-column: span 3;}
 
 /* 모달 - 하단 */
-.modal-container .modal-btn {padding: 15px 20px 20px;}
+.modal-container .modal-btn {padding: 15px 20px; border: 2px solid #EAECF0; border-radius: 0 0 12px 12px;}
 .modal-container .modal-btn ul {display: flex;justify-content: flex-end;}
 .modal-container .modal-btn ul li:has(button:not([style*="display:none"])):last-of-type button {margin-left: 8px;}
 
@@ -2089,24 +2106,6 @@ button.btn.btn-add-skill:hover,
   background: #fff url("../icons/btn-ico-excel-download.png") no-repeat 16px;
   background-size: 18px 18px;
   padding-left: 40px;
-}
-
-/* 사용자 관리 수정 모달: 비고 입력칸 포함 모든 입력영역이 잘리지 않도록 폭 고정 */
-#write-user-area .modal-content {
-  grid-template-columns: 1fr;
-  overflow-y: auto;
-}
-
-#write-user-area .modal-content li.table-col.fl-ac .table-cell {
-  flex: 1 1 0;
-  width: auto;
-  min-width: 0;
-}
-
-/* 사용자 관리 수정 모달: 비고 입력칸 포함 모든 입력영역이 잘리지 않도록 폭 고정 */
-#write-user-area .modal-content {
-  grid-template-columns: 1fr;
-  overflow-y: auto;
 }
 
 #write-user-area .modal-content li.table-col.fl-ac .table-cell {

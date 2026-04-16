@@ -56,7 +56,7 @@
         </div>
     </div>
 
-    <!-- 사용자 상세 모달 -->
+    <!-- 사용자 상세 모달 (조회) -->
     <div class="modal-wrap content" id="view-user-area" style="display: none">
         <div class="modal-container">
 
@@ -129,7 +129,7 @@
                         <div class="form-grid">
 
                             <div class="form-group">
-                                <label>사용 여부</label>
+                                <label>사용여부</label>
                                 <p class="text" id="view_use_yn"></p>
                             </div>
 
@@ -165,7 +165,7 @@
         </div>
     </div>
 
-    <!-- 사용자 등록 모달 -->
+    <!-- 사용자 등록 모달 (등록/수정) -->
     <div class="modal-wrap content" id="write-user-area" style="display: none">
         <div class="modal-container">
 
@@ -244,18 +244,18 @@
                         <div class="section-title">상태</div>
                         <div class="form-grid">
                             <div class="form-group">
-                                <label for="write_use_yn">사용 여부</label>
+                                <label for="write_use_yn">사용여부</label>
                                 <select id="write_use_yn">
-                                    <option value="Y">사용</option>
-                                    <option value="N">미사용</option>
+                                    <option value="Y">사용 (Y)</option>
+                                    <option value="N">미사용 (N)</option>
                                 </select>
                             </div>
 
                             <div class="form-group">
                                 <label for="write_lock_yn">계정 상태</label>
                                 <select id="write_lock_yn">
-                                    <option value="N">활성</option>
-                                    <option value="Y">비활성</option>
+                                    <option value="N">활성 (Y)</option>
+                                    <option value="Y">비활성 (N)</option>
                                 </select>
                             </div>
                         </div>
@@ -265,7 +265,7 @@
                     <div class="section full-modal-row">
                         <div class="section-title">비고</div>
                         <div class="form-group">
-                            <label for="write_remark"></label>
+                            <label for="write_remark" style="display: none;"></label>
                             <textarea id="write_remark"></textarea>
                         </div>
                     </div>
