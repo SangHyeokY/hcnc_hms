@@ -4,7 +4,7 @@
 
 <th:block layout:fragment="searchCondition">
     <div class="search-select">
-        <label class="fw600">• 검색조건 &nbsp;</label>
+        <label class="fw600 search-combo-label">검색조건</label>
         <select name="searchType" id="searchType">
             <option value="">전체</option>
             <option value="user_id">ID</option>
@@ -18,12 +18,12 @@
     </div>
     <div class="search-input">
         <p class="fl-ac">
-            <label for="searchKeyword" class="fw600 pd-r10">• 검색어</label>
-            <input type="text" class="" id="searchKeyword" name="searchKeyword" placeholder="ID/이름/이메일/연락처/권한/직무/부서 검색" />
+            <label for="searchKeyword" class="fw600">검색어</label>
+            <input type="text" class="" id="searchKeyword" name="searchKeyword" placeholder="검색할 ID / 이름 / 이메일 / 연락처 / 권한 / 직무 / 부서를 입력하세요." />
         </p>
     </div>
     <div class="search-select search-useyn-radio">
-        <label class="search-useyn-label fw600 pd-r10">• 사용여부</label>
+        <label class="search-useyn-label fw600">사용여부</label>
         <div class="radio-box search-useyn-options">
             <label for="searchUseYnAll">
                 <input type="radio" id="searchUseYnAll" name="searchUseYnRadio" value="" checked>
@@ -31,11 +31,11 @@
             </label>
             <label for="searchUseYnY">
                 <input type="radio" id="searchUseYnY" name="searchUseYnRadio" value="Y">
-                사용
+                사용 (Y)
             </label>
             <label for="searchUseYnN">
                 <input type="radio" id="searchUseYnN" name="searchUseYnRadio" value="N">
-                미사용
+                미사용 (N)
             </label>
         </div>
     </div>
@@ -238,8 +238,8 @@
                                     <p class="cell-tit">사용여부</p>
                                     <div class="cell-info">
                                         <select id="write_use_yn">
-                                            <option value="Y">Y</option>
-                                            <option value="N">N</option>
+                                            <option value="Y">사용 (Y)</option>
+                                            <option value="N">미사용 (N)</option>
                                         </select>
                                     </div>
                                 </div>
@@ -247,8 +247,8 @@
                                     <p class="cell-tit">활성화 여부</p>
                                     <div class="cell-info">
                                         <select id="write_lock_yn">
-                                            <option value="N">Y</option>
-                                            <option value="Y">N</option>
+                                            <option value="N">활성화 (Y)</option>
+                                            <option value="Y">비활성화 (N)</option>
                                         </select>
                                     </div>
                                 </div>

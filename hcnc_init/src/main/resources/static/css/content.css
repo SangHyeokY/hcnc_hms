@@ -313,7 +313,7 @@ option {
 }
 
 .tabulator-header .tabulator-col {
-  background: #EFF1F6 !important;
+  background: #EDF1F5 !important;
   text-align: center;
 }
 
@@ -470,7 +470,7 @@ option {
   justify-content: center;
   width: 100% !important;
   box-sizing: border-box;
-  padding-bottom: 10px;
+  padding: 10px;
 }
 
 .tabulator .tabulator-footer .tabulator-paginator {
@@ -604,13 +604,6 @@ option {
   width: 35px;
   height: 35px;
   font-size: 13px;
-}
-
-#TABLE_USER .tabulator-tableHolder {
-  overflow: hidden;
-  min-height: calc(100% - 94px) !important;
-  height: calc(100% - 94px) !important;
-  max-height: calc(100% - 94px) !important;
 }
 
 .profile-circle-bigIcon {
@@ -842,6 +835,7 @@ option {
   color: #333 !important;
   font-size: 15px !important;
   font-weight: 600 !important;
+  background: #EDF1F5 !important;
 }
 
 .tabulator .tabulator-header .tabulator-col.tabulator-col-group .tabulator-col-group-cols {
@@ -1890,10 +1884,7 @@ button.btn.btn-add-skill:hover,
   flex: 1;
 }
 
-#TABLE_COMMON_MAIN .tabulator-tableHolder {
-  min-height: calc(100% - 102px) !important;
-  max-height: none !important;
-}
+#TABLE_USER .tabulator-tableHolder, #TABLE_COMMON_MAIN .tabulator-tableHolder {min-height: 500px !important;}
 
 /* 시스템 - 공통코드 관리 영역 (좌, 우) */
 .common-code-section:first-child {
@@ -3382,35 +3373,20 @@ button.btn.btn-add-skill:hover,
 
 /* HR010 인적사항 검색 입력 스타일 */
 /* HR020 진행 프로젝트 내역검색 입력 스타일 */
-section.search-area {
-  display: flex;
-  align-items: center;
-}
-.search-select,
-.search-input {
-  white-space: nowrap;
-}
+section.search-area {display: flex; align-items: center;}
+.search-select, .search-input {white-space: nowrap;}
 
 section.search-area .search-info #searchKeyword,
-section.search-area .search-info #insertNm {
-  min-width: 500px !important;
-  width: auto;
-  line-height: 40px;
-  padding: 12px 0 12px 18px;
-  border: 1.5px solid #2C80FF;
-  border-radius: 12px;
-  background: #fff;
-}
+section.search-area .search-info #insertNm {min-width: 550px !important; width: auto; padding: 12px 18px; border: 1.5px solid #2C80FF; border-radius: 12px;background: #fff;font-size: 15px;font-weight: 400;letter-spacing: 0;}
 
-section.search-area .search-info #searchKeyword::placeholder,
-section.search-area .search-info #insertNm::placeholder {
-  color:#8F9098;
-}
+section.search-area .search-info #searchKeyword::placeholder, section.search-area .search-info #insertNm::placeholder {color:#8F9098;}
 
 section.search-area .search-info #searchKeyword:focus,
 section.search-area .search-info #insertNm:focus,
+section.search-area .search-info #searchType:focus,
 section.search-area .search-info #searchKeyword:hover,
-section.search-area .search-info #insertNm:hover {
+section.search-area .search-info #insertNm:hover,
+section.search-area .search-info #searchType:hover {
   outline: none;
   box-shadow: none;
 }
@@ -3426,15 +3402,16 @@ section.search-area .search-info #insertNm:hover {
 
 section.search-area .search-info #searchType {
   width: 200px;
-  background-color: #F6F6F6;
-  border: 1px solid #D9D9D9;
+  border: 1.5px solid #2C80FF;
+  border-radius: 12px;
+  cursor: pointer;
 }
 
-section.search-area .search-info #searchConditionKeyword {
-  width: 400px !important;
-  background-color: #F6F6F6;
-  border: 1px solid #D9D9D9;
-}
+/*section.search-area .search-info #searchConditionKeyword {*/
+/*  width: 400px !important;*/
+/*  background-color: #F6F6F6;*/
+/*  border: 1px solid #D9D9D9;*/
+/*}*/
 
 /* HR010/HR020/CM010/CM040 화면: 검색영역 세로 스크롤 제거 */
 .contents-wrap:has(.hr010-search-input)>section.search-area,
@@ -5897,7 +5874,7 @@ section.search-area .search-info #searchConditionKeyword {
 }
 
 /* 인적사항 페이징 css - 영역 */ /* tabulator 테이블에서 작업했던 페이징 css와 동일 */
-.container-wrap .container .contents-wrap.hr010-dashboard-wrap .hr010-pager {display: flex;justify-content: center;align-items: center;padding: 5px 10px;margin-bottom: 10px;}
+.container-wrap .container .contents-wrap.hr010-dashboard-wrap .hr010-pager {display: flex; justify-content: center; align-items: center; padding:10px;}
 
 /* 인적사항 페이징 css - 버튼 */
 .container-wrap .container .contents-wrap.hr010-dashboard-wrap .hr010-pager button {min-width: 24px;height: 24px;line-height: 24px;border-radius: 0;border: none;background: transparent;color: #5F666E;font-size: 14px;font-weight: 400;padding: 0;}
@@ -5939,7 +5916,7 @@ section.search-area .search-info #searchConditionKeyword {
 .contents-wrap.hr010-dashboard-wrap>.page-common, .contents-wrap.hr010-dashboard-wrap>.page-common {display:none;}
 .contents-wrap.hr010-dashboard-wrap>.page-common, .contents-wrap.hr010-dashboard-wrap>section.search-area {display:none;}
 .contents-wrap.hr010-dashboard-wrap>section.white-full.hr010-dashboard-shell {display:flex; flex-direction:column; height:100%; min-height:0; padding:0; border:0; border-radius:0; box-shadow:none; overflow:visible; background:linear-gradient(180deg, #ffffff 0%, #ffffff 42%, #fbfcff 100%);}
-.hr010-dashboard-wrap #CARD_HR010_A {display:grid; grid-template-columns:repeat(auto-fill, minmax(312px, 1fr)); gap:24px; flex:0 0 auto; min-height:0; margin: 10px 0; overflow:visible; position:relative; align-content:start; align-items:stretch; --hr010-card-fixed-h:415px; grid-auto-rows:var(--hr010-card-fixed-h);}
+.hr010-dashboard-wrap #CARD_HR010_A {display:grid; grid-template-columns:repeat(auto-fill, minmax(312px, 1fr)); gap:24px; flex:0 0 auto; min-height:0; margin-top: 10px; overflow:visible; position:relative; align-content:start; align-items:stretch; --hr010-card-fixed-h:415px; grid-auto-rows:var(--hr010-card-fixed-h);}
 .hr010-dashboard-wrap #CARD_HR010_A[data-view="list"] {display:block;}
 .hr010-dashboard-wrap #CARD_HR010_A[data-view="list"] .hr010-list-body {margin-top:15px;}
 /*.hr010-dashboard-wrap #CARD_HR010_A:not([data-view="list"]) {}*/
@@ -6041,7 +6018,7 @@ minmax(142px, 1.02fr); gap:10px; align-items:stretch;}
 .hr010-dashboard-wrap .user-list-row__skill-line-chips {display:flex; flex-wrap:wrap; gap:8px; min-width:0;}
 /*.hr010-dashboard-wrap .user-list-row__skill-line-chips .user-card__skill-chip {min-height:24px; padding:4px 8px; font-size:14px; font-weight:600; line-height:16px;}*/
 .hr010-dashboard-wrap .user-list-row__skill-line-value {min-width:0; color:#24344d; font-size:13px; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-.hr010-dashboard-wrap .user-list-row__skill-empty {color:#9aa9bf; font-size:13px; font-weight:700;}
+/*.hr010-dashboard-wrap .user-list-row__skill-empty {color:#9aa9bf; font-size:13px; font-weight:700;}*/
 .hr010-dashboard-wrap .user-list-row__cell {display:flex; align-items:center; min-height:100%; font-size:15px; font-weight:500; color:#3A3C40; line-height:1; letter-spacing: 0;}
 .hr010-dashboard-wrap .user-list-row__grade-cell {display:flex; flex-direction:column; align-items:flex-start; justify-content:center; padding-left: 46px;}
 .hr010-dashboard-wrap .user-list-row__skill-cell {display:flex; align-items:center;}
@@ -6075,6 +6052,9 @@ minmax(142px, 1.02fr); gap:10px; align-items:stretch;}
 .hr010-dashboard-wrap .toggle-filter-chip {display:inline-flex; align-items:center; justify-content:center; flex:1 1 0; width:69.33px; min-width:0; height:30px; min-height:30px; padding:6px 8px; font-family:var(--hcnc-font-body); font-size:13px; font-weight:600; line-height:1; border-radius:62px; border:0; background:#E0EDFF; color:#006FFD; box-shadow:none; transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;}
 .hr010-dashboard-wrap .toggle-filter-chip:hover {background:#d4e6fe; color:#2C80FF;}
 .hr010-dashboard-wrap .toggle-filter-chip.is-active, .hr010-dashboard-wrap .toggle-filter-chip.active {border-color:transparent; background:#2C80FF; color:#ffffff; /* box-shadow:0 6px 14px rgba(22, 112, 245, 0.18); */}
+.page-sub-title .hr010-dashboard-wrap .toggle-filter-chip {
+  cursor: default; margin-left: 15px;}
+
 
 /* 인적사항 - 오른쪽 컨텐츠 영역 */
 .hr010-dashboard-wrap .hr010-main {display:flex; flex-direction:column; flex:1; min-width:0; min-height:0; overflow:visible; margin:0; padding:25px; background:#F5F6FA; border:0; border-radius:0; box-shadow:none;}
@@ -6102,12 +6082,14 @@ minmax(142px, 1.02fr); gap:10px; align-items:stretch;}
 .hr010-dashboard-wrap .hr010-search-keyword-input:hover {outline:none !important; border-color: transparent !important; box-shadow: none !important;}
 .hr010-dashboard-wrap .hr010-search-action-group {display:inline-flex; align-items:center; justify-content:space-between; align-self:stretch; width:124px; min-width:124px; gap:10px; margin:-12px 0; padding:0 20px; background:#2C80FF; border-radius:0 12px 12px 0;}
 .hr010-dashboard-wrap .hr010-search-action-divider {display:block; width:1px; height:24px; background:rgba(255, 255, 255, 0.4);}
+
 .hr010-dashboard-wrap .hr010-search-icon-btn {display:inline-flex; align-items:center; justify-content:center; width:100%; height:100%; flex:0 0 24px; border:0; padding:0; background:transparent; cursor:pointer; transition:opacity .18s ease, transform .18s ease;}
 .hr010-dashboard-wrap .hr010-search-icon-btn:hover {opacity:1; transform: scale(0.9);}
 .hr010-dashboard-wrap .hr010-search-icon-btn::before {content:""; display:block; width:24px; height:24px; background-repeat:no-repeat; background-position:center; background-size:24px 24px;}
 .hr010-dashboard-wrap .hr010-search-icon-btn--search::before {background-image:url("../icons/ico-search.png");}
 /*.hr010-dashboard-wrap .hr010-search-action-group .hr010-search-icon-btn--search::before {filter:brightness(0) invert(1);}*/
 .hr010-dashboard-wrap .hr010-search-icon-btn--reset::before {background-image:url("../icons/ico-refresh-wh.png");}
+
 .hr010-dashboard-wrap .hr010-tag-suggestion-box {position:absolute; left:0; right:0; top:calc(100% + 8px); width:100%; z-index:120; display:flex; flex-direction:column; gap:4px; max-height:240px; overflow-y:auto; padding:10px; border:1px solid #d9e2ef; border-radius:14px; background:#fff; box-shadow:0 18px 30px rgba(15, 35, 95, 0.12); box-sizing:border-box; opacity:0; transform:translateY(-8px); pointer-events:none; transition:opacity .18s ease, transform .22s cubic-bezier(0.22, 1, 0.36, 1);}
 .hr010-dashboard-wrap .hr010-tag-suggestion-box.is-visible {opacity:1; transform:translateY(0); pointer-events:auto;}
 .hr010-dashboard-wrap .hr010-tag-suggestion-box[hidden] {display:none !important;}

@@ -87,7 +87,6 @@
  .btn-prj-eval:hover,
  .btn-prj-skl:hover {
      background:#DEEDFF;
-     box-shadow: 0 0 10px 0 #0000000D;
  }
  .btn-area button:disabled,
  .btn-area .btn:disabled{opacity:0.5; cursor:not-allowed;}
@@ -124,6 +123,7 @@
   font-size: 18px;
   font-weight: 700;
   cursor: pointer;
+  /*transition: opacity .18s ease, transform .18s ease;*/
 }
 
 /* No icon style */
@@ -322,7 +322,7 @@ textarea:focus-visible {
     outline: none;
     border-color: rgba(74,144,226,0.5);
     box-shadow: 0 0 0 2px rgba(74,144,226,0.5);
-    background-color: #fff !important;
+    /*background-color: #fff !important;*/
 }
 input[type="text"]:not([readonly]):not([disabled]):hover,
 input[type="number"]:not([readonly]):not([disabled]):hover,
@@ -408,11 +408,11 @@ input[type="button"], input[type="reset"], input[type="submit"] {cursor: pointer
 /* Radio Style */
 .radio-box {position: relative; display: flex; align-items: center;}
 .radio-box label {margin-right:15px; color: #333;}
-input[type="radio"]{padding:0; border:none; display: inline-block; position: relative; width:20px; height:20px; padding-left:0; cursor: pointer; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; }
-input[type="radio"]:before { content: ''; position: absolute; left: 0; top: 0; width: 18px; height: 18px; text-align: center; border: 1px solid #cacece; border-radius: 100%; box-shadow: 0 1px 2px rgba(0,0,0,0.05), inset 0 -15px 10px -12px rgba(0,0,0,0.05); }
+input[type="radio"]{ padding:0; border:none; display: inline-block; position: relative; width:20px; height:20px; cursor: pointer; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; }
+input[type="radio"]:before { content: ''; position: absolute; left: 0; top: 0; width: 18px; height: 18px; text-align: center; border: 1px solid #82868C; border-radius: 100%; box-shadow: 0 1px 2px rgba(0,0,0,0.05), inset 0 -15px 10px -12px rgba(0,0,0,0.05); }
 input[type="radio"]:active:before, .checks input[type="radio"]:checked:active:before { box-shadow: 0 1px 2px rgba(0,0,0,0.05), inset 0 1px 3px rgba(0,0,0,0.1); }
-input[type="radio"]:checked:before {border: 1px solid #222;}
-input[type="radio"]:checked:after { content: ''; position: absolute; top: 5px; left: 5px; width: 10px; height: 10px; background: #222; border-radius: 100%;}
+input[type="radio"]:checked:before { border: 1px solid var(--hcnc-shell-primary); }
+input[type="radio"]:checked:after { content: ''; position: absolute; top: 5px; left: 5px; width: 10px; height: 10px; background: var(--hcnc-shell-primary); border-radius: 100%;}
 
 /* Checkbox Style */
 .checkbox span{margin-top:-6px; display:inline-block;margin-right:10px;}

@@ -283,7 +283,7 @@ function buildPrjTable() {
                 resizable: false
             },
             {
-                title: "성명",
+                title: "이름",
                 field: "dev_nm",
                 headerSort: true,
                 resizable: false,
@@ -316,6 +316,14 @@ function buildPrjTable() {
             { title: "dev_id", field: "dev_id", visible: false },
             { title: "프로젝트명", field: "prj_nm", widthGrow: 4, formatter: cell => emptyToDash(cell.getValue()) },
             {
+                title: "경력연차",
+                field: "exp_yr",
+                widthGrow: 2,
+                formatter: function (cell) {
+                    return `<div style="text-align:right;">${formatCareerYearMonth(cell.getValue())}</div>`;
+                }
+            },
+            {
                 title: "역할",
                 field: "job_cd",
                 hozAlign: "center",
@@ -323,6 +331,28 @@ function buildPrjTable() {
                 editor: false,
                 editable: false,
                 widthGrow: 1
+            },
+            {
+                title: "참여 기간",
+                field: "working_dt",
+                hozAlign: "center",
+                headerSort: false,
+                width: 190,
+                formatter: function(cell) {
+                    const { st_dt, ed_dt } = cell.getRow().getData();
+
+                    const format = (d) => {
+                        if (!d) return "현재";
+
+                        const date = new Date(d);
+                        const year = date.getFullYear();
+                        const month = String(date.getMonth() + 1).padStart(2, "0");
+
+                        return `${year}-${month}`;
+                    };
+
+                    return `${format(st_dt)} ~ ${format(ed_dt)}`;
+                }
             },
             {
                 title: "계약단가",
@@ -335,6 +365,15 @@ function buildPrjTable() {
                         ${formatted || "-"}
                     </div>`;
                 }
+            },
+            {
+                title: "거주지역",
+                field: "sido_cd",
+                hozAlign: "center",
+                formatter: sidoFormatter,
+                editor: false,
+                editable: false,
+                widthGrow: 3
             },
             { title: "연락처", field: "tel", hozAlign: "center", widthGrow: 3, headerSort: false },
             {
@@ -351,25 +390,8 @@ function buildPrjTable() {
                         ${value}
                     </div>`;
                 }
-            },
-            {
-                title: "거주지역",
-                field: "sido_cd",
-                hozAlign: "center",
-                formatter: sidoFormatter,
-                editor: false,
-                editable: false,
-                widthGrow: 3
-            },
-            {
-                title: "경력연차",
-                field: "exp_yr",
-                widthGrow: 2,
-                formatter: function (cell) {
-                    return `<div style="text-align:right;">${formatCareerYearMonth(cell.getValue())}</div>`;
-                }
-            },
-            { title: "비고", field: "remark", headerSort: false, width: 200 }
+            }
+            // , { title: "비고", field: "remark", headerSort: false, width: 200 }
         ],
         data: [],
         // 행 클릭
