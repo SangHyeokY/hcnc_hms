@@ -271,6 +271,19 @@ function bindEvents() {
             hideTagSuggestions();
         }
     });
+
+    // 검색창 클릭 시, 알아서 검색 영역으로 포커싱
+    document.querySelector('.hr010-tag-search-box')
+        .addEventListener('click', function (e) {
+
+            // 버튼 클릭 시 무시
+            if (e.target.closest('.hr010-search-icon-btn')) return;
+
+            // 이미 input 클릭한 경우도 무시
+            if (e.target.classList.contains('hr010-search-input')) return;
+
+            document.getElementById('hr010TagKeywordInput').focus();
+        });
 }
 
 // 카드/리스트 토글 상태 동기화

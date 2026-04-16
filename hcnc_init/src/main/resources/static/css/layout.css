@@ -4,7 +4,7 @@
   --hcnc-shell-bg: #F5F6FA;
   --hcnc-shell-surface: #ffffff;
   --hcnc-shell-panel: #ffffff;
-  --hcnc-shell-line: #e8edf5;
+  --hcnc-shell-line: #DEE2E7;;
   --hcnc-shell-line-strong: #dbe4f0;
   --hcnc-shell-text: #1f2328;
   --hcnc-shell-muted: #6f7a88;
@@ -521,7 +521,7 @@ footer {width:100%; height:30px; line-height: 30px; padding:0 20px; display: fle
  .page-common .navi-box li a {font-weight: 600;}
 
  /* section */
- section {background-color: var(--hcnc-shell-panel); width: 100%; height:100%; padding:20px; border-radius: 20px; border:1px solid var(--hcnc-shell-line); box-shadow: 0 10px 26px rgba(44, 36, 24, 0.06); overflow: auto;}
+ section {background-color: var(--hcnc-shell-panel); width: 100%; height:100%; padding:20px; border-radius: 20px; border:1px solid var(--hcnc-shell-line); /*box-shadow: 0 10px 26px rgba(44, 36, 24, 0.06);*/ overflow: auto;}
  /*section:hover {box-shadow: 0 0 6px rgba(229, 0, 25, 0.18), 0 0 14px rgba(229, 0, 25, 0.1); border-radius: 8px;}*/
  section.search-area {overflow: hidden;} /*padding:15px 20px;*/
  section.search-area form {width: 100% !important;}

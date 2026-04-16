@@ -5836,7 +5836,8 @@ section.search-area .search-info #searchType {
 .hr010-dashboard-wrap .user-card, .hr010-dashboard-wrap .user-list-row {position:relative; cursor:pointer; transition:border-color .18s ease, background-color .18s ease;}
 .hr010-dashboard-wrap .user-card {display:flex; flex-direction:column; gap:15px; padding:25px 0 20px; border:1px solid #DEE2E7; border-radius:16px; background:#ffffff; box-shadow:none; min-height:0; height:var(--hr010-card-fixed-h); box-sizing:border-box; overflow:hidden;}
 .hr010-dashboard-wrap .user-card:hover, .hr010-dashboard-wrap .user-list-row:hover {transform:none; box-shadow:none;}
-.hr010-dashboard-wrap .user-card.selected, .hr010-dashboard-wrap .user-list-row.selected {border-color:var(--hcnc-shell-primary); /* box-shadow:0 0 0 2px rgba(59, 110, 234, 0.12), 0 16px 28px rgba(18, 38, 81, 0.10); */}
+.hr010-dashboard-wrap .user-card.selected, .hr010-dashboard-wrap .user-list-row.selected {border-color: var(--hcnc-shell-primary); /* box-shadow:0 0 0 2px rgba(59, 110, 234, 0.12), 0 16px 28px rgba(18, 38, 81, 0.10); */}
+/*.hr010-dashboard-wrap .user-card:hover, .hr010-dashboard-wrap .user-list-row:hover {border-color: #003675;}*/
 .hr010-dashboard-wrap .user-card__top {position:absolute; top:21px; right:21px; display:flex; align-items:flex-start; justify-content:flex-end; min-height:0; margin:0; z-index:1;}
 .hr010-dashboard-wrap .user-card__badge {display:inline-flex; align-items:center; justify-content:center; min-width:72px; height:30px; padding:6px 8px; border-radius:62px; font-family:var(--hcnc-font-body); font-size:13px; font-weight:600; line-height:16px; letter-spacing:0;}
 .hr010-dashboard-wrap .user-card__badge--staff {background:#FDE7EE; color:#F13252;}
