@@ -1416,7 +1416,7 @@ function getPrimarySkillLabel(row) {
 function getSkillSummaryMarkup(row, maxChips = 3) {
     const skillParts = getSkillDisplayParts(row);
     if (!skillParts.skills.length) {
-        return `<span class="user-list-row__skill-empty">-</span>`;
+        return `<span class="user-card__skill-chip is-muted">미등록</span>`;
     }
 
     const hasMore = skillParts.skills.length > maxChips;

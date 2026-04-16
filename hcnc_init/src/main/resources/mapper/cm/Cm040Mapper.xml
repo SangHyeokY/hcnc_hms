@@ -20,7 +20,7 @@
             AND use_yn = #{searchUseYn}
         </if>
         <if test="searchKeyword != null and searchKeyword != ''">
-            AND (grp_cd LIKE CONCAT('%', #{searchKeyword}, '%')
+            AND (cd LIKE CONCAT('%', #{searchKeyword}, '%')
              OR  cd_nm LIKE CONCAT('%', #{searchKeyword}, '%'))
         </if>
         ORDER BY grp_cd ASC

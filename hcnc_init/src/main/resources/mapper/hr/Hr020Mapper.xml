@@ -15,28 +15,31 @@
             , prj.remark -- 비고
             , tel -- 연락처
             , email -- 이메일
+            , prj.st_dt -- 프로젝트 시작일
+            , prj.ed_dt -- 프로젝트 종료일
             , CASE
             WHEN dev_img IS NOT NULL THEN TO_BASE64(dev_img)
             ELSE NULL
             END AS dev_img_base64
         FROM tb_dev_info dev
         LEFT JOIN tb_dev_prj_info prj
-        ON dev.dev_id = prj.dev_id
-        AND prj.use_yn = 'Y'
-        AND prj.del_yn = 'N'
+            ON dev.dev_id = prj.dev_id
+            AND prj.use_yn = 'Y'
+            AND prj.del_yn = 'N'
         LEFT JOIN tb_dev_rate_info rate
-        ON dev.dev_id = rate.dev_id
-        AND prj.dev_prj_id = rate.dev_prj_id
-        AND rate.use_yn = 'Y'
-        AND rate.del_yn = 'N'
+            ON dev.dev_id = rate.dev_id
+            AND prj.dev_prj_id = rate.dev_prj_id
+            AND rate.use_yn = 'Y'
+            AND rate.del_yn = 'N'
         WHERE dev.use_yn = 'Y'
-        AND dev.del_yn = 'N'
+            AND dev.del_yn = 'N'
+            AND prj.prj_nm IS NOT NULL
         <if test="dev_nm != null and dev_nm != ''">
             AND dev.dev_nm LIKE CONCAT('%', #{dev_nm}, '%')
         </if>
-        AND (prj.ed_dt IS NULL OR NOW() &lt; prj.ed_dt)
+            AND (prj.ed_dt IS NULL OR NOW() &lt; prj.ed_dt)
         GROUP BY dev.dev_id, prj.dev_prj_id
-        ORDER BY prj.st_dt DESC
+        ORDER BY dev.dev_nm ASC, prj.st_dt DESC
     </select>
 
 </mapper>

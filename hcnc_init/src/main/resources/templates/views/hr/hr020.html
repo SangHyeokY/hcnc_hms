@@ -12,16 +12,10 @@
 <th:block layout:fragment="searchCondition">
     <div class="search-input">
         <p class="fl-ac">
-            <label for="insertNm" class="fw600 pd-r10">• 성명</label>
-            <input type="text" class="hr020-search-input hr020-search-name-input" id="insertNm" name="insertNm" placeholder="성명을 입력하세요" />
+            <label for="insertNm" class="fw600">이름</label>
+            <input type="text" class="hr020-search-input hr020-search-name-input" id="insertNm" name="insertNm" placeholder="검색할 이름을 입력하세요." />
         </p>
     </div>
-<!--    <div class="search-input">-->
-<!--        <p class="fl-ac">-->
-<!--            <label for="searchKeyword" class="">• 검색어 &nbsp;</label>-->
-<!--            <input type="text" class="hr020-search-input hr020-search-keyword-input" id="searchKeyword" name="searchKeyword" placeholder="성명/연락처/이메일/거주지역/기술 검색" />-->
-<!--        </p>-->
-<!--    </div>-->
 </th:block>
 
 <!-- 실제 컨텐츠 영역 -->
@@ -29,7 +23,14 @@
 
     <!-- ================= 메인 리스트 ================= -->
     <div class="content-title fl-sb fl-ac">
-        <h4 class="page-sub-title">프로젝트 현황</h4>
+        <h4 class="page-sub-title">
+            진행 프로젝트 참여 직원
+<!--            <span class="toggle-filter-block hr010-dashboard-wrap">-->
+<!--                <span class="toggle-group" id="togglePerspectiveGroup" style="display: flex;">-->
+<!--                    <button type="button" class="toggle-filter-chip is-active" data-user-type="staff">직원</button>-->
+<!--                </span>-->
+<!--            </span>-->
+        </h4>
         <div class="btn-area">
 <!--            <button type="button" class="btn bg-primary btn-main-view">상세보기</button>-->
 <!--            <button type="button" class="btn btn-main-add">-->
@@ -38,15 +39,6 @@
 <!--                <img src="./images/common/btn-ico-pencil.png" alt="수정">수정</button>-->
 <!--            <button type="button" class="btn btn-main-del">-->
 <!--                <img src="./images/common/btn-ico-trash.png" alt="삭제">삭제</button>-->
-        </div>
-    </div>
-    <div class="hr010-user-type-tabs mg-b15" role="tablist" aria-label="인력 구분">
-        <div class="toggle-filter-block hr010-dashboard-wrap">
-<!--            <span class="toggle-filter-label toggle-text-reveal" style="&#45;&#45;toggle-text-delay: 52ms;">구분</span>-->
-            <div class="toggle-group" id="togglePerspectiveGroup">
-                <button type="button" class="toggle-filter-chip is-active" data-user-type="staff">직원</button>
-                <!--<button type="button" class="toggle-filter-chip" data-user-type="freelancer">프리랜서</button>-->
-            </div>
         </div>
     </div>
 
@@ -95,7 +87,7 @@
                                     <td colspan="3"><div class="fl-ct wp100 fs16 none_editable_text" id="dev_id_input"></div></td>
                                 </tr>
                                 <tr>
-                                    <th>성명</th>
+                                    <th>이름</th>
                                     <td><input type="text" class="wp100" id="dev_nm" disabled></td>
                                     <td colspan="2">
                                         <!-- 추후 공통 코드에 추가바람 -->
