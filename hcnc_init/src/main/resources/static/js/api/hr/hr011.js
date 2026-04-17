@@ -907,11 +907,14 @@ const HR011_EDIT_STEP_ACTIVE_OFFSET = 96;
 let hr011RefCurrentView = "overview";
 let hr011RefProjectEvalCache = new Map();
 let hr011RefProjectRadarCharts = new Map();
-let hr011RefProjectExpandedKey = "";
+let hr011RefProjectExpandedKeys = null;
 let hr011RefProjectAnimateOpenKey = "";
+let hr011ProjectEvalModalExpandedKeysSnapshot = null;
 let hr011ProjectEvalModalProjectKey = "";
 let hr011ProjectEvalModalLastFocus = null;
 let hr011ProjectEvalModalClosing = false;
+let hr011ProjectRadarResizeTimer = null;
+let hr011ProjectDetailRevealTimer = null;
 const HR011_SKILL_CHART_PALETTE = ["#24b4e3", "#4d8dff", "#57d7c8", "#7a6dff", "#95d95c", "#ff9f43", "#ff6b6b"];
 
 if (!window.hr011ProjectEvalModalEscBound) {
@@ -1217,7 +1220,7 @@ function bindHr011PageEvents() {
 
     $(document).on("click", ".hr011-ref-project-detail-summary[data-project-key]", function () {
         const projectKey = String($(this).data("projectKey") || "");
-        toggleHr011ProjectDetailExpanded(projectKey);
+        toggleHr011ProjectDetailExpanded(projectKey, this);
     });
 
     $(document).on("keydown", ".hr011-ref-project-detail-summary[data-project-key]", function (event) {
@@ -1225,7 +1228,7 @@ function bindHr011PageEvents() {
         if (key !== "enter" && key !== " ") return;
         event.preventDefault();
         const projectKey = String($(this).data("projectKey") || "");
-        toggleHr011ProjectDetailExpanded(projectKey);
+        toggleHr011ProjectDetailExpanded(projectKey, this);
     });
 
     $(document).on("click", "[data-hr011-project-eval-close]", function () {
@@ -2165,7 +2168,7 @@ function animateHr011SkillSection(rootEl) {
 
     const items = rootEl.querySelectorAll(".hr011-skill-stagger-item, .hr011-skill-score-row");
     items.forEach(function (el, idx) {
-        const delay = Math.min(idx * 52, 420);
+        const delay = idx * 48;
         el.style.setProperty("--hr011-skill-delay", `${delay}ms`);
         el.classList.remove("is-skill-animated");
         void el.offsetWidth;
@@ -2771,26 +2774,9 @@ function getHr011ProjectDetailDefaultExpandedKey(rows) {
 }
 
 function formatHr011ProjectDateText(value) {
-    const raw = $.trim(value == null ? "" : String(value));
-    if (!raw) return "-";
-
-    if (/^\d{8}$/.test(raw)) {
-        return `${raw.slice(0, 4)}.${raw.slice(4, 6)}.${raw.slice(6, 8)}`;
-    }
-
-    if (/^\d{4}-\d{2}-\d{2}/.test(raw)) {
-        return raw.slice(0, 10).replace(/-/g, ".");
-    }
-
-    const parsed = new Date(raw);
-    if (!Number.isNaN(parsed.getTime())) {
-        const y = parsed.getFullYear();
-        const m = String(parsed.getMonth() + 1).padStart(2, "0");
-        const d = String(parsed.getDate()).padStart(2, "0");
-        return `${y}.${m}.${d}`;
-    }
-
-    return raw;
+    const formatted = formatHr011Date(value);
+    if (!formatted || formatted === "-") return "-";
+    return formatted.replace(/-/g, ".");
 }
 
 function formatHr011ProjectPeriodText(stDt, edDt) {
@@ -2887,30 +2873,220 @@ function activateHr011ProjectDetailOpenAnimation(rootEl) {
             openItem.classList.add("is-open-active");
             window.setTimeout(function () {
                 openItem.classList.remove("is-opening", "is-open-active");
-            }, 420);
+            }, 560);
         });
     });
 }
 
-function renderHr011ProjectDetailView() {
+function findHr011ProjectDetailSummaryByKey(rootEl, projectKey) {
+    const scopeEl = rootEl || document;
+    return Array.from(scopeEl.querySelectorAll(".hr011-ref-project-detail-summary[data-project-key]")).find(function (itemEl) {
+        return String(itemEl.dataset.projectKey || "") === String(projectKey || "");
+    }) || null;
+}
+
+function findHr011ProjectDetailItemByKey(rootEl, projectKey) {
+    const scopeEl = rootEl || document;
+    return Array.from(scopeEl.querySelectorAll(".hr011-ref-project-detail-item[data-project-key]")).find(function (itemEl) {
+        return String(itemEl.dataset.projectKey || "") === String(projectKey || "");
+    }) || null;
+}
+
+function cancelHr011ProjectDetailScrollAnimation(listEl) {
+    if (!listEl) return;
+    if (listEl.__hr011ProjectDetailScrollRafId) {
+        cancelAnimationFrame(listEl.__hr011ProjectDetailScrollRafId);
+        listEl.__hr011ProjectDetailScrollRafId = 0;
+    }
+}
+
+function animateHr011ProjectDetailScroll(listEl, targetTop, durationMs) {
+    if (!listEl) return;
+
+    cancelHr011ProjectDetailScrollAnimation(listEl);
+
+    const startTop = Number(listEl.scrollTop) || 0;
+    const nextTop = Math.max(0, Number(targetTop) || 0);
+    const delta = nextTop - startTop;
+    if (Math.abs(delta) < 1) {
+        listEl.scrollTop = nextTop;
+        return;
+    }
+
+    const duration = Math.max(220, Math.min(520, Number(durationMs) || (240 + Math.min(220, Math.abs(delta) * 0.14))));
+    const startTime = (typeof performance !== "undefined" && typeof performance.now === "function")
+        ? performance.now()
+        : Date.now();
+    const easeOutCubic = function (t) {
+        const p = 1 - Math.max(0, Math.min(1, t));
+        return 1 - (p * p * p);
+    };
+
+    const tick = function (now) {
+        if (!listEl.isConnected) {
+            cancelHr011ProjectDetailScrollAnimation(listEl);
+            return;
+        }
+
+        const elapsed = now - startTime;
+        const progress = Math.max(0, Math.min(1, elapsed / duration));
+        const eased = easeOutCubic(progress);
+        listEl.scrollTop = startTop + (delta * eased);
+
+        if (progress < 1) {
+            listEl.__hr011ProjectDetailScrollRafId = requestAnimationFrame(tick);
+        } else {
+            listEl.scrollTop = nextTop;
+            listEl.__hr011ProjectDetailScrollRafId = 0;
+        }
+    };
+
+    listEl.__hr011ProjectDetailScrollRafId = requestAnimationFrame(tick);
+}
+
+function captureHr011ProjectDetailScrollState(projectKey, triggerEl) {
     const detailBodyEl = document.getElementById("hr011RefDetailBody");
-    const detailEl = document.getElementById("hr011RefDetail");
-    if (!detailBodyEl) return;
-    detailBodyEl.innerHTML = buildHr011ProjectDetailMarkup();
-    initializeHr011ProjectDetailEvaluations();
-    activateHr011ProjectDetailOpenAnimation(detailBodyEl);
-    requestAnimationFrame(function () {
-        animateHr011RefEntrance(detailEl || detailBodyEl);
+    const listEl = detailBodyEl ? detailBodyEl.querySelector(".hr011-ref-project-detail-list") : null;
+    const anchorEl = triggerEl || findHr011ProjectDetailSummaryByKey(detailBodyEl, projectKey);
+    if (!listEl || !anchorEl) {
+        return null;
+    }
+
+    return {
+        projectKey: String(projectKey || ""),
+        scrollTop: listEl.scrollTop,
+        anchorOffset: anchorEl.getBoundingClientRect().top - listEl.getBoundingClientRect().top,
+        restoreFocus: document.activeElement === anchorEl
+    };
+}
+
+function restoreHr011ProjectDetailScrollState(scrollState) {
+    if (!scrollState || !scrollState.projectKey) {
+        return;
+    }
+
+    const detailBodyEl = document.getElementById("hr011RefDetailBody");
+    const listEl = detailBodyEl ? detailBodyEl.querySelector(".hr011-ref-project-detail-list") : null;
+    const anchorEl = findHr011ProjectDetailSummaryByKey(detailBodyEl, scrollState.projectKey);
+    if (!listEl || !anchorEl) {
+        return;
+    }
+
+    if (scrollState.restoreFocus && typeof anchorEl.focus === "function") {
+        try {
+            anchorEl.focus({ preventScroll: true });
+        } catch (error) {
+            anchorEl.focus();
+        }
+    }
+
+    // Re-rendering the list changes item heights above the click target, so keep the clicked row anchored.
+    listEl.scrollTop = scrollState.scrollTop;
+    const nextAnchorOffset = anchorEl.getBoundingClientRect().top - listEl.getBoundingClientRect().top;
+    listEl.scrollTop += nextAnchorOffset - scrollState.anchorOffset;
+}
+
+function revealHr011ProjectDetailItem(projectKey) {
+    const detailBodyEl = document.getElementById("hr011RefDetailBody");
+    const listEl = detailBodyEl ? detailBodyEl.querySelector(".hr011-ref-project-detail-list") : null;
+    const itemEl = findHr011ProjectDetailItemByKey(detailBodyEl, projectKey);
+    if (!listEl || !itemEl) {
+        return;
+    }
+
+    const listRect = listEl.getBoundingClientRect();
+    const itemRect = itemEl.getBoundingClientRect();
+    const itemTop = listEl.scrollTop + (itemRect.top - listRect.top);
+    const maxScrollTop = Math.max(0, (listEl.scrollHeight || 0) - (listEl.clientHeight || 0));
+    const nextScrollTop = Math.min(maxScrollTop, Math.max(0, itemTop - 16));
+    animateHr011ProjectDetailScroll(listEl, nextScrollTop);
+}
+
+function syncHr011ProjectExpandedKeys(rows) {
+    const list = Array.isArray(rows) ? rows : [];
+    const availableKeys = new Set(list.map(function (item, idx) {
+        return getHr011ProjectDetailItemKey(item, idx);
+    }));
+
+    if (!(hr011RefProjectExpandedKeys instanceof Set)) {
+        hr011RefProjectExpandedKeys = new Set();
+        return;
+    }
+
+    hr011RefProjectExpandedKeys.forEach(function (key) {
+        if (!availableKeys.has(key)) {
+            hr011RefProjectExpandedKeys.delete(key);
+        }
     });
 }
 
-function toggleHr011ProjectDetailExpanded(projectKey) {
+function cloneHr011ProjectExpandedKeys(keys) {
+    if (!(keys instanceof Set)) {
+        return null;
+    }
+    return new Set(Array.from(keys));
+}
+
+function setHr011ProjectExpandedKeysOnly(projectKey) {
     const key = String(projectKey || "");
-    if (!key || hr011RefProjectExpandedKey === key) return;
-    hr011RefProjectExpandedKey = key;
-    hr011RefProjectAnimateOpenKey = key;
+    hr011RefProjectExpandedKeys = key ? new Set([key]) : new Set();
+    hr011RefProjectAnimateOpenKey = "";
+    syncHr011ProjectExpandedKeys(hr011RefProjectRows || []);
+}
+
+function renderHr011ProjectDetailView(options) {
+    const detailBodyEl = document.getElementById("hr011RefDetailBody");
+    if (!detailBodyEl) return;
+    cancelHr011ProjectDetailScrollAnimation(detailBodyEl.querySelector(".hr011-ref-project-detail-list"));
+    if (hr011ProjectDetailRevealTimer) {
+        clearTimeout(hr011ProjectDetailRevealTimer);
+        hr011ProjectDetailRevealTimer = null;
+    }
+    const renderOptions = options || {};
+    const scrollState = captureHr011ProjectDetailScrollState(renderOptions.anchorProjectKey, renderOptions.triggerEl);
+    detailBodyEl.innerHTML = buildHr011ProjectDetailMarkup();
+    initializeHr011ProjectDetailEvaluations();
+    activateHr011ProjectDetailOpenAnimation(detailBodyEl);
+    if (scrollState) {
+        requestAnimationFrame(function () {
+            restoreHr011ProjectDetailScrollState(scrollState);
+            if (renderOptions.revealProjectKey) {
+                requestAnimationFrame(function () {
+                    revealHr011ProjectDetailItem(renderOptions.revealProjectKey);
+                });
+                hr011ProjectDetailRevealTimer = window.setTimeout(function () {
+                    hr011ProjectDetailRevealTimer = null;
+                    revealHr011ProjectDetailItem(renderOptions.revealProjectKey);
+                }, 460);
+            }
+        });
+    }
+}
+
+function toggleHr011ProjectDetailExpanded(projectKey, triggerEl) {
+    const key = String(projectKey || "");
+    if (!key) return;
+
+    syncHr011ProjectExpandedKeys(hr011RefProjectRows || []);
+
+    if (!(hr011RefProjectExpandedKeys instanceof Set)) {
+        hr011RefProjectExpandedKeys = new Set();
+    }
+
+    if (hr011RefProjectExpandedKeys.has(key)) {
+        hr011RefProjectExpandedKeys.delete(key);
+        hr011RefProjectAnimateOpenKey = "";
+    } else {
+        hr011RefProjectExpandedKeys.add(key);
+        hr011RefProjectAnimateOpenKey = key;
+    }
+
     if (hr011RefCurrentView !== "project") return;
-    renderHr011ProjectDetailView();
+    renderHr011ProjectDetailView({
+        anchorProjectKey: key,
+        triggerEl: triggerEl || null,
+        revealProjectKey: hr011RefProjectExpandedKeys.has(key) ? key : ""
+    });
 }
 
 function setHr011SkillsDetailGridMode(detailBodyEl, enabled) {
@@ -2925,11 +3101,7 @@ function buildHr011ProjectDetailMarkup() {
         return `<article class="hr011-ref-detail-card hr011-ref-project-detail-empty"><h6>프로젝트 이력</h6><p>등록된 프로젝트가 없습니다.</p></article>`;
     }
 
-    if (!hr011RefProjectExpandedKey || !rows.some(function (item, idx) {
-        return getHr011ProjectDetailItemKey(item, idx) === hr011RefProjectExpandedKey;
-    })) {
-        hr011RefProjectExpandedKey = getHr011ProjectDetailDefaultExpandedKey(rows);
-    }
+    syncHr011ProjectExpandedKeys(rows);
 
     return [
         `<div class="hr011-ref-project-detail-list">`,
@@ -2942,7 +3114,7 @@ function buildHr011ProjectDetailMarkup() {
                 hr011RefProjectEvalCache.set(projectKey, createHr011ProjectEvalState(item, projectKey, projectDomId));
             }
             const state = hr011RefProjectEvalCache.get(projectKey);
-            const isExpanded = hr011RefProjectExpandedKey === projectKey;
+            const isExpanded = hr011RefProjectExpandedKeys instanceof Set && hr011RefProjectExpandedKeys.has(projectKey);
             const isAnimatingOpen = isExpanded && hr011RefProjectAnimateOpenKey === projectKey;
             const stackMarkup = (stacks.length ? stacks : ["-"]).slice(0, 4).map(function (stack) {
                 return `<span class="chip">${escapeHr011(stack)}</span>`;
@@ -2972,12 +3144,28 @@ function buildHr011ProjectDetailMarkup() {
 
 function resetHr011ProjectEvaluationState() {
     hr011RefProjectEvalCache = new Map();
-    hr011RefProjectExpandedKey = "";
+    hr011RefProjectExpandedKeys = null;
     hr011RefProjectAnimateOpenKey = "";
+    hr011ProjectEvalModalExpandedKeysSnapshot = null;
+    if (hr011ProjectDetailRevealTimer) {
+        clearTimeout(hr011ProjectDetailRevealTimer);
+        hr011ProjectDetailRevealTimer = null;
+    }
+    if (hr011ProjectRadarResizeTimer) {
+        clearTimeout(hr011ProjectRadarResizeTimer);
+        hr011ProjectRadarResizeTimer = null;
+    }
     if (hr011RefProjectRadarCharts && typeof hr011RefProjectRadarCharts.forEach === "function") {
         hr011RefProjectRadarCharts.forEach(function (chart) {
+            if (chart && typeof chart.getDom === "function") {
+                cleanupHr011RadarResizeObserver(chart.getDom());
+            }
             if (chart && typeof chart.dispose === "function") chart.dispose();
         });
+    }
+    const modalRadarEl = document.querySelector('[id^="hr011ProjectEvalModalRadar-"]');
+    if (modalRadarEl) {
+        cleanupHr011RadarResizeObserver(modalRadarEl);
     }
     hr011RefProjectRadarCharts = new Map();
 }
@@ -2993,10 +3181,11 @@ function createHr011ProjectEvalState(item, projectKey, domId) {
         loading: false,
         evalRows: [],
         risk: {
+            hasRow: false,
             leave_txt: "",
             claim_txt: "",
             sec_txt: "",
-            re_in_yn: "N",
+            re_in_yn: "",
             memo: ""
         }
     };
@@ -3134,10 +3323,11 @@ async function loadHr011ProjectEvaluationState(projectKey) {
             ? riskResponse.list[0]
             : {};
         state.risk = {
+            hasRow: !!(Array.isArray(riskResponse?.list) && riskResponse.list.length),
             leave_txt: riskRow.leave_txt || "",
             claim_txt: riskRow.claim_txt || "",
             sec_txt: riskRow.sec_txt || "",
-            re_in_yn: riskRow.re_in_yn || "N",
+            re_in_yn: riskRow.re_in_yn || "",
             memo: riskRow.memo || ""
         };
         state.loaded = true;
@@ -3176,6 +3366,84 @@ function renderHr011ProjectEvalSummary(projectKey) {
     renderHr011ProjectEvalRadar(projectKey);
 }
 
+function resizeHr011ProjectRadarCharts() {
+    if (!hr011RefProjectRadarCharts || typeof hr011RefProjectRadarCharts.forEach !== "function") {
+        return;
+    }
+
+    hr011RefProjectRadarCharts.forEach(function (chart) {
+        if (chart && typeof chart.resize === "function") {
+            chart.resize();
+        }
+    });
+}
+
+function scheduleHr011ProjectRadarResize(delayMs) {
+    const delay = Math.max(0, Number(delayMs) || 0);
+    if (hr011ProjectRadarResizeTimer) {
+        clearTimeout(hr011ProjectRadarResizeTimer);
+        hr011ProjectRadarResizeTimer = null;
+    }
+
+    hr011ProjectRadarResizeTimer = setTimeout(function () {
+        hr011ProjectRadarResizeTimer = null;
+        requestAnimationFrame(function () {
+            resizeHr011ProjectRadarCharts();
+            requestAnimationFrame(function () {
+                resizeHr011ProjectRadarCharts();
+            });
+        });
+    }, delay);
+}
+
+function cleanupHr011RadarResizeObserver(chartEl) {
+    if (!chartEl) return;
+    if (typeof chartEl.__hr011RadarResizeCleanup === "function") {
+        chartEl.__hr011RadarResizeCleanup();
+        return;
+    }
+    if (chartEl.__hr011RadarResizeObserver && typeof chartEl.__hr011RadarResizeObserver.disconnect === "function") {
+        chartEl.__hr011RadarResizeObserver.disconnect();
+    }
+    chartEl.__hr011RadarResizeObserver = null;
+    chartEl.__hr011RadarResizeCleanup = null;
+    chartEl.__hr011RadarResizeRafId = 0;
+}
+
+function bindHr011RadarResizeObserver(chartEl, resizeFn) {
+    if (!chartEl || typeof ResizeObserver !== "function" || typeof resizeFn !== "function") return;
+
+    cleanupHr011RadarResizeObserver(chartEl);
+
+    let rafId = 0;
+    const observer = new ResizeObserver(function (entries) {
+        if (!entries || !entries.length) return;
+        const entry = entries[0];
+        const width = Number(entry && entry.contentRect && entry.contentRect.width) || 0;
+        const height = Number(entry && entry.contentRect && entry.contentRect.height) || 0;
+        if (width <= 0 || height <= 0) return;
+        if (rafId) return;
+        rafId = requestAnimationFrame(function () {
+            rafId = 0;
+            if (!chartEl.isConnected) return;
+            resizeFn();
+        });
+    });
+
+    observer.observe(chartEl);
+    chartEl.__hr011RadarResizeObserver = observer;
+    chartEl.__hr011RadarResizeCleanup = function () {
+        if (rafId) {
+            cancelAnimationFrame(rafId);
+            rafId = 0;
+        }
+        observer.disconnect();
+        chartEl.__hr011RadarResizeObserver = null;
+        chartEl.__hr011RadarResizeCleanup = null;
+        chartEl.__hr011RadarResizeRafId = 0;
+    };
+}
+
 function renderHr011ProjectEvalRadar(projectKey) {
     const state = hr011RefProjectEvalCache.get(projectKey);
     if (!state) return;
@@ -3200,6 +3468,7 @@ function renderHr011ProjectEvalRadar(projectKey) {
     let chart = hr011RefProjectRadarCharts.get(projectKey);
 
     if (!hasData) {
+        cleanupHr011RadarResizeObserver(chartEl);
         if (chart && typeof chart.dispose === "function") {
             chart.dispose();
         }
@@ -3210,6 +3479,9 @@ function renderHr011ProjectEvalRadar(projectKey) {
 
     if (!chart || (typeof chart.getDom === "function" && chart.getDom() !== chartEl)) {
         // 기존 인스턴스가 없을 때만 placeholder를 정리한다.
+        if (chart && typeof chart.getDom === "function") {
+            cleanupHr011RadarResizeObserver(chart.getDom());
+        }
         if (chartEl.querySelector(".hr011-ref-project-eval-empty")) {
             chartEl.innerHTML = "";
         }
@@ -3265,8 +3537,8 @@ function renderHr011ProjectEvalRadar(projectKey) {
             fontFamily: "Inter, sans-serif"
         },
         radar: {
-            center: ["50%", "53%"],
-            radius: "62%",
+            center: ["50%", "56%"],
+            radius: "60%",
             splitNumber: 4,
             indicator: indicators,
             axisName: {
@@ -3334,12 +3606,19 @@ function renderHr011ProjectEvalRadar(projectKey) {
         }]
     }, true);
 
+    bindHr011RadarResizeObserver(chartEl, function () {
+        const currentChart = hr011RefProjectRadarCharts.get(projectKey);
+        if (currentChart && typeof currentChart.resize === "function") {
+            currentChart.resize();
+        }
+    });
+
     if (typeof chart.resize === "function") {
         requestAnimationFrame(function () {
             chart.resize();
-            setTimeout(function () {
+            requestAnimationFrame(function () {
                 chart.resize();
-            }, 120);
+            });
         });
     }
 }
@@ -3383,38 +3662,106 @@ function buildHr011ProjectEvalPopupMemoText(rows) {
     }).join("\n");
 }
 
+function hasHr011ProjectRiskText(value) {
+    return !!$.trim(String(value || ""));
+}
+
+function countHr011ProjectRiskEntries(value) {
+    return String(value || "")
+        .split(/\r?\n+/)
+        .map(function (line) { return $.trim(line); })
+        .filter(Boolean)
+        .length;
+}
+
+function getHr011ProjectEvalPopupRiskItems(state) {
+    const risk = state && state.risk ? state.risk : {};
+    const items = [];
+    const addTextItem = function (label, tone, text) {
+        const value = $.trim(String(text || ""));
+        if (!value) {
+            return;
+        }
+
+        items.push({
+            label: label,
+            tone: tone,
+            badgeText: `${Math.max(1, countHr011ProjectRiskEntries(value))}건`,
+            body: value
+        });
+    };
+
+    addTextItem("이탈이력", "info", risk.leave_txt);
+    addTextItem("클레임", "danger", risk.claim_txt);
+    addTextItem("보안이슈", "info", risk.sec_txt);
+    addTextItem("관리메모", "danger", risk.memo);
+
+    if (risk.hasRow && $.trim(String(risk.re_in_yn || ""))) {
+        items.push({
+            label: "재투입 가능 여부",
+            tone: String(risk.re_in_yn || "").toUpperCase() === "Y" ? "success" : "neutral",
+            badgeText: String(risk.re_in_yn || "").toUpperCase() === "Y" ? "가능" : "불가",
+            body: ""
+        });
+    }
+
+    return items;
+}
+
+function buildHr011ProjectEvalPopupRiskCardMarkup(item) {
+    if (!item) {
+        return "";
+    }
+
+    const bodyMarkup = item.body
+        ? `<p class="hr011-ref-project-eval-popup-risk-card__body">${escapeHr011(item.body)}</p>`
+        : "";
+
+    return [
+        `<article class="hr011-ref-project-eval-popup-risk-card hr011-ref-project-eval-popup-risk-card--${escapeHr011(item.tone || "info")}">`,
+        `<div class="hr011-ref-project-eval-popup-risk-card__head">`,
+        `<span class="hr011-ref-project-eval-popup-risk-card__label">${escapeHr011(item.label || "-")}</span>`,
+        `<strong class="hr011-ref-project-eval-popup-risk-card__badge">${escapeHr011(item.badgeText || "")}</strong>`,
+        `</div>`,
+        bodyMarkup,
+        `</article>`
+    ].join("");
+}
+
 function buildHr011ProjectEvalPopupViewMarkup(projectKey, state) {
     const rows = Array.isArray(state.evalRows) && state.evalRows.length
         ? state.evalRows
         : [{ eval_id: "", cd_nm: "평가 항목 미등록", lv1: "N", lv2: "N", lv3: "N", lv4: "N", lv5: "N", cmt: "" }];
     const avg = getHr011ProjectEvalAverageScore(state);
     const avgText = avg == null ? "-" : avg.toFixed(1);
+    const avgMaxText = "5점 만점";
     const memoText = buildHr011ProjectEvalPopupMemoText(rows);
+    const riskItems = getHr011ProjectEvalPopupRiskItems(state);
     return [
         `<div class="hr011-ref-project-eval-popup-view">`,
-        `<section class="hr011-ref-project-eval-popup-section hr011-ref-project-eval-popup-section--capability">`,
+        `<div class="hr011-ref-project-eval-popup-section hr011-ref-project-eval-popup-section--capability">`,
         `<div class="hr011-ref-project-eval-popup-section-head">`,
         `<h6>역량 평가</h6>`,
-        `<div class="hr011-ref-project-eval-popup-average"><span>평균 점수</span><strong>${escapeHr011(avgText)}</strong></div>`,
+        `<div class="hr011-ref-project-eval-popup-average"><span>평균 점수</span><strong>${escapeHr011(avgText)}</strong><span class="hr011-ref-project-eval-popup-average-max">${escapeHr011(avgMaxText)}</span></div>`,
         `</div>`,
         `<div class="hr011-ref-project-eval-popup-radar-box">`,
         `<div class="hr011-ref-project-eval-popup-radar" id="hr011ProjectEvalModalRadar-${makeHr011SafeDomId(projectKey)}"></div>`,
         `</div>`,
-        `</section>`,
-        `<section class="hr011-ref-project-eval-popup-section hr011-ref-project-eval-popup-section--memo">`,
+        `</div>`,
+        `<div class="hr011-ref-project-eval-popup-section hr011-ref-project-eval-popup-section--memo">`,
         `<div class="hr011-ref-project-eval-popup-field-label">평가 메모</div>`,
         `<div class="hr011-ref-project-eval-popup-textfield">${escapeHr011(memoText)}</div>`,
-        `</section>`,
-        `<section class="hr011-ref-project-eval-popup-section hr011-ref-project-eval-popup-section--risk">`,
-        `<h6>리스크 평가</h6>`,
-        `<div class="hr011-ref-project-eval-popup-risk-list">`,
-        `<div class="item"><span>이탈이력</span><strong>${escapeHr011(state.risk && state.risk.leave_txt ? state.risk.leave_txt : "없음")}</strong></div>`,
-        `<div class="item"><span>클레임</span><strong>${escapeHr011(state.risk && state.risk.claim_txt ? state.risk.claim_txt : "없음")}</strong></div>`,
-        `<div class="item"><span>보안이슈</span><strong>${escapeHr011(state.risk && state.risk.sec_txt ? state.risk.sec_txt : "없음")}</strong></div>`,
-        `<div class="item"><span>관리메모</span><strong>${escapeHr011(state.risk && state.risk.memo ? state.risk.memo : "없음")}</strong></div>`,
-        `<div class="item"><span>재투입 가능 여부</span><strong>${String((state.risk && state.risk.re_in_yn) || "N") === "Y" ? "가능" : "불가"}</strong></div>`,
         `</div>`,
-        `</section>`,
+        riskItems.length ? [
+            `<div class="hr011-ref-project-eval-popup-section hr011-ref-project-eval-popup-section--risk">`,
+            `<h6>리스크 평가</h6>`,
+            `<div class="hr011-ref-project-eval-popup-risk-list">`,
+            riskItems.map(function (item) {
+                return buildHr011ProjectEvalPopupRiskCardMarkup(item);
+            }).join(""),
+            `</div>`,
+            `</div>`
+        ].join("") : "",
         `</div>`
     ].join("");
 }
@@ -3443,6 +3790,7 @@ function renderHr011ProjectEvalPopupRadar(projectKey) {
     let chart = echarts.getInstanceByDom(chartEl);
 
     if (!hasData) {
+        cleanupHr011RadarResizeObserver(chartEl);
         if (chart && typeof chart.dispose === "function") {
             chart.dispose();
         }
@@ -3501,22 +3849,9 @@ function renderHr011ProjectEvalPopupRadar(projectKey) {
         textStyle: {
             fontFamily: "Inter, sans-serif"
         },
-        graphic: [{
-            type: "text",
-            left: 0,
-            top: 2,
-            style: {
-                text: "5점 만점",
-                fill: "#6f84a3",
-                fontFamily: "Inter, sans-serif",
-                fontSize: 13,
-                fontWeight: 700,
-                lineHeight: 16
-            }
-        }],
         radar: {
-            center: ["50%", "54%"],
-            radius: "72%",
+            center: ["50%", "60%"],
+            radius: "62%",
             startAngle: 90,
             splitNumber: 5,
             indicator: indicators,
@@ -3584,12 +3919,19 @@ function renderHr011ProjectEvalPopupRadar(projectKey) {
         }]
     }, true);
 
+    bindHr011RadarResizeObserver(chartEl, function () {
+        const currentChart = echarts.getInstanceByDom(chartEl);
+        if (currentChart && typeof currentChart.resize === "function") {
+            currentChart.resize();
+        }
+    });
+
     if (typeof chart.resize === "function") {
         requestAnimationFrame(function () {
             chart.resize();
-            setTimeout(function () {
+            requestAnimationFrame(function () {
                 chart.resize();
-            }, 120);
+            });
         });
     }
 }
@@ -3600,6 +3942,17 @@ async function openHr011ProjectEvaluationModal(projectKey) {
     const modalEl = getHr011ProjectEvalModalEl();
     const bodyEl = getHr011ProjectEvalModalBodyEl();
     if (!modalEl || !bodyEl) return;
+
+    const detailBodyEl = document.getElementById("hr011RefDetailBody");
+    const summaryEl = findHr011ProjectDetailSummaryByKey(detailBodyEl, projectKey);
+    hr011ProjectEvalModalExpandedKeysSnapshot = cloneHr011ProjectExpandedKeys(hr011RefProjectExpandedKeys);
+    setHr011ProjectExpandedKeysOnly(projectKey);
+    if (hr011RefCurrentView === "project") {
+        renderHr011ProjectDetailView({
+            anchorProjectKey: projectKey,
+            triggerEl: summaryEl || null
+        });
+    }
 
     hr011ProjectEvalModalProjectKey = projectKey;
     hr011ProjectEvalModalLastFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
@@ -3615,6 +3968,7 @@ async function openHr011ProjectEvaluationModal(projectKey) {
     renderHr011ProjectEvaluationContent(projectKey);
     await loadPromise;
     renderHr011ProjectEvalSummary(projectKey);
+    scheduleHr011ProjectRadarResize(0);
     requestAnimationFrame(function () {
         renderHr011ProjectEvaluationContent(projectKey);
         renderHr011ProjectEvalPopupRadar(projectKey);
@@ -3626,9 +3980,12 @@ function closeHr011ProjectEvaluationModal() {
     const modalEl = getHr011ProjectEvalModalEl();
     if (!modalEl) return;
     hr011ProjectEvalModalClosing = true;
+    const restoreProjectKey = hr011ProjectEvalModalProjectKey;
+    const restoreExpandedKeys = cloneHr011ProjectExpandedKeys(hr011ProjectEvalModalExpandedKeysSnapshot);
     hr011ProjectEvalModalProjectKey = "";
     modalEl.classList.remove("is-open");
     document.body.classList.remove("hr011-project-eval-modal-open");
+    scheduleHr011ProjectRadarResize(0);
 
     const focusEl = hr011ProjectEvalModalLastFocus;
     hr011ProjectEvalModalLastFocus = null;
@@ -3640,21 +3997,41 @@ function closeHr011ProjectEvaluationModal() {
         }
         modalEl.hidden = true;
         const bodyEl = getHr011ProjectEvalModalBodyEl();
-        if (bodyEl) {
-            bodyEl.innerHTML = "";
+        const chartEl = bodyEl ? bodyEl.querySelector('[id^="hr011ProjectEvalModalRadar-"]') : null;
+        if (chartEl) {
+            cleanupHr011RadarResizeObserver(chartEl);
         }
-        const chartEl = document.querySelector('[id^="hr011ProjectEvalModalRadar-"]');
         if (chartEl && typeof echarts === "object" && typeof echarts.getInstanceByDom === "function") {
             const chart = echarts.getInstanceByDom(chartEl);
             if (chart && typeof chart.dispose === "function") {
                 chart.dispose();
             }
         }
+        if (bodyEl) {
+            bodyEl.innerHTML = "";
+        }
+        scheduleHr011ProjectRadarResize(0);
+        if (hr011RefCurrentView === "project" && restoreExpandedKeys instanceof Set) {
+            hr011RefProjectExpandedKeys = new Set(restoreExpandedKeys);
+            hr011RefProjectAnimateOpenKey = "";
+            syncHr011ProjectExpandedKeys(hr011RefProjectRows || []);
+            const detailBodyEl = document.getElementById("hr011RefDetailBody");
+            const summaryEl = findHr011ProjectDetailSummaryByKey(detailBodyEl, restoreProjectKey);
+            renderHr011ProjectDetailView({
+                anchorProjectKey: restoreProjectKey,
+                triggerEl: summaryEl || null
+            });
+        }
+        hr011ProjectEvalModalExpandedKeysSnapshot = null;
         hr011ProjectEvalModalClosing = false;
-    }, 280);
+    }, 440);
 
     if (focusEl && typeof focusEl.focus === "function") {
-        focusEl.focus();
+        try {
+            focusEl.focus({ preventScroll: true });
+        } catch (error) {
+            focusEl.focus();
+        }
     }
 }
 
@@ -3665,6 +4042,9 @@ function renderHr011ProjectEvaluationContent(projectKey) {
     if (!contentEl) return;
 
     const prevChartEl = contentEl.querySelector('[id^="hr011ProjectEvalModalRadar-"]');
+    if (prevChartEl) {
+        cleanupHr011RadarResizeObserver(prevChartEl);
+    }
     if (prevChartEl && typeof echarts === "object" && typeof echarts.getInstanceByDom === "function") {
         const prevChart = echarts.getInstanceByDom(prevChartEl);
         if (prevChart && typeof prevChart.dispose === "function") {
@@ -3750,15 +4130,17 @@ function buildHr011ProjectRiskPane(projectKey, state) {
     const risk = state.risk || {};
     const isEditable = hr011Mode === "update";
     if (!isEditable) {
+        const riskItems = getHr011ProjectEvalPopupRiskItems(state);
+        if (!riskItems.length) {
+            return "";
+        }
         return [
             `<section class="hr011-ref-project-eval-pane-card" data-tab="risk">`,
             `<h6>리스크 평가</h6>`,
             `<div class="hr011-ref-project-risk-inline-list">`,
-            `<div class="row"><span>이탈이력</span><p>${escapeHr011(risk.leave_txt || "없음")}</p></div>`,
-            `<div class="row"><span>클레임</span><p>${escapeHr011(risk.claim_txt || "없음")}</p></div>`,
-            `<div class="row"><span>보안이슈</span><p>${escapeHr011(risk.sec_txt || "없음")}</p></div>`,
-            `<div class="row"><span>관리메모</span><p>${escapeHr011(risk.memo || "없음")}</p></div>`,
-            `<div class="row"><span>재투입</span><p>${String(risk.re_in_yn || "N") === "Y" ? "가능" : "불가"}</p></div>`,
+            riskItems.map(function (item) {
+                return `<div class="row"><span>${escapeHr011(item.label)}</span><p>${escapeHr011(item.body || item.badgeText || "-")}</p></div>`;
+            }).join(""),
             `</div>`,
             `</section>`
         ].join("");
@@ -3799,6 +4181,9 @@ function updateHr011ProjectRiskField(projectKey, field, value) {
     const state = hr011RefProjectEvalCache.get(projectKey);
     if (!state || !state.risk) return;
     state.risk[field] = String(value || "");
+    if (field === "re_in_yn" || hasHr011ProjectRiskText(state.risk[field])) {
+        state.risk.hasRow = true;
+    }
 }
 
 // async function saveHr011ProjectEvaluation(projectKey) {
@@ -4443,13 +4828,7 @@ function bindHr011RadarResize() {
         if (hr011RefSkillGaugeDetailChart && typeof hr011RefSkillGaugeDetailChart.resize === "function") {
             hr011RefSkillGaugeDetailChart.resize();
         }
-        if (hr011RefProjectRadarCharts && typeof hr011RefProjectRadarCharts.forEach === "function") {
-            hr011RefProjectRadarCharts.forEach(function (chart) {
-                if (chart && typeof chart.resize === "function") {
-                    chart.resize();
-                }
-            });
-        }
+        resizeHr011ProjectRadarCharts();
     });
 }
 
@@ -4490,12 +4869,19 @@ function getHr011AvatarMarkup(row) {
         return `<img src="${imgUrl}" class="profile-circle-icon" alt="${escapeHr011(row.dev_nm || "프로필")}">`;
     }
 
+    const name = $.trim(String(row.dev_nm || ""));
+    const fallbackText = typeof getProfileText === "function"
+        ? getProfileText(name)
+        : (name.length >= 2 ? name.slice(-2) : (name || "신규"));
+    const fallbackColor = typeof stringToSoftColor === "function"
+        ? stringToSoftColor(name || "신규")
+        : "#7a8ca4";
+
     return [
-        `<div class="profile-circle-icon profile-circle-icon--fallback" aria-label="기본 프로필">`,
-        `<svg viewBox="0 0 64 64" role="img" aria-hidden="true">`,
-        `<circle cx="32" cy="24" r="12"></circle>`,
-        `<path d="M12 56c0-11 9-20 20-20s20 9 20 20"></path>`,
-        `</svg>`,
+        `<div class="profile-circle-icon profile-circle-icon--fallback"`,
+        `     style="background:${escapeHr011(fallbackColor)};color:#fff"`,
+        `     aria-label="${escapeHr011(name ? `${name} 프로필` : "기본 프로필")}">`,
+        `${escapeHr011(fallbackText || "신규")}`,
         `</div>`
     ].join("");
 }
