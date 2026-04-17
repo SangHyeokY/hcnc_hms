@@ -1459,8 +1459,7 @@ function getHr013SelectedRow() {
 
 // 모달 입력값 채우기
 function fillHr013Form(data) {
-
-    console.log("st_dt : " + data.st_dt, "ed_dt : " + data.ed_dt);
+    console.log("모달 값 : " + data);
     $("#write_hr013_dev_prj_id").val(data.dev_prj_id || "");
     $("#write_hr013_inprj_yn").val(data.inprj_yn || "N");
     $("#write_hr013_st_dt").val(toDateInput(data.st_dt));

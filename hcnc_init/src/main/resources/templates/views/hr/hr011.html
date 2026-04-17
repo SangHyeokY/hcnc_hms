@@ -36,21 +36,21 @@
                 <input type="hidden" id="main_lang" name="main_lang">
 
                 <!-- [수정/등록할 때만 보임] 헤더 + 버튼 -->
-                <div class="btn-area hr011-page-actions hr011-page-actions--bottom">
-                    <div class="hr011-edit-mini-profile" id="hr011EditMiniProfile">
-                        <div class="avatar" id="hr011EditMiniAvatar" aria-hidden="true"></div>
-                        <div class="meta">
-                            <strong id="hr011EditMiniName">-</strong>
-                            <p id="hr011EditMiniSub">인적사항 정보 수정</p>
-                        </div>
-                    </div>
-                    <div class="hr011-page-action-buttons">
-                        <button type="button" class="btn hr011-page-btn hr011-page-btn--ghost" id="hr011BackBtn">목록으로</button>
-                        <button type="button" class="btn hr011-page-btn hr011-page-btn--ghost" id="hr011CancelBtn" hidden>등록취소</button>
-                        <button type="button" class="btn hr011-page-btn hr011-page-btn--ghost" id="hr011EditBtn">수정하기</button>
-                        <button type="button" class="btn hr011-page-btn hr011-page-btn--primary" id="hr011SaveBtn" hidden>저장</button>
-                    </div>
-                </div>
+<!--                <div class="btn-area hr011-page-actions hr011-page-actions&#45;&#45;bottom">-->
+<!--                    <div class="hr011-edit-mini-profile" id="hr011EditMiniProfile">-->
+<!--                        <div class="avatar" id="hr011EditMiniAvatar" aria-hidden="true"></div>-->
+<!--                        <div class="meta">-->
+<!--                            <strong id="hr011EditMiniName">-</strong>-->
+<!--                            <p id="hr011EditMiniSub">인적사항 정보 수정</p>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                    <div class="hr011-page-action-buttons">-->
+<!--                        <button type="button" class="btn hr011-page-btn hr011-page-btn&#45;&#45;ghost" id="hr011BackBtn">목록으로</button>-->
+<!--                        <button type="button" class="btn hr011-page-btn hr011-page-btn&#45;&#45;ghost" id="hr011CancelBtn" hidden>등록취소</button>-->
+<!--                        <button type="button" class="btn hr011-page-btn hr011-page-btn&#45;&#45;ghost" id="hr011EditBtn">수정하기</button>-->
+<!--                        <button type="button" class="btn hr011-page-btn hr011-page-btn&#45;&#45;primary" id="hr011SaveBtn" hidden>저장</button>-->
+<!--                    </div>-->
+<!--                </div>-->
 
                 <!-- [상세일 때만 보임] 상세 페이지 레이아웃 -->
                 <section class="hr011-ref-layout" id="hr011RefLayout">
@@ -228,32 +228,53 @@
 
                     <!-- [수정/등록할 때만 보임] 네비게이션 영역 -->
                     <aside class="hr011-edit-stepper" aria-label="인력 등록/수정 단계">
-                        <p class="hr011-edit-stepper-title">입력 단계</p>
-                        <button type="button" class="hr011-edit-step-btn hr011-edit-step-btn--profile is-active" data-step-target="profile">
-                            <span class="num">1</span>
-                            <span class="ico" aria-hidden="true"></span>
-                            <span class="txt">기본 인적사항</span>
-                        </button>
-                        <button type="button" class="hr011-edit-step-btn hr011-edit-step-btn--contract" data-step-target="contract">
-                            <span class="num">2</span>
-                            <span class="ico" aria-hidden="true"></span>
-                            <span class="txt">소속 및 계약정보</span>
-                        </button>
-                        <button type="button" class="hr011-edit-step-btn hr011-edit-step-btn--skill" data-step-target="skill">
-                            <span class="num">3</span>
-                            <span class="ico" aria-hidden="true"></span>
-                            <span class="txt">보유역량 및 숙련도</span>
-                        </button>
-                        <button type="button" class="hr011-edit-step-btn hr011-edit-step-btn--project" data-step-target="project">
-                            <span class="num">4</span>
-                            <span class="ico" aria-hidden="true"></span>
-                            <span class="txt">프로젝트 이력</span>
-                        </button>
-                        <button type="button" class="hr011-edit-step-btn hr011-edit-step-btn--eval" data-step-target="eval-risk">
-                            <span class="num">5</span>
-                            <span class="ico" aria-hidden="true"></span>
-                            <span class="txt">평가 및 리스크</span>
-                        </button>
+                        <div class="hr011-edit-mini-profile" id="hr011EditMiniProfile">
+                            <div class="avatar" id="hr011EditMiniAvatar" aria-hidden="true"></div>
+                            <div class="meta">
+                                <strong id="hr011EditMiniName">-</strong>
+                                <p id="hr011EditMiniSub">인적사항 정보 수정</p>
+                            </div>
+                        </div>
+                        <div class="hr011-edit-step">
+                            <p class="hr011-edit-stepper-title">입력 단계</p>
+                            <button type="button" class="hr011-edit-step-btn hr011-edit-step-btn--profile is-active" data-step-target="profile">
+                                <span class="num">1</span>
+<!--                                <span class="ico" aria-hidden="true"></span>-->
+                                <span class="txt">기본 인적사항</span>
+                                <span class="cnt">(1/6)</span>
+                            </button>
+                            <button type="button" class="hr011-edit-step-btn hr011-edit-step-btn--contract" data-step-target="contract">
+                                <span class="num">2</span>
+<!--                                <span class="ico" aria-hidden="true"></span>-->
+                                <span class="txt">소속 및 계약정보</span>
+                                <span class="cnt">(1/6)</span>
+                            </button>
+                            <button type="button" class="hr011-edit-step-btn hr011-edit-step-btn--skill" data-step-target="skill">
+                                <span class="num">3</span>
+<!--                                <span class="ico" aria-hidden="true"></span>-->
+                                <span class="txt">보유역량 및 숙련도</span>
+                                <span class="cnt">(1/6)</span>
+                            </button>
+                            <button type="button" class="hr011-edit-step-btn hr011-edit-step-btn--project" data-step-target="project">
+                                <span class="num">4</span>
+<!--                                <span class="ico" aria-hidden="true"></span>-->
+                                <span class="txt">프로젝트 이력</span>
+                                <span class="cnt">(1/6)</span>
+                            </button>
+                            <button type="button" class="hr011-edit-step-btn hr011-edit-step-btn--eval" data-step-target="eval-risk">
+                                <span class="num">5</span>
+<!--                                <span class="ico" aria-hidden="true"></span>-->
+                                <span class="txt">평가 및 리스크</span>
+                                <span class="cnt">(1/6)</span>
+                            </button>
+                        </div>
+
+                        <div class="hr011-page-action-buttons fl-ct">
+                            <button type="button" class="btn hr011-page-btn hr011-page-btn--primary wp100" id="hr011SaveBtn" hidden>저장</button>
+                            <button type="button" class="btn hr011-page-btn hr011-page-btn--ghost" id="hr011BackBtn">목록으로</button>
+                            <button type="button" class="btn hr011-page-btn hr011-page-btn--ghost" id="hr011CancelBtn" hidden>등록취소</button>
+                            <button type="button" class="btn hr011-page-btn hr011-page-btn--ghost" id="hr011EditBtn">수정하기</button>
+                        </div>
                     </aside>
 
                     <!-- [수정/등록할 때만 보임] 수정/등록 입력 영역 -->
@@ -263,7 +284,7 @@
                             <!-- [수정/등록할 때만 보임] 소제목 -->
                             <div class="hr011-section-head">
                                 <div>
-                                    <h5>기본 인적사항</h5>
+                                    <h4>기본 인적사항</h4>
                                     <p>목록 카드에서 보던 인적사항을 한 번에 수정할 수 있도록 정리한 화면입니다.</p>
                                 </div>
                             </div>
@@ -410,7 +431,7 @@
                         <section class="white-full hr011-section hr011-edit-sector hr011-edit-sector--full hr011-edit-profile-section" data-edit-step="contract">
                             <div class="hr011-section-head">
                                 <div>
-                                    <h5>소속 및 계약정보</h5>
+                                    <h4>소속 및 계약정보</h4>
                                     <p>기존 Tab1 내용을 그대로 유지하면서 한 페이지 흐름에 맞게 배치했습니다.</p>
                                 </div>
                             </div>
@@ -445,7 +466,7 @@
                         <section class="white-full hr011-section hr011-edit-sector hr011-edit-sector--full" data-edit-step="skill">
                             <div class="hr011-section-head">
                                 <div>
-                                    <h5>보유역량 및 숙련도</h5>
+                                    <h4>보유역량 및 숙련도</h4>
                                     <p>기존 보유역량/숙련도 탭을 한 화면에서 이어서 볼 수 있게 구성했습니다.</p>
                                 </div>
                             </div>
@@ -457,7 +478,7 @@
                         <section class="white-full hr011-section hr011-edit-sector hr011-edit-sector--full" data-edit-step="project">
                             <div class="hr011-section-head">
                                 <div>
-                                    <h5>프로젝트 이력</h5>
+                                    <h4>프로젝트 이력</h4>
                                     <p>프로젝트 경험과 참여 내용을 상세 페이지 안에서 바로 관리할 수 있습니다.</p>
                                 </div>
                                 <div class="hr011-section-head-actions">
@@ -473,7 +494,7 @@
                         <section class="white-full hr011-section hr011-edit-sector hr011-edit-sector--full" data-edit-step="eval-risk">
                             <div class="hr011-section-head">
                                 <div>
-                                    <h5>평가 및 리스크</h5>
+                                    <h4>평가 및 리스크</h4>
                                     <p>프로젝트별 평가와 리스크 정보를 한 화면에서 확인하고 수정합니다.</p>
                                 </div>
                             </div>
@@ -482,7 +503,7 @@
                             </div>
                         </section>
 
-                        <!-- [수정/등록할 때만 보임] 페이징? -->
+                        <!-- [수정/등록할 때만 보임] ?? -->
                         <div class="hr011-edit-wizard-controls">
                             <button type="button" class="btn hr011-page-btn hr011-page-btn--ghost" id="hr011StepPrevBtn">이전</button>
                             <div class="hr011-edit-wizard-progress">
@@ -503,19 +524,21 @@
     <!-- 인적사항 서브 모달 -->
     <div class="modal-wrap" id="main-lang-picker-area" style="display:none">
         <div class="modal-container main-lang-picker-container">
+
             <div class="header">
-                <h3 class="sub-title">주 개발언어<span>선택</span></h3>
+                <h3 class="sub-title">주 개발언어 <span>선택</span></h3>
                 <div class="btn-area">
                     <button class="close-btn" type="button" id="btn_main_lang_picker_close_x">
                         <img src="./icons/Icon-close.png" alt="" />
                     </button>
                 </div>
             </div>
+
             <div class="modal-content main-lang-picker-content">
                 <div class="main-lang-picker-search-row">
-                    <label for="main-lang-picker-search">• 기술 검색</label>
+                    <label for="main-lang-picker-search" class="fw600">기술 검색</label>
                     <div class="main-lang-picker-search-wrap">
-                        <input type="text" id="main-lang-picker-search" class="wp100" placeholder="기술명 입력 후 선택"
+                        <input type="text" id="main-lang-picker-search" class="wp100" placeholder="검색할 기술명을 입력해주세요."
                                autocomplete="off">
                         <ul class="main-lang-picker-suggest" id="main-lang-picker-suggest"></ul>
                     </div>
@@ -536,20 +559,22 @@
     <!-- Tab2 서브 모달 -->
     <div class="modal-wrap" id="hr012-skill-picker-area" style="display:none">
         <div class="modal-container hr012-skill-picker-container">
+
             <div class="header">
-                <h3 class="sub-title">보유역량 기술<span>선택</span></h3>
+                <h3 class="sub-title">보유역량 기술 <span>선택</span></h3>
                 <div class="btn-area">
                     <button class="close-btn" type="button" id="btn_hr012_skill_picker_close_x">
                         <img src="./icons/Icon-close.png" alt="" />
                     </button>
                 </div>
             </div>
+
             <div class="modal-content hr012-skill-picker-content">
                 <div class="hr012-skill-picker-search-row">
-                    <label for="hr012-skill-picker-search">• 기술 검색</label>
+                    <label for="hr012-skill-picker-search" class="fw600">기술 검색</label>
                     <div class="hr012-skill-picker-search-wrap">
                         <input type="text" id="hr012-skill-picker-search" class="wp100"
-                               placeholder="기술명 입력 후 선택" autocomplete="off">
+                               placeholder="검색할 기술명을 입력해주세요." autocomplete="off">
                         <ul class="hr012-skill-picker-suggest" id="hr012-skill-picker-suggest"></ul>
                     </div>
                     <span class="hr012-skill-picker-meta" id="hr012-skill-picker-meta"></span>
@@ -569,10 +594,16 @@
     <!-- 프로젝트 이력 모달 -->
     <div class="modal-wrap" id="write-hr013-area" style="display: none">
         <div class="modal-container">
+
             <div class="header">
-                <h4>프로젝트 이력 <span id="hr013-type">등록</span></h4>
-                <span class="modal-close" onclick="closeHr013Modal()"></span>
+                <h3 class="sub-title">프로젝트 이력 <span id="hr013-type">등록</span></h3>
+                <div class="btn-area">
+                    <button class="modal-close" type="button" onclick="closeHr013Modal()">
+                        <img src="./icons/Icon-close.png" alt="" />
+                    </button>
+                </div>
             </div>
+
             <div class="modal-content">
                 <article>
                     <div class="div-table">
@@ -605,13 +636,13 @@
                                 <div class="table-cell">
                                     <p class="cell-tit">고객사</p>
                                     <div class="cell-info">
-                                        <input type="text" class="text" id="write_hr013_cust_nm" placeholder="">
+                                        <input type="text" class="text" id="write_hr013_cust_nm" placeholder="고객사">
                                     </div>
                                 </div>
                                 <div class="table-cell">
                                     <p class="cell-tit">프로젝트명</p>
                                     <div class="cell-info">
-                                        <input type="text" class="text" id="write_hr013_prj_nm" placeholder="">
+                                        <input type="text" class="text" id="write_hr013_prj_nm" placeholder="프로젝트명">
                                     </div>
                                 </div>
                             </li>
@@ -619,7 +650,7 @@
                                 <div class="table-cell">
                                     <p class="cell-tit">계약단가</p>
                                     <div class="cell-info">
-                                        <input type="text" class="text" id="write_hr013_rate_amt" placeholder="금액 입력">
+                                        <input type="text" class="text" id="write_hr013_rate_amt" placeholder="계약단가">
                                     </div>
                                 </div>
                                 <div class="table-cell">
@@ -647,7 +678,7 @@
                                                 <div class="tag-help"></div>
                                                 <ul class="tag-list" id="hr013SkillTagList"></ul>
                                                 <input type="text" class="text" id="write_hr013_stack_input"
-                                                       list="write_hr013_stack_datalist" placeholder="기술 입력/선택 후 Enter"
+                                                       list="write_hr013_stack_datalist" placeholder="검색할 기술명을 입력하세요."
                                                        style="display:none;">
                                             </div>
                                             <div class="tag-select-row">
@@ -686,19 +717,21 @@
 
     <div class="modal-wrap" id="hr013-skill-picker-area" style="display:none">
         <div class="modal-container hr013-skill-picker-container">
+
             <div class="header">
-                <h3 class="sub-title">프로젝트 기술<span>선택</span></h3>
+                <h3 class="sub-title">프로젝트 기술 <span>선택</span></h3>
                 <div class="btn-area">
                     <button class="close-btn" type="button" id="btn_hr013_skill_picker_close_x">
                         <img src="./icons/Icon-close.png" alt="" />
                     </button>
                 </div>
             </div>
+
             <div class="modal-content hr013-skill-picker-content">
                 <div class="hr013-skill-picker-search-row">
-                    <label for="hr013-skill-picker-search">• 기술 검색</label>
+                    <label for="hr013-skill-picker-search" class="fw600">기술 검색</label>
                     <div class="hr013-skill-picker-search-wrap">
-                        <input type="text" id="hr013-skill-picker-search" class="wp100" placeholder="기술명 입력 후 선택"
+                        <input type="text" id="hr013-skill-picker-search" class="wp100" placeholder="검색할 기술명을 입력하세요."
                                autocomplete="off">
                         <ul class="hr013-skill-picker-suggest" id="hr013-skill-picker-suggest"></ul>
                     </div>
@@ -719,8 +752,9 @@
     <!-- 프로젝트 코드 선택/등록 팝업 -->
     <div class="modal-wrap" id="hr013-project-picker-area" style="display:none">
         <div class="modal-container hr013-project-picker-container">
+
             <div class="header">
-                <h3 class="sub-title">프로젝트 목록<span>추가</span></h3>
+                <h3 class="sub-title">프로젝트 목록 <span>추가</span></h3>
                 <div class="btn-area">
                     <button class="close-btn" type="button" id="btn_hr013_project_picker_close_x">
                         <img src="./icons/Icon-close.png" alt="" />
@@ -732,10 +766,10 @@
                 <!-- 좌: 검색/목록 -->
                 <div class="hr013-project-picker-left">
                     <div class="hr013-project-picker-search-row">
-                        <label for="hr013-project-picker-search">프로젝트 검색</label>
+                        <label for="hr013-project-picker-search" class="fw600">프로젝트 검색</label>
                         <div class="hr013-project-picker-search-wrap">
                             <input type="text" id="hr013-project-picker-search" class="wp100"
-                                   placeholder="검색어를 입력하세요">
+                                   placeholder="검색할 프로젝트명을 입력하세요.">
                             <button type="button" class="btn btn-close" id="btn_hr013_project_picker_search">
                                 <!--<img src="/icons/ico-search.png" alt="검색">-->
                                 조회
@@ -756,8 +790,8 @@
                     <p class="cell-tit hr013-project-picker-title">신규 프로젝트 등록</p>
                     <div class="cell-right">
                         <div class="cell-info">
-                            <label for="write_hr013_project_cd_nm">프로젝트 명칭</label>
-                            <input type="text" id="write_hr013_project_cd_nm" class="text" placeholder="신규 프로젝트명">
+                            <label for="write_hr013_project_cd_nm" class="fw600">프로젝트 명칭</label>
+                            <input type="text" id="write_hr013_project_cd_nm" class="text" placeholder="등록할 신규 프로젝트명을 입력하세요.">
                         </div>
                         <div class="cell-info">
                             <label for="write_hr013_project_inprj_yn">당사 여부</label>
