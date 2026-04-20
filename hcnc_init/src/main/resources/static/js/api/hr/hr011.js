@@ -3240,14 +3240,6 @@ function hasHr011ProjectRiskText(value) {
     return !!$.trim(String(value || ""));
 }
 
-function countHr011ProjectRiskEntries(value) {
-    return String(value || "")
-        .split(/\r?\n+/)
-        .map(function (line) { return $.trim(line); })
-        .filter(Boolean)
-        .length;
-}
-
 function getHr011ProjectEvalPopupRiskItems(state) {
     const risk = state && state.risk ? state.risk : {};
     const items = [];
@@ -3260,7 +3252,6 @@ function getHr011ProjectEvalPopupRiskItems(state) {
         items.push({
             label: label,
             tone: tone,
-            badgeText: `${Math.max(1, countHr011ProjectRiskEntries(value))}건`,
             body: value
         });
     };
@@ -3290,12 +3281,15 @@ function buildHr011ProjectEvalPopupRiskCardMarkup(item) {
     const bodyMarkup = item.body
         ? `<p class="hr011-ref-project-eval-popup-risk-card__body">${escapeHr011(item.body)}</p>`
         : "";
+    const badgeMarkup = item.badgeText
+        ? `<strong class="hr011-ref-project-eval-popup-risk-card__badge">${escapeHr011(item.badgeText)}</strong>`
+        : "";
 
     return [
         `<article class="hr011-ref-project-eval-popup-risk-card hr011-ref-project-eval-popup-risk-card--${escapeHr011(item.tone || "info")}">`,
         `<div class="hr011-ref-project-eval-popup-risk-card__head">`,
         `<span class="hr011-ref-project-eval-popup-risk-card__label">${escapeHr011(item.label || "-")}</span>`,
-        `<strong class="hr011-ref-project-eval-popup-risk-card__badge">${escapeHr011(item.badgeText || "")}</strong>`,
+        badgeMarkup,
         `</div>`,
         bodyMarkup,
         `</article>`

@@ -8993,15 +8993,15 @@ body.hr011-project-eval-modal-open {
 }
 
 .hr011-detail-wrap .hr011-ref-project-eval-popup-risk-card--info .hr011-ref-project-eval-popup-risk-card__badge {
-  background: #16a3ff;
+  background: #009FFE;
 }
 
 .hr011-detail-wrap .hr011-ref-project-eval-popup-risk-card--danger .hr011-ref-project-eval-popup-risk-card__badge {
-  background: #ff4d73;
+  background: #FD4E6B;
 }
 
 .hr011-detail-wrap .hr011-ref-project-eval-popup-risk-card--success .hr011-ref-project-eval-popup-risk-card__badge {
-  background: #31c95c;
+  background: #38C568;
 }
 
 .hr011-detail-wrap .hr011-ref-project-eval-popup-risk-card--neutral .hr011-ref-project-eval-popup-risk-card__badge {
