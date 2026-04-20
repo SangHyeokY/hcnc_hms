@@ -877,7 +877,7 @@ function syncHr012SkillPickerUi(forceRebuild) {
     const totalCount = Array.isArray(hr012SkillOptions) ? hr012SkillOptions.length : 0;
     const selectedCount = getHr012SelectedCodeSet().size;
     $("#hr012-skill-picker-meta").html(
-        `전체 기술 <span class="fw700 mg-l4">${totalCount}</span>개 / 선택 <span class="hcnc-sub-count-number">${selectedCount}</span>개`
+        `전체 기술 <span class="result-count-bold">${totalCount}</span>개 / 선택 <span class="result-count-bold selected">${selectedCount}</span>개`
     );
 
     if (!hr012SkillPickerTable) {

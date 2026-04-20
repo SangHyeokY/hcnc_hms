@@ -2273,7 +2273,7 @@ function animateHr010RenderedItems(container) {
 }
 
 function updateHr010ResultCount(count) {
-    const countEl = document.getElementById("hr010ResultCount");
+    const countEl = document.getElementById("result-count-bold");
     if (!countEl) return;
     countEl.textContent = String(Number(count) || 0);
 }
