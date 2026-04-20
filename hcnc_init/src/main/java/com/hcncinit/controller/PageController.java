@@ -94,6 +94,20 @@ public class PageController {
         return mv;
     }
 
+    @GetMapping("/hr010v2")
+    public ModelAndView hr010v2(HttpSession session, Model model) {
+        ModelAndView mv = new ModelAndView();
+        mv.setViewName("views/hr/hr010v2");
+
+        String auth = (String) session.getAttribute("LOGIN_AUTH");
+        String lock = (String) session.getAttribute("LOGIN_LOCK");
+        String pwchg = (String) session.getAttribute("LOGIN_PW_CHG");
+        model.addAttribute("LOGIN_AUTH", auth);
+        model.addAttribute("LOGIN_LOCK", lock);
+        model.addAttribute("LOGIN_PW_CHG", pwchg);
+        return mv;
+    }
+
     @GetMapping("/hr020")
     public ModelAndView hr020(HttpSession session, Model model) {
         ModelAndView mv = new ModelAndView();

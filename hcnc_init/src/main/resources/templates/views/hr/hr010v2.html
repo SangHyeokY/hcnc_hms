@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+
+<th:block layout:fragment="content">
+    <script>
+        (function () {
+            var script = document.currentScript;
+            var contentsWrap = script && script.closest ? script.closest(".contents-wrap") : null;
+            var whiteFull = script && script.closest ? script.closest(".white-full") : null;
+
+            if (contentsWrap) {
+                contentsWrap.classList.add("hr010-dashboard-wrap", "hr010v2-wrap");
+            }
+
+            if (whiteFull) {
+                whiteFull.classList.add("hr010-dashboard-shell", "hr010v2-shell");
+            }
+        })();
+    </script>
+
+    <div class="hr010v2-page" id="hr010v2Page">
+        <input type="hidden" id="dev_id" name="dev_id" th:value="${dev_id}">
+        <input type="hidden" id="dev_nm" name="dev_nm" th:value="${dev_nm}">
+        <input type="hidden" id="main_lang" name="main_lang" th:value="${main_lang}">
+
+        <div class="hr010v2-dashboard">
+            <div class="hr010v2-topbar">
+                <h1>인력 운영 대시보드</h1>
+                <div class="hr010v2-topbar__meta" aria-label="기준 일자">
+                    <span class="hr010v2-topbar__today">Today</span>
+                    <span class="hr010v2-topbar__date" id="hr010v2TodayLabel">4월 20일 (월)</span>
+                </div>
+            </div>
+
+            <div class="hr010v2-kpi-grid" id="hr010v2KpiGrid"></div>
+
+            <div class="hr010v2-main-grid">
+                <article class="hr010v2-panel hr010v2-panel--health">
+                    <div class="hr010v2-panel__head">
+                        <div>
+                            <p class="hr010v2-eyebrow">현재 가용</p>
+                            <h3>투입 가능 현황</h3>
+                        </div>
+                    </div>
+
+                    <div class="hr010v2-health-layout">
+                        <div class="hr010v2-health-ring">
+                            <div class="hr010v2-ring" id="hr010v2HealthRing" style="--value: 0;">
+                                <div class="hr010v2-ring__inner">
+                                    <strong id="hr010v2HealthScore">0%</strong>
+                                    <span id="hr010v2HealthLabel">데이터 대기</span>
+                                </div>
+                            </div>
+                            <p class="hr010v2-health-footnote" id="hr010v2HealthFootnote">즉시와 2주 내 투입 가능 인원을 기준으로 계산합니다.</p>
+                        </div>
+
+                        <div class="hr010v2-health-stats" id="hr010v2HealthStats"></div>
+                    </div>
+                </article>
+
+                <article class="hr010v2-panel hr010v2-panel--supply">
+                    <div class="hr010v2-panel__head">
+                        <div>
+                            <p class="hr010v2-eyebrow">기술 수급</p>
+                            <h3>기술별 인력 수급 현황</h3>
+                        </div>
+                    </div>
+
+                    <div class="hr010v2-supply-table">
+                        <div class="hr010v2-supply-table__head">
+                            <span>기술</span>
+                            <span>현황</span>
+                            <span>즉시+단기</span>
+                            <span>판정</span>
+                        </div>
+                        <div class="hr010v2-supply-table__body" id="hr010v2SkillRows"></div>
+                    </div>
+                </article>
+
+                <article class="hr010v2-panel hr010v2-panel--alerts">
+                    <div class="hr010v2-panel__head">
+                        <div>
+                            <p class="hr010v2-eyebrow">확인 필요</p>
+                            <h3>주요 알림</h3>
+                        </div>
+                    </div>
+
+                    <div class="hr010v2-alert-list" id="hr010v2AlertList"></div>
+                </article>
+
+                <article class="hr010v2-panel hr010v2-panel--timeline">
+                    <div class="hr010v2-panel__head">
+                        <div>
+                            <p class="hr010v2-eyebrow">주간 예정</p>
+                            <h3>인력 수급 / 주간 예정</h3>
+                        </div>
+                    </div>
+
+                    <div class="hr010v2-weekly-bars" id="hr010v2WeeklyBars"></div>
+                </article>
+
+                <article class="hr010v2-panel hr010v2-panel--grade">
+                    <div class="hr010v2-panel__head">
+                        <div>
+                            <p class="hr010v2-eyebrow">등급 분포</p>
+                            <h3>등급별 투입 가능 인력</h3>
+                        </div>
+                    </div>
+
+                    <div class="hr010v2-grade-chart" id="hr010v2GradeBars"></div>
+                </article>
+
+                <article class="hr010v2-panel hr010v2-panel--pool">
+                    <div class="hr010v2-panel__head">
+                        <div>
+                            <p class="hr010v2-eyebrow">추천 인력</p>
+                            <h3>추천 인력 프로필</h3>
+                        </div>
+                        <div class="hr010v2-panel__actions">
+                            <button type="button" class="hr010v2-panel-btn" id="hr010CreateBtn">
+                                <img src="/icons/btn-ico-plus.png" alt="" aria-hidden="true">
+                                <span>등록</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="hr010v2-recommend-list" id="hr010v2RecommendList"></div>
+                </article>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/api/hr/hr010.js"></script>
+</th:block>
+
+</html>

@@ -14,7 +14,14 @@ export const menuData = [
     type: "A"
   },
   {
-    title: "프로젝트",
+    title: "인적사항 V2",
+    path: "/hr010v2",
+    icon: "employee",
+    visible: false,
+    type: "A"
+  },
+  {
+    title: "진행 프로젝트",
     path: "/hr020",
     icon: "project",
     visible: true,
