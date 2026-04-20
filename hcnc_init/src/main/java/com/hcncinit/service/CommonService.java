@@ -1,29 +1,33 @@
 package com.hcncinit.service;
 
-import com.hcncinit.logging.QryLog;
-import com.hcncinit.config.PoiRowInsertUtil;
-import jakarta.servlet.ServletOutputStream;
-import jakarta.servlet.http.HttpServletResponse;
-import org.apache.ibatis.session.SqlSession;
-import org.apache.poi.xssf.usermodel.XSSFCell;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.stereotype.Service;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static com.hcncinit.config.PoiRowInsertUtil.*;
+import org.apache.ibatis.session.SqlSession;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.stereotype.Service;
+
+import static com.hcncinit.config.PoiRowInsertUtil.copyRowMerges;
+import static com.hcncinit.config.PoiRowInsertUtil.copyRowStyle;
+import static com.hcncinit.config.PoiRowInsertUtil.deleteRowAndFixMerges;
+import static com.hcncinit.config.PoiRowInsertUtil.getOrCreateRow;
+import static com.hcncinit.config.PoiRowInsertUtil.insertRowsAndFixMerges;
+import static com.hcncinit.config.PoiRowInsertUtil.setCellValueKeepStyle;
+import com.hcncinit.logging.QryLog;
+
+import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.http.HttpServletResponse;
 
 @Service("CommonService")
 public class CommonService {
+
     @Autowired
     private SqlSession sqlSession;
 
@@ -47,10 +51,8 @@ public class CommonService {
         List<Map<String, Object>> sheet6Data01 = this.sqlSession.selectList("com.hcncinit.CommonMapper.get_rate_info_excel", map);
         List<Map<String, Object>> sheet6Data02 = this.sqlSession.selectList("com.hcncinit.CommonMapper.get_avl_info_excel", map);
 
-        try (InputStream is =
-                     new ClassPathResource(TEMPLATE_PATH).getInputStream();
-             XSSFWorkbook wb = new XSSFWorkbook(is);
-             ServletOutputStream os = response.getOutputStream()) {
+        try (InputStream is
+                = new ClassPathResource(TEMPLATE_PATH).getInputStream(); XSSFWorkbook wb = new XSSFWorkbook(is); ServletOutputStream os = response.getOutputStream()) {
 
             fillSheet1(wb.getSheetAt(0), sheet1Data);
             fillSheet2(wb.getSheetAt(1), sheet2Data01, sheet2Data02);
@@ -73,24 +75,24 @@ public class CommonService {
         int templateRowIndex = 2;
 
         Map<String, Integer> colMap = Map.ofEntries(
-            Map.entry("dev_nm", 0),
-            Map.entry("brdt", 1),
-            Map.entry("tel", 2),
-            Map.entry("email", 3),
-            Map.entry("region", 4),
-            Map.entry("main_lang", 5),
-            Map.entry("exp_yr", 6),
-            Map.entry("edu_last", 7),
-            Map.entry("cert_txt", 8),
-            Map.entry("work_md", 9),
-            Map.entry("hope_rate_amt", 10),
-            Map.entry("ctrt_typ", 11),
-            Map.entry("org_nm", 16),
-            Map.entry("biz_typ", 17),
-            Map.entry("st_dt", 18),
-            Map.entry("ed_dt", 19),
-            Map.entry("amt", 20),
-            Map.entry("remark", 22)
+                Map.entry("dev_nm", 0),
+                Map.entry("brdt", 1),
+                Map.entry("tel", 2),
+                Map.entry("email", 3),
+                Map.entry("region", 4),
+                Map.entry("main_lang", 5),
+                Map.entry("exp_yr", 6),
+                Map.entry("edu_last", 7),
+                Map.entry("cert_txt", 8),
+                Map.entry("work_md", 9),
+                Map.entry("hope_rate_amt", 10),
+                Map.entry("ctrt_typ", 11),
+                Map.entry("org_nm", 16),
+                Map.entry("biz_typ", 17),
+                Map.entry("st_dt", 18),
+                Map.entry("ed_dt", 19),
+                Map.entry("amt", 20),
+                Map.entry("remark", 22)
         );
 
         fillByMap_rvc(sheet, data, startRow, startCol, templateRowIndex, colMap);
@@ -157,8 +159,8 @@ public class CommonService {
 
         Map<String, Integer> colMap = Map.of(
                 "st_ed_dt", 1,
-                "cust_nm",   2,
-                "prj_nm",    3,
+                "cust_nm", 2,
+                "prj_nm", 3,
                 "job_cd", 4,
                 "stack_txt", 5,
                 "remark", 6
@@ -183,7 +185,7 @@ public class CommonService {
 
         Map<String, Integer> colMap = Map.of(
                 "st_ed_dt", 1,
-                "prj_nm",    2,
+                "prj_nm", 2,
                 "job_cd", 3,
                 "alloc_pct", 4,
                 "remark", 5
@@ -207,7 +209,7 @@ public class CommonService {
         deleteRowAndFixMerges(sheet, startRow, false);
 
         Map<String, Integer> colMap = Map.of(
-                "cd_nm",   1,
+                "cd_nm", 1,
                 "lv1", 2,
                 "lv2", 3,
                 "lv3", 4,
@@ -253,7 +255,7 @@ public class CommonService {
         deleteRowAndFixMerges(sheet, startRow, false);
 
         Map<String, Integer> colMap = Map.of(
-                "dt",   1,
+                "dt", 1,
                 "prj_nm", 2,
                 "rate_amt", 3,
                 "remark", 4
@@ -286,10 +288,9 @@ public class CommonService {
     /* =========================================================
        공통 처리 (Map → Row)
        ========================================================= */
-
     // 콤마(,) 뒤에 띄어쓰기 추가할 컬럼들 정의
-    private static final Set<String> COMMA_FORMAT_KEYS =
-            Set.of("main_lang", "skl_id_lst", "stack_txt");
+    private static final Set<String> COMMA_FORMAT_KEYS
+            = Set.of("main_lang", "skl_id_lst", "stack_txt");
 
     private void fillByMap(
             XSSFSheet sheet,
@@ -323,10 +324,10 @@ public class CommonService {
     private void fillByMap_rvc(
             XSSFSheet sheet,
             Map<String, Object> data,
-            int startRow,          // 시작 행
-            int startCol,          // 고정 컬럼
-            int templateRowIndex,  // 서식 기준 행
-            Map<String, Integer> rowMap  // key → row offset
+            int startRow, // 시작 행
+            int startCol, // 고정 컬럼
+            int templateRowIndex, // 서식 기준 행
+            Map<String, Integer> rowMap // key → row offset
     ) {
 
         for (Map.Entry<String, Integer> entry : rowMap.entrySet()) {
@@ -344,7 +345,7 @@ public class CommonService {
                     sheet,
                     row,
                     templateRowIndex,
-                    startCol,   // ✅ 컬럼 고정
+                    startCol, // ✅ 컬럼 고정
                     value
             );
         }
@@ -352,8 +353,12 @@ public class CommonService {
 
     // 콤마(,) 뒤에 띄어쓰기 추가
     private Object formatCommaText(Object value) {
-        if (!(value instanceof String str)) return value;
-        if (!str.contains(",")) return str;
+        if (!(value instanceof String str)) {
+            return value;
+        }
+        if (!str.contains(",")) {
+            return str;
+        }
 
         return String.join(", ", str.split("\\s*,\\s*"));
     }

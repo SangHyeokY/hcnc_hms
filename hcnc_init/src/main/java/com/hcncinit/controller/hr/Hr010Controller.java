@@ -6,7 +6,6 @@ import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -123,7 +122,7 @@ public class Hr010Controller {
         hr010Service.delete_hr010(param);
         mv.addObject("result", "success");
         return mv;
-        
+
     }
 
     // [기본 인적사항] > 등급 계산
@@ -136,14 +135,12 @@ public class Hr010Controller {
     }
 
     //---------------------------------------------------------------
-
     private static final Set<String> HR010_EDITOR_ROLE_SET = Set.of("01", "02", "03");   // 편집권한
 
     // 권한 확인
     private boolean canEditHr010(HttpSession session) {
         return HR010_EDITOR_ROLE_SET.contains(getLoginRoleCd(session));
     }
-    
 
     private String getLoginRoleCd(HttpSession session) {
         if (session == null) {
@@ -165,4 +162,3 @@ public class Hr010Controller {
     }
 
 }
-

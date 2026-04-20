@@ -12253,17 +12253,13 @@ body.hr011-project-eval-modal-open {
     grid-template-columns: minmax(0, 750px) 358px !important;
     gap: 14px !important;
     padding: 16px 20px !important;
-    transition: gap 0.96s cubic-bezier(0.22, 1, 0.36, 1) !important,
-      padding 0.96s cubic-bezier(0.22, 1, 0.36, 1) !important,
-      grid-template-columns 0.96s cubic-bezier(0.22, 1, 0.36, 1) !important;
+    transition: gap 0.96s cubic-bezier(0.22, 1, 0.36, 1) !important, padding 0.96s cubic-bezier(0.22, 1, 0.36, 1) !important,grid-template-columns 0.96s cubic-bezier(0.22, 1, 0.36, 1) !important;
   }
 
   body.hr011-project-eval-modal-open .hr011-detail-wrap .hr011-ref-layout[data-ref-view="project"] .hr011-ref-project-detail-panel--info {
     max-width: 750px !important;
     padding: 27.5px 20px !important;
-    transition: width 0.96s cubic-bezier(0.22, 1, 0.36, 1) !important,
-      max-width 0.96s cubic-bezier(0.22, 1, 0.36, 1) !important,
-      padding 0.96s cubic-bezier(0.22, 1, 0.36, 1) !important;
+    transition: width 0.96s cubic-bezier(0.22, 1, 0.36, 1) !important, max-width 0.96s cubic-bezier(0.22, 1, 0.36, 1) !important,padding 0.96s cubic-bezier(0.22, 1, 0.36, 1) !important;
   }
 
   .hr011-detail-wrap .hr011-ref-layout[data-ref-view="project"] .hr011-ref-project-detail-list {
@@ -12387,15 +12383,6 @@ body.hr011-project-eval-modal-open {
     word-break: break-word !important;
   }
 
-  .hr011-detail-wrap .hr011-ref-layout[data-ref-view="profile"] .hr011-ref-profile-table tr:last-child > th,
-  .hr011-detail-wrap .hr011-ref-layout[data-ref-view="profile"] .hr011-ref-profile-table tr:last-child > td {
-    /* border-bottom: 1px solid #d9dee7 !important; */
-  }
-
-  .hr011-detail-wrap .hr011-ref-layout[data-ref-view="profile"] .hr011-ref-profile-table th:last-child,
-  .hr011-detail-wrap .hr011-ref-layout[data-ref-view="profile"] .hr011-ref-profile-table td:last-child {
-    /* border-right: 1px solid #d9dee7 !important; */
-  }
 
   .hr011-detail-wrap .hr011-ref-layout[data-ref-view="profile"] .hr011-ref-profile-table-row {
     height: 50px !important;
