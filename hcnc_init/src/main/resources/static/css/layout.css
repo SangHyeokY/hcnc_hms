@@ -527,9 +527,13 @@ footer {width:100%; height:30px; line-height: 30px; padding:0 20px; display: fle
  section.search-area form {width: 100% !important;}
  section.white-full.no-white { background: none; padding: 0; border-radius: 0; border: none;  height: 100%; box-shadow: none;}
  .search-info { display: flex; gap: 70px; flex: 1; min-width: 0; align-items: center; flex-wrap: nowrap; }
+
 .search-area .search-info .search-input label,
 .search-area .search-info .search-select .search-combo-label,
-.search-area .search-info .search-select .search-useyn-label {
+.search-area .search-info .search-select .search-useyn-label,
+#main-lang-picker-area .main-lang-picker-search-row>label,
+#hr012-skill-picker-area .hr012-skill-picker-search-row>label,
+#hr013-skill-picker-area .hr013-skill-picker-search-row>label {
     border-radius: 72px;
     border: 0;
     background: #E0EDFF;
@@ -543,7 +547,7 @@ footer {width:100%; height:30px; line-height: 30px; padding:0 20px; display: fle
     line-height: 1.2;
 }
 .search-select.search-useyn-radio {margin-left: 0; display: inline-flex; align-items: center; gap: 8px; white-space: nowrap;}
- .search-select.search-useyn-radio .search-useyn-label {margin: 0;}
+ /*.search-select.search-useyn-radio .search-useyn-label {margin: 0;}*/
  .search-select.search-useyn-radio .radio-box {display: inline-flex; align-items: center; gap: 14px;}
  .search-select.search-useyn-radio .radio-box label {display: inline-flex; align-items: center; gap: 6px; margin-right: 0;}
  /* Main */
