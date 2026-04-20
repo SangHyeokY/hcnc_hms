@@ -1,23 +1,26 @@
 package com.hcncinit.config;
 
-import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.util.CellRangeAddress;
-import org.apache.poi.xssf.usermodel.*;
-
-        import java.util.ArrayList;
+import java.util.ArrayList;
 import java.util.List;
+
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
 
 public class PoiRowInsertUtil {
 
     /**
      * 특정 위치(insertRowIdx)에 rowsToInsert 만큼 "행 삽입" + "병합영역 보정"
      *
-     * @param sheet        대상 시트
+     * @param sheet 대상 시트
      * @param insertRowIdx 삽입할 행 index (0-based)
      * @param rowsToInsert 삽입할 행 수 (보통 1)
      */
     public static void insertRowsAndFixMerges(XSSFSheet sheet, int insertRowIdx, int rowsToInsert) {
-        if (rowsToInsert <= 0) return;
+        if (rowsToInsert <= 0) {
+            return;
+        }
 
         // 1) 병합영역 "복제"해서 저장 (원본 객체 재사용/변형 방지)
         List<CellRangeAddress> original = new ArrayList<>();
@@ -53,29 +56,30 @@ public class PoiRowInsertUtil {
         // 5) 삽입된 행 생성
         for (int i = 0; i < rowsToInsert; i++) {
             int r = insertRowIdx + i;
-            if (sheet.getRow(r) == null) sheet.createRow(r);
+            if (sheet.getRow(r) == null) {
+                sheet.createRow(r);
+            }
         }
     }
 
     /**
      * 병합영역을 "행 삽입"에 맞게 보정
      *
-     * 규칙:
-     *  A) 병합영역이 삽입 위치 아래에 완전히 있으면 => firstRow/lastRow 모두 +n 이동
-     *  B) 병합영역이 삽입 위치를 "가로지르면"(firstRow < insertRow <= lastRow) => lastRow만 +n 확장
-     *  C) 그 외 => 변화 없음
+     * 규칙: A) 병합영역이 삽입 위치 아래에 완전히 있으면 => firstRow/lastRow 모두 +n 이동 B) 병합영역이 삽입
+     * 위치를 "가로지르면"(firstRow < insertRow <= lastRow) => lastRow만 +n 확장 C) 그 외 =>
+     * 변화 없음
      */
     private static CellRangeAddress fixMergedRegionForRowInsert(
             CellRangeAddress region, int insertRowIdx, int rowsToInsert
     ) {
         int firstRow = region.getFirstRow();
-        int lastRow  = region.getLastRow();
+        int lastRow = region.getLastRow();
         int firstCol = region.getFirstColumn();
-        int lastCol  = region.getLastColumn();
+        int lastCol = region.getLastColumn();
 
         if (firstRow >= insertRowIdx) {
             firstRow += rowsToInsert;
-            lastRow  += rowsToInsert;
+            lastRow += rowsToInsert;
         } else if (firstRow < insertRowIdx && lastRow >= insertRowIdx) {
             lastRow += rowsToInsert;
         }
@@ -84,23 +88,30 @@ public class PoiRowInsertUtil {
     }
 
     // ---- (선택) 템플릿 행 스타일 복사 유틸 ----
-
     public static void copyRowStyle(XSSFSheet sheet, int templateRowIdx, int targetRowIdx) {
         XSSFRow templateRow = sheet.getRow(templateRowIdx);
-        if (templateRow == null) return;
+        if (templateRow == null) {
+            return;
+        }
 
         XSSFRow targetRow = sheet.getRow(targetRowIdx);
-        if (targetRow == null) targetRow = sheet.createRow(targetRowIdx);
+        if (targetRow == null) {
+            targetRow = sheet.createRow(targetRowIdx);
+        }
 
         targetRow.setHeight(templateRow.getHeight());
 
         short lastCellNum = templateRow.getLastCellNum();
         for (int c = 0; c < lastCellNum; c++) {
             XSSFCell tCell = templateRow.getCell(c);
-            if (tCell == null) continue;
+            if (tCell == null) {
+                continue;
+            }
 
             XSSFCell cell = targetRow.getCell(c);
-            if (cell == null) cell = targetRow.createCell(c);
+            if (cell == null) {
+                cell = targetRow.createCell(c);
+            }
 
             cell.setCellStyle(tCell.getCellStyle());
             // 타입까지 굳이 복제할 필요는 없지만 템플릿이 명확하면 도움이 됩니다.
@@ -110,7 +121,9 @@ public class PoiRowInsertUtil {
 
     public static void setCellValueSafe(XSSFRow row, int colIdx, Object value) {
         XSSFCell cell = row.getCell(colIdx);
-        if (cell == null) cell = row.createCell(colIdx);
+        if (cell == null) {
+            cell = row.createCell(colIdx);
+        }
 
         if (value == null) {
             cell.setBlank();
@@ -123,7 +136,6 @@ public class PoiRowInsertUtil {
         }
     }
 
-
     public static XSSFRow getOrCreateRow(XSSFSheet sheet, int rowIdx) {
         XSSFRow row = sheet.getRow(rowIdx);
         return (row != null) ? row : sheet.createRow(rowIdx);
@@ -132,20 +144,28 @@ public class PoiRowInsertUtil {
     public static void copyTemplateRowStyle(
             XSSFSheet sheet, int templateRowIdx, int targetRowIdx) {
 
-        if (templateRowIdx == targetRowIdx) return;
+        if (templateRowIdx == targetRowIdx) {
+            return;
+        }
 
         XSSFRow templateRow = sheet.getRow(templateRowIdx);
-        if (templateRow == null) return;
+        if (templateRow == null) {
+            return;
+        }
 
         XSSFRow targetRow = getOrCreateRow(sheet, targetRowIdx);
         targetRow.setHeight(templateRow.getHeight());
 
         for (int c = 0; c < templateRow.getLastCellNum(); c++) {
             XSSFCell tCell = templateRow.getCell(c);
-            if (tCell == null) continue;
+            if (tCell == null) {
+                continue;
+            }
 
             XSSFCell cell = targetRow.getCell(c);
-            if (cell == null) cell = targetRow.createCell(c);
+            if (cell == null) {
+                cell = targetRow.createCell(c);
+            }
 
             cell.setCellStyle(tCell.getCellStyle());
             cell.setCellType(tCell.getCellType());
@@ -160,7 +180,9 @@ public class PoiRowInsertUtil {
             Object value) {
 
         XSSFCell cell = targetRow.getCell(col);
-        if (cell == null) cell = targetRow.createCell(col);
+        if (cell == null) {
+            cell = targetRow.createCell(col);
+        }
 
         XSSFRow templateRow = sheet.getRow(templateRowIndex);
         if (templateRow != null && templateRow.getCell(col) != null) {
@@ -201,7 +223,9 @@ public class PoiRowInsertUtil {
 
             for (int c = 0; c < templateRow.getLastCellNum(); c++) {
                 XSSFCell tCell = templateRow.getCell(c);
-                if (tCell == null) continue;
+                if (tCell == null) {
+                    continue;
+                }
 
                 XSSFCell cell = newRow.createCell(c);
                 cell.setCellStyle(tCell.getCellStyle());
@@ -219,7 +243,7 @@ public class PoiRowInsertUtil {
             // 템플릿 행을 포함하는 병합만 골라서
             if (r.getFirstRow() <= templateRowIdx && templateRowIdx <= r.getLastRow()) {
                 int rowSpanStart = r.getFirstRow() - templateRowIdx;
-                int rowSpanEnd   = r.getLastRow()  - templateRowIdx;
+                int rowSpanEnd = r.getLastRow() - templateRowIdx;
 
                 CellRangeAddress copied = new CellRangeAddress(
                         targetRowIdx + rowSpanStart,
@@ -244,11 +268,10 @@ public class PoiRowInsertUtil {
                 CellRangeAddress region = sheet.getMergedRegion(i);
 
                 // 삭제 대상 행을 포함하는 병합이면 제거
-                if (region.getFirstRow() <= deleteRowIdx &&
-                        region.getLastRow() >= deleteRowIdx) {
+                if (region.getFirstRow() <= deleteRowIdx
+                        && region.getLastRow() >= deleteRowIdx) {
                     sheet.removeMergedRegion(i);
-                }
-                // 삭제 행 아래에 있는 병합이면 위로 이동
+                } // 삭제 행 아래에 있는 병합이면 위로 이동
                 else if (region.getFirstRow() > deleteRowIdx) {
                     sheet.removeMergedRegion(i);
                     CellRangeAddress moved = new CellRangeAddress(
@@ -275,4 +298,3 @@ public class PoiRowInsertUtil {
         }
     }
 }
-

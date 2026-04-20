@@ -12295,15 +12295,6 @@ body.hr011-project-eval-modal-open {
     word-break: break-word !important;
   }
 
-  .hr011-detail-wrap .hr011-ref-layout[data-ref-view="profile"] .hr011-ref-profile-table tr:last-child > th,
-  .hr011-detail-wrap .hr011-ref-layout[data-ref-view="profile"] .hr011-ref-profile-table tr:last-child > td {
-    /* border-bottom: 1px solid #d9dee7 !important; */
-  }
-
-  .hr011-detail-wrap .hr011-ref-layout[data-ref-view="profile"] .hr011-ref-profile-table th:last-child,
-  .hr011-detail-wrap .hr011-ref-layout[data-ref-view="profile"] .hr011-ref-profile-table td:last-child {
-    /* border-right: 1px solid #d9dee7 !important; */
-  }
 
   .hr011-detail-wrap .hr011-ref-layout[data-ref-view="profile"] .hr011-ref-profile-table-row {
     height: 50px !important;

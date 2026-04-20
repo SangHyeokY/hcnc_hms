@@ -2,9 +2,7 @@ package com.hcncinit.controller.login;
 
 import java.util.Map;
 
-import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -14,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.hcncinit.service.cm.Cm010Service;
+
+import jakarta.servlet.http.HttpSession;
 
 @Controller
 public class LoginController {
@@ -62,7 +62,7 @@ public class LoginController {
         }
         String pwdHash = String.valueOf(user.get("pwd_hash"));
         // BCrypt 암호화 방식으로 암화화 된 데이터 혹은 일반 문자열로 저장된 데이터 모두 검증 (※ 추후 일반 문자열에 대한 조건은 제외해야 함.)
-        if (!passwordEncoder.matches(password, pwdHash) && !pwdHash.equals(password)){
+        if (!passwordEncoder.matches(password, pwdHash) && !pwdHash.equals(password)) {
             mv.addObject("success", false);
             mv.addObject("message", "아이디 또는 비밀번호가 올바르지 않습니다.");
             return mv;
