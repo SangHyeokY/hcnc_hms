@@ -91,8 +91,6 @@ let hr011Mode = "view";
 window.hr011Data = null;
 window.hr011EditUnlocked = false;
 
-// const HR011_FIELDS = "#org_nm, #select_biz_typ, #st_dt, #ed_dt, #amt, #remark"; // 데이터 담을 상수
-
 // 사업자 유형 공통코드
 let bizTypMap = [];
 let bizTypOptions = [];
@@ -448,7 +446,7 @@ function validateUserForm() {
     }
 
     // 소속 구분
-    if (!devTyp || devTyp == "") {
+    if (!devTyp || devTyp === "") {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
@@ -560,7 +558,7 @@ function validateUserForm() {
     }
 
     // KOSA등급
-    if (!kosaGrd || kosaGrd == "") {
+    if (!kosaGrd || kosaGrd === "") {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
@@ -607,7 +605,7 @@ function validateUserForm() {
     syncCareerExpValue();
 
     // 주요분야
-    if (!mainFld || mainFld == "") {
+    if (!mainFld || mainFld === "") {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
@@ -618,7 +616,7 @@ function validateUserForm() {
     }
 
     // 계약 형태
-    if (!ctrtTyp || ctrtTyp == "") {
+    if (!ctrtTyp || ctrtTyp === "") {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
@@ -629,7 +627,7 @@ function validateUserForm() {
     }
 
     // 주요고객사
-    if (!mainCust || mainCust == "") {
+    if (!mainCust || mainCust === "") {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
@@ -883,12 +881,6 @@ function setAmountCaretByDigitIndex(input, digitIndex) {
         pos++;
     }
     input.setSelectionRange(pos, pos);
-}
-
-// caret를 항상 "원" 앞 끝으로 이동
-function moveAmountCaretToEditableEnd(input) {
-    const suffixIndex = getAmountEditableEndIndex(input.value);
-    input.setSelectionRange(suffixIndex, suffixIndex);
 }
 
 // "원" 바로 뒤로 커서 못 가게 제한
@@ -4908,12 +4900,6 @@ const stepFields = {
 
     // 4. 프로젝트 이력
     project: () => window.hr013Table ? window.hr013Table.getData().length : 0,
-
-    // "eval-risk": () => {
-    //     const evalCnt = $("#HR014_TAB_A").find("input, textarea").filter(function () { return $(this).val(); }).length;
-    //     const riskCnt = $("#HR014_TAB_B").find("input, textarea").filter(function () { return $(this).val(); }).length;
-    //     return evalCnt + riskCnt;
-    // }
 
     // 5. 평가 및 리스크
     "eval-risk": () => {

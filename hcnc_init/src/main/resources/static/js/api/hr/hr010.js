@@ -966,22 +966,25 @@ function formatGradeLabel(rank, score) {
 }
 
 // 계약단가(,),(테이블표)
-function amountFormatter(value, data, cell, row, options) {
-    if (value === null || value === undefined || value === "") {
-        return "";
-    }
-    return formatAmount(value);
+function amountFormatter(value) {
+    if (!value) return "";
+
+    const num = Number(value);
+    if (isNaN(num)) return "";
+
+    const man = Math.floor(num / 10000);
+
+    return formatAmount(man) + "만원";
 }
 
 // 팝업에서도 마찬가지로 (,) 표시
 function formatAmount(value) {
     if (value === null || value === undefined || value === "") return "";
 
-    const numeric = value
+    return value
         .toString()
         .replace(/[^0-9]/g, "")
         .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-    return numeric ? numeric + "원" : "";
 }
 
 // 경력 표시
@@ -1106,33 +1109,9 @@ function filterHr010RowsByType(list) {
 // 페이지 나누기
 function getPagedList(list) {
     let size = hr010Paging.size;
-    // if (currentHr010ViewMode === "card") {
-    //     size = getCardPageSize();
-    // }
     const start = (hr010Paging.page - 1) * size;
     return list.slice(start, start + size);
 }
-
-// 카드 나누기 (cardView)
-// function getCardColumns() {
-//     const container = document.getElementById("CARD_HR010_A");
-//     if (!container) return 4;
-//
-//     const card = container.querySelector(".user-card");
-//     if (!card) return 4;
-//
-//     const containerWidth = container.clientWidth;
-//     const cardWidth = card.offsetWidth;
-//
-//     return Math.max(1, Math.floor(containerWidth / cardWidth));
-// }
-
-// cardView로 보여줄 최대 row 설정
-// function getCardPageSize() {
-//     const cols = getCardColumns();
-//     const rows = 3; // 한 페이지에 보여줄 줄 수 있는 row
-//     return cols * rows;
-// }
 
 // 페이지 렌더링
 function renderHr010Pager() {
@@ -1140,10 +1119,6 @@ function renderHr010Pager() {
     if (!pagerRoot) return;
 
     let pager = pagerRoot.querySelector(".hr010-pager");
-
-    // const size = currentHr010ViewMode === "card"
-    //     ? getCardPageSize()
-    //     : hr010Paging.size;
 
     const size = hr010Paging.size;
     const totalPage = Math.ceil(hr010Paging.total / size);
@@ -1476,13 +1451,6 @@ function getContractTypeLabel(row) {
 function getKosaLabel(row) {
     return getDropdownOptionLabel("kosa_grd_cd", row.kosa_grd_cd) || row.kosa_grd_cd || "-";
 }
-
-// function getProfileMetaSummary(row) {
-//     const career = formatCareerYearMonth(row.exp_yr) || "-";
-//     const contract = getContractTypeLabel(row);
-//     const kosa = getKosaLabel(row);
-//     return `${escapeHtml(career)} · ${escapeHtml(contract)} · ${escapeHtml(kosa)}`;
-// }
 
 // 표기되는 별 갯수가 매칭이 안되는데...(최대 4개로 축소)
 function getKosaStarCount(row) {
