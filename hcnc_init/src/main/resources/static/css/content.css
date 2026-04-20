@@ -1624,19 +1624,19 @@ button.btn.btn-add-skill:hover,
 }
 
 /* 소속 구분 (직원, 프리랜서) */
-#select_dev_typ {
-  background: #ED24551F;
-  border-radius: 6px;
-  border: 1px solid #ED24551F;
-  -webkit-text-fill-color: #ED2455;
-  font-weight: 500;
-  height: 40px;
-}
+/*#select_dev_typ {*/
+/*  background: #ED24551F;*/
+/*  border-radius: 6px;*/
+/*  border: 1px solid #ED24551F;*/
+/*  -webkit-text-fill-color: #ED2455;*/
+/*  font-weight: 500;*/
+/*  height: 40px;*/
+/*}*/
 
-.selectedDevTyp {
-  background: url(../images/common/ico-arrow-down.png) calc(100% - 10px) center no-repeat #ED24551F !important;
-  background-size: 14px !important;
-}
+/*.selectedDevTyp {*/
+/*  background: url(../images/common/ico-arrow-down.png) calc(100% - 10px) center no-repeat #ED24551F !important;*/
+/*  background-size: 14px !important;*/
+/*}*/
 
 #TABLE_MAIN_LANG_PICKER .main-lang-skill-chip-wrap,
 #TABLE_HR012_SKILL_PICKER .hr012-skill-chip-wrap,
@@ -1962,7 +1962,9 @@ button.btn.btn-add-skill:hover,
 .modal-container .form-group select:disabled,
 .modal-container .form-group textarea:disabled,
 .modal-container .form-group input:read-only,
-.modal-container .form-group textarea:read-only {background: #DEEDFF; box-shadow: none; border: 1px solid #D9D9D9; cursor: default;}
+.modal-container .form-group textarea:read-only,
+.hr011-detail-wrap .hr011-field-card input.is-readonly,
+.hr011-detail-wrap .hr011-field-card select.is-readonly {background: #DEEDFF; box-shadow: none; border: 1px solid #D9D9D9; cursor: default;}
 .modal-container .form-group textarea {width: 100%; min-width: 0; border-radius: 6px; border: 1px solid #D9D9D9; font-size: 14px;}
 
 /* 모달 - 비고 full */
@@ -2403,9 +2405,10 @@ button.btn.btn-add-skill:hover,
   border-radius: 8px;
 }
 
-#TABLE_HR011_A #amt,
-#TABLE_HR011_A #amt.is-readonly,
-#hope_rate_amt {
+/*#TABLE_HR011_A #amt,*/
+/*#TABLE_HR011_A #amt.is-readonly,*/
+.hr011-field-card #hope_rate_amt,
+.hr011-field-card #amt {
   text-align: right;
 }
 
@@ -6160,7 +6163,7 @@ minmax(142px, 1.02fr); gap:10px; align-items:stretch;}
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
-  /*justify-content: flex-end;*/
+  justify-content: space-between;
 }
 
 .hr011-detail-wrap .hr011-edit-mini-profile {
@@ -6520,7 +6523,7 @@ minmax(142px, 1.02fr); gap:10px; align-items:stretch;}
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-wizard-controls .hr011-page-btn {min-width: 96px;}
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-wizard-controls .hr011-page-btn[disabled] {opacity: 0.5; cursor: not-allowed;}
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-wizard-controls {display: none !important;}
-.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section-head p {display: none;}
+/*.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section-head p {display: none;}*/
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section-head {margin-bottom: 10px;}
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section-head {
   display: flex;
@@ -6545,7 +6548,7 @@ minmax(142px, 1.02fr); gap:10px; align-items:stretch;}
 
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section-head h4 {
   font-family: var(--hcnc-font-display) !important;
-  font-size: 20px;
+  font-size: 24px;
   font-weight: 600;
   line-height: 28px;
   letter-spacing: 0;
@@ -10915,12 +10918,6 @@ body.hr011-project-eval-modal-open {
   padding-inline-end: 10px;
 }
 
-.hr011-detail-wrap .hr011-field-card input.is-readonly,
-.hr011-detail-wrap .hr011-field-card select.is-readonly {
-  background: #f8fbff;
-  color: #1f304a;
-}
-
 .hr011-detail-wrap .hr011-field-card select.is-fixed-field {
   pointer-events: none;
   opacity: 0.98;
@@ -11211,11 +11208,11 @@ body.hr011-project-eval-modal-open {
   max-width: 420px;
 }
 
-.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section-body .hr014-shell.hr011-dual-pane .hr014-tab-panels {
-  display: grid !important;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-}
+/*.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section-body .hr014-shell.hr011-dual-pane .hr014-tab-panels {*/
+/*  display: grid !important;*/
+/*  grid-template-columns: repeat(2, minmax(0, 1fr));*/
+/*  gap: 12px;*/
+/*}*/
 
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section-body .hr014-shell.hr011-dual-pane .hr014-tab-panel {
   display: block !important;
@@ -11314,11 +11311,11 @@ body.hr011-project-eval-modal-open {
   gap: 12px;
 }
 
-.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section-body .tab4-content .hr014-tab-panels {
-  display: grid !important;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-}
+/*.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section-body .tab4-content .hr014-tab-panels {*/
+/*  display: grid !important;*/
+/*  grid-template-columns: repeat(2, minmax(0, 1fr));*/
+/*  gap: 12px;*/
+/*}*/
 
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section-body .tab4-content .hr014-tab-panel {
   display: block !important;

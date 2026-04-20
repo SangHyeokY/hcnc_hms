@@ -26,7 +26,7 @@ const Layout = {
       if (menuItem) {
         this.loadMenu(menuItem, contentsWrap, article);
       } else {
-        console.warn("현재 페이지 정보를 찾을 수 없습니다");
+        // console.warn("현재 페이지 정보를 찾을 수 없습니다");
         this.loadMenu(fallbackItem, contentsWrap, article);
       }
     } else {
