@@ -34,6 +34,13 @@ const hr010GradeOrder = ["S", "A", "B", "C"];
 const HR010_SUGGESTION_TRANSITION_MS = 220;
 const HR010_SUGGESTION_INPUT_DEBOUNCE_MS = 260;
 const HR010_LIST_ENTER_STAGGER_MS = 48;
+const HR010_NAVIGATION_PRESET_STORAGE_KEY = "hr010-navigation-preset";
+let hr010RuntimeFilters = {
+    availability: "",
+    profileCompleteness: "",
+    scoreState: ""
+};
+let hr010PendingNavigationPreset = null;
 
 try {
     currentHr010ViewMode = window.localStorage.getItem("hr010ViewMode") || "card";
@@ -46,8 +53,10 @@ try {
 // ==============================
 $(document).ready(async function () {
     bindEvents();
+    initHr010V2Chrome();
     syncHr010ViewToggle();
     syncHr010FilterSidebar();
+    hr010PendingNavigationPreset = shouldApplyHr010NavigationPreset() ? pullHr010NavigationPreset() : null;
     showLoading();
 
     // 스마트 필터 공통코드 초기화
@@ -63,7 +72,11 @@ $(document).ready(async function () {
 
     renderSelectedTags();
     refreshTagSuggestions();
-    document.querySelector(".hr010-tag-search-box").classList.add("is-ready");
+
+    const tagSearchBox = document.querySelector(".hr010-tag-search-box");
+    if (tagSearchBox) {
+        tagSearchBox.classList.add("is-ready");
+    }
 
     hideLoading();
 
@@ -105,6 +118,15 @@ function bindEvents() {
     $(".hr010-main .btn-search").on("click", function (e) {
         e.preventDefault();
         resetHr010Filters();
+    });
+
+    $(document).on("click", ".js-hr010v2-nav", function (e) {
+        const presetValue = this.getAttribute("data-hr010-preset");
+        const preset = decodeHr010NavigationPreset(presetValue);
+        if (!preset) return;
+
+        e.preventDefault();
+        navigateToHr010WithPreset(preset);
     });
 
     $("#hr010SearchTrigger").on("click", function (e) {
@@ -175,6 +197,16 @@ function bindEvents() {
 
         if (tagType === "keyword") {
             keywordTags = keywordTags.filter(tag => tag !== value);
+            renderSelectedTags();
+            applyFiltersAndRender();
+            return;
+        }
+
+        if (tagType === "special") {
+            if (key && Object.prototype.hasOwnProperty.call(hr010RuntimeFilters, key)) {
+                hr010RuntimeFilters[key] = "";
+            }
+
             renderSelectedTags();
             applyFiltersAndRender();
             return;
@@ -273,17 +305,21 @@ function bindEvents() {
     });
 
     // 검색창 클릭 시, 알아서 검색 영역으로 포커싱
-    document.querySelector('.hr010-tag-search-box')
-        .addEventListener('click', function (e) {
-
+    const tagSearchBox = document.querySelector('.hr010-tag-search-box');
+    if (tagSearchBox) {
+        tagSearchBox.addEventListener('click', function (e) {
             // 버튼 클릭 시 무시
             if (e.target.closest('.hr010-search-icon-btn')) return;
 
             // 이미 input 클릭한 경우도 무시
             if (e.target.classList.contains('hr010-search-input')) return;
 
-            document.getElementById('hr010TagKeywordInput').focus();
+            const input = document.getElementById('hr010TagKeywordInput');
+            if (input) {
+                input.focus();
+            }
         });
+    }
 }
 
 // 카드/리스트 토글 상태 동기화
@@ -332,6 +368,7 @@ async function loadUserTableData() {
         if (!list.length) {
             hr010SourceRows = [];
             refreshDynamicFilterOptions([]);
+            renderHr010V2Dashboard([]);
             renderUserCards([]);
             return;
         }
@@ -357,6 +394,12 @@ async function loadUserTableData() {
 
         hr010SourceRows = list;
         refreshDynamicFilterOptions(list);
+
+        if (hr010PendingNavigationPreset) {
+            applyHr010NavigationPreset(hr010PendingNavigationPreset);
+            hr010PendingNavigationPreset = null;
+        }
+
         applyFiltersAndRender();
         refreshTagSuggestions($("#hr010TagKeywordInput").val());
 
@@ -391,9 +434,940 @@ function applyFiltersAndRender() {
         );
     });
 
+    filtered = filterHr010RowsByRuntimePreset(filtered);
+
+    renderHr010V2Dashboard(filtered);
     hr010Paging.page = 1;
 
     renderUserCards(filtered);
+}
+
+function shouldApplyHr010NavigationPreset() {
+    return Boolean(document.getElementById("CARD_HR010_A")) && !document.getElementById("hr010v2Page");
+}
+
+function pullHr010NavigationPreset() {
+    let preset = null;
+
+    try {
+        const raw = window.sessionStorage.getItem(HR010_NAVIGATION_PRESET_STORAGE_KEY);
+        if (raw) {
+            window.sessionStorage.removeItem(HR010_NAVIGATION_PRESET_STORAGE_KEY);
+            preset = JSON.parse(raw);
+        }
+    } catch (error) {
+        preset = null;
+    }
+
+    if (preset) {
+        return preset;
+    }
+
+    try {
+        const params = new URLSearchParams(window.location.search);
+        const rawParam = params.get("hr010Preset");
+        if (!rawParam) return null;
+
+        const parsed = JSON.parse(decodeURIComponent(rawParam));
+        params.delete("hr010Preset");
+        const cleanQuery = params.toString();
+        const cleanUrl = cleanQuery ? `${window.location.pathname}?${cleanQuery}` : window.location.pathname;
+        window.history.replaceState({}, document.title, cleanUrl);
+        return parsed;
+    } catch (error) {
+        return null;
+    }
+}
+
+function encodeHr010NavigationPreset(preset) {
+    if (!preset) return "";
+
+    try {
+        return encodeURIComponent(JSON.stringify(preset));
+    } catch (error) {
+        return "";
+    }
+}
+
+function decodeHr010NavigationPreset(value) {
+    if (!value) return null;
+
+    try {
+        return JSON.parse(decodeURIComponent(String(value)));
+    } catch (error) {
+        return null;
+    }
+}
+
+function navigateToHr010WithPreset(preset) {
+    if (!preset) {
+        window.location.href = "/hr010";
+        return;
+    }
+
+    const encoded = encodeHr010NavigationPreset(preset);
+
+    try {
+        window.sessionStorage.setItem(HR010_NAVIGATION_PRESET_STORAGE_KEY, JSON.stringify(preset));
+        window.location.href = "/hr010";
+        return;
+    } catch (error) {
+        window.location.href = encoded ? `/hr010?hr010Preset=${encoded}` : "/hr010";
+    }
+}
+
+function clearHr010RuntimeFilters() {
+    hr010RuntimeFilters = {
+        availability: "",
+        profileCompleteness: "",
+        scoreState: ""
+    };
+}
+
+function syncHr010UserTypeTabs() {
+    $(".toggle-filter-chip").removeClass("is-active");
+    $(`.toggle-filter-chip[data-user-type="${currentHr010UserTypeTab}"]`).addClass("is-active");
+}
+
+function applyHr010NavigationPreset(preset) {
+    if (!preset) return;
+
+    currentHr010UserTypeTab = ["all", "staff", "freelancer"].includes(preset.userType) ? preset.userType : "all";
+    clearHr010RuntimeFilters();
+    keywordTags = Array.isArray(preset.keywordTags)
+        ? Array.from(new Set(preset.keywordTags.map(value => String(value || "").trim()).filter(Boolean)))
+        : [];
+
+    Object.keys(selectedFilters).forEach(key => {
+        selectedFilters[key] = [];
+    });
+
+    const presetFilters = preset.filters || {};
+    Object.keys(presetFilters).forEach(key => {
+        if (!selectedFilters[key]) return;
+
+        const values = Array.isArray(presetFilters[key]) ? presetFilters[key] : [presetFilters[key]];
+        selectedFilters[key] = values.map(value => String(value || "").trim()).filter(Boolean);
+    });
+
+    const runtimePreset = preset.runtimeFilters || {};
+    if (runtimePreset.availability) {
+        hr010RuntimeFilters.availability = String(runtimePreset.availability);
+    }
+    if (runtimePreset.profileCompleteness) {
+        hr010RuntimeFilters.profileCompleteness = String(runtimePreset.profileCompleteness);
+    }
+    if (runtimePreset.scoreState) {
+        hr010RuntimeFilters.scoreState = String(runtimePreset.scoreState);
+    }
+
+    if (preset.viewMode) {
+        currentHr010ViewMode = preset.viewMode === "list" ? "list" : "card";
+    }
+
+    syncHr010ViewToggle();
+    syncHr010UserTypeTabs();
+    renderSelectedTags();
+
+    Object.keys(dropdownFilters).forEach(key => {
+        if (key === "kosa_grd_cd") return;
+        renderDropdown(key);
+    });
+}
+
+function filterHr010RowsByRuntimePreset(list) {
+    const currentList = Array.isArray(list) ? list : [];
+    const today = getHr010Today();
+
+    return currentList.filter(row => {
+        if (hr010RuntimeFilters.availability && !matchesHr010AvailabilityPreset(row, hr010RuntimeFilters.availability, today)) {
+            return false;
+        }
+
+        if (hr010RuntimeFilters.profileCompleteness === "low" && !hasHr010CoreFieldGap(row)) {
+            return false;
+        }
+
+        if (hr010RuntimeFilters.scoreState === "ungraded" && Number(row.score) > 0) {
+            return false;
+        }
+
+        return true;
+    });
+}
+
+function matchesHr010AvailabilityPreset(row, presetValue, today) {
+    const availabilityKey = String(presetValue || "").trim();
+    if (!availabilityKey) return true;
+
+    const parsed = parseHr010Date(row.avail_dt);
+    if (!parsed) {
+        return availabilityKey === "coord";
+    }
+
+    const diff = getHr010DiffDays(parsed, today);
+    switch (availabilityKey) {
+        case "now":
+            return diff <= 0;
+        case "week1":
+            return diff > 0 && diff <= 7;
+        case "week2":
+            return diff > 7 && diff <= 14;
+        case "soon":
+            return diff > 0 && diff <= 14;
+        case "later":
+            return diff > 14;
+        case "coord":
+            return false;
+        default:
+            return true;
+    }
+}
+
+function initHr010V2Chrome() {
+    const dateEl = document.getElementById("hr010v2TodayLabel");
+    if (!dateEl) return;
+
+    const today = new Date();
+    dateEl.textContent = today.toLocaleDateString("ko-KR", {
+        month: "long",
+        day: "numeric",
+        weekday: "short"
+    });
+}
+
+function renderHr010V2Dashboard(list) {
+    const dashboardRoot = document.getElementById("hr010v2Page");
+    if (!dashboardRoot) return;
+
+    const filteredList = Array.isArray(list) ? list : [];
+    const stats = getHr010V2DashboardStats(filteredList);
+
+    setHr010Text("hr010v2HealthScore", `${stats.healthScore}%`);
+    setHr010Text("hr010v2HealthLabel", stats.healthLabel);
+    setHr010Text("hr010v2HealthFootnote", stats.healthFootnote);
+
+    const ring = document.getElementById("hr010v2HealthRing");
+    if (ring) {
+        ring.style.setProperty("--value", String(stats.healthScore));
+    }
+
+    setHr010Html("hr010v2KpiGrid", renderHr010V2KpiCards(stats.kpis));
+    setHr010Html("hr010v2HealthStats", renderHr010V2HealthStats(stats));
+    setHr010Html("hr010v2SkillRows", renderHr010V2SkillRows(stats.skillRows));
+    setHr010Html("hr010v2AlertList", renderHr010V2Alerts(stats.alerts));
+    setHr010Html("hr010v2WeeklyBars", renderHr010V2WeeklyBars(stats.timeline));
+    setHr010Html("hr010v2GradeBars", renderHr010V2GradeBars(stats.gradeRows));
+    setHr010Html("hr010v2RecommendList", renderHr010V2RecommendList(stats.recommendRows));
+}
+
+function getHr010V2DashboardStats(list) {
+    const total = list.length;
+    const today = getHr010Today();
+    const staffRows = list.filter(row => resolveUserType(row) === "staff");
+    const staffCount = staffRows.length;
+    const freelancerCount = total - staffCount;
+    const freelancerRows = list.filter(row => resolveUserType(row) === "freelancer");
+    const reliabilityScores = [];
+    const availability = {
+        now: { key: "now", label: "즉시 투입", tone: "good", count: 0 },
+        soon: { key: "soon", label: "2주 내 전환", tone: "info", count: 0 },
+        coord: { key: "coord", label: "일정 협의", tone: "warn", count: 0 },
+        later: { key: "later", label: "2주 이후", tone: "risk", count: 0 }
+    };
+
+    list.forEach(row => {
+        const bucket = getHr010AvailabilityBucket(row, today);
+        availability[bucket.key].count += 1;
+        reliabilityScores.push(getHr010ProfileCompleteness(row));
+    });
+
+    const lowDataCount = list.filter(row => hasHr010CoreFieldGap(row)).length;
+    const ungradedCount = list.filter(row => !(Number(row.score) > 0)).length;
+
+    const reliabilityScore = total
+        ? Math.round(reliabilityScores.reduce((sum, value) => sum + value, 0) / total)
+        : 0;
+    const readyCount = availability.now.count + availability.soon.count;
+    const healthScore = total
+        ? Math.round((readyCount / total) * 100)
+        : 0;
+
+    const healthLabel = total
+        ? `즉시 + 2주 내 ${readyCount}명`
+        : "데이터 대기";
+
+    const healthFootnote = total
+        ? `즉시 ${availability.now.count}명 · 2주 내 ${availability.soon.count}명 · 일정 협의 ${availability.coord.count}명`
+        : "조건에 맞는 인력이 없습니다.";
+
+    return {
+        total,
+        staffCount,
+        freelancerCount,
+        lowDataCount,
+        ungradedCount,
+        reliabilityScore,
+        healthScore,
+        healthLabel,
+        healthFootnote,
+        availability,
+        kpis: buildHr010V2KpiCards(list, {
+            today,
+            staffRows,
+            freelancerRows,
+            availability
+        }),
+        skillRows: buildHr010V2SkillRows(list, today),
+        alerts: buildHr010V2Alerts(list, availability, reliabilityScore, today, lowDataCount, ungradedCount),
+        timeline: buildHr010V2TimelineRows(list, today),
+        gradeRows: buildHr010V2GradeRows(list, today),
+        recommendRows: buildHr010V2RecommendRows(list, today)
+    };
+}
+
+function renderHr010V2KpiCards(kpis) {
+    if (!Array.isArray(kpis) || !kpis.length) {
+        return `<div class="hr010v2-empty">표시할 KPI 데이터가 없습니다.</div>`;
+    }
+
+    return kpis.map(item => `
+        <button type="button" class="hr010v2-kpi-card hr010v2-kpi-card--${item.tone} js-hr010v2-nav" data-hr010-preset="${escapeHtml(encodeHr010NavigationPreset(item.preset))}">
+            <div class="hr010v2-kpi-card__main">
+                <div class="hr010v2-kpi-card__copy">
+                    <span class="hr010v2-kpi-card__label">${escapeHtml(item.label)}</span>
+                    <strong class="hr010v2-kpi-card__value">${escapeHtml(item.value)}</strong>
+                    <span class="hr010v2-kpi-card__meta">${escapeHtml(item.meta)}</span>
+                </div>
+                <div class="hr010v2-kpi-card__spark" aria-hidden="true">
+                    ${renderHr010V2SparkLine(item.sparkline, item.tone)}
+                </div>
+            </div>
+        </button>
+    `).join("");
+}
+
+function renderHr010V2SparkLine(values, tone = "blue") {
+    const points = Array.isArray(values) && values.length ? values : [0, 0, 0, 0, 0, 0];
+    const width = 132;
+    const height = 38;
+    const paddingX = 6;
+    const paddingY = 6;
+    const maxValue = Math.max(...points, 1);
+    const stepX = points.length > 1 ? (width - (paddingX * 2)) / (points.length - 1) : 0;
+    const chartHeight = height - (paddingY * 2);
+
+    const chartPoints = points.map((value, index) => {
+        const x = paddingX + (stepX * index);
+        const y = height - paddingY - ((value / maxValue) * chartHeight);
+        return { x, y };
+    });
+
+    const pathD = chartPoints.map((point, index) => `${index === 0 ? "M" : "L"} ${point.x.toFixed(2)} ${point.y.toFixed(2)}`).join(" ");
+    const baselineY = height - paddingY;
+    const lastPoint = chartPoints[chartPoints.length - 1];
+    const prevPoint = chartPoints[chartPoints.length - 2] || { x: lastPoint.x - 10, y: lastPoint.y };
+    const dx = lastPoint.x - prevPoint.x;
+    const dy = lastPoint.y - prevPoint.y;
+    const length = Math.sqrt((dx * dx) + (dy * dy)) || 1;
+    const ux = dx / length;
+    const uy = dy / length;
+    const arrowSize = 7;
+    const arrowBaseX = lastPoint.x - (ux * arrowSize);
+    const arrowBaseY = lastPoint.y - (uy * arrowSize);
+    const perpX = -uy;
+    const perpY = ux;
+    const arrowSpread = 3.4;
+    const arrowPoints = [
+        `${lastPoint.x.toFixed(2)},${lastPoint.y.toFixed(2)}`,
+        `${(arrowBaseX + (perpX * arrowSpread)).toFixed(2)},${(arrowBaseY + (perpY * arrowSpread)).toFixed(2)}`,
+        `${(arrowBaseX - (perpX * arrowSpread)).toFixed(2)},${(arrowBaseY - (perpY * arrowSpread)).toFixed(2)}`
+    ].join(" ");
+
+    return `
+        <svg class="hr010v2-kpi-trend hr010v2-kpi-trend--${tone}" viewBox="0 0 ${width} ${height}" preserveAspectRatio="none">
+            <path class="hr010v2-kpi-trend__axis" d="M ${paddingX} ${baselineY} L ${width - paddingX} ${baselineY}"></path>
+            <path class="hr010v2-kpi-trend__path" d="${pathD}"></path>
+            <polygon class="hr010v2-kpi-trend__arrow" points="${arrowPoints}"></polygon>
+        </svg>
+    `;
+}
+
+function renderHr010V2HealthStats(stats) {
+    const rows = [
+        {
+            label: stats.availability.now.label,
+            value: `${stats.availability.now.count}명`,
+            percent: stats.total ? Math.round((stats.availability.now.count / stats.total) * 100) : 0,
+            preset: makeHr010NavigationPreset({ runtimeFilters: { availability: "now" } })
+        },
+        {
+            label: stats.availability.soon.label,
+            value: `${stats.availability.soon.count}명`,
+            percent: stats.total ? Math.round((stats.availability.soon.count / stats.total) * 100) : 0,
+            preset: makeHr010NavigationPreset({ runtimeFilters: { availability: "soon" } })
+        },
+        {
+            label: stats.availability.coord.label,
+            value: `${stats.availability.coord.count}명`,
+            percent: stats.total ? Math.round((stats.availability.coord.count / stats.total) * 100) : 0,
+            preset: makeHr010NavigationPreset({ runtimeFilters: { availability: "coord" } })
+        },
+        {
+            label: "데이터 보완 필요",
+            value: `${stats.lowDataCount}명`,
+            percent: stats.total ? Math.round((stats.lowDataCount / stats.total) * 100) : 0,
+            preset: makeHr010NavigationPreset({ runtimeFilters: { profileCompleteness: "low" } })
+        }
+    ];
+
+    return rows.map(row => `
+        <button type="button" class="hr010v2-health-stat js-hr010v2-nav" data-hr010-preset="${escapeHtml(encodeHr010NavigationPreset(row.preset))}">
+            <span class="hr010v2-health-stat__label">${escapeHtml(row.label)}</span>
+            <strong class="hr010v2-health-stat__value">${escapeHtml(row.value)}</strong>
+            <div class="hr010v2-health-stat__bar">
+                <span style="--value:${clampHr010Value(row.percent)}"></span>
+            </div>
+        </button>
+    `).join("");
+}
+
+function renderHr010V2SkillRows(rows) {
+    if (!rows.length) {
+        return `<div class="hr010v2-empty">표시할 기술 수급 데이터가 없습니다.</div>`;
+    }
+
+    return rows.map(row => `
+        <button type="button" class="hr010v2-supply-row ${row.preset ? "js-hr010v2-nav" : ""}" ${row.preset ? `data-hr010-preset="${escapeHtml(encodeHr010NavigationPreset(row.preset))}"` : ""}>
+            <div class="hr010v2-supply-row__skill">
+                <strong>${escapeHtml(row.skill)}</strong>
+                <span>즉시 ${row.nowCount}명 · 2주 내 ${row.soonCount}명</span>
+            </div>
+            <div class="hr010v2-supply-meter">
+                <div class="hr010v2-supply-meter__bar">
+                    <span style="--value:${clampHr010Value(row.readyRatio)}"></span>
+                </div>
+                <div class="hr010v2-supply-meter__meta">
+                    <span>현황 ${row.totalCount}명</span>
+                    <span>가용 ${row.availableCount}명</span>
+                </div>
+            </div>
+            <div class="hr010v2-supply-value">${row.availableCount}명</div>
+            <span class="hr010v2-status-pill hr010v2-status-pill--${row.statusTone}">${escapeHtml(row.statusLabel)}</span>
+        </button>
+    `).join("");
+}
+
+function renderHr010V2Alerts(alerts) {
+    if (!alerts.length) {
+        return `<div class="hr010v2-empty">현재 조건에서 바로 확인할 운영 알림이 없습니다.</div>`;
+    }
+
+    return alerts.map(alert => `
+        <button type="button" class="hr010v2-alert-item ${alert.preset ? "js-hr010v2-nav" : ""}" ${alert.preset ? `data-hr010-preset="${escapeHtml(encodeHr010NavigationPreset(alert.preset))}"` : ""}>
+            <div class="hr010v2-alert-item__head">
+                <strong class="hr010v2-alert-item__title">${escapeHtml(alert.title)}</strong>
+                <span class="hr010v2-alert-item__tone hr010v2-alert-item__tone--${alert.tone}">${escapeHtml(alert.badge)}</span>
+            </div>
+            <p class="hr010v2-alert-item__meta">${escapeHtml(alert.meta)}</p>
+        </button>
+    `).join("");
+}
+
+function renderHr010V2WeeklyBars(rows) {
+    if (!rows.length) {
+        return `<div class="hr010v2-empty">예정 데이터를 계산할 수 없습니다.</div>`;
+    }
+
+    const maxCount = Math.max(...rows.map(row => row.count), 1);
+
+    return rows.map(row => {
+        const height = row.count ? Math.max(12, Math.round((row.count / maxCount) * 100)) : 8;
+        return `
+            <button type="button" class="hr010v2-weekbar hr010v2-weekbar--${row.tone} js-hr010v2-nav" data-hr010-preset="${escapeHtml(encodeHr010NavigationPreset(row.preset))}">
+                <div class="hr010v2-weekbar__column">
+                    <span class="hr010v2-weekbar__count">${row.count}</span>
+                    <span class="hr010v2-weekbar__fill" style="--value:${height}"></span>
+                </div>
+                <strong class="hr010v2-weekbar__label">${escapeHtml(row.label)}</strong>
+                <span class="hr010v2-weekbar__meta">${escapeHtml(row.meta)}</span>
+            </button>
+        `;
+    }).join("");
+}
+
+function renderHr010V2GradeBars(rows) {
+    if (!rows.length) {
+        return `<div class="hr010v2-empty">등급 데이터를 계산할 수 없습니다.</div>`;
+    }
+
+    return rows.map(row => `
+        <button type="button" class="hr010v2-grade-card js-hr010v2-nav" data-hr010-preset="${escapeHtml(encodeHr010NavigationPreset(row.preset))}">
+            <div class="hr010v2-grade-card__head">
+                <strong class="hr010v2-grade-card__label">${escapeHtml(row.label)}</strong>
+                <span class="hr010v2-grade-card__percent">${row.readyRatio}%</span>
+            </div>
+            <div class="hr010v2-grade-card__body">
+                <div class="hr010v2-grade-card__ring" style="--value:${clampHr010Value(row.readyRatio)}" aria-hidden="true">
+                    <span class="hr010v2-grade-card__ring-inner">
+                        <strong>${row.readyCount}</strong>
+                        <small>가용</small>
+                    </span>
+                </div>
+                <div class="hr010v2-grade-card__stats">
+                    <div class="hr010v2-grade-card__stat">
+                        <span>전체</span>
+                        <strong>${row.totalCount}명</strong>
+                    </div>
+                    <div class="hr010v2-grade-card__stat">
+                        <span>투입 가능</span>
+                        <strong>${row.readyCount}명</strong>
+                    </div>
+                </div>
+            </div>
+        </button>
+    `).join("");
+}
+
+function renderHr010V2RecommendList(rows) {
+    if (!rows.length) {
+        return `<div class="hr010v2-empty">추천할 인력이 없습니다.</div>`;
+    }
+
+    return rows.map(row => `
+        <a class="hr010v2-recommend-item" href="/hr011?dev_id=${encodeURIComponent(row.devId)}">
+            <div class="hr010v2-recommend-item__avatar">${row.profileMarkup}</div>
+            <div class="hr010v2-recommend-item__body">
+                <div class="hr010v2-recommend-item__title">
+                    <strong>${escapeHtml(row.name)}</strong>
+                    <span class="hr010v2-status-pill hr010v2-status-pill--${row.typeTone}">${escapeHtml(row.typeLabel)}</span>
+                </div>
+                <p class="hr010v2-recommend-item__meta">${escapeHtml(row.skillLabel)} · ${escapeHtml(row.regionLabel)} · ${escapeHtml(row.availabilityLabel)}</p>
+            </div>
+            <div class="hr010v2-recommend-item__score">
+                <strong>${escapeHtml(row.scoreLabel)}</strong>
+                <span class="hr010v2-status-pill hr010v2-status-pill--${row.availabilityTone}">${escapeHtml(row.availabilityBadge)}</span>
+            </div>
+        </a>
+    `).join("");
+}
+
+function buildHr010V2SkillRows(list, today) {
+    const skillMap = new Map();
+
+    list.forEach(row => {
+        const skillCodes = getSkillCodes(row);
+        const skillNames = getSkillNameList(row);
+        const skillCode = skillCodes[0] || "";
+        const skillLabel = skillNames[0] || getPrimarySkillLabel(row);
+        const skill = !skillLabel || skillLabel === "주개발언어 미등록" ? "미등록" : skillLabel;
+        const availability = getHr010AvailabilityBucket(row, today);
+        const mapKey = skillCode || skill;
+        const current = skillMap.get(mapKey) || {
+            skill,
+            skillCode,
+            totalCount: 0,
+            nowCount: 0,
+            soonCount: 0
+        };
+
+        current.totalCount += 1;
+        if (availability.key === "now") current.nowCount += 1;
+        if (availability.key === "soon") current.soonCount += 1;
+        skillMap.set(mapKey, current);
+    });
+
+    return Array.from(skillMap.values())
+        .sort((left, right) => {
+            if (left.skill === "미등록") return 1;
+            if (right.skill === "미등록") return -1;
+            return right.totalCount - left.totalCount;
+        })
+        .slice(0, 5)
+        .map(row => {
+            const availableCount = row.nowCount + row.soonCount;
+            const readyRatio = row.totalCount ? Math.round((availableCount / row.totalCount) * 100) : 0;
+            const statusTone = readyRatio >= 55
+                ? "good"
+                : readyRatio >= 30
+                    ? "warn"
+                    : "risk";
+            const statusLabel = statusTone === "good"
+                ? "양호"
+                : statusTone === "warn"
+                    ? "주의"
+                    : "부족";
+
+            return {
+                ...row,
+                availableCount,
+                readyRatio,
+                statusTone,
+                statusLabel,
+                preset: row.skillCode
+                    ? makeHr010NavigationPreset({ filters: { skl_grp: [row.skillCode] } })
+                    : null
+            };
+        });
+}
+
+function buildHr010V2Alerts(list, availability, reliabilityScore, today, lowDataCount, ungradedCount) {
+    const alerts = [];
+    const skillRows = buildHr010V2SkillRows(list, today);
+
+    skillRows
+        .filter(row => row.statusTone !== "good")
+        .slice(0, 2)
+        .forEach(row => {
+            alerts.push({
+                tone: row.statusTone === "risk" ? "risk" : "warn",
+                badge: row.statusTone === "risk" ? "공급 부족" : "공급 주의",
+                title: `${row.skill} 즉시 투입 가능 인력 점검 필요`,
+                meta: `전체 ${row.totalCount}명 중 즉시/단기 가용 ${row.availableCount}명입니다.`,
+                preset: row.preset
+            });
+        });
+
+    if (availability.coord.count) {
+        alerts.push({
+            tone: "info",
+            badge: "일정 확인",
+            title: `투입 가능일 협의 필요 프로필 ${availability.coord.count}건`,
+            meta: "배치 판단 전에 가용 시점을 먼저 확정하는 것이 좋습니다.",
+            preset: makeHr010NavigationPreset({ runtimeFilters: { availability: "coord" } })
+        });
+    }
+
+    if (lowDataCount) {
+        alerts.push({
+            tone: "warn",
+            badge: "데이터 품질",
+            title: `핵심 필드 보완 필요 프로필 ${lowDataCount}건`,
+            meta: "주개발언어, 단가, 가용일이 비어 있으면 추천 정확도가 낮아집니다.",
+            preset: makeHr010NavigationPreset({ runtimeFilters: { profileCompleteness: "low" } })
+        });
+    }
+
+    if (ungradedCount) {
+        alerts.push({
+            tone: "risk",
+            badge: "평가 미반영",
+            title: `평가 점수 미반영 프로필 ${ungradedCount}건`,
+            meta: "등급 산정 전에는 우선순위 추천이 보수적으로 계산됩니다.",
+            preset: makeHr010NavigationPreset({ runtimeFilters: { scoreState: "ungraded" } })
+        });
+    }
+
+    if (!alerts.length && list.length) {
+        alerts.push({
+            tone: "good",
+            badge: "상태 양호",
+            title: `즉시 또는 단기 투입 가능 인력 ${availability.now.count + availability.soon.count}명 확보`,
+            meta: "현재 조건에서는 운영 리스크보다 선택 가능한 풀이 더 충분합니다.",
+            preset: makeHr010NavigationPreset({ runtimeFilters: { availability: "soon" } })
+        });
+    }
+
+    return alerts.slice(0, 4);
+}
+
+function buildHr010V2TimelineRows(list, today) {
+    const rows = [
+        { label: "즉시", meta: "오늘 가능", tone: "now", count: 0, preset: makeHr010NavigationPreset({ runtimeFilters: { availability: "now" } }) },
+        { label: "+1주", meta: "7일 이내", tone: "soon", count: 0, preset: makeHr010NavigationPreset({ runtimeFilters: { availability: "week1" } }) },
+        { label: "+2주", meta: "14일 이내", tone: "soon", count: 0, preset: makeHr010NavigationPreset({ runtimeFilters: { availability: "week2" } }) },
+        { label: "+3주", meta: "15일 이후", tone: "later", count: 0, preset: makeHr010NavigationPreset({ runtimeFilters: { availability: "later" } }) },
+        { label: "협의", meta: "일정 미확정", tone: "coord", count: 0, preset: makeHr010NavigationPreset({ runtimeFilters: { availability: "coord" } }) }
+    ];
+
+    list.forEach(row => {
+        const parsed = parseHr010Date(row.avail_dt);
+        if (!parsed) {
+            rows[4].count += 1;
+            return;
+        }
+
+        const diff = getHr010DiffDays(parsed, today);
+        if (diff <= 0) {
+            rows[0].count += 1;
+        } else if (diff <= 7) {
+            rows[1].count += 1;
+        } else if (diff <= 14) {
+            rows[2].count += 1;
+        } else {
+            rows[3].count += 1;
+        }
+    });
+
+    return rows;
+}
+
+function buildHr010V2GradeRows(list, today) {
+    const grades = ["S", "A", "B", "C"];
+
+    return grades.map(grade => {
+        const gradeRows = list.filter(row => String(row.grade || "").toUpperCase() === grade);
+        const readyCount = gradeRows.filter(row => {
+            const bucket = getHr010AvailabilityBucket(row, today);
+            return bucket.key === "now" || bucket.key === "soon";
+        }).length;
+
+        return {
+            label: grade,
+            totalCount: gradeRows.length,
+            readyCount,
+            readyRatio: gradeRows.length ? Math.round((readyCount / gradeRows.length) * 100) : 0,
+            preset: makeHr010NavigationPreset({ filters: { grade: [grade] } })
+        };
+    });
+}
+
+function buildHr010V2KpiCards(list, context) {
+    const today = context.today;
+    const staffRows = context.staffRows || [];
+    const freelancerRows = context.freelancerRows || [];
+    const readyNowRows = list.filter(row => getHr010AvailabilityBucket(row, today).key === "now");
+    const readyNowStaffRows = staffRows.filter(row => getHr010AvailabilityBucket(row, today).key === "now");
+    const readyNowFreelancerRows = freelancerRows.filter(row => getHr010AvailabilityBucket(row, today).key === "now");
+    const totalCount = list.length;
+
+    return [
+        {
+            label: "전체 인원",
+            value: `${totalCount}명`,
+            meta: `즉시 ${readyNowRows.length}명 · 2주 내 ${context.availability.soon.count}명`,
+            tone: "coral",
+            sparkline: buildHr010V2AvailabilitySparkline(list, today),
+            preset: makeHr010NavigationPreset()
+        },
+        {
+            label: "직원",
+            value: `${staffRows.length}명`,
+            meta: totalCount ? `전체의 ${Math.round((staffRows.length / totalCount) * 100)}%` : "직원 데이터 없음",
+            tone: "blue",
+            sparkline: buildHr010V2AvailabilitySparkline(staffRows, today),
+            preset: makeHr010NavigationPreset({ userType: "staff" })
+        },
+        {
+            label: "프리랜서",
+            value: `${freelancerRows.length}명`,
+            meta: totalCount ? `전체의 ${Math.round((freelancerRows.length / totalCount) * 100)}%` : "프리랜서 데이터 없음",
+            tone: "indigo",
+            sparkline: buildHr010V2AvailabilitySparkline(freelancerRows, today),
+            preset: makeHr010NavigationPreset({ userType: "freelancer" })
+        },
+        {
+            label: "즉시 투입 가능",
+            value: `${readyNowRows.length}명`,
+            meta: totalCount ? `전체 대비 ${Math.round((readyNowRows.length / totalCount) * 100)}%` : "가용 인력 없음",
+            tone: "violet",
+            sparkline: buildHr010V2AvailabilitySparkline(readyNowRows, today),
+            preset: makeHr010NavigationPreset({ runtimeFilters: { availability: "now" } })
+        },
+        {
+            label: "즉시 투입 가능 (직원)",
+            value: `${readyNowStaffRows.length}명`,
+            meta: staffRows.length ? `직원 중 ${Math.round((readyNowStaffRows.length / staffRows.length) * 100)}%` : "직원 데이터 없음",
+            tone: "mint",
+            sparkline: buildHr010V2AvailabilitySparkline(readyNowStaffRows, today),
+            preset: makeHr010NavigationPreset({ userType: "staff", runtimeFilters: { availability: "now" } })
+        },
+        {
+            label: "즉시 투입 가능 (프리랜서)",
+            value: `${readyNowFreelancerRows.length}명`,
+            meta: freelancerRows.length ? `프리랜서 중 ${Math.round((readyNowFreelancerRows.length / freelancerRows.length) * 100)}%` : "프리랜서 데이터 없음",
+            tone: "sky",
+            sparkline: buildHr010V2AvailabilitySparkline(readyNowFreelancerRows, today),
+            preset: makeHr010NavigationPreset({ userType: "freelancer", runtimeFilters: { availability: "now" } })
+        }
+    ];
+}
+
+function buildHr010V2AvailabilitySparkline(list, today) {
+    const points = [0, 0, 0, 0, 0, 0];
+
+    (Array.isArray(list) ? list : []).forEach(row => {
+        const parsed = parseHr010Date(row.avail_dt);
+        if (!parsed) {
+            points[5] += 1;
+            return;
+        }
+
+        const diff = getHr010DiffDays(parsed, today);
+        if (diff <= 0) {
+            points[0] += 1;
+        } else if (diff <= 7) {
+            points[1] += 1;
+        } else if (diff <= 14) {
+            points[2] += 1;
+        } else if (diff <= 21) {
+            points[3] += 1;
+        } else if (diff <= 35) {
+            points[4] += 1;
+        } else {
+            points[5] += 1;
+        }
+    });
+
+    return points;
+}
+
+function makeHr010NavigationPreset(options = {}) {
+    return {
+        userType: options.userType || "all",
+        filters: options.filters || {},
+        runtimeFilters: options.runtimeFilters || {},
+        keywordTags: Array.isArray(options.keywordTags) ? options.keywordTags : [],
+        viewMode: options.viewMode || currentHr010ViewMode || "card"
+    };
+}
+
+function buildHr010V2RecommendRows(list, today) {
+    return list
+        .slice()
+        .sort((left, right) => {
+            const leftBucket = getHr010AvailabilityBucket(left, today).priority;
+            const rightBucket = getHr010AvailabilityBucket(right, today).priority;
+            if (leftBucket !== rightBucket) return leftBucket - rightBucket;
+
+            const leftScore = Number(left.score) || 0;
+            const rightScore = Number(right.score) || 0;
+            if (leftScore !== rightScore) return rightScore - leftScore;
+
+            return getHr010ProfileCompleteness(right) - getHr010ProfileCompleteness(left);
+        })
+        .slice(0, 4)
+        .map(row => {
+            const availability = getHr010AvailabilityBucket(row, today);
+            const employment = getEmploymentMeta(row);
+
+            return {
+                devId: row.dev_id,
+                name: row.dev_nm || "-",
+                skillLabel: getPrimarySkillLabel(row),
+                regionLabel: `${getSidoLabel(row) || "-"} / ${getWorkModeLabel(row)}`,
+                availabilityLabel: getAvailabilityLabel(row),
+                availabilityBadge: availability.label,
+                availabilityTone: availability.tone,
+                scoreLabel: formatGradeLabel(row.grade, row.score) || "평가 대기",
+                typeLabel: employment.label,
+                typeTone: employment.className === "freelancer" ? "info" : "good",
+                profileMarkup: getProfileMarkup(row)
+            };
+        });
+}
+
+function getHr010AvailabilityBucket(row, today) {
+    const parsed = parseHr010Date(row.avail_dt);
+    if (!parsed) {
+        return { key: "coord", label: "일정 협의", tone: "warn", priority: 2 };
+    }
+
+    const diff = getHr010DiffDays(parsed, today);
+    if (diff <= 0) {
+        return { key: "now", label: "즉시 가능", tone: "good", priority: 0 };
+    }
+    if (diff <= 14) {
+        return { key: "soon", label: "2주 내 가능", tone: "info", priority: 1 };
+    }
+    return { key: "later", label: "2주 이후", tone: "risk", priority: 3 };
+}
+
+function getHr010ProfileCompleteness(row) {
+    const fields = [
+        row.dev_nm,
+        row.main_lang_nm,
+        row.work_md,
+        row.ctrt_typ,
+        row.sido_cd,
+        row.avail_dt,
+        row.hope_rate_amt,
+        row.kosa_grd_cd,
+        row.exp_yr
+    ];
+    const filled = fields.filter(value => value !== null && value !== undefined && String(value).trim() !== "").length;
+    return Math.round((filled / fields.length) * 100);
+}
+
+function hasHr010CoreFieldGap(row) {
+    const coreFields = [
+        row.main_lang_nm,
+        row.work_md,
+        row.sido_cd,
+        row.avail_dt,
+        row.hope_rate_amt
+    ];
+
+    return coreFields.some(value => value === null || value === undefined || String(value).trim() === "");
+}
+
+function parseHr010Date(value) {
+    if (!value) return null;
+    const date = new Date(String(value).trim());
+    if (Number.isNaN(date.getTime())) return null;
+    date.setHours(0, 0, 0, 0);
+    return date;
+}
+
+function getHr010Today() {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return today;
+}
+
+function getHr010DiffDays(target, base) {
+    return Math.round((target.getTime() - base.getTime()) / 86400000);
+}
+
+function clampHr010Value(value) {
+    const numeric = Number(value) || 0;
+    if (numeric < 0) return 0;
+    if (numeric > 100) return 100;
+    return numeric;
+}
+
+function setHr010Text(id, value) {
+    const element = document.getElementById(id);
+    if (!element) return;
+    element.textContent = value;
+}
+
+function setHr010Html(id, markup) {
+    const element = document.getElementById(id);
+    if (!element) return;
+    element.innerHTML = markup;
+}
+
+function getHr010RuntimeFilterTagLabel(key, value) {
+    switch (key) {
+        case "availability":
+            return `투입 가능: ${getHr010AvailabilityPresetLabel(value)}`;
+        case "profileCompleteness":
+            return value === "low" ? "추가 조건: 데이터 보완 필요" : `추가 조건: ${value}`;
+        case "scoreState":
+            return value === "ungraded" ? "추가 조건: 평가 미반영" : `추가 조건: ${value}`;
+        default:
+            return `${key}: ${value}`;
+    }
+}
+
+function getHr010AvailabilityPresetLabel(value) {
+    switch (String(value || "")) {
+        case "now":
+            return "즉시 가능";
+        case "week1":
+            return "1주 이내";
+        case "week2":
+            return "2주 이내";
+        case "soon":
+            return "2주 내 가능";
+        case "later":
+            return "3주 이후";
+        case "coord":
+            return "일정 협의";
+        default:
+            return String(value || "-");
+    }
 }
 
 // 검색창 입력값 기준 추천어 적용
@@ -469,6 +1443,17 @@ function renderSelectedTags() {
         });
     });
 
+    Object.entries(hr010RuntimeFilters).forEach(([key, value]) => {
+        if (!value) return;
+
+        tags.push({
+            type: "special",
+            key,
+            value,
+            label: getHr010RuntimeFilterTagLabel(key, value)
+        });
+    });
+
     if (!tags.length) {
         area.innerHTML = "";
         area.classList.add("is-empty");
@@ -488,6 +1473,7 @@ function renderSelectedTags() {
 function resetHr010Filters() {
     currentHr010UserTypeTab = "all";
     keywordTags = [];
+    clearHr010RuntimeFilters();
 
     Object.keys(selectedFilters).forEach(key => {
         selectedFilters[key] = [];

@@ -322,7 +322,8 @@ const Menu = {
     const pageMap = {
       "hr011": "hr010",
       "hr012": "hr010",
-      "hr011v2": "hr010" // 임시로 추가... 추후 삭제
+      "hr011v2": "hr010",
+      "hr010v2": "hr010" // 임시로 추가... 추후 삭제
     };
     if (pageMap[pageCode]) {
       return pageMap[pageCode];
