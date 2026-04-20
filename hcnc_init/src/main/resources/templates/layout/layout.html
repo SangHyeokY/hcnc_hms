@@ -103,10 +103,43 @@
       setUserProfile(devId, devName, devImg, devJob);
     });
 
+    $(document).on("click", ".header-profile-trigger", function (e) {
+        e.stopPropagation();
+
+        const $wrap = $(this).closest(".header-profile-menu");
+        const isOpen = $wrap.hasClass("is-open");
+
+        $(".header-profile-menu")
+            .removeClass("is-open")
+            .find(".header-profile-trigger")
+            .attr("aria-expanded", "false");
+
+        if (!isOpen) {
+            $wrap.addClass("is-open");
+            $(this).attr("aria-expanded", "true");
+        }
+    });
+
+    $(document).on("click", function () {
+        $(".header-profile-menu")
+            .removeClass("is-open")
+            .find(".header-profile-trigger")
+            .attr("aria-expanded", "false");
+    });
+
     // lnb에 프로필 이미지 표시하기
     function setUserProfile(devId, devName, devImgBase64, devJob) {
+        const $badge = $("#profileBadgeText");
+
         const badgeText = getProfileBadgeText(devName);
-        $("#profileBadgeText").text(badgeText);
+        const color = stringToSoftColor(devName || devId || "default");
+
+        $badge.text(badgeText);
+        $badge.css({
+            backgroundColor: color,
+            color: "#fff"
+        });
+
         $(".header-profile-trigger").attr("aria-label", `${badgeText} 계정 메뉴`);
     }
 
@@ -125,7 +158,7 @@
 
     function getProfileBadgeText(name) {
         const fallback = getProfileText(name);
-        return fallback || "사용";
+        return fallback || "";
     }
 
     // 이니셜 아이콘을 만들기 위한 색상표
@@ -143,18 +176,6 @@
         const l = 45 + (Math.abs(hash >> 3) % 10); // 45~55
 
         return `hsl(${h}, ${s}%, ${l}%)`;
-    }
-
-    // 둥근 프로필 생성
-    function makeProfileBigCircle(name) {
-        const text = getProfileText(name);
-        const bgColor = stringToSoftColor(name);
-
-        return `
-            <div class="profile-circle-bigIcon" style="background:${bgColor}">
-                ${text}
-            </div>
-        `;
     }
 </script>
 <script>

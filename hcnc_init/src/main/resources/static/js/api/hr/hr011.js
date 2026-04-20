@@ -12,6 +12,29 @@ var mainLangPicker = null;
 var mainLangSkillOptions = [];
 var mainLangGroupOptions = [];
 
+let hr011StepInputTimer = null;
+
+// 수정, 등록 시에 네비게이션 바 반응 이벤트
+$(document).on(
+    "input change",
+    ".hr011-edit-flow input, .hr011-edit-flow select, .hr011-edit-flow textarea",
+    function () {
+
+        updateStepperUI();
+
+        const stepEl = this.closest(".hr011-section[data-edit-step]");
+        if (!stepEl) return;
+
+        const step = stepEl.getAttribute("data-edit-step");
+        if (!step) return;
+
+        clearTimeout(hr011StepInputTimer);
+
+        hr011StepInputTimer = setTimeout(() => {
+            setHr011ActiveEditStep(step);
+        }, 120);
+    });
+
 // view일 때는 수정 불가, update일 때는 수정 가능
 $(document).on("tab:readonly.hr011", function (_, isReadOnly) {
     if (isReadOnly) {
@@ -1217,9 +1240,13 @@ function bindHr011PageEvents() {
         closeHr011ProjectEvaluationModal();
     });
 
-    $(document).off("hr013:focusEvaluation.hr011").on("hr013:focusEvaluation.hr011", function (_e, selectedProjectId) {
-        scrollHr011ToEvalRiskSection(selectedProjectId);
-    });
+    $(document)
+        .off("hr013:focusEvaluation.hr011")
+        .on("hr013:focusEvaluation.hr011", function () {
+            requestAnimationFrame(() => {
+                goHr011EditStep("eval-risk");
+            });
+        });
 
     $(document).on("click", ".hr011-ref-eval-score-btn", function () {
         const projectKey = String($(this).data("projectKey") || "");
@@ -4843,7 +4870,8 @@ const HR011_EDIT_STEP_KEYS = ["profile", "contract", "skill", "project", "eval-r
 let hr011CurrentEditStepKey = HR011_EDIT_STEP_KEYS[0];
 let hr011EditStepRafId = null;
 const HR011_EDIT_STEP_ACTIVE_OFFSET = 96;
-
+let IsScrolling = false;
+let hr011NavRaf = null;
 /*********************************************************
  * STEP 진행도 계산
  *********************************************************/
@@ -4884,101 +4912,91 @@ const stepFields = {
     // 4. 프로젝트 이력
     project: () => window.hr013Table ? window.hr013Table.getData().length : 0,
 
+    // "eval-risk": () => {
+    //     const evalCnt = $("#HR014_TAB_A").find("input, textarea").filter(function () { return $(this).val(); }).length;
+    //     const riskCnt = $("#HR014_TAB_B").find("input, textarea").filter(function () { return $(this).val(); }).length;
+    //     return evalCnt + riskCnt;
+    // }
+
     // 5. 평가 및 리스크
     "eval-risk": () => {
-        const evalCnt = $("#HR014_TAB_A").find("input, textarea").filter(function () { return $(this).val(); }).length;
-        const riskCnt = $("#HR014_TAB_B").find("input, textarea").filter(function () { return $(this).val(); }).length;
-        return evalCnt + riskCnt;
+        const data = window.hr013Table?.getData?.() || [];
+        return data.filter(row => row?.cust_nm === "HCNC").length;
     }
 };
 
 // 완료된 단계 카운팅
-function calculateStepProgress(step, debug = false) {
+function calculateStepProgress(step) {
     const config = stepFields[step];
+
+    if (!config) return { filled: 0, total: 0 };
 
     // 함수형 step (skill, project, eval-risk)
     if (typeof config === "function") {
         const count = config();
-
-        if (debug) {
-            console.log(`[${step}] count =`, count);
-        }
-
-        return { filled: count, total: count || 1 };
+        return { filled: count, total: Math.max(count, 1) };
     }
 
     let filled = 0;
-    const details = [];
 
     config.forEach(selector => {
         const $el = $(selector);
-        if (!$el.length) {
-            details.push({ selector, status: "not-found" });
-            return;
-        }
+        if (!$el.length) return;
+
         let isFilled = false;
 
         if ($el.is(":checkbox, :radio")) {
             isFilled = $el.is(":checked");
         } else {
-            const rawVal = $el.val();
-            const val = $.trim(rawVal);
+            const val = $.trim($el.val());
             isFilled = val !== "" && val !== "0" && Number(val) !== 0;
         }
 
         if (isFilled) filled++;
-
-        details.push({
-            selector,
-            status: isFilled ? "filled" : "empty",
-            value: $el.val()
-        });
     });
 
-    // 디버그 출력
-    // 예시) 콘솔 창에 calculateStepProgress("profile", true); 입력
-    if (debug) {
-        console.group(`[STEP: ${step}] (${filled}/${config.length})`);
-        details.forEach(d => {
-            if (d.status === "filled") {
-                console.log("확인 : ", d.selector, "=", d.value);
-            } else if (d.status === "empty") {
-                console.warn("경고 : ", d.selector);
-            } else {
-                console.error("에러 : ", d.selector, "(not found)");
-            }
-        });
-        console.groupEnd();
-    }
-    return { filled, total: config.length };
+    return {
+        filled,
+        total: config.length
+    };
 }
 
 /*********************************************************
  * STEP UI 업데이트
  *********************************************************/
 function updateStepperUI() {
-    const visibleKeys = getHr011VisibleStepKeys();
+    const activeKeys = getActiveStepKeys();
 
     $(".hr011-edit-step-btn").each(function () {
         const step = $(this).data("step-target");
 
-        // 숨겨야 할 step이면 UI 자체 제거
-        if (!visibleKeys.includes(step)) {
-            $(this).hide();
-            return;
-        } else {
-            $(this).show();
-        }
+        const isVisible = activeKeys.includes(step);
+        $(this).toggle(isVisible);
+
+        if (!isVisible) return;
 
         const { filled, total } = calculateStepProgress(step);
 
         $(this).find(".cnt").text(`(${filled}/${total})`);
+
         $(this).removeClass("is-done is-progress is-empty");
 
         if (filled === 0) $(this).addClass("is-empty");
         else if (filled === total) $(this).addClass("is-done");
         else $(this).addClass("is-progress");
     });
+    updateStepConnectorLine()
+}
+
+function updateStepConnectorLine() {
+    const activeKeys = getActiveStepKeys();
+
+    const $visibleBtns = $(".hr011-edit-step-btn").filter(function () {
+        return activeKeys.includes($(this).data("step-target")) && $(this).is(":visible");
+    });
+
+    $(".hr011-edit-step-btn").removeClass("is-last-visible");
+    $visibleBtns.last().addClass("is-last-visible");
 }
 
 /*********************************************************
@@ -4987,94 +5005,129 @@ function updateStepperUI() {
 
 // 네비게이션바 세팅
 function setHr011ActiveEditStep(stepKey) {
-    const visibleKeys = getHr011VisibleStepKeys();
+    const activeKeys = getActiveStepKeys();
 
-    if (!visibleKeys.includes(stepKey)) {
-        stepKey = visibleKeys[0];
+    if (!activeKeys.includes(stepKey)) {
+        stepKey = activeKeys[0];
     }
-
-    // 먼저 section / 버튼 visibility 처리
-    document.querySelectorAll(".hr011-edit-step-btn").forEach(btn => {
-        const key = btn.getAttribute("data-step-target");
-        btn.hidden = !visibleKeys.includes(key);
-    });
-
-    // 안맞는 조건 영역은 숨김처리 (오른쪽)
-    document.querySelectorAll(".hr011-section[data-edit-step]").forEach(section => {
-        const key = section.getAttribute("data-edit-step");
-        // section.hidden = !visibleKeys.includes(key);
-        section.style.display = visibleKeys.includes(key) ? "" : "none";
-    });
-
-    if (hr011CurrentEditStepKey === stepKey) return;
 
     hr011CurrentEditStepKey = stepKey;
 
-    // 안맞는 조건 단계는 숨김처리 (왼쪽)
-    document.querySelectorAll(".hr011-edit-step-btn").forEach(btn => {
-        const key = btn.getAttribute("data-step-target");
-        btn.classList.toggle("is-active", key === stepKey);
+    if (hr011NavRaf) cancelAnimationFrame(hr011NavRaf);
+
+    hr011NavRaf = requestAnimationFrame(() => {
+        document.querySelectorAll(".hr011-edit-step-btn").forEach(btn => {
+            const key = btn.getAttribute("data-step-target");
+
+            const isVisible = activeKeys.includes(key);
+
+            btn.hidden = !isVisible;
+
+            btn.classList.toggle("is-active", key === stepKey);
+        });
+
+        document.querySelectorAll(".hr011-section[data-edit-step]").forEach(section => {
+            const key = section.getAttribute("data-edit-step");
+            section.style.display = activeKeys.includes(key) ? "" : "none";
+        });
     });
 }
 
-// 신규 등록일 때 안보일 STEP (보유역량 평가 & 프로젝트 평가)
-function getHr011VisibleStepKeys() {
+// 신규 등록일 때 안보일 STEP은 빼놓기 (보유역량 평가 & 프로젝트 평가 제외)
+function getActiveStepKeys() {
     if (hr011Mode === "insert") {
-        return HR011_EDIT_STEP_KEYS.filter(key => key !== "eval-risk" && key !== "project");
+        return ["profile", "contract", "skill"];
     }
-    return HR011_EDIT_STEP_KEYS.slice();
+    return HR011_EDIT_STEP_KEYS;
 }
 
 /*********************************************************
  * STEP 이동 (클릭)
  *********************************************************/
 function goHr011EditStep(stepKey) {
+    const activeKeys = getActiveStepKeys();
+
+    if (!activeKeys.includes(stepKey)) return;
+
     setHr011ActiveEditStep(stepKey);
 
-    const scrollEl = document.querySelector(".hr011-detail-wrap .hr011-edit-flow");
+    const scrollEl = document.querySelector(".hr011-edit-flow");
     const section = document.querySelector(`.hr011-section[data-edit-step="${stepKey}"]`);
     if (!scrollEl || !section) return;
 
-    const top = section.offsetTop - HR011_EDIT_STEP_ACTIVE_OFFSET;
+    smoothScrollTo(scrollEl, section.offsetTop - HR011_EDIT_STEP_ACTIVE_OFFSET, 450);
+}
 
-    scrollEl.scrollTo({
-        top: top,
-        behavior: "smooth"
-    });
+function smoothScrollTo(container, target, duration = 500) {
+    const start = container.scrollTop;
+    const change = target - start;
+    const startTime = performance.now();
+
+    IsScrolling = true;
+
+    function easeInOutCubic(t) {
+        return t < 0.5
+            ? 4 * t * t * t
+            : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    }
+
+    function animate(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = easeInOutCubic(progress);
+
+        container.scrollTop = start + change * eased;
+
+        if (progress < 1) {
+            requestAnimationFrame(animate);
+        } else {
+            // 끝나고 약간 딜레이 후 해제
+            setTimeout(() => {
+                IsScrolling = false;
+            }, 80);
+        }
+    }
+    requestAnimationFrame(animate);
 }
 
 /*********************************************************
- * 스크롤 → STEP 동기화 (핵심)
+ * 스크롤 → STEP 동기화
  *********************************************************/
+let lastScrollTop = 0;
+let scrollVelocity = 0;
+
 function syncHr011ActiveStepByScroll() {
-    const scrollEl = document.querySelector(".hr011-detail-wrap .hr011-edit-flow");
+    const scrollEl = document.querySelector(".hr011-edit-flow");
     if (!scrollEl) return;
 
-    const visibleKeys = getHr011VisibleStepKeys();
+    const current = scrollEl.scrollTop;
+    scrollVelocity = current - lastScrollTop;
+    lastScrollTop = current;
 
-    const sections = Array.from(
-        document.querySelectorAll(".hr011-section[data-edit-step]")
-    ).filter(section => {
-        const key = section.getAttribute("data-edit-step");
-        return visibleKeys.includes(key);
-    });
+    const activeKeys = getActiveStepKeys();
 
-    if (!sections.length) return;
+    const sections = activeKeys
+        .map(k => document.querySelector(`.hr011-section[data-edit-step="${k}"]`))
+        .filter(Boolean);
 
-    const anchor = scrollEl.scrollTop + scrollEl.clientHeight * 0.3;
+    const anchor = scrollEl.scrollTop + scrollEl.clientHeight * 0.35;
 
-    let active = sections[0];
+    let activeKey = hr011CurrentEditStepKey;
 
-    sections.forEach(section => {
-        if (section.offsetTop <= anchor) {
-            active = section;
+    for (const section of sections) {
+        const top = section.offsetTop;
+
+        if (scrollVelocity >= 0) {
+            // 내려갈 때
+            if (top <= anchor) activeKey = section.dataset.editStep;
+        } else {
+            // 올라갈 때
+            if (top < anchor) activeKey = section.dataset.editStep;
         }
-    });
+    }
 
-    const key = active.getAttribute("data-edit-step");
-
-    if (key && key !== hr011CurrentEditStepKey) {
-        setHr011ActiveEditStep(key);
+    if (activeKey !== hr011CurrentEditStepKey) {
+        setHr011ActiveEditStep(activeKey);
     }
 }
 
@@ -5082,6 +5135,7 @@ function syncHr011ActiveStepByScroll() {
  * scroll → RAF 최적화
  *********************************************************/
 function requestHr011ActiveStepSync() {
+    if (IsScrolling) return;
     if (hr011EditStepRafId) return;
 
     hr011EditStepRafId = requestAnimationFrame(() => {
@@ -5116,7 +5170,6 @@ function initHr011EditStepNavigation(isEditable) {
     document.querySelectorAll(".hr011-edit-step-btn").forEach(btn => {
         btn.addEventListener("click", function () {
             const key = this.getAttribute("data-step-target");
-            if (!getHr011VisibleStepKeys().includes(key)) return;
             if (key) goHr011EditStep(key);
         });
     });
@@ -5128,14 +5181,10 @@ function initHr011EditStepNavigation(isEditable) {
 
 // 넘버링 개선
 function updateStepNumbers() {
-    const visibleKeys = getHr011VisibleStepKeys();
     let idx = 1;
 
     $(".hr011-edit-step-btn").each(function () {
         const step = $(this).data("step-target");
-
-        if (!visibleKeys.includes(step)) return;
-
         $(this).find(".step-num").text(idx++);
     });
 }

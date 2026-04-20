@@ -597,6 +597,7 @@ option {
   font-size: 18px;
   font-weight: 600;
   object-fit: cover;
+  user-select: none;
 }
 
 #TABLE_HR020_A .profile-circle-icon,
@@ -621,11 +622,14 @@ option {
 }
 
 /* 총 건수(타이틀) */
-.page-sub-title .hcnc-grid-count-title {
+.page-sub-title .hcnc-grid-count-title,
+#main-lang-picker-area .main-lang-picker-meta,
+#hr012-skill-picker-area .hr012-skill-picker-meta,
+#hr013-skill-picker-area .hr013-skill-picker-meta {
   display: inline-flex;
   align-items: center;
   gap: 3px;
-  margin: 0 0 0 15px;
+  margin-left: 15px;
   color: #5F666E;
   font-family: var(--hcnc-font-body);
   font-size: 13px;
@@ -649,7 +653,8 @@ option {
 /*}*/
 
 /* 총 데이터 수 색상 */
-.hcnc-grid-count-number {
+.hcnc-grid-count-number,
+.result-count-bold {
   display: inline-flex;
   align-items: center;
   position: relative;
@@ -660,39 +665,35 @@ option {
 }
 
 /* 2중 팝업 내의 데이터 수 색상 */
-.hcnc-sub-count-number {
-  color: #E50019;
-  font-weight: 700;
-  margin-left: 4px;
-}
+.result-count-bold.selected {color: #E50019;}
 
-.tabulator .tabulator-footer.hcnc-grid-footer-compact {
-  padding: 8px 12px 6px !important;
-  min-height: 76px;
-}
+/*.tabulator .tabulator-footer.hcnc-grid-footer-compact {*/
+/*  padding: 8px 12px 6px !important;*/
+/*  min-height: 76px;*/
+/*}*/
 
-.tabulator .tabulator-footer.hcnc-grid-footer-compact .tabulator-pages {
-  margin: 0 auto;
-}
+/*.tabulator .tabulator-footer.hcnc-grid-footer-compact .tabulator-pages {*/
+/*  margin: 0 auto;*/
+/*}*/
 
-.tabulator .tabulator-footer.hcnc-grid-footer-compact .hcnc-grid-count {
-  position: static;
-  transform: none;
-  margin-top: 8px;
-  text-align: center;
-  white-space: normal;
-}
+/*.tabulator .tabulator-footer.hcnc-grid-footer-compact .hcnc-grid-count {*/
+/*  position: static;*/
+/*  transform: none;*/
+/*  margin-top: 8px;*/
+/*  text-align: center;*/
+/*  white-space: normal;*/
+/*}*/
 
-#TABLE_COMMON_MAIN .tabulator-footer .hcnc-grid-count {
-  position: static;
-  left: auto;
-  top: auto;
-  transform: none;
-  display: block;
-  margin-top: 8px;
-  text-align: center;
-  white-space: normal;
-}
+/*#TABLE_COMMON_MAIN .tabulator-footer .hcnc-grid-count {*/
+/*  position: static;*/
+/*  left: auto;*/
+/*  top: auto;*/
+/*  transform: none;*/
+/*  display: block;*/
+/*  margin-top: 8px;*/
+/*  text-align: center;*/
+/*  white-space: normal;*/
+/*}*/
 
 /* 인적사항/사용자관리는 페이지네이션이 화면 하단에 고정되도록 컨테이너 높이를 보장 */
 .grid-pager-fixed {
@@ -1547,15 +1548,6 @@ button.btn.btn-add-skill:hover,
 #hr013-project-picker-area #hr013-project-picker-search {
   position: relative;
   flex: 1;
-  margin-right: 12px;
-}
-
-#main-lang-picker-area .main-lang-picker-meta,
-#hr012-skill-picker-area .hr012-skill-picker-meta,
-#hr013-skill-picker-area .hr013-skill-picker-meta {
-  font-size: 16px;
-  white-space: nowrap;
-  display: flex;
 }
 
 @media (max-width: 900px) {
@@ -2460,37 +2452,37 @@ button.btn.btn-add-skill:hover,
   height: 40px
 }
 
-.hr012-toolbar-01 p.tool-title .hcnc-grid-count-title {
-  display: inline-flex;
-  align-items: center;
-  margin-left: 10px;
-  font-family: "Pretendard Variable", "Pretendard", "Noto Sans KR", sans-serif;
-  font-style: normal;
-  font-size: 15px;
-  font-weight: 700;
-  line-height: 140%;
-  letter-spacing: 0;
-  color: #1D232D;
-  white-space: nowrap;
-  pointer-events: none;
-}
+/*.hr012-toolbar-01 p.tool-title .hcnc-grid-count-title {*/
+/*  display: inline-flex;*/
+/*  align-items: center;*/
+/*  margin-left: 10px;*/
+/*  font-family: "Pretendard Variable", "Pretendard", "Noto Sans KR", sans-serif;*/
+/*  font-style: normal;*/
+/*  font-size: 15px;*/
+/*  font-weight: 700;*/
+/*  line-height: 140%;*/
+/*  letter-spacing: 0;*/
+/*  color: #1D232D;*/
+/*  white-space: nowrap;*/
+/*  pointer-events: none;*/
+/*}*/
 
-.hr012-toolbar-01 p.tool-title .hcnc-grid-count-title:before {
-  content: "";
-  display: inline-block;
-  width: 4px;
-  height: 18px;
-  border-radius: 6px;
-  background: #E50019;
-  margin-right: 8px;
-  flex: 0 0 auto;
-}
+/*.hr012-toolbar-01 p.tool-title .hcnc-grid-count-title:before {*/
+/*  content: "";*/
+/*  display: inline-block;*/
+/*  width: 4px;*/
+/*  height: 18px;*/
+/*  border-radius: 6px;*/
+/*  background: #E50019;*/
+/*  margin-right: 8px;*/
+/*  flex: 0 0 auto;*/
+/*}*/
 
-.hr012-toolbar-01 p.tool-title .hcnc-grid-count-number {
-  color: #1D232D;
-  font-weight: 700;
-  margin-left: 4px;
-}
+/*.hr012-toolbar-01 p.tool-title .hcnc-grid-count-number {*/
+/*  color: #1D232D;*/
+/*  font-weight: 700;*/
+/*  margin-left: 4px;*/
+/*}*/
 
 .hr012-toolbar-01 p.tool-title,
 .hr013-toolbar p.tool-title,
@@ -3419,20 +3411,20 @@ section.search-area .search-info #searchType {
   color: #1d232d;
 }
 
-#hr013-project-picker-area .hr013-project-picker-search-row>label::before,
-#hr013-project-picker-area .hr013-project-picker-title::before {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 0;
-  transform: translateY(-50%);
-  display: block;
-  background: #E50019;
-  width: 4px;
-  height: 20px;
-  border-radius: 6px;
-  margin-right: 5px;
-}
+/*#hr013-project-picker-area .hr013-project-picker-search-row>label::before,*/
+/*#hr013-project-picker-area .hr013-project-picker-title::before {*/
+/*  content: "";*/
+/*  position: absolute;*/
+/*  top: 50%;*/
+/*  left: 0;*/
+/*  transform: translateY(-50%);*/
+/*  display: block;*/
+/*  background: #E50019;*/
+/*  width: 4px;*/
+/*  height: 20px;*/
+/*  border-radius: 6px;*/
+/*  margin-right: 5px;*/
+/*}*/
 
 #hr013-project-picker-area .hr013-project-picker-search-wrap {
   display: flex;
@@ -5824,8 +5816,8 @@ section.search-area .search-info #searchType {
 .hr010-dashboard-wrap .hr010-create-btn:hover {background:#DEEDFF;}
 .hr010-dashboard-wrap .hr010-create-btn img {width: 12px; height: 12px; filter: brightness(0);}
 .hr010-dashboard-wrap .hr010-result-bar {display:flex; align-items:center; justify-content:space-between; gap:15px;}
-.hr010-dashboard-wrap .hr010-result-count {display:inline-flex; align-items:center; gap:3px; margin:0; color:#5F666E; font-family:var(--hcnc-font-body); font-size:13px; font-weight:400; line-height:1.4;}
-.hr010-dashboard-wrap .hr010-result-count strong {display:inline-flex; align-items:center; position:relative; color:#000000; font-family:var(--hcnc-font-body); font-size:18px; font-weight:700;} /*top:-1px; */
+.hr010-dashboard-wrap .result-count {display:inline-flex; align-items:center; gap:3px; margin:0; color:#5F666E; font-family:var(--hcnc-font-body); font-size:13px; font-weight:400; line-height:1.4;}
+.hr010-dashboard-wrap .result-count strong {display:inline-flex; align-items:center; position:relative; color:#000000; font-family:var(--hcnc-font-body); font-size:18px; font-weight:700;} /*top:-1px; */
 .hr010-dashboard-wrap .hr010-view-toggle {display:inline-flex; align-items:center; width:240px; height:40px; padding:4px; border:0; border-radius:12px; background:#E2E6ED; gap:0; box-shadow:none;}
 .hr010-dashboard-wrap .hr010-view-toggle-btn {display:inline-flex; align-items:center; justify-content:center; gap:10px; flex:1 1 0; min-width:0; height:32px; padding:8px 12px; border:none; border-radius:12px; background:transparent; color:#71727A; font-family:var(--hcnc-font-body); font-size:13px; font-weight:700; line-height:1; cursor:pointer; transition:background-color .18s ease, color .18s ease, box-shadow .18s ease; letter-spacing:0;}
 .hr010-dashboard-wrap .hr010-view-toggle-btn:hover {box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);}
@@ -6397,6 +6389,10 @@ minmax(142px, 1.02fr); gap:10px; align-items:stretch;}
   text-align: left;
   cursor: pointer;
   position: relative;
+  transition:
+          background-color 0.2s ease,
+          color 0.2s ease,
+          transform 0.2s ease;
 }
 
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-step-btn:not(:last-child)::after {
@@ -6408,6 +6404,8 @@ minmax(142px, 1.02fr); gap:10px; align-items:stretch;}
   height: 10px;
   background: #d9e5f8;
 }
+
+.hr011-edit-step-btn.is-last-visible::after {display: none;}
 
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-step-btn .txt {
   display: block;
@@ -6421,7 +6419,7 @@ minmax(142px, 1.02fr); gap:10px; align-items:stretch;}
   position: relative;
 }
 
-.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-step-btn .cnt {margin-right: 20px;}
+.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-step-btn .cnt {margin-right: 15px; color: #587199;}
 
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-step-btn .cnt::after {
   content: "›";
@@ -6474,6 +6472,7 @@ minmax(142px, 1.02fr); gap:10px; align-items:stretch;}
   background: #eef4ff;
   color: #1f3f77;
   box-shadow: 0 7px 14px rgba(46, 92, 246, 0.14);
+  transform: translateX(2px);
 }
 
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-step-btn.is-active .txt::after {
@@ -6573,7 +6572,6 @@ minmax(142px, 1.02fr); gap:10px; align-items:stretch;}
   color: #fff;
   font-size: 14px;
   font-weight: 800;
-  box-shadow: 0 8px 16px rgba(47, 99, 244, 0.22);
 }
 
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section-remove-btn {
@@ -10866,10 +10864,6 @@ body.hr011-project-eval-modal-open {
   z-index: 3;
 }
 
-.hr011-detail-wrap .hr011-grade-help__tooltip {
-  z-index: 9999;
-}
-
 /*.hr011-detail-wrap .hr011-section-head {*/
 /*  display: flex;*/
 /*  align-items: flex-start;*/
@@ -11029,7 +11023,7 @@ body.hr011-project-eval-modal-open {
   border: 1px solid #dbe6f4;
   opacity: 0;
   pointer-events: none;
-  z-index: 20;
+  z-index: 99;
   transition: opacity 0.18s ease, transform 0.18s ease;
 }
 
@@ -11784,41 +11778,40 @@ body.hr011-project-eval-modal-open {
   overflow-x: hidden !important;
 }
 
+/*.hr011-detail-wrap .hr012-toolbar-01 p.tool-title .hcnc-grid-count-title {*/
+/*  display: inline-flex;*/
+/*  align-items: center;*/
+/*  position: relative;*/
+/*  margin-left: 8px;*/
+/*  padding-left: 14px;*/
+/*  font-family: "Pretendard Variable", "Pretendard", "Noto Sans KR", sans-serif;*/
+/*  font-style: normal;*/
+/*  font-size: 15px;*/
+/*  font-weight: 700;*/
+/*  line-height: 1.4;*/
+/*  letter-spacing: 0;*/
+/*  color: #1d232d;*/
+/*  white-space: nowrap;*/
+/*}*/
 
-.hr011-detail-wrap .hr012-toolbar-01 p.tool-title .hcnc-grid-count-title {
-  display: inline-flex;
-  align-items: center;
-  position: relative;
-  margin-left: 8px;
-  padding-left: 14px;
-  font-family: "Pretendard Variable", "Pretendard", "Noto Sans KR", sans-serif;
-  font-style: normal;
-  font-size: 15px;
-  font-weight: 700;
-  line-height: 1.4;
-  letter-spacing: 0;
-  color: #1d232d;
-  white-space: nowrap;
-}
+/*.hr011-detail-wrap .hr012-toolbar-01 p.tool-title .hcnc-grid-count-title::before {*/
+/*  content: "";*/
+/*  position: absolute;*/
+/*  top: 50%;*/
+/*  left: 0;*/
+/*  width: 4px;*/
+/*  height: 16px;*/
+/*  border-radius: 999px;*/
+/*  background: #e50019;*/
+/*  transform: translateY(-50%);*/
+/*}*/
 
-.hr011-detail-wrap .hr012-toolbar-01 p.tool-title .hcnc-grid-count-title::before {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 0;
-  width: 4px;
-  height: 16px;
-  border-radius: 999px;
-  background: #e50019;
-  transform: translateY(-50%);
-}
-
-.hr011-detail-wrap .hr012-toolbar-01 p.tool-title .hcnc-grid-count-number {
-  margin-left: 4px;
-  font-size: 15px;
-  font-weight: 800;
-  color: #1d232d;
-}
+/*.hr011-detail-wrap .hr012-toolbar-01 p.tool-title .hcnc-grid-count-number {*/
+/*  margin-left: 4px;*/
+/*  font-size: 15px;*/
+/*  font-weight: 800;*/
+/*  color: #1d232d;*/
+/*}*/
 
 @media (max-width: 1600px) {
   .hr011-detail-wrap .hr011-page-layout {
