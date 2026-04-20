@@ -4,6 +4,7 @@
 
 // 모달
 var $modal = $("#view-user-area");
+const HR011_PROJECT_EVAL_MODAL_MOTION_MS = 800;
 
 // 주 개발언어 태그 입력 공통 모듈
 var mainLangTagInput = null;
@@ -3266,14 +3267,6 @@ function hasHr011ProjectRiskText(value) {
     return !!$.trim(String(value || ""));
 }
 
-function countHr011ProjectRiskEntries(value) {
-    return String(value || "")
-        .split(/\r?\n+/)
-        .map(function (line) { return $.trim(line); })
-        .filter(Boolean)
-        .length;
-}
-
 function getHr011ProjectEvalPopupRiskItems(state) {
     const risk = state && state.risk ? state.risk : {};
     const items = [];
@@ -3286,7 +3279,6 @@ function getHr011ProjectEvalPopupRiskItems(state) {
         items.push({
             label: label,
             tone: tone,
-            badgeText: `${Math.max(1, countHr011ProjectRiskEntries(value))}건`,
             body: value
         });
     };
@@ -3316,12 +3308,15 @@ function buildHr011ProjectEvalPopupRiskCardMarkup(item) {
     const bodyMarkup = item.body
         ? `<p class="hr011-ref-project-eval-popup-risk-card__body">${escapeHr011(item.body)}</p>`
         : "";
+    const badgeMarkup = item.badgeText
+        ? `<strong class="hr011-ref-project-eval-popup-risk-card__badge">${escapeHr011(item.badgeText)}</strong>`
+        : "";
 
     return [
         `<article class="hr011-ref-project-eval-popup-risk-card hr011-ref-project-eval-popup-risk-card--${escapeHr011(item.tone || "info")}">`,
         `<div class="hr011-ref-project-eval-popup-risk-card__head">`,
         `<span class="hr011-ref-project-eval-popup-risk-card__label">${escapeHr011(item.label || "-")}</span>`,
-        `<strong class="hr011-ref-project-eval-popup-risk-card__badge">${escapeHr011(item.badgeText || "")}</strong>`,
+        badgeMarkup,
         `</div>`,
         bodyMarkup,
         `</article>`
@@ -3559,9 +3554,11 @@ async function openHr011ProjectEvaluationModal(projectKey) {
     hr011ProjectEvalModalClosing = false;
     modalEl.hidden = false;
     bodyEl.innerHTML = `<div class="hr011-ref-project-eval-loading">평가 데이터를 불러오는 중입니다.</div>`;
-    document.body.classList.add("hr011-project-eval-modal-open");
     requestAnimationFrame(function () {
-        modalEl.classList.add("is-open");
+        requestAnimationFrame(function () {
+            document.body.classList.add("hr011-project-eval-modal-open");
+            modalEl.classList.add("is-open");
+        });
     });
 
     const loadPromise = loadHr011ProjectEvaluationState(projectKey);
@@ -3624,7 +3621,7 @@ function closeHr011ProjectEvaluationModal() {
         }
         hr011ProjectEvalModalExpandedKeysSnapshot = null;
         hr011ProjectEvalModalClosing = false;
-    }, 440);
+    }, HR011_PROJECT_EVAL_MODAL_MOTION_MS);
 
     if (focusEl && typeof focusEl.focus === "function") {
         try {
