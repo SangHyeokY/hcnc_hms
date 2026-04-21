@@ -55,7 +55,7 @@ public class PageController {
     @GetMapping("/cm040")
     public ModelAndView commonCode(HttpSession session, Model model) {
         ModelAndView mv = new ModelAndView();
-        mv.setViewName("views/cm020/cm040");
+        mv.setViewName("views/cm040/cm040");
 
         String auth = (String) session.getAttribute("LOGIN_AUTH");
         String lock = (String) session.getAttribute("LOGIN_LOCK");
@@ -83,7 +83,7 @@ public class PageController {
     @GetMapping("/hr010")
     public ModelAndView hr010(HttpSession session, Model model) {
         ModelAndView mv = new ModelAndView();
-        mv.setViewName("views/hr/hr010");
+        mv.setViewName("views/hr010/hr010");
 
         String auth = (String) session.getAttribute("LOGIN_AUTH");
         String lock = (String) session.getAttribute("LOGIN_LOCK");
@@ -97,7 +97,7 @@ public class PageController {
     @GetMapping("/hr010v2")
     public ModelAndView hr010v2(HttpSession session, Model model) {
         ModelAndView mv = new ModelAndView();
-        mv.setViewName("views/hr/hr010v2");
+        mv.setViewName("views/hr010/hr010v2");
 
         String auth = (String) session.getAttribute("LOGIN_AUTH");
         String lock = (String) session.getAttribute("LOGIN_LOCK");
@@ -111,7 +111,7 @@ public class PageController {
     @GetMapping("/hr020")
     public ModelAndView hr020(HttpSession session, Model model) {
         ModelAndView mv = new ModelAndView();
-        mv.setViewName("views/hr/hr020");
+        mv.setViewName("views/hr020/hr020");
 
         String auth = (String) session.getAttribute("LOGIN_AUTH");
         String lock = (String) session.getAttribute("LOGIN_LOCK");
@@ -125,7 +125,7 @@ public class PageController {
     @GetMapping("/hr011")
     public ModelAndView hr011(@RequestParam(value = "dev_id", required = false) String devId, HttpSession session, Model model) {
         ModelAndView mv = new ModelAndView();
-        mv.setViewName("views/hr/hr011");
+        mv.setViewName("views/hr010/hr011");
 
         String auth = (String) session.getAttribute("LOGIN_AUTH");
         String lock = (String) session.getAttribute("LOGIN_LOCK");
@@ -140,7 +140,7 @@ public class PageController {
     @GetMapping("/hr011v2")
     public ModelAndView hr011v2(@RequestParam(value = "dev_id", required = false) String devId, HttpSession session, Model model) {
         ModelAndView mv = new ModelAndView();
-        mv.setViewName("views/hr/hr011v2");
+        mv.setViewName("views/hr010/hr011v2");
 
         String auth = (String) session.getAttribute("LOGIN_AUTH");
         String lock = (String) session.getAttribute("LOGIN_LOCK");
@@ -155,7 +155,7 @@ public class PageController {
     @GetMapping("/hr030")
     public ModelAndView hr030(HttpSession session, Model model) {
         ModelAndView mv = new ModelAndView();
-        mv.setViewName("views/hr/hr030");
+        mv.setViewName("views/hr030/hr030");
 
         String auth = (String) session.getAttribute("LOGIN_AUTH");
         String lock = (String) session.getAttribute("LOGIN_LOCK");
