@@ -4,33 +4,52 @@
 
     <!-- 인력관리 > 기본 인적사항 조회 -->
     <select id="select_hr010" parameterType="map" resultType="map">
-        SELECT dev_id
-            , dev_nm -- 성명
+        SELECT dev.dev_id
+            , dev.dev_nm -- 성명
             , DATE_FORMAT(brdt, '%Y-%m-%d') AS brdt -- 생년월일
-            , tel -- 연락처
-            , email -- 이메일
-            , region AS sido_cd -- 거주지역
-            , main_lang -- 주 개발언어 코드
-            , fn_get_cm_lst('skl_id', main_lang) AS main_lang_nm -- 주 개발언어 라벨
-            , exp_yr -- 경력연차
-            , edu_last -- 최종학력
-            , cert_txt -- 보유 자격증
-            , work_md -- 근무형태
-            , DATE_FORMAT(avail_dt, '%Y-%m-%d') AS avail_dt -- 투입가능시점
-            , ctrt_typ -- 계약형태
-            , hope_rate_amt -- 단가
-            , search_txt
-            , IFNULL(fn_total_score(dev_id), 0) score
-            , kosa_grd_cd
-            , main_fld_cd
-            , main_cust_cd
+            , dev.tel -- 연락처
+            , dev.email -- 이메일
+            , dev.region AS sido_cd -- 거주지역
+            , dev.main_lang -- 주 개발언어 코드
+            , fn_get_cm_lst('skl_id', dev.main_lang) AS main_lang_nm -- 주 개발언어 라벨
+            , dev.exp_yr -- 경력연차
+            , dev.edu_last -- 최종학력
+            , dev.cert_txt -- 보유 자격증
+            , dev.work_md -- 근무형태
+            , DATE_FORMAT(dev.avail_dt, '%Y-%m-%d') AS avail_dt -- 투입가능시점
+            , dev.ctrt_typ -- 계약형태
+            , dev.hope_rate_amt -- 단가
+            , dev.search_txt
+            , IFNULL(fn_total_score(dev.dev_id), 0) score
+            , dev.kosa_grd_cd
+            , dev.main_fld_cd
+            , dev.main_cust_cd
+            , DATE_FORMAT(ctrt.ed_dt, '%Y-%m-%d') AS contract_end_dt
             , CASE
-                WHEN dev_img IS NOT NULL THEN TO_BASE64(dev_img)
+                WHEN dev.dev_img IS NOT NULL THEN TO_BASE64(dev.dev_img)
                 ELSE NULL
                 END AS dev_img_base64
-        FROM tb_dev_info
-        WHERE del_yn='N'
-        AND use_yn='Y'
+        FROM tb_dev_info dev
+        LEFT JOIN (
+            SELECT c.dev_id
+                 , c.ed_dt
+            FROM tb_ctrt_info c
+            INNER JOIN (
+                SELECT dev_id
+                     , MAX(ctrt_id) AS latest_ctrt_id
+                FROM tb_ctrt_info
+                WHERE del_yn = 'N'
+                  AND use_yn = 'Y'
+                GROUP BY dev_id
+            ) latest
+                ON latest.dev_id = c.dev_id
+               AND latest.latest_ctrt_id = c.ctrt_id
+            WHERE c.del_yn = 'N'
+              AND c.use_yn = 'Y'
+        ) ctrt
+            ON ctrt.dev_id = dev.dev_id
+        WHERE dev.del_yn='N'
+        AND dev.use_yn='Y'
         <if test="searchKeyword != null and searchKeyword.trim() != ''">
             <bind name="searchKeywordTokens" value="searchKeyword.trim().split(' ')" />
             AND (
@@ -45,12 +64,12 @@
             )
         </if>
         <if test="dev_nm != null and dev_nm != ''">
-            AND dev_nm LIKE CONCAT('%', #{dev_nm}, '%')
+            AND dev.dev_nm LIKE CONCAT('%', #{dev_nm}, '%')
         </if>
         <if test="dev_id != null and dev_id != ''">
-            AND dev_id = #{dev_id}
+            AND dev.dev_id = #{dev_id}
         </if>
-        ORDER BY score DESC, dev_id
+        ORDER BY score DESC, dev.dev_id
     </select>
 
     <!-- 인력관리 > 기본 인적사항 이미지 -->

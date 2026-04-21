@@ -21,6 +21,17 @@ let hr010Paging = {
     size: 20,
     total: 0
 };
+let hr010V2DashboardBaseRows = [];
+let hr010V2GradeChartMode = "stack";
+let hr010V2DashboardFilters = {
+    department: "",
+    stack: "",
+    timing: ""
+};
+let hr010V2DashboardCodeMaps = {
+    mainFld: {},
+    mainCust: {}
+};
 const selectedFilters = {
     skl_grp: [],
     ctrt_typ: [],
@@ -38,7 +49,8 @@ const HR010_NAVIGATION_PRESET_STORAGE_KEY = "hr010-navigation-preset";
 let hr010RuntimeFilters = {
     availability: "",
     profileCompleteness: "",
-    scoreState: ""
+    scoreState: "",
+    contractExpiry: ""
 };
 let hr010PendingNavigationPreset = null;
 
@@ -65,7 +77,8 @@ $(document).ready(async function () {
         initDropdownFilter("ctrt_typ"), // 계약형태
         initDropdownFilter("sido_cd"), // 거주지역
         initDropdownFilter("skl_grp"), // 주개발언어 - 스킬
-        initDropdownFilter("grade") // 등급 / KOSA
+        initDropdownFilter("grade"), // 등급 / KOSA
+        initHr010V2DashboardCodeMaps()
     ]);
 
     await loadUserTableData();
@@ -89,6 +102,26 @@ $(document).ready(async function () {
 function bindEvents() {
     $("#hr010CreateBtn").on("click", function () {
         window.location.href = "/hr011?mode=insert";
+    });
+
+    $(document).on("change", ".js-hr010v2-filter", function () {
+        const key = String(this.getAttribute("data-filter") || "").trim();
+        if (!key || !Object.prototype.hasOwnProperty.call(hr010V2DashboardFilters, key)) return;
+
+        hr010V2DashboardFilters[key] = String(this.value || "").trim();
+        if (document.getElementById("hr010v2Page")) {
+            renderHr010V2Dashboard(hr010V2DashboardBaseRows);
+        }
+    });
+
+    $(document).on("click", ".js-hr010v2-grade-view", function () {
+        const nextMode = String(this.getAttribute("data-view") || "").trim();
+        if (!nextMode || hr010V2GradeChartMode === nextMode) return;
+
+        hr010V2GradeChartMode = nextMode === "pie" ? "pie" : "stack";
+        if (document.getElementById("hr010v2Page")) {
+            renderHr010V2Dashboard(hr010V2DashboardBaseRows);
+        }
     });
 
     $("#hr010FilterRefreshBtn").on("click", function () {
@@ -520,7 +553,8 @@ function clearHr010RuntimeFilters() {
     hr010RuntimeFilters = {
         availability: "",
         profileCompleteness: "",
-        scoreState: ""
+        scoreState: "",
+        contractExpiry: ""
     };
 }
 
@@ -560,6 +594,9 @@ function applyHr010NavigationPreset(preset) {
     if (runtimePreset.scoreState) {
         hr010RuntimeFilters.scoreState = String(runtimePreset.scoreState);
     }
+    if (runtimePreset.contractExpiry) {
+        hr010RuntimeFilters.contractExpiry = String(runtimePreset.contractExpiry);
+    }
 
     if (preset.viewMode) {
         currentHr010ViewMode = preset.viewMode === "list" ? "list" : "card";
@@ -592,6 +629,10 @@ function filterHr010RowsByRuntimePreset(list) {
             return false;
         }
 
+        if (hr010RuntimeFilters.contractExpiry && !matchesHr010ContractExpiryPreset(row, hr010RuntimeFilters.contractExpiry, today)) {
+            return false;
+        }
+
         return true;
     });
 }
@@ -607,6 +648,10 @@ function matchesHr010AvailabilityPreset(row, presetValue, today) {
 
     const diff = getHr010DiffDays(parsed, today);
     switch (availabilityKey) {
+        case "available":
+            return true;
+        case "deployable":
+            return diff <= 14;
         case "now":
             return diff <= 0;
         case "week1":
@@ -619,6 +664,28 @@ function matchesHr010AvailabilityPreset(row, presetValue, today) {
             return diff > 14;
         case "coord":
             return false;
+        default:
+            return true;
+    }
+}
+
+function matchesHr010ContractExpiryPreset(row, presetValue, today) {
+    const contractKey = String(presetValue || "").trim();
+    if (!contractKey) return true;
+
+    const parsed = parseHr010Date(row.contract_end_dt);
+    if (!parsed) return false;
+
+    const diff = getHr010DiffDays(parsed, today);
+    if (diff < 0) return false;
+
+    switch (contractKey) {
+        case "30":
+            return diff <= 30;
+        case "60":
+            return diff > 30 && diff <= 60;
+        case "90":
+            return diff > 60 && diff <= 90;
         default:
             return true;
     }
@@ -641,17 +708,17 @@ function renderHr010V2Dashboard(list) {
     if (!dashboardRoot) return;
 
     const filteredList = Array.isArray(list) ? list : [];
-    const stats = getHr010V2DashboardStats(filteredList);
+    hr010V2DashboardBaseRows = filteredList.slice();
+    syncHr010V2DashboardFilterControls(filteredList);
+
+    const dashboardList = filterHr010V2DashboardRows(filteredList);
+    const stats = getHr010V2DashboardStats(dashboardList);
 
     setHr010Text("hr010v2HealthScore", `${stats.healthScore}%`);
     setHr010Text("hr010v2HealthLabel", stats.healthLabel);
     setHr010Text("hr010v2HealthFootnote", stats.healthFootnote);
 
-    const ring = document.getElementById("hr010v2HealthRing");
-    if (ring) {
-        ring.style.setProperty("--value", String(stats.healthScore));
-    }
-
+    setHr010Html("hr010v2HealthComposition", renderHr010V2HealthComposition(stats));
     setHr010Html("hr010v2KpiGrid", renderHr010V2KpiCards(stats.kpis));
     setHr010Html("hr010v2HealthStats", renderHr010V2HealthStats(stats));
     setHr010Html("hr010v2SkillRows", renderHr010V2SkillRows(stats.skillRows));
@@ -661,18 +728,80 @@ function renderHr010V2Dashboard(list) {
     setHr010Html("hr010v2RecommendList", renderHr010V2RecommendList(stats.recommendRows));
 }
 
+function syncHr010V2DashboardFilterControls(list) {
+    const rows = Array.isArray(list) ? list : [];
+    const departmentOptions = Array.from(new Set(rows.map(row => getHr010DepartmentLabel(row)).filter(Boolean))).sort((left, right) => left.localeCompare(right, "ko"));
+    const stackOptions = Array.from(new Set(rows.flatMap(row => getSkillNameList(row)).filter(Boolean))).sort((left, right) => left.localeCompare(right, "ko"));
+
+    updateHr010V2FilterControl("hr010v2DepartmentFilter", "department", departmentOptions.map(value => ({ value, label: value })));
+    updateHr010V2FilterControl("hr010v2StackFilter", "stack", stackOptions.map(value => ({ value, label: value })));
+    updateHr010V2FilterControl("hr010v2TimingFilter", "timing", [
+        { value: "now", label: "즉시 가능" },
+        { value: "soon", label: "2주 내 가능" },
+        { value: "coord", label: "가용일 미확정" },
+        { value: "later", label: "2주 이후" }
+    ]);
+}
+
+function updateHr010V2FilterControl(id, key, options) {
+    const select = document.getElementById(id);
+    if (!select) return;
+
+    const normalizedOptions = Array.isArray(options) ? options : [];
+    const currentValue = String(hr010V2DashboardFilters[key] || "");
+    const validValues = new Set(normalizedOptions.map(option => String(option.value || "")));
+    if (currentValue && !validValues.has(currentValue)) {
+        hr010V2DashboardFilters[key] = "";
+    }
+
+    const value = String(hr010V2DashboardFilters[key] || "");
+    const placeholderLabel = key === "department"
+        ? "전체 주요 분야"
+        : key === "stack"
+            ? "전체 기술"
+            : "전체 시기";
+
+    select.innerHTML = [
+        `<option value="">${escapeHtml(placeholderLabel)}</option>`,
+        ...normalizedOptions.map(option => `<option value="${escapeHtml(option.value)}">${escapeHtml(option.label)}</option>`)
+    ].join("");
+    select.value = value;
+}
+
+function filterHr010V2DashboardRows(list) {
+    const rows = Array.isArray(list) ? list : [];
+    const today = getHr010Today();
+
+    return rows.filter(row => {
+        if (hr010V2DashboardFilters.department && getHr010DepartmentLabel(row) !== hr010V2DashboardFilters.department) {
+            return false;
+        }
+
+        if (hr010V2DashboardFilters.stack && !getSkillNameList(row).includes(hr010V2DashboardFilters.stack)) {
+            return false;
+        }
+
+        if (hr010V2DashboardFilters.timing) {
+            const availability = getHr010AvailabilityBucket(row, today);
+            if (availability.key !== hr010V2DashboardFilters.timing) {
+                return false;
+            }
+        }
+
+        return true;
+    });
+}
+
 function getHr010V2DashboardStats(list) {
     const total = list.length;
     const today = getHr010Today();
     const staffRows = list.filter(row => resolveUserType(row) === "staff");
-    const staffCount = staffRows.length;
-    const freelancerCount = total - staffCount;
     const freelancerRows = list.filter(row => resolveUserType(row) === "freelancer");
     const reliabilityScores = [];
     const availability = {
         now: { key: "now", label: "즉시 투입", tone: "good", count: 0 },
         soon: { key: "soon", label: "2주 내 전환", tone: "info", count: 0 },
-        coord: { key: "coord", label: "일정 협의", tone: "warn", count: 0 },
+        coord: { key: "coord", label: "가용일 미확정", tone: "warn", count: 0 },
         later: { key: "later", label: "2주 이후", tone: "risk", count: 0 }
     };
 
@@ -688,39 +817,71 @@ function getHr010V2DashboardStats(list) {
     const reliabilityScore = total
         ? Math.round(reliabilityScores.reduce((sum, value) => sum + value, 0) / total)
         : 0;
-    const readyCount = availability.now.count + availability.soon.count;
-    const healthScore = total
-        ? Math.round((readyCount / total) * 100)
+    const availablePoolCount = total - availability.coord.count;
+    const deployableCount = availability.now.count + availability.soon.count;
+    const unavailableCount = total - availablePoolCount;
+    const availableRatio = total
+        ? Math.round((availablePoolCount / total) * 100)
+        : 0;
+    const deployableRatio = availablePoolCount
+        ? Math.round((deployableCount / availablePoolCount) * 100)
+        : 0;
+    const seniorCount = list.filter(row => ["S", "A"].includes(String(row.grade || "").toUpperCase())).length;
+    const seniorRatio = total
+        ? Math.round((seniorCount / total) * 100)
+        : 0;
+    const contractRows = buildHr010V2ContractRows(list, today);
+    const contractBaseCount = list.filter(row => parseHr010Date(row.contract_end_dt)).length;
+    const contractImminentCount = contractRows.reduce((sum, row) => sum + row.count, 0);
+    const healthScore = availablePoolCount
+        ? Math.round((deployableCount / availablePoolCount) * 100)
         : 0;
 
     const healthLabel = total
-        ? `즉시 + 2주 내 ${readyCount}명`
+        ? `가용 ${availablePoolCount}명 중 투입 가능 ${deployableCount}명`
         : "데이터 대기";
 
     const healthFootnote = total
-        ? `즉시 ${availability.now.count}명 · 2주 내 ${availability.soon.count}명 · 일정 협의 ${availability.coord.count}명`
+        ? `가용은 가용일 입력 인원, 투입 가능은 즉시·2주 내 배치 가능 인원 기준입니다.`
         : "조건에 맞는 인력이 없습니다.";
 
     return {
         total,
-        staffCount,
-        freelancerCount,
+        staffCount: staffRows.length,
+        freelancerCount: freelancerRows.length,
         lowDataCount,
         ungradedCount,
         reliabilityScore,
         healthScore,
         healthLabel,
         healthFootnote,
+        availablePoolCount,
+        unavailableCount,
+        availableRatio,
+        deployableCount,
+        deployableRatio,
+        seniorCount,
+        seniorRatio,
+        contractBaseCount,
+        contractImminentCount,
         availability,
         kpis: buildHr010V2KpiCards(list, {
             today,
             staffRows,
             freelancerRows,
-            availability
+            availability,
+            total,
+            availablePoolCount,
+            deployableCount,
+            unavailableCount,
+            availableRatio,
+            deployableRatio,
+            seniorCount,
+            seniorRatio
         }),
         skillRows: buildHr010V2SkillRows(list, today),
-        alerts: buildHr010V2Alerts(list, availability, reliabilityScore, today, lowDataCount, ungradedCount),
-        timeline: buildHr010V2TimelineRows(list, today),
+        alerts: buildHr010V2Alerts(list, availability, reliabilityScore, today, lowDataCount, ungradedCount, contractRows),
+        timeline: contractRows,
         gradeRows: buildHr010V2GradeRows(list, today),
         recommendRows: buildHr010V2RecommendRows(list, today)
     };
@@ -740,56 +901,82 @@ function renderHr010V2KpiCards(kpis) {
                     <span class="hr010v2-kpi-card__meta">${escapeHtml(item.meta)}</span>
                 </div>
                 <div class="hr010v2-kpi-card__spark" aria-hidden="true">
-                    ${renderHr010V2SparkLine(item.sparkline, item.tone)}
+                    ${item.chartMarkup || ""}
                 </div>
             </div>
         </button>
     `).join("");
 }
 
-function renderHr010V2SparkLine(values, tone = "blue") {
-    const points = Array.isArray(values) && values.length ? values : [0, 0, 0, 0, 0, 0];
-    const width = 132;
-    const height = 38;
-    const paddingX = 6;
-    const paddingY = 6;
-    const maxValue = Math.max(...points, 1);
-    const stepX = points.length > 1 ? (width - (paddingX * 2)) / (points.length - 1) : 0;
-    const chartHeight = height - (paddingY * 2);
+function renderHr010V2KpiMiniDonut(segments) {
+    const normalized = (Array.isArray(segments) ? segments : [])
+        .map(segment => ({
+            color: segment.color,
+            value: Number(segment.value) || 0
+        }))
+        .filter(segment => segment.value > 0);
 
-    const chartPoints = points.map((value, index) => {
-        const x = paddingX + (stepX * index);
-        const y = height - paddingY - ((value / maxValue) * chartHeight);
-        return { x, y };
-    });
+    if (!normalized.length) {
+        return `<div class="hr010v2-kpi-mini hr010v2-kpi-mini--empty">-</div>`;
+    }
 
-    const pathD = chartPoints.map((point, index) => `${index === 0 ? "M" : "L"} ${point.x.toFixed(2)} ${point.y.toFixed(2)}`).join(" ");
-    const baselineY = height - paddingY;
-    const lastPoint = chartPoints[chartPoints.length - 1];
-    const prevPoint = chartPoints[chartPoints.length - 2] || { x: lastPoint.x - 10, y: lastPoint.y };
-    const dx = lastPoint.x - prevPoint.x;
-    const dy = lastPoint.y - prevPoint.y;
-    const length = Math.sqrt((dx * dx) + (dy * dy)) || 1;
-    const ux = dx / length;
-    const uy = dy / length;
-    const arrowSize = 7;
-    const arrowBaseX = lastPoint.x - (ux * arrowSize);
-    const arrowBaseY = lastPoint.y - (uy * arrowSize);
-    const perpX = -uy;
-    const perpY = ux;
-    const arrowSpread = 3.4;
-    const arrowPoints = [
-        `${lastPoint.x.toFixed(2)},${lastPoint.y.toFixed(2)}`,
-        `${(arrowBaseX + (perpX * arrowSpread)).toFixed(2)},${(arrowBaseY + (perpY * arrowSpread)).toFixed(2)}`,
-        `${(arrowBaseX - (perpX * arrowSpread)).toFixed(2)},${(arrowBaseY - (perpY * arrowSpread)).toFixed(2)}`
-    ].join(" ");
+    const total = normalized.reduce((sum, segment) => sum + segment.value, 0);
+    let start = 0;
+    const gradient = normalized.map(segment => {
+        const share = total ? (segment.value / total) * 100 : 0;
+        const end = start + share;
+        const rule = `${segment.color} ${start.toFixed(2)}% ${end.toFixed(2)}%`;
+        start = end;
+        return rule;
+    }).join(", ");
 
     return `
-        <svg class="hr010v2-kpi-trend hr010v2-kpi-trend--${tone}" viewBox="0 0 ${width} ${height}" preserveAspectRatio="none">
-            <path class="hr010v2-kpi-trend__axis" d="M ${paddingX} ${baselineY} L ${width - paddingX} ${baselineY}"></path>
-            <path class="hr010v2-kpi-trend__path" d="${pathD}"></path>
-            <polygon class="hr010v2-kpi-trend__arrow" points="${arrowPoints}"></polygon>
-        </svg>
+        <div class="hr010v2-kpi-mini hr010v2-kpi-mini--donut">
+            <span class="hr010v2-kpi-mini__donut" style="background:conic-gradient(${gradient})"></span>
+        </div>
+    `;
+}
+
+function renderHr010V2KpiMiniCompare(rows) {
+    const normalized = Array.isArray(rows) ? rows : [];
+    const maxValue = Math.max(...normalized.map(row => Number(row.value) || 0), 1);
+
+    return `
+        <div class="hr010v2-kpi-mini hr010v2-kpi-mini--compare">
+            ${normalized.map(row => `
+                <div class="hr010v2-kpi-mini__compare-row">
+                    <span class="hr010v2-kpi-mini__compare-label">${escapeHtml(row.label)}</span>
+                    <span class="hr010v2-kpi-mini__compare-track">
+                        <span class="hr010v2-kpi-mini__compare-fill hr010v2-kpi-mini__compare-fill--${row.tone || "base"}" style="width:${((Number(row.value) || 0) / maxValue) * 100}%"></span>
+                    </span>
+                </div>
+            `).join("")}
+        </div>
+    `;
+}
+
+function renderHr010V2KpiMiniStack(segments) {
+    const normalized = (Array.isArray(segments) ? segments : [])
+        .map(segment => ({
+            tone: segment.tone,
+            value: Number(segment.value) || 0
+        }))
+        .filter(segment => segment.value > 0);
+
+    if (!normalized.length) {
+        return `<div class="hr010v2-kpi-mini hr010v2-kpi-mini--empty">-</div>`;
+    }
+
+    const total = normalized.reduce((sum, segment) => sum + segment.value, 0);
+
+    return `
+        <div class="hr010v2-kpi-mini hr010v2-kpi-mini--stack">
+            <span class="hr010v2-kpi-mini__stack">
+                ${normalized.map(segment => `
+                    <span class="hr010v2-kpi-mini__stack-segment hr010v2-kpi-mini__stack-segment--${segment.tone}" style="width:${(segment.value / total) * 100}%"></span>
+                `).join("")}
+            </span>
+        </div>
     `;
 }
 
@@ -799,30 +986,34 @@ function renderHr010V2HealthStats(stats) {
             label: stats.availability.now.label,
             value: `${stats.availability.now.count}명`,
             percent: stats.total ? Math.round((stats.availability.now.count / stats.total) * 100) : 0,
+            tone: "now",
             preset: makeHr010NavigationPreset({ runtimeFilters: { availability: "now" } })
         },
         {
             label: stats.availability.soon.label,
             value: `${stats.availability.soon.count}명`,
             percent: stats.total ? Math.round((stats.availability.soon.count / stats.total) * 100) : 0,
+            tone: "soon",
             preset: makeHr010NavigationPreset({ runtimeFilters: { availability: "soon" } })
         },
         {
             label: stats.availability.coord.label,
             value: `${stats.availability.coord.count}명`,
             percent: stats.total ? Math.round((stats.availability.coord.count / stats.total) * 100) : 0,
+            tone: "coord",
             preset: makeHr010NavigationPreset({ runtimeFilters: { availability: "coord" } })
         },
         {
-            label: "데이터 보완 필요",
-            value: `${stats.lowDataCount}명`,
-            percent: stats.total ? Math.round((stats.lowDataCount / stats.total) * 100) : 0,
-            preset: makeHr010NavigationPreset({ runtimeFilters: { profileCompleteness: "low" } })
+            label: stats.availability.later.label,
+            value: `${stats.availability.later.count}명`,
+            percent: stats.total ? Math.round((stats.availability.later.count / stats.total) * 100) : 0,
+            tone: "later",
+            preset: makeHr010NavigationPreset({ runtimeFilters: { availability: "later" } })
         }
     ];
 
     return rows.map(row => `
-        <button type="button" class="hr010v2-health-stat js-hr010v2-nav" data-hr010-preset="${escapeHtml(encodeHr010NavigationPreset(row.preset))}">
+        <button type="button" class="hr010v2-health-stat hr010v2-health-stat--${row.tone} js-hr010v2-nav" data-hr010-preset="${escapeHtml(encodeHr010NavigationPreset(row.preset))}">
             <span class="hr010v2-health-stat__label">${escapeHtml(row.label)}</span>
             <strong class="hr010v2-health-stat__value">${escapeHtml(row.value)}</strong>
             <div class="hr010v2-health-stat__bar">
@@ -832,28 +1023,61 @@ function renderHr010V2HealthStats(stats) {
     `).join("");
 }
 
+function renderHr010V2HealthComposition(stats) {
+    if (!stats.total) {
+        return `<span class="hr010v2-health-composition__empty">데이터 없음</span>`;
+    }
+
+    const compareRows = [
+        {
+            label: "가용 인력",
+            value: `${stats.availablePoolCount}명`,
+            percent: 100,
+            tone: "available"
+        },
+        {
+            label: "투입 가능",
+            value: `${stats.deployableCount}명`,
+            percent: stats.availablePoolCount ? (stats.deployableCount / stats.availablePoolCount) * 100 : 0,
+            tone: "deployable"
+        }
+    ];
+
+    return compareRows.map(row => `
+        <div class="hr010v2-health-compare">
+            <div class="hr010v2-health-compare__head">
+                <span>${escapeHtml(row.label)}</span>
+                <strong>${escapeHtml(row.value)}</strong>
+            </div>
+            <div class="hr010v2-health-compare__track">
+                <span class="hr010v2-health-compare__fill hr010v2-health-compare__fill--${row.tone}" style="width:${clampHr010Value(row.percent)}%"></span>
+            </div>
+        </div>
+    `).join("");
+}
+
 function renderHr010V2SkillRows(rows) {
     if (!rows.length) {
-        return `<div class="hr010v2-empty">표시할 기술 수급 데이터가 없습니다.</div>`;
+        return `<div class="hr010v2-empty">표시할 기술 분포 데이터가 없습니다.</div>`;
     }
 
     return rows.map(row => `
         <button type="button" class="hr010v2-supply-row ${row.preset ? "js-hr010v2-nav" : ""}" ${row.preset ? `data-hr010-preset="${escapeHtml(encodeHr010NavigationPreset(row.preset))}"` : ""}>
             <div class="hr010v2-supply-row__skill">
                 <strong>${escapeHtml(row.skill)}</strong>
-                <span>즉시 ${row.nowCount}명 · 2주 내 ${row.soonCount}명</span>
+                <span>${escapeHtml(row.metaLabel)}</span>
             </div>
             <div class="hr010v2-supply-meter">
                 <div class="hr010v2-supply-meter__bar">
-                    <span style="--value:${clampHr010Value(row.readyRatio)}"></span>
+                    <span style="--value:${clampHr010Value(row.shareRatio)}"></span>
                 </div>
                 <div class="hr010v2-supply-meter__meta">
-                    <span>현황 ${row.totalCount}명</span>
-                    <span>가용 ${row.availableCount}명</span>
+                    <span>전체 비중</span>
+                    <span>${row.shareRatio}%</span>
                 </div>
             </div>
-            <div class="hr010v2-supply-value">${row.availableCount}명</div>
-            <span class="hr010v2-status-pill hr010v2-status-pill--${row.statusTone}">${escapeHtml(row.statusLabel)}</span>
+            <div class="hr010v2-supply-value">${row.totalCount}명</div>
+            <span class="hr010v2-status-pill hr010v2-status-pill--info">가용 ${row.availableCount}명</span>
         </button>
     `).join("");
 }
@@ -863,8 +1087,8 @@ function renderHr010V2Alerts(alerts) {
         return `<div class="hr010v2-empty">현재 조건에서 바로 확인할 운영 알림이 없습니다.</div>`;
     }
 
-    return alerts.map(alert => `
-        <button type="button" class="hr010v2-alert-item ${alert.preset ? "js-hr010v2-nav" : ""}" ${alert.preset ? `data-hr010-preset="${escapeHtml(encodeHr010NavigationPreset(alert.preset))}"` : ""}>
+    return alerts.map((alert, index) => `
+        <button type="button" class="hr010v2-alert-item hr010v2-alert-item--${alert.tone} ${index === 0 ? "hr010v2-alert-item--featured" : ""} ${alert.preset ? "js-hr010v2-nav" : ""}" ${alert.preset ? `data-hr010-preset="${escapeHtml(encodeHr010NavigationPreset(alert.preset))}"` : ""}>
             <div class="hr010v2-alert-item__head">
                 <strong class="hr010v2-alert-item__title">${escapeHtml(alert.title)}</strong>
                 <span class="hr010v2-alert-item__tone hr010v2-alert-item__tone--${alert.tone}">${escapeHtml(alert.badge)}</span>
@@ -876,15 +1100,15 @@ function renderHr010V2Alerts(alerts) {
 
 function renderHr010V2WeeklyBars(rows) {
     if (!rows.length) {
-        return `<div class="hr010v2-empty">예정 데이터를 계산할 수 없습니다.</div>`;
+        return `<div class="hr010v2-empty">계약 종료일 데이터를 계산할 수 없습니다.</div>`;
     }
 
     const maxCount = Math.max(...rows.map(row => row.count), 1);
 
     return rows.map(row => {
-        const height = row.count ? Math.max(12, Math.round((row.count / maxCount) * 100)) : 8;
+        const height = row.count ? Math.max(12, Math.round((row.count / maxCount) * 100)) : 0;
         return `
-            <button type="button" class="hr010v2-weekbar hr010v2-weekbar--${row.tone} js-hr010v2-nav" data-hr010-preset="${escapeHtml(encodeHr010NavigationPreset(row.preset))}">
+            <button type="button" class="hr010v2-weekbar hr010v2-weekbar--${row.tone} ${row.count === 0 ? "is-empty" : ""} js-hr010v2-nav" data-hr010-preset="${escapeHtml(encodeHr010NavigationPreset(row.preset))}">
                 <div class="hr010v2-weekbar__column">
                     <span class="hr010v2-weekbar__count">${row.count}</span>
                     <span class="hr010v2-weekbar__fill" style="--value:${height}"></span>
@@ -901,37 +1125,114 @@ function renderHr010V2GradeBars(rows) {
         return `<div class="hr010v2-empty">등급 데이터를 계산할 수 없습니다.</div>`;
     }
 
-    return rows.map(row => `
-        <button type="button" class="hr010v2-grade-card js-hr010v2-nav" data-hr010-preset="${escapeHtml(encodeHr010NavigationPreset(row.preset))}">
-            <div class="hr010v2-grade-card__head">
-                <strong class="hr010v2-grade-card__label">${escapeHtml(row.label)}</strong>
-                <span class="hr010v2-grade-card__percent">${row.readyRatio}%</span>
-            </div>
-            <div class="hr010v2-grade-card__body">
-                <div class="hr010v2-grade-card__ring" style="--value:${clampHr010Value(row.readyRatio)}" aria-hidden="true">
-                    <span class="hr010v2-grade-card__ring-inner">
-                        <strong>${row.readyCount}</strong>
-                        <small>가용</small>
-                    </span>
-                </div>
-                <div class="hr010v2-grade-card__stats">
-                    <div class="hr010v2-grade-card__stat">
-                        <span>전체</span>
-                        <strong>${row.totalCount}명</strong>
-                    </div>
-                    <div class="hr010v2-grade-card__stat">
-                        <span>투입 가능</span>
-                        <strong>${row.readyCount}명</strong>
+    const totalCount = rows.reduce((sum, row) => sum + (Number(row.totalCount) || 0), 0);
+    const readyCount = rows.reduce((sum, row) => sum + (Number(row.readyCount) || 0), 0);
+    const readyRatio = totalCount ? Math.round((readyCount / totalCount) * 100) : 0;
+    const pieGradient = buildHr010V2GradePieGradient(rows, totalCount);
+
+    const chartMarkup = hr010V2GradeChartMode === "pie"
+        ? `
+            <div class="hr010v2-grade-pie-wrap">
+                <div class="hr010v2-grade-pie" style="background:${escapeHtml(pieGradient)}" role="img" aria-label="등급별 전체 인력 비중 원형 차트">
+                    <div class="hr010v2-grade-pie__inner">
+                        <strong>${totalCount}명</strong>
+                        <span>전체 인력</span>
                     </div>
                 </div>
             </div>
-        </button>
-    `).join("");
+        `
+        : `
+            <div class="hr010v2-grade-stack" role="img" aria-label="등급별 전체 인력 비중">
+                ${rows
+        .filter(row => row.totalCount > 0)
+        .map(row => {
+            const share = totalCount ? ((row.totalCount / totalCount) * 100).toFixed(2) : "0";
+            return `
+                <button
+                    type="button"
+                    class="hr010v2-grade-stack__segment hr010v2-grade-stack__segment--${row.tone} js-hr010v2-nav"
+                    data-hr010-preset="${escapeHtml(encodeHr010NavigationPreset(row.preset))}"
+                    style="--segment:${share}"
+                    aria-label="${escapeHtml(`${row.label} 등급 전체 ${row.totalCount}명, 투입 가능 ${row.readyCount}명`)}">
+                    <span>${escapeHtml(row.label)}</span>
+                </button>
+            `;
+        }).join("") || `<span class="hr010v2-grade-stack__empty">등급 데이터 없음</span>`}
+            </div>
+        `;
+
+    return `
+        <div class="hr010v2-grade-overview">
+            <div class="hr010v2-grade-overview__summary">
+                <div>
+                    <strong>전체 등급 비중</strong>
+                    <p>총 ${totalCount}명 중 투입 가능 ${readyCount}명</p>
+                </div>
+                <div class="hr010v2-grade-overview__aside">
+                    <span class="hr010v2-grade-overview__rate">${readyRatio}%</span>
+                    <div class="hr010v2-grade-view-toggle" role="tablist" aria-label="등급 분포 보기 전환">
+                        <button type="button" class="hr010v2-grade-view-toggle__btn js-hr010v2-grade-view ${hr010V2GradeChartMode === "stack" ? "is-active" : ""}" data-view="stack">막대</button>
+                        <button type="button" class="hr010v2-grade-view-toggle__btn js-hr010v2-grade-view ${hr010V2GradeChartMode === "pie" ? "is-active" : ""}" data-view="pie">원형</button>
+                    </div>
+                </div>
+            </div>
+            ${chartMarkup}
+            <div class="hr010v2-grade-legend">
+                ${rows.map(row => `
+                    <button type="button" class="hr010v2-grade-legend__item js-hr010v2-nav" data-hr010-preset="${escapeHtml(encodeHr010NavigationPreset(row.preset))}">
+                        <div class="hr010v2-grade-legend__head">
+                            <span class="hr010v2-grade-legend__chip hr010v2-grade-legend__chip--${row.tone}">${escapeHtml(row.label)}</span>
+                            <strong>${row.readyRatio}%</strong>
+                        </div>
+                        <div class="hr010v2-grade-legend__meta">
+                            <span>전체 ${row.totalCount}명</span>
+                            <span>투입 가능 ${row.readyCount}명</span>
+                        </div>
+                    </button>
+                `).join("")}
+            </div>
+        </div>
+    `;
+}
+
+function buildHr010V2GradePieGradient(rows, totalCount) {
+    const segments = [];
+    let start = 0;
+
+    rows.forEach(row => {
+        const count = Number(row.totalCount) || 0;
+        if (!count || !totalCount) return;
+
+        const percent = (count / totalCount) * 100;
+        const end = start + percent;
+        const color = row.tone === "s"
+            ? "#1d4ed8"
+            : row.tone === "a"
+                ? "#3b82f6"
+                : row.tone === "b"
+                    ? "#60a5fa"
+                    : "#93c5fd";
+
+        segments.push(`${color} ${start.toFixed(2)}% ${end.toFixed(2)}%`);
+        start = end;
+    });
+
+    if (!segments.length) {
+        return "conic-gradient(#e7edf5 0% 100%)";
+    }
+
+    return `conic-gradient(${segments.join(", ")})`;
 }
 
 function renderHr010V2RecommendList(rows) {
     if (!rows.length) {
-        return `<div class="hr010v2-empty">추천할 인력이 없습니다.</div>`;
+        return `
+            <div class="hr010v2-empty-state">
+                <div class="hr010v2-empty-state__icon" aria-hidden="true"></div>
+                <strong>적합한 추천 인력이 없습니다</strong>
+                <p>현재 선택한 조건에 맞는 추천 인력 프로필을 찾지 못했습니다. 필터를 조정해 다시 확인해 주세요.</p>
+            </div>
+        `;
     }
 
     return rows.map(row => `
@@ -942,7 +1243,8 @@ function renderHr010V2RecommendList(rows) {
                     <strong>${escapeHtml(row.name)}</strong>
                     <span class="hr010v2-status-pill hr010v2-status-pill--${row.typeTone}">${escapeHtml(row.typeLabel)}</span>
                 </div>
-                <p class="hr010v2-recommend-item__meta">${escapeHtml(row.skillLabel)} · ${escapeHtml(row.regionLabel)} · ${escapeHtml(row.availabilityLabel)}</p>
+                <p class="hr010v2-recommend-item__meta">${escapeHtml(row.skillLabel)} · ${escapeHtml(row.regionLabel)}</p>
+                <p class="hr010v2-recommend-item__submeta">투입 가능 ${escapeHtml(row.availabilityLabel)}</p>
             </div>
             <div class="hr010v2-recommend-item__score">
                 <strong>${escapeHtml(row.scoreLabel)}</strong>
@@ -954,6 +1256,7 @@ function renderHr010V2RecommendList(rows) {
 
 function buildHr010V2SkillRows(list, today) {
     const skillMap = new Map();
+    const totalCount = Array.isArray(list) ? list.length : 0;
 
     list.forEach(row => {
         const skillCodes = getSkillCodes(row);
@@ -977,33 +1280,40 @@ function buildHr010V2SkillRows(list, today) {
         skillMap.set(mapKey, current);
     });
 
-    return Array.from(skillMap.values())
+    const sortedRows = Array.from(skillMap.values())
         .sort((left, right) => {
             if (left.skill === "미등록") return 1;
             if (right.skill === "미등록") return -1;
             return right.totalCount - left.totalCount;
-        })
-        .slice(0, 5)
-        .map(row => {
+        });
+
+    const topRows = sortedRows.slice(0, 5);
+    const remainRows = sortedRows.slice(5);
+
+    if (remainRows.length) {
+        const otherCount = remainRows.reduce((sum, row) => sum + row.totalCount, 0);
+        const otherAvailableCount = remainRows.reduce((sum, row) => sum + row.nowCount + row.soonCount, 0);
+
+        topRows.push({
+            skill: "기타",
+            skillCode: "",
+            totalCount: otherCount,
+            nowCount: otherAvailableCount,
+            soonCount: 0
+        });
+    }
+
+    return topRows.map(row => {
             const availableCount = row.nowCount + row.soonCount;
-            const readyRatio = row.totalCount ? Math.round((availableCount / row.totalCount) * 100) : 0;
-            const statusTone = readyRatio >= 55
-                ? "good"
-                : readyRatio >= 30
-                    ? "warn"
-                    : "risk";
-            const statusLabel = statusTone === "good"
-                ? "양호"
-                : statusTone === "warn"
-                    ? "주의"
-                    : "부족";
+            const shareRatio = totalCount ? Math.round((row.totalCount / totalCount) * 100) : 0;
 
             return {
                 ...row,
                 availableCount,
-                readyRatio,
-                statusTone,
-                statusLabel,
+                shareRatio,
+                metaLabel: row.skill === "기타"
+                    ? `상위 기술 외 ${row.totalCount}명`
+                    : `즉시/단기 ${availableCount}명`,
                 preset: row.skillCode
                     ? makeHr010NavigationPreset({ filters: { skl_grp: [row.skillCode] } })
                     : null
@@ -1011,31 +1321,42 @@ function buildHr010V2SkillRows(list, today) {
         });
 }
 
-function buildHr010V2Alerts(list, availability, reliabilityScore, today, lowDataCount, ungradedCount) {
+function buildHr010V2Alerts(list, availability, reliabilityScore, today, lowDataCount, ungradedCount, contractRows) {
     const alerts = [];
     const skillRows = buildHr010V2SkillRows(list, today);
+    const expiring30 = (Array.isArray(contractRows) ? contractRows : []).find(row => row.presetValue === "30");
 
-    skillRows
-        .filter(row => row.statusTone !== "good")
-        .slice(0, 2)
-        .forEach(row => {
-            alerts.push({
-                tone: row.statusTone === "risk" ? "risk" : "warn",
-                badge: row.statusTone === "risk" ? "공급 부족" : "공급 주의",
-                title: `${row.skill} 즉시 투입 가능 인력 점검 필요`,
-                meta: `전체 ${row.totalCount}명 중 즉시/단기 가용 ${row.availableCount}명입니다.`,
-                preset: row.preset
-            });
+    if (expiring30?.count) {
+        alerts.push({
+            tone: expiring30.count >= 3 ? "risk" : "warn",
+            badge: "계약 임박",
+            title: `30일 이내 계약 만료 ${expiring30.count}건`,
+            meta: "계약 종료 예정 인력의 연장 여부와 대체 풀을 먼저 확인하는 것이 좋습니다.",
+            preset: expiring30.preset
         });
+    }
 
     if (availability.coord.count) {
         alerts.push({
             tone: "info",
             badge: "일정 확인",
-            title: `투입 가능일 협의 필요 프로필 ${availability.coord.count}건`,
-            meta: "배치 판단 전에 가용 시점을 먼저 확정하는 것이 좋습니다.",
+            title: `가용일 미확정 프로필 ${availability.coord.count}건`,
+            meta: "배치 판단 전에 투입 가능일을 먼저 확정하는 것이 좋습니다.",
             preset: makeHr010NavigationPreset({ runtimeFilters: { availability: "coord" } })
         });
+    }
+
+    if (skillRows.length) {
+        const topSkill = skillRows[0];
+        if (topSkill.skill !== "기타" && topSkill.shareRatio >= 35) {
+            alerts.push({
+                tone: "warn",
+                badge: "기술 편중",
+                title: `${topSkill.skill} 비중 ${topSkill.shareRatio}%`,
+                meta: "주력 기술 의존도가 높으면 특정 기술 수요 변동에 민감해질 수 있습니다.",
+                preset: topSkill.preset
+            });
+        }
     }
 
     if (lowDataCount) {
@@ -1064,38 +1385,62 @@ function buildHr010V2Alerts(list, availability, reliabilityScore, today, lowData
             badge: "상태 양호",
             title: `즉시 또는 단기 투입 가능 인력 ${availability.now.count + availability.soon.count}명 확보`,
             meta: "현재 조건에서는 운영 리스크보다 선택 가능한 풀이 더 충분합니다.",
-            preset: makeHr010NavigationPreset({ runtimeFilters: { availability: "soon" } })
+            preset: makeHr010NavigationPreset({ runtimeFilters: { availability: "deployable" } })
         });
     }
 
-    return alerts.slice(0, 4);
+    const tonePriority = { risk: 0, warn: 1, info: 2, good: 3 };
+
+    return alerts
+        .sort((left, right) => {
+            const leftPriority = tonePriority[left.tone] ?? 9;
+            const rightPriority = tonePriority[right.tone] ?? 9;
+            return leftPriority - rightPriority;
+        })
+        .slice(0, 4);
 }
 
-function buildHr010V2TimelineRows(list, today) {
+function buildHr010V2ContractRows(list, today) {
     const rows = [
-        { label: "즉시", meta: "오늘 가능", tone: "now", count: 0, preset: makeHr010NavigationPreset({ runtimeFilters: { availability: "now" } }) },
-        { label: "+1주", meta: "7일 이내", tone: "soon", count: 0, preset: makeHr010NavigationPreset({ runtimeFilters: { availability: "week1" } }) },
-        { label: "+2주", meta: "14일 이내", tone: "soon", count: 0, preset: makeHr010NavigationPreset({ runtimeFilters: { availability: "week2" } }) },
-        { label: "+3주", meta: "15일 이후", tone: "later", count: 0, preset: makeHr010NavigationPreset({ runtimeFilters: { availability: "later" } }) },
-        { label: "협의", meta: "일정 미확정", tone: "coord", count: 0, preset: makeHr010NavigationPreset({ runtimeFilters: { availability: "coord" } }) }
+        {
+            label: "30일",
+            meta: "30일 이내",
+            tone: "risk",
+            count: 0,
+            presetValue: "30",
+            preset: makeHr010NavigationPreset({ runtimeFilters: { contractExpiry: "30" } })
+        },
+        {
+            label: "60일",
+            meta: "31~60일",
+            tone: "warn",
+            count: 0,
+            presetValue: "60",
+            preset: makeHr010NavigationPreset({ runtimeFilters: { contractExpiry: "60" } })
+        },
+        {
+            label: "90일",
+            meta: "61~90일",
+            tone: "info",
+            count: 0,
+            presetValue: "90",
+            preset: makeHr010NavigationPreset({ runtimeFilters: { contractExpiry: "90" } })
+        }
     ];
 
-    list.forEach(row => {
-        const parsed = parseHr010Date(row.avail_dt);
-        if (!parsed) {
-            rows[4].count += 1;
-            return;
-        }
+    (Array.isArray(list) ? list : []).forEach(row => {
+        const parsed = parseHr010Date(row.contract_end_dt);
+        if (!parsed) return;
 
         const diff = getHr010DiffDays(parsed, today);
-        if (diff <= 0) {
+        if (diff < 0) return;
+
+        if (diff <= 30) {
             rows[0].count += 1;
-        } else if (diff <= 7) {
+        } else if (diff <= 60) {
             rows[1].count += 1;
-        } else if (diff <= 14) {
+        } else if (diff <= 90) {
             rows[2].count += 1;
-        } else {
-            rows[3].count += 1;
         }
     });
 
@@ -1104,6 +1449,12 @@ function buildHr010V2TimelineRows(list, today) {
 
 function buildHr010V2GradeRows(list, today) {
     const grades = ["S", "A", "B", "C"];
+    const gradeTones = {
+        S: "s",
+        A: "a",
+        B: "b",
+        C: "c"
+    };
 
     return grades.map(grade => {
         const gradeRows = list.filter(row => String(row.grade || "").toUpperCase() === grade);
@@ -1117,99 +1468,67 @@ function buildHr010V2GradeRows(list, today) {
             totalCount: gradeRows.length,
             readyCount,
             readyRatio: gradeRows.length ? Math.round((readyCount / gradeRows.length) * 100) : 0,
+            tone: gradeTones[grade] || "c",
             preset: makeHr010NavigationPreset({ filters: { grade: [grade] } })
         };
     });
 }
 
 function buildHr010V2KpiCards(list, context) {
-    const today = context.today;
     const staffRows = context.staffRows || [];
     const freelancerRows = context.freelancerRows || [];
-    const readyNowRows = list.filter(row => getHr010AvailabilityBucket(row, today).key === "now");
-    const readyNowStaffRows = staffRows.filter(row => getHr010AvailabilityBucket(row, today).key === "now");
-    const readyNowFreelancerRows = freelancerRows.filter(row => getHr010AvailabilityBucket(row, today).key === "now");
     const totalCount = list.length;
+    const staffRatio = totalCount ? Math.round((staffRows.length / totalCount) * 100) : 0;
+    const freelancerRatio = totalCount ? Math.round((freelancerRows.length / totalCount) * 100) : 0;
 
     return [
         {
-            label: "전체 인원",
+            label: "전체 개발 인력",
             value: `${totalCount}명`,
-            meta: `즉시 ${readyNowRows.length}명 · 2주 내 ${context.availability.soon.count}명`,
+            meta: totalCount ? `직원 ${staffRows.length}명 · 프리랜서 ${freelancerRows.length}명` : "재직 인력 데이터 없음",
             tone: "coral",
-            sparkline: buildHr010V2AvailabilitySparkline(list, today),
+            chartMarkup: renderHr010V2KpiMiniDonut([
+                { color: "#2c80ff", value: staffRows.length },
+                { color: "#8f77ff", value: freelancerRows.length }
+            ]),
             preset: makeHr010NavigationPreset()
         },
         {
-            label: "직원",
-            value: `${staffRows.length}명`,
-            meta: totalCount ? `전체의 ${Math.round((staffRows.length / totalCount) * 100)}%` : "직원 데이터 없음",
-            tone: "blue",
-            sparkline: buildHr010V2AvailabilitySparkline(staffRows, today),
-            preset: makeHr010NavigationPreset({ userType: "staff" })
-        },
-        {
-            label: "프리랜서",
-            value: `${freelancerRows.length}명`,
-            meta: totalCount ? `전체의 ${Math.round((freelancerRows.length / totalCount) * 100)}%` : "프리랜서 데이터 없음",
-            tone: "indigo",
-            sparkline: buildHr010V2AvailabilitySparkline(freelancerRows, today),
-            preset: makeHr010NavigationPreset({ userType: "freelancer" })
-        },
-        {
-            label: "즉시 투입 가능",
-            value: `${readyNowRows.length}명`,
-            meta: totalCount ? `전체 대비 ${Math.round((readyNowRows.length / totalCount) * 100)}%` : "가용 인력 없음",
-            tone: "violet",
-            sparkline: buildHr010V2AvailabilitySparkline(readyNowRows, today),
-            preset: makeHr010NavigationPreset({ runtimeFilters: { availability: "now" } })
-        },
-        {
-            label: "즉시 투입 가능 (직원)",
-            value: `${readyNowStaffRows.length}명`,
-            meta: staffRows.length ? `직원 중 ${Math.round((readyNowStaffRows.length / staffRows.length) * 100)}%` : "직원 데이터 없음",
+            label: "고용 형태 구성",
+            value: `${staffRows.length}명 / ${freelancerRows.length}명`,
+            meta: totalCount ? `직원 ${staffRatio}% · 프리랜서 ${freelancerRatio}%` : "고용 형태 데이터 없음",
             tone: "mint",
-            sparkline: buildHr010V2AvailabilitySparkline(readyNowStaffRows, today),
-            preset: makeHr010NavigationPreset({ userType: "staff", runtimeFilters: { availability: "now" } })
+            chartMarkup: renderHr010V2KpiMiniStack(
+                [
+                    { tone: "staff", value: staffRows.length },
+                    { tone: "freelancer", value: freelancerRows.length }
+                ]
+            ),
+            preset: makeHr010NavigationPreset()
         },
         {
-            label: "즉시 투입 가능 (프리랜서)",
-            value: `${readyNowFreelancerRows.length}명`,
-            meta: freelancerRows.length ? `프리랜서 중 ${Math.round((readyNowFreelancerRows.length / freelancerRows.length) * 100)}%` : "프리랜서 데이터 없음",
-            tone: "sky",
-            sparkline: buildHr010V2AvailabilitySparkline(readyNowFreelancerRows, today),
-            preset: makeHr010NavigationPreset({ userType: "freelancer", runtimeFilters: { availability: "now" } })
+            label: "가용 인력",
+            value: `${context.availablePoolCount}명`,
+            meta: totalCount ? `전체 대비 ${context.availableRatio}%` : "가용 데이터 없음",
+            tone: "blue",
+            chartMarkup: renderHr010V2KpiMiniDonut([
+                { color: "#2c80ff", value: context.availablePoolCount },
+                { color: "#d9e1eb", value: context.unavailableCount }
+            ]),
+            preset: makeHr010NavigationPreset({ runtimeFilters: { availability: "available" } })
+        },
+        {
+            label: "투입 가능 인력",
+            value: `${context.deployableCount}명`,
+            meta: context.availablePoolCount ? `가용 대비 ${context.deployableRatio}%` : "가용 인력 없음",
+            tone: "violet",
+            chartMarkup: renderHr010V2KpiMiniCompare([
+                { label: "가용", value: context.availablePoolCount, tone: "base" },
+                { label: "투입", value: context.deployableCount, tone: "accent" }
+            ]),
+            preset: makeHr010NavigationPreset({ runtimeFilters: { availability: "deployable" } })
         }
     ];
-}
-
-function buildHr010V2AvailabilitySparkline(list, today) {
-    const points = [0, 0, 0, 0, 0, 0];
-
-    (Array.isArray(list) ? list : []).forEach(row => {
-        const parsed = parseHr010Date(row.avail_dt);
-        if (!parsed) {
-            points[5] += 1;
-            return;
-        }
-
-        const diff = getHr010DiffDays(parsed, today);
-        if (diff <= 0) {
-            points[0] += 1;
-        } else if (diff <= 7) {
-            points[1] += 1;
-        } else if (diff <= 14) {
-            points[2] += 1;
-        } else if (diff <= 21) {
-            points[3] += 1;
-        } else if (diff <= 35) {
-            points[4] += 1;
-        } else {
-            points[5] += 1;
-        }
-    });
-
-    return points;
 }
 
 function makeHr010NavigationPreset(options = {}) {
@@ -1260,7 +1579,7 @@ function buildHr010V2RecommendRows(list, today) {
 function getHr010AvailabilityBucket(row, today) {
     const parsed = parseHr010Date(row.avail_dt);
     if (!parsed) {
-        return { key: "coord", label: "일정 협의", tone: "warn", priority: 2 };
+        return { key: "coord", label: "가용일 미확정", tone: "warn", priority: 2 };
     }
 
     const diff = getHr010DiffDays(parsed, today);
@@ -1346,6 +1665,8 @@ function getHr010RuntimeFilterTagLabel(key, value) {
             return value === "low" ? "추가 조건: 데이터 보완 필요" : `추가 조건: ${value}`;
         case "scoreState":
             return value === "ungraded" ? "추가 조건: 평가 미반영" : `추가 조건: ${value}`;
+        case "contractExpiry":
+            return `계약 만료: ${getHr010ContractExpiryPresetLabel(value)}`;
         default:
             return `${key}: ${value}`;
     }
@@ -1353,6 +1674,10 @@ function getHr010RuntimeFilterTagLabel(key, value) {
 
 function getHr010AvailabilityPresetLabel(value) {
     switch (String(value || "")) {
+        case "available":
+            return "가용 인력";
+        case "deployable":
+            return "투입 가능 인력";
         case "now":
             return "즉시 가능";
         case "week1":
@@ -1362,9 +1687,22 @@ function getHr010AvailabilityPresetLabel(value) {
         case "soon":
             return "2주 내 가능";
         case "later":
-            return "3주 이후";
+            return "2주 이후";
         case "coord":
-            return "일정 협의";
+            return "가용일 미확정";
+        default:
+            return String(value || "-");
+    }
+}
+
+function getHr010ContractExpiryPresetLabel(value) {
+    switch (String(value || "")) {
+        case "30":
+            return "30일 이내";
+        case "60":
+            return "31~60일";
+        case "90":
+            return "61~90일";
         default:
             return String(value || "-");
     }
@@ -1474,6 +1812,12 @@ function resetHr010Filters() {
     currentHr010UserTypeTab = "all";
     keywordTags = [];
     clearHr010RuntimeFilters();
+    hr010V2DashboardFilters = {
+        department: "",
+        stack: "",
+        timing: ""
+    };
+    hr010V2GradeChartMode = "stack";
 
     Object.keys(selectedFilters).forEach(key => {
         selectedFilters[key] = [];
@@ -2387,6 +2731,37 @@ function getPrimarySkillLabel(row) {
     return skillParts.primary;
 }
 
+function getHr010DepartmentLabel(row) {
+    const mainFldLabel = getHr010V2DashboardCodeLabel("mainFld", row?.main_fld_cd);
+    const mainCustLabel = getHr010V2DashboardCodeLabel("mainCust", row?.main_cust_cd);
+    const candidates = [
+        row?.dept_nm,
+        row?.org_nm,
+        row?.team_nm,
+        row?.part_nm,
+        row?.blg_nm,
+        row?.main_fld_nm,
+        mainFldLabel,
+        mainCustLabel,
+        row?.main_fld_cd ? `주요 분야 ${String(row.main_fld_cd).trim()}` : "",
+        row?.main_cust_cd ? `주요 고객 ${String(row.main_cust_cd).trim()}` : ""
+    ].map(value => String(value || "").trim()).filter(Boolean);
+
+    if (candidates.length) {
+        return candidates[0];
+    }
+
+    return resolveUserType(row) === "staff" ? "직원 그룹" : "프리랜서 그룹";
+}
+
+function getHr010V2DashboardCodeLabel(groupKey, code) {
+    const normalizedCode = String(code || "").trim();
+    if (!normalizedCode) return "";
+
+    const map = hr010V2DashboardCodeMaps[groupKey] || {};
+    return String(map[normalizedCode] || "").trim();
+}
+
 function getSkillSummaryMarkup(row, maxChips = 3) {
     const skillParts = getSkillDisplayParts(row);
     if (!skillParts.skills.length) {
@@ -2481,7 +2856,7 @@ function getRegionWorkInlineMarkup(row) {
 
 // 투입 가능 표시명
 function getAvailabilityLabel(row) {
-    if (!row.avail_dt) return "협의";
+    if (!row.avail_dt) return "가용일 미정";
     return row.avail_dt;
 }
 
@@ -2623,6 +2998,22 @@ async function fetchComCodeOptions(grpCd, tag = "") {
     } catch (error) {
         console.warn(`[hr010] 공통코드 조회 실패: ${grpCd}`, error);
         return [];
+    }
+}
+
+async function initHr010V2DashboardCodeMaps() {
+    try {
+        const [mainFldOptions, mainCustOptions] = await Promise.all([
+            fetchComCodeOptions("MAIN_FLD_CD", ""),
+            fetchComCodeOptions("MAIN_CUST_CD", "")
+        ]);
+
+        hr010V2DashboardCodeMaps.mainFld = buildMap(normalizeDropdownOptions(mainFldOptions));
+        hr010V2DashboardCodeMaps.mainCust = buildMap(normalizeDropdownOptions(mainCustOptions));
+    } catch (error) {
+        console.warn("[hr010] 대시보드 코드맵 초기화 실패", error);
+        hr010V2DashboardCodeMaps.mainFld = {};
+        hr010V2DashboardCodeMaps.mainCust = {};
     }
 }
 

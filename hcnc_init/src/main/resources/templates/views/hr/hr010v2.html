@@ -27,9 +27,35 @@
         <div class="hr010v2-dashboard">
             <div class="hr010v2-topbar">
                 <h1>인력 운영 대시보드</h1>
-                <div class="hr010v2-topbar__meta" aria-label="기준 일자">
-                    <span class="hr010v2-topbar__today">Today</span>
-                    <span class="hr010v2-topbar__date" id="hr010v2TodayLabel">4월 20일 (월)</span>
+                <div class="hr010v2-topbar__tools">
+                    <div class="hr010v2-topbar__meta" aria-label="기준 일자">
+                        <span class="hr010v2-topbar__today">Today</span>
+                        <span class="hr010v2-topbar__date" id="hr010v2TodayLabel">4월 20일 (월)</span>
+                    </div>
+                    <div class="hr010v2-filterbar" aria-label="대시보드 필터">
+                        <label class="hr010v2-filter">
+                            <span class="hr010v2-filter__label">주요 분야</span>
+                            <select id="hr010v2DepartmentFilter" class="hr010v2-filter__control js-hr010v2-filter" data-filter="department">
+                                <option value="">전체</option>
+                            </select>
+                        </label>
+                        <label class="hr010v2-filter">
+                            <span class="hr010v2-filter__label">기술 스택</span>
+                            <select id="hr010v2StackFilter" class="hr010v2-filter__control js-hr010v2-filter" data-filter="stack">
+                                <option value="">전체</option>
+                            </select>
+                        </label>
+                        <label class="hr010v2-filter">
+                            <span class="hr010v2-filter__label">투입 가능 시기</span>
+                            <select id="hr010v2TimingFilter" class="hr010v2-filter__control js-hr010v2-filter" data-filter="timing">
+                                <option value="">전체</option>
+                                <option value="now">즉시 가능</option>
+                                <option value="soon">2주 내 가능</option>
+                                <option value="coord">가용일 미확정</option>
+                                <option value="later">2주 이후</option>
+                            </select>
+                        </label>
+                    </div>
                 </div>
             </div>
 
@@ -39,18 +65,19 @@
                 <article class="hr010v2-panel hr010v2-panel--health">
                     <div class="hr010v2-panel__head">
                         <div>
-                            <p class="hr010v2-eyebrow">현재 가용</p>
-                            <h3>투입 가능 현황</h3>
+                            <p class="hr010v2-eyebrow">가용 비교</p>
+                            <h3>가용 / 투입 가능</h3>
                         </div>
                     </div>
 
                     <div class="hr010v2-health-layout">
-                        <div class="hr010v2-health-ring">
-                            <div class="hr010v2-ring" id="hr010v2HealthRing" style="--value: 0;">
-                                <div class="hr010v2-ring__inner">
-                                    <strong id="hr010v2HealthScore">0%</strong>
-                                    <span id="hr010v2HealthLabel">데이터 대기</span>
-                                </div>
+                        <div class="hr010v2-health-summary">
+                            <div class="hr010v2-health-summary__copy">
+                                <strong id="hr010v2HealthScore">0%</strong>
+                                <span id="hr010v2HealthLabel">데이터 대기</span>
+                            </div>
+                            <div class="hr010v2-health-composition">
+                                <div class="hr010v2-health-composition__bar" id="hr010v2HealthComposition" role="img" aria-label="투입 가능 구성비"></div>
                             </div>
                             <p class="hr010v2-health-footnote" id="hr010v2HealthFootnote">즉시와 2주 내 투입 가능 인원을 기준으로 계산합니다.</p>
                         </div>
@@ -62,17 +89,17 @@
                 <article class="hr010v2-panel hr010v2-panel--supply">
                     <div class="hr010v2-panel__head">
                         <div>
-                            <p class="hr010v2-eyebrow">기술 수급</p>
-                            <h3>기술별 인력 수급 현황</h3>
+                            <p class="hr010v2-eyebrow">기술 분포</p>
+                            <h3>주력 기술 분포</h3>
                         </div>
                     </div>
 
                     <div class="hr010v2-supply-table">
                         <div class="hr010v2-supply-table__head">
                             <span>기술</span>
-                            <span>현황</span>
-                            <span>즉시+단기</span>
-                            <span>판정</span>
+                            <span>비중</span>
+                            <span>인원</span>
+                            <span>가용</span>
                         </div>
                         <div class="hr010v2-supply-table__body" id="hr010v2SkillRows"></div>
                     </div>
@@ -92,8 +119,8 @@
                 <article class="hr010v2-panel hr010v2-panel--timeline">
                     <div class="hr010v2-panel__head">
                         <div>
-                            <p class="hr010v2-eyebrow">주간 예정</p>
-                            <h3>인력 수급 / 주간 예정</h3>
+                            <p class="hr010v2-eyebrow">계약 리스크</p>
+                            <h3>계약 만료 임박</h3>
                         </div>
                     </div>
 
@@ -103,8 +130,8 @@
                 <article class="hr010v2-panel hr010v2-panel--grade">
                     <div class="hr010v2-panel__head">
                         <div>
-                            <p class="hr010v2-eyebrow">등급 분포</p>
-                            <h3>등급별 투입 가능 인력</h3>
+                            <p class="hr010v2-eyebrow">등급 요약</p>
+                            <h3>시니어 풀 비중</h3>
                         </div>
                     </div>
 
