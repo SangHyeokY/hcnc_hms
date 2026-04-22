@@ -1215,14 +1215,25 @@ function renderHr010V2SkillRows(rows) {
 
     const renderColumn = (columnRows, tone) => `
         <div class="hr010v2-supply-column hr010v2-supply-column--${tone}">
-            ${columnRows.map(row => `
+            ${columnRows.map((row, index) => {
+                const share = Math.max(10, Math.min(100, Number(row.shareRatio) || 0));
+                return `
                 <button type="button" class="hr010v2-supply-row hr010v2-supply-row--compact ${row.preset ? "js-hr010v2-nav" : ""}" ${row.preset ? `data-hr010-preset="${escapeHtml(encodeHr010NavigationPreset(row.preset))}"` : ""}>
-                    <div class="hr010v2-supply-row__skill">
-                        <strong>${escapeHtml(row.skill)}</strong>
+                    <div class="hr010v2-supply-row__rank" aria-hidden="true">${String(index + 1).padStart(2, "0")}</div>
+                    <div class="hr010v2-supply-row__body">
+                        <div class="hr010v2-supply-row__head">
+                            <div class="hr010v2-supply-row__skill">
+                                <strong>${escapeHtml(row.skill)}</strong>
+                            </div>
+                            <strong class="hr010v2-supply-row__meta">${escapeHtml(row.metaLabel)}</strong>
+                        </div>
+                        <div class="hr010v2-supply-row__bar" aria-hidden="true">
+                            <span style="width:${share}%"></span>
+                        </div>
                     </div>
-                    <div class="hr010v2-supply-row__meta">${escapeHtml(row.metaLabel)}</div>
                 </button>
-            `).join("")}
+                `;
+            }).join("")}
         </div>
     `;
 
@@ -1384,12 +1395,12 @@ function buildHr010V2GradePieGradient(rows, totalCount) {
         const percent = (count / totalCount) * 100;
         const end = start + percent;
         const color = row.tone === "s"
-            ? "#1d4ed8"
+            ? "var(--hr010v2-grade-s)"
             : row.tone === "a"
-                ? "#3b82f6"
+                ? "var(--hr010v2-grade-a)"
                 : row.tone === "b"
-                    ? "#60a5fa"
-                    : "#93c5fd";
+                    ? "var(--hr010v2-grade-b)"
+                    : "var(--hr010v2-grade-c)";
 
         segments.push(`${color} ${start.toFixed(2)}% ${end.toFixed(2)}%`);
         start = end;
@@ -1425,7 +1436,10 @@ function renderHr010V2RecommendList(rows) {
             </div>
             <div class="hr010v2-recommend-item__score">
                 <strong>${escapeHtml(row.scoreLabel)}</strong>
-                <span class="hr010v2-status-pill hr010v2-status-pill--${row.availabilityTone}">${escapeHtml(row.availabilityBadge)}</span>
+                <div class="hr010v2-recommend-item__badges">
+                    <span class="hr010v2-status-pill hr010v2-status-pill--${row.availabilityTone}">${escapeHtml(row.availabilityBadge)}</span>
+                    <span class="hr010v2-recommend-item__action">상세보기</span>
+                </div>
             </div>
         </a>
     `).join("");
