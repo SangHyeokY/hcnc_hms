@@ -20,6 +20,7 @@
             , dev.ctrt_typ -- 계약형태
             , dev.hope_rate_amt -- 단가
             , dev.search_txt
+            , DATE_FORMAT(dev.crt_ts, '%Y-%m-%d') AS crt_ts
             , IFNULL(fn_total_score(dev.dev_id), 0) score
             , dev.kosa_grd_cd
             , dev.main_fld_cd

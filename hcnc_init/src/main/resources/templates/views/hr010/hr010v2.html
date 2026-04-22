@@ -65,19 +65,14 @@
                 <article class="hr010v2-panel hr010v2-panel--health">
                     <div class="hr010v2-panel__head">
                         <div>
-                            <span class="hr010v2-eyebrow">가용 비교</span>
                             <h3>투입 가능 분포</h3>
                         </div>
                     </div>
 
                     <div class="hr010v2-health-layout">
                         <div class="hr010v2-health-summary">
-                            <div class="hr010v2-health-summary__copy">
-                                <strong id="hr010v2HealthScore">0%</strong>
-                                <span id="hr010v2HealthLabel">데이터 대기</span>
-                            </div>
                             <div class="hr010v2-health-composition">
-                                <div class="hr010v2-health-composition__bar" id="hr010v2HealthComposition" role="img" aria-label="투입 가능 구성비"></div>
+                                <div class="hr010v2-health-composition__content" id="hr010v2HealthComposition" role="img" aria-label="투입 가능 구성비"></div>
                             </div>
                         </div>
 
@@ -88,59 +83,22 @@
                 <article class="hr010v2-panel hr010v2-panel--supply">
                     <div class="hr010v2-panel__head">
                         <div>
-                            <span class="hr010v2-eyebrow">기술 분포</span>
                             <h3>주력 기술 분포</h3>
                         </div>
                     </div>
 
                     <div class="hr010v2-supply-table">
-                        <div class="hr010v2-supply-table__head">
-                            <span>기술</span>
-                            <span>비중</span>
-                            <span>인원</span>
-                            <span>가용</span>
+                        <div class="hr010v2-supply-columns__head">
+                            <span>상위 기술 Top3</span>
+                            <span>하위 기술 Top3</span>
                         </div>
-                        <div class="hr010v2-supply-table__body" id="hr010v2SkillRows"></div>
+                        <div class="hr010v2-supply-columns" id="hr010v2SkillRows"></div>
                     </div>
-                </article>
-
-                <article class="hr010v2-panel hr010v2-panel--alerts">
-                    <div class="hr010v2-panel__head">
-                        <div>
-                            <span class="hr010v2-eyebrow">확인 필요</span>
-                            <h3>주요 알림</h3>
-                        </div>
-                    </div>
-
-                    <div class="hr010v2-alert-list" id="hr010v2AlertList"></div>
-                </article>
-
-                <article class="hr010v2-panel hr010v2-panel--timeline">
-                    <div class="hr010v2-panel__head">
-                        <div>
-                            <span class="hr010v2-eyebrow">계약 리스크</span>
-                            <h3>계약 만료 임박</h3>
-                        </div>
-                    </div>
-
-                    <div class="hr010v2-weekly-bars" id="hr010v2WeeklyBars"></div>
-                </article>
-
-                <article class="hr010v2-panel hr010v2-panel--grade">
-                    <div class="hr010v2-panel__head">
-                        <div>
-                            <span class="hr010v2-eyebrow">등급 요약</span>
-                            <h3>시니어 풀 비중</h3>
-                        </div>
-                    </div>
-
-                    <div class="hr010v2-grade-chart" id="hr010v2GradeBars"></div>
                 </article>
 
                 <article class="hr010v2-panel hr010v2-panel--pool">
                     <div class="hr010v2-panel__head">
                         <div>
-                            <span class="hr010v2-eyebrow">추천 인력</span>
                             <h3>추천 인력 프로필</h3>
                         </div>
                         <div class="hr010v2-panel__actions">
@@ -152,6 +110,42 @@
                     </div>
 
                     <div class="hr010v2-recommend-list" id="hr010v2RecommendList"></div>
+                </article>
+
+                <article class="hr010v2-panel hr010v2-panel--timeline">
+                    <div class="hr010v2-panel__head">
+                        <div>
+                            <h3>계약 만료 임박</h3>
+                        </div>
+                    </div>
+
+                    <div class="hr010v2-weekly-bars" id="hr010v2WeeklyBars"></div>
+                </article>
+
+                <article class="hr010v2-panel hr010v2-panel--grade">
+                    <div class="hr010v2-panel__head">
+                        <div>
+                            <h3>시니어 풀 비중</h3>
+                        </div>
+                        <div class="hr010v2-panel__actions">
+                            <div class="hr010v2-grade-switch" role="tablist" aria-label="시니어 풀 비중 보기 전환">
+                                <button type="button" class="hr010v2-grade-switch__btn js-hr010v2-grade-view is-active" data-view="grade" aria-pressed="true">등급</button>
+                                <button type="button" class="hr010v2-grade-switch__btn js-hr010v2-grade-view" data-view="kosa" aria-pressed="false">KOSA</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="hr010v2-grade-chart" id="hr010v2GradeBars"></div>
+                </article>
+
+                <article class="hr010v2-panel hr010v2-panel--alerts">
+                    <div class="hr010v2-panel__head">
+                        <div>
+                            <h3>주요 알림</h3>
+                        </div>
+                    </div>
+
+                    <div class="hr010v2-alert-list" id="hr010v2AlertList"></div>
                 </article>
             </div>
         </div>
