@@ -3780,7 +3780,7 @@ async function saveHr011ProjectEvaluationAll() {
     for (let i = 0; i < keys.length; i += 1) {
         const projectKey = keys[i];
         const state = hr011RefProjectEvalCache.get(projectKey);
-        if (!state || !state.isInternal || !state.projectId || !state.loaded) continue;
+        if (!state || !state.isInternal || !state.projectId || !state.loaded);
         // await saveHr011ProjectEvaluation(projectKey);
     }
 }
@@ -4421,19 +4421,21 @@ function getHr011AvatarMarkup(row) {
     ].join("");
 }
 
+// 미니 프로필 생성 & 등록 or 수정 알림
 function renderHr011EditMiniProfile() {
-    const root = document.getElementById("hr011EditMiniProfile");
-    const avatarEl = document.getElementById("hr011EditMiniAvatar");
-    const nameEl = document.getElementById("hr011EditMiniName");
+    // const root = document.getElementById("hr011EditMiniProfile");
+    // const avatarEl = document.getElementById("hr011EditMiniAvatar");
+    // const nameEl = document.getElementById("hr011EditMiniName");
     const subEl = document.getElementById("hr011EditMiniSub");
-    if (!root || !avatarEl || !nameEl || !subEl) return;
+    // if (!root || !avatarEl || !nameEl || !subEl) return;
+    if (!subEl) return;
 
-    const row = hr011CurrentRow || {};
-    const name = $.trim($("#dev_nm").val()) || row.dev_nm || "신규 인력";
-    const avatarRow = Object.assign({}, row, { dev_nm: name });
-    avatarEl.innerHTML = getHr011AvatarMarkup(avatarRow);
-    nameEl.textContent = name;
-    subEl.textContent = hr011Mode === "insert" ? "인적사항 정보 등록" : "인적사항 정보 수정";
+    // const row = hr011CurrentRow || {};
+    // const name = $.trim($("#dev_nm").val()) || row.dev_nm || "신규 인력";
+    // const avatarRow = Object.assign({}, row, { dev_nm: name });
+    // avatarEl.innerHTML = getHr011AvatarMarkup(avatarRow);
+    // nameEl.textContent = name;
+    subEl.textContent = hr011Mode === "insert" ? "등록하기" : "수정하기";
 }
 
 // 직원/프리랜서 코드를 정규화한다.
@@ -4960,7 +4962,9 @@ function updateStepperUI() {
 
         const { filled, total } = calculateStepProgress(step);
 
-        $(this).find(".cnt").text(`(${filled}/${total})`);
+        $(this).find(".cnt").html(`
+          <span class="filled">${filled}</span>&nbsp;/&nbsp;${total}
+        `);
 
         $(this).removeClass("is-done is-progress is-empty");
 

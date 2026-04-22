@@ -35,7 +35,7 @@
                 <input type="hidden" id="write_user_id" name="write_user_id">
                 <input type="hidden" id="main_lang" name="main_lang">
 
-                <!-- [수정/등록할 때만 보임] 헤더 + 버튼 -->
+                <!-- ★ [수정/등록할 때만 보임] 헤더 + 버튼 -->
 <!--                <div class="btn-area hr011-page-actions hr011-page-actions&#45;&#45;bottom">-->
 <!--                    <div class="hr011-edit-mini-profile" id="hr011EditMiniProfile">-->
 <!--                        <div class="avatar" id="hr011EditMiniAvatar" aria-hidden="true"></div>-->
@@ -223,65 +223,63 @@
                     </aside>
                 </div>
 
-                <!-- [수정/등록할 때만 보임] 수정/등록 페이지 레이아웃 -->
+                <!-- ★ [수정/등록할 때만 보임] 수정/등록 페이지 레이아웃 -->
                 <div class="hr011-edit-flow" style="display:none;">
 
-                    <!-- [수정/등록할 때만 보임] 네비게이션 영역 -->
+                    <!-- ★ [수정/등록할 때만 보임] 네비게이션 영역 -->
                     <aside class="hr011-edit-stepper" aria-label="인력 등록/수정 단계">
-                        <div class="hr011-edit-mini-profile" id="hr011EditMiniProfile">
-                            <div class="avatar" id="hr011EditMiniAvatar" aria-hidden="true"></div>
-                            <div class="meta">
-                                <strong id="hr011EditMiniName">-</strong>
-                                <p id="hr011EditMiniSub">인적사항 정보 수정</p>
+
+                        <div class="hr011-edit-mini-header">
+                            <h4 id="hr011EditMiniSub">수정하기</h4>
+                            <div class="step-display">STEP
+                                <div class="step-cnt">0</div>
+                                <div class="opacity-num">/</div>
+                                <div class="tot-cnt opacity-num">0</div>
                             </div>
                         </div>
+
                         <div class="hr011-edit-step">
-                            <p class="hr011-edit-stepper-title">입력 단계</p>
+                            <!--<p class="hr011-edit-stepper-title">입력 단계</p>-->
                             <button type="button" class="hr011-edit-step-btn hr011-edit-step-btn--profile is-active" data-step-target="profile">
                                 <span class="num">1</span>
-<!--                                <span class="ico" aria-hidden="true"></span>-->
                                 <span class="txt">기본 인적사항</span>
-                                <span class="cnt">(0/0)</span>
+                                <span class="cnt">0 / 0</span>
                             </button>
                             <button type="button" class="hr011-edit-step-btn hr011-edit-step-btn--contract" data-step-target="contract">
                                 <span class="num">2</span>
-<!--                                <span class="ico" aria-hidden="true"></span>-->
                                 <span class="txt">소속 및 계약정보</span>
-                                <span class="cnt">(0/0)</span>
+                                <span class="cnt">0 / 0</span>
                             </button>
                             <button type="button" class="hr011-edit-step-btn hr011-edit-step-btn--skill" data-step-target="skill">
                                 <span class="num">3</span>
-<!--                                <span class="ico" aria-hidden="true"></span>-->
                                 <span class="txt">보유역량 및 숙련도</span>
-                                <span class="cnt">(0/0)</span>
+                                <span class="cnt">0 / 0</span>
                             </button>
                             <button type="button" class="hr011-edit-step-btn hr011-edit-step-btn--project" data-step-target="project">
                                 <span class="num">4</span>
-<!--                                <span class="ico" aria-hidden="true"></span>-->
                                 <span class="txt">프로젝트 이력</span>
-                                <span class="cnt">(0/0)</span>
+                                <span class="cnt">0 / 0</span>
                             </button>
                             <button type="button" class="hr011-edit-step-btn hr011-edit-step-btn--eval" data-step-target="eval-risk">
                                 <span class="num">5</span>
-<!--                                <span class="ico" aria-hidden="true"></span>-->
                                 <span class="txt">평가 및 리스크</span>
-                                <span class="cnt">(0/0)</span>
+                                <span class="cnt">0 / 0</span>
                             </button>
                         </div>
 
                         <div class="hr011-page-action-buttons">
-                            <button type="button" class="btn hr011-page-btn hr011-page-btn--primary wp100" id="hr011SaveBtn" hidden>저장</button>
+                            <button type="button" class="btn hr011-page-btn hr011-page-btn--primary" id="hr011SaveBtn" hidden>저장</button>
                             <button type="button" class="btn hr011-page-btn hr011-page-btn--ghost" id="hr011BackBtn">목록으로</button>
                             <button type="button" class="btn hr011-page-btn hr011-page-btn--ghost" id="hr011CancelBtn" hidden>등록취소</button>
                             <button type="button" class="btn hr011-page-btn hr011-page-btn--ghost" id="hr011EditBtn">수정하기</button>
                         </div>
                     </aside>
 
-                    <!-- [수정/등록할 때만 보임] 수정/등록 입력 영역 -->
+                    <!-- ★ [수정/등록할 때만 보임] 수정/등록 입력 영역 -->
                     <div class="hr011-dashboard-grid">
                         <section class="white-full hr011-section hr011-edit-sector hr011-edit-sector--full hr011-edit-profile-section" data-edit-step="profile">
 
-                            <!-- [수정/등록할 때만 보임] 소제목 -->
+                            <!-- ★ [수정/등록할 때만 보임] 소제목 -->
                             <div class="hr011-section-head">
                                 <div>
                                     <h4>기본 인적사항</h4>
@@ -289,7 +287,7 @@
                                 </div>
                             </div>
 
-                            <!-- [수정/등록할 때만 보임] 프로필 이미지 -->
+                            <!-- ★ [수정/등록할 때만 보임] 프로필 이미지 -->
                             <div class="modal-human-area">
                                 <div class="pic-area fd-col mg-b20">
                                     <div class="profile-area" tabindex="0">
@@ -300,7 +298,7 @@
                                 </div>
                             </div>
 
-                            <!-- [수정/등록할 때만 보임] 입력 영역 -->
+                            <!-- ★ [수정/등록할 때만 보임] 입력 영역 -->
                             <div class="hr011-basic-grid">
                                 <div class="hr011-field-card">
                                     <label for="dev_nm">성명</label>
@@ -503,7 +501,7 @@
                             </div>
                         </section>
 
-                        <!-- [수정/등록할 때만 보임] ?? -->
+                        <!-- ★ [수정/등록할 때만 보임] ?? -->
                         <div class="hr011-edit-wizard-controls">
                             <button type="button" class="btn hr011-page-btn hr011-page-btn--ghost" id="hr011StepPrevBtn">이전</button>
                             <div class="hr011-edit-wizard-progress">
