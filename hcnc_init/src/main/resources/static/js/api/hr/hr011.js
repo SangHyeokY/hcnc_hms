@@ -1438,19 +1438,24 @@ async function loadHr011MainDetail(devId) {
     }
 
     fillHr011MainForm(row);
+
     await Promise.all([
         fillHr011Grade(row.dev_id),
         loadHr011SkillSummary(row.dev_id),
         loadHr011RadarSummary(row.dev_id),
         loadHr011SkillCategorySummary(row.dev_id),
         loadHr011ProjectSummary(row.dev_id)
-    ]);
+    ]).then(function (res) {
+        
+        hideLoading();
+    });
     renderHr011Summary(row);
     renderHr011RadarChart();
     renderHr011ReferenceDashboard(row);
     renderHr011RefSkillCards("hr011RefSkillGauge");
     renderHr011RefRadarChart();
     scheduleHr011ReadOnlyTextareas();
+    setTimeout``();
 }
 
 // 메인 폼 입력값을 채운다.
@@ -4879,8 +4884,8 @@ const stepFields = {
     profile: [
         "#dev_nm",
         "#select_dev_typ",
-        "#tel","#select_sido_cd",
-        "#avail_dt","#brdt",
+        "#tel", "#select_sido_cd",
+        "#avail_dt", "#brdt",
         "#select_ctrt_typ",
         "#select_work_md",
         "#select_main_fld_cd",
