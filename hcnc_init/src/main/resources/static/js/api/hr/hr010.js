@@ -1141,19 +1141,20 @@ function renderHr010V2HealthCompositionBuckets(stats) {
         {
             key: "now",
             label: "즉시",
+            fullLabel: "즉시 가능",
             tone: "now",
             preset: "now"
         },
         {
             key: "soon",
             label: "2주 내",
+            fullLabel: "2주 내 가능",
             tone: "soon",
             preset: "soon"
         },
         {
             key: "later",
-            label: "2주 이후",
-            labelSub: "4주 이내",
+            label: "2~4주",
             fullLabel: HR010V2_AVAILABILITY_LATER_LABEL,
             tone: "later",
             preset: "later"
@@ -1164,9 +1165,12 @@ function renderHr010V2HealthCompositionBuckets(stats) {
         const totalCount = staffCount + freelancerCount;
         const staffShare = totalCount ? (staffCount / totalCount) * 100 : 0;
         const freelancerShare = totalCount ? (freelancerCount / totalCount) * 100 : 0;
-        const totalLabel = totalCount ? `${totalCount}명` : "없음";
-        const staffLabel = staffCount ? `${staffCount}명` : "없음";
-        const freelancerLabel = freelancerCount ? `${freelancerCount}명` : "없음";
+        const totalLabel = `${totalCount}명`;
+        const staffLabel = `${staffCount}명`;
+        const freelancerLabel = `${freelancerCount}명`;
+        const legendLabel = totalCount
+            ? `직원 ${staffLabel} · 프리랜서 ${freelancerLabel}`
+            : "구성 없음";
 
         return {
             ...bucket,
@@ -1177,19 +1181,22 @@ function renderHr010V2HealthCompositionBuckets(stats) {
             freelancerShare,
             totalLabel,
             staffLabel,
-            freelancerLabel
+            freelancerLabel,
+            legendLabel
         };
     });
+    const compositionAriaLabel = bucketRows
+        .map(bucket => bucket.fullLabel || bucket.label)
+        .join(", ");
 
     return `
-        <div class="hr010v2-health-composition__stack hr010v2-health-composition__stack--compact" role="img" aria-label="즉시, 2주 내, ${escapeHtml(HR010V2_AVAILABILITY_LATER_LABEL)} 투입 가능 분포">
+        <div class="hr010v2-health-composition__stack hr010v2-health-composition__stack--compact" role="img" aria-label="${escapeHtml(`${compositionAriaLabel} 투입 가능 분포`)}">
             <div class="hr010v2-health-buckets">
                 ${bucketRows.map(bucket => `
                     <div class="hr010v2-health-bucket hr010v2-health-bucket--${bucket.tone}">
                         <div class="hr010v2-health-bucket__head">
                             <span class="hr010v2-health-bucket__label" title="${escapeHtml(bucket.fullLabel || bucket.label)}">
                                 <span class="hr010v2-health-bucket__label-main">${escapeHtml(bucket.label)}</span>
-                                ${bucket.labelSub ? `<span class="hr010v2-health-bucket__label-sub">${escapeHtml(bucket.labelSub)}</span>` : ""}
                             </span>
                             <strong class="hr010v2-health-bucket__count">${escapeHtml(bucket.totalLabel)}</strong>
                         </div>
@@ -1197,9 +1204,19 @@ function renderHr010V2HealthCompositionBuckets(stats) {
                             <span class="hr010v2-health-bucket__segment hr010v2-health-bucket__segment--staff" style="width:${bucket.staffShare}%"></span>
                             <span class="hr010v2-health-bucket__segment hr010v2-health-bucket__segment--freelancer" style="width:${bucket.freelancerShare}%"></span>
                         </div>
-                        <div class="hr010v2-health-bucket__legend">
-                            <span class="hr010v2-health-bucket__legend-item hr010v2-health-bucket__legend-item--staff">직원 ${escapeHtml(bucket.staffLabel)}</span>
-                            <span class="hr010v2-health-bucket__legend-item hr010v2-health-bucket__legend-item--freelancer">프리랜서 ${escapeHtml(bucket.freelancerLabel)}</span>
+                        <div class="hr010v2-health-bucket__legend ${bucket.totalCount ? "" : "hr010v2-health-bucket__legend--empty"}" title="${escapeHtml(bucket.legendLabel)}">
+                            ${bucket.totalCount ? `
+                                <span class="hr010v2-health-bucket__legend-item hr010v2-health-bucket__legend-item--staff">
+                                    <span class="hr010v2-health-bucket__legend-dot" aria-hidden="true"></span>
+                                    <span>직원 ${escapeHtml(bucket.staffLabel)}</span>
+                                </span>
+                                <span class="hr010v2-health-bucket__legend-item hr010v2-health-bucket__legend-item--freelancer">
+                                    <span class="hr010v2-health-bucket__legend-dot" aria-hidden="true"></span>
+                                    <span>프리랜서 ${escapeHtml(bucket.freelancerLabel)}</span>
+                                </span>
+                            ` : `
+                                <span class="hr010v2-health-bucket__legend-empty">구성 없음</span>
+                            `}
                         </div>
                     </div>
                 `).join("")}
@@ -1293,14 +1310,14 @@ function renderHr010V2WeeklyBars(rows, stats = {}) {
     }
 
     const maxCount = Math.max(...rows.map(row => row.count), 1);
-    const baseCount = Number(stats.contractBaseCount) || 0;
     const managementCount = Number(stats.contractImminentCount) || rows.reduce((sum, row) => sum + (Number(row.count) || 0), 0);
     const expiredCount = Number((rows.find(row => row.presetValue === "expired") || {}).count) || 0;
     const thirtyCount = Number((rows.find(row => row.presetValue === "30") || {}).count) || 0;
     const sixtyCount = Number((rows.find(row => row.presetValue === "60") || {}).count) || 0;
     const ninetyCount = Number((rows.find(row => row.presetValue === "90") || {}).count) || 0;
     const missingCount = Number(stats.contractMissingCount) || 0;
-    const managementTitle = managementCount ? `재계약 대상 ${formatHr010CountLabel(managementCount)}` : "재계약 대상 없음";
+    const managementTitle = "재계약 대상";
+    const managementNote = managementCount ? formatHr010CountLabel(managementCount) : "0명";
 
     const summaryItems = rows.map(row => ({
         tone: row.tone,
@@ -1331,7 +1348,7 @@ function renderHr010V2WeeklyBars(rows, stats = {}) {
         <div class="hr010v2-weekly-summary">
             <div class="hr010v2-weekly-summary__head">
                 <strong>${escapeHtml(managementTitle)}</strong>
-                <span class="hr010v2-weekly-summary__note">총인원 ${escapeHtml(formatHr010CountLabel(baseCount))}</span>
+                <span class="hr010v2-weekly-summary__note">${escapeHtml(managementNote)}</span>
             </div>
             <div class="hr010v2-weekly-summary__legend" aria-label="재계약 대상 범례">
                 ${summaryItems.filter(item => item.count > 0).map(item => `
@@ -1507,22 +1524,21 @@ function renderHr010V2RecommendList(rows) {
     return `
         ${filterMarkup}
         ${selectedRows.map(row => `
-        <a class="hr010v2-recommend-item" href="/hr011?dev_id=${encodeURIComponent(row.devId)}">
+        <a
+            class="hr010v2-recommend-item"
+            href="/hr011?dev_id=${encodeURIComponent(row.devId)}"
+            aria-label="${escapeHtml([row.name, row.skillLabel, row.regionLabel, row.typeLabel, row.availabilityBadge, row.scoreLabel].filter(Boolean).join(" · ") + " 상세보기")}">
             <div class="hr010v2-recommend-item__avatar">${row.profileMarkup}</div>
             <div class="hr010v2-recommend-item__body">
                 <div class="hr010v2-recommend-item__title">
                     <strong>${escapeHtml(row.name)}</strong>
-                    <span class="hr010v2-status-pill hr010v2-status-pill--${row.typeTone}">${escapeHtml(row.typeLabel)}</span>
+                    <span class="hr010v2-recommend-item__type hr010v2-recommend-item__type--${row.typeTone}">${escapeHtml(row.typeLabel)}</span>
                 </div>
                 <div class="hr010v2-recommend-item__meta">${escapeHtml(row.skillLabel)} · ${escapeHtml(row.regionLabel)}</div>
-                <div class="hr010v2-recommend-item__submeta">투입 가능 ${escapeHtml(row.availabilityLabel)}</div>
+                <div class="hr010v2-recommend-item__submeta hr010v2-recommend-item__submeta--${row.availabilityTone}">${escapeHtml(row.availabilityBadge)}</div>
             </div>
             <div class="hr010v2-recommend-item__score">
                 <strong>${escapeHtml(row.scoreLabel)}</strong>
-                <div class="hr010v2-recommend-item__badges">
-                    <span class="hr010v2-status-pill hr010v2-status-pill--${row.availabilityTone}">${escapeHtml(row.availabilityBadge)}</span>
-                    <span class="hr010v2-recommend-item__action">상세보기</span>
-                </div>
             </div>
         </a>
     `).join("")}

@@ -24,9 +24,13 @@
         <input type="hidden" id="dev_nm" name="dev_nm" th:value="${dev_nm}">
         <input type="hidden" id="main_lang" name="main_lang" th:value="${main_lang}">
 
-        <div class="hr010v2-dashboard">
+            <div class="hr010v2-dashboard">
             <div class="hr010v2-topbar">
-                <h1>인력 운영 대시보드</h1>
+                <h1 class="hr010v2-topbar__title">
+                    <span class="hr010v2-topbar__title-icon" aria-hidden="true">
+                    </span>
+                    <span class="hr010v2-topbar__title-text">인력 운영 대시보드</span>
+                </h1>
                 <div class="hr010v2-topbar__tools">
                     <div class="hr010v2-topbar__meta" aria-label="기준 일자">
                         <span class="hr010v2-topbar__today">Today</span>
@@ -120,8 +124,13 @@
                     <div class="hr010v2-panel__head">
                         <div>
                             <h3 class="hr010v2-panel__title-with-help">
-                                재계약 대상
-                                <button type="button" class="hr010v2-panel-help" title="계약 종료일 기준으로 재계약 검토가 필요한 인력의 분포입니다." aria-label="재계약 대상 설명">?</button>
+                                계약 만료 임박 현황
+                                <span class="hr010v2-panel-help-wrap">
+                                    <button type="button" class="hr010v2-panel-help" aria-describedby="hr010v2ContractHelpTooltip" aria-label="재계약 대상 설명">?</button>
+                                    <span class="hr010v2-panel-help-tooltip" id="hr010v2ContractHelpTooltip" role="tooltip">
+                                        계약 종료일 기준으로 재계약 검토가 필요한 인력의 분포입니다.
+                                    </span>
+                                </span>
                             </h3>
                         </div>
                     </div>
