@@ -6140,7 +6140,7 @@ minmax(142px, 1.02fr); gap:10px; align-items:stretch;}
 }
 
 .hr011-detail-wrap .hr011-edit-mini-header #hr011EditMiniSub {font-size: 24px; font-weight: 700;}
-.hr011-detail-wrap .hr011-edit-mini-header .step-display {font-size: 14px; display: flex; gap: 6px; font-weight: 600;}
+.hr011-detail-wrap .hr011-edit-mini-header .step-display {font-size: 14px; display: flex; gap: 4px; font-weight: 600;}
 .hr011-detail-wrap .hr011-edit-mini-header .step-display .opacity-num {color: #FFFFFF80; font-weight: 500;}
 
 .hr011-detail-wrap .hr011-edit-flow {display: block; overflow-y: auto;}
