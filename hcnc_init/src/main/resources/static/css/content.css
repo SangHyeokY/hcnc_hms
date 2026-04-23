@@ -6524,8 +6524,6 @@ minmax(142px, 1.02fr); gap:10px; align-items:stretch;}
   box-shadow: 0 0 0 3px rgba(93, 140, 222, 0.16);
 }
 
-/*.hr011-detail-wrap .hr011-page:not(.is-edit-mode) .hr011-page-actions--bottom {display: none;}*/
-
 /* Pretendard 폰트 대신 inter 폰트 사용 */
 /*.hr011-detail-wrap .hr011-ref-layout,
 .hr011-detail-wrap .hr011-ref-layout * {
@@ -8997,8 +8995,6 @@ body.hr011-project-eval-modal-open {
     grid-template-columns: 1fr;
   }
 
-  /*.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-page-actions--bottom {position: sticky; left: auto; right: auto; top: 6px;}*/
-
   .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-page-content {
     padding-top: 0;
   }
@@ -9064,8 +9060,6 @@ body.hr011-project-eval-modal-open {
     width: 100%;
     max-width: none;
   }
-
-  /*.hr011-detail-wrap .hr011-page-actions--bottom {top: 6px;}*/
 
   .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-wizard-controls {
     padding: 10px;
@@ -9272,7 +9266,7 @@ body.hr011-project-eval-modal-open {
   .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-step-btn {
     min-width: 210px;
   }
-  /*.hr011-detail-wrap .hr011-page-actions--bottom {position: static; padding: 8px; backdrop-filter: none;}*/
+
   .hr011-detail-wrap .hr011-edit-mini-profile .meta strong {
     font-size: 22px;
   }
