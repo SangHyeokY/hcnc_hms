@@ -23,7 +23,7 @@ let hr010Paging = {
 };
 let hr010V2DashboardBaseRows = [];
 let hr010V2GradeChartMode = "grade";
-let hr010V2RecommendGradeFilter = "all";
+let hr010V2RecommendGradeFilter = "S";
 let hr010V2DashboardFilters = {
     department: "",
     stack: "",
@@ -45,6 +45,7 @@ const hr010FilterOrder = ["skl_grp", "ctrt_typ", "work_md", "grade", "kosa_grd_c
 const hr010GradeOrder = ["S", "A", "B", "C"];
 const HR010V2_ROLE_STAFF_COLOR = "var(--hr010v2-role-staff)";
 const HR010V2_ROLE_FREELANCER_COLOR = "var(--hr010v2-role-freelancer)";
+const HR010V2_BAR_RX = 5;
 const HR010V2_AVAILABILITY_LATER_LABEL = "2주 이후 ~ 4주 이내";
 const HR010_SUGGESTION_TRANSITION_MS = 220;
 const HR010_SUGGESTION_INPUT_DEBOUNCE_MS = 260;
@@ -132,7 +133,7 @@ function bindEvents() {
     });
 
     $(document).on("click", ".js-hr010v2-recommend-grade-filter", function () {
-        const nextFilter = String(this.getAttribute("data-grade-filter") || "all").trim() || "all";
+        const nextFilter = String(this.getAttribute("data-grade-filter") || "S").trim().toUpperCase() || "S";
         if (hr010V2RecommendGradeFilter === nextFilter) return;
 
         hr010V2RecommendGradeFilter = nextFilter;
@@ -740,7 +741,7 @@ function renderHr010V2Dashboard(list) {
     const stats = getHr010V2DashboardStats(dashboardList);
 
     setHr010Html("hr010v2HealthComposition", renderHr010V2HealthComposition(stats));
-    setHr010Html("hr010v2KpiGrid", renderHr010V2KpiCards(stats.kpis));
+    setHr010Html("hr010v2KpiGrid", renderHr010V2KpiCards(stats.kpis, stats.gradeRows));
     setHr010Html("hr010v2HealthStats", renderHr010V2HealthStats(stats));
     setHr010Html("hr010v2SkillRows", renderHr010V2SkillRows(stats.skillRows));
     setHr010Html("hr010v2AlertList", renderHr010V2Alerts(stats.alerts));
@@ -908,26 +909,29 @@ function getHr010V2DashboardStats(list) {
     };
 }
 
-function renderHr010V2KpiCards(kpis) {
+function renderHr010V2KpiCards(kpis, gradeRows = []) {
     if (!Array.isArray(kpis) || !kpis.length) {
         return `<div class="hr010v2-empty">표시할 KPI 데이터가 없습니다.</div>`;
     }
 
     const renderCard = item => {
         const isTrendCard = item.kind === "trend";
+        const isDonutCard = item.kind === "donut";
+        const isTypeGradeCard = item.kind === "type-grade";
         return `
-            <button type="button" class="hr010v2-kpi-card hr010v2-kpi-card--${item.tone} ${isTrendCard ? "hr010v2-kpi-card--trend" : ""} js-hr010v2-nav" data-hr010-preset="${escapeHtml(encodeHr010NavigationPreset(item.preset))}">
-                <div class="hr010v2-kpi-card__main ${isTrendCard ? "hr010v2-kpi-card__main--trend" : ""}">
+            <button type="button" class="hr010v2-kpi-card hr010v2-kpi-card--${item.tone} ${isTrendCard ? "hr010v2-kpi-card--trend" : ""} ${isDonutCard ? "hr010v2-kpi-card--donut" : ""} ${isTypeGradeCard ? "hr010v2-kpi-card--type-grade" : ""} js-hr010v2-nav" data-hr010-preset="${escapeHtml(encodeHr010NavigationPreset(item.preset))}">
+                <div class="hr010v2-kpi-card__main ${isTrendCard ? "hr010v2-kpi-card__main--trend" : ""} ${isTypeGradeCard ? "hr010v2-kpi-card__main--type-grade" : ""}">
                     <div class="hr010v2-kpi-card__copy">
                         <span class="hr010v2-kpi-card__label">${escapeHtml(item.label)}</span>
                         <strong class="hr010v2-kpi-card__value">${escapeHtml(item.value)}</strong>
+                        ${isTypeGradeCard && item.meta ? `<span class="hr010v2-kpi-card__meta hr010v2-kpi-card__meta--compact">${escapeHtml(item.meta)}</span>` : ""}
                     </div>
                     ${isTrendCard ? `
                         <div class="hr010v2-kpi-card__trend" aria-hidden="true">
                             ${item.chartMarkup || ""}
                         </div>
                     ` : `
-                        <div class="hr010v2-kpi-card__visual" aria-hidden="true">
+                        <div class="hr010v2-kpi-card__visual ${isTypeGradeCard ? "hr010v2-kpi-card__visual--type-grade" : ""}" aria-hidden="true">
                             <div class="hr010v2-kpi-card__spark">
                                 ${item.chartMarkup || ""}
                             </div>
@@ -1056,7 +1060,8 @@ function renderHr010V2KpiMiniDonut(segments, options = {}) {
         .map(item => ({
             color: item.color,
             label: item.label,
-            value: item.value
+            value: item.value,
+            meta: item.meta
         }))
         .filter(item => item.label || item.value);
     const isInline = options.layout === "inline";
@@ -1076,8 +1081,13 @@ function renderHr010V2KpiMiniDonut(segments, options = {}) {
                     ${legendItems.map(item => `
                         <div class="hr010v2-kpi-mini__legend-item" role="listitem">
                             <span class="hr010v2-kpi-mini__legend-dot" style="--legend-dot:${escapeHtml(String(item.color || HR010V2_ROLE_STAFF_COLOR))}"></span>
-                            <span class="hr010v2-kpi-mini__legend-label">${escapeHtml(String(item.label || ""))}</span>
-                            <strong class="hr010v2-kpi-mini__legend-value">${escapeHtml(String(item.value || ""))}</strong>
+                            <div class="hr010v2-kpi-mini__legend-copy">
+                                <div class="hr010v2-kpi-mini__legend-head">
+                                    <span class="hr010v2-kpi-mini__legend-label">${escapeHtml(String(item.label || ""))}</span>
+                                    <strong class="hr010v2-kpi-mini__legend-value">${escapeHtml(String(item.value || ""))}</strong>
+                                </div>
+                                ${item.meta ? `<span class="hr010v2-kpi-mini__legend-meta">${escapeHtml(String(item.meta))}</span>` : ""}
+                            </div>
                         </div>
                     `).join("")}
                 </div>
@@ -1105,6 +1115,244 @@ function renderHr010V2KpiMiniCompare(rows) {
             `).join("")}
         </div>
     `;
+}
+
+function renderHr010V2KpiMiniBreakdown(rows, options = {}) {
+    const normalized = Array.isArray(rows) ? rows : [];
+    const showSegmentLabels = Boolean(options.segmentLabels);
+    const segmentLabelPlacement = String(options.segmentLabelPlacement || "below").trim().toLowerCase();
+
+    if (!normalized.length) {
+        return `<div class="hr010v2-kpi-mini hr010v2-kpi-mini--empty">-</div>`;
+    }
+
+    const compact = Boolean(options.compact);
+    const caption = String(options.caption || "").trim();
+    const legendLabel = String(options.legendLabel || "").trim();
+    const legendItems = (Array.isArray(options.legendItems) ? options.legendItems : [])
+        .map(item => ({
+            tone: String(item.tone || "").trim().toLowerCase(),
+            label: String(item.label || "").trim()
+        }))
+        .filter(item => item.label);
+
+    return `
+        <div class="hr010v2-kpi-mini hr010v2-kpi-mini--breakdown ${compact ? "hr010v2-kpi-mini--breakdown-compact" : ""}">
+            ${caption ? `<div class="hr010v2-kpi-mini__breakdown-caption">${escapeHtml(caption)}</div>` : ""}
+            ${legendItems.length ? `
+                <div class="hr010v2-kpi-mini__breakdown-legend" role="list" aria-label="${escapeHtml(legendLabel || "등급 색상 안내")}">
+                    ${legendLabel ? `<span class="hr010v2-kpi-mini__breakdown-legend-label">${escapeHtml(legendLabel)}</span>` : ""}
+                    ${legendItems.map(item => `
+                        <span class="hr010v2-kpi-mini__breakdown-legend-item hr010v2-kpi-mini__breakdown-legend-item--${item.tone}" role="listitem">
+                            <span class="hr010v2-kpi-mini__breakdown-legend-dot" aria-hidden="true"></span>
+                            <span>${escapeHtml(item.label)}</span>
+                        </span>
+                    `).join("")}
+                </div>
+            ` : ""}
+            <div class="hr010v2-kpi-mini__breakdown-list">
+                ${normalized.map(row => {
+                    const segments = (Array.isArray(row.segments) ? row.segments : [])
+                        .map(segment => ({
+                            tone: segment.tone,
+                            label: segment.label,
+                            value: Number(segment.value) || 0,
+                            valueLabel: segment.valueLabel || formatHr010CountLabel(segment.value)
+                        }));
+                    const stackSegments = segments.filter(segment => segment.value > 0);
+                    const visibleSegments = stackSegments.length ? stackSegments : [];
+                    const totalValue = Number(row.value) || segments.reduce((sum, segment) => sum + segment.value, 0);
+                    const valueLabel = String(row.valueLabel || `${totalValue}명`);
+                    const rowClass = row.tone ? `hr010v2-kpi-mini__breakdown-row--${row.tone}` : "";
+
+                    return `
+                        <div
+                            class="hr010v2-kpi-mini__breakdown-row ${rowClass}"
+                            aria-label="${escapeHtml(`${row.label} ${valueLabel}`)}">
+                            <div class="hr010v2-kpi-mini__breakdown-head">
+                                <span class="hr010v2-kpi-mini__breakdown-label">${escapeHtml(String(row.label || "-"))}</span>
+                                <strong class="hr010v2-kpi-mini__breakdown-value">${escapeHtml(valueLabel)}</strong>
+                            </div>
+                            <div class="hr010v2-kpi-mini__breakdown-body ${showSegmentLabels && segmentLabelPlacement === "aside" ? "hr010v2-kpi-mini__breakdown-body--aside" : ""}">
+                                <div class="hr010v2-kpi-mini__breakdown-stack" aria-hidden="true">
+                                    ${stackSegments.length ? stackSegments.map(segment => `
+                                        <span class="hr010v2-kpi-mini__stack-segment hr010v2-kpi-mini__stack-segment--${segment.tone}" style="width:${totalValue ? (segment.value / totalValue) * 100 : 0}%"></span>
+                                    `).join("") : `<span class="hr010v2-kpi-mini__breakdown-empty"></span>`}
+                                </div>
+                                ${showSegmentLabels && segmentLabelPlacement === "aside" ? `
+                                    <div class="hr010v2-kpi-mini__breakdown-segment-labels" role="list" aria-label="${escapeHtml(`${row.label || ""} 등급 분해`) }">
+                                        ${visibleSegments.length ? visibleSegments.map(segment => `
+                                            <span class="hr010v2-kpi-mini__breakdown-segment-item hr010v2-kpi-mini__breakdown-segment-item--${segment.tone}" role="listitem">
+                                                <span class="hr010v2-kpi-mini__breakdown-segment-dot" aria-hidden="true"></span>
+                                                <span class="hr010v2-kpi-mini__breakdown-segment-label">${escapeHtml(String(segment.label || "-"))}</span>
+                                                <strong class="hr010v2-kpi-mini__breakdown-segment-value">${escapeHtml(String(segment.valueLabel || "0명"))}</strong>
+                                            </span>
+                                        `).join("") : `<span class="hr010v2-kpi-mini__breakdown-segment-item is-empty" role="listitem">구성 없음</span>`}
+                                    </div>
+                                ` : ""}
+                            </div>
+                            ${showSegmentLabels && segmentLabelPlacement !== "aside" ? `
+                                <div class="hr010v2-kpi-mini__breakdown-segment-labels" role="list" aria-label="${escapeHtml(`${row.label || ""} 등급 분해`) }">
+                                    ${visibleSegments.length ? visibleSegments.map(segment => `
+                                        <span class="hr010v2-kpi-mini__breakdown-segment-item hr010v2-kpi-mini__breakdown-segment-item--${segment.tone}" role="listitem">
+                                            <span class="hr010v2-kpi-mini__breakdown-segment-dot" aria-hidden="true"></span>
+                                            <span class="hr010v2-kpi-mini__breakdown-segment-label">${escapeHtml(String(segment.label || "-"))}</span>
+                                            <strong class="hr010v2-kpi-mini__breakdown-segment-value">${escapeHtml(String(segment.valueLabel || "0명"))}</strong>
+                                        </span>
+                                    `).join("") : `<span class="hr010v2-kpi-mini__breakdown-segment-item is-empty" role="listitem">구성 없음</span>`}
+                                </div>
+                            ` : ""}
+                        </div>
+                    `;
+                }).join("")}
+            </div>
+        </div>
+    `;
+}
+
+function renderHr010V2KpiGradeMatrix(rows, options = {}) {
+    const normalized = (Array.isArray(rows) ? rows : []).map(row => ({
+        code: String(row.code || "").trim().toUpperCase(),
+        label: String(row.label || "").trim(),
+        tone: String(row.tone || "").trim().toLowerCase(),
+        staffCount: Number(row.staffCount) || 0,
+        freelancerCount: Number(row.freelancerCount) || 0,
+        totalCount: Number(row.totalCount) || 0
+    })).filter(row => row.label);
+
+    if (!normalized.length) {
+        return `<div class="hr010v2-kpi-mini hr010v2-kpi-mini--empty">-</div>`;
+    }
+
+    const formatMatrixCount = value => `${Number(value) || 0}`;
+    const totalStaff = normalized.reduce((sum, row) => sum + row.staffCount, 0);
+    const totalFreelancer = normalized.reduce((sum, row) => sum + row.freelancerCount, 0);
+    const totalCount = normalized.reduce((sum, row) => sum + row.totalCount, 0);
+    const pendingCount = Number(options.pendingCount) || 0;
+    const ariaBaseLabel = String(options.ariaLabel || options.caption || "등급별 인력 현황").trim();
+    const ariaLabel = pendingCount > 0
+        ? `${ariaBaseLabel}, 평가 대기 ${formatMatrixCount(pendingCount)}명`
+        : ariaBaseLabel;
+
+    return `
+        <div class="hr010v2-kpi-matrix">
+            <div class="hr010v2-kpi-matrix__rows" role="list" aria-label="${escapeHtml(ariaLabel)}">
+                ${normalized.map(row => {
+                    const rowTotal = Number(row.totalCount) || (row.staffCount + row.freelancerCount);
+                    const staffShare = rowTotal ? (row.staffCount / rowTotal) * 100 : 0;
+                    const freelancerShare = rowTotal ? (row.freelancerCount / rowTotal) * 100 : 0;
+                    const rowLabel = row.label || "-";
+                    const labelText = `${rowLabel} 직원 ${formatMatrixCount(row.staffCount)}명, 프리랜서 ${formatMatrixCount(row.freelancerCount)}명, 합계 ${formatMatrixCount(rowTotal)}명`;
+
+                    return `
+                        <div class="hr010v2-kpi-matrix__row" role="listitem" aria-label="${escapeHtml(labelText)}">
+                            <span class="hr010v2-kpi-matrix__grade">${escapeHtml(rowLabel)}</span>
+                            <div class="hr010v2-kpi-matrix__track" aria-hidden="true">
+                                ${rowTotal ? `
+                                    <span class="hr010v2-kpi-matrix__segment hr010v2-kpi-matrix__segment--staff" style="width:${staffShare.toFixed(3)}%">
+                                        <span>${escapeHtml(formatMatrixCount(row.staffCount))}</span>
+                                    </span>
+                                    <span class="hr010v2-kpi-matrix__segment hr010v2-kpi-matrix__segment--freelancer" style="width:${freelancerShare.toFixed(3)}%">
+                                        <span>${escapeHtml(formatMatrixCount(row.freelancerCount))}</span>
+                                    </span>
+                                ` : `<span class="hr010v2-kpi-matrix__empty">0</span>`}
+                            </div>
+                            <strong class="hr010v2-kpi-matrix__total">${escapeHtml(formatMatrixCount(rowTotal))}</strong>
+                        </div>
+                    `;
+                }).join("")}
+            </div>
+            <div class="hr010v2-kpi-matrix__footer">
+                <span class="hr010v2-kpi-matrix__footer-label">합계</span>
+                <strong class="hr010v2-kpi-matrix__footer-value hr010v2-kpi-matrix__footer-value--staff">${escapeHtml(formatMatrixCount(totalStaff))}</strong>
+                <strong class="hr010v2-kpi-matrix__footer-value hr010v2-kpi-matrix__footer-value--freelancer">${escapeHtml(formatMatrixCount(totalFreelancer))}</strong>
+                <strong class="hr010v2-kpi-matrix__footer-value hr010v2-kpi-matrix__footer-value--total">${escapeHtml(formatMatrixCount(totalCount))}</strong>
+            </div>
+        </div>
+    `;
+}
+
+function getHr010GradeToneColor(tone) {
+    switch (String(tone || "").trim().toLowerCase()) {
+        case "s":
+            return "var(--hr010v2-grade-s)";
+        case "a":
+            return "var(--hr010v2-grade-a)";
+        case "b":
+            return "var(--hr010v2-grade-b)";
+        case "c":
+            return "var(--hr010v2-grade-c)";
+        case "u":
+            return "var(--hr010v2-grade-pending)";
+        default:
+            return "var(--hr010v2-grade-pending)";
+    }
+}
+
+function buildHr010V2TypeGradeRows(list, today, mode = "available") {
+    const useDeployable = mode === "deployable";
+    const labels = {
+        S: "특급",
+        A: "고급",
+        B: "중급",
+        C: "초급",
+        U: "평가 대기"
+    };
+    const groups = {
+        staff: {
+            key: "staff",
+            label: "직원",
+            tone: "staff",
+            totalCount: 0,
+            gradeCounts: { S: 0, A: 0, B: 0, C: 0, U: 0 },
+            preset: makeHr010NavigationPreset({
+                userType: "staff",
+                runtimeFilters: { availability: useDeployable ? "deployable" : "available" }
+            })
+        },
+        freelancer: {
+            key: "freelancer",
+            label: "프리랜서",
+            tone: "freelancer",
+            totalCount: 0,
+            gradeCounts: { S: 0, A: 0, B: 0, C: 0, U: 0 },
+            preset: makeHr010NavigationPreset({
+                userType: "freelancer",
+                runtimeFilters: { availability: useDeployable ? "deployable" : "available" }
+            })
+        }
+    };
+
+    (Array.isArray(list) ? list : []).forEach(row => {
+        const bucket = getHr010AvailabilityBucket(row, today);
+        const isMatched = useDeployable
+            ? bucket.key === "now" || bucket.key === "soon"
+            : bucket.key !== "coord";
+
+        if (!isMatched) return;
+
+        const typeKey = resolveUserType(row) === "staff" ? "staff" : "freelancer";
+        const current = groups[typeKey];
+        const rawGradeCode = String(row.grade || "").trim().toUpperCase();
+        const gradeCode = Object.prototype.hasOwnProperty.call(current.gradeCounts, rawGradeCode) ? rawGradeCode : "U";
+
+        current.totalCount += 1;
+        current.gradeCounts[gradeCode] += 1;
+    });
+
+    return [groups.staff, groups.freelancer].map(group => ({
+        label: group.label,
+        tone: group.tone,
+        value: group.totalCount,
+        valueLabel: formatHr010CountLabel(group.totalCount),
+        segments: [...hr010GradeOrder, "U"].map(code => ({
+            tone: code.toLowerCase(),
+            label: labels[code] || code,
+            value: group.gradeCounts[code] || 0,
+            valueLabel: formatHr010CountLabel(group.gradeCounts[code] || 0)
+        })),
+        preset: group.preset
+    }));
 }
 
 function renderHr010V2KpiMiniStack(segments) {
@@ -1387,6 +1635,12 @@ function renderHr010V2GradeBars(gradeRows, kosaRows) {
     const activeRows = activeMode === "kosa"
         ? (Array.isArray(kosaRows) ? kosaRows : [])
         : (Array.isArray(gradeRows) ? gradeRows : []);
+    const pendingRow = activeMode === "grade"
+        ? activeRows.find(row => String(row.code || "").trim().toUpperCase() === "U")
+        : null;
+    const legendRows = activeMode === "grade"
+        ? activeRows.filter(row => String(row.code || "").trim().toUpperCase() !== "U")
+        : activeRows;
 
     if (!activeRows.length) {
         return `<div class="hr010v2-empty">비중 데이터를 계산할 수 없습니다.</div>`;
@@ -1397,36 +1651,46 @@ function renderHr010V2GradeBars(gradeRows, kosaRows) {
         const rounded = Math.round((Number(value) || 0) * 10) / 10;
         return `${rounded}`.replace(/\.0$/, "");
     };
-    const summaryLabel = activeMode === "kosa" ? "KOSA 분포" : "S/A/B/C 분포";
+    const summaryLabel = activeMode === "kosa" ? "KOSA 분포" : "S / A / B / C 분포";
     const stackMarkup = activeRows
         .filter(row => (Number(row.totalCount) || 0) > 0)
         .map(row => {
             const share = totalCount ? ((Number(row.totalCount) || 0) / totalCount) * 100 : 0;
             const shareLabel = `${formatShare(share)}%`;
+            const displayLabel = activeMode === "kosa"
+                ? row.label
+                : String(row.code || row.label || "").trim().toUpperCase();
             return `
                 <button
                     type="button"
                     class="hr010v2-grade-stack__segment hr010v2-grade-stack__segment--${row.tone} js-hr010v2-nav"
                     data-hr010-preset="${escapeHtml(encodeHr010NavigationPreset(row.preset))}"
                     style="--segment:${share.toFixed(2)}"
-                    aria-label="${escapeHtml(`${row.label} 비중 ${shareLabel}`)}">
-                    <span>${escapeHtml(row.label)}</span>
+                    aria-label="${escapeHtml(`${displayLabel} 비중 ${shareLabel}`)}">
+                    <span>${escapeHtml(displayLabel)}</span>
                 </button>
             `;
         })
         .join("");
 
-    const legendMarkup = activeRows.map(row => {
+    const legendMarkup = legendRows.map(row => {
         const share = totalCount ? ((Number(row.totalCount) || 0) / totalCount) * 100 : 0;
         const shareLabel = `${formatShare(share)}%`;
+        const displayLabel = activeMode === "kosa"
+            ? row.label
+            : String(row.code || row.label || "").trim().toUpperCase();
+        const isCombinedPending = activeMode === "grade"
+            && String(row.code || "").trim().toUpperCase() === "C"
+            && Number(pendingRow?.totalCount) > 0;
         return `
-            <button type="button" class="hr010v2-grade-legend__item ${row.preset ? "js-hr010v2-nav" : ""}" ${row.preset ? `data-hr010-preset="${escapeHtml(encodeHr010NavigationPreset(row.preset))}"` : ""}>
+            <button type="button" class="hr010v2-grade-legend__item ${isCombinedPending ? "hr010v2-grade-legend__item--combined" : ""} ${row.preset ? "js-hr010v2-nav" : ""}" ${row.preset ? `data-hr010-preset="${escapeHtml(encodeHr010NavigationPreset(row.preset))}"` : ""}>
                 <div class="hr010v2-grade-legend__head">
-                    <span class="hr010v2-grade-legend__chip hr010v2-grade-legend__chip--${row.tone}">${escapeHtml(row.label)}</span>
+                    <span class="hr010v2-grade-legend__chip hr010v2-grade-legend__chip--${row.tone}">${escapeHtml(displayLabel)}</span>
                     <strong>${escapeHtml(shareLabel)}</strong>
                 </div>
                 <div class="hr010v2-grade-legend__meta">
                     <span>직원 ${escapeHtml(formatHr010CountLabel(row.staffCount))} · 프리랜서 ${escapeHtml(formatHr010CountLabel(row.freelancerCount))}</span>
+                    ${isCombinedPending ? `<span class="hr010v2-grade-legend__pending">평가대기 ${escapeHtml(formatHr010CountLabel(pendingRow.totalCount))}</span>` : ""}
                 </div>
             </button>
         `;
@@ -1487,24 +1751,22 @@ function buildHr010V2GradePieGradient(rows, totalCount) {
 
 function renderHr010V2RecommendList(rows) {
     const gradeFilters = [
-        { value: "all", label: "전체" },
         { value: "S", label: "특급" },
         { value: "A", label: "고급" },
         { value: "B", label: "중급" },
         { value: "C", label: "초급" }
     ];
-    const selectedRows = hr010V2RecommendGradeFilter === "all"
-        ? rows
-        : rows.filter(row => String(row.gradeCode || "").toUpperCase() === hr010V2RecommendGradeFilter);
+    const currentGradeFilter = String(hr010V2RecommendGradeFilter || "S").trim().toUpperCase() || "S";
+    const selectedRows = rows.filter(row => String(row.gradeCode || "").toUpperCase() === currentGradeFilter);
 
     const filterMarkup = `
         <div class="hr010v2-recommend-filter" role="tablist" aria-label="추천 인력 등급 필터">
             ${gradeFilters.map(filter => `
                 <button
                     type="button"
-                    class="hr010v2-recommend-filter__btn js-hr010v2-recommend-grade-filter ${hr010V2RecommendGradeFilter === filter.value ? "is-active" : ""}"
+                    class="hr010v2-recommend-filter__btn js-hr010v2-recommend-grade-filter ${currentGradeFilter === filter.value ? "is-active" : ""}"
                     data-grade-filter="${escapeHtml(filter.value)}"
-                    aria-pressed="${hr010V2RecommendGradeFilter === filter.value ? "true" : "false"}">
+                    aria-pressed="${currentGradeFilter === filter.value ? "true" : "false"}">
                     ${escapeHtml(filter.label)}
                 </button>
             `).join("")}
@@ -1516,7 +1778,7 @@ function renderHr010V2RecommendList(rows) {
             ${filterMarkup}
             <div class="hr010v2-empty-state">
                 <div class="hr010v2-empty-state__icon" aria-hidden="true"></div>
-                <strong>${hr010V2RecommendGradeFilter === "all" ? "적합한 추천 인력이 없습니다" : "선택한 등급의 추천 인력이 없습니다"}</strong>
+                <strong>선택한 등급의 추천 인력이 없습니다</strong>
             </div>
         `;
     }
@@ -1547,28 +1809,35 @@ function renderHr010V2RecommendList(rows) {
 
 function buildHr010V2SkillRows(list, today) {
     const skillMap = new Map();
-    const totalCount = Array.isArray(list) ? list.length : 0;
+    let totalCount = 0;
 
-    list.forEach(row => {
-        const skillCodes = getSkillCodes(row);
-        const skillNames = getSkillNameList(row);
-        const skillCode = skillCodes[0] || "";
-        const skillLabel = skillNames[0] || getPrimarySkillLabel(row);
-        const skill = !skillLabel || skillLabel === "주개발언어 미등록" ? "미등록" : skillLabel;
+    (Array.isArray(list) ? list : []).forEach(row => {
         const availability = getHr010AvailabilityBucket(row, today);
-        const mapKey = skillCode || skill;
-        const current = skillMap.get(mapKey) || {
-            skill,
-            skillCode,
-            totalCount: 0,
-            nowCount: 0,
-            soonCount: 0
-        };
+        const skillEntries = getSkillEntries(row);
 
-        current.totalCount += 1;
-        if (availability.key === "now") current.nowCount += 1;
-        if (availability.key === "soon") current.soonCount += 1;
-        skillMap.set(mapKey, current);
+        skillEntries.forEach(({ skill, skillCode }) => {
+            const normalizedSkill = String(skill || "").trim();
+            const normalizedSkillCode = String(skillCode || "").trim().toUpperCase();
+
+            if (!normalizedSkill || (normalizedSkill === "미등록" && !normalizedSkillCode)) {
+                return;
+            }
+
+            const mapKey = skillCode || skill;
+            const current = skillMap.get(mapKey) || {
+                skill,
+                skillCode,
+                totalCount: 0,
+                nowCount: 0,
+                soonCount: 0
+            };
+
+            current.totalCount += 1;
+            totalCount += 1;
+            if (availability.key === "now") current.nowCount += 1;
+            if (availability.key === "soon") current.soonCount += 1;
+            skillMap.set(mapKey, current);
+        });
     });
 
     const sortedRows = Array.from(skillMap.values())
@@ -1761,16 +2030,16 @@ function buildHr010V2ContractRows(list, today) {
 }
 
 function buildHr010V2GradeRows(list, today) {
-    const grades = ["S", "A", "B", "C"];
-    const gradeTones = {
-        S: "s",
-        A: "a",
-        B: "b",
-        C: "c"
-    };
+    const grades = [
+        { code: "S", label: "특급", tone: "s" },
+        { code: "A", label: "고급", tone: "a" },
+        { code: "B", label: "중급", tone: "b" },
+        { code: "C", label: "초급", tone: "c" }
+    ];
+    const pendingRows = (Array.isArray(list) ? list : []).filter(row => !(Number(row.score) > 0));
 
-    return grades.map(grade => {
-        const gradeRows = list.filter(row => String(row.grade || "").toUpperCase() === grade);
+    const gradedRows = grades.map(grade => {
+        const gradeRows = list.filter(row => String(row.grade || "").toUpperCase() === grade.code);
         const staffRows = gradeRows.filter(row => resolveUserType(row) === "staff");
         const freelancerRows = gradeRows.filter(row => resolveUserType(row) === "freelancer");
         const readyCount = gradeRows.filter(row => {
@@ -1785,20 +2054,205 @@ function buildHr010V2GradeRows(list, today) {
             const bucket = getHr010AvailabilityBucket(row, today);
             return bucket.key === "now" || bucket.key === "soon";
         }).length;
+        const availableCount = gradeRows.filter(row => {
+            const bucket = getHr010AvailabilityBucket(row, today);
+            return bucket.key !== "coord";
+        }).length;
+        const availableStaffCount = staffRows.filter(row => {
+            const bucket = getHr010AvailabilityBucket(row, today);
+            return bucket.key !== "coord";
+        }).length;
+        const availableFreelancerCount = freelancerRows.filter(row => {
+            const bucket = getHr010AvailabilityBucket(row, today);
+            return bucket.key !== "coord";
+        }).length;
 
         return {
-            label: grade,
+            code: grade.code,
+            label: grade.label,
             totalCount: gradeRows.length,
             readyCount,
             readyRatio: gradeRows.length ? Math.round((readyCount / gradeRows.length) * 100) : 0,
+            availableCount,
             staffCount: staffRows.length,
             freelancerCount: freelancerRows.length,
             staffReadyCount,
             freelancerReadyCount,
-            tone: gradeTones[grade] || "c",
-            preset: makeHr010NavigationPreset({ filters: { grade: [grade] } })
+            availableStaffCount,
+            availableFreelancerCount,
+            tone: grade.tone,
+            preset: makeHr010NavigationPreset({ filters: { grade: [grade.code] } })
         };
     });
+
+    if (!pendingRows.length) {
+        return gradedRows;
+    }
+
+    const pendingStaffRows = pendingRows.filter(row => resolveUserType(row) === "staff");
+    const pendingFreelancerRows = pendingRows.filter(row => resolveUserType(row) === "freelancer");
+    const pendingReadyCount = pendingRows.filter(row => {
+        const bucket = getHr010AvailabilityBucket(row, today);
+        return bucket.key === "now" || bucket.key === "soon";
+    }).length;
+    const pendingAvailableCount = pendingRows.filter(row => {
+        const bucket = getHr010AvailabilityBucket(row, today);
+        return bucket.key !== "coord";
+    }).length;
+    const pendingAvailableStaffCount = pendingStaffRows.filter(row => {
+        const bucket = getHr010AvailabilityBucket(row, today);
+        return bucket.key !== "coord";
+    }).length;
+    const pendingAvailableFreelancerCount = pendingFreelancerRows.filter(row => {
+        const bucket = getHr010AvailabilityBucket(row, today);
+        return bucket.key !== "coord";
+    }).length;
+
+    gradedRows.push({
+        code: "U",
+        label: "평가 대기",
+        tone: "u",
+        totalCount: pendingRows.length,
+        readyCount: pendingReadyCount,
+        readyRatio: pendingRows.length ? Math.round((pendingReadyCount / pendingRows.length) * 100) : 0,
+        availableCount: pendingAvailableCount,
+        staffCount: pendingStaffRows.length,
+        freelancerCount: pendingFreelancerRows.length,
+        staffReadyCount: pendingStaffRows.filter(row => {
+            const bucket = getHr010AvailabilityBucket(row, today);
+            return bucket.key === "now" || bucket.key === "soon";
+        }).length,
+        freelancerReadyCount: pendingFreelancerRows.filter(row => {
+            const bucket = getHr010AvailabilityBucket(row, today);
+            return bucket.key === "now" || bucket.key === "soon";
+        }).length,
+        availableStaffCount: pendingAvailableStaffCount,
+        availableFreelancerCount: pendingAvailableFreelancerCount,
+        tone: "u",
+        preset: makeHr010NavigationPreset({ runtimeFilters: { scoreState: "ungraded" } })
+    });
+
+    return gradedRows;
+}
+
+function buildHr010V2KpiMatrixRows(gradeRows, mode = "total") {
+    const rowsByCode = new Map((Array.isArray(gradeRows) ? gradeRows : []).map(row => [String(row.code || "").trim().toUpperCase(), row]));
+    const visibleCodes = hr010GradeOrder.slice().reverse();
+    const pendingRow = rowsByCode.get("U");
+
+    const pickCount = (row, key) => Number(row && row[key]) || 0;
+    const rows = visibleCodes.map(code => {
+        const row = rowsByCode.get(code);
+        if (!row) return null;
+
+        const useAvailable = mode === "available";
+        const useDeployable = mode === "deployable";
+        const staffCount = useAvailable
+            ? pickCount(row, "availableStaffCount")
+            : useDeployable
+                ? pickCount(row, "staffReadyCount")
+                : pickCount(row, "staffCount");
+        const freelancerCount = useAvailable
+            ? pickCount(row, "availableFreelancerCount")
+            : useDeployable
+                ? pickCount(row, "freelancerReadyCount")
+                : pickCount(row, "freelancerCount");
+        const totalCount = useAvailable
+            ? pickCount(row, "availableCount")
+            : useDeployable
+                ? pickCount(row, "readyCount")
+                : pickCount(row, "totalCount");
+
+        return {
+            code,
+            label: row.label || code,
+            tone: String(row.tone || code).trim().toLowerCase(),
+            staffCount,
+            freelancerCount,
+            totalCount
+        };
+    }).filter(Boolean);
+
+    const pendingCount = pendingRow
+        ? (
+            mode === "available"
+                ? pickCount(pendingRow, "availableCount")
+                : mode === "deployable"
+                    ? pickCount(pendingRow, "readyCount")
+                    : pickCount(pendingRow, "totalCount")
+        )
+        : 0;
+
+    return { rows, pendingCount };
+}
+
+function buildHr010V2EmploymentGradeRows(list) {
+    const groups = {
+        staff: {
+            key: "staff",
+            label: "직원",
+            tone: "staff",
+            totalCount: 0,
+            gradeCounts: { S: 0, A: 0, B: 0, C: 0 },
+            preset: makeHr010NavigationPreset({ userType: "staff" })
+        },
+        freelancer: {
+            key: "freelancer",
+            label: "프리랜서",
+            tone: "freelancer",
+            totalCount: 0,
+            gradeCounts: { S: 0, A: 0, B: 0, C: 0 },
+            preset: makeHr010NavigationPreset({ userType: "freelancer" })
+        }
+    };
+
+    (Array.isArray(list) ? list : []).forEach(row => {
+        const typeKey = resolveUserType(row) === "staff" ? "staff" : "freelancer";
+        const gradeCode = String(row.grade || "").trim().toUpperCase();
+        const current = groups[typeKey];
+
+        current.totalCount += 1;
+        if (Object.prototype.hasOwnProperty.call(current.gradeCounts, gradeCode)) {
+            current.gradeCounts[gradeCode] += 1;
+        }
+    });
+
+    return [groups.staff, groups.freelancer].map(group => ({
+        label: group.label,
+        tone: group.tone,
+        value: group.totalCount,
+        valueLabel: formatHr010ExactCountLabel(group.totalCount),
+        segments: hr010GradeOrder.map(code => ({
+            tone: code.toLowerCase(),
+            value: group.gradeCounts[code] || 0
+        })),
+        preset: group.preset
+    }));
+}
+
+function buildHr010V2GradeAvailabilityRows(gradeRows, mode = "available") {
+    const useDeployable = mode === "deployable";
+
+    return (Array.isArray(gradeRows) ? gradeRows : []).map(row => ({
+        label: row.label || getHr010RecommendGradeTierLabel(row.code || row.label),
+        tone: String(row.tone || row.code || "").toLowerCase(),
+        value: useDeployable ? Number(row.readyCount) || 0 : Number(row.availableCount) || 0,
+        valueLabel: formatHr010ExactCountLabel(useDeployable ? row.readyCount : row.availableCount),
+        segments: [
+            {
+                tone: "staff",
+                value: useDeployable ? Number(row.staffReadyCount) || 0 : Number(row.availableStaffCount) || 0
+            },
+            {
+                tone: "freelancer",
+                value: useDeployable ? Number(row.freelancerReadyCount) || 0 : Number(row.availableFreelancerCount) || 0
+            }
+        ],
+        preset: makeHr010NavigationPreset({
+            filters: { grade: [row.code || row.label] },
+            runtimeFilters: { availability: useDeployable ? "deployable" : "available" }
+        })
+    }));
 }
 
 function buildHr010V2KosaRows(list, today) {
@@ -1865,13 +2319,19 @@ function buildHr010V2KosaRows(list, today) {
 function buildHr010V2KpiCards(list, context) {
     const staffRows = context.staffRows || [];
     const freelancerRows = context.freelancerRows || [];
+    const gradeRows = buildHr010V2GradeRows(list, context.today);
+    const gradeMatrixTotal = buildHr010V2KpiMatrixRows(gradeRows, "total");
+    const gradeMatrixAvailable = buildHr010V2KpiMatrixRows(gradeRows, "available");
+    const gradeMatrixDeployable = buildHr010V2KpiMatrixRows(gradeRows, "deployable");
     const totalCount = list.length;
     const totalCountLabel = formatHr010CountLabel(totalCount);
     const staffCountLabel = formatHr010CountLabel(staffRows.length);
     const freelancerCountLabel = formatHr010CountLabel(freelancerRows.length);
     const availablePoolLabel = formatHr010CountLabel(context.availablePoolCount);
-    const availableNowLabel = formatHr010CountLabel(context.availability.now.count);
-    const availableSoonLabel = formatHr010CountLabel(context.availability.soon.count);
+    const deployableLabel = formatHr010CountLabel(context.deployableCount);
+    const gradeMatrixTotalNote = gradeMatrixTotal.pendingCount > 0 ? `평가 대기 ${formatHr010ExactCountLabel(gradeMatrixTotal.pendingCount)}` : "";
+    const gradeMatrixAvailableNote = gradeMatrixAvailable.pendingCount > 0 ? `평가 대기 ${formatHr010ExactCountLabel(gradeMatrixAvailable.pendingCount)}` : "";
+    const gradeMatrixDeployableNote = gradeMatrixDeployable.pendingCount > 0 ? `평가 대기 ${formatHr010ExactCountLabel(gradeMatrixDeployable.pendingCount)}` : "";
 
     return [
         {
@@ -1894,43 +2354,33 @@ function buildHr010V2KpiCards(list, context) {
             preset: makeHr010NavigationPreset()
         },
         {
-            label: "고용 형태 구성",
-            value: `${staffCountLabel} / ${freelancerCountLabel}`,
-            meta: totalCount ? "직원/프리랜서 분포" : "고용 형태 데이터 없음",
+            label: "고용 형태별 등급",
+            value: totalCountLabel,
+            meta: totalCount ? "등급별 인력 현황" : "고용 형태 데이터 없음",
+            matrixNote: gradeMatrixTotalNote,
             tone: "mint",
-            chartMarkup: renderHr010V2KpiMiniCompare([
-                { label: "직원", value: staffRows.length, valueLabel: staffCountLabel, tone: "staff" },
-                { label: "프리랜서", value: freelancerRows.length, valueLabel: freelancerCountLabel, tone: "freelancer" }
-            ]),
+            kind: "type-grade",
+            chartMarkup: renderHr010V2KpiGradeMatrix(gradeMatrixTotal.rows, { caption: "등급별 인력 현황", pendingCount: gradeMatrixTotal.pendingCount }),
             preset: makeHr010NavigationPreset()
         },
         {
-            label: "가용 인력",
+            label: "투입 가능 인력",
             value: availablePoolLabel,
-            meta: totalCount ? "가용일 기준" : "가용 데이터 없음",
+            meta: totalCount ? "투입 가능 인력 현황" : "가용 데이터 없음",
+            matrixNote: gradeMatrixAvailableNote,
             tone: "blue",
-            chartMarkup: renderHr010V2KpiMiniDonut([
-                { color: "#2c80ff", value: context.availablePoolCount },
-                { color: "#d6deea", value: context.unavailableCount }
-            ], {
-                layout: "inline",
-                centerValue: availablePoolLabel,
-                legendItems: [
-                    { color: "#2c80ff", label: "가용", value: availablePoolLabel },
-                    { color: "#d6deea", label: "비가용", value: formatHr010CountLabel(context.unavailableCount) }
-                ]
-            }),
+            kind: "type-grade",
+            chartMarkup: renderHr010V2KpiGradeMatrix(gradeMatrixAvailable.rows, { caption: "투입 가능 인력 현황", pendingCount: gradeMatrixAvailable.pendingCount }),
             preset: makeHr010NavigationPreset({ runtimeFilters: { availability: "available" } })
         },
         {
-            label: "즉시 투입 가능 인력",
-            value: availableNowLabel,
-            meta: context.availablePoolCount ? "즉시 기준" : "가용 인력 없음",
+            label: "즉시·단기 투입",
+            value: deployableLabel,
+            meta: context.deployableCount ? "즉시·단기 투입 현황" : "투입 가능 인력 없음",
+            matrixNote: gradeMatrixDeployableNote,
             tone: "violet",
-            chartMarkup: renderHr010V2KpiMiniCompare([
-                { label: "즉시", value: context.availability.now.count, valueLabel: availableNowLabel, tone: "base" },
-                { label: "2주 내", value: context.availability.soon.count, valueLabel: availableSoonLabel, tone: "accent" }
-            ]),
+            kind: "type-grade",
+            chartMarkup: renderHr010V2KpiGradeMatrix(gradeMatrixDeployable.rows, { caption: "즉시·단기 투입 현황", pendingCount: gradeMatrixDeployable.pendingCount }),
             preset: makeHr010NavigationPreset({ runtimeFilters: { availability: "now" } })
         }
     ];
@@ -1976,7 +2426,7 @@ function buildHr010V2RecommendRows(list, today) {
                 availabilityLabel: getAvailabilityLabel(row),
                 availabilityBadge: availability.label,
                 availabilityTone: availability.tone,
-                scoreLabel: formatGradeLabel(row.grade, row.score) || "평가 대기",
+                scoreLabel: formatHr010RecommendGradeLabel(gradeCode, row.score),
                 typeLabel: employment.label,
                 typeTone: employment.className === "freelancer" ? "info" : "good",
                 profileMarkup: getProfileMarkup(row)
@@ -2056,6 +2506,11 @@ function clampHr010Value(value) {
 function formatHr010CountLabel(value, unit = "명") {
     const numeric = Number(value) || 0;
     return numeric > 0 ? `${numeric}${unit}` : "없음";
+}
+
+function formatHr010ExactCountLabel(value, unit = "명") {
+    const numeric = Number(value) || 0;
+    return `${numeric}${unit}`;
 }
 
 function setHr010Text(id, value) {
@@ -2233,7 +2688,7 @@ function resetHr010Filters() {
         timing: ""
     };
     hr010V2GradeChartMode = "grade";
-    hr010V2RecommendGradeFilter = "all";
+    hr010V2RecommendGradeFilter = "S";
 
     Object.keys(selectedFilters).forEach(key => {
         selectedFilters[key] = [];
@@ -2359,7 +2814,7 @@ function refreshDynamicFilterOptions(list) {
             const right = hr010GradeOrder.indexOf(b);
             return (left === -1 ? 99 : left) - (right === -1 ? 99 : right);
         })
-        .map(code => ({ cd: code, cd_nm: `${code}등급` }));
+        .map(code => ({ cd: code, cd_nm: getHr010RecommendGradeTierLabel(code) }));
 
     gradeConfig.map = buildMap(gradeConfig.options);
     selectedFilters.grade = selectedFilters.grade.filter(code => gradeConfig.map[code]);
@@ -2579,7 +3034,7 @@ function buildFilterSuggestionSource() {
             label: option.cd_nm,
             meta: "등급",
             kind: "필터",
-            matchText: `${option.cd_nm} 등급`
+            matchText: `${option.cd_nm} ${option.cd}`
         });
     });
 
@@ -2709,11 +3164,31 @@ function fetchUserScore(devId) {
 // ==============================
 function formatGradeLabel(rank, score) {
     if (!rank) return "";
+    const tierLabel = getHr010RecommendGradeTierLabel(rank);
+    if (tierLabel !== "평가 대기") {
+        return `${tierLabel} (${score || 0}점)`;
+    }
     return `${rank}등급 (${score || 0}점)`;
 }
 
+function formatHr010RecommendGradeLabel(gradeCode, score) {
+    const tierLabel = getHr010RecommendGradeTierLabel(gradeCode);
+    const numericScore = Number(score);
+
+    if (tierLabel === "평가 대기") {
+        return Number.isFinite(numericScore) && numericScore > 0 ? `${numericScore}점` : tierLabel;
+    }
+
+    return `${tierLabel} (${Number.isFinite(numericScore) ? numericScore : 0}점)`;
+}
+
 function getHr010RecommendGradeTierLabel(gradeCode) {
-    switch (String(gradeCode || "").toUpperCase()) {
+    const normalized = String(gradeCode || "").trim();
+    if (["특급", "고급", "중급", "초급"].includes(normalized)) {
+        return normalized;
+    }
+
+    switch (normalized.toUpperCase()) {
         case "S":
             return "특급";
         case "A":
@@ -3233,6 +3708,35 @@ function getSkillNameList(row) {
     return String(row.main_lang_nm || "").split(",").map(skill => skill.trim()).filter(Boolean);
 }
 
+function getSkillEntries(row) {
+    const skillCodes = getSkillCodes(row);
+    const skillNames = getSkillNameList(row);
+    const skillEntries = [];
+    const seenKeys = new Set();
+    const maxLength = Math.max(skillCodes.length, skillNames.length);
+
+    for (let index = 0; index < maxLength; index += 1) {
+        const skillCode = String(skillCodes[index] || "").trim().toUpperCase();
+        const rawSkillName = String(skillNames[index] || "").trim();
+        const fallbackSkillName = getDropdownOptionLabel("skl_grp", skillCode) || skillCode || "미등록";
+        const skill = rawSkillName && rawSkillName !== "주개발언어 미등록" ? rawSkillName : fallbackSkillName;
+        const skillKey = skillCode || skill;
+
+        if (!skillKey || seenKeys.has(skillKey)) continue;
+        seenKeys.add(skillKey);
+        skillEntries.push({ skill, skillCode });
+    }
+
+    if (!skillEntries.length) {
+        skillEntries.push({
+            skill: "미등록",
+            skillCode: ""
+        });
+    }
+
+    return skillEntries;
+}
+
 function getWorkModeLabel(row) {
     return getDropdownOptionLabel("work_md", row.work_md) || row.work_md || "근무형태 미정";
 }
@@ -3707,26 +4211,48 @@ function renderRelatedDropdown(key) {
     renderDropdown(key);
 }
 
-function renderHr010V2KpiCards(kpis) {
+function renderHr010V2KpiCards(kpis, gradeRows = []) {
     if (!Array.isArray(kpis) || !kpis.length) {
         return `<div class="hr010v2-empty">표시할 KPI 데이터가 없습니다.</div>`;
     }
 
     const renderCard = item => {
         const isTrendCard = item.kind === "trend";
+        const isDonutCard = item.kind === "donut";
+        const isTypeGradeCard = item.kind === "type-grade";
+        const matrixMetaMarkup = isTypeGradeCard ? `
+            <div class="hr010v2-kpi-card__matrix-meta">
+                <div class="hr010v2-kpi-matrix__legend hr010v2-kpi-card__matrix-legend" aria-hidden="true">
+                    <span class="hr010v2-kpi-matrix__legend-item hr010v2-kpi-matrix__legend-item--staff">
+                        <span class="hr010v2-kpi-matrix__legend-dot"></span>
+                        <span>직원</span>
+                    </span>
+                    <span class="hr010v2-kpi-matrix__legend-item hr010v2-kpi-matrix__legend-item--freelancer">
+                        <span class="hr010v2-kpi-matrix__legend-dot"></span>
+                        <span>프리랜서</span>
+                    </span>
+                </div>
+                ${item.matrixNote ? `<span class="hr010v2-kpi-matrix__note hr010v2-kpi-card__matrix-note">${escapeHtml(item.matrixNote)}</span>` : ""}
+            </div>
+        ` : "";
         return `
-            <button type="button" class="hr010v2-kpi-card hr010v2-kpi-card--${item.tone} ${isTrendCard ? "hr010v2-kpi-card--trend" : ""} js-hr010v2-nav" data-hr010-preset="${escapeHtml(encodeHr010NavigationPreset(item.preset))}">
-                <div class="hr010v2-kpi-card__main ${isTrendCard ? "hr010v2-kpi-card__main--trend" : ""}">
-                    <div class="hr010v2-kpi-card__copy">
+            <button type="button" class="hr010v2-kpi-card hr010v2-kpi-card--${item.tone} ${isTrendCard ? "hr010v2-kpi-card--trend" : ""} ${isDonutCard ? "hr010v2-kpi-card--donut" : ""} ${isTypeGradeCard ? "hr010v2-kpi-card--type-grade" : ""} js-hr010v2-nav" data-hr010-preset="${escapeHtml(encodeHr010NavigationPreset(item.preset))}">
+                <div class="hr010v2-kpi-card__main ${isTrendCard ? "hr010v2-kpi-card__main--trend" : ""} ${isTypeGradeCard ? "hr010v2-kpi-card__main--type-grade" : ""}">
+                    <div class="hr010v2-kpi-card__copy ${isTypeGradeCard ? "hr010v2-kpi-card__copy--type-grade" : ""}">
                         <span class="hr010v2-kpi-card__label">${escapeHtml(item.label)}</span>
                         <strong class="hr010v2-kpi-card__value">${escapeHtml(item.value)}</strong>
+                        ${isTypeGradeCard ? `
+                            <div class="hr010v2-kpi-card__meta-stack">
+                                ${matrixMetaMarkup}
+                            </div>
+                        ` : item.meta ? `<span class="hr010v2-kpi-card__meta ${isTypeGradeCard ? "hr010v2-kpi-card__meta--compact" : ""}">${escapeHtml(item.meta)}</span>` : ""}
                     </div>
                     ${isTrendCard ? `
                         <div class="hr010v2-kpi-card__trend" aria-hidden="true">
                             ${item.chartMarkup || ""}
                         </div>
                     ` : `
-                        <div class="hr010v2-kpi-card__visual" aria-hidden="true">
+                        <div class="hr010v2-kpi-card__visual ${isTypeGradeCard ? "hr010v2-kpi-card__visual--type-grade" : ""}" aria-hidden="true">
                             <div class="hr010v2-kpi-card__spark">
                                 ${item.chartMarkup || ""}
                             </div>
@@ -3744,14 +4270,16 @@ function renderHr010V2KpiCards(kpis) {
 
     return `
         <div class="hr010v2-kpi-groups">
-            ${groups.map(group => `
-                <section class="hr010v2-kpi-group">
-                    <div class="hr010v2-kpi-group__title">${escapeHtml(group.title)}</div>
-                    <div class="hr010v2-kpi-group__cards">
-                        ${group.items.map(renderCard).join("")}
-                    </div>
-                </section>
-            `).join("")}
+            <div class="hr010v2-kpi-groups__body">
+                ${groups.map(group => `
+                    <section class="hr010v2-kpi-group">
+                        <div class="hr010v2-kpi-group__title">${escapeHtml(group.title)}</div>
+                        <div class="hr010v2-kpi-group__cards">
+                            ${group.items.map(renderCard).join("")}
+                        </div>
+                    </section>
+                `).join("")}
+            </div>
         </div>
     `;
 }
@@ -3791,7 +4319,7 @@ function renderHr010V2KpiTrend(series, options = {}) {
                         y="${y.toFixed(2)}"
                         width="${barWidth.toFixed(2)}"
                         height="${barHeight.toFixed(2)}"
-                        rx="3"
+                        rx="${HR010V2_BAR_RX}"
                     ></rect>
                 `;
     }).join("")}
