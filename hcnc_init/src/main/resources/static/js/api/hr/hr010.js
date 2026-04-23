@@ -23,6 +23,7 @@ let hr010Paging = {
 };
 let hr010V2DashboardBaseRows = [];
 let hr010V2GradeChartMode = "grade";
+let hr010V2RecommendGradeFilter = "all";
 let hr010V2DashboardFilters = {
     department: "",
     stack: "",
@@ -44,6 +45,7 @@ const hr010FilterOrder = ["skl_grp", "ctrt_typ", "work_md", "grade", "kosa_grd_c
 const hr010GradeOrder = ["S", "A", "B", "C"];
 const HR010V2_ROLE_STAFF_COLOR = "var(--hr010v2-role-staff)";
 const HR010V2_ROLE_FREELANCER_COLOR = "var(--hr010v2-role-freelancer)";
+const HR010V2_AVAILABILITY_LATER_LABEL = "2주 이후 ~ 4주 이내";
 const HR010_SUGGESTION_TRANSITION_MS = 220;
 const HR010_SUGGESTION_INPUT_DEBOUNCE_MS = 260;
 const HR010_LIST_ENTER_STAGGER_MS = 48;
@@ -127,6 +129,14 @@ function bindEvents() {
         if (document.getElementById("hr010v2Page")) {
             renderHr010V2Dashboard(hr010V2DashboardBaseRows);
         }
+    });
+
+    $(document).on("click", ".js-hr010v2-recommend-grade-filter", function () {
+        const nextFilter = String(this.getAttribute("data-grade-filter") || "all").trim() || "all";
+        if (hr010V2RecommendGradeFilter === nextFilter) return;
+
+        hr010V2RecommendGradeFilter = nextFilter;
+        renderHr010V2Dashboard(hr010V2DashboardBaseRows);
     });
 
     $("#hr010FilterRefreshBtn").on("click", function () {
@@ -750,7 +760,7 @@ function syncHr010V2DashboardFilterControls(list) {
         { value: "now", label: "즉시 가능" },
         { value: "soon", label: "2주 내 가능" },
         { value: "coord", label: "가용일 미확정" },
-        { value: "later", label: "2주 이후" }
+        { value: "later", label: HR010V2_AVAILABILITY_LATER_LABEL }
     ]);
 }
 
@@ -817,7 +827,7 @@ function getHr010V2DashboardStats(list) {
         now: { key: "now", label: "즉시 투입", tone: "good", count: 0 },
         soon: { key: "soon", label: "2주 내 전환", tone: "info", count: 0 },
         coord: { key: "coord", label: "가용일 미확정", tone: "warn", count: 0 },
-        later: { key: "later", label: "2주 이후", tone: "risk", count: 0 }
+        later: { key: "later", label: HR010V2_AVAILABILITY_LATER_LABEL, tone: "risk", count: 0 }
     };
 
     list.forEach(row => {
@@ -1143,6 +1153,8 @@ function renderHr010V2HealthCompositionBuckets(stats) {
         {
             key: "later",
             label: "2주 이후",
+            labelSub: "4주 이내",
+            fullLabel: HR010V2_AVAILABILITY_LATER_LABEL,
             tone: "later",
             preset: "later"
         }
@@ -1170,12 +1182,15 @@ function renderHr010V2HealthCompositionBuckets(stats) {
     });
 
     return `
-        <div class="hr010v2-health-composition__stack hr010v2-health-composition__stack--compact" role="img" aria-label="즉시, 2주 내, 2주 이후 투입 가능 분포">
+        <div class="hr010v2-health-composition__stack hr010v2-health-composition__stack--compact" role="img" aria-label="즉시, 2주 내, ${escapeHtml(HR010V2_AVAILABILITY_LATER_LABEL)} 투입 가능 분포">
             <div class="hr010v2-health-buckets">
                 ${bucketRows.map(bucket => `
                     <div class="hr010v2-health-bucket hr010v2-health-bucket--${bucket.tone}">
                         <div class="hr010v2-health-bucket__head">
-                            <span class="hr010v2-health-bucket__label">${escapeHtml(bucket.label)}</span>
+                            <span class="hr010v2-health-bucket__label" title="${escapeHtml(bucket.fullLabel || bucket.label)}">
+                                <span class="hr010v2-health-bucket__label-main">${escapeHtml(bucket.label)}</span>
+                                ${bucket.labelSub ? `<span class="hr010v2-health-bucket__label-sub">${escapeHtml(bucket.labelSub)}</span>` : ""}
+                            </span>
                             <strong class="hr010v2-health-bucket__count">${escapeHtml(bucket.totalLabel)}</strong>
                         </div>
                         <div class="hr010v2-health-bucket__stack" aria-hidden="true">
@@ -1210,13 +1225,22 @@ function renderHr010V2SkillRows(rows) {
     if (!visibleRows.length) {
         return `<div class="hr010v2-empty">표시할 기술 분포 데이터가 없습니다.</div>`;
     }
-    const topRows = visibleRows.slice(0, 3);
-    const bottomRows = visibleRows.slice(-3);
+    const sortByCountDesc = (left, right) => {
+        const diff = (Number(right.totalCount) || 0) - (Number(left.totalCount) || 0);
+        if (diff) return diff;
+        return String(left.skill || "").localeCompare(String(right.skill || ""), "ko");
+    };
+    const sortByCountAsc = (left, right) => {
+        const diff = (Number(left.totalCount) || 0) - (Number(right.totalCount) || 0);
+        if (diff) return diff;
+        return String(right.skill || "").localeCompare(String(left.skill || ""), "ko");
+    };
+    const topRows = visibleRows.slice().sort(sortByCountDesc).slice(0, 3);
+    const bottomRows = visibleRows.slice().sort(sortByCountAsc).slice(0, 3);
 
     const renderColumn = (columnRows, tone) => `
         <div class="hr010v2-supply-column hr010v2-supply-column--${tone}">
             ${columnRows.map((row, index) => {
-                const share = Math.max(10, Math.min(100, Number(row.shareRatio) || 0));
                 return `
                 <button type="button" class="hr010v2-supply-row hr010v2-supply-row--compact ${row.preset ? "js-hr010v2-nav" : ""}" ${row.preset ? `data-hr010-preset="${escapeHtml(encodeHr010NavigationPreset(row.preset))}"` : ""}>
                     <div class="hr010v2-supply-row__rank" aria-hidden="true">${String(index + 1).padStart(2, "0")}</div>
@@ -1225,12 +1249,9 @@ function renderHr010V2SkillRows(rows) {
                             <div class="hr010v2-supply-row__skill">
                                 <strong>${escapeHtml(row.skill)}</strong>
                             </div>
-                            <strong class="hr010v2-supply-row__meta">${escapeHtml(row.metaLabel)}</strong>
-                        </div>
-                        <div class="hr010v2-supply-row__bar" aria-hidden="true">
-                            <span style="width:${share}%"></span>
                         </div>
                     </div>
+                    <strong class="hr010v2-supply-row__meta">${escapeHtml(row.metaLabel)}</strong>
                 </button>
                 `;
             }).join("")}
@@ -1275,36 +1296,68 @@ function renderHr010V2WeeklyBars(rows, stats = {}) {
     const baseCount = Number(stats.contractBaseCount) || 0;
     const managementCount = Number(stats.contractImminentCount) || rows.reduce((sum, row) => sum + (Number(row.count) || 0), 0);
     const expiredCount = Number((rows.find(row => row.presetValue === "expired") || {}).count) || 0;
+    const thirtyCount = Number((rows.find(row => row.presetValue === "30") || {}).count) || 0;
+    const sixtyCount = Number((rows.find(row => row.presetValue === "60") || {}).count) || 0;
+    const ninetyCount = Number((rows.find(row => row.presetValue === "90") || {}).count) || 0;
     const missingCount = Number(stats.contractMissingCount) || 0;
-    const managementTitle = managementCount ? `계약 종료일 기준 ${formatHr010CountLabel(managementCount)} 관리 대상` : "계약 종료일 기준 관리 대상 없음";
+    const managementTitle = managementCount ? `재계약 대상 ${formatHr010CountLabel(managementCount)}` : "재계약 대상 없음";
 
-    const summaryParts = [
-        `입력 ${formatHr010CountLabel(baseCount)}`,
-        `만료 ${formatHr010CountLabel(expiredCount)}`,
-        `임박 ${formatHr010CountLabel(managementCount - expiredCount)}`
-    ];
+    const summaryItems = rows.map(row => ({
+        tone: row.tone,
+        label: row.presetValue === "expired"
+            ? "초과"
+            : row.presetValue === "30"
+                ? "30일"
+                : row.presetValue === "60"
+                    ? "60일"
+                    : "90일",
+        title: row.label,
+        detail: row.meta,
+        count: row.count,
+        preset: row.preset
+    }));
     if (missingCount) {
-        summaryParts.push(`미등록 ${formatHr010CountLabel(missingCount)}`);
+        summaryItems.push({
+            tone: "warn",
+            label: "미등록",
+            title: "계약 종료일 미등록",
+            detail: "입력 보완 필요",
+            count: missingCount,
+            preset: null
+        });
     }
 
     return `
         <div class="hr010v2-weekly-summary">
-            <strong>${escapeHtml(managementTitle)}</strong>
-            <div class="hr010v2-weekly-summary__chips">
-                ${summaryParts.map(text => `<span class="hr010v2-weekly-summary__chip">${escapeHtml(text)}</span>`).join("")}
+            <div class="hr010v2-weekly-summary__head">
+                <strong>${escapeHtml(managementTitle)}</strong>
+                <span class="hr010v2-weekly-summary__note">총인원 ${escapeHtml(formatHr010CountLabel(baseCount))}</span>
+            </div>
+            <div class="hr010v2-weekly-summary__legend" aria-label="재계약 대상 범례">
+                ${summaryItems.filter(item => item.count > 0).map(item => `
+                    <button
+                        type="button"
+                        class="hr010v2-weekly-summary__legend-item hr010v2-weekly-summary__legend-item--${item.tone} ${item.preset ? "js-hr010v2-nav" : ""}"
+                        ${item.preset ? `data-hr010-preset="${escapeHtml(encodeHr010NavigationPreset(item.preset))}"` : ""}
+                        title="${escapeHtml(`${item.title} · ${item.detail}`)}"
+                        aria-label="${escapeHtml(`${item.title} ${formatHr010CountLabel(item.count)}. ${item.detail}`)}">
+                        <span class="hr010v2-weekly-summary__legend-dot" aria-hidden="true"></span>
+                        <span class="hr010v2-weekly-summary__legend-label">${escapeHtml(item.label)}</span>
+                        <strong>${escapeHtml(formatHr010CountLabel(item.count))}</strong>
+                    </button>
+                `).join("")}
             </div>
         </div>
         <div class="hr010v2-weekly-bars__grid">
             ${rows.map(row => {
         const height = row.count ? Math.max(14, Math.round((row.count / maxCount) * 100)) : 0;
         return `
-            <button type="button" class="hr010v2-weekbar hr010v2-weekbar--${row.tone} ${row.count === 0 ? "is-empty" : ""} js-hr010v2-nav" data-hr010-preset="${escapeHtml(encodeHr010NavigationPreset(row.preset))}">
+            <button type="button" class="hr010v2-weekbar hr010v2-weekbar--${row.tone} ${row.count === 0 ? "is-empty" : ""} js-hr010v2-nav" data-hr010-preset="${escapeHtml(encodeHr010NavigationPreset(row.preset))}" title="${escapeHtml(`${row.label} · ${row.meta}`)}" aria-label="${escapeHtml(`${row.label} ${formatHr010CountLabel(row.count)}. ${row.meta}`)}">
                 <div class="hr010v2-weekbar__column">
                     <span class="hr010v2-weekbar__count">${escapeHtml(formatHr010CountLabel(row.count))}</span>
                     <span class="hr010v2-weekbar__fill" style="--value:${height}"></span>
                 </div>
                 <strong class="hr010v2-weekbar__label">${escapeHtml(row.label)}</strong>
-                <span class="hr010v2-weekbar__meta">${escapeHtml(row.meta)}</span>
             </button>
         `;
             }).join("")}
@@ -1327,8 +1380,7 @@ function renderHr010V2GradeBars(gradeRows, kosaRows) {
         const rounded = Math.round((Number(value) || 0) * 10) / 10;
         return `${rounded}`.replace(/\.0$/, "");
     };
-    const summaryLabel = activeMode === "kosa" ? "KOSA 등급 비중" : "전체 등급 비중";
-    const summarySubLabel = activeMode === "kosa" ? "KOSA 기준 전체 인력 분포" : "S/A/B/C 기준 전체 인력 분포";
+    const summaryLabel = activeMode === "kosa" ? "KOSA 분포" : "S/A/B/C 분포";
     const stackMarkup = activeRows
         .filter(row => (Number(row.totalCount) || 0) > 0)
         .map(row => {
@@ -1363,12 +1415,15 @@ function renderHr010V2GradeBars(gradeRows, kosaRows) {
         `;
     }).join("");
 
+    const overviewClass = activeMode === "kosa"
+        ? "hr010v2-grade-overview hr010v2-grade-overview--kosa"
+        : "hr010v2-grade-overview";
+
     return `
-        <div class="hr010v2-grade-overview">
+        <div class="${overviewClass}">
             <div class="hr010v2-grade-overview__summary">
                 <div class="hr010v2-grade-overview__copy">
                     <strong>${escapeHtml(summaryLabel)}</strong>
-                    <span>${escapeHtml(summarySubLabel)}</span>
                 </div>
                 <div class="hr010v2-grade-overview__aside">
                     <strong class="hr010v2-grade-overview__total">${escapeHtml(`전체 ${formatHr010CountLabel(totalCount)}`)}</strong>
@@ -1414,16 +1469,44 @@ function buildHr010V2GradePieGradient(rows, totalCount) {
 }
 
 function renderHr010V2RecommendList(rows) {
-    if (!rows.length) {
+    const gradeFilters = [
+        { value: "all", label: "전체" },
+        { value: "S", label: "특급" },
+        { value: "A", label: "고급" },
+        { value: "B", label: "중급" },
+        { value: "C", label: "초급" }
+    ];
+    const selectedRows = hr010V2RecommendGradeFilter === "all"
+        ? rows
+        : rows.filter(row => String(row.gradeCode || "").toUpperCase() === hr010V2RecommendGradeFilter);
+
+    const filterMarkup = `
+        <div class="hr010v2-recommend-filter" role="tablist" aria-label="추천 인력 등급 필터">
+            ${gradeFilters.map(filter => `
+                <button
+                    type="button"
+                    class="hr010v2-recommend-filter__btn js-hr010v2-recommend-grade-filter ${hr010V2RecommendGradeFilter === filter.value ? "is-active" : ""}"
+                    data-grade-filter="${escapeHtml(filter.value)}"
+                    aria-pressed="${hr010V2RecommendGradeFilter === filter.value ? "true" : "false"}">
+                    ${escapeHtml(filter.label)}
+                </button>
+            `).join("")}
+        </div>
+    `;
+
+    if (!selectedRows.length) {
         return `
+            ${filterMarkup}
             <div class="hr010v2-empty-state">
                 <div class="hr010v2-empty-state__icon" aria-hidden="true"></div>
-                <strong>적합한 추천 인력이 없습니다</strong>
+                <strong>${hr010V2RecommendGradeFilter === "all" ? "적합한 추천 인력이 없습니다" : "선택한 등급의 추천 인력이 없습니다"}</strong>
             </div>
         `;
     }
 
-    return rows.map(row => `
+    return `
+        ${filterMarkup}
+        ${selectedRows.map(row => `
         <a class="hr010v2-recommend-item" href="/hr011?dev_id=${encodeURIComponent(row.devId)}">
             <div class="hr010v2-recommend-item__avatar">${row.profileMarkup}</div>
             <div class="hr010v2-recommend-item__body">
@@ -1442,7 +1525,8 @@ function renderHr010V2RecommendList(rows) {
                 </div>
             </div>
         </a>
-    `).join("");
+    `).join("")}
+    `;
 }
 
 function buildHr010V2SkillRows(list, today) {
@@ -1503,10 +1587,10 @@ function buildHr010V2Alerts(list, availability, reliabilityScore, today, lowData
     if (expiredRow?.count) {
         alerts.push({
             tone: "risk",
-            badge: "계약 만료",
+            badge: "계약 초과",
             icon: "!",
-            title: `계약 만료 ${expiredRow.count}건`,
-            meta: "갱신되지 않은 인력을 먼저 확인하세요.",
+            title: `계약만료일 초과 ${expiredRow.count}건`,
+            meta: "재계약이 먼저 필요한 인력입니다.",
             preset: expiredRow.preset
         });
     }
@@ -1514,10 +1598,10 @@ function buildHr010V2Alerts(list, availability, reliabilityScore, today, lowData
     if (expiring30?.count) {
         alerts.push({
             tone: expiring30.count >= 3 ? "risk" : "warn",
-            badge: "계약 임박",
+            badge: "재계약 임박",
             icon: "!",
-            title: `30일 내 만료 ${expiring30.count}건`,
-            meta: "연장 여부부터 확인하세요.",
+            title: `30일 내 재계약 ${expiring30.count}건`,
+            meta: "연장 여부를 먼저 확인하세요.",
             preset: expiring30.preset
         });
     }
@@ -1575,7 +1659,7 @@ function buildHr010V2Alerts(list, availability, reliabilityScore, today, lowData
             badge: "계약 정보",
             icon: "?",
             title: `계약 종료일 미등록 ${contractMissingCount}건`,
-            meta: "만료 판단을 위해 입력이 필요합니다.",
+            meta: "재계약 판단을 위해 입력이 필요합니다.",
             preset: makeHr010NavigationPreset({ runtimeFilters: { contractExpiry: "30" } })
         });
     }
@@ -1605,8 +1689,8 @@ function buildHr010V2Alerts(list, availability, reliabilityScore, today, lowData
 function buildHr010V2ContractRows(list, today) {
     const rows = [
         {
-            label: "만료",
-            meta: "즉시 확인",
+            label: "계약만료일 초과",
+            meta: "재계약 검토 필요",
             tone: "expired",
             count: 0,
             presetValue: "expired",
@@ -1614,7 +1698,7 @@ function buildHr010V2ContractRows(list, today) {
         },
         {
             label: "30일 내",
-            meta: "긴급 확인",
+            meta: "긴급 재계약",
             tone: "risk",
             count: 0,
             presetValue: "30",
@@ -1622,7 +1706,7 @@ function buildHr010V2ContractRows(list, today) {
         },
         {
             label: "60일 내",
-            meta: "주의 확인",
+            meta: "재계약 검토",
             tone: "warn",
             count: 0,
             presetValue: "60",
@@ -1630,7 +1714,7 @@ function buildHr010V2ContractRows(list, today) {
         },
         {
             label: "90일 내",
-            meta: "점검",
+            meta: "사전 점검",
             tone: "info",
             count: 0,
             presetValue: "90",
@@ -1864,10 +1948,13 @@ function buildHr010V2RecommendRows(list, today) {
         .map(row => {
             const availability = getHr010AvailabilityBucket(row, today);
             const employment = getEmploymentMeta(row);
+            const gradeCode = String(row.grade || "").toUpperCase();
 
             return {
                 devId: row.dev_id,
                 name: row.dev_nm || "-",
+                gradeCode,
+                gradeLabel: getHr010RecommendGradeTierLabel(gradeCode),
                 skillLabel: getPrimarySkillLabel(row),
                 regionLabel: `${getSidoLabel(row) || "-"} / ${getWorkModeLabel(row)}`,
                 availabilityLabel: getAvailabilityLabel(row),
@@ -1894,7 +1981,7 @@ function getHr010AvailabilityBucket(row, today) {
     if (diff <= 14) {
         return { key: "soon", label: "2주 내 가능", tone: "info", priority: 1 };
     }
-    return { key: "later", label: "2주 이후", tone: "risk", priority: 3 };
+    return { key: "later", label: HR010V2_AVAILABILITY_LATER_LABEL, tone: "risk", priority: 3 };
 }
 
 function getHr010ProfileCompleteness(row) {
@@ -1976,7 +2063,7 @@ function getHr010RuntimeFilterTagLabel(key, value) {
         case "scoreState":
             return value === "ungraded" ? "추가 조건: 평가 미반영" : `추가 조건: ${value}`;
         case "contractExpiry":
-            return `계약 만료: ${getHr010ContractExpiryPresetLabel(value)}`;
+            return `재계약: ${getHr010ContractExpiryPresetLabel(value)}`;
         default:
             return `${key}: ${value}`;
     }
@@ -1997,7 +2084,7 @@ function getHr010AvailabilityPresetLabel(value) {
         case "soon":
             return "2주 내 가능";
         case "later":
-            return "2주 이후";
+            return HR010V2_AVAILABILITY_LATER_LABEL;
         case "coord":
             return "가용일 미확정";
         default:
@@ -2008,7 +2095,7 @@ function getHr010AvailabilityPresetLabel(value) {
 function getHr010ContractExpiryPresetLabel(value) {
     switch (String(value || "")) {
         case "expired":
-            return "만료";
+            return "계약만료일 초과";
         case "30":
             return "30일 내";
         case "60":
@@ -2130,6 +2217,7 @@ function resetHr010Filters() {
         timing: ""
     };
     hr010V2GradeChartMode = "grade";
+    hr010V2RecommendGradeFilter = "all";
 
     Object.keys(selectedFilters).forEach(key => {
         selectedFilters[key] = [];
@@ -2606,6 +2694,21 @@ function fetchUserScore(devId) {
 function formatGradeLabel(rank, score) {
     if (!rank) return "";
     return `${rank}등급 (${score || 0}점)`;
+}
+
+function getHr010RecommendGradeTierLabel(gradeCode) {
+    switch (String(gradeCode || "").toUpperCase()) {
+        case "S":
+            return "특급";
+        case "A":
+            return "고급";
+        case "B":
+            return "중급";
+        case "C":
+            return "초급";
+        default:
+            return "평가 대기";
+    }
 }
 
 // 계약단가(,),(테이블표)
