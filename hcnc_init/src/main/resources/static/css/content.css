@@ -6124,7 +6124,6 @@ minmax(142px, 1.02fr); gap:10px; align-items:stretch;}
   gap: 30px;
   flex-wrap: wrap;
   justify-content: center;
-  padding: 0 25px;
 }
 
 .hr011-detail-wrap .hr011-edit-mini-header {
@@ -6213,21 +6212,14 @@ minmax(142px, 1.02fr); gap:10px; align-items:stretch;}
   color: #7b8ea9;
 }
 
-/*.hr011-detail-wrap .hr011-page-actions {*/
-/*  display: flex;*/
-/*  align-items: center;*/
-/*  gap: 10px;*/
-/*}*/
-
 .hr011-detail-wrap .hr011-page-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 96px;
-  height: 42px;
+  height: 52px;
   min-width: 220px;
-  padding: 0 18px;
-  border-radius: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
   font-size: 16px;
   font-weight: 700;
 }
@@ -6240,7 +6232,7 @@ minmax(142px, 1.02fr); gap:10px; align-items:stretch;}
 
 .hr011-detail-wrap .hr011-page-btn--primary {
   border: 1px solid transparent;
-  background: #2e5cf6;
+  background: #222222;
   color: #ffffff;
 }
 
@@ -6287,7 +6279,7 @@ minmax(142px, 1.02fr); gap:10px; align-items:stretch;}
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-flow {display: block;}
 .hr011-detail-wrap .hr011-page.is-insert-mode .hr011-edit-step-btn[data-step-target="eval-risk"],
 .hr011-detail-wrap .hr011-page.is-insert-mode .hr011-dashboard-grid .hr011-section[data-edit-step="eval-risk"] {display: none !important;}
-.hr011-detail-wrap .hr011-page .hr011-edit-step {display: flex; flex-direction: column; gap: 10px; padding: 25px; align-items: center; justify-content: center;}
+.hr011-detail-wrap .hr011-page .hr011-edit-step {display: flex; flex-direction: column; gap: 12px; padding: 29px 0 30px 0; align-items: center; justify-content: center;}
 
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-stepper {
   position: fixed !important;
@@ -6312,10 +6304,11 @@ minmax(142px, 1.02fr); gap:10px; align-items:stretch;}
   display: flex;
   align-items: center;
   justify-content: space-between;
+  width: 220px;
   min-width: 220px;
   height: 50px;
   padding: 12px;
-  border: 1px solid #d4e1f3;
+  border: 1px solid #E0EDFF;
   border-radius: 12px;
   background: #F2F5F9;
   color: #333333;
@@ -6332,17 +6325,35 @@ minmax(142px, 1.02fr); gap:10px; align-items:stretch;}
           transform 0.2s ease;
 }
 
+.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-step-btn .wrap {display: flex; gap: 10px;}
+
+/* 안쪽 오른쪽에 요소 넣고싶을 때 */
 /*.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-step-btn:not(:last-child)::after {*/
-/*  content: "";*/
-/*  position: absolute;*/
-/*  left: 28px;*/
-/*  bottom: -11px;*/
-/*  width: 2px;*/
-/*  height: 10px;*/
-/*  background: #d9e5f8;*/
 /*}*/
 
-.hr011-edit-step-btn.is-last-visible::after {display: none;}
+/* 요소에서는 화살표 보이게 */
+.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-step .step-arrow {
+  width: 17px;
+  height: 13px;
+  margin: 2.5px;
+  background: url("../icons/step-arrow-wh.png") no-repeat center;
+  background-size: contain;
+}
+
+/* 선택된 요소에서는 검은 화살표 보이게 */
+.hr011-detail-wrap .hr011-page.is-edit-mode
+.hr011-edit-step-btn.is-active + .step-arrow {
+  width: 17px;
+  height: 13px;
+  margin: 2.5px;
+  background: url("../icons/step-arrow.png") no-repeat center;
+  background-size: contain;
+}
+
+/* 마지막 요소에서는 화살표 안보이게 */
+.hr011-edit-step-btn:last-of-type + .step-arrow {
+  display: none;
+}
 
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-step-btn .txt {
   display: block;

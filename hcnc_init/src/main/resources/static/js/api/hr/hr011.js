@@ -177,7 +177,7 @@ function setHr011Mode(mode, options) {
     $("#hr011PageTitleText").text(isView ? "인적사항 상세" : isInsert ? "인적사항 등록" : "인적사항 수정");
     $("#modal-title").text(isView ? "상세" : mode === "insert" ? "등록" : "수정");
     $("#hr011CancelBtn, #hr011CancelBtnView").text(isInsert ? "등록취소" : "수정취소");
-    $("#hr011SaveBtn, #hr011SaveBtnView").text(isInsert ? "등록" : "저장");
+    $("#hr011SaveBtn, #hr011SaveBtnView").text(isInsert ? "등록하기" : "저장하기");
     $("#hr011EditBtn").toggle(isView);
     $("#hr011CancelBtn").toggle(!isView);
     $("#hr011SaveBtn").prop("hidden", isView).toggle(!isView);
@@ -258,7 +258,7 @@ function setHr011Mode(mode, options) {
     setTimeout(function () {
         const isInsertMode = hr011Mode === "insert";
         $("#hr011CancelBtn, #hr011CancelBtnView").text(isInsertMode ? "등록취소" : "수정취소");
-        $("#hr011SaveBtn, #hr011SaveBtnView").text(isInsertMode ? "등록" : "저장");
+        $("#hr011SaveBtn, #hr011SaveBtnView").text(isInsertMode ? "등록하기" : "저장하기");
         renderHr011EditMiniProfile();
     }, 0);
 }
@@ -1376,7 +1376,7 @@ function applyHr011InsertDefaults() {
     $("#cert_txt").val("");
     $("#main_lang").val("");
     $("#hr011CancelBtn, #hr011CancelBtnView").text("등록취소");
-    $("#hr011SaveBtn, #hr011SaveBtnView").text("등록");
+    $("#hr011SaveBtn, #hr011SaveBtnView").text("등록하기");
 
     hr011CurrentRow = null;
     window.hr011Data = null;
@@ -4857,8 +4857,15 @@ if (excelBtn) {
 /*********************************************************
  * 네비게이션 STEP 기본 설정
  *********************************************************/
-const HR011_EDIT_STEP_KEYS = ["profile", "contract", "skill", "project", "eval-risk"];
-let hr011CurrentEditStepKey = HR011_EDIT_STEP_KEYS[0];
+// 네비게이션 바
+const HR011_STEP_CONFIG = [
+    { key: "profile", label: "기본 인적사항", className: "hr011-edit-step-btn--profile" },
+    { key: "contract", label: "소속 및 계약정보", className: "hr011-edit-step-btn--contract" },
+    { key: "skill", label: "보유역량 및 숙련도", className: "hr011-edit-step-btn--skill" },
+    { key: "project", label: "프로젝트 이력", className: "hr011-edit-step-btn--project" },
+    { key: "eval-risk", label: "평가 및 리스크", className: "hr011-edit-step-btn--eval" }
+];
+let hr011CurrentEditStepKey = HR011_STEP_CONFIG[0].key;
 let hr011EditStepRafId = null;
 const HR011_EDIT_STEP_ACTIVE_OFFSET = 96;
 let IsScrolling = false;
@@ -5017,15 +5024,19 @@ function setHr011ActiveEditStep(stepKey) {
             const key = section.getAttribute("data-edit-step");
             section.style.display = activeKeys.includes(key) ? "" : "none";
         });
+        // 현재 step 표기
+        updateCurrentStepUI();
     });
 }
 
 // 신규 등록일 때 안보일 STEP은 빼놓기 (보유역량 평가 & 프로젝트 평가 제외)
 function getActiveStepKeys() {
     if (hr011Mode === "insert") {
-        return ["profile", "contract", "skill"];
+        return HR011_STEP_CONFIG
+            .filter(step => ["profile", "contract", "skill"].includes(step.key))
+            .map(step => step.key);
     }
-    return HR011_EDIT_STEP_KEYS;
+    return HR011_STEP_CONFIG.map(step => step.key);
 }
 
 /*********************************************************
@@ -5144,6 +5155,7 @@ function initHr011EditStepNavigation(isEditable) {
     }
 
     flow.style.display = "";
+    renderHr011Steps();
 
     const scrollEl = document.querySelector(".hr011-detail-wrap .hr011-edit-flow");
 
@@ -5164,6 +5176,7 @@ function initHr011EditStepNavigation(isEditable) {
     // 최초 동기화
     requestHr011ActiveStepSync();
     updateStepperUI();
+    updateCurrentStepUI();
 }
 
 // 넘버링 개선
@@ -5173,5 +5186,53 @@ function updateStepNumbers() {
     $(".hr011-edit-step-btn").each(function () {
         const step = $(this).data("step-target");
         $(this).find(".step-num").text(idx++);
+    });
+}
+
+/*********************************************************
+ * 상단 STEP 표시
+ *********************************************************/
+function getCurrentStepProgress() {
+    const activeKeys = getActiveStepKeys();
+    const index = activeKeys.indexOf(hr011CurrentEditStepKey);
+
+    return {
+        current: index !== -1 ? index + 1 : 1,
+        total: activeKeys.length
+    };
+}
+
+function updateCurrentStepUI() {
+    const { current, total } = getCurrentStepProgress();
+    $(".step-display .step-cnt").text(current);
+    $(".step-display .tot-cnt").text(total);
+}
+
+// STEP 렌더링
+function renderHr011Steps() {
+    const activeKeys = getActiveStepKeys();
+    const $wrap = $(".hr011-edit-step");
+
+    $wrap.empty();
+
+    let idx = 1;
+
+    HR011_STEP_CONFIG.forEach(step => {
+        if (!activeKeys.includes(step.key)) return;
+
+        $wrap.append(`
+            <button type="button"
+                class="hr011-edit-step-btn ${step.className} ${idx === 1 ? "is-active" : ""}"
+                data-step-target="${step.key}">
+                <span class="wrap">
+                    <span class="num">${idx}</span>
+                    <span class="txt">${step.label}</span>
+                </span>
+                <span class="cnt"></span>
+            </button>
+            <span class="step-arrow"></span>
+        `);
+
+        idx++;
     });
 }
