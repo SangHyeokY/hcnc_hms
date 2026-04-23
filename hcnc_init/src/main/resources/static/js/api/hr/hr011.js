@@ -1455,7 +1455,6 @@ async function loadHr011MainDetail(devId) {
     renderHr011RefSkillCards("hr011RefSkillGauge");
     renderHr011RefRadarChart();
     scheduleHr011ReadOnlyTextareas();
-    setTimeout``();
 }
 
 // 메인 폼 입력값을 채운다.
@@ -4966,6 +4965,7 @@ function updateStepperUI() {
 
     $(".hr011-edit-step-btn").each(function () {
         const step = $(this).data("step-target");
+        const idx = activeKeys.indexOf(step);
 
         const isVisible = activeKeys.includes(step);
         $(this).toggle(isVisible);
@@ -4974,17 +4974,34 @@ function updateStepperUI() {
 
         const { filled, total } = calculateStepProgress(step);
 
+        // 수치 표시
         $(this).find(".cnt").html(`
-          <span class="filled">${filled}</span>&nbsp;/&nbsp;${total}
+            <span class="filled">${filled}</span>&nbsp;/&nbsp;<span class="total-filled">${total}</span>
         `);
 
-        $(this).removeClass("is-done is-progress is-empty");
+        // 초기화
+        const currentIndex = activeKeys.indexOf(hr011CurrentEditStepKey);
+        const isComplete = filled === total && total > 0;
 
-        if (filled === 0) $(this).addClass("is-empty");
-        else if (filled === total) $(this).addClass("is-done");
-        else $(this).addClass("is-progress");
+        const isPast = idx < currentIndex;
+        const isCurrent = idx === currentIndex;
+
+        $(this)
+            .toggleClass("is-not-progress", isComplete && (isPast || isCurrent))
+            .toggleClass("is-empty", filled === 0)
+            .toggleClass("is-progress", !isComplete && filled > 0);
+
+        // 위치 상태
+        $(this).removeClass("is-active is-done");
+
+        if (idx < currentIndex) {
+            $(this).addClass("is-done");
+        }
+        else if (idx === currentIndex) {
+            $(this).addClass("is-active");
+        }
     });
-    updateStepConnectorLine()
+    updateStepConnectorLine();
 }
 
 function updateStepConnectorLine() {
@@ -5005,11 +5022,11 @@ function updateStepConnectorLine() {
 // 네비게이션바 세팅
 function setHr011ActiveEditStep(stepKey) {
     const activeKeys = getActiveStepKeys();
-
     if (!activeKeys.includes(stepKey)) {
         stepKey = activeKeys[0];
     }
 
+    const currentIndex = activeKeys.indexOf(stepKey);
     hr011CurrentEditStepKey = stepKey;
 
     if (hr011NavRaf) cancelAnimationFrame(hr011NavRaf);
@@ -5017,12 +5034,19 @@ function setHr011ActiveEditStep(stepKey) {
     hr011NavRaf = requestAnimationFrame(() => {
         document.querySelectorAll(".hr011-edit-step-btn").forEach(btn => {
             const key = btn.getAttribute("data-step-target");
+            const idx = activeKeys.indexOf(key);
 
             const isVisible = activeKeys.includes(key);
-
             btn.hidden = !isVisible;
 
-            btn.classList.toggle("is-active", key === stepKey);
+            btn.classList.remove("is-active", "is-done");
+
+            if (idx < currentIndex) {
+                btn.classList.add("is-done");      // 이전 단계
+            }
+            if (idx === currentIndex) {
+                btn.classList.add("is-active");    // 현재 단계
+            }
         });
 
         document.querySelectorAll(".hr011-section[data-edit-step]").forEach(section => {
@@ -5049,10 +5073,13 @@ function getActiveStepKeys() {
  *********************************************************/
 function goHr011EditStep(stepKey) {
     const activeKeys = getActiveStepKeys();
-
     if (!activeKeys.includes(stepKey)) return;
 
+    // 진행 중 스크롤 강제 종료 (키 씹힘 방지)
+    IsScrolling = false;
+
     setHr011ActiveEditStep(stepKey);
+    updateStepperUI();
 
     const scrollEl = document.querySelector(".hr011-edit-flow");
     const section = document.querySelector(`.hr011-section[data-edit-step="${stepKey}"]`);
@@ -5131,6 +5158,7 @@ function syncHr011ActiveStepByScroll() {
 
     if (activeKey !== hr011CurrentEditStepKey) {
         setHr011ActiveEditStep(activeKey);
+        updateStepperUI();
     }
 }
 
@@ -5138,7 +5166,7 @@ function syncHr011ActiveStepByScroll() {
  * scroll → RAF 최적화
  *********************************************************/
 function requestHr011ActiveStepSync() {
-    if (IsScrolling) return;
+    // if (IsScrolling) return;
     if (hr011EditStepRafId) return;
 
     hr011EditStepRafId = requestAnimationFrame(() => {
