@@ -6220,7 +6220,7 @@ minmax(142px, 1.02fr); gap:10px; align-items:stretch;}
   min-width: 220px;
   padding: 10px 12px;
   border-radius: 10px;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 700;
 }
 
@@ -6357,13 +6357,9 @@ minmax(142px, 1.02fr); gap:10px; align-items:stretch;}
 
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-step-btn .txt {
   display: block;
-  font-size: 14px;
-  font-weight: 700;
   white-space: normal;
   overflow: visible;
   text-overflow: clip;
-  line-height: 1.22;
-  /*padding-right: 16px;*/
   position: relative;
 }
 
@@ -6385,16 +6381,14 @@ minmax(142px, 1.02fr); gap:10px; align-items:stretch;}
 }
 
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-step-btn.is-active,
-.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-step-btn.is-done {border-color: #000000; background: #ffffff; color: #000000;}
-
-/*.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-step-btn.is-active .txt::after {color: #2f63f4;}*/
-
+.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-step-btn.is-done {border: 1px solid #000000; background: #ffffff; color: #000000;}
+.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-step-btn.is-active .txt,
+.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-step-btn.is-done .txt {color: #000000; font-weight: 700;}
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-step-btn.is-active .num,
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-step-btn.is-done .num {color: #ffffff; background: #000000;}
-
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-step-btn.is-active .cnt .filled,
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-step-btn.is-done .cnt .filled,
-.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-step-btn.completely-done .cnt .total-filled {color: #2C80FF; font-weight: 600;}
+.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-step-btn.is-not-progress .cnt .total-filled {color: #2C80FF; font-weight: 600;}
 
 .hr011-detail-wrap .hr011-ref-left-head {justify-content: flex-end;}
 
@@ -10241,6 +10235,7 @@ body.hr011-project-eval-modal-open {
   font-weight: 700;
   line-height: 20px;
   box-sizing: border-box;
+  white-space: nowrap;
 }
 
 .hr011-detail-wrap .hr011-page:not(.is-edit-mode) .hr011-ref-actions-inline .hr011-page-btn::before {

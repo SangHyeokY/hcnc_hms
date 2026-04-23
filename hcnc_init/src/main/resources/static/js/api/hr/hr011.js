@@ -1455,7 +1455,6 @@ async function loadHr011MainDetail(devId) {
     renderHr011RefSkillCards("hr011RefSkillGauge");
     renderHr011RefRadarChart();
     scheduleHr011ReadOnlyTextareas();
-    setTimeout``();
 }
 
 // 메인 폼 입력값을 채운다.
@@ -4980,24 +4979,28 @@ function updateStepperUI() {
             <span class="filled">${filled}</span>&nbsp;/&nbsp;<span class="total-filled">${total}</span>
         `);
 
-        // 상태 초기화
-        $(this).removeClass("is-done is-progress is-empty");
+        // 초기화
+        const currentIndex = activeKeys.indexOf(hr011CurrentEditStepKey);
+        const isComplete = filled === total && total > 0;
 
-        // 상태 분기
-        if (filled === 0) {
-            $(this).addClass("is-empty");
+        const isPast = idx < currentIndex;
+        const isCurrent = idx === currentIndex;
+
+        $(this)
+            .toggleClass("is-not-progress", isComplete && (isPast || isCurrent))
+            .toggleClass("is-empty", filled === 0)
+            .toggleClass("is-progress", !isComplete && filled > 0);
+
+        // 위치 상태
+        $(this).removeClass("is-active is-done");
+
+        if (idx < currentIndex) {
+            $(this).addClass("is-done");
         }
-        else if (idx === 0 && filled === total && total > 0) {
-            $(this).addClass("completely-done");  // 첫 번째 step만 허용 => 이후 클래스 붙는 것은 다른 함수에서 처리해야 함
-        }
-        // else if (filled === total && total > 0) {
-        //     $(this).addClass("is-done");          // 나머지는 done
-        // }
-        else {
-            $(this).addClass("is-progress");
+        else if (idx === currentIndex) {
+            $(this).addClass("is-active");
         }
     });
-
     updateStepConnectorLine();
 }
 
@@ -5036,13 +5039,12 @@ function setHr011ActiveEditStep(stepKey) {
             const isVisible = activeKeys.includes(key);
             btn.hidden = !isVisible;
 
-            // btn.classList.toggle("is-active", key === stepKey);
-
-            btn.classList.remove("is-active", "is-done", "completely-done");
+            btn.classList.remove("is-active", "is-done");
 
             if (idx < currentIndex) {
                 btn.classList.add("is-done");      // 이전 단계
-            } else if (idx === currentIndex) {
+            }
+            if (idx === currentIndex) {
                 btn.classList.add("is-active");    // 현재 단계
             }
         });
@@ -5071,10 +5073,13 @@ function getActiveStepKeys() {
  *********************************************************/
 function goHr011EditStep(stepKey) {
     const activeKeys = getActiveStepKeys();
-
     if (!activeKeys.includes(stepKey)) return;
 
+    // 진행 중 스크롤 강제 종료 (키 씹힘 방지)
+    IsScrolling = false;
+
     setHr011ActiveEditStep(stepKey);
+    updateStepperUI();
 
     const scrollEl = document.querySelector(".hr011-edit-flow");
     const section = document.querySelector(`.hr011-section[data-edit-step="${stepKey}"]`);
@@ -5153,6 +5158,7 @@ function syncHr011ActiveStepByScroll() {
 
     if (activeKey !== hr011CurrentEditStepKey) {
         setHr011ActiveEditStep(activeKey);
+        updateStepperUI();
     }
 }
 
@@ -5160,7 +5166,7 @@ function syncHr011ActiveStepByScroll() {
  * scroll → RAF 최적화
  *********************************************************/
 function requestHr011ActiveStepSync() {
-    if (IsScrolling) return;
+    // if (IsScrolling) return;
     if (hr011EditStepRafId) return;
 
     hr011EditStepRafId = requestAnimationFrame(() => {
