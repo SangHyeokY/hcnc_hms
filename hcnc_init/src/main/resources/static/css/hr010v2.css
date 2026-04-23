@@ -1413,10 +1413,10 @@
 
 .hr010v2-supply-table {
   min-height: 0;
-  display: flex;
+  /* display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  gap: 18px;
+  gap: 18px; */
 }
 
 .hr010v2-supply-columns__head,
