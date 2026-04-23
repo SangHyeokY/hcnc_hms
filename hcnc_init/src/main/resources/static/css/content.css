@@ -6341,8 +6341,8 @@ minmax(142px, 1.02fr); gap:10px; align-items:stretch;}
 }
 
 /* 선택된 요소에서는 검은 화살표 보이게 */
-.hr011-detail-wrap .hr011-page.is-edit-mode
-.hr011-edit-step-btn.is-active + .step-arrow {
+/* .hr011-edit-step-btn:has(+ .step-arrow + .hr011-edit-step-btn.is-active) + .step-arrow */
+.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-step-btn.is-active + .step-arrow {
   width: 17px;
   height: 13px;
   margin: 2.5px;
@@ -6384,17 +6384,17 @@ minmax(142px, 1.02fr); gap:10px; align-items:stretch;}
   flex: 0 0 18px;
 }
 
-.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-step-btn.is-active {
-  border-color: #000000;
-  background: #ffffff;
-  color: #000000;
-}
+.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-step-btn.is-active,
+.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-step-btn.is-done {border-color: #000000; background: #ffffff; color: #000000;}
 
 /*.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-step-btn.is-active .txt::after {color: #2f63f4;}*/
 
-.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-step-btn.is-active .num {color: #ffffff; background: #000000;}
+.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-step-btn.is-active .num,
+.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-step-btn.is-done .num {color: #ffffff; background: #000000;}
 
-.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-step-btn.is-active .cnt .filled {color: #2C80FF; font-weight: 600;}
+.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-step-btn.is-active .cnt .filled,
+.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-step-btn.is-done .cnt .filled,
+.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-step-btn.completely-done .cnt .total-filled {color: #2C80FF; font-weight: 600;}
 
 .hr011-detail-wrap .hr011-ref-left-head {justify-content: flex-end;}
 

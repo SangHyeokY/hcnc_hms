@@ -4966,6 +4966,7 @@ function updateStepperUI() {
 
     $(".hr011-edit-step-btn").each(function () {
         const step = $(this).data("step-target");
+        const idx = activeKeys.indexOf(step);
 
         const isVisible = activeKeys.includes(step);
         $(this).toggle(isVisible);
@@ -4974,17 +4975,30 @@ function updateStepperUI() {
 
         const { filled, total } = calculateStepProgress(step);
 
+        // 수치 표시
         $(this).find(".cnt").html(`
-          <span class="filled">${filled}</span>&nbsp;/&nbsp;${total}
+            <span class="filled">${filled}</span>&nbsp;/&nbsp;<span class="total-filled">${total}</span>
         `);
 
+        // 상태 초기화
         $(this).removeClass("is-done is-progress is-empty");
 
-        if (filled === 0) $(this).addClass("is-empty");
-        else if (filled === total) $(this).addClass("is-done");
-        else $(this).addClass("is-progress");
+        // 상태 분기
+        if (filled === 0) {
+            $(this).addClass("is-empty");
+        }
+        else if (idx === 0 && filled === total && total > 0) {
+            $(this).addClass("completely-done");  // 첫 번째 step만 허용 => 이후 클래스 붙는 것은 다른 함수에서 처리해야 함
+        }
+        // else if (filled === total && total > 0) {
+        //     $(this).addClass("is-done");          // 나머지는 done
+        // }
+        else {
+            $(this).addClass("is-progress");
+        }
     });
-    updateStepConnectorLine()
+
+    updateStepConnectorLine();
 }
 
 function updateStepConnectorLine() {
@@ -5005,11 +5019,11 @@ function updateStepConnectorLine() {
 // 네비게이션바 세팅
 function setHr011ActiveEditStep(stepKey) {
     const activeKeys = getActiveStepKeys();
-
     if (!activeKeys.includes(stepKey)) {
         stepKey = activeKeys[0];
     }
 
+    const currentIndex = activeKeys.indexOf(stepKey);
     hr011CurrentEditStepKey = stepKey;
 
     if (hr011NavRaf) cancelAnimationFrame(hr011NavRaf);
@@ -5017,12 +5031,20 @@ function setHr011ActiveEditStep(stepKey) {
     hr011NavRaf = requestAnimationFrame(() => {
         document.querySelectorAll(".hr011-edit-step-btn").forEach(btn => {
             const key = btn.getAttribute("data-step-target");
+            const idx = activeKeys.indexOf(key);
 
             const isVisible = activeKeys.includes(key);
-
             btn.hidden = !isVisible;
 
-            btn.classList.toggle("is-active", key === stepKey);
+            // btn.classList.toggle("is-active", key === stepKey);
+
+            btn.classList.remove("is-active", "is-done", "completely-done");
+
+            if (idx < currentIndex) {
+                btn.classList.add("is-done");      // 이전 단계
+            } else if (idx === currentIndex) {
+                btn.classList.add("is-active");    // 현재 단계
+            }
         });
 
         document.querySelectorAll(".hr011-section[data-edit-step]").forEach(section => {
