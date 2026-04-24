@@ -820,8 +820,8 @@ function getHr010V2DashboardStats(list) {
     const staffRows = list.filter(row => resolveUserType(row) === "staff");
     const freelancerRows = list.filter(row => resolveUserType(row) === "freelancer");
     const availabilityByType = {
-        staff: { now: 0, soon: 0, later: 0, total: staffRows.length },
-        freelancer: { now: 0, soon: 0, later: 0, total: freelancerRows.length }
+        staff: { now: 0, soon: 0, later: 0, coord: 0, total: staffRows.length },
+        freelancer: { now: 0, soon: 0, later: 0, coord: 0, total: freelancerRows.length }
     };
     const reliabilityScores = [];
     const availability = {
@@ -836,6 +836,9 @@ function getHr010V2DashboardStats(list) {
         availability[bucket.key].count += 1;
         const typeKey = resolveUserType(row) === "staff" ? "staff" : "freelancer";
         const displayBucketKey = bucket.key === "coord" ? "later" : bucket.key;
+        if (bucket.key === "coord") {
+            availabilityByType[typeKey].coord += 1;
+        }
         if (Object.prototype.hasOwnProperty.call(availabilityByType[typeKey], displayBucketKey)) {
             availabilityByType[typeKey][displayBucketKey] += 1;
         }
@@ -1621,7 +1624,6 @@ function renderHr010V2WeeklyBars(rows, stats = {}) {
                         aria-label="${escapeHtml(`${item.title} ${formatHr010CountLabel(item.count)}. ${item.detail}`)}">
                         <span class="hr010v2-weekly-summary__legend-dot" aria-hidden="true"></span>
                         <span class="hr010v2-weekly-summary__legend-label">${escapeHtml(item.label)}</span>
-                        <strong>${escapeHtml(formatHr010CountLabel(item.count))}</strong>
                     </button>
                 `).join("")}
             </div>
@@ -2349,6 +2351,10 @@ function buildHr010V2KpiCards(list, context) {
     const unavailableRate = totalCount ? ((Number(context.unavailableCount) || 0) / totalCount) * 100 : 0;
     const availableRateLabel = formatHr010PercentLabel(availableRate);
     const unavailableRateLabel = formatHr010PercentLabel(unavailableRate);
+    const availableStaffCount = Math.max(0, (Number(context.availabilityByType?.staff?.total) || 0) - (Number(context.availabilityByType?.staff?.coord) || 0));
+    const availableFreelancerCount = Math.max(0, (Number(context.availabilityByType?.freelancer?.total) || 0) - (Number(context.availabilityByType?.freelancer?.coord) || 0));
+    const unavailableStaffCount = Math.max(0, Number(context.availabilityByType?.staff?.coord) || 0);
+    const unavailableFreelancerCount = Math.max(0, Number(context.availabilityByType?.freelancer?.coord) || 0);
     return [
         {
             label: "전체 개발 인력",
@@ -2394,12 +2400,14 @@ function buildHr010V2KpiCards(list, context) {
                     {
                         color: "var(--hr010v2-blue)",
                         label: "가용",
-                        value: availableRateLabel
+                        value: availableRateLabel,
+                        meta: `직원 ${formatHr010CountLabel(availableStaffCount)} / 프리랜서 ${formatHr010CountLabel(availableFreelancerCount)}`
                     },
                     {
                         color: "var(--hr010v2-grade-pending)",
                         label: "비가용",
-                        value: unavailableRateLabel
+                        value: unavailableRateLabel,
+                        meta: `직원 ${formatHr010CountLabel(unavailableStaffCount)} / 프리랜서 ${formatHr010CountLabel(unavailableFreelancerCount)}`
                     }
                 ]
             }),
