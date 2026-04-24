@@ -1170,7 +1170,6 @@ function bindHr011PageEvents() {
     // $("#hr011RefDetailEditBtn").on("click", function () {
     //     $("#hr011EditBtn").trigger("click");
     // });
-
     $("#hr011BackBtnView").on("click", function () {
         if (hr011Mode !== "view"){
             $("#hr011BackBtn").trigger("click");
@@ -1186,7 +1185,6 @@ function bindHr011PageEvents() {
     $("#hr011SaveBtnView").on("click", function () {
         $("#hr011SaveBtn").trigger("click");
     });
-
     $("#hr011QuickAddProjectBtn").on("click", function () {
         if (!$(".hr011-page").hasClass("is-edit-mode")) return;
         goHr011EditStep("project");
@@ -1425,14 +1423,14 @@ async function loadHr011MainDetail(devId) {
 
     // 수정/등록 폼에 프로필 이미지 표시
     const $img = $("#dev_img");
-    var $form = $(".hr011-dashboard-grid");
-    const $reUploadProfile = $form.find(".re-upload-image");
+    // var $form = $(".hr011-dashboard-grid");
+    // const $reUploadProfile = $form.find(".re-upload-image");
     const hasImage = row && row.img_url;
 
     // 프로필 이미지 처리
     if (hasImage) {
         $img.attr("src", row.img_url).addClass("has-img").show();
-        $reUploadProfile.show();
+        // $reUploadProfile.show();
     }
     else {
         $img.attr("src", "").removeClass("has-img");
