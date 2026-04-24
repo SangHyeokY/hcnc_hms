@@ -2322,16 +2322,27 @@ function buildHr010V2KpiCards(list, context) {
     const gradeRows = buildHr010V2GradeRows(list, context.today);
     const gradeMatrixTotal = buildHr010V2KpiMatrixRows(gradeRows, "total");
     const gradeMatrixAvailable = buildHr010V2KpiMatrixRows(gradeRows, "available");
-    const gradeMatrixDeployable = buildHr010V2KpiMatrixRows(gradeRows, "deployable");
     const totalCount = list.length;
     const totalCountLabel = formatHr010CountLabel(totalCount);
     const staffCountLabel = formatHr010CountLabel(staffRows.length);
     const freelancerCountLabel = formatHr010CountLabel(freelancerRows.length);
     const availablePoolLabel = formatHr010CountLabel(context.availablePoolCount);
-    const deployableLabel = formatHr010CountLabel(context.deployableCount);
+    const availableRate = totalCount ? ((Number(context.availablePoolCount) || 0) / totalCount) * 100 : 0;
+    const unavailableRate = totalCount ? ((Number(context.unavailableCount) || 0) / totalCount) * 100 : 0;
+    const availableRateLabel = formatHr010PercentLabel(availableRate);
+    const unavailableRateLabel = formatHr010PercentLabel(unavailableRate);
+    const availabilityBreakdown = {
+        available: { staff: 0, freelancer: 0 },
+        unavailable: { staff: 0, freelancer: 0 }
+    };
+    (Array.isArray(list) ? list : []).forEach(row => {
+        const typeKey = resolveUserType(row) === "staff" ? "staff" : "freelancer";
+        const bucket = getHr010AvailabilityBucket(row, context.today);
+        const availabilityKey = bucket.key === "coord" ? "unavailable" : "available";
+        availabilityBreakdown[availabilityKey][typeKey] += 1;
+    });
     const gradeMatrixTotalNote = gradeMatrixTotal.pendingCount > 0 ? `평가 대기 ${formatHr010ExactCountLabel(gradeMatrixTotal.pendingCount)}` : "";
     const gradeMatrixAvailableNote = gradeMatrixAvailable.pendingCount > 0 ? `평가 대기 ${formatHr010ExactCountLabel(gradeMatrixAvailable.pendingCount)}` : "";
-    const gradeMatrixDeployableNote = gradeMatrixDeployable.pendingCount > 0 ? `평가 대기 ${formatHr010ExactCountLabel(gradeMatrixDeployable.pendingCount)}` : "";
 
     return [
         {
@@ -2374,14 +2385,33 @@ function buildHr010V2KpiCards(list, context) {
             preset: makeHr010NavigationPreset({ runtimeFilters: { availability: "available" } })
         },
         {
-            label: "즉시·단기 투입",
-            value: deployableLabel,
-            meta: context.deployableCount ? "즉시·단기 투입 현황" : "투입 가능 인력 없음",
-            matrixNote: gradeMatrixDeployableNote,
-            tone: "violet",
-            kind: "type-grade",
-            chartMarkup: renderHr010V2KpiGradeMatrix(gradeMatrixDeployable.rows, { caption: "즉시·단기 투입 현황", pendingCount: gradeMatrixDeployable.pendingCount }),
-            preset: makeHr010NavigationPreset({ runtimeFilters: { availability: "now" } })
+            label: "가용률",
+            value: availableRateLabel,
+            meta: totalCount ? "전체 대비 투입 가능 비율" : "데이터 없음",
+            tone: "sky",
+            kind: "donut",
+            chartMarkup: renderHr010V2KpiMiniDonut([
+                { color: "var(--hr010v2-blue)", value: context.availablePoolCount },
+                { color: "var(--hr010v2-grade-pending)", value: context.unavailableCount }
+            ], {
+                layout: "inline",
+                centerValue: availableRateLabel,
+                legendItems: [
+                    {
+                        color: "var(--hr010v2-blue)",
+                        label: "가용",
+                        value: availableRateLabel,
+                        meta: `직원 ${formatHr010ExactCountLabel(availabilityBreakdown.available.staff)}\n프리랜서 ${formatHr010ExactCountLabel(availabilityBreakdown.available.freelancer)}`
+                    },
+                    {
+                        color: "var(--hr010v2-grade-pending)",
+                        label: "비가용",
+                        value: unavailableRateLabel,
+                        meta: `직원 ${formatHr010ExactCountLabel(availabilityBreakdown.unavailable.staff)}\n프리랜서 ${formatHr010ExactCountLabel(availabilityBreakdown.unavailable.freelancer)}`
+                    }
+                ]
+            }),
+            preset: makeHr010NavigationPreset({ runtimeFilters: { availability: "available" } })
         }
     ];
 }
@@ -2511,6 +2541,11 @@ function formatHr010CountLabel(value, unit = "명") {
 function formatHr010ExactCountLabel(value, unit = "명") {
     const numeric = Number(value) || 0;
     return `${numeric}${unit}`;
+}
+
+function formatHr010PercentLabel(value) {
+    const numeric = Number(value) || 0;
+    return `${Math.round(numeric)}%`;
 }
 
 function setHr010Text(id, value) {
