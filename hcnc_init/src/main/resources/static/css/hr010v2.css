@@ -428,7 +428,7 @@
   height: 100%;
   min-width: 0;
   min-height: 178px;
-  padding: 20px 20px;
+  padding: 15px 20px;
   position: relative;
   overflow: hidden;
   text-align: left;
@@ -741,6 +741,38 @@
   align-self: center;
 }
 
+.hr010v2-kpi-card--value-hidden .hr010v2-kpi-card__main {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.hr010v2-kpi-card--value-hidden .hr010v2-kpi-card__visual {
+  width: 100%;
+}
+
+.hr010v2-kpi-card--donut.hr010v2-kpi-card--value-hidden .hr010v2-kpi-card__main {
+  align-items: center;
+}
+
+.hr010v2-kpi-card--donut.hr010v2-kpi-card--value-hidden .hr010v2-kpi-card__spark {
+  min-height: 128px;
+  align-content: end;
+  justify-items: center;
+  margin-top: 10px;
+}
+
+.hr010v2-kpi-card--donut.hr010v2-kpi-card--value-hidden .hr010v2-kpi-card__visual {
+  justify-items: center;
+  align-self: stretch;
+}
+
+.hr010v2-kpi-card--type-grade.hr010v2-kpi-card--value-hidden .hr010v2-kpi-card__spark {
+  min-height: 134px;
+}
+
+.hr010v2-kpi-card--type-grade.hr010v2-kpi-card--value-hidden .hr010v2-kpi-card__visual {
+  align-content: stretch;
+}
+
 .hr010v2-kpi-card--type-grade .hr010v2-kpi-mini__breakdown-stack {
   height: 9px;
 }
@@ -1042,9 +1074,39 @@
 
 .hr010v2-kpi-mini__donut-copy strong {
   color: var(--hr010v2-ink);
-  font-size: 16px;
-  font-weight: 600;
+  font-size: 22px;
+  font-weight: 700;
   line-height: 1.05;
+}
+
+.hr010v2-kpi-card--donut.hr010v2-kpi-card--value-hidden .hr010v2-kpi-mini--donut-inline {
+  grid-template-columns: 122px minmax(0, 1fr);
+  column-gap: 18px;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 auto;
+  justify-content: center;
+}
+
+.hr010v2-kpi-card--donut.hr010v2-kpi-card--value-hidden .hr010v2-kpi-mini--donut-inline .hr010v2-kpi-mini__donut {
+  width: 122px;
+  height: 122px;
+}
+
+.hr010v2-kpi-card--donut.hr010v2-kpi-card--value-hidden .hr010v2-kpi-mini__donut::after {
+  inset: 19px;
+}
+
+.hr010v2-kpi-card--donut.hr010v2-kpi-card--value-hidden .hr010v2-kpi-mini__donut-copy strong {
+  font-size: 31px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+
+.hr010v2-kpi-card--donut.hr010v2-kpi-card--value-hidden .hr010v2-kpi-mini__legend {
+  width: auto;
+  max-width: 100%;
+  justify-self: center;
 }
 
 .hr010v2-kpi-mini__caption {
@@ -1057,7 +1119,8 @@
 
 .hr010v2-kpi-mini__legend {
   display: grid;
-  gap: 6px;
+  gap: 25px;
+  padding-left: 30px;
   min-width: 0;
   width: 100%;
 }
@@ -1086,12 +1149,13 @@
 .hr010v2-kpi-mini__legend-label {
   color: var(--hr010v2-text);
   font-weight: 700;
+  font-size: 16px;
 }
 
 .hr010v2-kpi-mini__legend-value {
   color: var(--hr010v2-ink);
-  font-weight: 700;
-  font-size: 14px;
+  font-weight: 600;
+  font-size: 15px;
   white-space: normal;
 }
 
@@ -1105,7 +1169,7 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   align-items: start;
-  gap: 2px;
+  gap: 5px;
   min-width: 0;
 }
 
@@ -1945,7 +2009,7 @@
   --bucket-accent: #0056b3;
   --bucket-label: #0056b3;
   /* background: linear-gradient(180deg, #f7fbff 0%, #ffffff 62%); */
-  border-color: rgba(44, 128, 255, 0.22);
+  border-color: rgb(122 174 253);
   box-shadow: 0 8px 18px rgba(44, 128, 255, 0.06), inset 0 0 0 1px rgba(44, 128, 255, 0.04);
 }
 
@@ -2008,8 +2072,8 @@
 
 .hr010v2-health-bucket__share {
   color: var(--bucket-accent);
-  font-size: 18px;
-  font-weight: 600;
+  font-size: 16px;
+  font-weight: 500;
   line-height: 1;
   letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
@@ -2045,7 +2109,7 @@
   gap: 3px;
   min-height: 34px;
   color: var(--hr010v2-muted);
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   line-height: 1.15;
   overflow: hidden;

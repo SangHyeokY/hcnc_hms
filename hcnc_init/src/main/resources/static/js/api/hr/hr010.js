@@ -2071,6 +2071,18 @@ function buildHr010V2GradeRows(list, today) {
         const gradeRows = list.filter(row => String(row.grade || "").toUpperCase() === grade.code);
         const staffRows = gradeRows.filter(row => resolveUserType(row) === "staff");
         const freelancerRows = gradeRows.filter(row => resolveUserType(row) === "freelancer");
+        const nowCount = gradeRows.filter(row => {
+            const bucket = getHr010AvailabilityBucket(row, today);
+            return bucket.key === "now";
+        }).length;
+        const nowStaffCount = staffRows.filter(row => {
+            const bucket = getHr010AvailabilityBucket(row, today);
+            return bucket.key === "now";
+        }).length;
+        const nowFreelancerCount = freelancerRows.filter(row => {
+            const bucket = getHr010AvailabilityBucket(row, today);
+            return bucket.key === "now";
+        }).length;
         const readyCount = gradeRows.filter(row => {
             const bucket = getHr010AvailabilityBucket(row, today);
             return bucket.key === "now" || bucket.key === "soon";
@@ -2100,11 +2112,15 @@ function buildHr010V2GradeRows(list, today) {
             code: grade.code,
             label: grade.label,
             totalCount: gradeRows.length,
+            nowCount,
+            nowRatio: gradeRows.length ? Math.round((nowCount / gradeRows.length) * 100) : 0,
             readyCount,
             readyRatio: gradeRows.length ? Math.round((readyCount / gradeRows.length) * 100) : 0,
             availableCount,
             staffCount: staffRows.length,
             freelancerCount: freelancerRows.length,
+            nowStaffCount,
+            nowFreelancerCount,
             staffReadyCount,
             freelancerReadyCount,
             availableStaffCount,
@@ -2120,6 +2136,18 @@ function buildHr010V2GradeRows(list, today) {
 
     const pendingStaffRows = pendingRows.filter(row => resolveUserType(row) === "staff");
     const pendingFreelancerRows = pendingRows.filter(row => resolveUserType(row) === "freelancer");
+    const pendingNowCount = pendingRows.filter(row => {
+        const bucket = getHr010AvailabilityBucket(row, today);
+        return bucket.key === "now";
+    }).length;
+    const pendingNowStaffCount = pendingStaffRows.filter(row => {
+        const bucket = getHr010AvailabilityBucket(row, today);
+        return bucket.key === "now";
+    }).length;
+    const pendingNowFreelancerCount = pendingFreelancerRows.filter(row => {
+        const bucket = getHr010AvailabilityBucket(row, today);
+        return bucket.key === "now";
+    }).length;
     const pendingReadyCount = pendingRows.filter(row => {
         const bucket = getHr010AvailabilityBucket(row, today);
         return bucket.key === "now" || bucket.key === "soon";
@@ -2142,11 +2170,15 @@ function buildHr010V2GradeRows(list, today) {
         label: "평가 대기",
         tone: "u",
         totalCount: pendingRows.length,
+        nowCount: pendingNowCount,
+        nowRatio: pendingRows.length ? Math.round((pendingNowCount / pendingRows.length) * 100) : 0,
         readyCount: pendingReadyCount,
         readyRatio: pendingRows.length ? Math.round((pendingReadyCount / pendingRows.length) * 100) : 0,
         availableCount: pendingAvailableCount,
         staffCount: pendingStaffRows.length,
         freelancerCount: pendingFreelancerRows.length,
+        nowStaffCount: pendingNowStaffCount,
+        nowFreelancerCount: pendingNowFreelancerCount,
         staffReadyCount: pendingStaffRows.filter(row => {
             const bucket = getHr010AvailabilityBucket(row, today);
             return bucket.key === "now" || bucket.key === "soon";
@@ -2176,20 +2208,27 @@ function buildHr010V2KpiMatrixRows(gradeRows, mode = "total") {
 
         const useAvailable = mode === "available";
         const useDeployable = mode === "deployable";
+        const useNow = mode === "now";
         const staffCount = useAvailable
             ? pickCount(row, "availableStaffCount")
             : useDeployable
                 ? pickCount(row, "staffReadyCount")
+                : useNow
+                    ? pickCount(row, "nowStaffCount")
                 : pickCount(row, "staffCount");
         const freelancerCount = useAvailable
             ? pickCount(row, "availableFreelancerCount")
             : useDeployable
                 ? pickCount(row, "freelancerReadyCount")
+                : useNow
+                    ? pickCount(row, "nowFreelancerCount")
                 : pickCount(row, "freelancerCount");
         const totalCount = useAvailable
             ? pickCount(row, "availableCount")
             : useDeployable
                 ? pickCount(row, "readyCount")
+                : useNow
+                    ? pickCount(row, "nowCount")
                 : pickCount(row, "totalCount");
 
         return {
@@ -2208,6 +2247,8 @@ function buildHr010V2KpiMatrixRows(gradeRows, mode = "total") {
                 ? pickCount(pendingRow, "availableCount")
                 : mode === "deployable"
                     ? pickCount(pendingRow, "readyCount")
+                    : mode === "now"
+                        ? pickCount(pendingRow, "nowCount")
                     : pickCount(pendingRow, "totalCount")
         )
         : 0;
@@ -2261,25 +2302,38 @@ function buildHr010V2EmploymentGradeRows(list) {
 
 function buildHr010V2GradeAvailabilityRows(gradeRows, mode = "available") {
     const useDeployable = mode === "deployable";
+    const useNow = mode === "now";
 
     return (Array.isArray(gradeRows) ? gradeRows : []).map(row => ({
         label: row.label || getHr010RecommendGradeTierLabel(row.code || row.label),
         tone: String(row.tone || row.code || "").toLowerCase(),
-        value: useDeployable ? Number(row.readyCount) || 0 : Number(row.availableCount) || 0,
-        valueLabel: formatHr010ExactCountLabel(useDeployable ? row.readyCount : row.availableCount),
+        value: useNow
+            ? Number(row.nowCount) || 0
+            : useDeployable
+                ? Number(row.readyCount) || 0
+                : Number(row.availableCount) || 0,
+        valueLabel: formatHr010ExactCountLabel(useNow ? row.nowCount : useDeployable ? row.readyCount : row.availableCount),
         segments: [
             {
                 tone: "staff",
-                value: useDeployable ? Number(row.staffReadyCount) || 0 : Number(row.availableStaffCount) || 0
+                value: useNow
+                    ? Number(row.nowStaffCount) || 0
+                    : useDeployable
+                        ? Number(row.staffReadyCount) || 0
+                        : Number(row.availableStaffCount) || 0
             },
             {
                 tone: "freelancer",
-                value: useDeployable ? Number(row.freelancerReadyCount) || 0 : Number(row.availableFreelancerCount) || 0
+                value: useNow
+                    ? Number(row.nowFreelancerCount) || 0
+                    : useDeployable
+                        ? Number(row.freelancerReadyCount) || 0
+                        : Number(row.availableFreelancerCount) || 0
             }
         ],
         preset: makeHr010NavigationPreset({
             filters: { grade: [row.code || row.label] },
-            runtimeFilters: { availability: useDeployable ? "deployable" : "available" }
+            runtimeFilters: { availability: useNow ? "now" : useDeployable ? "deployable" : "available" }
         })
     }));
 }
@@ -2350,12 +2404,13 @@ function buildHr010V2KpiCards(list, context) {
     const freelancerRows = context.freelancerRows || [];
     const gradeRows = buildHr010V2GradeRows(list, context.today);
     const gradeMatrixTotal = buildHr010V2KpiMatrixRows(gradeRows, "total");
-    const gradeMatrixAvailable = buildHr010V2KpiMatrixRows(gradeRows, "available");
+    const gradeMatrixNow = buildHr010V2KpiMatrixRows(gradeRows, "now");
     const totalCount = list.length;
     const totalCountLabel = formatHr010CountLabel(totalCount);
     const staffCountLabel = formatHr010CountLabel(staffRows.length);
     const freelancerCountLabel = formatHr010CountLabel(freelancerRows.length);
     const availablePoolLabel = formatHr010CountLabel(context.availablePoolCount);
+    const nowCountLabel = formatHr010CountLabel(context.availability?.now?.count || 0);
     const availableRate = totalCount ? ((Number(context.availablePoolCount) || 0) / totalCount) * 100 : 0;
     const unavailableRate = totalCount ? ((Number(context.unavailableCount) || 0) / totalCount) * 100 : 0;
     const availableRateLabel = formatHr010PercentLabel(availableRate);
@@ -2371,6 +2426,7 @@ function buildHr010V2KpiCards(list, context) {
             label: "1. 전체 개발 인력",
             value: totalCountLabel,
             meta: "",
+            hideValue: true,
             footerSpacer: true,
             tone: "coral",
             kind: "donut",
@@ -2391,6 +2447,7 @@ function buildHr010V2KpiCards(list, context) {
             label: "2. 고용형태별 등급",
             value: totalCountLabel,
             meta: "",
+            hideValue: true,
             tone: "mint",
             kind: "type-grade",
             chartMarkup: renderHr010V2KpiGradeMatrix(gradeMatrixTotal.rows, { caption: "", unitLabel: "", pendingCount: gradeMatrixTotal.pendingCount }),
@@ -2400,6 +2457,7 @@ function buildHr010V2KpiCards(list, context) {
             label: "3. 가용률",
             value: availableRateLabel,
             meta: "",
+            hideValue: true,
             footerMeta: totalCount ? `가용 ${availablePoolLabel} / 전체 ${totalCountLabel}` : "",
             tone: "sky",
             kind: "donut",
@@ -2426,15 +2484,15 @@ function buildHr010V2KpiCards(list, context) {
         },
         {
             label: "4. 즉시 투입 가능",
-            value: availablePoolLabel,
+            value: nowCountLabel,
             meta: "",
             valueChip: "즉시 가능",
             valueChipTone: "blue",
             featured: true,
             tone: "blue",
             kind: "type-grade",
-            chartMarkup: renderHr010V2KpiGradeMatrix(gradeMatrixAvailable.rows, { caption: "", unitLabel: "", pendingCount: gradeMatrixAvailable.pendingCount }),
-            preset: makeHr010NavigationPreset({ runtimeFilters: { availability: "available" } })
+            chartMarkup: renderHr010V2KpiGradeMatrix(gradeMatrixNow.rows, { caption: "", unitLabel: "", pendingCount: gradeMatrixNow.pendingCount }),
+            preset: makeHr010NavigationPreset({ runtimeFilters: { availability: "now" } })
         }
     ];
 }
@@ -4290,11 +4348,12 @@ function renderHr010V2KpiCards(kpis, gradeRows = []) {
         const isDonutCard = item.kind === "donut";
         const isTypeGradeCard = item.kind === "type-grade";
         const isFeaturedCard = Boolean(item.featured);
+        const isValueHidden = Boolean(item.hideValue);
         const cardIndexMatch = String(item.label || "").match(/^(\d+)\.\s*(.*)$/);
         const cardNumber = cardIndexMatch ? cardIndexMatch[1] : "";
         const cardTitle = cardIndexMatch ? cardIndexMatch[2] : String(item.label || "");
         return `
-            <button type="button" class="hr010v2-kpi-card hr010v2-kpi-card--${item.tone} ${isTrendCard ? "hr010v2-kpi-card--trend" : ""} ${isDonutCard ? "hr010v2-kpi-card--donut" : ""} ${isTypeGradeCard ? "hr010v2-kpi-card--type-grade" : ""} ${isFeaturedCard ? "hr010v2-kpi-card--featured" : ""} js-hr010v2-nav" data-hr010-preset="${escapeHtml(encodeHr010NavigationPreset(item.preset))}">
+            <button type="button" class="hr010v2-kpi-card hr010v2-kpi-card--${item.tone} ${isTrendCard ? "hr010v2-kpi-card--trend" : ""} ${isDonutCard ? "hr010v2-kpi-card--donut" : ""} ${isTypeGradeCard ? "hr010v2-kpi-card--type-grade" : ""} ${isFeaturedCard ? "hr010v2-kpi-card--featured" : ""} ${isValueHidden ? "hr010v2-kpi-card--value-hidden" : ""} js-hr010v2-nav" data-hr010-preset="${escapeHtml(encodeHr010NavigationPreset(item.preset))}">
                 <div class="hr010v2-kpi-card__header">
                     <span class="hr010v2-kpi-card__label">
                         ${cardNumber ? `<span class="hr010v2-kpi-card__label-index">${escapeHtml(`${cardNumber}.`)}</span>` : ""}
@@ -4302,13 +4361,15 @@ function renderHr010V2KpiCards(kpis, gradeRows = []) {
                     </span>
                 </div>
                 <div class="hr010v2-kpi-card__main ${isTrendCard ? "hr010v2-kpi-card__main--trend" : ""} ${isTypeGradeCard ? "hr010v2-kpi-card__main--type-grade" : ""}">
-                    <div class="hr010v2-kpi-card__copy ${isTypeGradeCard ? "hr010v2-kpi-card__copy--type-grade" : ""}">
-                        <div class="hr010v2-kpi-card__value-row">
-                            <strong class="hr010v2-kpi-card__value">${escapeHtml(item.value)}</strong>
-                            ${item.valueChip ? `<span class="hr010v2-kpi-card__chip hr010v2-kpi-card__chip--${escapeHtml(item.valueChipTone || "blue")}">${escapeHtml(item.valueChip)}</span>` : ""}
+                    ${isValueHidden ? "" : `
+                        <div class="hr010v2-kpi-card__copy ${isTypeGradeCard ? "hr010v2-kpi-card__copy--type-grade" : ""}">
+                            <div class="hr010v2-kpi-card__value-row">
+                                <strong class="hr010v2-kpi-card__value">${escapeHtml(item.value)}</strong>
+                                ${item.valueChip ? `<span class="hr010v2-kpi-card__chip hr010v2-kpi-card__chip--${escapeHtml(item.valueChipTone || "blue")}">${escapeHtml(item.valueChip)}</span>` : ""}
+                            </div>
+                            ${!isTypeGradeCard && item.meta ? `<span class="hr010v2-kpi-card__meta ${item.metaClass || ""}">${escapeHtml(item.meta)}</span>` : ""}
                         </div>
-                        ${!isTypeGradeCard && item.meta ? `<span class="hr010v2-kpi-card__meta ${item.metaClass || ""}">${escapeHtml(item.meta)}</span>` : ""}
-                    </div>
+                    `}
                     ${isTrendCard ? `
                         <div class="hr010v2-kpi-card__trend" aria-hidden="true">
                             ${item.chartMarkup || ""}
