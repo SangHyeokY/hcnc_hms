@@ -244,14 +244,24 @@
 
                         <div class="hr011-page-action-buttons">
                             <button type="button" class="btn hr011-page-btn hr011-page-btn--primary" id="hr011SaveBtn" hidden>저장하기</button>
-                            <button type="button" class="btn hr011-page-btn hr011-page-btn--ghost" id="hr011BackBtn">목록으로</button>
-                            <button type="button" class="btn hr011-page-btn hr011-page-btn--ghost" id="hr011CancelBtn" hidden>등록취소</button>
-                            <button type="button" class="btn hr011-page-btn hr011-page-btn--ghost" id="hr011EditBtn">수정하기</button>
+                            <!--<button type="button" class="btn hr011-page-btn hr011-page-btn--ghost" id="hr011EditBtn">수정하기</button>-->
                         </div>
                     </aside>
 
                     <!-- ★ [수정/등록할 때만 보임] 수정/등록 입력 영역 -->
                     <div class="hr011-dashboard-grid">
+
+                        <!-- [수정/등록 화면] 헤더 -->
+                        <div class="hr011-ref-page-head hr011-ref-actions-row">
+                            <div class="hr011-ref-page-title">
+                                <button type="button" class="hr011-ref-detail-btn hr011-ref-detail-back" aria-label="수정, 등록 취소" id="hr011CancelBtn"></button>
+                                <h4 class="page-sub-title" id="upsert-header">인적사항</h4>
+                            </div>
+                            <div class="hr011-ref-actions-inline">
+                                <button type="button" class="btn hr011-page-btn hr011-page-btn--ghost" id="hr011BackBtn">목록</button>
+                            </div>
+                        </div>
+
                         <section class="white-full hr011-section hr011-edit-sector hr011-edit-sector--full hr011-edit-profile-section" data-edit-step="profile">
 
                             <!-- ★ [수정/등록할 때만 보임] 소제목 -->

@@ -176,10 +176,10 @@ function setHr011Mode(mode, options) {
         .toggleClass("is-update-mode", isUpdate);
     $("#hr011PageTitleText").text(isView ? "인적사항 상세" : isInsert ? "인적사항 등록" : "인적사항 수정");
     $("#modal-title").text(isView ? "상세" : mode === "insert" ? "등록" : "수정");
-    $("#hr011CancelBtn, #hr011CancelBtnView").text(isInsert ? "등록취소" : "수정취소");
+    // $("#hr011CancelBtn, #hr011CancelBtnView").text(isInsert ? "등록취소" : "수정취소");
     $("#hr011SaveBtn, #hr011SaveBtnView").text(isInsert ? "등록하기" : "저장하기");
-    $("#hr011EditBtn").toggle(isView);
-    $("#hr011CancelBtn").toggle(!isView);
+    // $("#hr011EditBtn").toggle(isView);
+    // $("#hr011CancelBtn").toggle(!isView);
     $("#hr011SaveBtn").prop("hidden", isView).toggle(!isView);
     $("#hr011BackBtnView").toggle(isView);
     $("#hr011EditBtnView").toggle(isView);
@@ -257,7 +257,7 @@ function setHr011Mode(mode, options) {
     // 일부 탭 초기화가 버튼 라벨을 덮는 경우가 있어 모드 기준으로 한 번 더 보정한다.
     setTimeout(function () {
         const isInsertMode = hr011Mode === "insert";
-        $("#hr011CancelBtn, #hr011CancelBtnView").text(isInsertMode ? "등록취소" : "수정취소");
+        // $("#hr011CancelBtn, #hr011CancelBtnView").text(isInsertMode ? "등록취소" : "수정취소");
         $("#hr011SaveBtn, #hr011SaveBtnView").text(isInsertMode ? "등록하기" : "저장하기");
         renderHr011EditMiniProfile();
     }, 0);
@@ -1084,12 +1084,22 @@ $(document).ready(async function () {
 function bindHr011PageEvents() {
 
     // 목록으로
-    $("#hr011BackBtn").on("click", function () {
+    $("#hr011BackBtn").on("click", async function () {
+        const isInsert = hr011Mode === "insert";
+        const result = await showAlert({
+            icon: "question",
+            title: isInsert ? "등록 취소" : "수정 취소",
+            text: isInsert ? "등록을 취소하고 목록으로 돌아가시겠습니까?" : "수정을 취소하고 목록으로 돌아가시겠습니까?",
+            confirmText: isInsert ? "등록취소" : "취소하기",
+            showCancelButton: true,
+            cancelText: isInsert ? "계속 등록" : "계속 수정"
+        });
+        if (!result.isConfirmed) return;
         window.location.href = "/hr010";
     });
 
     // 수정 모드 진입
-    $("#hr011EditBtn").on("click", async function () {
+    $("#hr011EditBtnView").on("click", async function () {
         const result = await showAlert({
             icon: "question",
             title: "수정 모드 진입",
@@ -1157,16 +1167,19 @@ function bindHr011PageEvents() {
         updateStepperUI();
     });
 
-    $("#hr011RefDetailEditBtn").on("click", function () {
-        $("#hr011EditBtn").trigger("click");
-    });
+    // $("#hr011RefDetailEditBtn").on("click", function () {
+    //     $("#hr011EditBtn").trigger("click");
+    // });
 
     $("#hr011BackBtnView").on("click", function () {
-        $("#hr011BackBtn").trigger("click");
+        if (hr011Mode !== "view"){
+            $("#hr011BackBtn").trigger("click");
+        }
+        window.location.href = "/hr010";
     });
-    $("#hr011EditBtnView").on("click", function () {
-        $("#hr011EditBtn").trigger("click");
-    });
+    // $("#hr011EditBtnView").on("click", function () {
+    //     $("#hr011EditBtn").trigger("click");
+    // });
     $("#hr011CancelBtnView").on("click", function () {
         $("#hr011CancelBtn").trigger("click");
     });
@@ -4872,31 +4885,33 @@ const stepFields = {
 
     // 1. 기본 인적사항
     profile: [
-        "#dev_nm",
-        "#select_dev_typ",
-        "#tel", "#select_sido_cd",
-        "#avail_dt", "#brdt",
-        "#select_ctrt_typ",
-        "#select_work_md",
-        "#select_main_fld_cd",
-        "#select_main_cust_cd",
-        "#select_kosa_grd_cd",
-        "#email",
-        "#hope_rate_amt",
-        "#edu_last",
-        "#exp_yr_year",
-        "#exp_yr_month",
-        "#cert_txt"
+        "#dev_nm"
+        , "#select_dev_typ"
+        , "#tel"
+        , "#select_sido_cd"
+        // , "#avail_dt"
+        , "#brdt"
+        , "#select_ctrt_typ"
+        , "#select_work_md"
+        , "#select_main_fld_cd"
+        , "#select_main_cust_cd"
+        , "#select_kosa_grd_cd"
+        , "#email"
+        , "#hope_rate_amt"
+        , "#edu_last"
+        , "#exp_yr_year"
+        , "#exp_yr_month"
+        // , "#cert_txt"
     ],
 
     // 2. 소속 및 계약정보
     contract: [
-        "#org_nm",
-        "#select_biz_typ",
-        "#st_dt",
-        "#ed_dt",
-        "#amt",
-        "#remark"
+        "#org_nm"
+        , "#select_biz_typ"
+        , "#st_dt"
+        , "#ed_dt"
+        , "#amt"
+        // , "#remark"
     ],
 
     // 3. 보유역량 및 숙련도
