@@ -722,11 +722,9 @@ function initHr010V2Chrome() {
     if (!dateEl) return;
 
     const today = new Date();
-    dateEl.textContent = today.toLocaleDateString("ko-KR", {
-        month: "long",
-        day: "numeric",
-        weekday: "short"
-    });
+    const weekday = today.toLocaleDateString("ko-KR", { weekday: "short" });
+    const pad = value => String(value).padStart(2, "0");
+    dateEl.textContent = `${today.getFullYear()}.${pad(today.getMonth() + 1)}.${pad(today.getDate())} (${weekday})`;
 }
 
 function renderHr010V2Dashboard(list) {
@@ -1232,14 +1230,16 @@ function renderHr010V2KpiGradeMatrix(rows, options = {}) {
     const totalFreelancer = normalized.reduce((sum, row) => sum + row.freelancerCount, 0);
     const totalCount = normalized.reduce((sum, row) => sum + row.totalCount, 0);
     const pendingCount = Number(options.pendingCount) || 0;
+    const unitLabel = String(options.unitLabel || "단위: 명").trim();
+    const captionText = String(options.caption || "").trim();
     const ariaBaseLabel = String(options.ariaLabel || options.caption || "등급별 인력 현황").trim();
     const ariaLabel = pendingCount > 0
         ? `${ariaBaseLabel}, 평가 대기 ${formatMatrixCount(pendingCount)}명`
         : ariaBaseLabel;
     return `
         <div class="hr010v2-kpi-matrix">
-            <div class="hr010v2-kpi-matrix__summary">
-                <span class="hr010v2-kpi-matrix__title">${escapeHtml(String(options.caption || "등급별 인력 현황"))}</span>
+            <div class="hr010v2-kpi-matrix__summary ${captionText ? "" : "hr010v2-kpi-matrix__summary--compact"}">
+                ${captionText ? `<span class="hr010v2-kpi-matrix__title">${escapeHtml(captionText)}</span>` : ""}
                 <div class="hr010v2-kpi-matrix__summary-right">
                     <div class="hr010v2-kpi-matrix__legend" aria-hidden="true">
                         <span class="hr010v2-kpi-matrix__legend-item hr010v2-kpi-matrix__legend-item--staff">
@@ -1251,6 +1251,7 @@ function renderHr010V2KpiGradeMatrix(rows, options = {}) {
                             <span>프리랜서</span>
                         </span>
                     </div>
+                    ${unitLabel ? `<span class="hr010v2-kpi-matrix__unit">${escapeHtml(unitLabel)}</span>` : ""}
                 </div>
             </div>
             <div class="hr010v2-kpi-matrix__rows" role="list" aria-label="${escapeHtml(ariaLabel)}">
@@ -1429,7 +1430,9 @@ function renderHr010V2HealthCompositionBuckets(stats) {
         const totalCount = staffCount + freelancerCount;
         const staffShare = totalCount ? (staffCount / totalCount) * 100 : 0;
         const freelancerShare = totalCount ? (freelancerCount / totalCount) * 100 : 0;
+        const totalShare = stats.total ? (totalCount / stats.total) * 100 : 0;
         const totalLabel = `${totalCount}명`;
+        const shareLabel = `(${formatHr010PercentDetailLabel(totalShare)})`;
         const staffLabel = `${staffCount}명`;
         const freelancerLabel = `${freelancerCount}명`;
         const legendLabel = totalCount
@@ -1443,7 +1446,9 @@ function renderHr010V2HealthCompositionBuckets(stats) {
             totalCount,
             staffShare,
             freelancerShare,
+            totalShare,
             totalLabel,
+            shareLabel,
             staffLabel,
             freelancerLabel,
             legendLabel
@@ -1462,7 +1467,10 @@ function renderHr010V2HealthCompositionBuckets(stats) {
                             <span class="hr010v2-health-bucket__label" title="${escapeHtml(bucket.fullLabel || bucket.label)}">
                                 <span class="hr010v2-health-bucket__label-main">${escapeHtml(bucket.label)}</span>
                             </span>
-                            <strong class="hr010v2-health-bucket__count">${escapeHtml(bucket.totalLabel)}</strong>
+                            <div class="hr010v2-health-bucket__metric">
+                                <strong class="hr010v2-health-bucket__count">${escapeHtml(bucket.totalLabel)}</strong>
+                                <span class="hr010v2-health-bucket__share">${escapeHtml(bucket.shareLabel)}</span>
+                            </div>
                         </div>
                         <div class="hr010v2-health-bucket__stack" aria-hidden="true">
                             <span class="hr010v2-health-bucket__segment hr010v2-health-bucket__segment--staff" style="width:${bucket.staffShare}%"></span>
@@ -1485,6 +1493,7 @@ function renderHr010V2HealthCompositionBuckets(stats) {
                     </div>
                 `).join("")}
             </div>
+            <div class="hr010v2-health-buckets__note">${escapeHtml(`전체 대상 ${formatHr010ExactCountLabel(stats.total)} 기준`)}</div>
         </div>
     `;
 }
@@ -2355,11 +2364,14 @@ function buildHr010V2KpiCards(list, context) {
     const availableFreelancerCount = Math.max(0, (Number(context.availabilityByType?.freelancer?.total) || 0) - (Number(context.availabilityByType?.freelancer?.coord) || 0));
     const unavailableStaffCount = Math.max(0, Number(context.availabilityByType?.staff?.coord) || 0);
     const unavailableFreelancerCount = Math.max(0, Number(context.availabilityByType?.freelancer?.coord) || 0);
+    const staffShareLabel = formatHr010PercentLabel(totalCount ? (staffRows.length / totalCount) * 100 : 0);
+    const freelancerShareLabel = formatHr010PercentLabel(totalCount ? (freelancerRows.length / totalCount) * 100 : 0);
     return [
         {
-            label: "전체 개발 인력",
+            label: "1. 전체 개발 인력",
             value: totalCountLabel,
-            meta: totalCount ? "직원/프리랜서 구성" : "재직 인력 데이터 없음",
+            meta: "",
+            footerSpacer: true,
             tone: "coral",
             kind: "donut",
             chartMarkup: renderHr010V2KpiMiniDonut([
@@ -2376,50 +2388,52 @@ function buildHr010V2KpiCards(list, context) {
             preset: makeHr010NavigationPreset()
         },
         {
-            label: "고용 형태별 등급",
+            label: "2. 고용형태별 등급",
             value: totalCountLabel,
-            meta: totalCount ? "등급별 인력 현황" : "고용 형태 데이터 없음",
+            meta: "",
             tone: "mint",
             kind: "type-grade",
-            chartMarkup: renderHr010V2KpiGradeMatrix(gradeMatrixTotal.rows, { caption: "등급별 인력 현황", pendingCount: gradeMatrixTotal.pendingCount }),
+            chartMarkup: renderHr010V2KpiGradeMatrix(gradeMatrixTotal.rows, { caption: "", unitLabel: "", pendingCount: gradeMatrixTotal.pendingCount }),
             preset: makeHr010NavigationPreset()
         },
         {
-            label: "가용률",
+            label: "3. 가용률",
             value: availableRateLabel,
             meta: "",
+            footerMeta: totalCount ? `가용 ${availablePoolLabel} / 전체 ${totalCountLabel}` : "",
             tone: "sky",
             kind: "donut",
             chartMarkup: renderHr010V2KpiMiniDonut([
-                { color: "var(--hr010v2-blue)", value: context.availablePoolCount },
-                { color: "var(--hr010v2-grade-pending)", value: context.unavailableCount }
+                { color: "var(--hr010v2-role-freelancer)", value: context.availablePoolCount },
+                { color: "var(--hr010v2-blue)", value: context.unavailableCount }
             ], {
                 layout: "inline",
                 centerValue: availableRateLabel,
                 legendItems: [
                     {
-                        color: "var(--hr010v2-blue)",
+                        color: "var(--hr010v2-role-freelancer)",
                         label: "가용",
-                        value: availableRateLabel,
-                        meta: `직원 ${formatHr010CountLabel(availableStaffCount)} / 프리랜서 ${formatHr010CountLabel(availableFreelancerCount)}`
+                        value: `직원 ${formatHr010ExactCountLabel(availableStaffCount)} / 프리 ${formatHr010ExactCountLabel(availableFreelancerCount)}`
                     },
                     {
-                        color: "var(--hr010v2-grade-pending)",
+                        color: "var(--hr010v2-blue)",
                         label: "비가용",
-                        value: unavailableRateLabel,
-                        meta: `직원 ${formatHr010CountLabel(unavailableStaffCount)} / 프리랜서 ${formatHr010CountLabel(unavailableFreelancerCount)}`
+                        value: `직원 ${formatHr010ExactCountLabel(unavailableStaffCount)} / 프리 ${formatHr010ExactCountLabel(unavailableFreelancerCount)}`
                     }
                 ]
             }),
             preset: makeHr010NavigationPreset({ runtimeFilters: { availability: "available" } })
         },
         {
-            label: "투입 가능 인력",
+            label: "4. 즉시 투입 가능",
             value: availablePoolLabel,
-            meta: totalCount ? "투입 가능 인력 현황" : "가용 데이터 없음",
+            meta: "",
+            valueChip: "즉시 가능",
+            valueChipTone: "blue",
+            featured: true,
             tone: "blue",
             kind: "type-grade",
-            chartMarkup: renderHr010V2KpiGradeMatrix(gradeMatrixAvailable.rows, { caption: "투입 가능 인력 현황", pendingCount: gradeMatrixAvailable.pendingCount }),
+            chartMarkup: renderHr010V2KpiGradeMatrix(gradeMatrixAvailable.rows, { caption: "", unitLabel: "", pendingCount: gradeMatrixAvailable.pendingCount }),
             preset: makeHr010NavigationPreset({ runtimeFilters: { availability: "available" } })
         }
     ];
@@ -2560,6 +2574,12 @@ function formatHr010ExactCountLabel(value, unit = "명") {
 function formatHr010PercentLabel(value) {
     const numeric = Number(value) || 0;
     return `${Math.round(numeric)}%`;
+}
+
+function formatHr010PercentDetailLabel(value) {
+    const numeric = Number(value) || 0;
+    const rounded = Math.round(numeric * 10) / 10;
+    return `${rounded.toFixed(1).replace(/\.0$/, "")}%`;
 }
 
 function setHr010Text(id, value) {
@@ -4265,17 +4285,29 @@ function renderHr010V2KpiCards(kpis, gradeRows = []) {
         return `<div class="hr010v2-empty">표시할 KPI 데이터가 없습니다.</div>`;
     }
 
-    const renderCard = item => {
+    const renderCard = (item) => {
         const isTrendCard = item.kind === "trend";
         const isDonutCard = item.kind === "donut";
         const isTypeGradeCard = item.kind === "type-grade";
+        const isFeaturedCard = Boolean(item.featured);
+        const cardIndexMatch = String(item.label || "").match(/^(\d+)\.\s*(.*)$/);
+        const cardNumber = cardIndexMatch ? cardIndexMatch[1] : "";
+        const cardTitle = cardIndexMatch ? cardIndexMatch[2] : String(item.label || "");
         return `
-            <button type="button" class="hr010v2-kpi-card hr010v2-kpi-card--${item.tone} ${isTrendCard ? "hr010v2-kpi-card--trend" : ""} ${isDonutCard ? "hr010v2-kpi-card--donut" : ""} ${isTypeGradeCard ? "hr010v2-kpi-card--type-grade" : ""} js-hr010v2-nav" data-hr010-preset="${escapeHtml(encodeHr010NavigationPreset(item.preset))}">
+            <button type="button" class="hr010v2-kpi-card hr010v2-kpi-card--${item.tone} ${isTrendCard ? "hr010v2-kpi-card--trend" : ""} ${isDonutCard ? "hr010v2-kpi-card--donut" : ""} ${isTypeGradeCard ? "hr010v2-kpi-card--type-grade" : ""} ${isFeaturedCard ? "hr010v2-kpi-card--featured" : ""} js-hr010v2-nav" data-hr010-preset="${escapeHtml(encodeHr010NavigationPreset(item.preset))}">
+                <div class="hr010v2-kpi-card__header">
+                    <span class="hr010v2-kpi-card__label">
+                        ${cardNumber ? `<span class="hr010v2-kpi-card__label-index">${escapeHtml(`${cardNumber}.`)}</span>` : ""}
+                        <span class="hr010v2-kpi-card__label-text">${escapeHtml(cardTitle)}</span>
+                    </span>
+                </div>
                 <div class="hr010v2-kpi-card__main ${isTrendCard ? "hr010v2-kpi-card__main--trend" : ""} ${isTypeGradeCard ? "hr010v2-kpi-card__main--type-grade" : ""}">
                     <div class="hr010v2-kpi-card__copy ${isTypeGradeCard ? "hr010v2-kpi-card__copy--type-grade" : ""}">
-                        <span class="hr010v2-kpi-card__label">${escapeHtml(item.label)}</span>
-                        <strong class="hr010v2-kpi-card__value">${escapeHtml(item.value)}</strong>
-                        ${!isTypeGradeCard && item.meta ? `<span class="hr010v2-kpi-card__meta">${escapeHtml(item.meta)}</span>` : ""}
+                        <div class="hr010v2-kpi-card__value-row">
+                            <strong class="hr010v2-kpi-card__value">${escapeHtml(item.value)}</strong>
+                            ${item.valueChip ? `<span class="hr010v2-kpi-card__chip hr010v2-kpi-card__chip--${escapeHtml(item.valueChipTone || "blue")}">${escapeHtml(item.valueChip)}</span>` : ""}
+                        </div>
+                        ${!isTypeGradeCard && item.meta ? `<span class="hr010v2-kpi-card__meta ${item.metaClass || ""}">${escapeHtml(item.meta)}</span>` : ""}
                     </div>
                     ${isTrendCard ? `
                         <div class="hr010v2-kpi-card__trend" aria-hidden="true">
@@ -4289,27 +4321,15 @@ function renderHr010V2KpiCards(kpis, gradeRows = []) {
                         </div>
                     `}
                 </div>
+                ${item.footerMeta ? `<div class="hr010v2-kpi-card__footer-pill">${escapeHtml(item.footerMeta)}</div>` : ""}
+                ${!item.footerMeta && item.footerSpacer ? `<div class="hr010v2-kpi-card__footer-pill hr010v2-kpi-card__footer-pill--ghost" aria-hidden="true"></div>` : ""}
             </button>
         `;
     };
 
-    const groups = [
-        { title: "인력 현황", items: kpis.slice(0, 2) },
-        { title: "투입 가능성", items: kpis.slice(2, 4) }
-    ].filter(group => group.items.length);
-
     return `
-        <div class="hr010v2-kpi-groups">
-            <div class="hr010v2-kpi-groups__body">
-                ${groups.map(group => `
-                    <section class="hr010v2-kpi-group">
-                        <div class="hr010v2-kpi-group__title">${escapeHtml(group.title)}</div>
-                        <div class="hr010v2-kpi-group__cards">
-                            ${group.items.map(renderCard).join("")}
-                        </div>
-                    </section>
-                `).join("")}
-            </div>
+        <div class="hr010v2-kpi-strip">
+            ${kpis.map(item => renderCard(item)).join("")}
         </div>
     `;
 }

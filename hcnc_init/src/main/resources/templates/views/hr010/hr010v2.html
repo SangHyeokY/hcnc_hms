@@ -33,7 +33,10 @@
                 </h1>
                 <div class="hr010v2-topbar__tools">
                     <div class="hr010v2-topbar__meta" aria-label="기준 일자">
-                        <span class="hr010v2-topbar__today">Today</span>
+                        <span class="hr010v2-topbar__today">
+                            <span class="hr010v2-topbar__today-icon" aria-hidden="true"></span>
+                            <span class="hr010v2-topbar__today-text">기준일</span>
+                        </span>
                         <span class="hr010v2-topbar__date" id="hr010v2TodayLabel">4월 20일 (월)</span>
                     </div>
                     <div class="hr010v2-filterbar" aria-label="대시보드 필터">
@@ -69,7 +72,15 @@
                 <article class="hr010v2-panel hr010v2-panel--health">
                     <div class="hr010v2-panel__head">
                         <div>
-                            <h3>투입 가능 분포</h3>
+                            <h3 class="hr010v2-panel__title-with-help">
+                                투입 가능 분포
+                                <span class="hr010v2-panel-help-wrap">
+                                    <button type="button" class="hr010v2-panel-help" aria-describedby="hr010v2HealthHelpTooltip" aria-label="투입 가능 분포 설명">?</button>
+                                    <span class="hr010v2-panel-help-tooltip" id="hr010v2HealthHelpTooltip" role="tooltip">
+                                        투입 가능 시점 기준으로 즉시, 2주 내, 2~4주 인력을 나눈 분포입니다.
+                                    </span>
+                                </span>
+                            </h3>
                         </div>
                     </div>
 
@@ -87,17 +98,17 @@
                 <article class="hr010v2-panel hr010v2-panel--supply">
                     <div class="hr010v2-panel__head">
                         <div>
-                            <h3>주력 기술 분포</h3>
+                            <h3>주력 기술</h3>
                         </div>
                     </div>
 
                     <div class="hr010v2-supply-table">
                         <div class="hr010v2-supply-columns__head">
                             <span class="hr010v2-supply-columns__label hr010v2-supply-columns__label--top">
-                                보유기술 많은 순 <strong>TOP3</strong> <span class="hr010v2-supply-columns__arrow hr010v2-supply-columns__arrow--up" aria-hidden="true">↑</span>
+                                보유기술 많은 순 <span class="hr010v2-supply-columns__arrow hr010v2-supply-columns__arrow--up" aria-hidden="true">↑</span>
                             </span>
                             <span class="hr010v2-supply-columns__label hr010v2-supply-columns__label--bottom">
-                                보유기술 적은 순 <strong>TOP3</strong> <span class="hr010v2-supply-columns__arrow hr010v2-supply-columns__arrow--down" aria-hidden="true">↓</span>
+                                보유기술 적은 순 <span class="hr010v2-supply-columns__arrow hr010v2-supply-columns__arrow--down" aria-hidden="true">↓</span>
                             </span>
                         </div>
                         <div class="hr010v2-supply-columns" id="hr010v2SkillRows"></div>
