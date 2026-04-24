@@ -4872,31 +4872,33 @@ const stepFields = {
 
     // 1. 기본 인적사항
     profile: [
-        "#dev_nm",
-        "#select_dev_typ",
-        "#tel", "#select_sido_cd",
-        "#avail_dt", "#brdt",
-        "#select_ctrt_typ",
-        "#select_work_md",
-        "#select_main_fld_cd",
-        "#select_main_cust_cd",
-        "#select_kosa_grd_cd",
-        "#email",
-        "#hope_rate_amt",
-        "#edu_last",
-        "#exp_yr_year",
-        "#exp_yr_month",
-        "#cert_txt"
+        "#dev_nm"
+        , "#select_dev_typ"
+        , "#tel"
+        , "#select_sido_cd"
+        // , "#avail_dt"
+        , "#brdt"
+        , "#select_ctrt_typ"
+        , "#select_work_md"
+        , "#select_main_fld_cd"
+        , "#select_main_cust_cd"
+        , "#select_kosa_grd_cd"
+        , "#email"
+        , "#hope_rate_amt"
+        , "#edu_last"
+        , "#exp_yr_year"
+        , "#exp_yr_month"
+        // , "#cert_txt"
     ],
 
     // 2. 소속 및 계약정보
     contract: [
-        "#org_nm",
-        "#select_biz_typ",
-        "#st_dt",
-        "#ed_dt",
-        "#amt",
-        "#remark"
+        "#org_nm"
+        , "#select_biz_typ"
+        , "#st_dt"
+        , "#ed_dt"
+        , "#amt"
+        // , "#remark"
     ],
 
     // 3. 보유역량 및 숙련도
