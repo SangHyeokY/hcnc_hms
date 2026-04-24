@@ -1233,9 +1233,23 @@ function renderHr010V2KpiGradeMatrix(rows, options = {}) {
     const ariaLabel = pendingCount > 0
         ? `${ariaBaseLabel}, 평가 대기 ${formatMatrixCount(pendingCount)}명`
         : ariaBaseLabel;
-
     return `
         <div class="hr010v2-kpi-matrix">
+            <div class="hr010v2-kpi-matrix__summary">
+                <span class="hr010v2-kpi-matrix__title">${escapeHtml(String(options.caption || "등급별 인력 현황"))}</span>
+                <div class="hr010v2-kpi-matrix__summary-right">
+                    <div class="hr010v2-kpi-matrix__legend" aria-hidden="true">
+                        <span class="hr010v2-kpi-matrix__legend-item hr010v2-kpi-matrix__legend-item--staff">
+                            <span class="hr010v2-kpi-matrix__legend-dot"></span>
+                            <span>직원</span>
+                        </span>
+                        <span class="hr010v2-kpi-matrix__legend-item hr010v2-kpi-matrix__legend-item--freelancer">
+                            <span class="hr010v2-kpi-matrix__legend-dot"></span>
+                            <span>프리랜서</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
             <div class="hr010v2-kpi-matrix__rows" role="list" aria-label="${escapeHtml(ariaLabel)}">
                 ${normalized.map(row => {
                     const rowTotal = Number(row.totalCount) || (row.staffCount + row.freelancerCount);
@@ -1681,15 +1695,18 @@ function renderHr010V2GradeBars(gradeRows, kosaRows) {
         const isCombinedPending = activeMode === "grade"
             && String(row.code || "").trim().toUpperCase() === "C"
             && Number(pendingRow?.totalCount) > 0;
+        const combinedPendingLabel = isCombinedPending
+            ? `U ${formatHr010CountLabel(pendingRow.totalCount)}`
+            : "";
         return `
             <button type="button" class="hr010v2-grade-legend__item ${isCombinedPending ? "hr010v2-grade-legend__item--combined" : ""} ${row.preset ? "js-hr010v2-nav" : ""}" ${row.preset ? `data-hr010-preset="${escapeHtml(encodeHr010NavigationPreset(row.preset))}"` : ""}>
                 <div class="hr010v2-grade-legend__head">
                     <span class="hr010v2-grade-legend__chip hr010v2-grade-legend__chip--${row.tone}">${escapeHtml(displayLabel)}</span>
                     <strong>${escapeHtml(shareLabel)}</strong>
                 </div>
-                <div class="hr010v2-grade-legend__meta">
-                    <span>직원 ${escapeHtml(formatHr010CountLabel(row.staffCount))} · 프리랜서 ${escapeHtml(formatHr010CountLabel(row.freelancerCount))}</span>
-                    ${isCombinedPending ? `<span class="hr010v2-grade-legend__pending">평가대기 ${escapeHtml(formatHr010CountLabel(pendingRow.totalCount))}</span>` : ""}
+                <div class="hr010v2-grade-legend__meta ${isCombinedPending ? "hr010v2-grade-legend__meta--split" : ""}">
+                    <span class="hr010v2-grade-legend__meta-main">직원 ${escapeHtml(formatHr010CountLabel(row.staffCount))} · 프리랜서 ${escapeHtml(formatHr010CountLabel(row.freelancerCount))}</span>
+                    ${isCombinedPending ? `<span class="hr010v2-grade-legend__pending hr010v2-grade-legend__pending--inline">${escapeHtml(combinedPendingLabel)}</span>` : ""}
                 </div>
             </button>
         `;
@@ -1795,8 +1812,10 @@ function renderHr010V2RecommendList(rows) {
                     <strong>${escapeHtml(row.name)}</strong>
                     <span class="hr010v2-recommend-item__type hr010v2-recommend-item__type--${row.typeTone}">${escapeHtml(row.typeLabel)}</span>
                 </div>
-                <div class="hr010v2-recommend-item__meta">${escapeHtml(row.skillLabel)} · ${escapeHtml(row.regionLabel)}</div>
-                <div class="hr010v2-recommend-item__submeta hr010v2-recommend-item__submeta--${row.availabilityTone}">${escapeHtml(row.availabilityBadge)}</div>
+                <div class="hr010v2-recommend-item__meta">
+                    <span class="hr010v2-recommend-item__meta-main">${escapeHtml(row.skillLabel)} · ${escapeHtml(row.regionLabel)}</span>
+                    <span class="hr010v2-recommend-item__availability hr010v2-recommend-item__availability--${row.availabilityTone}">${escapeHtml(row.availabilityBadge)}</span>
+                </div>
             </div>
             <div class="hr010v2-recommend-item__score">
                 <strong>${escapeHtml(row.scoreLabel)}</strong>
@@ -2330,19 +2349,6 @@ function buildHr010V2KpiCards(list, context) {
     const unavailableRate = totalCount ? ((Number(context.unavailableCount) || 0) / totalCount) * 100 : 0;
     const availableRateLabel = formatHr010PercentLabel(availableRate);
     const unavailableRateLabel = formatHr010PercentLabel(unavailableRate);
-    const availabilityBreakdown = {
-        available: { staff: 0, freelancer: 0 },
-        unavailable: { staff: 0, freelancer: 0 }
-    };
-    (Array.isArray(list) ? list : []).forEach(row => {
-        const typeKey = resolveUserType(row) === "staff" ? "staff" : "freelancer";
-        const bucket = getHr010AvailabilityBucket(row, context.today);
-        const availabilityKey = bucket.key === "coord" ? "unavailable" : "available";
-        availabilityBreakdown[availabilityKey][typeKey] += 1;
-    });
-    const gradeMatrixTotalNote = gradeMatrixTotal.pendingCount > 0 ? `평가 대기 ${formatHr010ExactCountLabel(gradeMatrixTotal.pendingCount)}` : "";
-    const gradeMatrixAvailableNote = gradeMatrixAvailable.pendingCount > 0 ? `평가 대기 ${formatHr010ExactCountLabel(gradeMatrixAvailable.pendingCount)}` : "";
-
     return [
         {
             label: "전체 개발 인력",
@@ -2367,26 +2373,15 @@ function buildHr010V2KpiCards(list, context) {
             label: "고용 형태별 등급",
             value: totalCountLabel,
             meta: totalCount ? "등급별 인력 현황" : "고용 형태 데이터 없음",
-            matrixNote: gradeMatrixTotalNote,
             tone: "mint",
             kind: "type-grade",
             chartMarkup: renderHr010V2KpiGradeMatrix(gradeMatrixTotal.rows, { caption: "등급별 인력 현황", pendingCount: gradeMatrixTotal.pendingCount }),
             preset: makeHr010NavigationPreset()
         },
         {
-            label: "투입 가능 인력",
-            value: availablePoolLabel,
-            meta: totalCount ? "투입 가능 인력 현황" : "가용 데이터 없음",
-            matrixNote: gradeMatrixAvailableNote,
-            tone: "blue",
-            kind: "type-grade",
-            chartMarkup: renderHr010V2KpiGradeMatrix(gradeMatrixAvailable.rows, { caption: "투입 가능 인력 현황", pendingCount: gradeMatrixAvailable.pendingCount }),
-            preset: makeHr010NavigationPreset({ runtimeFilters: { availability: "available" } })
-        },
-        {
             label: "가용률",
             value: availableRateLabel,
-            meta: totalCount ? "전체 대비 투입 가능 비율" : "데이터 없음",
+            meta: "",
             tone: "sky",
             kind: "donut",
             chartMarkup: renderHr010V2KpiMiniDonut([
@@ -2399,17 +2394,24 @@ function buildHr010V2KpiCards(list, context) {
                     {
                         color: "var(--hr010v2-blue)",
                         label: "가용",
-                        value: availableRateLabel,
-                        meta: `직원 ${formatHr010ExactCountLabel(availabilityBreakdown.available.staff)}\n프리랜서 ${formatHr010ExactCountLabel(availabilityBreakdown.available.freelancer)}`
+                        value: availableRateLabel
                     },
                     {
                         color: "var(--hr010v2-grade-pending)",
                         label: "비가용",
-                        value: unavailableRateLabel,
-                        meta: `직원 ${formatHr010ExactCountLabel(availabilityBreakdown.unavailable.staff)}\n프리랜서 ${formatHr010ExactCountLabel(availabilityBreakdown.unavailable.freelancer)}`
+                        value: unavailableRateLabel
                     }
                 ]
             }),
+            preset: makeHr010NavigationPreset({ runtimeFilters: { availability: "available" } })
+        },
+        {
+            label: "투입 가능 인력",
+            value: availablePoolLabel,
+            meta: totalCount ? "투입 가능 인력 현황" : "가용 데이터 없음",
+            tone: "blue",
+            kind: "type-grade",
+            chartMarkup: renderHr010V2KpiGradeMatrix(gradeMatrixAvailable.rows, { caption: "투입 가능 인력 현황", pendingCount: gradeMatrixAvailable.pendingCount }),
             preset: makeHr010NavigationPreset({ runtimeFilters: { availability: "available" } })
         }
     ];
@@ -4259,32 +4261,13 @@ function renderHr010V2KpiCards(kpis, gradeRows = []) {
         const isTrendCard = item.kind === "trend";
         const isDonutCard = item.kind === "donut";
         const isTypeGradeCard = item.kind === "type-grade";
-        const matrixMetaMarkup = isTypeGradeCard ? `
-            <div class="hr010v2-kpi-card__matrix-meta">
-                <div class="hr010v2-kpi-matrix__legend hr010v2-kpi-card__matrix-legend" aria-hidden="true">
-                    <span class="hr010v2-kpi-matrix__legend-item hr010v2-kpi-matrix__legend-item--staff">
-                        <span class="hr010v2-kpi-matrix__legend-dot"></span>
-                        <span>직원</span>
-                    </span>
-                    <span class="hr010v2-kpi-matrix__legend-item hr010v2-kpi-matrix__legend-item--freelancer">
-                        <span class="hr010v2-kpi-matrix__legend-dot"></span>
-                        <span>프리랜서</span>
-                    </span>
-                </div>
-                ${item.matrixNote ? `<span class="hr010v2-kpi-matrix__note hr010v2-kpi-card__matrix-note">${escapeHtml(item.matrixNote)}</span>` : ""}
-            </div>
-        ` : "";
         return `
             <button type="button" class="hr010v2-kpi-card hr010v2-kpi-card--${item.tone} ${isTrendCard ? "hr010v2-kpi-card--trend" : ""} ${isDonutCard ? "hr010v2-kpi-card--donut" : ""} ${isTypeGradeCard ? "hr010v2-kpi-card--type-grade" : ""} js-hr010v2-nav" data-hr010-preset="${escapeHtml(encodeHr010NavigationPreset(item.preset))}">
                 <div class="hr010v2-kpi-card__main ${isTrendCard ? "hr010v2-kpi-card__main--trend" : ""} ${isTypeGradeCard ? "hr010v2-kpi-card__main--type-grade" : ""}">
                     <div class="hr010v2-kpi-card__copy ${isTypeGradeCard ? "hr010v2-kpi-card__copy--type-grade" : ""}">
                         <span class="hr010v2-kpi-card__label">${escapeHtml(item.label)}</span>
                         <strong class="hr010v2-kpi-card__value">${escapeHtml(item.value)}</strong>
-                        ${isTypeGradeCard ? `
-                            <div class="hr010v2-kpi-card__meta-stack">
-                                ${matrixMetaMarkup}
-                            </div>
-                        ` : item.meta ? `<span class="hr010v2-kpi-card__meta ${isTypeGradeCard ? "hr010v2-kpi-card__meta--compact" : ""}">${escapeHtml(item.meta)}</span>` : ""}
+                        ${!isTypeGradeCard && item.meta ? `<span class="hr010v2-kpi-card__meta">${escapeHtml(item.meta)}</span>` : ""}
                     </div>
                     ${isTrendCard ? `
                         <div class="hr010v2-kpi-card__trend" aria-hidden="true">
