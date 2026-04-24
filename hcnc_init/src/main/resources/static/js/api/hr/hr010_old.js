@@ -1052,7 +1052,6 @@ function upsertUserBtn() {
             edu_last: $("#edu_last").val(),
             cert_txt: $("#cert_txt").val(),
             hope_rate_amt: normalizeAmountValue($("#hope_rate_amt").val()),
-            avail_dt: $("#avail_dt").val(),
             ctrt_typ: $("#select_ctrt_typ").val(),
             work_md: $("#select_work_md").val(),
             dev_typ: $("#select_dev_typ").val(),
@@ -1061,6 +1060,9 @@ function upsertUserBtn() {
             main_fld_cd: $("#select_main_fld_cd").val(),
             main_cust_cd: $("#select_main_cust_cd").val()
         };
+
+        const availDt = ($("#avail_dt").val() || "").trim();
+        payload.avail_dt = availDt || null;
 
         const activeTab = $(".tab-btn.active").data("tab");
         const file = $("#fileProfile")[0].files[0];
@@ -1626,7 +1628,6 @@ function validateUserForm() {
     const tel = ($("#tel").val() || "").trim();                  // 연락처
     const email = ($("#email").val() || "").trim();              // 이메일
     const workMd = ($("#select_work_md").val() || "").trim();    // 근무 가능형태 (01: 상주, 02: 재택, 03: 혼합)
-    const availDt = ($("#avail_dt").val() || "").trim();         // 투입 가능일
     const eduLast = ($("#edu_last").val() || "").trim();         // 최종학력
     const hopeRaw = normalizeAmountValue($("#hope_rate_amt").val()); // 희망단가 금액
     const kosaGrd = ($("#select_kosa_grd_cd").val() || "").trim(); // KOSA등급 (01: 초급, 02: 중급, 03: 고급, 04: 특급)
@@ -1728,17 +1729,6 @@ function validateUserForm() {
             html: `<strong>근무가능형태</strong>을(를) 선택해주세요.`
         });
         $("#select_work_md").focus();
-        return false;
-    }
-
-    // 투입 가능일
-    if (!availDt) {
-        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
-            icon: 'warning',
-            title: '경고',
-            html: `<strong>투입가능시점</strong>을(를) 입력하세요.`
-        });
-        $("#avail_dt").focus();
         return false;
     }
 

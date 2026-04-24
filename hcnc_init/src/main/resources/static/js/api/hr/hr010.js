@@ -1239,23 +1239,22 @@ function renderHr010V2KpiGradeMatrix(rows, options = {}) {
             <div class="hr010v2-kpi-matrix__rows" role="list" aria-label="${escapeHtml(ariaLabel)}">
                 ${normalized.map(row => {
                     const rowTotal = Number(row.totalCount) || (row.staffCount + row.freelancerCount);
-                    const staffShare = rowTotal ? (row.staffCount / rowTotal) * 100 : 0;
-                    const freelancerShare = rowTotal ? (row.freelancerCount / rowTotal) * 100 : 0;
                     const rowLabel = row.label || "-";
                     const labelText = `${rowLabel} 직원 ${formatMatrixCount(row.staffCount)}명, 프리랜서 ${formatMatrixCount(row.freelancerCount)}명, 합계 ${formatMatrixCount(rowTotal)}명`;
+                    const segments = [
+                        { tone: "staff", value: row.staffCount },
+                        { tone: "freelancer", value: row.freelancerCount }
+                    ].filter(segment => Number(segment.value) > 0);
 
                     return `
                         <div class="hr010v2-kpi-matrix__row" role="listitem" aria-label="${escapeHtml(labelText)}">
                             <span class="hr010v2-kpi-matrix__grade">${escapeHtml(rowLabel)}</span>
                             <div class="hr010v2-kpi-matrix__track" aria-hidden="true">
-                                ${rowTotal ? `
-                                    <span class="hr010v2-kpi-matrix__segment hr010v2-kpi-matrix__segment--staff" style="width:${staffShare.toFixed(3)}%">
-                                        <span>${escapeHtml(formatMatrixCount(row.staffCount))}</span>
+                                ${segments.length ? segments.map(segment => `
+                                    <span class="hr010v2-kpi-matrix__segment hr010v2-kpi-matrix__segment--${segment.tone}" style="width:${(Number(segment.value) / rowTotal) * 100}%">
+                                        <span>${escapeHtml(formatMatrixCount(segment.value))}</span>
                                     </span>
-                                    <span class="hr010v2-kpi-matrix__segment hr010v2-kpi-matrix__segment--freelancer" style="width:${freelancerShare.toFixed(3)}%">
-                                        <span>${escapeHtml(formatMatrixCount(row.freelancerCount))}</span>
-                                    </span>
-                                ` : `<span class="hr010v2-kpi-matrix__empty">0</span>`}
+                                `).join("") : `<span class="hr010v2-kpi-matrix__empty">0</span>`}
                             </div>
                             <strong class="hr010v2-kpi-matrix__total">${escapeHtml(formatMatrixCount(rowTotal))}</strong>
                         </div>
@@ -2427,7 +2426,7 @@ function makeHr010NavigationPreset(options = {}) {
 }
 
 function buildHr010V2RecommendRows(list, today) {
-    return list
+    const sortRows = rows => rows
         .slice()
         .sort((left, right) => {
             const leftBucket = getHr010AvailabilityBucket(left, today).priority;
@@ -2439,29 +2438,34 @@ function buildHr010V2RecommendRows(list, today) {
             if (leftScore !== rightScore) return rightScore - leftScore;
 
             return getHr010ProfileCompleteness(right) - getHr010ProfileCompleteness(left);
-        })
-        .slice(0, 3)
-        .map(row => {
-            const availability = getHr010AvailabilityBucket(row, today);
-            const employment = getEmploymentMeta(row);
-            const gradeCode = String(row.grade || "").toUpperCase();
-
-            return {
-                devId: row.dev_id,
-                name: row.dev_nm || "-",
-                gradeCode,
-                gradeLabel: getHr010RecommendGradeTierLabel(gradeCode),
-                skillLabel: getPrimarySkillLabel(row),
-                regionLabel: `${getSidoLabel(row) || "-"} / ${getWorkModeLabel(row)}`,
-                availabilityLabel: getAvailabilityLabel(row),
-                availabilityBadge: availability.label,
-                availabilityTone: availability.tone,
-                scoreLabel: formatHr010RecommendGradeLabel(gradeCode, row.score),
-                typeLabel: employment.label,
-                typeTone: employment.className === "freelancer" ? "info" : "good",
-                profileMarkup: getProfileMarkup(row)
-            };
         });
+
+    return ["S", "A", "B", "C"].flatMap(gradeCode => {
+        const gradeRows = (Array.isArray(list) ? list : []).filter(row => String(row.grade || "").toUpperCase() === gradeCode);
+
+        return sortRows(gradeRows)
+            .slice(0, 3)
+            .map(row => {
+                const availability = getHr010AvailabilityBucket(row, today);
+                const employment = getEmploymentMeta(row);
+
+                return {
+                    devId: row.dev_id,
+                    name: row.dev_nm || "-",
+                    gradeCode,
+                    gradeLabel: getHr010RecommendGradeTierLabel(gradeCode),
+                    skillLabel: getPrimarySkillLabel(row),
+                    regionLabel: `${getSidoLabel(row) || "-"} / ${getWorkModeLabel(row)}`,
+                    availabilityLabel: getAvailabilityLabel(row),
+                    availabilityBadge: availability.label,
+                    availabilityTone: availability.tone,
+                    scoreLabel: formatHr010RecommendGradeLabel(gradeCode, row.score),
+                    typeLabel: employment.label,
+                    typeTone: employment.className === "freelancer" ? "info" : "good",
+                    profileMarkup: getProfileMarkup(row)
+                };
+            });
+    });
 }
 
 function getHr010AvailabilityBucket(row, today) {

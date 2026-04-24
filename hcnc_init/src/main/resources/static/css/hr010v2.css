@@ -432,7 +432,7 @@
 
 .hr010v2-kpi-card__main {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(222px, 1fr);
+  grid-template-columns: minmax(0, 1fr) minmax(242px, 1fr);
   flex: 1;
   min-height: 100%;
 }
@@ -529,11 +529,11 @@
 }
 
 .hr010v2-kpi-card--donut .hr010v2-kpi-card__copy {
-  gap: 18px;
+  /* gap: 18px; */
 }
 
 .hr010v2-kpi-card--donut .hr010v2-kpi-card__spark {
-  min-height: 120px;
+  /* min-height: 120px; */
 }
 
 .hr010v2-kpi-card--type-grade .hr010v2-kpi-card__main {
@@ -666,14 +666,14 @@
 
 .hr010v2-kpi-matrix__rows {
   display: grid;
-  gap: 6px;
+  gap: 17px;
   min-width: 0;
 }
 
 .hr010v2-kpi-matrix__row {
   display: grid;
-  grid-template-columns: 46px minmax(0, 1fr) 34px;
-  gap: 8px;
+  grid-template-columns: 40px minmax(0, 1fr) 30px;
+  gap: 0px;
   align-items: center;
   min-width: 0;
 }
@@ -690,7 +690,7 @@
 .hr010v2-kpi-matrix__track {
   display: flex;
   min-width: 0;
-  height: 24px;
+  height: 20px;
   overflow: hidden;
   border-radius: var(--hr010v2-bar-radius);
   background: linear-gradient(180deg, #f6f9fe 0%, #e7eef8 100%);
@@ -703,8 +703,9 @@
   justify-content: center;
   min-width: 0;
   padding: 0 7px;
+  box-sizing: border-box;
   color: #ffffff;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 700;
   line-height: 1;
   white-space: nowrap;
@@ -827,19 +828,19 @@
   display: grid;
   align-items: center;
   justify-items: center;
-  gap: 6px;
+  gap: 30px;
 }
 
 .hr010v2-kpi-mini--donut-inline {
-  grid-template-columns: 88px minmax(0, 1fr);
+  grid-template-columns: 100px minmax(0, 1fr);
   align-items: center;
-  justify-items: start;
-  column-gap: 10px;
+  /* justify-items: start; */
+  /* column-gap: 10px; */
 }
 
 .hr010v2-kpi-mini--donut-inline .hr010v2-kpi-mini__donut {
-  width: 86px;
-  height: 86px;
+  width: 105px;
+  height: 105px;
 }
 
 .hr010v2-kpi-mini--donut-inline .hr010v2-kpi-mini__caption {
@@ -876,7 +877,7 @@
 
 .hr010v2-kpi-mini__donut-copy strong {
   color: var(--hr010v2-ink);
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 700;
   line-height: 1.05;
 }

@@ -1034,7 +1034,10 @@
         formData.append("edu_last", getFieldValue("#hr011v2EduLast"));
         formData.append("cert_txt", getFieldValue("#hr011v2CertTxt"));
         formData.append("work_md", getFieldValue("#hr011v2WorkMd"));
-        formData.append("avail_dt", getFieldValue("#hr011v2AvailDt"));
+        const availDt = getFieldValue("#hr011v2AvailDt");
+        if (availDt) {
+            formData.append("avail_dt", availDt);
+        }
         formData.append("ctrt_typ", getFieldValue("#hr011v2CtrtTyp"));
         formData.append("hope_rate_amt", normalizeAmountValue(getFieldValue("#hr011v2HopeRateAmt")));
         formData.append("kosa_grd_cd", getFieldValue("#hr011v2Kosa"));
@@ -1086,7 +1089,6 @@
             { value: getFieldValue("#hr011v2Tel"), selector: "#hr011v2Tel", message: "연락처를 입력하세요." },
             { value: getFieldValue("#hr011v2Email"), selector: "#hr011v2Email", message: "이메일을 입력하세요." },
             { value: getFieldValue("#hr011v2WorkMd"), selector: "#hr011v2WorkMd", message: "근무가능형태를 선택하세요." },
-            { value: getFieldValue("#hr011v2AvailDt"), selector: "#hr011v2AvailDt", message: "투입 가능 시점을 입력하세요." },
             { value: getFieldValue("#hr011v2EduLast"), selector: "#hr011v2EduLast", message: "최종학력을 입력하세요." },
             { value: getFieldValue("#hr011v2CtrtTyp"), selector: "#hr011v2CtrtTyp", message: "계약형태를 선택하세요." },
             { value: getFieldValue("#hr011v2Kosa"), selector: "#hr011v2Kosa", message: "KOSA 등급을 선택하세요." },
@@ -1218,7 +1220,6 @@
             "#hr011v2Sido"
         ];
         const workSelectors = [
-            "#hr011v2AvailDt",
             "#hr011v2WorkMd",
             "#hr011v2CtrtTyp",
             "#hr011v2Kosa",
