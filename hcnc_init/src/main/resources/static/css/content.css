@@ -2070,23 +2070,27 @@ button.btn.btn-add-skill:hover,
 
 .modal-human-area .pic-area .profile-area {
   position: relative;
-  min-height: 280px;
+  /*min-height: 280px;*/
+  /*min-width: 218px;*/
+  height: 280px;
   min-width: 218px;
-  border: none; /* 기존 border 제거 */
   border-radius: 12px !important;
-  background:
-    /* top */
-    linear-gradient(to right, #ADB5BF 60%, transparent 0) top / 12px 1px repeat-x,
-      /* bottom */
-    linear-gradient(to right, #ADB5BF 60%, transparent 0) bottom / 12px 1px repeat-x,
-      /* left */
-    linear-gradient(to bottom, #ADB5BF 60%, transparent 0) left / 1px 12px repeat-y,
-      /* right */
-    linear-gradient(to bottom, #ADB5BF 60%, transparent 0) right / 1px 12px repeat-y,
-      /* 기존 배경 이미지 */
-    url(../images/common/bg-userimg.png) center center no-repeat #F2F5F9;
-  background-size: 12px 1px, 12px 1px, 1px 12px, 1px 12px, contain;
+  background: #F2F5F9;
   overflow: hidden;
+}
+
+.modal-human-area .pic-area .profile-area .border-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.modal-human-area .pic-area .profile-area #upload-btn {
+  width: 26px !important;
+  height: 26px !important;
+  background: url("../icons/ico-img-upload.png") center center no-repeat;
 }
 
 .modal-human-area .pic-area .profile-area #dev_img[src=""] {display: none;}
@@ -2095,31 +2099,32 @@ button.btn.btn-add-skill:hover,
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
 }
 
-.modal-human-area .pic-area .re-upload-image {
-  position: absolute;
-  bottom: 8px;
-  right: 8px;
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  background-color: #E50019;
-  display: none;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-  z-index: 20;
-}
+/*.modal-human-area .pic-area .re-upload-image {*/
+/*  position: absolute;*/
+/*  bottom: 8px;*/
+/*  right: 8px;*/
+/*  width: 60px;*/
+/*  height: 60px;*/
+/*  border-radius: 50%;*/
+/*  background-color: #E50019;*/
+/*  display: none;*/
+/*  box-shadow: 0 4px 10px rgba(0,0,0,0.15);*/
+/*  z-index: 20;*/
+/*}*/
 
-.modal-human-area .pic-area .re-upload-image::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLWNhbWVyYS1pY29uIGx1Y2lkZS1jYW1lcmEiPjxwYXRoIGQ9Ik0xMy45OTcgNGEyIDIgMCAwIDEgMS43NiAxLjA1bC40ODYuOUEyIDIgMCAwIDAgMTguMDAzIDdIMjBhMiAyIDAgMCAxIDIgMnY5YTIgMiAwIDAgMS0yIDJINGEyIDIgMCAwIDEtMi0yVjlhMiAyIDAgMCAxIDItMmgxLjk5N2EyIDIgMCAwIDAgMS43NTktMS4wNDhsLjQ4OS0uOTA0QTIgMiAwIDAgMSAxMC4wMDQgNHoiLz48Y2lyY2xlIGN4PSIxMiIgY3k9IjEzIiByPSIzIi8+PC9zdmc+");
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: 36px;
-  filter: brightness(0) invert(1);
-}
+/*.modal-human-area .pic-area .re-upload-image::before {*/
+/*  content: "";*/
+/*  position: absolute;*/
+/*  inset: 0;*/
+/*  background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLWNhbWVyYS1pY29uIGx1Y2lkZS1jYW1lcmEiPjxwYXRoIGQ9Ik0xMy45OTcgNGEyIDIgMCAwIDEgMS43NiAxLjA1bC40ODYuOUEyIDIgMCAwIDAgMTguMDAzIDdIMjBhMiAyIDAgMCAxIDIgMnY5YTIgMiAwIDAgMS0yIDJINGEyIDIgMCAwIDEtMi0yVjlhMiAyIDAgMCAxIDItMmgxLjk5N2EyIDIgMCAwIDAgMS43NTktMS4wNDhsLjQ4OS0uOTA0QTIgMiAwIDAgMSAxMC4wMDQgNHoiLz48Y2lyY2xlIGN4PSIxMiIgY3k9IjEzIiByPSIzIi8+PC9zdmc+");*/
+/*  background-repeat: no-repeat;*/
+/*  background-position: center;*/
+/*  background-size: 36px;*/
+/*  filter: brightness(0) invert(1);*/
+/*}*/
 
 .modal-human-area .file {
   position: absolute;
