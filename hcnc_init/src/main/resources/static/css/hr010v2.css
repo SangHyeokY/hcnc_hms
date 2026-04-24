@@ -145,20 +145,20 @@
   width: min(100%, 780px);
   align-items: start;
   justify-content: flex-end;
-  gap: 520px;
+  gap: 20px;
   min-width: 0;
 }
 
 .hr010v2-topbar__meta {
   display: inline-flex;
-  align-items: center;
+  align-items: start;
   gap: 13px;
   color: var(--hr010v2-muted);
   font-size: var(--hr010v2-font-body);
   font-weight: 600;
   line-height: 1.4;
   white-space: nowrap;
-  flex-direction: row;
+  flex-direction: column;
 }
 
 .hr010v2-topbar__today {
