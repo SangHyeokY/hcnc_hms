@@ -628,29 +628,14 @@ option {
 #hr013-skill-picker-area .hr013-skill-picker-meta {
   display: inline-flex;
   align-items: center;
-  gap: 3px;
-  margin-left: 15px;
+  gap: 4px;
+  /*margin-left: 15px;*/
   color: #5F666E;
   font-family: var(--hcnc-font-body);
   font-size: 13px;
   font-weight: 400;
   line-height: 1.4;
 }
-
-/*.page-sub-title .hcnc-grid-count-title:before {*/
-/*  content: "";*/
-/*  display: inline-block;*/
-/*  width: 6px;*/
-/*  height: 24px;*/
-/*  border-radius: 6px;*/
-/*  background: #E50019;*/
-/*  margin-right: 8px;*/
-/*}*/
-
-/*.tab-content .page-sub-title .hcnc-grid-count-title:before {*/
-/*  height: 18px !important;*/
-/*  width: 4px !important;*/
-/*}*/
 
 /* 총 데이터 수 색상 */
 .hcnc-grid-count-number,
@@ -666,34 +651,6 @@ option {
 
 /* 2중 팝업 내의 데이터 수 색상 */
 .result-count-bold.selected {color: #E50019;}
-
-/*.tabulator .tabulator-footer.hcnc-grid-footer-compact {*/
-/*  padding: 8px 12px 6px !important;*/
-/*  min-height: 76px;*/
-/*}*/
-
-/*.tabulator .tabulator-footer.hcnc-grid-footer-compact .tabulator-pages {*/
-/*  margin: 0 auto;*/
-/*}*/
-
-/*.tabulator .tabulator-footer.hcnc-grid-footer-compact .hcnc-grid-count {*/
-/*  position: static;*/
-/*  transform: none;*/
-/*  margin-top: 8px;*/
-/*  text-align: center;*/
-/*  white-space: normal;*/
-/*}*/
-
-/*#TABLE_COMMON_MAIN .tabulator-footer .hcnc-grid-count {*/
-/*  position: static;*/
-/*  left: auto;*/
-/*  top: auto;*/
-/*  transform: none;*/
-/*  display: block;*/
-/*  margin-top: 8px;*/
-/*  text-align: center;*/
-/*  white-space: normal;*/
-/*}*/
 
 /* 인적사항/사용자관리는 페이지네이션이 화면 하단에 고정되도록 컨테이너 높이를 보장 */
 .grid-pager-fixed {
@@ -1538,6 +1495,21 @@ button.btn.btn-add-skill:hover,
   z-index: 1100;
 }
 
+/* 주 개발언어 팝업 테이블 줄바꿈 높이 제한 풀기 */
+#main-lang-picker-area .tabulator .tabulator-row,
+#hr012-skill-picker-area .tabulator .tabulator-row,
+#hr013-skill-picker-area .tabulator .tabulator-row {display: flex; height: auto !important; min-height: auto !important;}
+
+/* 주 개발언어 팝업 테이블 줄바꿈 높이 제한 풀기 */
+#main-lang-picker-area .tabulator .tabulator-cell,
+#hr012-skill-picker-area .tabulator .tabulator-cell,
+#hr013-skill-picker-area .tabulator .tabulator-cell  {display: flex; align-items: center; height: auto !important; min-height: auto !important; white-space: normal !important;}
+
+/* 주 개발언어 팝업 테이블 줄바꿈 높이 제한 풀기 - 패딩 */
+#main-lang-picker-area .tabulator .tabulator-cell:last-of-type,
+#hr012-skill-picker-area .tabulator .tabulator-cell:last-of-type,
+#hr013-skill-picker-area .tabulator .tabulator-cell:last-of-type {padding: 6px !important;}
+
 #main-lang-picker-area .main-lang-picker-search-row,
 #hr012-skill-picker-area .hr012-skill-picker-search-row,
 #hr013-skill-picker-area .hr013-skill-picker-search-row {display: flex; align-items: center; margin-bottom: 12px;}
@@ -1615,30 +1587,9 @@ button.btn.btn-add-skill:hover,
   font-size: 12px;
 }
 
-/* 소속 구분 (직원, 프리랜서) */
-/*#select_dev_typ {*/
-/*  background: #ED24551F;*/
-/*  border-radius: 6px;*/
-/*  border: 1px solid #ED24551F;*/
-/*  -webkit-text-fill-color: #ED2455;*/
-/*  font-weight: 500;*/
-/*  height: 40px;*/
-/*}*/
-
-/*.selectedDevTyp {*/
-/*  background: url(../images/common/ico-arrow-down.png) calc(100% - 10px) center no-repeat #ED24551F !important;*/
-/*  background-size: 14px !important;*/
-/*}*/
-
 #TABLE_MAIN_LANG_PICKER .main-lang-skill-chip-wrap,
 #TABLE_HR012_SKILL_PICKER .hr012-skill-chip-wrap,
-#TABLE_HR013_SKILL_PICKER .hr013-skill-chip-wrap {
-  flex-wrap: wrap;
-  gap: 6px;
-  display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: max-content;
-}
+#TABLE_HR013_SKILL_PICKER .hr013-skill-chip-wrap {flex-wrap: wrap; gap: 6px; display: flex;}
 
 #TABLE_MAIN_LANG_PICKER .main-lang-skill-chip,
 #TABLE_HR012_SKILL_PICKER .hr012-skill-chip,
@@ -1652,6 +1603,7 @@ button.btn.btn-add-skill:hover,
   line-height: 1;
   padding: 6px 10px 5px 10px;
   cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 #TABLE_MAIN_LANG_PICKER .main-lang-skill-chip:hover,
@@ -1669,11 +1621,18 @@ button.btn.btn-add-skill:hover,
   color: #111;
 }
 
-#TABLE_MAIN_LANG_PICKER .main-lang-skill-chip.is-flash,
-#TABLE_HR012_SKILL_PICKER .hr012-skill-chip.is-flash,
-#TABLE_HR013_SKILL_PICKER .hr013-skill-chip.is-flash {
-  box-shadow: 0 0 0 2px rgba(72, 128, 255, 0.2);
+#TABLE_MAIN_LANG_PICKER .main-lang-skill-chip:focus,
+#TABLE_HR012_SKILL_PICKER .hr012-skill-chip:focus,
+#TABLE_HR013_SKILL_PICKER .hr013-skill-chip:focus {
+  outline: none;
+  box-shadow: none;
 }
+
+/*#TABLE_MAIN_LANG_PICKER .main-lang-skill-chip.is-flash,*/
+/*#TABLE_HR012_SKILL_PICKER .hr012-skill-chip.is-flash,*/
+/*#TABLE_HR013_SKILL_PICKER .hr013-skill-chip.is-flash {*/
+/*  box-shadow: 0 0 0 2px rgba(72, 128, 255, 0.2);*/
+/*}*/
 
 .date-range {
   display: flex;
@@ -3262,7 +3221,7 @@ section.search-area .search-info #insertNm,
 #main-lang-picker-area #main-lang-picker-search,
 #hr012-skill-picker-area #hr012-skill-picker-search,
 #hr013-skill-picker-area #hr013-skill-picker-search,
-#hr013-project-picker-area #hr013-project-picker-search {min-width: 0 !important;}
+#hr013-project-picker-area #hr013-project-picker-search {min-width: 0 !important; width: 480px !important;}
 
 section.search-area .search-info #searchKeyword::placeholder,
 section.search-area .search-info #insertNm::placeholder,
@@ -6565,8 +6524,6 @@ minmax(142px, 1.02fr); gap:10px; align-items:stretch;}
   box-shadow: 0 0 0 3px rgba(93, 140, 222, 0.16);
 }
 
-/*.hr011-detail-wrap .hr011-page:not(.is-edit-mode) .hr011-page-actions--bottom {display: none;}*/
-
 /* Pretendard 폰트 대신 inter 폰트 사용 */
 /*.hr011-detail-wrap .hr011-ref-layout,
 .hr011-detail-wrap .hr011-ref-layout * {
@@ -9038,8 +8995,6 @@ body.hr011-project-eval-modal-open {
     grid-template-columns: 1fr;
   }
 
-  /*.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-page-actions--bottom {position: sticky; left: auto; right: auto; top: 6px;}*/
-
   .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-page-content {
     padding-top: 0;
   }
@@ -9105,8 +9060,6 @@ body.hr011-project-eval-modal-open {
     width: 100%;
     max-width: none;
   }
-
-  /*.hr011-detail-wrap .hr011-page-actions--bottom {top: 6px;}*/
 
   .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-wizard-controls {
     padding: 10px;
@@ -9313,7 +9266,7 @@ body.hr011-project-eval-modal-open {
   .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-step-btn {
     min-width: 210px;
   }
-  /*.hr011-detail-wrap .hr011-page-actions--bottom {position: static; padding: 8px; backdrop-filter: none;}*/
+
   .hr011-detail-wrap .hr011-edit-mini-profile .meta strong {
     font-size: 22px;
   }

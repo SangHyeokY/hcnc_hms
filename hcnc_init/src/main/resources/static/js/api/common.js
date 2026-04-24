@@ -872,8 +872,9 @@ function createGroupedSkillPicker(config) {
             return;
         }
         state.table = new Tabulator(cfg.tableSelector, {
-            layout: "fitColumns",
+            layout: "fitDataStretch",
             height: cfg.tableHeight,
+            virtualDom: false,
             placeholder: cfg.emptyText,
             headerHozAlign: "center",
             selectableRange: false, // v5 이상이면 안전하게 추가
@@ -883,8 +884,8 @@ function createGroupedSkillPicker(config) {
                 resizable: false
             },
             columns: [
-                { title: cfg.groupColumnTitle, field: "groupName", width: cfg.groupColumnWidth, hozAlign: "left" },
-                { title: cfg.skillColumnTitle, field: "skills", hozAlign: "left", formatter: skillFormatter, widthGrow: cfg.skillColumnWidthGrow }
+                { title: cfg.groupColumnTitle, field: "groupName", width: cfg.groupColumnWidth, hozAlign: "left", variableHeight: false},
+                { title: cfg.skillColumnTitle, field: "skills", hozAlign: "left", formatter: skillFormatter, widthGrow: cfg.skillColumnWidthGrow, variableHeight: true }
             ],
             data: []
         });
@@ -918,9 +919,14 @@ function createGroupedSkillPicker(config) {
         var prevLeft = holder ? holder.scrollLeft : 0;  // 기존 가로 스크롤
 
         // setData 이후에도 스크롤이 튀지 않도록 이전 위치를 복원한다.
-        var afterRender = function () { // setData 이후 즉시 처리
+        var afterRender = function () {
             state.tableReady = true;
             syncChipState();
+
+            setTimeout(function () {
+                state.table.redraw(true);   // 높이 재계산 (핵심)
+            }, 30);
+
             var currentEl = state.table.getElement ? state.table.getElement() : null;
             var currentHolder = currentEl ? currentEl.querySelector(".tabulator-tableHolder") : null;
             if (currentHolder) {
@@ -929,11 +935,28 @@ function createGroupedSkillPicker(config) {
             }
         };
 
-        var setResult = state.table.setData(buildRows()); // 그룹/기술 행 데이터 교체
-        if (setResult && typeof setResult.then === "function") {    // Promise 반환이면
-            setResult.then(afterRender);    // 비동기 완료 후 후처리
+        var setResult = state.table.setData(buildRows());
+
+        if (setResult && typeof setResult.then === "function") {
+            setResult.then(function () {
+                state.table.redraw(true);   // 전체 다시 계산
+
+                state.table.getRows().forEach(function (row) {
+                    row.reformat();   // 각 row 높이 재계산 (핵심)
+                });
+
+                afterRender();   // 기존 후처리
+            });
         } else {
-            setTimeout(afterRender, 0); // 다음 tick에서 후처리
+            setTimeout(function () {
+                state.table.redraw(true);
+
+                state.table.getRows().forEach(function (row) {
+                    row.reformat();
+                });
+
+                afterRender();
+            }, 50);
         }
     }
 
