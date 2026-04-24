@@ -2744,7 +2744,7 @@
 .hr010v2-weekly-summary__head {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: end;
   gap: 8px;
   min-width: 0;
 }
@@ -2982,7 +2982,7 @@
 .hr010v2-grade-overview {
   min-height: 0;
   display: grid;
-  gap: 8px;
+  gap: 14px;
 }
 
 .hr010v2-grade-overview--kosa {
