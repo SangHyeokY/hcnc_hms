@@ -893,6 +893,7 @@ function getHr010V2DashboardStats(list) {
             staffRows,
             freelancerRows,
             availability,
+            availabilityByType,
             total,
             availablePoolCount,
             deployableCount,
@@ -2410,6 +2411,7 @@ function buildHr010V2KpiCards(list, context) {
     const staffCountLabel = formatHr010CountLabel(staffRows.length);
     const freelancerCountLabel = formatHr010CountLabel(freelancerRows.length);
     const availablePoolLabel = formatHr010CountLabel(context.availablePoolCount);
+    const unavailableCountLabel = formatHr010CountLabel(context.unavailableCount);
     const nowCountLabel = formatHr010CountLabel(context.availability?.now?.count || 0);
     const availableRate = totalCount ? ((Number(context.availablePoolCount) || 0) / totalCount) * 100 : 0;
     const unavailableRate = totalCount ? ((Number(context.unavailableCount) || 0) / totalCount) * 100 : 0;
@@ -2463,7 +2465,7 @@ function buildHr010V2KpiCards(list, context) {
             kind: "donut",
             chartMarkup: renderHr010V2KpiMiniDonut([
                 { color: "var(--hr010v2-role-freelancer)", value: context.availablePoolCount },
-                { color: "var(--hr010v2-blue)", value: context.unavailableCount }
+                { color: "var(--hr010v2-slate)", value: context.unavailableCount }
             ], {
                 layout: "inline",
                 centerValue: availableRateLabel,
@@ -2471,12 +2473,14 @@ function buildHr010V2KpiCards(list, context) {
                     {
                         color: "var(--hr010v2-role-freelancer)",
                         label: "가용",
-                        value: `직원 ${formatHr010ExactCountLabel(availableStaffCount)} / 프리 ${formatHr010ExactCountLabel(availableFreelancerCount)}`
+                        value: availablePoolLabel,
+                        meta: `직원 ${formatHr010ExactCountLabel(availableStaffCount)} / 프리 ${formatHr010ExactCountLabel(availableFreelancerCount)}`
                     },
                     {
-                        color: "var(--hr010v2-blue)",
+                        color: "var(--hr010v2-slate)",
                         label: "비가용",
-                        value: `직원 ${formatHr010ExactCountLabel(unavailableStaffCount)} / 프리 ${formatHr010ExactCountLabel(unavailableFreelancerCount)}`
+                        value: unavailableCountLabel,
+                        meta: `직원 ${formatHr010ExactCountLabel(unavailableStaffCount)} / 프리 ${formatHr010ExactCountLabel(unavailableFreelancerCount)}`
                     }
                 ]
             }),
@@ -2486,9 +2490,8 @@ function buildHr010V2KpiCards(list, context) {
             label: "4. 즉시 투입 가능",
             value: nowCountLabel,
             meta: "",
-            valueChip: "즉시 가능",
-            valueChipTone: "blue",
-            featured: true,
+            hideValue: true,
+            footerMeta: nowCountLabel ? `즉시 가능 ${nowCountLabel}` : "",
             tone: "blue",
             kind: "type-grade",
             chartMarkup: renderHr010V2KpiGradeMatrix(gradeMatrixNow.rows, { caption: "", unitLabel: "", pendingCount: gradeMatrixNow.pendingCount }),
