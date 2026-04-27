@@ -1930,7 +1930,7 @@ button.btn.btn-add-skill,
 .modal-container .form-group input:read-only,
 .modal-container .form-group textarea:read-only,
 .hr011-detail-wrap .hr011-field-card input.is-readonly,
-.hr011-detail-wrap .hr011-field-card select.is-readonly {background: #DEEDFF; box-shadow: none; border: 1px solid #D9D9D9; cursor: default;}
+.hr011-detail-wrap .hr011-field-card select.is-readonly {background: #F2F5F9; box-shadow: none; cursor: default;}
 .modal-container .form-group textarea {width: 100%; min-width: 0; border-radius: 6px; border: 1px solid #D9D9D9; font-size: 14px;}
 
 /* 모달 - 비고 full */
@@ -3046,6 +3046,8 @@ button.btn.btn-add-skill,
   display: inline-flex;
   flex-direction: column;
   width: 20px;
+  height: 45px;
+  justify-content: space-around;
 }
 
 /* 상세(view)에서는 경력연차 스핀 버튼 숨김 */
@@ -6544,20 +6546,15 @@ minmax(142px, 1.02fr); gap:10px; align-items:stretch;}
 
 .hr011-profile-grid .modal-human-area {width: 218px !important;}
 
-.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-profile-section .hr011-field-card {
-  border: none;
-  padding: 0;
-}
-
-.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-profile-section .hr011-field-card::after {
-  display: none;
-}
+.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-profile-section .hr011-field-card {border: none; padding: 0;}
+.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-profile-section .hr011-field-card::after {display: none;}
 
 /*.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-profile-section .hr011-field-card--span2,*/
 /*.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-profile-section .hr011-field-card--readonly {*/
 /*  grid-column: 1 / -1;*/
 /*}*/
 
+.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-profile-section .hr011-field-card label,
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-profile-section .hr011-field-card label {
   display: flex;
   align-items: center;
@@ -6580,29 +6577,21 @@ minmax(142px, 1.02fr); gap:10px; align-items:stretch;}
   letter-spacing: 0;
   border: 1px solid #E9ECEF;
 }
-.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-profile-section .hr011-field-card input,
-.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-profile-section .hr011-field-card textarea {
-  padding: 18px 16px;
-}
+.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-profile-section .hr011-field-card input {padding: 18px 16px;}
+.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-profile-section .hr011-field-card textarea {padding: 13px 16px; min-height: 45px !important; overflow: hidden; resize: none;}
+.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-profile-section .hr011-field-card select {padding: 0 16px;}
 
-.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-profile-section .hr011-field-card select {
-  padding: 0 16px;
-}
+.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section[data-edit-step="skill"] {min-height: 320px;}
+.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section[data-edit-step="project"] {margin-top: 0;}
 
-.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section[data-edit-step="skill"] {
-  min-height: 320px;
-}
-
-.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section[data-edit-step="project"] {
-  margin-top: 0;
-}
+.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-profile-section .hr011-field-card.last-row {align-self: start;}
+.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-profile-section .hr011-field-card.last-row label {height: 45px; display: flex; align-items: center;}
 
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-profile-section .hr011-field-card input:focus,
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-profile-section .hr011-field-card select:focus,
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-profile-section .hr011-field-card textarea:focus {
   outline: none;
-  border-color: #8fb0e4;
-  box-shadow: 0 0 0 3px rgba(93, 140, 222, 0.16);
+  box-shadow: 0 0 0 2px rgba(229, 0, 25, 0.5) !important;
 }
 
 /* Pretendard 폰트 대신 inter 폰트 사용 */
@@ -10273,6 +10262,11 @@ body.hr011-project-eval-modal-open {
   white-space: nowrap;
 }
 
+.hr011-detail-wrap .hr011-page:not(.is-edit-mode) .hr011-ref-actions-inline .hr011-page-btn:hover,
+.hr011-detail-wrap .hr011-page .hr011-ref-actions-inline #hr011BackBtn:hover {
+  background:#DEEDFF;
+}
+
 .hr011-detail-wrap .hr011-page:not(.is-edit-mode) .hr011-ref-actions-inline #btn-excel {
   width: 129px;
   min-width: 129px;
@@ -10756,7 +10750,25 @@ body.hr011-project-eval-modal-open {
   color: #8093ae;
 }
 
-.hr011-detail-wrap .hr011-basic-grid {
+.hr011-detail-wrap .hr011-defPro-grid {
+  position: relative;
+  display: grid;
+  grid-template-columns: 106px 1fr 52px 106px 1fr;
+  align-items: center;
+  gap: 24px;
+  width: 100%;
+}
+
+.hr011-detail-wrap .hr011-skill-grid {
+  position: relative;
+  display: grid;
+  grid-template-columns: 106px 1fr 52px 106px 1fr;
+  align-items: center;
+  gap: 24px;
+  width: 100%;
+}
+
+.hr011-detail-wrap .hr011-contract-grid {
   position: relative;
   display: grid;
   grid-template-columns: 106px 1fr 52px 106px 1fr;

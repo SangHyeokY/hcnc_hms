@@ -316,15 +316,13 @@ input::placeholder, select::placeholder, textarea::placeholder {
     opacity: 1;
 }
 
-input:focus-visible,
+/*input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
     outline: none;
-    border-color: rgba(74,144,226,0.5);
-    box-shadow: 0 0 0 2px rgba(74,144,226,0.5);
-    /*background-color: #fff !important;*/
-}
-input[type="text"]:not([readonly]):not([disabled]):hover,
+    box-shadow: 0 0 0 2px rgba(74,144,226,0.5) !important;
+}*/
+/*input[type="text"]:not([readonly]):not([disabled]):hover,
 input[type="number"]:not([readonly]):not([disabled]):hover,
 input[type="email"]:not([readonly]):not([disabled]):hover,
 input[type="date"]:not([readonly]):not([disabled]):hover,
@@ -333,15 +331,12 @@ input[type="button"]:not([readonly]):not([disabled]):hover,
 select:not([readonly]):not([disabled]):hover,
 textarea:not([readonly]):not([disabled]):hover {
     outline: none;
-    border-color: rgba(229, 0, 25, 0.5);
-    box-shadow: 0 0 0 2px rgba(229, 0, 25, 0.5);
-    background-color: #fff !important;
-}
-.modal-human-area .pic-area .profile-area.edit:hover {
+    box-shadow: 0 0 0 3px rgba(93, 140, 222, 0.16) !important;
+}*/
+/*.modal-human-area .pic-area .profile-area.edit:hover {
     outline: none;
-    border-color: rgba(229, 0, 25, 0.5);
-    box-shadow: 0 0 0 2px rgba(229, 0, 25, 0.5);
-}
+    box-shadow: 0 0 0 3px rgba(93, 140, 222, 0.16) !important;
+}*/
 
 /*테이블 호버*/
 /*

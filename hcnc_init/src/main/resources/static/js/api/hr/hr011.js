@@ -84,6 +84,16 @@ $(document).on("tab:readonly.hr011", function (_, isReadOnly) {
             closeUserViewModal();
         }
     });
+
+    // textarea 자동으로 커지기
+    $("textarea").on("input", function () {
+        if (!this.value.trim()) {
+            this.style.height = "45px";
+            return;
+        }
+        this.style.height = "auto";
+        this.style.height = this.scrollHeight + "px";
+    });
 });
 
 // mode 초기값 : view, 테이블 데이터 초기값 : null
@@ -107,7 +117,7 @@ window.initTab1 = function () {
                 return { cd: this.value, cd_nm: $(this).text() };
             }).get();
 
-            initSelectDefault("select_biz_typ", "개인/개인사업자/법인");
+            initSelectDefault("select_biz_typ", "개인 / 개인사업자 / 법인");
             bizTypMap = getBizTypMap();
 
             // AJAX 끝날 때까지 기다림
@@ -1294,11 +1304,11 @@ async function initHr011DetailPage() {
 
     await Promise.all([
         loadHr011MainSelect("select_dev_typ", "DEV_TYP", hr011MainSelectMaps.devTyp, "프리랜서 / 직원"),
-        loadHr011MainSelect("select_work_md", "WORK_MD", hr011MainSelectMaps.workMd, "근무형태"),
-        loadHr011MainSelect("select_ctrt_typ", "CTRT_TYP", hr011MainSelectMaps.ctrtTyp, "계약유형"),
+        loadHr011MainSelect("select_work_md", "WORK_MD", hr011MainSelectMaps.workMd, "근무 가능 형태"),
+        loadHr011MainSelect("select_ctrt_typ", "CTRT_TYP", hr011MainSelectMaps.ctrtTyp, "계약 형태"),
         loadHr011MainSelect("select_kosa_grd_cd", "KOSA_GRD_CD", hr011MainSelectMaps.kosa, "KOSA 등급"),
-        loadHr011MainSelect("select_main_fld_cd", "MAIN_FLD_CD", hr011MainSelectMaps.mainFld, "주요분야"),
-        loadHr011MainSelect("select_main_cust_cd", "MAIN_CUST_CD", hr011MainSelectMaps.mainCust, "고객사"),
+        loadHr011MainSelect("select_main_fld_cd", "MAIN_FLD_CD", hr011MainSelectMaps.mainFld, "주요 분야"),
+        loadHr011MainSelect("select_main_cust_cd", "MAIN_CUST_CD", hr011MainSelectMaps.mainCust, "주요 고객사"),
         loadHr011MainSelect("select_sido_cd", "SIDO_CD", hr011MainSelectMaps.sido, "거주지역")
     ]);
 
@@ -4873,7 +4883,7 @@ if (excelBtn) {
 // 네비게이션 바
 const HR011_STEP_CONFIG = [
     { key: "profile", label: "기본 프로필", className: "hr011-edit-step-btn--profile" },
-    { key: "skill", label: "조건 및 역량(수정중)", className: "hr011-edit-step-btn--skill" },
+    { key: "skill", label: "조건 및 역량", className: "hr011-edit-step-btn--skill" },
     { key: "contract", label: "소속 및 계약정보", className: "hr011-edit-step-btn--contract" },
     { key: "project", label: "프로젝트 이력", className: "hr011-edit-step-btn--project" },
     { key: "eval-risk", label: "평가 및 리스크", className: "hr011-edit-step-btn--eval" }
@@ -4899,27 +4909,40 @@ const stepFields = {
     ],
 
     // 2. 조건 및 역량
-    skill: () => $("#mainLangTagList li").length > 0,
+    skill: {
+        fields: [
+            // "#avail_dt", // 투입가능시점
+            "#select_main_cust_cd" // 주요고객사
+            , "#select_work_md" // 근무 가능 형태
+            , "#select_ctrt_typ" // 계약 형태
+            , "#hope_rate_amt" // 희망 단가
+            , "#select_kosa_grd_cd" // KOSA 등급
+            , "#edu_last" // 최종 학력
+            , "#select_main_fld_cd" // 주요 분야
+            // , "#cert_txt" // 보유 자격증
+        ],
+        extraCheck: () => {
+            const hasMainLang = $("#mainLangTagList li").length > 0;
+
+            const year = $.trim($("#exp_yr_year").val());
+            const month = $.trim($("#exp_yr_month").val());
+            const hasExp = (year && year !== "0") || (month && month !== "0");
+
+            return {
+                mainLang: hasMainLang,
+                exp: hasExp
+            };
+        }
+    },
 
     // 3. 소속 및 계약
     contract: [
-        "#org_nm"
-        , "#select_biz_typ"
-        , "#st_dt"
-        , "#ed_dt"
-        , "#amt"
-        // , "#remark"
-        // , "#avail_dt" // 투입가능시점
-        , "#select_ctrt_typ" // 계약유형
-        , "#select_work_md" // 근무형태
-        , "#hope_rate_amt" // 희망단가
-        , "#edu_last" // 최종학력
-        , "#exp_yr_year" // 경력(년)
-        , "#exp_yr_month" // 경력(월)
-        // , "#cert_txt"
-        , "#select_main_fld_cd" // 주요분야
-        , "#select_main_cust_cd" // 주요고객사
-        , "#select_kosa_grd_cd" // KOSA등급
+        "#org_nm" // 소속사
+        , "#select_biz_typ" // 사업자 유형
+        , "#st_dt" // 계약 시작일
+        , "#ed_dt" // 계약 종료일
+        , "#amt" // 계약 금액
+        // , "#remark" // 비고
     ],
 
     // 4. 프로젝트 이력
@@ -4938,12 +4961,57 @@ function calculateStepProgress(step) {
 
     if (!config) return { filled: 0, total: 0 };
 
-    // 함수형 step (skill, project, eval-risk)
+    // 1. 함수형 step
     if (typeof config === "function") {
         const count = config();
         return { filled: count, total: Math.max(count, 1) };
     }
 
+    // 금액 필드 공통
+    const amountFields = ["#hope_rate_amt", "#amt"];
+
+    // 2. 객체형 STEP (skill)
+    if (typeof config === "object" && config.fields) {
+        let filled = 0;
+
+        config.fields.forEach(selector => {
+            const $el = $(selector);
+            if (!$el.length) return;
+
+            let isFilled = false;
+            let val = $.trim($el.val());
+
+            if (amountFields.includes(selector)) {
+                const numeric = Number(val.replace(/[^\d]/g, ""));
+                isFilled = numeric > 0;
+            } else if ($el.is(":checkbox, :radio")) {
+                isFilled = $el.is(":checked");
+            } else {
+                isFilled = val !== "" && val !== "0" && Number(val) !== 0;
+            }
+
+            if (isFilled) filled++;
+        });
+
+        let extraFilled = 0;
+        let extraTotal = 0;
+
+        if (config.extraCheck) {
+            const extra = config.extraCheck();
+
+            Object.values(extra).forEach(v => {
+                extraTotal++;
+                if (v) extraFilled++;
+            });
+        }
+
+        return {
+            filled: filled + extraFilled,
+            total: config.fields.length + extraTotal
+        };
+    }
+
+    // 3. 배열형 STEP
     let filled = 0;
 
     config.forEach(selector => {
@@ -4951,11 +5019,14 @@ function calculateStepProgress(step) {
         if (!$el.length) return;
 
         let isFilled = false;
+        let val = $.trim($el.val());
 
-        if ($el.is(":checkbox, :radio")) {
+        if (amountFields.includes(selector)) {
+            const numeric = Number(val.replace(/[^\d]/g, ""));
+            isFilled = numeric > 0;
+        } else if ($el.is(":checkbox, :radio")) {
             isFilled = $el.is(":checked");
         } else {
-            const val = $.trim($el.val());
             isFilled = val !== "" && val !== "0" && Number(val) !== 0;
         }
 
@@ -5071,7 +5142,10 @@ function setHr011ActiveEditStep(stepKey) {
 
 // 신규 등록일 때 안보일 STEP은 빼놓기 (보유역량 평가 & 프로젝트 평가 제외)
 function getActiveStepKeys() {
-    if (hr011Mode === "insert") {
+    const isInsert = hr011Mode === "insert";
+    $("#3-step-end, #4-step-end").toggle(!isInsert);
+
+    if (isInsert) {
         return HR011_STEP_CONFIG
             .filter(step => ["profile", "skill", "contract"].includes(step.key))
             .map(step => step.key);
