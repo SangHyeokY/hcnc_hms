@@ -343,14 +343,14 @@ textarea:not([readonly]):not([disabled]):hover {
     box-shadow: 0 0 0 2px rgba(229, 0, 25, 0.5);
 }
 
-/* 인력관리 팝업 => 테이블 hover */
+/*테이블 호버*/
+/*
 #main-modal-table:hover,
 #TABLE_HR011_A table:hover {
     box-shadow:
             0 0 0 1px rgba(0, 54, 117, 0.6),
             0 2px 6px rgba(0, 54, 117, 0.08);
 }
-/* tabulator 테이블 hover */
 #TABLE_COMMON_MAIN:hover,
 #TABLE_COMMON_DETAIL:hover,
 #TABLE_USER:hover,
@@ -370,7 +370,7 @@ textarea:not([readonly]):not([disabled]):hover {
             0 0 0 1px rgba(0, 54, 117, 0.6),
             0 2px 6px rgba(0, 54, 117, 0.08);
     border-radius: 12px;
-}
+}*/
 
 .main-human-modal input:is(:read-only, :disabled),
 .main-human-modal select:disabled,

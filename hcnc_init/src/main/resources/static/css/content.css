@@ -191,7 +191,18 @@ option {
   color: #222222;
 }
 
-/* 1. 대시보드 텍스트 앞 아이콘 */
+.hr011-ref-page-title #upsert-header {
+  display:flex;
+  align-items:flex-end;
+  font-family:var(--hcnc-font-display) !important;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: 0;
+  color: #006FFD;
+  height: 28px;
+}
+
+  /* 1. 대시보드 텍스트 앞 아이콘 */
 .hr030-main-titlebar .page-sub-title::before {
   content: "";
   display: inline-block;
@@ -805,15 +816,17 @@ option {
 ================================================================================*/
 button.btn.btn-add-skill,
 .hr012-toolbar-01 button.btn.btn-add-skill {
-  background-color: #212E41;
-  color: #fff;
-  border-radius: 12px;
-  border: none;
-  padding: 10px 8px;
-  font-size: 14px;
-  font-weight: 500;
-  height: 100%;
-  min-height: 33px;
+  background-color: #ffffff;
+  color: #1C80FF;
+  border-radius: 8px;
+  border: 1px solid #1C80FF;
+  padding: 18px 16px;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 18px;
+  letter-spacing: 0;
+  min-height: 45px;
+  height: 45px;
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -824,10 +837,10 @@ button.btn.btn-add-skill,
   margin-right: 6px;
 }
 
-button.btn.btn-add-skill:hover,
-.hr012-toolbar-01 button.btn.btn-add-skill:hover {
-  background-color: #324760;
-}
+/*button.btn.btn-add-skill:hover,*/
+/*.hr012-toolbar-01 button.btn.btn-add-skill:hover {*/
+/*  background-color: #324760;*/
+/*}*/
 
 /*===============================================================================
   HR015,HR014 - score tables alignment
@@ -901,11 +914,11 @@ button.btn.btn-add-skill:hover,
 /*===============================================================================
   HR014 - risk memo
 ================================================================================*/
-#HR014_TAB_B .risk-wrap {
+/*#HR014_TAB_B .risk-wrap {
   border-radius: 12px;
   border: 1px solid #DEE2E7;
   padding: 12px;
-}
+}*/
 
 .risk-list-top {
   gap: 12px;
@@ -1351,7 +1364,7 @@ button.btn.btn-add-skill:hover,
 }
 
 .tag-input-box {
-  position: relative;
+  /*position: absolute;*/
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
@@ -1376,7 +1389,7 @@ button.btn.btn-add-skill:hover,
 .tag-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 8px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -1393,15 +1406,17 @@ button.btn.btn-add-skill:hover,
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 0 8px;
-  border: 1px solid #000;
-  border-radius: 999px;
-  background: #fff;
-  color: #000;
-  font-size: 13px;
+  padding: 4px 8px;
+  border: 1px transparent;
+  border-radius: 4px;
+  background: #E7E8F5;
+  color: #5B6281;
+  font-size: 16px;
   font-weight: 600;
-  height: 32px;
+  font-family: "Pretendard Variable", "Pretendard", "Noto Sans KR", sans-serif !important;
+  height: 28px;
   line-height: normal;
+  white-space: nowrap;
 }
 
 .tag-input-box.is-readonly .tag-list {
@@ -2400,6 +2415,30 @@ button.btn.btn-add-skill:hover,
 .hr011-field-card #amt {
   text-align: right;
 }
+
+.hr011-field-card .tag-text {
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.4;
+  letter-spacing: 0;
+  color: #FD323A;
+  height: 18px;
+}
+
+.hr011-field-card.hr011-skill-card {bottom: 9px;}
+
+.hr011-dashboard-grid .hr011-edit-form {
+  background: #ffffff;
+  padding: 30px;
+  border-radius: 20px;
+  border: 1px solid #DEE2E7;
+}
+
+.hr011-edit-form .section-line {
+  margin: 30px 0;
+  border-bottom: 1px solid #E9ECEF;
+}
+
 
 .hr014-side-tabs>button.active {
   color: #E50019;
@@ -6150,10 +6189,6 @@ minmax(142px, 1.02fr); gap:10px; align-items:stretch;}
   align-items: start;
 }
 
-.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-sector--full {
-  grid-column: 1 / -1;
-}
-
 .hr011-detail-wrap .hr011-dashboard-columns {
   display: grid;
   grid-template-columns: minmax(520px, 1fr) minmax(560px, 1.12fr);
@@ -6485,9 +6520,15 @@ minmax(142px, 1.02fr); gap:10px; align-items:stretch;}
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-profile-section {
   max-width: none;
   width: 100%;
-  margin: 0;
   position: relative;
-  padding: 30px;
+
+}
+
+.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-sector--full {
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 0;
 }
 
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-profile-section::before {
@@ -6504,10 +6545,7 @@ minmax(142px, 1.02fr); gap:10px; align-items:stretch;}
 .hr011-profile-grid .modal-human-area {width: 218px !important;}
 
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-profile-section .hr011-field-card {
-  /*grid-column: span 2;*/
-  background: #ffffff;
   border: none;
-  position: relative;
   padding: 0;
 }
 
@@ -9436,7 +9474,7 @@ body.hr011-project-eval-modal-open {
 .hr011-detail-wrap .hr011-ref-page-title {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 10px;
   min-width: 0;
 }
 
@@ -10719,6 +10757,7 @@ body.hr011-project-eval-modal-open {
 }
 
 .hr011-detail-wrap .hr011-basic-grid {
+  position: relative;
   display: grid;
   grid-template-columns: 106px 1fr 52px 106px 1fr;
   align-items: center;
@@ -10738,6 +10777,7 @@ body.hr011-project-eval-modal-open {
 }
 .hr011-detail-wrap .hr011-field-card--row2 {
   grid-row: span 2;
+  flex-direction: column !important;
 }
 
 .hr011-detail-wrap .hr011-field-card label {
@@ -11073,14 +11113,14 @@ body.hr011-project-eval-modal-open {
 /*  gap: 12px;*/
 /*}*/
 
-.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section-body .hr014-shell.hr011-dual-pane .hr014-tab-panel {
+/*.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section-body .hr014-shell.hr011-dual-pane .hr014-tab-panel {
   display: block !important;
   border: 1px solid #dfe8f5;
   border-radius: 12px;
   background: #fff;
   position: relative;
   padding-top: 38px;
-}
+}*/
 
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section-body .hr014-shell.hr011-dual-pane #HR014_TAB_A::before,
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section-body .hr014-shell.hr011-dual-pane #HR014_TAB_B::before {
@@ -11653,9 +11693,9 @@ body.hr011-project-eval-modal-open {
     display: none;
   }
 
-  .hr011-detail-wrap .hr011-basic-grid {
+  /*.hr011-detail-wrap .hr011-basic-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
+  }*/
 
   .hr011-detail-wrap .hr011-summary-card {
     grid-template-columns: 1fr;
@@ -11667,9 +11707,9 @@ body.hr011-project-eval-modal-open {
 }
 
 @media (max-width: 1200px) {
-  .hr011-detail-wrap .hr011-basic-grid {
+  /*.hr011-detail-wrap .hr011-basic-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+  }*/
 
   .hr011-detail-wrap .hr011-field-card--span2 {
     grid-column: span 2;

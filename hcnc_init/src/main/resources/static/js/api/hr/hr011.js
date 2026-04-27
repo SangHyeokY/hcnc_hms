@@ -176,6 +176,7 @@ function setHr011Mode(mode, options) {
         .toggleClass("is-update-mode", isUpdate);
     $("#hr011PageTitleText").text(isView ? "인적사항 상세" : isInsert ? "인적사항 등록" : "인적사항 수정");
     $("#modal-title").text(isView ? "상세" : mode === "insert" ? "등록" : "수정");
+    $("#upsert-header").text(isView ? "상세" : mode === "insert" ? "등록" : "수정");
     // $("#hr011CancelBtn, #hr011CancelBtnView").text(isInsert ? "등록취소" : "수정취소");
     $("#hr011SaveBtn, #hr011SaveBtnView").text(isInsert ? "등록하기" : "저장하기");
     // $("#hr011EditBtn").toggle(isView);
@@ -4872,8 +4873,8 @@ if (excelBtn) {
 // 네비게이션 바
 const HR011_STEP_CONFIG = [
     { key: "profile", label: "기본 프로필", className: "hr011-edit-step-btn--profile" },
+    { key: "skill", label: "조건 및 역량(수정중)", className: "hr011-edit-step-btn--skill" },
     { key: "contract", label: "소속 및 계약정보", className: "hr011-edit-step-btn--contract" },
-    { key: "skill", label: "보유역량 및 숙련도", className: "hr011-edit-step-btn--skill" },
     { key: "project", label: "프로젝트 이력", className: "hr011-edit-step-btn--project" },
     { key: "eval-risk", label: "평가 및 리스크", className: "hr011-edit-step-btn--eval" }
 ];
@@ -4895,11 +4896,12 @@ const stepFields = {
         , "#select_sido_cd" // 거주지역
         , "#brdt" // 생년월일
         , "#tel" // 연락처
-
-
     ],
 
-    // 2. 소속 및 계약정보
+    // 2. 조건 및 역량
+    skill: () => $("#mainLangTagList li").length > 0,
+
+    // 3. 소속 및 계약
     contract: [
         "#org_nm"
         , "#select_biz_typ"
@@ -4919,9 +4921,6 @@ const stepFields = {
         , "#select_main_cust_cd" // 주요고객사
         , "#select_kosa_grd_cd" // KOSA등급
     ],
-
-    // 3. 보유역량 및 숙련도
-    skill: () => $("#mainLangTagList li").length,
 
     // 4. 프로젝트 이력
     project: () => window.hr013Table ? window.hr013Table.getData().length : 0,
@@ -5074,7 +5073,7 @@ function setHr011ActiveEditStep(stepKey) {
 function getActiveStepKeys() {
     if (hr011Mode === "insert") {
         return HR011_STEP_CONFIG
-            .filter(step => ["profile", "contract", "skill"].includes(step.key))
+            .filter(step => ["profile", "skill", "contract"].includes(step.key))
             .map(step => step.key);
     }
     return HR011_STEP_CONFIG.map(step => step.key);

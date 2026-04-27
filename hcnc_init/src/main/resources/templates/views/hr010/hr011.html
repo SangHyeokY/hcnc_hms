@@ -255,294 +255,307 @@
                         <div class="hr011-ref-page-head hr011-ref-actions-row">
                             <div class="hr011-ref-page-title">
                                 <button type="button" class="hr011-ref-detail-btn hr011-ref-detail-back" aria-label="수정, 등록 취소" id="hr011CancelBtn"></button>
-                                <h4 class="page-sub-title" id="upsert-header">인적사항</h4>
+                                <h4 class="page-sub-title">인적사항</h4>
+                                <div id="upsert-header"></div>
                             </div>
                             <div class="hr011-ref-actions-inline">
                                 <button type="button" class="btn hr011-page-btn hr011-page-btn--ghost" id="hr011BackBtn">목록</button>
                             </div>
                         </div>
 
-                        <!-- 1 STEP -->
-                        <section class="white-full hr011-section hr011-edit-sector hr011-edit-sector--full hr011-edit-profile-section" data-edit-step="profile">
-                            <!-- ★ [수정/등록할 때만 보임] 소제목 -->
-                            <div class="hr011-section-head">
-                                <div>
-                                    <h4>기본 프로필</h4>
+                        <div class="hr011-edit-form">
+                            <!-- 1 STEP -->
+                            <section class="white-full hr011-section hr011-edit-sector hr011-edit-sector--full hr011-edit-profile-section" data-edit-step="profile">
+                                <!-- ★ [수정/등록할 때만 보임] 소제목 -->
+                                <div class="hr011-section-head">
+                                    <div>
+                                        <h4>기본 프로필</h4>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="hr011-profile-grid">
-                                <!-- ★ [수정/등록할 때만 보임] 프로필 이미지 -->
-                                <div class="modal-human-area">
-                                    <div class="pic-area">
-                                        <div class="profile-area" tabindex="0">
-                                            <img id="dev_img" src="" alt="profile" />
+                                <div class="hr011-profile-grid">
+                                    <!-- ★ [수정/등록할 때만 보임] 프로필 이미지 -->
+                                    <div class="modal-human-area">
+                                        <div class="pic-area">
+                                            <div class="profile-area" tabindex="0">
+                                                <img id="dev_img" src="" alt="profile" />
 
-                                            <!-- 내부 문구  -->
-                                            <div class="none-img-text">
-                                                <!--<div class="re-upload-image"></div>-->
-                                                <div id="upload-btn"></div>
-                                                <div class="tit">이미지 선택</div>
-                                                <div class="sub-tit">JPG, PNG (Max:2MB)</div>
+                                                <!-- 내부 문구  -->
+                                                <div class="none-img-text">
+                                                    <!--<div class="re-upload-image"></div>-->
+                                                    <div id="upload-btn"></div>
+                                                    <div class="tit">이미지 선택</div>
+                                                    <div class="sub-tit">JPG, PNG (Max:2MB)</div>
+                                                </div>
+
+                                                <svg class="border-svg" viewBox="0 0 218 280" preserveAspectRatio="none">
+                                                    <rect
+                                                            x="0.5" y="0.5"
+                                                            width="217" height="279"
+                                                            rx="12" ry="12"
+                                                            fill="none"
+                                                            stroke="#ADB5BF"
+                                                            stroke-width="1"
+                                                            stroke-dasharray="8 6"
+                                                    />
+                                                </svg>
+
+                                                <input id="fileProfile" type="file" class="file">
                                             </div>
+                                        </div>
+                                    </div>
+                                    <!-- ★ [수정/등록할 때만 보임] 입력 영역 -->
+                                    <div class="hr011-basic-grid">
 
-                                            <svg class="border-svg" viewBox="0 0 218 280" preserveAspectRatio="none">
-                                                <rect
-                                                    x="0.5" y="0.5"
-                                                    width="217" height="279"
-                                                    rx="12" ry="12"
-                                                    fill="none"
-                                                    stroke="#ADB5BF"
-                                                    stroke-width="1"
-                                                    stroke-dasharray="8 6"
-                                                />
-                                            </svg>
+                                        <!-- 1행 -->
+                                        <div class="hr011-field-card">
+                                            <label for="dev_nm">성명</label>
+                                        </div>
+                                        <div class="hr011-field-card">
+                                            <input type="text" id="dev_nm" class="wp100">
+                                        </div>
+                                        <div class="null-card"></div>
+                                        <div class="hr011-field-card">
+                                            <label for="email">이메일</label>
+                                        </div>
+                                        <div class="hr011-field-card">
+                                            <input type="email" id="email" class="wp100">
+                                        </div>
 
-                                            <input id="fileProfile" type="file" class="file">
+                                        <!-- 2행 -->
+                                        <div class="hr011-field-card">
+                                            <label for="select_dev_typ">구분</label>
+                                        </div>
+                                        <div class="hr011-field-card">
+                                            <select id="select_dev_typ" class="wp100"></select>
+                                        </div>
+                                        <div class="null-card"></div>
+                                        <div class="hr011-field-card">
+                                            <label for="select_sido_cd">거주지역</label>
+                                        </div>
+                                        <div class="hr011-field-card">
+                                            <select id="select_sido_cd" class="wp100"></select>
+                                        </div>
+
+                                        <!-- 3행 -->
+                                        <div class="hr011-field-card">
+                                            <label for="brdt">생년월일</label>
+                                        </div>
+                                        <div class="hr011-field-card">
+                                            <input type="date" id="brdt" class="wp100">
+                                        </div>
+                                        <div class="null-card"></div>
+                                        <!-- 주 개발언어 영역 -->
+                                        <div class="hr011-field-card">
+                                            <label for="main_lang">주 개발언어</label>
+                                        </div>
+                                        <div class="hr011-field-card">
+                                        <span style="width: auto;">
+                                            <button type="button" class="btn btn-add-skill btn-main-lang-picker" id="btn_main_lang_picker">
+                                                <img src="./images/common/ico-skill-search.png" alt="기술 선택">
+                                                개발언어
+                                            </button>
+                                        </span>
+                                        </div>
+
+                                        <!-- 4행 -->
+                                        <div class="hr011-field-card" style="align-self: start;">
+                                            <label for="tel" style="height: 45px; display: flex; align-items: center;">연락처</label>
+                                        </div>
+                                        <div class="hr011-field-card" style="align-self: start;">
+                                            <input type="text" id="tel" class="wp100">
+                                        </div>
+                                        <div class="null-card hr011-field-card--span2"></div>
+                                        <div class="hr011-field-card hr011-skill-card">
+                                            <span class="tag-text">* 기존 스킬 정보와 연동합니다.</span>
+                                            <div class="tag-input-box">
+                                                <div class="tag-help"></div>
+                                                <ul class="tag-list" id="mainLangTagList"></ul>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                                <!-- ★ [수정/등록할 때만 보임] 입력 영역 -->
+                            </section>
+
+                            <!-- 영역 부분선 -->
+                            <div class="section-line"></div>
+
+                            <!-- 2 STEP -->
+                            <section class="white-full hr011-section hr011-edit-sector hr011-edit-sector--full hr011-edit-profile-section" data-edit-step="skill">
+                                <div class="hr011-section-head">
+                                    <div>
+                                        <h4>조건 및 역량</h4>
+                                    </div>
+                                </div>
                                 <div class="hr011-basic-grid">
-
-                                    <!-- 1행 -->
-                                    <div class="hr011-field-card">
-                                        <label for="dev_nm">성명</label>
-                                    </div>
-                                    <div class="hr011-field-card">
-                                        <input type="text" id="dev_nm" class="wp100">
-                                    </div>
-                                    <div class="hr011-field-card"></div>
-                                    <div class="hr011-field-card">
-                                        <label for="email">이메일</label>
-                                    </div>
-                                    <div class="hr011-field-card">
-                                        <input type="email" id="email" class="wp100">
+                                    <div class="hr011-field-card hr011-field-card--summary-dup">
+                                        <label for="avail_dt">투입 가능 시점 (선택)</label>
+                                        <input type="date" id="avail_dt" class="wp100">
                                     </div>
 
-                                    <!-- 2행 -->
                                     <div class="hr011-field-card">
-                                        <label for="select_dev_typ">구분</label>
-                                    </div>
-                                    <div class="hr011-field-card">
-                                        <select id="select_dev_typ" class="wp100"></select>
-                                    </div>
-                                    <div class="hr011-field-card"></div>
-                                    <div class="hr011-field-card">
-                                        <label for="select_sido_cd">거주지역</label>
+                                        <label for="select_ctrt_typ">계약형태</label>
+                                        <select id="select_ctrt_typ" class="wp100"></select>
                                     </div>
                                     <div class="hr011-field-card">
-                                        <select id="select_sido_cd" class="wp100"></select>
-                                    </div>
-
-                                    <!-- 3행 -->
-                                    <div class="hr011-field-card">
-                                        <label for="brdt">생년월일</label>
+                                        <label for="select_work_md">근무가능형태</label>
+                                        <select id="select_work_md" class="wp100"></select>
                                     </div>
                                     <div class="hr011-field-card">
-                                        <input type="date" id="brdt" class="wp100">
-                                    </div>
-                                    <div class="hr011-field-card"></div>
-                                    <!-- 주 개발언어 영역 -->
-                                    <div class="hr011-field-card">
-                                        <label for="main_lang">주 개발언어</label>
-                                    </div>
-                                    <div class="hr011-field-card hr011-field-card--row2">
-                                        <div style="display: flex; align-items: center; justify-content: space-between;">
-                                            <span style="width: auto;">
-                                                <button type="button" class="btn btn-add-skill btn-main-lang-picker" id="btn_main_lang_picker">
-                                                    <img src="./images/common/btn_search_outlined.png" alt="기술 선택">
-                                                    주 개발언어 선택
-                                                </button>
-                                            </span>
-                                        </div>
-                                        <div class="tag-input-box">
-                                            <div class="tag-help"></div>
-                                            <ul class="tag-list" id="mainLangTagList" style="flex-wrap: nowrap;"></ul>
-                                        </div>
-                                    </div>
-
-                                    <!-- 4행 -->
-                                    <div class="hr011-field-card">
-                                        <label for="tel">연락처</label>
+                                        <label for="select_main_fld_cd">주요 분야</label>
+                                        <select id="select_main_fld_cd" class="wp100"></select>
                                     </div>
                                     <div class="hr011-field-card">
-                                        <input type="text" id="tel" class="wp100">
+                                        <label for="select_main_cust_cd">주요 고객사</label>
+                                        <select id="select_main_cust_cd" class="wp100"></select>
                                     </div>
-                                </div>
-                            </div>
-
-                            <!-- 다른 정보들은 뒤에서 나중에 수정할 것 (한 섹션에서 모든 데이터 처리할 것임) -->
-                            <div style="margin-top: 300px;"></div>
-                        </section>
-
-                        <!-- 2 STEP -->
-                        <section class="white-full hr011-section hr011-edit-sector hr011-edit-sector--full hr011-edit-profile-section" data-edit-step="contract">
-                            <div class="hr011-section-head">
-                                <div>
-                                    <h4>소속 및 계약정보</h4>
-                                </div>
-                            </div>
-                            <div class="hr011-basic-grid">
-                                <div class="hr011-field-card hr011-field-card--summary-dup">
-                                    <label for="avail_dt">투입 가능 시점 (선택)</label>
-                                    <input type="date" id="avail_dt" class="wp100">
-                                </div>
-
-                                <div class="hr011-field-card">
-                                    <label for="select_ctrt_typ">계약형태</label>
-                                    <select id="select_ctrt_typ" class="wp100"></select>
-                                </div>
-                                <div class="hr011-field-card">
-                                    <label for="select_work_md">근무가능형태</label>
-                                    <select id="select_work_md" class="wp100"></select>
-                                </div>
-                                <div class="hr011-field-card">
-                                    <label for="select_main_fld_cd">주요 분야</label>
-                                    <select id="select_main_fld_cd" class="wp100"></select>
-                                </div>
-                                <div class="hr011-field-card">
-                                    <label for="select_main_cust_cd">주요 고객사</label>
-                                    <select id="select_main_cust_cd" class="wp100"></select>
-                                </div>
-                                <div class="hr011-field-card">
-                                    <label for="select_kosa_grd_cd">KOSA 등급</label>
-                                    <select id="select_kosa_grd_cd" class="wp100"></select>
-                                </div>
-                                <div class="hr011-field-card hr011-field-card--readonly" style="grid-column: span 2">
-                                    <div class="hr011-grade-label-line">
-                                        <label>등급</label>
-                                        <button type="button" class="hr011-grade-help" aria-label="등급 기준 안내">
-                                            <img src="/icons/ico-support.png" alt="" aria-hidden="true">
-                                            <span class="hr011-grade-help__tooltip" role="tooltip">
+                                    <div class="hr011-field-card">
+                                        <label for="select_kosa_grd_cd">KOSA 등급</label>
+                                        <select id="select_kosa_grd_cd" class="wp100"></select>
+                                    </div>
+                                    <div class="hr011-field-card hr011-field-card--readonly" style="grid-column: span 2">
+                                        <div class="hr011-grade-label-line">
+                                            <label>등급</label>
+                                            <button type="button" class="hr011-grade-help" aria-label="등급 기준 안내">
+                                                <img src="/icons/ico-support.png" alt="" aria-hidden="true">
+                                                <span class="hr011-grade-help__tooltip" role="tooltip">
                                                 평가 점수 기준으로 등급이 산정됩니다.<br>
                                                 보유 기술 40점, 업무 태도 30점, 재계약 의사 20점, 단가 경쟁력 10점입니다.
                                             </span>
-                                        </button>
-                                    </div>
-                                    <div class="hr011-readonly-value">
-                                        <strong id="grade">-</strong>
-                                        <span id="score">0점</span>
-                                    </div>
-                                </div>
-                                <div class="hr011-field-card hr011-field-card--summary-dup" style="grid-column: span 3">
-                                    <label for="hope_rate_amt">희망단가</label>
-                                    <input type="text" id="hope_rate_amt" class="wp100" placeholder="0원">
-                                </div>
-                                <div class="hr011-field-card" style="grid-column: span 3">
-                                    <label for="edu_last">최종학력</label>
-                                    <input type="text" id="edu_last" class="wp100">
-                                </div>
-                                <div class="hr011-field-card hr011-field-card--summary-dup" style="grid-column: span 3">
-                                    <label>경력</label>
-                                    <div class="career-spin-wrap">
-                                        <!-- 년 -->
-                                        <div class="career-spin-field">
-                                            <label for="exp_yr_year"></label>
-                                            <input type="number" class="career-spin-input" id="exp_yr_year" min="0" max="99" step="1" value="0">
-                                            <div class="career-spin-buttons">
-                                                <button type="button" class="career-spin-btn" data-target="#exp_yr_year" data-step="1">▲</button>
-                                                <button type="button" class="career-spin-btn" data-target="#exp_yr_year" data-step="-1">▼</button>
-                                            </div>
+                                            </button>
                                         </div>
-                                        <span>년</span>
-                                        <!-- 개월 -->
-                                        <div class="career-spin-field">
-                                            <label for="exp_yr_month"></label>
-                                            <input type="number" class="career-spin-input" id="exp_yr_month" min="0" max="11" step="1" value="0">
-                                            <div class="career-spin-buttons">
-                                                <button type="button" class="career-spin-btn" data-target="#exp_yr_month" data-step="1">▲</button>
-                                                <button type="button" class="career-spin-btn" data-target="#exp_yr_month" data-step="-1">▼</button>
-                                            </div>
+                                        <div class="hr011-readonly-value">
+                                            <strong id="grade">-</strong>
+                                            <span id="score">0점</span>
                                         </div>
-                                        <span>개월</span>
-                                        <!-- 실제 DB 저장용 -->
-                                        <input type="hidden" id="exp_yr">
                                     </div>
-                                    <!-- 화면 표시용 -->
-                                    <!--<span id="exp_yr_text" class="career-exp-text"></span>-->
-                                </div>
+                                    <div class="hr011-field-card hr011-field-card--summary-dup" style="grid-column: span 3">
+                                        <label for="hope_rate_amt">희망단가</label>
+                                        <input type="text" id="hope_rate_amt" class="wp100" placeholder="0원">
+                                    </div>
+                                    <div class="hr011-field-card" style="grid-column: span 3">
+                                        <label for="edu_last">최종학력</label>
+                                        <input type="text" id="edu_last" class="wp100">
+                                    </div>
+                                    <div class="hr011-field-card hr011-field-card--summary-dup" style="grid-column: span 3">
+                                        <label>경력</label>
+                                        <div class="career-spin-wrap">
+                                            <!-- 년 -->
+                                            <div class="career-spin-field">
+                                                <label for="exp_yr_year"></label>
+                                                <input type="number" class="career-spin-input" id="exp_yr_year" min="0" max="99" step="1" value="0">
+                                                <div class="career-spin-buttons">
+                                                    <button type="button" class="career-spin-btn" data-target="#exp_yr_year" data-step="1">▲</button>
+                                                    <button type="button" class="career-spin-btn" data-target="#exp_yr_year" data-step="-1">▼</button>
+                                                </div>
+                                            </div>
+                                            <span>년</span>
+                                            <!-- 개월 -->
+                                            <div class="career-spin-field">
+                                                <label for="exp_yr_month"></label>
+                                                <input type="number" class="career-spin-input" id="exp_yr_month" min="0" max="11" step="1" value="0">
+                                                <div class="career-spin-buttons">
+                                                    <button type="button" class="career-spin-btn" data-target="#exp_yr_month" data-step="1">▲</button>
+                                                    <button type="button" class="career-spin-btn" data-target="#exp_yr_month" data-step="-1">▼</button>
+                                                </div>
+                                            </div>
+                                            <span>개월</span>
+                                            <!-- 실제 DB 저장용 -->
+                                            <input type="hidden" id="exp_yr">
+                                        </div>
+                                        <!-- 화면 표시용 -->
+                                        <!--<span id="exp_yr_text" class="career-exp-text"></span>-->
+                                    </div>
 
-                                <div class="hr011-field-card hr011-field-card--span2">
-                                    <label for="cert_txt">보유 자격증</label>
-                                    <textarea id="cert_txt" rows="3" class="wp100"></textarea>
+                                    <div class="hr011-field-card hr011-field-card--span2">
+                                        <label for="cert_txt">보유 자격증</label>
+                                        <textarea id="cert_txt" rows="3" class="wp100"></textarea>
+                                    </div>
+                                    <div class="hr011-field-card" style="grid-column: span 3">
+                                        <label for="org_nm">소속사</label>
+                                        <input type="text" id="org_nm" class="wp100">
+                                    </div>
+                                    <div class="hr011-field-card">
+                                        <label for="select_biz_typ">사업자유형</label>
+                                        <select id="select_biz_typ" class="wp100"></select>
+                                    </div>
+                                    <div class="hr011-field-card">
+                                        <label for="st_dt">계약시작일</label>
+                                        <input type="date" id="st_dt" class="wp100">
+                                    </div>
+                                    <div class="hr011-field-card">
+                                        <label for="ed_dt">계약종료일</label>
+                                        <input type="date" id="ed_dt" class="wp100">
+                                    </div>
+                                    <div class="hr011-field-card" style="grid-column: span 3">
+                                        <label for="amt">계약금액</label>
+                                        <input type="text" id="amt" class="wp100">
+                                    </div>
+                                    <div class="hr011-field-card hr011-field-card--span2">
+                                        <label for="remark">비고</label>
+                                        <textarea id="remark" rows="3" class="wp100"></textarea>
+                                    </div>
                                 </div>
-                                <div class="hr011-field-card" style="grid-column: span 3">
-                                    <label for="org_nm">소속사</label>
-                                    <input type="text" id="org_nm" class="wp100">
-                                </div>
-                                <div class="hr011-field-card">
-                                    <label for="select_biz_typ">사업자유형</label>
-                                    <select id="select_biz_typ" class="wp100"></select>
-                                </div>
-                                <div class="hr011-field-card">
-                                    <label for="st_dt">계약시작일</label>
-                                    <input type="date" id="st_dt" class="wp100">
-                                </div>
-                                <div class="hr011-field-card">
-                                    <label for="ed_dt">계약종료일</label>
-                                    <input type="date" id="ed_dt" class="wp100">
-                                </div>
-                                <div class="hr011-field-card" style="grid-column: span 3">
-                                    <label for="amt">계약금액</label>
-                                    <input type="text" id="amt" class="wp100">
-                                </div>
-                                <div class="hr011-field-card hr011-field-card--span2">
-                                    <label for="remark">비고</label>
-                                    <textarea id="remark" rows="3" class="wp100"></textarea>
-                                </div>
-                            </div>
-                        </section>
+                            </section>
 
-                        <!-- 3 STEP -->
-                        <section class="white-full hr011-section hr011-edit-sector hr011-edit-sector--full" data-edit-step="skill">
-                            <div class="hr011-section-head">
-                                <div>
-                                    <h4>보유역량 및 숙련도</h4>
-<!--                                    <p>기존 보유역량/숙련도 탭을 한 화면에서 이어서 볼 수 있게 구성했습니다.</p>-->
-                                </div>
-                            </div>
-                            <div class="hr011-section-body">
-                                <th:block th:replace="~{views/hr010/hr012 :: tab2Content}"></th:block>
-                            </div>
-                        </section>
+                            <!-- 영역 부분선 -->
+                            <div class="section-line"></div>
 
-                        <section class="white-full hr011-section hr011-edit-sector hr011-edit-sector--full" data-edit-step="project">
-                            <div class="hr011-section-head">
-                                <div>
-                                    <h4>프로젝트 이력</h4>
-<!--                                    <p>프로젝트 경험과 참여 내용을 상세 페이지 안에서 바로 관리할 수 있습니다.</p>-->
+                            <!-- 3 STEP -->
+                            <section class="white-full hr011-section hr011-edit-sector hr011-edit-sector--full" data-edit-step="contract">
+                                <div class="hr011-section-head">
+                                    <div>
+                                        <h4>소속 및 계약정보</h4>
+                                    </div>
                                 </div>
-                                <div class="hr011-section-head-actions">
-                                    <button type="button" class="btn hr011-section-add-btn" id="hr011QuickAddProjectBtn">+ 프로젝트 추가</button>
-                                    <button type="button" class="btn hr011-section-remove-btn" id="hr011QuickRemoveProjectBtn">- 프로젝트 제거</button>
+                                <div class="hr011-section-body">
+                                    <th:block th:replace="~{views/hr010/hr012 :: tab2Content}"></th:block>
                                 </div>
-                            </div>
-                            <div class="hr011-section-body">
-                                <th:block th:replace="~{views/hr010/hr013 :: tab3Content}"></th:block>
-                            </div>
-                        </section>
+                            </section>
 
-                        <section class="white-full hr011-section hr011-edit-sector hr011-edit-sector--full" data-edit-step="eval-risk">
-                            <div class="hr011-section-head">
-                                <div>
-                                    <h4>평가 및 리스크</h4>
-<!--                                    <p>프로젝트별 평가와 리스크 정보를 한 화면에서 확인하고 수정합니다.</p>-->
-                                </div>
-                            </div>
-                            <div class="hr011-section-body">
-                                <th:block th:replace="~{views/hr010/hr014 :: tab4Content}"></th:block>
-                            </div>
-                        </section>
+                            <!-- 영역 부분선 -->
+                            <div class="section-line"></div>
 
-                        <!-- ★ [수정/등록할 때만 보임] ?? -->
-                        <div class="hr011-edit-wizard-controls">
-                            <button type="button" class="btn hr011-page-btn hr011-page-btn--ghost" id="hr011StepPrevBtn">이전</button>
-                            <div class="hr011-edit-wizard-progress">
-                                <strong id="hr011EditStepCurrent">1</strong>
-                                <span>/</span>
-                                <span id="hr011EditStepTotal">5</span>
+                            <!-- 4 STEP -->
+                            <section class="white-full hr011-section hr011-edit-sector hr011-edit-sector--full" data-edit-step="project">
+                                <div class="hr011-section-head">
+                                    <div>
+                                        <h4>프로젝트 이력</h4>
+                                    </div>
+                                    <div class="hr011-section-head-actions">
+                                        <button type="button" class="btn hr011-section-add-btn" id="hr011QuickAddProjectBtn">+ 프로젝트 추가</button>
+                                        <button type="button" class="btn hr011-section-remove-btn" id="hr011QuickRemoveProjectBtn">- 프로젝트 제거</button>
+                                    </div>
+                                </div>
+                                <div class="hr011-section-body">
+                                    <th:block th:replace="~{views/hr010/hr013 :: tab3Content}"></th:block>
+                                </div>
+                            </section>
+
+                            <!-- 영역 부분선 -->
+                            <div class="section-line"></div>
+
+                            <!-- 5 STEP -->
+                            <section class="white-full hr011-section hr011-edit-sector hr011-edit-sector--full" data-edit-step="eval-risk">
+                                <div class="hr011-section-head">
+                                    <div>
+                                        <h4>평가 및 리스크</h4>
+                                    </div>
+                                </div>
+                                <div class="hr011-section-body">
+                                    <th:block th:replace="~{views/hr010/hr014 :: tab4Content}"></th:block>
+                                </div>
+                            </section>
+
+                            <!-- ★ [수정/등록할 때만 보임] ?? -->
+                            <div class="hr011-edit-wizard-controls">
+                                <button type="button" class="btn hr011-page-btn hr011-page-btn--ghost" id="hr011StepPrevBtn">이전</button>
+                                <div class="hr011-edit-wizard-progress">
+                                    <strong id="hr011EditStepCurrent">1</strong>
+                                    <span>/</span>
+                                    <span id="hr011EditStepTotal">5</span>
+                                </div>
+                                <button type="button" class="btn hr011-page-btn hr011-page-btn--primary" id="hr011StepNextBtn">다음</button>
                             </div>
-                            <button type="button" class="btn hr011-page-btn hr011-page-btn--primary" id="hr011StepNextBtn">다음</button>
                         </div>
                     </div>
                 </div>
