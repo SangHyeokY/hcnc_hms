@@ -1364,11 +1364,10 @@ button.btn.btn-add-skill,
 }
 
 .tag-input-box {
-  /*position: absolute;*/
   display: flex;
+  flex-direction: column;
   flex-wrap: wrap;
-  gap: 6px;
-  border-radius: 4px;
+  gap: 8px;
   max-width: 100%;
 }
 
@@ -2423,6 +2422,8 @@ button.btn.btn-add-skill,
   letter-spacing: 0;
   color: #FD323A;
   height: 18px;
+  position: absolute;
+  top: 59px;
 }
 
 .hr011-field-card.hr011-skill-card {bottom: 9px;}
