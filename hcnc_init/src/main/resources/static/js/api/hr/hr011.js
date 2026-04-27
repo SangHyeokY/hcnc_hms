@@ -1292,13 +1292,13 @@ async function initHr011DetailPage() {
     setHr011Mode("view", { silent: true });
 
     await Promise.all([
-        loadHr011MainSelect("select_dev_typ", "DEV_TYP", hr011MainSelectMaps.devTyp),
-        loadHr011MainSelect("select_work_md", "WORK_MD", hr011MainSelectMaps.workMd),
-        loadHr011MainSelect("select_ctrt_typ", "CTRT_TYP", hr011MainSelectMaps.ctrtTyp),
-        loadHr011MainSelect("select_kosa_grd_cd", "KOSA_GRD_CD", hr011MainSelectMaps.kosa),
-        loadHr011MainSelect("select_main_fld_cd", "MAIN_FLD_CD", hr011MainSelectMaps.mainFld),
-        loadHr011MainSelect("select_main_cust_cd", "MAIN_CUST_CD", hr011MainSelectMaps.mainCust),
-        loadHr011MainSelect("select_sido_cd", "SIDO_CD", hr011MainSelectMaps.sido)
+        loadHr011MainSelect("select_dev_typ", "DEV_TYP", hr011MainSelectMaps.devTyp, "프리랜서 / 직원"),
+        loadHr011MainSelect("select_work_md", "WORK_MD", hr011MainSelectMaps.workMd, "근무형태"),
+        loadHr011MainSelect("select_ctrt_typ", "CTRT_TYP", hr011MainSelectMaps.ctrtTyp, "계약유형"),
+        loadHr011MainSelect("select_kosa_grd_cd", "KOSA_GRD_CD", hr011MainSelectMaps.kosa, "KOSA 등급"),
+        loadHr011MainSelect("select_main_fld_cd", "MAIN_FLD_CD", hr011MainSelectMaps.mainFld, "주요분야"),
+        loadHr011MainSelect("select_main_cust_cd", "MAIN_CUST_CD", hr011MainSelectMaps.mainCust, "고객사"),
+        loadHr011MainSelect("select_sido_cd", "SIDO_CD", hr011MainSelectMaps.sido, "거주지역")
     ]);
 
     if (!devId && isInsertRequest) {
@@ -1358,7 +1358,8 @@ function applyHr011InsertDefaults() {
 
     $("#dev_id").val("");
     $("#dev_nm").val("");
-    $("#select_dev_typ").val(defaultDevTyp);
+    // $("#select_dev_typ").val(defaultDevTyp);
+    $("#select_dev_typ").val("");
     $("#brdt").val("");
     $("#tel").val("");
     $("#email").val("");
@@ -1386,16 +1387,21 @@ function applyHr011InsertDefaults() {
     hr011RefProjectRows = [];
     hr011RefProjectEvalCache.clear();
     clearHr011Form();
-
     scheduleHr011ReadOnlyFields();
     renderHr011EditMiniProfile();
 }
 
 // 메인 폼용 공통코드 select를 불러온다.
-function loadHr011MainSelect(selectId, grpCd, mapRef) {
+function loadHr011MainSelect(selectId, grpCd, mapRef, placeholder) {
     return new Promise((resolve) => {
         setComCode(selectId, grpCd, "", "cd", "cd_nm", function () {
-            $("#" + selectId).find("option").each(function () {
+            const $select = $("#" + selectId);
+            // placeholder 추가
+            if (placeholder) {
+                $select.prepend(`<option value="">${placeholder} 선택</option>`);
+            }
+            // map 세팅
+            $select.find("option").each(function () {
                 if (this.value) {
                     mapRef[this.value] = $(this).text();
                 }
@@ -4865,7 +4871,7 @@ if (excelBtn) {
  *********************************************************/
 // 네비게이션 바
 const HR011_STEP_CONFIG = [
-    { key: "profile", label: "기본 인적사항", className: "hr011-edit-step-btn--profile" },
+    { key: "profile", label: "기본 프로필", className: "hr011-edit-step-btn--profile" },
     { key: "contract", label: "소속 및 계약정보", className: "hr011-edit-step-btn--contract" },
     { key: "skill", label: "보유역량 및 숙련도", className: "hr011-edit-step-btn--skill" },
     { key: "project", label: "프로젝트 이력", className: "hr011-edit-step-btn--project" },
@@ -4881,25 +4887,16 @@ let hr011NavRaf = null;
  *********************************************************/
 const stepFields = {
 
-    // 1. 기본 인적사항
+    // 1. 기본 프로필
     profile: [
-        "#dev_nm"
-        , "#select_dev_typ"
-        , "#tel"
-        , "#select_sido_cd"
-        // , "#avail_dt"
-        , "#brdt"
-        , "#select_ctrt_typ"
-        , "#select_work_md"
-        , "#select_main_fld_cd"
-        , "#select_main_cust_cd"
-        , "#select_kosa_grd_cd"
-        , "#email"
-        , "#hope_rate_amt"
-        , "#edu_last"
-        , "#exp_yr_year"
-        , "#exp_yr_month"
-        // , "#cert_txt"
+        "#dev_nm" // 성명
+        , "#email" // 이메일
+        , "#select_dev_typ" // 구분
+        , "#select_sido_cd" // 거주지역
+        , "#brdt" // 생년월일
+        , "#tel" // 연락처
+
+
     ],
 
     // 2. 소속 및 계약정보
@@ -4910,6 +4907,17 @@ const stepFields = {
         , "#ed_dt"
         , "#amt"
         // , "#remark"
+        // , "#avail_dt" // 투입가능시점
+        , "#select_ctrt_typ" // 계약유형
+        , "#select_work_md" // 근무형태
+        , "#hope_rate_amt" // 희망단가
+        , "#edu_last" // 최종학력
+        , "#exp_yr_year" // 경력(년)
+        , "#exp_yr_month" // 경력(월)
+        // , "#cert_txt"
+        , "#select_main_fld_cd" // 주요분야
+        , "#select_main_cust_cd" // 주요고객사
+        , "#select_kosa_grd_cd" // KOSA등급
     ],
 
     // 3. 보유역량 및 숙련도

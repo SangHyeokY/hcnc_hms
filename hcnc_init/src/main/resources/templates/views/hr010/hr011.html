@@ -277,10 +277,13 @@
                                         <div class="profile-area" tabindex="0">
                                             <img id="dev_img" src="" alt="profile" />
 
-                                            <!--<div class="re-upload-image"></div>-->
-
-                                            <!-- 수정 할 것 -->
-                                            <div id="upload-btn"></div>
+                                            <!-- 내부 문구  -->
+                                            <div class="none-img-text">
+                                                <!--<div class="re-upload-image"></div>-->
+                                                <div id="upload-btn"></div>
+                                                <div class="tit">이미지 선택</div>
+                                                <div class="sub-tit">JPG, PNG (Max:2MB)</div>
+                                            </div>
 
                                             <svg class="border-svg" viewBox="0 0 218 280" preserveAspectRatio="none">
                                                 <rect
@@ -300,129 +303,76 @@
                                 </div>
                                 <!-- ★ [수정/등록할 때만 보임] 입력 영역 -->
                                 <div class="hr011-basic-grid">
+
+                                    <!-- 1행 -->
                                     <div class="hr011-field-card">
                                         <label for="dev_nm">성명</label>
+                                    </div>
+                                    <div class="hr011-field-card">
                                         <input type="text" id="dev_nm" class="wp100">
                                     </div>
+                                    <div class="hr011-field-card"></div>
                                     <div class="hr011-field-card">
-                                        <label for="select_dev_typ">구분</label>
-                                        <select id="select_dev_typ" class="wp100"></select>
-                                    </div>
-                                    <div class="hr011-field-card">
-                                        <label for="tel">연락처</label>
-                                        <input type="text" id="tel" class="wp100">
-                                    </div>
-                                    <div class="hr011-field-card">
-                                        <label for="select_sido_cd">거주지역</label>
-                                        <select id="select_sido_cd" class="wp100"></select>
-                                    </div>
-                                    <div class="hr011-field-card hr011-field-card--summary-dup">
-                                        <label for="avail_dt">투입 가능 시점 (선택)</label>
-                                        <input type="date" id="avail_dt" class="wp100">
-                                    </div>
-                                    <div class="hr011-field-card">
-                                        <label for="brdt">생년월일</label>
-                                        <input type="date" id="brdt" class="wp100">
-                                    </div>
-                                    <div class="hr011-field-card">
-                                        <label for="select_ctrt_typ">계약형태</label>
-                                        <select id="select_ctrt_typ" class="wp100"></select>
-                                    </div>
-                                    <div class="hr011-field-card">
-                                        <label for="select_work_md">근무가능형태</label>
-                                        <select id="select_work_md" class="wp100"></select>
-                                    </div>
-                                    <div class="hr011-field-card">
-                                        <label for="select_main_fld_cd">주요 분야</label>
-                                        <select id="select_main_fld_cd" class="wp100"></select>
-                                    </div>
-                                    <div class="hr011-field-card">
-                                        <label for="select_main_cust_cd">주요 고객사</label>
-                                        <select id="select_main_cust_cd" class="wp100"></select>
-                                    </div>
-                                    <div class="hr011-field-card">
-                                        <label for="select_kosa_grd_cd">KOSA 등급</label>
-                                        <select id="select_kosa_grd_cd" class="wp100"></select>
-                                    </div>
-                                    <div class="hr011-field-card hr011-field-card--readonly" style="grid-column: span 2">
-                                        <div class="hr011-grade-label-line">
-                                            <label>등급</label>
-                                            <button type="button" class="hr011-grade-help" aria-label="등급 기준 안내">
-                                                <img src="/icons/ico-support.png" alt="" aria-hidden="true">
-                                                <span class="hr011-grade-help__tooltip" role="tooltip">
-                                                평가 점수 기준으로 등급이 산정됩니다.<br>
-                                                보유 기술 40점, 업무 태도 30점, 재계약 의사 20점, 단가 경쟁력 10점입니다.
-                                            </span>
-                                            </button>
-                                        </div>
-                                        <div class="hr011-readonly-value">
-                                            <strong id="grade">-</strong>
-                                            <span id="score">0점</span>
-                                        </div>
-                                    </div>
-                                    <div class="hr011-field-card" style="grid-column: span 3">
                                         <label for="email">이메일</label>
+                                    </div>
+                                    <div class="hr011-field-card">
                                         <input type="email" id="email" class="wp100">
                                     </div>
-                                    <div class="hr011-field-card hr011-field-card--summary-dup" style="grid-column: span 3">
-                                        <label for="hope_rate_amt">희망단가</label>
-                                        <input type="text" id="hope_rate_amt" class="wp100" placeholder="0원">
+
+                                    <!-- 2행 -->
+                                    <div class="hr011-field-card">
+                                        <label for="select_dev_typ">구분</label>
                                     </div>
-                                    <div class="hr011-field-card" style="grid-column: span 3">
-                                        <label for="edu_last">최종학력</label>
-                                        <input type="text" id="edu_last" class="wp100">
+                                    <div class="hr011-field-card">
+                                        <select id="select_dev_typ" class="wp100"></select>
                                     </div>
-                                    <div class="hr011-field-card hr011-field-card--summary-dup" style="grid-column: span 3">
-                                        <label>경력</label>
-                                        <div class="career-spin-wrap">
-                                            <!-- 년 -->
-                                            <div class="career-spin-field">
-                                                <label for="exp_yr_year"></label>
-                                                <input type="number" class="career-spin-input" id="exp_yr_year" min="0" max="99" step="1" value="0">
-                                                <div class="career-spin-buttons">
-                                                    <button type="button" class="career-spin-btn" data-target="#exp_yr_year" data-step="1">▲</button>
-                                                    <button type="button" class="career-spin-btn" data-target="#exp_yr_year" data-step="-1">▼</button>
-                                                </div>
-                                            </div>
-                                            <span>년</span>
-                                            <!-- 개월 -->
-                                            <div class="career-spin-field">
-                                                <label for="exp_yr_month"></label>
-                                                <input type="number" class="career-spin-input" id="exp_yr_month" min="0" max="11" step="1" value="0">
-                                                <div class="career-spin-buttons">
-                                                    <button type="button" class="career-spin-btn" data-target="#exp_yr_month" data-step="1">▲</button>
-                                                    <button type="button" class="career-spin-btn" data-target="#exp_yr_month" data-step="-1">▼</button>
-                                                </div>
-                                            </div>
-                                            <span>개월</span>
-                                            <!-- 실제 DB 저장용 -->
-                                            <input type="hidden" id="exp_yr">
-                                        </div>
-                                        <!-- 화면 표시용 -->
-                                        <!--<span id="exp_yr_text" class="career-exp-text"></span>-->
+                                    <div class="hr011-field-card"></div>
+                                    <div class="hr011-field-card">
+                                        <label for="select_sido_cd">거주지역</label>
                                     </div>
+                                    <div class="hr011-field-card">
+                                        <select id="select_sido_cd" class="wp100"></select>
+                                    </div>
+
+                                    <!-- 3행 -->
+                                    <div class="hr011-field-card">
+                                        <label for="brdt">생년월일</label>
+                                    </div>
+                                    <div class="hr011-field-card">
+                                        <input type="date" id="brdt" class="wp100">
+                                    </div>
+                                    <div class="hr011-field-card"></div>
                                     <!-- 주 개발언어 영역 -->
-                                    <div class="hr011-field-card hr011-field-card--span2">
+                                    <div class="hr011-field-card">
+                                        <label for="main_lang">주 개발언어</label>
+                                    </div>
+                                    <div class="hr011-field-card hr011-field-card--row2">
                                         <div style="display: flex; align-items: center; justify-content: space-between;">
-                                            <label for="main_lang">주 개발언어</label>
                                             <span style="width: auto;">
-                                            <button type="button" class="btn btn-add-skill btn-main-lang-picker" id="btn_main_lang_picker">
-                                                <img src="./images/common/btn_search_outlined.png" alt="기술 선택">
-                                                주 개발언어 선택
-                                            </button>
-                                        </span>
+                                                <button type="button" class="btn btn-add-skill btn-main-lang-picker" id="btn_main_lang_picker">
+                                                    <img src="./images/common/btn_search_outlined.png" alt="기술 선택">
+                                                    주 개발언어 선택
+                                                </button>
+                                            </span>
                                         </div>
                                         <div class="tag-input-box">
                                             <div class="tag-help"></div>
                                             <ul class="tag-list" id="mainLangTagList" style="flex-wrap: nowrap;"></ul>
                                         </div>
                                     </div>
-                                    <div class="hr011-field-card hr011-field-card--span2">
-                                        <label for="cert_txt">보유 자격증</label>
-                                        <textarea id="cert_txt" rows="3" class="wp100"></textarea>
+
+                                    <!-- 4행 -->
+                                    <div class="hr011-field-card">
+                                        <label for="tel">연락처</label>
+                                    </div>
+                                    <div class="hr011-field-card">
+                                        <input type="text" id="tel" class="wp100">
                                     </div>
                                 </div>
                             </div>
+
+                            <!-- 다른 정보들은 뒤에서 나중에 수정할 것 (한 섹션에서 모든 데이터 처리할 것임) -->
+                            <div style="margin-top: 300px;"></div>
                         </section>
 
                         <!-- 2 STEP -->
@@ -433,6 +383,89 @@
                                 </div>
                             </div>
                             <div class="hr011-basic-grid">
+                                <div class="hr011-field-card hr011-field-card--summary-dup">
+                                    <label for="avail_dt">투입 가능 시점 (선택)</label>
+                                    <input type="date" id="avail_dt" class="wp100">
+                                </div>
+
+                                <div class="hr011-field-card">
+                                    <label for="select_ctrt_typ">계약형태</label>
+                                    <select id="select_ctrt_typ" class="wp100"></select>
+                                </div>
+                                <div class="hr011-field-card">
+                                    <label for="select_work_md">근무가능형태</label>
+                                    <select id="select_work_md" class="wp100"></select>
+                                </div>
+                                <div class="hr011-field-card">
+                                    <label for="select_main_fld_cd">주요 분야</label>
+                                    <select id="select_main_fld_cd" class="wp100"></select>
+                                </div>
+                                <div class="hr011-field-card">
+                                    <label for="select_main_cust_cd">주요 고객사</label>
+                                    <select id="select_main_cust_cd" class="wp100"></select>
+                                </div>
+                                <div class="hr011-field-card">
+                                    <label for="select_kosa_grd_cd">KOSA 등급</label>
+                                    <select id="select_kosa_grd_cd" class="wp100"></select>
+                                </div>
+                                <div class="hr011-field-card hr011-field-card--readonly" style="grid-column: span 2">
+                                    <div class="hr011-grade-label-line">
+                                        <label>등급</label>
+                                        <button type="button" class="hr011-grade-help" aria-label="등급 기준 안내">
+                                            <img src="/icons/ico-support.png" alt="" aria-hidden="true">
+                                            <span class="hr011-grade-help__tooltip" role="tooltip">
+                                                평가 점수 기준으로 등급이 산정됩니다.<br>
+                                                보유 기술 40점, 업무 태도 30점, 재계약 의사 20점, 단가 경쟁력 10점입니다.
+                                            </span>
+                                        </button>
+                                    </div>
+                                    <div class="hr011-readonly-value">
+                                        <strong id="grade">-</strong>
+                                        <span id="score">0점</span>
+                                    </div>
+                                </div>
+                                <div class="hr011-field-card hr011-field-card--summary-dup" style="grid-column: span 3">
+                                    <label for="hope_rate_amt">희망단가</label>
+                                    <input type="text" id="hope_rate_amt" class="wp100" placeholder="0원">
+                                </div>
+                                <div class="hr011-field-card" style="grid-column: span 3">
+                                    <label for="edu_last">최종학력</label>
+                                    <input type="text" id="edu_last" class="wp100">
+                                </div>
+                                <div class="hr011-field-card hr011-field-card--summary-dup" style="grid-column: span 3">
+                                    <label>경력</label>
+                                    <div class="career-spin-wrap">
+                                        <!-- 년 -->
+                                        <div class="career-spin-field">
+                                            <label for="exp_yr_year"></label>
+                                            <input type="number" class="career-spin-input" id="exp_yr_year" min="0" max="99" step="1" value="0">
+                                            <div class="career-spin-buttons">
+                                                <button type="button" class="career-spin-btn" data-target="#exp_yr_year" data-step="1">▲</button>
+                                                <button type="button" class="career-spin-btn" data-target="#exp_yr_year" data-step="-1">▼</button>
+                                            </div>
+                                        </div>
+                                        <span>년</span>
+                                        <!-- 개월 -->
+                                        <div class="career-spin-field">
+                                            <label for="exp_yr_month"></label>
+                                            <input type="number" class="career-spin-input" id="exp_yr_month" min="0" max="11" step="1" value="0">
+                                            <div class="career-spin-buttons">
+                                                <button type="button" class="career-spin-btn" data-target="#exp_yr_month" data-step="1">▲</button>
+                                                <button type="button" class="career-spin-btn" data-target="#exp_yr_month" data-step="-1">▼</button>
+                                            </div>
+                                        </div>
+                                        <span>개월</span>
+                                        <!-- 실제 DB 저장용 -->
+                                        <input type="hidden" id="exp_yr">
+                                    </div>
+                                    <!-- 화면 표시용 -->
+                                    <!--<span id="exp_yr_text" class="career-exp-text"></span>-->
+                                </div>
+
+                                <div class="hr011-field-card hr011-field-card--span2">
+                                    <label for="cert_txt">보유 자격증</label>
+                                    <textarea id="cert_txt" rows="3" class="wp100"></textarea>
+                                </div>
                                 <div class="hr011-field-card" style="grid-column: span 3">
                                     <label for="org_nm">소속사</label>
                                     <input type="text" id="org_nm" class="wp100">
