@@ -15,6 +15,14 @@ var hr013ProjectPickerContextRow = null; // 어느 행에서 팝업 열었는지
 var hr013SelectedProjectCode = null;     // 사용자가 선택한 코드 1건
 
 var hr013Data = []; // 테이블 구조 분리
+var hr013Paging = {
+    page: 1,
+    size: 10,
+    total: 0
+};
+
+const $container = $("#TABLE_HR013_A");
+let hr013LastRenderedRows = [];
 
 function isHr013InprjYnY(value) {
     return String(value || "").trim().toUpperCase() === "Y";
@@ -41,10 +49,6 @@ window.initTab3 = function () {
     $(".btn-hr013-save").off("click").on("click", function () {
         saveHr013Row();
     });
-
-    $(".btn-tab3-new").off("click").on("click", function () {
-        openHr013Modal("new");
-    });
     $(".btn-tab3-edit").off("click").on("click", function () {
         const index = $(this).data("index");
         const row = hr013Data[index];
@@ -57,20 +61,20 @@ window.initTab3 = function () {
     $(".btn-tab3-add").off("click").on("click", function () {
         addHr013Row();
     });
-
     $("#write_hr013_inprj_yn").off("change").on("change", function () {
         applyInprjCustomerName($(this).val(), $("#write_hr013_cust_nm").val());
         syncHr013ProjectLinkUi($(this).val());
     });
-
     $("#write_hr013_cust_nm").off("input").on("input", function () {
         if ($("#write_hr013_inprj_yn").val() !== "Y") {
             lastNonInprjCustNm = $(this).val();
         }
     });
-
     $("#btn_hr013_project_link").off("click.hr013projectlink").on("click.hr013projectlink", function () {
         openHr013ProjectPicker(null);
+    });
+    $(document).on("click", ".btn-tab3-new", function () {
+        openHr013Modal("new");
     });
 
     // 역할/기술스택 공통코드는 테이블 formatter/editor에서 재사용하므로 캐시해 둔다.
@@ -941,13 +945,14 @@ function loadHr013TableData() {
         data: { dev_id: dev_id },
         success: function (res) {
             const dataArray = Array.isArray(res.list) ? res.list : [];
+            hr013OriginalData = dataArray.map(row => ({ ...row }));
             var normalized = dataArray.map(function (row) {
                 if (row.inprj_yn !== "Y") {
                     row._prev_cust_nm = row.cust_nm || "";
                 }
                 row.role_nm = normalizeJobValue(row.role_nm) || "";
                 row.job_cd = normalizeJobValue(row.job_cd) || "";
-                row.rate_amt = parseHr013RateAmountValue(row.rate_amt);
+                row.rate_amt = convertWonToMan(row.rate_amt);
                 row.skl_id_lst = normalizeHr013SkillRows(row.skl_id_lst, row.stack_txt);
                 row.stack_txt = getHr013SkillCsvForSave(row.skl_id_lst, row.stack_txt);
                 row.stack_txt_nm = getSkillLabelList(row.stack_txt);
@@ -992,7 +997,7 @@ function fillHr013Form(data) {
     applyInprjCustomerName(data.inprj_yn, data.cust_nm);
     syncHr013ProjectLinkUi(data.inprj_yn);
     $("#write_hr013_prj_nm").val(data.prj_nm || "");
-    $("#write_hr013_rate_amt").val(formatNumberInput(parseHr013RateAmountValue(data.rate_amt)));
+    $("#write_hr013_rate_amt").val(formatNumberInput(convertWonToMan(data.rate_amt)));
     $("#write_hr013_job_cd").val(data.job_cd || "");
     $("#write_hr013_alloc_pct").val(formatPercentInput(data.alloc_pct));
     $("#write_hr013_remark").val(data.remark || "");
@@ -1035,7 +1040,7 @@ function saveHr013Row() {
         ed_dt: normalizeDateForSave($("#write_hr013_ed_dt").val()),
         cust_nm: $("#write_hr013_cust_nm").val(),
         prj_nm: $("#write_hr013_prj_nm").val(),
-        rate_amt: parseHr013RateAmountValue($("#write_hr013_rate_amt").val()),
+        rate_amt: convertManToWon($("#write_hr013_rate_amt").val()),
         job_cd: $("#write_hr013_job_cd").val(),
         stack_txt: $("#write_hr013_stack_txt").val(),
         alloc_pct: $("#write_hr013_alloc_pct").val(),
@@ -1073,8 +1078,8 @@ function saveHr013Row() {
 // 당사 여부에 따라 고객사 자동 입력
 function applyInprjCustomerName(inprjYn, custNm) {
     if (inprjYn === "Y") {
-        if (custNm && custNm !== "HCNC") {
-            lastNonInprjCustNm = custNm;
+        if (inprjYn !== "Y") {
+            lastNonInprjCustNm = custNm || "";
         }
         $("#write_hr013_cust_nm").val("HCNC").prop("disabled", true);
         return;
@@ -1095,6 +1100,10 @@ function syncHr013ProjectLinkUi(inprjYn) {
 
 // 통합 저장 버튼에서 호출
 window.saveHr013TableData = function () {
+    if (!changedTabs.tab3) {
+        console.log("[Tab3] 저장할 프로젝트 데이터 없음 → [Skip]");
+        return Promise.resolve();
+    }
     return saveHr013InlineRows();
 };
 
@@ -1122,8 +1131,13 @@ function saveHr013InlineRows() {
             return;
         }
 
+        const original = hr013OriginalData.find(o => o.dev_prj_id === row.dev_prj_id);
+        if (!isHr013RowChanged(row, original)) {
+            return;
+        }
+
         var stackCsv = getHr013SkillCsvForSave(row.skl_id_lst, row.stack_txt);
-        var rateAmt = parseHr013RateAmountValue(row.rate_amt);
+        var rateAmt = convertManToWon(row.rate_amt);
         var custNm = row.cust_nm || "";
 
         if (row.inprj_yn === "Y") {
@@ -1163,11 +1177,8 @@ function saveHr013InlineRows() {
         );
     });
 
-    // 요청 없으면 바로 성공 처리
-    if (requests.length === 0) {
-        console.log("[Tab3] 저장할 프로젝트 데이터 없음 → [Skip]");
-        return Promise.resolve();
-    }
+    console.log(requests);
+    console.log(requests.length);
 
     // 전체 요청 실행
     return $.when.apply($, requests)
@@ -1187,6 +1198,25 @@ function saveHr013InlineRows() {
         });
 }
 
+// 데이터 변경 여부 판단
+function isHr013RowChanged(row, originalRow) {
+    if (!originalRow) return true; // 신규 row
+
+    return (
+        row.inprj_yn !== originalRow.inprj_yn ||
+        row.st_dt !== originalRow.st_dt ||
+        row.ed_dt !== originalRow.ed_dt ||
+        row.cust_nm !== originalRow.cust_nm ||
+        row.prj_nm !== originalRow.prj_nm ||
+        row.job_cd !== originalRow.job_cd ||
+        String(row.rate_amt) !== String(originalRow.rate_amt) ||
+        getHr013SkillCsvForSave(row.skl_id_lst, row.stack_txt) !==
+        getHr013SkillCsvForSave(originalRow.skl_id_lst, originalRow.stack_txt) ||
+        row.alloc_pct !== originalRow.alloc_pct ||
+        row.remark !== originalRow.remark
+    );
+}
+
 // 저장하기 전, 유효성 검사
 function validateHr013Rows(rows) {
     for (let row of rows) {
@@ -1195,12 +1225,12 @@ function validateHr013Rows(rows) {
         if (!row.cust_nm && row.inprj_yn !== "Y") return warnAlert("고객사");
         if (!row.prj_nm) return warnAlert("프로젝트명");
         if (!row.job_cd) return warnAlert("역할");
-        if (!row.rate_amt) return warnAlert("계약단가");
+        if (row.rate_amt === "" || row.rate_amt === null) return warnAlert("계약단가");
         const stackCsv = getHr013SkillCsvForSave(row.skl_id_lst, row.stack_txt);
         if (!stackCsv) return warnAlert("기술스택");
         if (!row.st_dt) return warnAlert("시작일");
         if (!row.ed_dt) return warnAlert("종료일");
-        if (!row.alloc_pct) return warnAlert("투입률");
+        if (row.alloc_pct === "" || row.alloc_pct === null) return warnAlert("투입률");
     }
     return true;
 }
@@ -1232,6 +1262,7 @@ function addHr013Row() {
         stack_txt: "",
         remark: ""
     });
+    changedTabs.tab3 = true;
     renderHr013Cards();
 }
 // 행 삭제
@@ -1241,6 +1272,7 @@ function removeHr013Row(index) {
         hr013DeletedIds.push(row.dev_prj_id);
     }
     hr013Data.splice(index, 1);
+    changedTabs.tab3 = true;
     renderHr013Cards();
 }
 /* ================================================= 임시 추가 ================================================= */
@@ -1480,11 +1512,24 @@ function percentageFormatter(cell) {
 function hr013AmountFormatter(cell) {
     var value = cell && typeof cell.getValue === "function" ? cell.getValue() : cell;
     var parsed = parseHr013RateAmountValue(value);
-    if (!parsed) {
+    if (parsed === "" || parsed === null) {
         return "-";
     }
-    return formatNumberInput(parsed);
+    return formatNumberInput(parsed) + "만원";
+}
 
+// 만원 → 원
+function convertManToWon(value) {
+    const num = parseHr013RateAmountValue(value);
+    if (!num) return "";
+    return String(Number(num) * 10000);
+}
+
+// 원 → 만원
+function convertWonToMan(value) {
+    const num = parseHr013RateAmountValue(value);
+    if (!num) return "";
+    return String(Math.floor(Number(num) / 10000));
 }
 
 // 날짜(테이블 표시)
@@ -1572,79 +1617,100 @@ function formatPercentInput(value) {
 }
 
 // 카드뷰 렌더 함수
-function renderHr013Cards() {
-    const $container = $("#TABLE_HR013_A");
+function renderHr013Cards(list) {
+    if (!Array.isArray(list)) {
+        list = hr013Data || [];
+    }
+
+    hr013LastRenderedRows = list.slice();
+    hr013Paging.total = hr013LastRenderedRows.length;
+    const totalPage = Math.ceil(hr013Paging.total / hr013Paging.size);
+
+    if (hr013Paging.page > totalPage) {
+        hr013Paging.page = totalPage || 1;
+    }
+
+    const pagedList = getPagedList(hr013LastRenderedRows);
+
     $container.empty();
 
-    if (!hr013Data.length) {
+    if (!pagedList.length) {
         $container.html('<div class="empty">데이터 없음</div>');
+        renderHr013Pager();
         return;
     }
 
-    const isReadOnly = window.hr010ReadOnly && !document.querySelector(".hr011-page.is-edit-mode");
-
-    const html = hr013Data.map((row, index) => {
+    const html = pagedList.map((row, index) => {
         const cust = hr013EscapeHtml(row.cust_nm || "-");
         const prj = hr013EscapeHtml(row.prj_nm || "-");
         const job = hr013EscapeHtml(getJobCodeMap()[row.job_cd] || "-");
 
         const rate = hr013AmountFormatter({ getValue: () => row.rate_amt });
-        const period = `${formatDateDisplay(row.st_dt)} ~ ${formatDateDisplay(row.ed_dt)}`;
+        const period = `${formatDateDisplay(row.st_dt)}<br>${formatDateDisplay(row.ed_dt)}`;
         const pct = formatPercentSafe(row.alloc_pct);
 
         const skills = hr013EscapeHtml(
             getHr013SkillLabelText(row.skl_id_lst || row.stack_txt)
         );
 
-        // 자사 여부
+        const remark = hr013EscapeHtml(row.remark || "-");
+
+        const isReadOnly = window.hr010ReadOnly && !document.querySelector(".hr011-page.is-edit-mode");
         const isInternal = String(row.inprj_yn).toUpperCase() === "Y";
 
         return `
             <div class="hr013-card ${isInternal ? "is-hcnc" : ""}" data-index="${index}">
                 
-                <div class="card-header">
-                    <div class="left">
-                        <span class="cust">${cust}</span>
-                        ${isInternal ? `<span class="badge">당사</span>` : ""}
-                    </div>
-                    <div class="right">
-                        ${!isReadOnly ? `
-                            <button class="btn-edit" data-index="${index}">수정</button>
-                            <button class="btn-delete" data-index="${index}">삭제</button>
+                <!-- 기존 grid 컬럼 그대로 -->
+                <div class="cust">
+                    ${!isReadOnly ? `
+                        <input type="checkbox" class="card-check" data-index="${index}" ${row._checked ? "checked" : ""}>
+                    ` : ""}
+                    ${cust}
+                </div>
+                <div class="prj">${prj}</div>
+                <div class="skills">${skills || "-"}</div>
+                <div class="job">${job}</div>
+                <div class="pct">${pct}</div>
+                <div class="period">${period}</div>
+                <div class="rate">${rate}</div>
+        
+                <!-- footer -->
+                <div class="card-footer">
+                    <div class="remark">${remark}</div>
+                    <div class="card-actions">
+                        ${isInternal && !isReadOnly ? `
+                            <button class="btn-eval" data-index="${index}">평가</button>
                         ` : ""}
                     </div>
                 </div>
-
-                <div class="card-title">${prj}</div>
-
-                <div class="card-body">
-                    <div><b>역할</b> ${job}</div>
-                    <div><b>단가</b> ${rate}</div>
-                    <div><b>기간</b> ${period}</div>
-                    <div><b>투입률</b> ${pct}</div>
-                </div>
-
-                <div class="card-skill">${skills || "-"}</div>
-
-                ${isInternal && !isReadOnly ? `
-                    <div class="card-footer">
-                        <button class="btn-eval" data-index="${index}">평가</button>
-                    </div>
-                ` : ""}
+        
             </div>
         `;
     }).join("");
 
     $container.html(html);
+    renderHr013Pager();
+
     bindHr013CardEvents();
     updateHr013TitleCount();
 }
+
+// 체크 박스 이벤트 처리
+$container.on("change.card", ".card-check", function () {
+    const index = $(this).data("index");
+    hr013Data[index]._checked = $(this).is(":checked");
+
+    $(this).closest(".hr013-card")
+        .toggleClass("selected", $(this).is(":checked"));
+});
 
 function bindHr013CardEvents() {
     const $container = $("#TABLE_HR013_A");
 
     $container.off(".card"); // 전체 네임스페이스 제거
 
+    // 버튼 기능 안하고 있음
     $container.on("click.card", ".btn-edit", function () {
         const index = $(this).data("index");
         openHr013RowEditor(hr013Data[index]);
@@ -1671,5 +1737,69 @@ function bindHr013CardEvents() {
 }
 
 function refreshHr013View() {
-    renderHr013Cards();
+    renderHr013Cards(hr013Data);
+}
+
+function renderHr013Pager() {
+    const totalPage = Math.ceil(hr013Paging.total / hr013Paging.size);
+    const $pager = $("#HR013_PAGER");
+
+    $pager.empty();
+
+    if (totalPage <= 1) return;
+
+    let html = `<div class="hr013-pager">`;
+
+    // 이전 버튼
+    html += `
+        <button class="hr013-page-btn" data-page="${hr013Paging.page - 1}" 
+            ${hr013Paging.page === 1 ? "disabled" : ""}>
+            ‹
+        </button>
+    `;
+
+    // 페이지 번호
+    for (let i = 1; i <= totalPage; i++) {
+        html += `
+            <button class="hr013-page-btn ${i === hr013Paging.page ? "active" : ""}" 
+                data-page="${i}">
+                ${i}
+            </button>
+        `;
+    }
+
+    // 다음 버튼
+    html += `
+        <button class="hr013-page-btn" data-page="${hr013Paging.page + 1}" 
+            ${hr013Paging.page === totalPage ? "disabled" : ""}>
+            ›
+        </button>
+    `;
+
+    html += `</div>`;
+
+    $pager.html(html);
+
+    bindHr013PagerEvent();
+}
+
+function bindHr013PagerEvent() {
+    $("#hr013-pager").off("click").on("click", ".hr013-page-btn", function () {
+        const page = Number($(this).data("page"));
+
+        if (!page || page < 1) return;
+
+        const totalPage = Math.ceil(hr013Paging.total / hr013Paging.size);
+        if (page > totalPage) return;
+
+        hr013Paging.page = page;
+
+        renderHr013Cards();
+    });
+}
+
+function getPagedList(list) {
+    const start = (hr013Paging.page - 1) * hr013Paging.size;
+    const end = start + hr013Paging.size;
+    return (list || []).slice(start, end);
 }

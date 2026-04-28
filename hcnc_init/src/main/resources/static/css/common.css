@@ -179,8 +179,9 @@ a.disable {background-color:#bababa !important; pointer-events: none;/*이벤트
 .ta-l {text-align:left !important;}
 .ta-c {text-align:center !important;}
 .ta-r {text-align:right !important;}
-.ta-r5 {text-align:right !important;}
-.ta-r10 {text-align:right !important;}
+
+/*.ta-r5 {text-align:right !important;}*/
+/*.ta-r10 {text-align:right !important;}*/
 
 /* Vertical-align */
 .va-t {vertical-align:top !important;}
