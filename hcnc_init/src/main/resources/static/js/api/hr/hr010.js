@@ -98,7 +98,6 @@ $(document).ready(async function () {
     }
 
     hideLoading();
-
     // console.log(hr010SourceRows[0]);
 });
 
@@ -911,58 +910,6 @@ function getHr010V2DashboardStats(list) {
     };
 }
 
-function renderHr010V2KpiCards(kpis, gradeRows = []) {
-    if (!Array.isArray(kpis) || !kpis.length) {
-        return `<div class="hr010v2-empty">표시할 KPI 데이터가 없습니다.</div>`;
-    }
-
-    const renderCard = item => {
-        const isTrendCard = item.kind === "trend";
-        const isDonutCard = item.kind === "donut";
-        const isTypeGradeCard = item.kind === "type-grade";
-        return `
-            <button type="button" class="hr010v2-kpi-card hr010v2-kpi-card--${item.tone} ${isTrendCard ? "hr010v2-kpi-card--trend" : ""} ${isDonutCard ? "hr010v2-kpi-card--donut" : ""} ${isTypeGradeCard ? "hr010v2-kpi-card--type-grade" : ""} js-hr010v2-nav" data-hr010-preset="${escapeHtml(encodeHr010NavigationPreset(item.preset))}">
-                <div class="hr010v2-kpi-card__main ${isTrendCard ? "hr010v2-kpi-card__main--trend" : ""} ${isTypeGradeCard ? "hr010v2-kpi-card__main--type-grade" : ""}">
-                    <div class="hr010v2-kpi-card__copy">
-                        <span class="hr010v2-kpi-card__label">${escapeHtml(item.label)}</span>
-                        <strong class="hr010v2-kpi-card__value">${escapeHtml(item.value)}</strong>
-                        ${isTypeGradeCard && item.meta ? `<span class="hr010v2-kpi-card__meta hr010v2-kpi-card__meta--compact">${escapeHtml(item.meta)}</span>` : ""}
-                    </div>
-                    ${isTrendCard ? `
-                        <div class="hr010v2-kpi-card__trend" aria-hidden="true">
-                            ${item.chartMarkup || ""}
-                        </div>
-                    ` : `
-                        <div class="hr010v2-kpi-card__visual ${isTypeGradeCard ? "hr010v2-kpi-card__visual--type-grade" : ""}" aria-hidden="true">
-                            <div class="hr010v2-kpi-card__spark">
-                                ${item.chartMarkup || ""}
-                            </div>
-                        </div>
-                    `}
-                </div>
-            </button>
-        `;
-    };
-
-    const groups = [
-        { title: "인력 현황", items: kpis.slice(0, 2) },
-        { title: "투입 가능성", items: kpis.slice(2, 4) }
-    ].filter(group => group.items.length);
-
-    return `
-        <div class="hr010v2-kpi-groups">
-            ${groups.map(group => `
-                <section class="hr010v2-kpi-group">
-                    <div class="hr010v2-kpi-group__title">${escapeHtml(group.title)}</div>
-                    <div class="hr010v2-kpi-group__cards">
-                        ${group.items.map(renderCard).join("")}
-                    </div>
-                </section>
-            `).join("")}
-        </div>
-    `;
-}
-
 function buildHr010V2RegistrationTrend(list, today) {
     const days = 7;
     const series = Array.from({ length: days }, () => 0);
@@ -988,53 +935,6 @@ function buildHr010V2RegistrationTrend(list, today) {
         deltaTone: delta > 0 ? "good" : delta < 0 ? "risk" : "info",
         deltaLabel: delta > 0 ? `+${delta}명` : delta < 0 ? `${delta}명` : "없음"
     };
-}
-
-function renderHr010V2KpiTrend(series, options = {}) {
-    const normalized = (Array.isArray(series) ? series : []).map(value => Number(value) || 0);
-    const safeSeries = normalized.length ? normalized : [0, 0];
-    const maxValue = Math.max(...safeSeries, 1);
-    const width = 100;
-    const height = 44;
-    const paddingX = 4;
-    const paddingY = 4;
-    const innerWidth = width - paddingX * 2;
-    const innerHeight = height - paddingY * 2;
-    const step = safeSeries.length > 1 ? innerWidth / (safeSeries.length - 1) : innerWidth;
-
-    const points = safeSeries.map((value, index) => {
-        const x = paddingX + (step * index);
-        const y = paddingY + innerHeight - ((value / maxValue) * innerHeight);
-        return { x, y };
-    });
-
-    const pathD = points
-        .map((point, index) => `${index === 0 ? "M" : "L"} ${point.x.toFixed(2)} ${point.y.toFixed(2)}`)
-        .join(" ");
-    const lastPoint = points[points.length - 1] || { x: width - paddingX, y: height / 2 };
-    const prevPoint = points[points.length - 2] || lastPoint;
-    const deltaTone = options.deltaTone || "info";
-    const deltaLabel = options.deltaLabel || "없음";
-    const noteLabel = options.noteLabel || "최근 7일 등록";
-
-    return `
-        <div class="hr010v2-kpi-mini hr010v2-kpi-mini--trend hr010v2-kpi-mini--trend-${deltaTone}">
-            <div class="hr010v2-kpi-mini__trend-head">
-                <span class="hr010v2-kpi-mini__trend-note">${escapeHtml(noteLabel)}</span>
-                <span class="hr010v2-kpi-mini__trend-chip hr010v2-kpi-mini__trend-chip--${deltaTone}">${escapeHtml(deltaLabel)}</span>
-            </div>
-            <svg class="hr010v2-kpi-trend hr010v2-kpi-trend--${options.tone || "blue"}" viewBox="0 0 100 44" preserveAspectRatio="none" aria-hidden="true">
-                <path class="hr010v2-kpi-trend__path" d="${pathD}" />
-                <path
-                    class="hr010v2-kpi-trend__arrow"
-                    d="M 0 0 L 6 0 L 6 6 L 0 6 Z"
-                    transform="translate(${Math.min(Math.max(lastPoint.x - 3, 6), 94)}, ${Math.min(Math.max(lastPoint.y - 3, 6), 38)}) rotate(45)"
-                />
-                <circle cx="${prevPoint.x.toFixed(2)}" cy="${prevPoint.y.toFixed(2)}" r="1.8" fill="currentColor" opacity="0.24"></circle>
-                <circle cx="${lastPoint.x.toFixed(2)}" cy="${lastPoint.y.toFixed(2)}" r="2.4" fill="currentColor"></circle>
-            </svg>
-        </div>
-    `;
 }
 
 function renderHr010V2KpiMiniDonut(segments, options = {}) {
@@ -1098,119 +998,119 @@ function renderHr010V2KpiMiniDonut(segments, options = {}) {
     `;
 }
 
-function renderHr010V2KpiMiniCompare(rows) {
-    const normalized = Array.isArray(rows) ? rows : [];
-    const maxValue = Math.max(...normalized.map(row => Number(row.value) || 0), 1);
+// function renderHr010V2KpiMiniCompare(rows) {
+//     const normalized = Array.isArray(rows) ? rows : [];
+//     const maxValue = Math.max(...normalized.map(row => Number(row.value) || 0), 1);
+//
+//     return `
+//         <div class="hr010v2-kpi-mini hr010v2-kpi-mini--compare">
+//             ${normalized.map(row => `
+//                 <div class="hr010v2-kpi-mini__compare-row hr010v2-kpi-mini__compare-row--${row.tone || "base"}">
+//                     <div class="hr010v2-kpi-mini__compare-head">
+//                         <span class="hr010v2-kpi-mini__compare-label">${escapeHtml(row.label)}</span>
+//                         <strong class="hr010v2-kpi-mini__compare-value">${escapeHtml(String(row.valueLabel ?? row.value ?? "-"))}</strong>
+//                     </div>
+//                     <span class="hr010v2-kpi-mini__compare-track">
+//                         <span class="hr010v2-kpi-mini__compare-fill" style="width:${((Number(row.value) || 0) / maxValue) * 100}%"></span>
+//                     </span>
+//                 </div>
+//             `).join("")}
+//         </div>
+//     `;
+// }
 
-    return `
-        <div class="hr010v2-kpi-mini hr010v2-kpi-mini--compare">
-            ${normalized.map(row => `
-                <div class="hr010v2-kpi-mini__compare-row hr010v2-kpi-mini__compare-row--${row.tone || "base"}">
-                    <div class="hr010v2-kpi-mini__compare-head">
-                        <span class="hr010v2-kpi-mini__compare-label">${escapeHtml(row.label)}</span>
-                        <strong class="hr010v2-kpi-mini__compare-value">${escapeHtml(String(row.valueLabel ?? row.value ?? "-"))}</strong>
-                    </div>
-                    <span class="hr010v2-kpi-mini__compare-track">
-                        <span class="hr010v2-kpi-mini__compare-fill" style="width:${((Number(row.value) || 0) / maxValue) * 100}%"></span>
-                    </span>
-                </div>
-            `).join("")}
-        </div>
-    `;
-}
-
-function renderHr010V2KpiMiniBreakdown(rows, options = {}) {
-    const normalized = Array.isArray(rows) ? rows : [];
-    const showSegmentLabels = Boolean(options.segmentLabels);
-    const segmentLabelPlacement = String(options.segmentLabelPlacement || "below").trim().toLowerCase();
-
-    if (!normalized.length) {
-        return `<div class="hr010v2-kpi-mini hr010v2-kpi-mini--empty">-</div>`;
-    }
-
-    const compact = Boolean(options.compact);
-    const caption = String(options.caption || "").trim();
-    const legendLabel = String(options.legendLabel || "").trim();
-    const legendItems = (Array.isArray(options.legendItems) ? options.legendItems : [])
-        .map(item => ({
-            tone: String(item.tone || "").trim().toLowerCase(),
-            label: String(item.label || "").trim()
-        }))
-        .filter(item => item.label);
-
-    return `
-        <div class="hr010v2-kpi-mini hr010v2-kpi-mini--breakdown ${compact ? "hr010v2-kpi-mini--breakdown-compact" : ""}">
-            ${caption ? `<div class="hr010v2-kpi-mini__breakdown-caption">${escapeHtml(caption)}</div>` : ""}
-            ${legendItems.length ? `
-                <div class="hr010v2-kpi-mini__breakdown-legend" role="list" aria-label="${escapeHtml(legendLabel || "등급 색상 안내")}">
-                    ${legendLabel ? `<span class="hr010v2-kpi-mini__breakdown-legend-label">${escapeHtml(legendLabel)}</span>` : ""}
-                    ${legendItems.map(item => `
-                        <span class="hr010v2-kpi-mini__breakdown-legend-item hr010v2-kpi-mini__breakdown-legend-item--${item.tone}" role="listitem">
-                            <span class="hr010v2-kpi-mini__breakdown-legend-dot" aria-hidden="true"></span>
-                            <span>${escapeHtml(item.label)}</span>
-                        </span>
-                    `).join("")}
-                </div>
-            ` : ""}
-            <div class="hr010v2-kpi-mini__breakdown-list">
-                ${normalized.map(row => {
-                    const segments = (Array.isArray(row.segments) ? row.segments : [])
-                        .map(segment => ({
-                            tone: segment.tone,
-                            label: segment.label,
-                            value: Number(segment.value) || 0,
-                            valueLabel: segment.valueLabel || formatHr010CountLabel(segment.value)
-                        }));
-                    const stackSegments = segments.filter(segment => segment.value > 0);
-                    const visibleSegments = stackSegments.length ? stackSegments : [];
-                    const totalValue = Number(row.value) || segments.reduce((sum, segment) => sum + segment.value, 0);
-                    const valueLabel = String(row.valueLabel || `${totalValue}명`);
-                    const rowClass = row.tone ? `hr010v2-kpi-mini__breakdown-row--${row.tone}` : "";
-
-                    return `
-                        <div
-                            class="hr010v2-kpi-mini__breakdown-row ${rowClass}"
-                            aria-label="${escapeHtml(`${row.label} ${valueLabel}`)}">
-                            <div class="hr010v2-kpi-mini__breakdown-head">
-                                <span class="hr010v2-kpi-mini__breakdown-label">${escapeHtml(String(row.label || "-"))}</span>
-                                <strong class="hr010v2-kpi-mini__breakdown-value">${escapeHtml(valueLabel)}</strong>
-                            </div>
-                            <div class="hr010v2-kpi-mini__breakdown-body ${showSegmentLabels && segmentLabelPlacement === "aside" ? "hr010v2-kpi-mini__breakdown-body--aside" : ""}">
-                                <div class="hr010v2-kpi-mini__breakdown-stack" aria-hidden="true">
-                                    ${stackSegments.length ? stackSegments.map(segment => `
-                                        <span class="hr010v2-kpi-mini__stack-segment hr010v2-kpi-mini__stack-segment--${segment.tone}" style="width:${totalValue ? (segment.value / totalValue) * 100 : 0}%"></span>
-                                    `).join("") : `<span class="hr010v2-kpi-mini__breakdown-empty"></span>`}
-                                </div>
-                                ${showSegmentLabels && segmentLabelPlacement === "aside" ? `
-                                    <div class="hr010v2-kpi-mini__breakdown-segment-labels" role="list" aria-label="${escapeHtml(`${row.label || ""} 등급 분해`) }">
-                                        ${visibleSegments.length ? visibleSegments.map(segment => `
-                                            <span class="hr010v2-kpi-mini__breakdown-segment-item hr010v2-kpi-mini__breakdown-segment-item--${segment.tone}" role="listitem">
-                                                <span class="hr010v2-kpi-mini__breakdown-segment-dot" aria-hidden="true"></span>
-                                                <span class="hr010v2-kpi-mini__breakdown-segment-label">${escapeHtml(String(segment.label || "-"))}</span>
-                                                <strong class="hr010v2-kpi-mini__breakdown-segment-value">${escapeHtml(String(segment.valueLabel || "0명"))}</strong>
-                                            </span>
-                                        `).join("") : `<span class="hr010v2-kpi-mini__breakdown-segment-item is-empty" role="listitem">구성 없음</span>`}
-                                    </div>
-                                ` : ""}
-                            </div>
-                            ${showSegmentLabels && segmentLabelPlacement !== "aside" ? `
-                                <div class="hr010v2-kpi-mini__breakdown-segment-labels" role="list" aria-label="${escapeHtml(`${row.label || ""} 등급 분해`) }">
-                                    ${visibleSegments.length ? visibleSegments.map(segment => `
-                                        <span class="hr010v2-kpi-mini__breakdown-segment-item hr010v2-kpi-mini__breakdown-segment-item--${segment.tone}" role="listitem">
-                                            <span class="hr010v2-kpi-mini__breakdown-segment-dot" aria-hidden="true"></span>
-                                            <span class="hr010v2-kpi-mini__breakdown-segment-label">${escapeHtml(String(segment.label || "-"))}</span>
-                                            <strong class="hr010v2-kpi-mini__breakdown-segment-value">${escapeHtml(String(segment.valueLabel || "0명"))}</strong>
-                                        </span>
-                                    `).join("") : `<span class="hr010v2-kpi-mini__breakdown-segment-item is-empty" role="listitem">구성 없음</span>`}
-                                </div>
-                            ` : ""}
-                        </div>
-                    `;
-                }).join("")}
-            </div>
-        </div>
-    `;
-}
+// function renderHr010V2KpiMiniBreakdown(rows, options = {}) {
+//     const normalized = Array.isArray(rows) ? rows : [];
+//     const showSegmentLabels = Boolean(options.segmentLabels);
+//     const segmentLabelPlacement = String(options.segmentLabelPlacement || "below").trim().toLowerCase();
+//
+//     if (!normalized.length) {
+//         return `<div class="hr010v2-kpi-mini hr010v2-kpi-mini--empty">-</div>`;
+//     }
+//
+//     const compact = Boolean(options.compact);
+//     const caption = String(options.caption || "").trim();
+//     const legendLabel = String(options.legendLabel || "").trim();
+//     const legendItems = (Array.isArray(options.legendItems) ? options.legendItems : [])
+//         .map(item => ({
+//             tone: String(item.tone || "").trim().toLowerCase(),
+//             label: String(item.label || "").trim()
+//         }))
+//         .filter(item => item.label);
+//
+//     return `
+//         <div class="hr010v2-kpi-mini hr010v2-kpi-mini--breakdown ${compact ? "hr010v2-kpi-mini--breakdown-compact" : ""}">
+//             ${caption ? `<div class="hr010v2-kpi-mini__breakdown-caption">${escapeHtml(caption)}</div>` : ""}
+//             ${legendItems.length ? `
+//                 <div class="hr010v2-kpi-mini__breakdown-legend" role="list" aria-label="${escapeHtml(legendLabel || "등급 색상 안내")}">
+//                     ${legendLabel ? `<span class="hr010v2-kpi-mini__breakdown-legend-label">${escapeHtml(legendLabel)}</span>` : ""}
+//                     ${legendItems.map(item => `
+//                         <span class="hr010v2-kpi-mini__breakdown-legend-item hr010v2-kpi-mini__breakdown-legend-item--${item.tone}" role="listitem">
+//                             <span class="hr010v2-kpi-mini__breakdown-legend-dot" aria-hidden="true"></span>
+//                             <span>${escapeHtml(item.label)}</span>
+//                         </span>
+//                     `).join("")}
+//                 </div>
+//             ` : ""}
+//             <div class="hr010v2-kpi-mini__breakdown-list">
+//                 ${normalized.map(row => {
+//                     const segments = (Array.isArray(row.segments) ? row.segments : [])
+//                         .map(segment => ({
+//                             tone: segment.tone,
+//                             label: segment.label,
+//                             value: Number(segment.value) || 0,
+//                             valueLabel: segment.valueLabel || formatHr010CountLabel(segment.value)
+//                         }));
+//                     const stackSegments = segments.filter(segment => segment.value > 0);
+//                     const visibleSegments = stackSegments.length ? stackSegments : [];
+//                     const totalValue = Number(row.value) || segments.reduce((sum, segment) => sum + segment.value, 0);
+//                     const valueLabel = String(row.valueLabel || `${totalValue}명`);
+//                     const rowClass = row.tone ? `hr010v2-kpi-mini__breakdown-row--${row.tone}` : "";
+//
+//                     return `
+//                         <div
+//                             class="hr010v2-kpi-mini__breakdown-row ${rowClass}"
+//                             aria-label="${escapeHtml(`${row.label} ${valueLabel}`)}">
+//                             <div class="hr010v2-kpi-mini__breakdown-head">
+//                                 <span class="hr010v2-kpi-mini__breakdown-label">${escapeHtml(String(row.label || "-"))}</span>
+//                                 <strong class="hr010v2-kpi-mini__breakdown-value">${escapeHtml(valueLabel)}</strong>
+//                             </div>
+//                             <div class="hr010v2-kpi-mini__breakdown-body ${showSegmentLabels && segmentLabelPlacement === "aside" ? "hr010v2-kpi-mini__breakdown-body--aside" : ""}">
+//                                 <div class="hr010v2-kpi-mini__breakdown-stack" aria-hidden="true">
+//                                     ${stackSegments.length ? stackSegments.map(segment => `
+//                                         <span class="hr010v2-kpi-mini__stack-segment hr010v2-kpi-mini__stack-segment--${segment.tone}" style="width:${totalValue ? (segment.value / totalValue) * 100 : 0}%"></span>
+//                                     `).join("") : `<span class="hr010v2-kpi-mini__breakdown-empty"></span>`}
+//                                 </div>
+//                                 ${showSegmentLabels && segmentLabelPlacement === "aside" ? `
+//                                     <div class="hr010v2-kpi-mini__breakdown-segment-labels" role="list" aria-label="${escapeHtml(`${row.label || ""} 등급 분해`) }">
+//                                         ${visibleSegments.length ? visibleSegments.map(segment => `
+//                                             <span class="hr010v2-kpi-mini__breakdown-segment-item hr010v2-kpi-mini__breakdown-segment-item--${segment.tone}" role="listitem">
+//                                                 <span class="hr010v2-kpi-mini__breakdown-segment-dot" aria-hidden="true"></span>
+//                                                 <span class="hr010v2-kpi-mini__breakdown-segment-label">${escapeHtml(String(segment.label || "-"))}</span>
+//                                                 <strong class="hr010v2-kpi-mini__breakdown-segment-value">${escapeHtml(String(segment.valueLabel || "0명"))}</strong>
+//                                             </span>
+//                                         `).join("") : `<span class="hr010v2-kpi-mini__breakdown-segment-item is-empty" role="listitem">구성 없음</span>`}
+//                                     </div>
+//                                 ` : ""}
+//                             </div>
+//                             ${showSegmentLabels && segmentLabelPlacement !== "aside" ? `
+//                                 <div class="hr010v2-kpi-mini__breakdown-segment-labels" role="list" aria-label="${escapeHtml(`${row.label || ""} 등급 분해`) }">
+//                                     ${visibleSegments.length ? visibleSegments.map(segment => `
+//                                         <span class="hr010v2-kpi-mini__breakdown-segment-item hr010v2-kpi-mini__breakdown-segment-item--${segment.tone}" role="listitem">
+//                                             <span class="hr010v2-kpi-mini__breakdown-segment-dot" aria-hidden="true"></span>
+//                                             <span class="hr010v2-kpi-mini__breakdown-segment-label">${escapeHtml(String(segment.label || "-"))}</span>
+//                                             <strong class="hr010v2-kpi-mini__breakdown-segment-value">${escapeHtml(String(segment.valueLabel || "0명"))}</strong>
+//                                         </span>
+//                                     `).join("") : `<span class="hr010v2-kpi-mini__breakdown-segment-item is-empty" role="listitem">구성 없음</span>`}
+//                                 </div>
+//                             ` : ""}
+//                         </div>
+//                     `;
+//                 }).join("")}
+//             </div>
+//         </div>
+//     `;
+// }
 
 function renderHr010V2KpiGradeMatrix(rows, options = {}) {
     const normalized = (Array.isArray(rows) ? rows : []).map(row => ({
@@ -1290,113 +1190,113 @@ function renderHr010V2KpiGradeMatrix(rows, options = {}) {
     `;
 }
 
-function getHr010GradeToneColor(tone) {
-    switch (String(tone || "").trim().toLowerCase()) {
-        case "s":
-            return "var(--hr010v2-grade-s)";
-        case "a":
-            return "var(--hr010v2-grade-a)";
-        case "b":
-            return "var(--hr010v2-grade-b)";
-        case "c":
-            return "var(--hr010v2-grade-c)";
-        case "u":
-            return "var(--hr010v2-grade-pending)";
-        default:
-            return "var(--hr010v2-grade-pending)";
-    }
-}
+// function getHr010GradeToneColor(tone) {
+//     switch (String(tone || "").trim().toLowerCase()) {
+//         case "s":
+//             return "var(--hr010v2-grade-s)";
+//         case "a":
+//             return "var(--hr010v2-grade-a)";
+//         case "b":
+//             return "var(--hr010v2-grade-b)";
+//         case "c":
+//             return "var(--hr010v2-grade-c)";
+//         case "u":
+//             return "var(--hr010v2-grade-pending)";
+//         default:
+//             return "var(--hr010v2-grade-pending)";
+//     }
+// }
 
-function buildHr010V2TypeGradeRows(list, today, mode = "available") {
-    const useDeployable = mode === "deployable";
-    const labels = {
-        S: "특급",
-        A: "고급",
-        B: "중급",
-        C: "초급",
-        U: "평가 대기"
-    };
-    const groups = {
-        staff: {
-            key: "staff",
-            label: "직원",
-            tone: "staff",
-            totalCount: 0,
-            gradeCounts: { S: 0, A: 0, B: 0, C: 0, U: 0 },
-            preset: makeHr010NavigationPreset({
-                userType: "staff",
-                runtimeFilters: { availability: useDeployable ? "deployable" : "available" }
-            })
-        },
-        freelancer: {
-            key: "freelancer",
-            label: "프리랜서",
-            tone: "freelancer",
-            totalCount: 0,
-            gradeCounts: { S: 0, A: 0, B: 0, C: 0, U: 0 },
-            preset: makeHr010NavigationPreset({
-                userType: "freelancer",
-                runtimeFilters: { availability: useDeployable ? "deployable" : "available" }
-            })
-        }
-    };
+// function buildHr010V2TypeGradeRows(list, today, mode = "available") {
+//     const useDeployable = mode === "deployable";
+//     const labels = {
+//         S: "특급",
+//         A: "고급",
+//         B: "중급",
+//         C: "초급",
+//         U: "평가 대기"
+//     };
+//     const groups = {
+//         staff: {
+//             key: "staff",
+//             label: "직원",
+//             tone: "staff",
+//             totalCount: 0,
+//             gradeCounts: { S: 0, A: 0, B: 0, C: 0, U: 0 },
+//             preset: makeHr010NavigationPreset({
+//                 userType: "staff",
+//                 runtimeFilters: { availability: useDeployable ? "deployable" : "available" }
+//             })
+//         },
+//         freelancer: {
+//             key: "freelancer",
+//             label: "프리랜서",
+//             tone: "freelancer",
+//             totalCount: 0,
+//             gradeCounts: { S: 0, A: 0, B: 0, C: 0, U: 0 },
+//             preset: makeHr010NavigationPreset({
+//                 userType: "freelancer",
+//                 runtimeFilters: { availability: useDeployable ? "deployable" : "available" }
+//             })
+//         }
+//     };
+//
+//     (Array.isArray(list) ? list : []).forEach(row => {
+//         const bucket = getHr010AvailabilityBucket(row, today);
+//         const isMatched = useDeployable
+//             ? bucket.key === "now" || bucket.key === "soon"
+//             : bucket.key !== "coord";
+//
+//         if (!isMatched) return;
+//
+//         const typeKey = resolveUserType(row) === "staff" ? "staff" : "freelancer";
+//         const current = groups[typeKey];
+//         const rawGradeCode = String(row.grade || "").trim().toUpperCase();
+//         const gradeCode = Object.prototype.hasOwnProperty.call(current.gradeCounts, rawGradeCode) ? rawGradeCode : "U";
+//
+//         current.totalCount += 1;
+//         current.gradeCounts[gradeCode] += 1;
+//     });
+//
+//     return [groups.staff, groups.freelancer].map(group => ({
+//         label: group.label,
+//         tone: group.tone,
+//         value: group.totalCount,
+//         valueLabel: formatHr010CountLabel(group.totalCount),
+//         segments: [...hr010GradeOrder, "U"].map(code => ({
+//             tone: code.toLowerCase(),
+//             label: labels[code] || code,
+//             value: group.gradeCounts[code] || 0,
+//             valueLabel: formatHr010CountLabel(group.gradeCounts[code] || 0)
+//         })),
+//         preset: group.preset
+//     }));
+// }
 
-    (Array.isArray(list) ? list : []).forEach(row => {
-        const bucket = getHr010AvailabilityBucket(row, today);
-        const isMatched = useDeployable
-            ? bucket.key === "now" || bucket.key === "soon"
-            : bucket.key !== "coord";
-
-        if (!isMatched) return;
-
-        const typeKey = resolveUserType(row) === "staff" ? "staff" : "freelancer";
-        const current = groups[typeKey];
-        const rawGradeCode = String(row.grade || "").trim().toUpperCase();
-        const gradeCode = Object.prototype.hasOwnProperty.call(current.gradeCounts, rawGradeCode) ? rawGradeCode : "U";
-
-        current.totalCount += 1;
-        current.gradeCounts[gradeCode] += 1;
-    });
-
-    return [groups.staff, groups.freelancer].map(group => ({
-        label: group.label,
-        tone: group.tone,
-        value: group.totalCount,
-        valueLabel: formatHr010CountLabel(group.totalCount),
-        segments: [...hr010GradeOrder, "U"].map(code => ({
-            tone: code.toLowerCase(),
-            label: labels[code] || code,
-            value: group.gradeCounts[code] || 0,
-            valueLabel: formatHr010CountLabel(group.gradeCounts[code] || 0)
-        })),
-        preset: group.preset
-    }));
-}
-
-function renderHr010V2KpiMiniStack(segments) {
-    const normalized = (Array.isArray(segments) ? segments : [])
-        .map(segment => ({
-            tone: segment.tone,
-            value: Number(segment.value) || 0
-        }))
-        .filter(segment => segment.value > 0);
-
-    if (!normalized.length) {
-        return `<div class="hr010v2-kpi-mini hr010v2-kpi-mini--empty">-</div>`;
-    }
-
-    const total = normalized.reduce((sum, segment) => sum + segment.value, 0);
-
-    return `
-        <div class="hr010v2-kpi-mini hr010v2-kpi-mini--stack">
-            <span class="hr010v2-kpi-mini__stack">
-                ${normalized.map(segment => `
-                    <span class="hr010v2-kpi-mini__stack-segment hr010v2-kpi-mini__stack-segment--${segment.tone}" style="width:${(segment.value / total) * 100}%"></span>
-                `).join("")}
-            </span>
-        </div>
-    `;
-}
+// function renderHr010V2KpiMiniStack(segments) {
+//     const normalized = (Array.isArray(segments) ? segments : [])
+//         .map(segment => ({
+//             tone: segment.tone,
+//             value: Number(segment.value) || 0
+//         }))
+//         .filter(segment => segment.value > 0);
+//
+//     if (!normalized.length) {
+//         return `<div class="hr010v2-kpi-mini hr010v2-kpi-mini--empty">-</div>`;
+//     }
+//
+//     const total = normalized.reduce((sum, segment) => sum + segment.value, 0);
+//
+//     return `
+//         <div class="hr010v2-kpi-mini hr010v2-kpi-mini--stack">
+//             <span class="hr010v2-kpi-mini__stack">
+//                 ${normalized.map(segment => `
+//                     <span class="hr010v2-kpi-mini__stack-segment hr010v2-kpi-mini__stack-segment--${segment.tone}" style="width:${(segment.value / total) * 100}%"></span>
+//                 `).join("")}
+//             </span>
+//         </div>
+//     `;
+// }
 
 function renderHr010V2HealthCompositionBuckets(stats) {
     if (!stats.total) {
@@ -1585,10 +1485,10 @@ function renderHr010V2WeeklyBars(rows, stats = {}) {
 
     const maxCount = Math.max(...rows.map(row => row.count), 1);
     const managementCount = Number(stats.contractImminentCount) || rows.reduce((sum, row) => sum + (Number(row.count) || 0), 0);
-    const expiredCount = Number((rows.find(row => row.presetValue === "expired") || {}).count) || 0;
-    const thirtyCount = Number((rows.find(row => row.presetValue === "30") || {}).count) || 0;
-    const sixtyCount = Number((rows.find(row => row.presetValue === "60") || {}).count) || 0;
-    const ninetyCount = Number((rows.find(row => row.presetValue === "90") || {}).count) || 0;
+    // const expiredCount = Number((rows.find(row => row.presetValue === "expired") || {}).count) || 0;
+    // const thirtyCount = Number((rows.find(row => row.presetValue === "30") || {}).count) || 0;
+    // const sixtyCount = Number((rows.find(row => row.presetValue === "60") || {}).count) || 0;
+    // const ninetyCount = Number((rows.find(row => row.presetValue === "90") || {}).count) || 0;
     const missingCount = Number(stats.contractMissingCount) || 0;
     const managementTitle = "재계약 대상";
     const managementNote = managementCount ? formatHr010CountLabel(managementCount) : "0명";
@@ -1748,34 +1648,34 @@ function renderHr010V2GradeBars(gradeRows, kosaRows) {
     `;
 }
 
-function buildHr010V2GradePieGradient(rows, totalCount) {
-    const segments = [];
-    let start = 0;
-
-    rows.forEach(row => {
-        const count = Number(row.totalCount) || 0;
-        if (!count || !totalCount) return;
-
-        const percent = (count / totalCount) * 100;
-        const end = start + percent;
-        const color = row.tone === "s"
-            ? "var(--hr010v2-grade-s)"
-            : row.tone === "a"
-                ? "var(--hr010v2-grade-a)"
-                : row.tone === "b"
-                    ? "var(--hr010v2-grade-b)"
-                    : "var(--hr010v2-grade-c)";
-
-        segments.push(`${color} ${start.toFixed(2)}% ${end.toFixed(2)}%`);
-        start = end;
-    });
-
-    if (!segments.length) {
-        return "conic-gradient(#e7edf5 0% 100%)";
-    }
-
-    return `conic-gradient(${segments.join(", ")})`;
-}
+// function buildHr010V2GradePieGradient(rows, totalCount) {
+//     const segments = [];
+//     let start = 0;
+//
+//     rows.forEach(row => {
+//         const count = Number(row.totalCount) || 0;
+//         if (!count || !totalCount) return;
+//
+//         const percent = (count / totalCount) * 100;
+//         const end = start + percent;
+//         const color = row.tone === "s"
+//             ? "var(--hr010v2-grade-s)"
+//             : row.tone === "a"
+//                 ? "var(--hr010v2-grade-a)"
+//                 : row.tone === "b"
+//                     ? "var(--hr010v2-grade-b)"
+//                     : "var(--hr010v2-grade-c)";
+//
+//         segments.push(`${color} ${start.toFixed(2)}% ${end.toFixed(2)}%`);
+//         start = end;
+//     });
+//
+//     if (!segments.length) {
+//         return "conic-gradient(#e7edf5 0% 100%)";
+//     }
+//
+//     return `conic-gradient(${segments.join(", ")})`;
+// }
 
 function renderHr010V2RecommendList(rows) {
     const gradeFilters = [
@@ -2257,87 +2157,87 @@ function buildHr010V2KpiMatrixRows(gradeRows, mode = "total") {
     return { rows, pendingCount };
 }
 
-function buildHr010V2EmploymentGradeRows(list) {
-    const groups = {
-        staff: {
-            key: "staff",
-            label: "직원",
-            tone: "staff",
-            totalCount: 0,
-            gradeCounts: { S: 0, A: 0, B: 0, C: 0 },
-            preset: makeHr010NavigationPreset({ userType: "staff" })
-        },
-        freelancer: {
-            key: "freelancer",
-            label: "프리랜서",
-            tone: "freelancer",
-            totalCount: 0,
-            gradeCounts: { S: 0, A: 0, B: 0, C: 0 },
-            preset: makeHr010NavigationPreset({ userType: "freelancer" })
-        }
-    };
+// function buildHr010V2EmploymentGradeRows(list) {
+//     const groups = {
+//         staff: {
+//             key: "staff",
+//             label: "직원",
+//             tone: "staff",
+//             totalCount: 0,
+//             gradeCounts: { S: 0, A: 0, B: 0, C: 0 },
+//             preset: makeHr010NavigationPreset({ userType: "staff" })
+//         },
+//         freelancer: {
+//             key: "freelancer",
+//             label: "프리랜서",
+//             tone: "freelancer",
+//             totalCount: 0,
+//             gradeCounts: { S: 0, A: 0, B: 0, C: 0 },
+//             preset: makeHr010NavigationPreset({ userType: "freelancer" })
+//         }
+//     };
+//
+//     (Array.isArray(list) ? list : []).forEach(row => {
+//         const typeKey = resolveUserType(row) === "staff" ? "staff" : "freelancer";
+//         const gradeCode = String(row.grade || "").trim().toUpperCase();
+//         const current = groups[typeKey];
+//
+//         current.totalCount += 1;
+//         if (Object.prototype.hasOwnProperty.call(current.gradeCounts, gradeCode)) {
+//             current.gradeCounts[gradeCode] += 1;
+//         }
+//     });
+//
+//     return [groups.staff, groups.freelancer].map(group => ({
+//         label: group.label,
+//         tone: group.tone,
+//         value: group.totalCount,
+//         valueLabel: formatHr010ExactCountLabel(group.totalCount),
+//         segments: hr010GradeOrder.map(code => ({
+//             tone: code.toLowerCase(),
+//             value: group.gradeCounts[code] || 0
+//         })),
+//         preset: group.preset
+//     }));
+// }
 
-    (Array.isArray(list) ? list : []).forEach(row => {
-        const typeKey = resolveUserType(row) === "staff" ? "staff" : "freelancer";
-        const gradeCode = String(row.grade || "").trim().toUpperCase();
-        const current = groups[typeKey];
-
-        current.totalCount += 1;
-        if (Object.prototype.hasOwnProperty.call(current.gradeCounts, gradeCode)) {
-            current.gradeCounts[gradeCode] += 1;
-        }
-    });
-
-    return [groups.staff, groups.freelancer].map(group => ({
-        label: group.label,
-        tone: group.tone,
-        value: group.totalCount,
-        valueLabel: formatHr010ExactCountLabel(group.totalCount),
-        segments: hr010GradeOrder.map(code => ({
-            tone: code.toLowerCase(),
-            value: group.gradeCounts[code] || 0
-        })),
-        preset: group.preset
-    }));
-}
-
-function buildHr010V2GradeAvailabilityRows(gradeRows, mode = "available") {
-    const useDeployable = mode === "deployable";
-    const useNow = mode === "now";
-
-    return (Array.isArray(gradeRows) ? gradeRows : []).map(row => ({
-        label: row.label || getHr010RecommendGradeTierLabel(row.code || row.label),
-        tone: String(row.tone || row.code || "").toLowerCase(),
-        value: useNow
-            ? Number(row.nowCount) || 0
-            : useDeployable
-                ? Number(row.readyCount) || 0
-                : Number(row.availableCount) || 0,
-        valueLabel: formatHr010ExactCountLabel(useNow ? row.nowCount : useDeployable ? row.readyCount : row.availableCount),
-        segments: [
-            {
-                tone: "staff",
-                value: useNow
-                    ? Number(row.nowStaffCount) || 0
-                    : useDeployable
-                        ? Number(row.staffReadyCount) || 0
-                        : Number(row.availableStaffCount) || 0
-            },
-            {
-                tone: "freelancer",
-                value: useNow
-                    ? Number(row.nowFreelancerCount) || 0
-                    : useDeployable
-                        ? Number(row.freelancerReadyCount) || 0
-                        : Number(row.availableFreelancerCount) || 0
-            }
-        ],
-        preset: makeHr010NavigationPreset({
-            filters: { grade: [row.code || row.label] },
-            runtimeFilters: { availability: useNow ? "now" : useDeployable ? "deployable" : "available" }
-        })
-    }));
-}
+// function buildHr010V2GradeAvailabilityRows(gradeRows, mode = "available") {
+//     const useDeployable = mode === "deployable";
+//     const useNow = mode === "now";
+//
+//     return (Array.isArray(gradeRows) ? gradeRows : []).map(row => ({
+//         label: row.label || getHr010RecommendGradeTierLabel(row.code || row.label),
+//         tone: String(row.tone || row.code || "").toLowerCase(),
+//         value: useNow
+//             ? Number(row.nowCount) || 0
+//             : useDeployable
+//                 ? Number(row.readyCount) || 0
+//                 : Number(row.availableCount) || 0,
+//         valueLabel: formatHr010ExactCountLabel(useNow ? row.nowCount : useDeployable ? row.readyCount : row.availableCount),
+//         segments: [
+//             {
+//                 tone: "staff",
+//                 value: useNow
+//                     ? Number(row.nowStaffCount) || 0
+//                     : useDeployable
+//                         ? Number(row.staffReadyCount) || 0
+//                         : Number(row.availableStaffCount) || 0
+//             },
+//             {
+//                 tone: "freelancer",
+//                 value: useNow
+//                     ? Number(row.nowFreelancerCount) || 0
+//                     : useDeployable
+//                         ? Number(row.freelancerReadyCount) || 0
+//                         : Number(row.availableFreelancerCount) || 0
+//             }
+//         ],
+//         preset: makeHr010NavigationPreset({
+//             filters: { grade: [row.code || row.label] },
+//             runtimeFilters: { availability: useNow ? "now" : useDeployable ? "deployable" : "available" }
+//         })
+//     }));
+// }
 
 function buildHr010V2KosaRows(list, today) {
     const kosaOrder = (dropdownFilters.kosa_grd_cd.options || [])
@@ -2414,15 +2314,15 @@ function buildHr010V2KpiCards(list, context) {
     const unavailableCountLabel = formatHr010CountLabel(context.unavailableCount);
     const nowCountLabel = formatHr010CountLabel(context.availability?.now?.count || 0);
     const availableRate = totalCount ? ((Number(context.availablePoolCount) || 0) / totalCount) * 100 : 0;
-    const unavailableRate = totalCount ? ((Number(context.unavailableCount) || 0) / totalCount) * 100 : 0;
+    // const unavailableRate = totalCount ? ((Number(context.unavailableCount) || 0) / totalCount) * 100 : 0;
     const availableRateLabel = formatHr010PercentLabel(availableRate);
-    const unavailableRateLabel = formatHr010PercentLabel(unavailableRate);
+    // const unavailableRateLabel = formatHr010PercentLabel(unavailableRate);
     const availableStaffCount = Math.max(0, (Number(context.availabilityByType?.staff?.total) || 0) - (Number(context.availabilityByType?.staff?.coord) || 0));
     const availableFreelancerCount = Math.max(0, (Number(context.availabilityByType?.freelancer?.total) || 0) - (Number(context.availabilityByType?.freelancer?.coord) || 0));
     const unavailableStaffCount = Math.max(0, Number(context.availabilityByType?.staff?.coord) || 0);
     const unavailableFreelancerCount = Math.max(0, Number(context.availabilityByType?.freelancer?.coord) || 0);
-    const staffShareLabel = formatHr010PercentLabel(totalCount ? (staffRows.length / totalCount) * 100 : 0);
-    const freelancerShareLabel = formatHr010PercentLabel(totalCount ? (freelancerRows.length / totalCount) * 100 : 0);
+    // const staffShareLabel = formatHr010PercentLabel(totalCount ? (staffRows.length / totalCount) * 100 : 0);
+    // const freelancerShareLabel = formatHr010PercentLabel(totalCount ? (freelancerRows.length / totalCount) * 100 : 0);
     return [
         {
             label: "1. 전체 개발 인력",
@@ -2615,12 +2515,12 @@ function getHr010DiffDays(target, base) {
     return Math.round((target.getTime() - base.getTime()) / 86400000);
 }
 
-function clampHr010Value(value) {
-    const numeric = Number(value) || 0;
-    if (numeric < 0) return 0;
-    if (numeric > 100) return 100;
-    return numeric;
-}
+// function clampHr010Value(value) {
+//     const numeric = Number(value) || 0;
+//     if (numeric < 0) return 0;
+//     if (numeric > 100) return 100;
+//     return numeric;
+// }
 
 function formatHr010CountLabel(value, unit = "명") {
     const numeric = Number(value) || 0;
@@ -2643,11 +2543,11 @@ function formatHr010PercentDetailLabel(value) {
     return `${rounded.toFixed(1).replace(/\.0$/, "")}%`;
 }
 
-function setHr010Text(id, value) {
-    const element = document.getElementById(id);
-    if (!element) return;
-    element.textContent = value;
-}
+// function setHr010Text(id, value) {
+//     const element = document.getElementById(id);
+//     if (!element) return;
+//     element.textContent = value;
+// }
 
 function setHr010Html(id, markup) {
     const element = document.getElementById(id);
@@ -4398,50 +4298,46 @@ function renderHr010V2KpiCards(kpis, gradeRows = []) {
     `;
 }
 
-function renderHr010V2KpiTrend(series, options = {}) {
-    const normalized = (Array.isArray(series) ? series : []).map(value => Number(value) || 0);
-    const safeSeries = normalized.length ? normalized : [0, 0];
-    const maxValue = Math.max(...safeSeries, 1);
-    const width = 100;
-    const height = 56;
-    const paddingX = 5;
-    const paddingY = 6;
-    const innerWidth = width - paddingX * 2;
-    const innerHeight = height - paddingY * 2;
-    const slotWidth = innerWidth / safeSeries.length;
-    const barWidth = Math.max(6, Math.min(10, slotWidth * 0.62));
-    const deltaTone = options.deltaTone || "info";
-    const deltaLabel = options.deltaLabel || "없음";
-    const noteLabel = options.noteLabel || "최근 7일 등록";
-
-    return `
-        <div class="hr010v2-kpi-mini hr010v2-kpi-mini--trend hr010v2-kpi-mini--trend-${deltaTone}">
-            <div class="hr010v2-kpi-mini__trend-head">
-                <span class="hr010v2-kpi-mini__trend-note">${escapeHtml(noteLabel)}</span>
-                <span class="hr010v2-kpi-mini__trend-chip hr010v2-kpi-mini__trend-chip--${deltaTone}">${escapeHtml(deltaLabel)}</span>
-            </div>
-            <svg class="hr010v2-kpi-trend hr010v2-kpi-trend--${options.tone || "blue"}" viewBox="0 0 100 56" preserveAspectRatio="none" aria-hidden="true">
-                <line class="hr010v2-kpi-trend__baseline" x1="5" y1="50" x2="95" y2="50"></line>
-                ${safeSeries.map((value, index) => {
-        const barHeight = Math.max(Math.round(((Number(value) || 0) / maxValue) * innerHeight), Number(value) > 0 ? 10 : 4);
-        const x = paddingX + (slotWidth * index) + ((slotWidth - barWidth) / 2);
-        const y = height - paddingY - barHeight;
-        return `
-                    <rect
-                        class="hr010v2-kpi-trend__bar ${index === safeSeries.length - 1 ? "is-current" : ""}"
-                        x="${x.toFixed(2)}"
-                        y="${y.toFixed(2)}"
-                        width="${barWidth.toFixed(2)}"
-                        height="${barHeight.toFixed(2)}"
-                        rx="${HR010V2_BAR_RX}"
-                    ></rect>
-                `;
-    }).join("")}
-            </svg>
-        </div>
-    `;
-}
-
-function renderHr010V2HealthComposition(stats) {
-    return renderHr010V2HealthCompositionBuckets(stats);
-}
+// function renderHr010V2KpiTrend(series, options = {}) {
+//     const normalized = (Array.isArray(series) ? series : []).map(value => Number(value) || 0);
+//     const safeSeries = normalized.length ? normalized : [0, 0];
+//     const maxValue = Math.max(...safeSeries, 1);
+//     const width = 100;
+//     const height = 56;
+//     const paddingX = 5;
+//     const paddingY = 6;
+//     const innerWidth = width - paddingX * 2;
+//     const innerHeight = height - paddingY * 2;
+//     const slotWidth = innerWidth / safeSeries.length;
+//     const barWidth = Math.max(6, Math.min(10, slotWidth * 0.62));
+//     const deltaTone = options.deltaTone || "info";
+//     const deltaLabel = options.deltaLabel || "없음";
+//     const noteLabel = options.noteLabel || "최근 7일 등록";
+//
+//     return `
+//         <div class="hr010v2-kpi-mini hr010v2-kpi-mini--trend hr010v2-kpi-mini--trend-${deltaTone}">
+//             <div class="hr010v2-kpi-mini__trend-head">
+//                 <span class="hr010v2-kpi-mini__trend-note">${escapeHtml(noteLabel)}</span>
+//                 <span class="hr010v2-kpi-mini__trend-chip hr010v2-kpi-mini__trend-chip--${deltaTone}">${escapeHtml(deltaLabel)}</span>
+//             </div>
+//             <svg class="hr010v2-kpi-trend hr010v2-kpi-trend--${options.tone || "blue"}" viewBox="0 0 100 56" preserveAspectRatio="none" aria-hidden="true">
+//                 <line class="hr010v2-kpi-trend__baseline" x1="5" y1="50" x2="95" y2="50"></line>
+//                 ${safeSeries.map((value, index) => {
+//         const barHeight = Math.max(Math.round(((Number(value) || 0) / maxValue) * innerHeight), Number(value) > 0 ? 10 : 4);
+//         const x = paddingX + (slotWidth * index) + ((slotWidth - barWidth) / 2);
+//         const y = height - paddingY - barHeight;
+//         return `
+//                     <rect
+//                         class="hr010v2-kpi-trend__bar ${index === safeSeries.length - 1 ? "is-current" : ""}"
+//                         x="${x.toFixed(2)}"
+//                         y="${y.toFixed(2)}"
+//                         width="${barWidth.toFixed(2)}"
+//                         height="${barHeight.toFixed(2)}"
+//                         rx="${HR010V2_BAR_RX}"
+//                     ></rect>
+//                 `;
+//     }).join("")}
+//             </svg>
+//         </div>
+//     `;
+// }

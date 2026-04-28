@@ -420,11 +420,11 @@ option {
   height: 550px !important;
 }
 
-#TABLE_HR013_A .tabulator-header .tabulator-col-title {
-  white-space: nowrap;
-  overflow: visible;
-  text-overflow: clip;
-}
+/*#TABLE_HR013_A .tabulator-header .tabulator-col-title {*/
+/*  white-space: nowrap;*/
+/*  overflow: visible;*/
+/*  text-overflow: clip;*/
+/*}*/
 
 #TABLE_HR013_PROJECT_PICKER .tabulator-tableHolder {
   height: 480px !important;
@@ -633,7 +633,7 @@ option {
 }
 
 /* 총 건수(타이틀) */
-.page-sub-title .hcnc-grid-count-title,
+.hcnc-grid-count-title,
 #main-lang-picker-area .main-lang-picker-meta,
 #hr012-skill-picker-area .hr012-skill-picker-meta,
 #hr013-skill-picker-area .hr013-skill-picker-meta {
@@ -698,44 +698,44 @@ option {
   cursor: pointer;
 }
 
-#TABLE_HR013_A.is-readonly .row-check,
-#TABLE_HR013_A.is-readonly .tabulator-cell input[type="checkbox"] {
-  display: none !important;
-  pointer-events: none;
-  cursor: default;
-}
+/*#TABLE_HR013_A.is-readonly .row-check,*/
+/*#TABLE_HR013_A.is-readonly .tabulator-cell input[type="checkbox"] {*/
+/*  display: none !important;*/
+/*  pointer-events: none;*/
+/*  cursor: default;*/
+/*}*/
 
-#TABLE_HR013_A .tabulator-row .tabulator-cell {
-  padding: 0 4px !important;
-}
+/*#TABLE_HR013_A .tabulator-row .tabulator-cell {*/
+/*  padding: 0 4px !important;*/
+/*}*/
 
-#TABLE_HR013_A .tabulator-row {
-  height: auto !important;
-  min-height: 45px !important;
-}
+/*#TABLE_HR013_A .tabulator-row {*/
+/*  height: auto !important;*/
+/*  min-height: 45px !important;*/
+/*}*/
 
-#TABLE_HR013_A .tabulator-row.stack-editing {
-  height: auto !important;
-}
+/*#TABLE_HR013_A .tabulator-row.stack-editing {*/
+/*  height: auto !important;*/
+/*}*/
 
-#TABLE_HR013_A .tabulator-row.stack-editing .tabulator-cell {
-  height: auto !important;
-  overflow: visible;
-  white-space: normal;
-  padding-top: 6px;
-  padding-bottom: 6px;
-}
+/*#TABLE_HR013_A .tabulator-row.stack-editing .tabulator-cell {*/
+/*  height: auto !important;*/
+/*  overflow: visible;*/
+/*  white-space: normal;*/
+/*  padding-top: 6px;*/
+/*  padding-bottom: 6px;*/
+/*}*/
 
-#TABLE_HR013_A .tabulator-row.stack-editing .tabulator-cell.tabulator-editing {
-  overflow: visible;
-}
+/*#TABLE_HR013_A .tabulator-row.stack-editing .tabulator-cell.tabulator-editing {*/
+/*  overflow: visible;*/
+/*}*/
 
-#TABLE_HR013_A .tabulator-row.stack-editing .tag-input,
-#TABLE_HR013_A .tabulator-row.stack-editing .tag-input-box,
-#TABLE_HR013_A .tabulator-row.stack-editing .tag-list {
-  width: 100%;
-  flex-wrap: wrap;
-}
+/*#TABLE_HR013_A .tabulator-row.stack-editing .tag-input,*/
+/*#TABLE_HR013_A .tabulator-row.stack-editing .tag-input-box,*/
+/*#TABLE_HR013_A .tabulator-row.stack-editing .tag-list {*/
+/*  width: 100%;*/
+/*  flex-wrap: wrap;*/
+/*}*/
 
 #TABLE_HR013_A .hr013-stack-cell {
   display: flex;
@@ -866,59 +866,110 @@ button.btn.btn-add-skill,
   cursor: default;
 }
 
-#TABLE_HR013_A.is-readonly .tabulator-row,
-#TABLE_HR013_A.is-readonly .tabulator-row .tabulator-cell {
-  cursor: default;
-}
+/*#TABLE_HR013_A.is-readonly .tabulator-row,*/
+/*#TABLE_HR013_A.is-readonly .tabulator-row .tabulator-cell {*/
+/*  cursor: default;*/
+/*}*/
 
-#TABLE_HR013_A.is-readonly .tabulator-cell[data-field="skl_id_lst"] .tag-list,
-#TABLE_HR013_A.is-readonly .tabulator-cell[tabulator-field="skl_id_lst"] .tag-list {
-  gap: 0;
-}
+/*#TABLE_HR013_A.is-readonly .tabulator-cell[data-field="skl_id_lst"] .tag-list,*/
+/*#TABLE_HR013_A.is-readonly .tabulator-cell[tabulator-field="skl_id_lst"] .tag-list {*/
+/*  gap: 0;*/
+/*}*/
 
-#TABLE_HR013_A.is-readonly .tabulator-cell[data-field="skl_id_lst"] .tag-item::after,
-#TABLE_HR013_A.is-readonly .tabulator-cell[tabulator-field="skl_id_lst"] .tag-item::after {
-  content: ", ";
-}
+/*#TABLE_HR013_A.is-readonly .tabulator-cell[data-field="skl_id_lst"] .tag-item::after,*/
+/*#TABLE_HR013_A.is-readonly .tabulator-cell[tabulator-field="skl_id_lst"] .tag-item::after {*/
+/*  content: ", ";*/
+/*}*/
 
-#TABLE_HR013_A.is-readonly .tabulator-cell[data-field="skl_id_lst"] .tag-item:last-child::after,
-#TABLE_HR013_A.is-readonly .tabulator-cell[tabulator-field="skl_id_lst"] .tag-item:last-child::after {
-  content: "";
-}
+/*#TABLE_HR013_A.is-readonly .tabulator-cell[data-field="skl_id_lst"] .tag-item:last-child::after,*/
+/*#TABLE_HR013_A.is-readonly .tabulator-cell[tabulator-field="skl_id_lst"] .tag-item:last-child::after {*/
+/*  content: "";*/
+/*}*/
 
-#TABLE_HR013_A.is-readonly .tabulator-cell[data-field="cust_nm"],
-#TABLE_HR013_A.is-readonly .tabulator-cell[tabulator-field="cust_nm"],
-#TABLE_HR013_A.is-readonly .tabulator-cell[data-field="prj_nm"],
-#TABLE_HR013_A.is-readonly .tabulator-cell[tabulator-field="prj_nm"],
-#TABLE_HR013_A.is-readonly .tabulator-cell[data-field="skl_id_lst"],
-#TABLE_HR013_A.is-readonly .tabulator-cell[tabulator-field="skl_id_lst"] {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  min-width: 0;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  height: auto !important;
-}
+/*#TABLE_HR013_A.is-readonly .tabulator-cell[data-field="cust_nm"],*/
+/*#TABLE_HR013_A.is-readonly .tabulator-cell[tabulator-field="cust_nm"],*/
+/*#TABLE_HR013_A.is-readonly .tabulator-cell[data-field="prj_nm"],*/
+/*#TABLE_HR013_A.is-readonly .tabulator-cell[tabulator-field="prj_nm"],*/
+/*#TABLE_HR013_A.is-readonly .tabulator-cell[data-field="skl_id_lst"],*/
+/*#TABLE_HR013_A.is-readonly .tabulator-cell[tabulator-field="skl_id_lst"] {*/
+/*  display: flex;*/
+/*  align-items: center;*/
+/*  width: 100%;*/
+/*  min-width: 0;*/
+/*  white-space: nowrap !important;*/
+/*  overflow: hidden !important;*/
+/*  text-overflow: ellipsis !important;*/
+/*  height: auto !important;*/
+/*}*/
 
-#TABLE_HR013_A.is-readonly .prj-cell,
-#TABLE_HR013_A.is-readonly .hr013-stack-cell {
-  display: flex;
-  align-items: flex-start;
-  height: auto;
-  min-width: 0;
-  width: 100%;
-}
+/*#TABLE_HR013_A.is-readonly .prj-cell,*/
+/*#TABLE_HR013_A.is-readonly .hr013-stack-cell {*/
+/*  display: flex;*/
+/*  align-items: flex-start;*/
+/*  height: auto;*/
+/*  min-width: 0;*/
+/*  width: 100%;*/
+/*}*/
 
 .hr013-table-header {
   display: flex;
   justify-content: space-between;
   width: 100%;
-  align-items: center;
+  align-items: flex-end;
 }
 
-.hr013-toolbar .hr011-section-head-actions {gap: 4px;}
+/* ===================  작업 중 =================== */
+.tab3-content .hr013-list-header {
+  min-height:48px;
+  padding:0 20px;
+  margin: 10px 0 15px;
+  border-radius:12px;
+  border:1px solid #DEE2E7;
+  color:#000000;
+  font-size:15px;
+  font-weight:600;
+  line-height:1.4;
+  text-transform:none;
+  letter-spacing:0; box-shadow:none;
+  display:grid;
+  grid-template-columns: minmax(154px, 1.4fr) 84px minmax(232px, 2.44fr) minmax(154px, 1.3fr) minmax(118px, 0.94fr) minmax(120px, 0.98fr) minmax(142px, 1.02fr);
+  gap:10px;
+  align-items: stretch;
+}
+
+.tab3-content .hr013-list-header > div:nth-child(1), .tab3-content .hr013-list-header > div:nth-child(4), .tab3-content .hr013-list-header > div:nth-child(6) {
+  justify-content: flex-start;
+  padding-left: 56px;
+  text-align: left;
+}
+
+.tab3-content .hr013-list-header > div {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  text-align: center;
+}
+
+.tab3-content .content-body #TABLE_HR013_A {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 30px;
+}
+
+.tab3-content .content-body #TABLE_HR013_A .hr013-card {
+  min-height: 85px;
+  padding: 16px 20px 16px 30px;
+  border: 1px solid #DEE2E7;
+  border-radius: 14px;
+  background: #ffffff;
+  box-shadow: none;
+  display: grid;
+  grid-template-columns: minmax(154px, 1.4fr) 84px minmax(232px, 2.44fr) minmax(154px, 1.3fr) minmax(118px, 0.94fr) minmax(120px, 0.98fr) minmax(142px, 1.02fr);
+  gap: 10px;
+  align-items: stretch;
+}
 
 /*===============================================================================
   HR014 - risk memo
@@ -2505,37 +2556,6 @@ button.btn.btn-add-skill,
   white-space: nowrap;
 }
 
-/*.hr012-toolbar-01 p.tool-title::before,*/
-/*.hr013-toolbar p.tool-title::before,*/
-/*.hr012-toolbar-02 p.tool-title::before,*/
-/*.hr014-toolbar-01 p.tool-title::before,*/
-/*.hr014-toolbar-02 p.tool-title::before {*/
-/*  content: "";*/
-/*  position: absolute;*/
-/*  top: 50%;*/
-/*  left: 0;*/
-/*  transform: translateY(-50%);*/
-/*  width: 16px;*/
-/*  height: 16px;*/
-/*  background: url("../icons/ico-right-arrow.png") no-repeat center;*/
-/*  background-size: contain;*/
-/*}*/
-
-.hr012-toolbar-02 p.tool-title .hcnc-grid-count-title,
-.hr013-toolbar p.tool-title .hcnc-grid-count-title {
-  display: inline-flex;
-  align-items: center;
-  margin-left: 8px;
-  font-family: "Inter", sans-serif;
-  font-style: normal;
-  font-size: 16px;
-  font-weight: 400;
-  line-height: 140%;
-  letter-spacing: 0;
-  color: #1D232D;
-  white-space: nowrap;
-}
-
 .tab4-content .hr014-title-wrap {
   display: flex;
   align-items: center;
@@ -2707,10 +2727,10 @@ button.btn.btn-add-skill,
 }
 
 /* 첫 행이 특정 상황에 사라지는 경우, 대신 2번째 행이 둥글게 */
-#TABLE_HR013_A.is-readonly .tabulator-row:last-child .tabulator-cell:nth-child(2) {
-  border-bottom-left-radius: 12px;
-  overflow: hidden;
-}
+/*#TABLE_HR013_A.is-readonly .tabulator-row:last-child .tabulator-cell:nth-child(2) {*/
+/*  border-bottom-left-radius: 12px;*/
+/*  overflow: hidden;*/
+/*}*/
 
 /* 마지막 행의 마지막 셀 둥글게 */
 .tabulator .tabulator-table .tabulator-row:last-child .tabulator-cell:last-child {
@@ -3495,18 +3515,18 @@ section.search-area .search-info #searchType {
   border-color: #C40016;
 }
 
-/* ============================== */
+  /* ============================== */
 
 /* 프로젝트 기술스택이 길면 해당 행만 자동 확장 */
-#TABLE_HR013_A .tabulator-row.stack-multi-line,
-#TABLE_HR013_A .tabulator-row.stack-multi-line .tabulator-cell {
-  height: auto !important;
-  min-height: 45px !important;
-}
+/*#TABLE_HR013_A .tabulator-row.stack-multi-line,*/
+/*#TABLE_HR013_A .tabulator-row.stack-multi-line .tabulator-cell {*/
+/*  height: auto !important;*/
+/*  min-height: 45px !important;*/
+/*}*/
 
-#TABLE_HR013_A .tabulator-row.stack-multi-line .hr013-stack-cell {
-  align-items: flex-start;
-}
+/*#TABLE_HR013_A .tabulator-row.stack-multi-line .hr013-stack-cell {*/
+/*  align-items: flex-start;*/
+/*}*/
 
 /* 인적사항 경력연차 행 높이 미세 축소 */
 #view-user-area #TABLE_HR010_B .career-exp-cell {
@@ -5742,7 +5762,7 @@ section.search-area .search-info #searchType {
   }
 }
 
-/* ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ 인적사항(HR010) 화면 css (작업 중) ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ */
+/* ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ 인적사항(HR010) 화면 css  ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ */
 /* 인적사항 - 왼쪽 고정 영역 */
 .container-wrap .container .contents-wrap.hr010-dashboard-wrap {
   box-sizing: border-box;
@@ -6414,6 +6434,7 @@ section.search-area .search-info #searchType {
   border: 1px solid #1C80FF;
   border-radius: 8px;
   gap: 6px;
+  margin-right: 4px;
 }
 
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section-add-btn {background: #1C80FF; color: #fff;}
@@ -9060,9 +9081,9 @@ body.hr011-project-eval-modal-open {
     margin-right: 0;
   }
 
-  .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section[data-edit-step="project"] #TABLE_HR013_A .tabulator-table {
-    min-width: 1360px !important;
-  }
+  /*.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section[data-edit-step="project"] #TABLE_HR013_A .tabulator-table {*/
+  /*  min-width: 1360px !important;*/
+  /*}*/
 
   .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section-body .tab4-content .hr014-toolbar-01 .hr014-title-wrap {
     flex-wrap: wrap;
@@ -10993,7 +11014,7 @@ body.hr011-project-eval-modal-open {
 
 .hr011-detail-wrap .hr011-section-body #TABLE_HR012_A,
 .hr011-detail-wrap .hr011-section-body #TABLE_HR012_B,
-.hr011-detail-wrap .hr011-section-body #TABLE_HR013_A,
+/*.hr011-detail-wrap .hr011-section-body #TABLE_HR013_A,*/
 .hr011-detail-wrap .hr011-section-body #TABLE_HR014_A {
   min-height: 0;
   height: auto !important;
@@ -11452,10 +11473,10 @@ body.hr011-project-eval-modal-open {
   border: 0 !important;
 }
 
-.hr011-detail-wrap .hr011-page.is-view-mode .hr011-section-body #TABLE_HR013_A .tabulator-cell[tabulator-field="_checked"],
-.hr011-detail-wrap .hr011-page.is-view-mode .hr011-section-body #TABLE_HR013_A .tabulator-col[tabulator-field="_checked"] {
-  display: none !important;
-}
+/*.hr011-detail-wrap .hr011-page.is-view-mode .hr011-section-body #TABLE_HR013_A .tabulator-cell[tabulator-field="_checked"],*/
+/*.hr011-detail-wrap .hr011-page.is-view-mode .hr011-section-body #TABLE_HR013_A .tabulator-col[tabulator-field="_checked"] {*/
+/*  display: none !important;*/
+/*}*/
 
 .hr011-detail-wrap .hr011-page.is-view-mode .hr011-section-body .hr012-toolbar-02,
 .hr011-detail-wrap .hr011-page.is-view-mode .hr011-section-body .hr014-toolbar-02 {
@@ -11564,38 +11585,38 @@ body.hr011-project-eval-modal-open {
   box-shadow: none !important;
 }
 
-.hr011-detail-wrap .hr011-section-body #TABLE_HR013_A .tabulator-row .tabulator-cell[tabulator-field="cust_nm"],
-.hr011-detail-wrap .hr011-section-body #TABLE_HR013_A .tabulator-row .tabulator-cell[tabulator-field="prj_nm"],
-.hr011-detail-wrap .hr011-section-body #TABLE_HR013_A .tabulator-row .tabulator-cell[tabulator-field="skl_id_lst"],
-.hr011-detail-wrap .hr011-section-body #TABLE_HR013_A .tabulator-row .tabulator-cell[data-field="cust_nm"],
-.hr011-detail-wrap .hr011-section-body #TABLE_HR013_A .tabulator-row .tabulator-cell[data-field="prj_nm"],
-.hr011-detail-wrap .hr011-section-body #TABLE_HR013_A .tabulator-row .tabulator-cell[data-field="skl_id_lst"] {
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  word-break: normal !important;
-}
+/*.hr011-detail-wrap .hr011-section-body #TABLE_HR013_A .tabulator-row .tabulator-cell[tabulator-field="cust_nm"],*/
+/*.hr011-detail-wrap .hr011-section-body #TABLE_HR013_A .tabulator-row .tabulator-cell[tabulator-field="prj_nm"],*/
+/*.hr011-detail-wrap .hr011-section-body #TABLE_HR013_A .tabulator-row .tabulator-cell[tabulator-field="skl_id_lst"],*/
+/*.hr011-detail-wrap .hr011-section-body #TABLE_HR013_A .tabulator-row .tabulator-cell[data-field="cust_nm"],*/
+/*.hr011-detail-wrap .hr011-section-body #TABLE_HR013_A .tabulator-row .tabulator-cell[data-field="prj_nm"],*/
+/*.hr011-detail-wrap .hr011-section-body #TABLE_HR013_A .tabulator-row .tabulator-cell[data-field="skl_id_lst"] {*/
+/*  white-space: nowrap !important;*/
+/*  overflow: hidden !important;*/
+/*  text-overflow: ellipsis !important;*/
+/*  word-break: normal !important;*/
+/*}*/
 
-.hr011-detail-wrap .hr011-section-body #TABLE_HR013_A .hr013-stack-cell,
-.hr011-detail-wrap .hr011-section-body #TABLE_HR013_A .prj-cell,
-.hr011-detail-wrap .hr011-section-body #TABLE_HR013_A .hr013-readonly-text {
-  min-width: 0;
-  display: flex;
-  align-items: center;
-  width: 100%;
-}
+/*.hr011-detail-wrap .hr011-section-body #TABLE_HR013_A .hr013-stack-cell,*/
+/*.hr011-detail-wrap .hr011-section-body #TABLE_HR013_A .prj-cell,*/
+/*.hr011-detail-wrap .hr011-section-body #TABLE_HR013_A .hr013-readonly-text {*/
+/*  min-width: 0;*/
+/*  display: flex;*/
+/*  align-items: center;*/
+/*  width: 100%;*/
+/*}*/
 
-.hr011-detail-wrap .hr011-section-body #TABLE_HR013_A .hr013-stack-text,
-.hr011-detail-wrap .hr011-section-body #TABLE_HR013_A .hr013-stack-text--readonly,
-.hr011-detail-wrap .hr011-section-body #TABLE_HR013_A .prj-text,
-.hr011-detail-wrap .hr011-section-body #TABLE_HR013_A .prj-text--readonly {
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  min-width: 0;
-  display: block;
-  width: 100%;
-}
+/*.hr011-detail-wrap .hr011-section-body #TABLE_HR013_A .hr013-stack-text,*/
+/*.hr011-detail-wrap .hr011-section-body #TABLE_HR013_A .hr013-stack-text--readonly,*/
+/*.hr011-detail-wrap .hr011-section-body #TABLE_HR013_A .prj-text,*/
+/*.hr011-detail-wrap .hr011-section-body #TABLE_HR013_A .prj-text--readonly {*/
+/*  white-space: nowrap !important;*/
+/*  overflow: hidden !important;*/
+/*  text-overflow: ellipsis !important;*/
+/*  min-width: 0;*/
+/*  display: block;*/
+/*  width: 100%;*/
+/*}*/
 
 .hr011-detail-wrap #TABLE_HR012_A,
 .hr011-detail-wrap #TABLE_HR012_B {
