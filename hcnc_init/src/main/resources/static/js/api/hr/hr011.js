@@ -293,7 +293,7 @@ function clearHr011Form() {
     $("#amt").val("0원");
 }
 
-// Tab1에 '소속 및 계약정보' 테이블 불러오기
+// Tab1에 '소속 및 계약' 테이블 불러오기
 function loadHr011TableData(devId) {
     return new Promise((resolve) => {
 
@@ -330,7 +330,7 @@ function loadHr011TableData(devId) {
     });
 }
 
-// '소속 및 계약정보' 테이블 데이터 수정, 저장
+// '소속 및 계약' 테이블 데이터 수정, 저장
 function saveHr011TableData() {
     if (!validateHr011Form()) {
         return Promise.reject("validation fail"); // 프로미스로 반환해야 유효성 검사 제대로 진행됨
@@ -368,7 +368,7 @@ function saveHr011TableData() {
             showAlert({
                 icon: 'error',
                 title: '오류',
-                html: `<strong>소속 및 계약정보</strong>&nbsp;저장 중 오류가 발생했습니다.`
+                html: `<strong>소속 및 계약</strong>&nbsp;저장 중 오류가 발생했습니다.`
             });
         }
     });
@@ -380,7 +380,7 @@ async function deleteHr011() {
         await showAlert({
             icon: 'error',
             title: '오류',
-            html: `<strong>소속 및 계약정보</strong>&nbsp;데이터가 존재하지 않습니다.`
+            html: `<strong>소속 및 계약</strong>&nbsp;데이터가 존재하지 않습니다.`
         });
         return;
     }
@@ -408,7 +408,7 @@ async function deleteHr011() {
             showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
                 icon: 'success',
                 title: '완료',
-                html: `<strong>소속 및 계약정보</strong>&nbsp;데이터가 삭제되었습니다.`
+                html: `<strong>소속 및 계약</strong>&nbsp;데이터가 삭제되었습니다.`
             });
             loadHr011TableData(window.currentDevId);
         },
@@ -416,7 +416,7 @@ async function deleteHr011() {
             showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
                 icon: 'error',
                 title: '오류',
-                html: `<strong>소속 및 계약정보</strong>&nbsp;데이터를 삭제하는 중 오류가 발생했습니다.`
+                html: `<strong>소속 및 계약</strong>&nbsp;데이터를 삭제하는 중 오류가 발생했습니다.`
             })
     });
 }
@@ -4768,6 +4768,7 @@ function setCareerSpinInputs(value) {
         $("#exp_yr_year").val(0);
         $("#exp_yr_month").val(0);
         syncCareerExpValue();
+        normalizeCareerSpinInputs();
         return;
     }
 
@@ -4776,6 +4777,7 @@ function setCareerSpinInputs(value) {
         $("#exp_yr_year").val(0);
         $("#exp_yr_month").val(0);
         syncCareerExpValue();
+        normalizeCareerSpinInputs();
         return;
     }
 
@@ -4786,6 +4788,7 @@ function setCareerSpinInputs(value) {
     $("#exp_yr_month").val(months);
 
     syncCareerExpValue(); // hidden 값 동기화
+    normalizeCareerSpinInputs();
 }
 
 function composeCareerExpValue() {
@@ -4802,10 +4805,10 @@ function syncCareerExpValue() {
     syncCareerExpText();
 }
 
-function syncCareerExpText(value) {
-    if (value === undefined || value === 0) {
-        $("#exp_yr").val();
-    }
+function syncCareerExpText() {
+    var value = $("#exp_yr").val();
+    var text = formatCareerYearMonth(value);
+    $("#exp_yr_text").text(text ? "(" + text + ")" : "");
 }
 
 function formatCareerYearMonth(value) {
@@ -4884,9 +4887,9 @@ if (excelBtn) {
 const HR011_STEP_CONFIG = [
     { key: "profile", label: "기본 프로필", className: "hr011-edit-step-btn--profile" },
     { key: "skill", label: "조건 및 역량", className: "hr011-edit-step-btn--skill" },
-    { key: "contract", label: "소속 및 계약정보", className: "hr011-edit-step-btn--contract" },
-    { key: "project", label: "프로젝트 이력", className: "hr011-edit-step-btn--project" },
-    { key: "eval-risk", label: "평가 및 리스크", className: "hr011-edit-step-btn--eval" }
+    { key: "contract", label: "소속 및 계약", className: "hr011-edit-step-btn--contract" },
+    { key: "project", label: "프로젝트 평가", className: "hr011-edit-step-btn--project" },
+    // { key: "eval-risk", label: "평가 및 리스크", className: "hr011-edit-step-btn--eval" }
 ];
 let hr011CurrentEditStepKey = HR011_STEP_CONFIG[0].key;
 let hr011EditStepRafId = null;
@@ -4945,30 +4948,58 @@ const stepFields = {
         // , "#remark" // 비고
     ],
 
-    // 4. 프로젝트 이력
-    project: () => window.hr013Table ? window.hr013Table.getData().length : 0,
+    // 4. 프로젝트 평가
+    // project: () => window.hr013Table ? window.hr013Table.getData().length : 0,
+    project: () => {
+        const data = window.hr013Table?.getData?.() || [];
+        const projectCount = data.length;
+        const evalRiskCount = data.filter(row => row?.cust_nm === "HCNC").length;
+        return {
+            projectCount,
+            evalRiskCount
+        };
+    }
 
     // 5. 평가 및 리스크
-    "eval-risk": () => {
-        const data = window.hr013Table?.getData?.() || [];
-        return data.filter(row => row?.cust_nm === "HCNC").length;
-    }
+    // "eval-risk": () => {
+    //     const data = window.hr013Table?.getData?.() || [];
+    //     return data.filter(row => row?.cust_nm === "HCNC").length;
+    // }
 };
 
 // 완료된 단계 카운팅
 function calculateStepProgress(step) {
     const config = stepFields[step];
 
+    // 금액 필드 공통
+    const amountFields = ["#hope_rate_amt", "#amt"];
+
     if (!config) return { filled: 0, total: 0 };
 
     // 1. 함수형 step
     if (typeof config === "function") {
-        const count = config();
-        return { filled: count, total: Math.max(count, 1) };
-    }
+        const result = config();
 
-    // 금액 필드 공통
-    const amountFields = ["#hope_rate_amt", "#amt"];
+        // 숫자 반환 (기존 step 호환)
+        if (typeof result === "number") {
+            return { filled: result, total: Math.max(result, 1) };
+        }
+
+        // project (객체 반환)
+        if (typeof result === "object") {
+            const projectCount = result.projectCount ?? 0;
+            const evalRiskCount = result.evalRiskCount ?? 0;
+
+            const evalRiskBonus = evalRiskCount > 0 ? 1 : 0;
+
+            return {
+                filled: projectCount + evalRiskBonus,
+                total: projectCount + 1 // eval-risk 1칸
+            };
+        }
+
+        return { filled: 0, total: 0 };
+    }
 
     // 2. 객체형 STEP (skill)
     if (typeof config === "object" && config.fields) {
@@ -5143,7 +5174,8 @@ function setHr011ActiveEditStep(stepKey) {
 // 신규 등록일 때 안보일 STEP은 빼놓기 (보유역량 평가 & 프로젝트 평가 제외)
 function getActiveStepKeys() {
     const isInsert = hr011Mode === "insert";
-    $("#3-step-end, #4-step-end").toggle(!isInsert);
+    // $("#3-step-end, #4-step-end").toggle(!isInsert);
+    $("#3-step-end").toggle(!isInsert);
 
     if (isInsert) {
         return HR011_STEP_CONFIG

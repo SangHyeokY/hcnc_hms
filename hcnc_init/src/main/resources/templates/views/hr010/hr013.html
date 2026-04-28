@@ -5,30 +5,48 @@
 <th:block th:fragment="tab3Content">
     <div class="content tab3-content hms-tab-wrap">
         <div class="hr013-toolbar page-sub-title fl-sb">
-            <p class="tool-title">프로젝트
-                <span id="hr013-count" class="hcnc-grid-count hcnc-grid-count-title" data-grid-for="TABLE_HR013_A">
-                    총 <span class="hcnc-grid-count-number">0</span>건
-                </span>
-            </p>
-            <div class="tab-actions" data-tab="tab3">
-                <div class="btn-area">
-                    <button type="button" onclick="location.href='/templates/ExcelUpload_Temp.xlsx'">
-                        <img src="/icons/btn-ico-excel-download.png" alt="엑셀 양식 다운로드">양식 다운로드
-                    </button>
-                    <input type="file" id="excelFile" style="display: none" accept=".xls,.xlsx" />
-                    <button type="button" id="btnUpload">
-                        <img src="/icons/btn-ico-excel-upload.png" alt="엑셀 파일 업로드">엑셀 업로드
-                    </button>
-                    <button type="button" class="btn btn-tab3-add">
-                        <img src="./images/common/btn-ico-plus.png" alt="프로젝트 추가">추가
-                    </button>
-                    <button type="button" class="btn btn-tab3-remove">
-                        <img src="/icons/btn-ico-trash.png" alt="삭제">삭제
-                    </button>
+            <div class="hr013-table-header">
+                <p class="tool-title">참여 프로젝트
+                    <span id="hr013-count" class="hcnc-grid-count hcnc-grid-count-title" data-grid-for="TABLE_HR013_A">
+                        총 <span class="hcnc-grid-count-number">0</span>건
+                    </span>
+                </p>
+                <div class="hr011-section-head-actions">
+                    <button type="button" class="btn hr011-section-add-btn" id="hr011QuickAddProjectBtn">프로젝트 추가</button>
+                    <button type="button" class="btn hr011-section-remove-btn" id="hr011QuickRemoveProjectBtn">프로젝트 제거</button>
                 </div>
             </div>
+
+<!--            <div class="tab-actions" data-tab="tab3">-->
+<!--                <div class="btn-area">-->
+<!--                    <button type="button" onclick="location.href='/templates/ExcelUpload_Temp.xlsx'">-->
+<!--                        <img src="/icons/btn-ico-excel-download.png" alt="엑셀 양식 다운로드">양식 다운로드-->
+<!--                    </button>-->
+<!--                    <input type="file" id="excelFile" style="display: none" accept=".xls,.xlsx" />-->
+<!--                    <button type="button" id="btnUpload">-->
+<!--                        <img src="/icons/btn-ico-excel-upload.png" alt="엑셀 파일 업로드">엑셀 업로드-->
+<!--                    </button>-->
+<!--                    <button type="button" class="btn btn-tab3-add">-->
+<!--                        <img src="./images/common/btn-ico-plus.png" alt="프로젝트 추가">추가-->
+<!--                    </button>-->
+<!--                    <button type="button" class="btn btn-tab3-remove">-->
+<!--                        <img src="/icons/btn-ico-trash.png" alt="삭제">삭제-->
+<!--                    </button>-->
+<!--                </div>-->
+<!--            </div>-->
         </div>
         <div class="scroll-body">
+
+            <div class="hr013-list-header">
+                <div>인력 정보</div>
+                <div>구분</div>
+                <div>주 개발언어</div>
+                <div>등급 / KOSA</div>
+                <div>지역 / 근무</div>
+                <div>투입 가능</div>
+                <div>희망 단가</div>
+            </div>
+
             <div class="content-body">
                 <!-- Tab3 내용 -->
                 <div id="TABLE_HR013_A"></div>

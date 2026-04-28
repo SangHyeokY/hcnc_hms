@@ -410,7 +410,7 @@
                                     <div class="hr011-field-card hr011-field-card--summary-dup">
                                         <label>경력</label>
                                     </div>
-                                    <div class="hr011-field-card hr011-field-card--summary-dup">
+                                    <div class="hr011-field-card hr011-field-card--summary-dup" style="flex-direction: row !important; white-space: nowrap; align-items: center;">
                                         <div class="career-spin-wrap">
                                             <!-- 년 -->
                                             <div class="career-spin-field">
@@ -421,7 +421,7 @@
                                                     <button type="button" class="career-spin-btn" data-target="#exp_yr_year" data-step="-1">▼</button>
                                                 </div>
                                             </div>
-                                            <span>년</span>
+                                            <span class="pd-r20">년</span>
                                             <!-- 개월 -->
                                             <div class="career-spin-field">
                                                 <label for="exp_yr_month"></label>
@@ -431,12 +431,12 @@
                                                     <button type="button" class="career-spin-btn" data-target="#exp_yr_month" data-step="-1">▼</button>
                                                 </div>
                                             </div>
-                                            <span>개월</span>
+                                            <span class="pd-r20">개월</span>
                                             <!-- 실제 DB 저장용 -->
                                             <input type="hidden" id="exp_yr">
                                         </div>
                                         <!-- 화면 표시용 -->
-                                        <!--<span id="exp_yr_text" class="career-exp-text"></span>-->
+                                        <span id="exp_yr_text" class="career-exp-text"></span>
                                     </div>
 
                                     <!-- 3행 -->
@@ -510,7 +510,7 @@
                             <!-- 3 STEP -->
                             <section class="white-full hr011-section hr011-edit-sector hr011-edit-sector--full hr011-edit-profile-section" data-edit-step="contract">
                                 <div class="hr011-section-head">
-                                    <h4>소속 및 계약정보</h4>
+                                    <h4>소속 및 계약</h4>
                                 </div>
                                 <div class="hr011-contract-grid">
                                     <!-- 1행 -->
@@ -566,22 +566,11 @@
                             <!-- 4 STEP -->
                             <section class="white-full hr011-section hr011-edit-sector hr011-edit-sector--full" data-edit-step="project">
                                 <div class="hr011-section-head">
-                                    <h4>프로젝트 이력</h4>
-                                    <div class="hr011-section-head-actions">
-                                        <button type="button" class="btn hr011-section-add-btn" id="hr011QuickAddProjectBtn">+ 프로젝트 추가</button>
-                                        <button type="button" class="btn hr011-section-remove-btn" id="hr011QuickRemoveProjectBtn">- 프로젝트 제거</button>
-                                    </div>
+                                    <h4>프로젝트 평가</h4>
                                 </div>
                                 <div class="hr011-section-body">
                                     <th:block th:replace="~{views/hr010/hr013 :: tab3Content}"></th:block>
                                 </div>
-                            </section>
-
-                            <!-- 영역 부분선 -->
-                            <div class="section-line" id="4-step-end"></div>
-
-                            <!-- 5 STEP -->
-                            <section class="white-full hr011-section hr011-edit-sector hr011-edit-sector--full" data-edit-step="eval-risk">
                                 <div class="hr011-section-head">
                                     <h4>평가 및 리스크</h4>
                                 </div>
@@ -592,6 +581,12 @@
                                     <th:block th:replace="~{views/hr010/hr012 :: tab2Content}"></th:block>
                                 </div>
                             </section>
+
+                            <!--                            &lt;!&ndash; 영역 부분선 &ndash;&gt;-->
+                            <!--                            <div class="section-line" id="4-step-end"></div>-->
+                            <!-- 5 STEP -->
+<!--                            <section class="white-full hr011-section hr011-edit-sector hr011-edit-sector&#45;&#45;full" data-edit-step="eval-risk">-->
+<!--                            </section>-->
 
                             <!-- ★ [수정/등록할 때만 보임] ?? -->
                             <div class="hr011-edit-wizard-controls">
@@ -682,12 +677,12 @@
         </div>
     </div>
 
-    <!-- 프로젝트 이력 모달 -->
+    <!-- 프로젝트 평가 모달 -->
     <div class="modal-wrap" id="write-hr013-area" style="display: none">
         <div class="modal-container">
 
             <div class="header">
-                <h3 class="sub-title">프로젝트 이력 <span id="hr013-type">등록</span></h3>
+                <h3 class="sub-title">프로젝트 평가 <span id="hr013-type">등록</span></h3>
                 <div class="btn-area">
                     <button class="modal-close" type="button" onclick="closeHr013Modal()">
                         <img src="./icons/Icon-close.png" alt="" />
