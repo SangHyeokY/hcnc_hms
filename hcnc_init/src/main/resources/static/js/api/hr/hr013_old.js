@@ -1,4 +1,4 @@
-// hr013.js
+// hr013_old.js
 // 탭3 편집 상태/참조 데이터 캐시
 var stackTagInput = null;
 var pendingStackValue = "";
@@ -8,13 +8,15 @@ var hr013SkillOptions = [];
 var hr013JobOptions = [];
 var hr013SkillGroupOptions = [];
 var hr013SkillPicker = null;
-const HR013_PROJECT_GRP_CD = "prj_cd"; // 프로젝트 공통코드 그룹 상수
 
+// 프로젝트 공통코드 그룹 상수
+const HR013_PROJECT_GRP_CD = "prj_cd";
+// var HR013_PROJECT_INPRJ_FIELD = "adinfo_01"; // 부가정보1(당사프로젝트)
+
+// 프로젝트 선택 팝업 상태
 var hr013ProjectPickerTable = null;     // 팝업 내 목록 테이블 인스턴스
 var hr013ProjectPickerContextRow = null; // 어느 행에서 팝업 열었는지 기억
 var hr013SelectedProjectCode = null;     // 사용자가 선택한 코드 1건
-
-var hr013Data = []; // 테이블 구조 분리
 
 function isHr013InprjYnY(value) {
     return String(value || "").trim().toUpperCase() === "Y";
@@ -24,11 +26,30 @@ function isHr013ProjectCodeSelectable(data) {
     return isHr013InprjYnY(data && data.inprj_yn);
 }
 
+function isHr013ProjectReadOnly() {
+    const isHr011EditMode = !!document.querySelector(".hr011-page.is-edit-mode");
+    if (isHr011EditMode) return false;
+    return currentMode === "view" || !!window.hr010ReadOnly;
+}
+
 // 프로젝트 탭 초기화 (버튼/콤보/태그/테이블)
 window.initTab3 = function () {
+    if (!window.hr013Table) buildHr013Table();
+
+    if (currentMode === "view")
+        window.hr013Table.getColumn("_checked").hide();
+    else
+        window.hr013Table.getColumn("_checked").show();
+
     // 프로젝트 제목 옆 건수 표기 초기화
     updateHr013TitleCount();
     loadHr013TableData();
+
+    // 상위 모달의 view/update 상태를 탭3 테이블 readonly 스타일과 동기화한다.
+    $(document).off("tab:readonly.hr013").on("tab:readonly.hr013", function (_, isReadOnly) {
+        applyTab3Readonly(!!isReadOnly);
+    });
+    applyTab3Readonly(!!window.hr010ReadOnly);
 
     $("#write_hr013_rate_amt").on("input", function () {
         $(this).val(formatNumberInput($(this).val()));
@@ -46,17 +67,17 @@ window.initTab3 = function () {
         openHr013Modal("new");
     });
     $(".btn-tab3-edit").off("click").on("click", function () {
-        const index = $(this).data("index");
-        const row = hr013Data[index];
-        openHr013RowEditor(row);
+        openHr013Modal("edit");
     });
     $(".btn-tab3-remove").off("click").on("click", function () {
-        const index = $(this).data("index");
-        removeHr013Row(index);
+        removeHr013SelectedRows();
     });
     $(".btn-tab3-add").off("click").on("click", function () {
         addHr013Row();
     });
+
+    // Tabulator cellClick이 환경에 따라 누락되는 경우를 대비한 버튼 fallback
+    bindHr013CellButtonFallback();
 
     $("#write_hr013_inprj_yn").off("change").on("change", function () {
         applyInprjCustomerName($(this).val(), $("#write_hr013_cust_nm").val());
@@ -79,6 +100,12 @@ window.initTab3 = function () {
             return { cd: this.value, cd_nm: $(this).text() };
         }).get();
         initSelectDefault("write_hr013_job_cd", "선택");
+        if (window.hr013Table) {
+            normalizeJobCodes();
+            normalizeJobRows();
+            window.hr013Table.redraw(true);
+        }
+
         jobMap = getJobCodeMap();
     });
     setComCode("write_hr013_skl_cd", "skl_id", "", "cd", "cd_nm", function (res) {
@@ -100,6 +127,11 @@ window.initTab3 = function () {
         syncHr013SkillPickerUi(true);
         // 프로젝트 선택 팝업 이벤트/테이블은 최초 1회 초기화
         bindHr013ProjectPickerEvents();
+
+        if (window.hr013Table) {
+            syncStackLabelsFromCodes();
+            window.hr013Table.redraw(true);
+        }
     });
 
     getComCode("skl_grp", "", function (res) {
@@ -108,9 +140,90 @@ window.initTab3 = function () {
     });
 };
 
+function getHr013RowComponentFromTarget(target) {
+    if (!window.hr013Table || !target) return null;
+    const rowEl = target.closest ? target.closest(".tabulator-row") : null;
+    if (!rowEl) return null;
+    const rows = typeof window.hr013Table.getRows === "function" ? window.hr013Table.getRows() : [];
+    for (let i = 0; i < rows.length; i += 1) {
+        const rowComp = rows[i];
+        if (rowComp && typeof rowComp.getElement === "function" && rowComp.getElement() === rowEl) {
+            return rowComp;
+        }
+    }
+    return null;
+}
+
+function getHr013RowComponentFromButtonMeta(target) {
+    if (!window.hr013Table || !target || typeof window.hr013Table.getRows !== "function") return null;
+    const btn = target.closest ? target.closest(".btn-prj-skl, .btn-prj-edit, .btn-prj-eval") : null;
+    if (!btn) return null;
+    const devPrjId = String(btn.getAttribute("data-dev-prj-id") || "").trim();
+    const prjNm = String(btn.getAttribute("data-prj-nm") || "").trim();
+    const rows = window.hr013Table.getRows() || [];
+    for (let i = 0; i < rows.length; i += 1) {
+        const rowComp = rows[i];
+        if (!rowComp || typeof rowComp.getData !== "function") continue;
+        const rowData = rowComp.getData() || {};
+        if (devPrjId && String(rowData.dev_prj_id || "").trim() === devPrjId) {
+            return rowComp;
+        }
+        if (!devPrjId && prjNm && String(rowData.prj_nm || "").trim() === prjNm) {
+            return rowComp;
+        }
+    }
+    return null;
+}
+
+function triggerHr013RowAction(target, action) {
+    if (window.hr010ReadOnly && !document.querySelector(".hr011-page.is-edit-mode")) return;
+    const rowComp = getHr013RowComponentFromTarget(target) || getHr013RowComponentFromButtonMeta(target);
+    if (!rowComp) return;
+    const rowData = typeof rowComp.getData === "function" ? rowComp.getData() : {};
+
+    if (action === "skill") {
+        openHr013SkillPicker("grid", rowComp);
+        return;
+    }
+    if (action === "edit") {
+        openHr013RowEditor(rowComp);
+        return;
+    }
+    if (action === "eval") {
+        window.currentDevId = rowData.dev_id;
+        window.hr013_prj_nm = rowData.dev_prj_id;
+        $(".tab-btn").last().click();
+        reloadTab4(rowData.dev_prj_id).then(function () {
+            $(document).trigger("hr013:focusEvaluation", [rowData.dev_prj_id]);
+        });
+    }
+}
+
+window.hr013HandleRowAction = function (btn, action) {
+    triggerHr013RowAction(btn, action);
+    return false;
+};
+
+function bindHr013CellButtonFallback() {
+    $(document).off("click.hr013CellFallback");
+    $(document).on("click.hr013CellFallback", "#TABLE_HR013_A .btn-prj-skl, #TABLE_HR013_A .btn-prj-edit, #TABLE_HR013_A .btn-prj-eval", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        if ($(e.target).closest(".btn-prj-skl").length) triggerHr013RowAction(e.target, "skill");
+        if ($(e.target).closest(".btn-prj-edit").length) triggerHr013RowAction(e.target, "edit");
+        if ($(e.target).closest(".btn-prj-eval").length) triggerHr013RowAction(e.target, "eval");
+    });
+}
+
 // 프로젝트 제목 옆 건수(span.hcnc-grid-count-number) 업데이트
 function updateHr013TitleCount() {
-    $("#hr013-count .hcnc-grid-count-number").text(hr013Data.length);
+    let count = 0;
+    if (window.hr013Table && typeof window.hr013Table.getDataCount === "function") {
+        count = window.hr013Table.getDataCount("active");
+    } else if (window.hr013Table && typeof window.hr013Table.getData === "function") {
+        count = window.hr013Table.getData().length;
+    }
+    $("#hr013-count .hcnc-grid-count-number").text(count);
 }
 
 // 프로젝트 선택 팝업 검색 결과 건수
@@ -119,6 +232,332 @@ function updateHr013ProjectPickerCount(count) {
 }
 
 let jobMap = [];
+
+function updateHr013StackRowState(row) {
+    if (document.querySelector(".hr011-page")) {
+        return;
+    }
+    if (!row || typeof row.getElement !== "function") {
+        return;
+    }
+
+    var rowEl = row.getElement();
+    if (!rowEl) {
+        return;
+    }
+
+    var stackText = rowEl.querySelector(".hr013-stack-text");
+    if (!stackText) {
+        rowEl.classList.remove("stack-multi-line");
+        return;
+    }
+
+    rowEl.classList.remove("stack-multi-line");
+
+    var computed = window.getComputedStyle ? window.getComputedStyle(stackText) : null;
+    var lineHeight = computed ? parseFloat(computed.lineHeight) : NaN;
+    if (!lineHeight || !isFinite(lineHeight) || lineHeight <= 0) {
+        lineHeight = 18;
+    }
+    var shouldExpand = stackText.offsetHeight > (lineHeight * 1.25);
+    rowEl.classList.toggle("stack-multi-line", shouldExpand);
+
+    if (shouldExpand && typeof row.normalizeHeight === "function") {
+        row.normalizeHeight();
+    }
+}
+
+function scheduleHr013StackRowState(row) {
+    if (document.querySelector(".hr011-page")) {
+        return;
+    }
+    if (!row) {
+        return;
+    }
+
+    var run = function () {
+        updateHr013StackRowState(row);
+    };
+
+    if (typeof window !== "undefined" && typeof window.requestAnimationFrame === "function") {
+        window.requestAnimationFrame(run);
+        return;
+    }
+
+    setTimeout(run, 0);
+}
+
+// 프로젝트 테이블 생성
+function buildHr013Table() {
+    if (!document.getElementById("TABLE_HR013_A")) return;
+    var isHr011Detail = !!document.querySelector(".hr011-page");
+    // var shouldAutoExpandRows = !isHr011Detail;
+
+    var options = {
+        layout: "fitColumns",
+        placeholder: "데이터 없음",
+        selectable: false,
+        rowHeight: isHr011Detail ? 46 : 42,
+        // 프로젝트 테이블 데이터 로드 시 건수 반영
+        dataLoaded: function () {
+            updateHr013TitleCount();
+        },
+        // 프로젝트 테이블 데이터 변경 시 건수 반영
+        // dataChanged: function () {
+        //     updateHr013TitleCount();
+        // },
+        cellEdited: function (cell) {
+            changedTabs.tab3 = true;
+            console.log("Tab3 클릭 반응", changedTabs.tab3);
+            const field = cell.getField();
+            const value = cell.getValue();
+
+            if (field === "skl_id_lst") {
+                $("#write_hr013_stack_txt").val(value);
+            }
+        },
+        // rowFormatter: function (row) {
+        //     if (shouldAutoExpandRows) {
+        //         scheduleHr013StackRowState(row);
+        //     }
+        // },
+        // rowUpdated: function (row) {
+        //     if (shouldAutoExpandRows) {
+        //         scheduleHr013StackRowState(row);
+        //     }
+        // },
+        columns: [
+            {
+                title: "",
+                field: "_checked",
+                formatter: rowSelectFormatter,
+                hozAlign: "center",
+                headerSort: false,
+                width: 20,
+                resizable: false,
+                cellClick: function (e, cell) {
+                    if (window.hr010ReadOnly) {
+                        return;
+                    }
+                    var resolved = resolveCell(e, cell);
+                    if (!resolved) {
+                        return;
+                    }
+                    var row = resolved.getRow();
+                    var next = !resolved.getValue();
+                    row.update({ _checked: next });
+                    syncRowCheckbox(row, next);
+                }
+            },
+            {
+                title: "당사여부",
+                field: "inprj_yn",
+                hozAlign: "center",
+                formatter: inprjCheckboxFormatter,
+                cellClick: function (e, cell) {
+                    if (window.hr010ReadOnly) {
+                        return;
+                    }
+                    var resolved = resolveCell(e, cell);
+                    if (!resolved) {
+                        return;
+                    }
+                    toggleInprjValue(resolved);
+                    window.hr013Table.redraw(true);
+                }, width: 80, resizable: false
+            },
+            {
+                title: "고객사",
+                field: "cust_nm",
+                editor: "input",
+                formatter: function (cell) {
+                    const value = cell.getValue();
+                    if (!value) return "";
+                    if (window.hr010ReadOnly) {
+                        return `<div class="hr013-readonly-text hr013-readonly-text--wrap" title="${hr013EscapeHtml(value)}">${hr013EscapeHtml(value)}</div>`;
+                    }
+                    return `<div class="hr013-cell-ellipsis" title="${hr013EscapeHtml(value)}">${hr013EscapeHtml(value)}</div>`;
+                },
+                editable: function (cell) {
+                    return isHr013Editable() && cell.getRow().getData().inprj_yn !== "Y";
+                },
+                cellEdited: function (cell) {
+                    var row = cell.getRow();
+                    var data = row ? row.getData() : null;
+                    if (data && data.inprj_yn !== "Y") {
+                        row.update({ _prev_cust_nm: cell.getValue() || "" });
+                    }
+                },
+                cellClick: startEditOnClick, width: 180, minWidth: 160
+            },
+            {
+                title: "프로젝트명",
+                field: "prj_nm",
+                editor: "input",
+                formatter: function (cell) {
+                    const v = cell.getValue() ?? "";
+                    const d = cell.getRow().getData();
+                    const devPrjIdAttr = hr013EscapeHtml(d.dev_prj_id || "");
+                    const prjNmAttr = hr013EscapeHtml(v || d.prj_nm || "");
+                    if (window.hr010ReadOnly) {
+                        return `<div class="hr013-readonly-text hr013-readonly-text--project" title="${hr013EscapeHtml(v)}">${hr013EscapeHtml(v)}</div>`;
+                    }
+                    const showBtn = String(d.inprj_yn).toUpperCase() === "Y";
+                    const isNew = d._isNew === true;
+                    const isReadOnly = isHr013ProjectReadOnly();
+                    const showEditBtn = !isReadOnly;
+
+                    return `
+                      <div class="prj-cell">
+                        ${showBtn && !isNew && !isReadOnly ? `<div><button type="button" class="btn-prj-eval" data-dev-prj-id="${devPrjIdAttr}" data-prj-nm="${prjNmAttr}" onclick="return window.hr013HandleRowAction && window.hr013HandleRowAction(this,'eval');">평가</button></div>` : ""}
+                        <span class="prj-text" title="${hr013EscapeHtml(v)}">${hr013EscapeHtml(v)}</span>
+                        ${showEditBtn ? `<div><button type="button" class="btn-prj-edit" data-dev-prj-id="${devPrjIdAttr}" data-prj-nm="${prjNmAttr}" onclick="return window.hr013HandleRowAction && window.hr013HandleRowAction(this,'edit');">수정</button></div>` : ""}
+                      </div>
+                    `;
+                },
+                editable: function (cell) {
+                    const rowData = cell.getRow().getData();
+                    // "조회"일 경우
+                    if (currentMode === "view")
+                        return false;
+                    // 당사여부 체크된 경우 → 수정 불가
+                    if (rowData.inprj_yn === 'Y') {   // 또는 'Y'
+                        return false;
+                    }
+                    return true;
+                },
+                cellClick: async function (e, cell) {
+                    if (!cell) return;
+                    // 버튼 클릭이면 평가만
+                    const evalBtn = e?.target?.closest(".btn-prj-eval");
+                    if (evalBtn) {
+                        e.stopPropagation();
+
+                        const rowData = cell.getRow().getData();
+                        window.currentDevId = rowData.dev_id;
+
+                        // 이게 있어야 경고 팝업이 안뜬다.
+                        window.hr013_prj_nm = rowData.dev_prj_id;
+
+                        $(".tab-btn").last().click();
+
+                        await reloadTab4(rowData.dev_prj_id);
+                        $(document).trigger("hr013:focusEvaluation", [rowData.dev_prj_id]);
+                        return;
+                    }
+                    // 등록 버튼 클릭 처리(새 요구사항)
+                    const regBtn = e?.target?.closest(".btn-prj-edit");
+                    if (regBtn) {
+                        e.stopPropagation();
+                        openHr013RowEditor(cell.getRow());
+                        return;
+                    }
+                },
+                cellEditCancelled: function (cell) {
+                    requestAnimationFrame(() => cell.getRow().reformat());
+                },
+                cellEdited: function (cell) {
+                    requestAnimationFrame(() => cell.getRow().reformat());
+                },
+                width: 360, minWidth: 320
+            },
+            {
+                title: "역할",
+                field: "job_cd",
+                hozAlign: "center",
+                formatter: jobCodeFormatter,
+                editor: "select",
+                editorParams: (cell) => jobMap,
+                editable: isHr013Editable,
+                cellEdited: function (cell) {
+                    var value = normalizeJobValue(cell.getValue()) || "";
+                    if (cell.getValue() !== value) {
+                        cell.setValue(value, true);
+                    }
+                },
+                cellClick: startEditOnClick, width: 110, minWidth: 100
+            },
+            {
+                title: "계약단가",
+                field: "rate_amt",
+                hozAlign: "right",
+                formatter: hr013AmountFormatter,
+                editor: "input",
+                editable: isHr013Editable,
+                cellClick: startEditOnClick,
+                width: 150
+            },
+            {
+                title: "기술스택",
+                field: "skl_id_lst",
+                formatter: hr013TableSkillFormatter,
+                editable: false,
+                cellClick: hr013TableSkillCellClick,
+                width: 360,
+                minWidth: 320
+            },
+            {
+                title: "시작일",
+                field: "st_dt",
+                hozAlign: "center",
+                formatter: dateDisplayFormatter,
+                editor: dateEditor,
+                editable: isHr013Editable,
+                cellClick: startEditOnClick, width: 155
+            },
+            {
+                title: "종료일",
+                field: "ed_dt",
+                hozAlign: "center",
+                formatter: dateDisplayFormatter,
+                editor: dateEditor,
+                editable: isHr013Editable,
+                cellClick: startEditOnClick, width: 155
+            },
+            { title: "투입률", field: "alloc_pct", hozAlign: "center", formatter: percentageFormatter, width: 92, minWidth: 86, editor: "input", editable: isHr013Editable, cellClick: startEditOnClick },
+            { title: "비고", field: "remark", editor: "input", editable: isHr013Editable, cellClick: startEditOnClick}
+        ],
+        data: []
+    };
+
+    if (!isHr011Detail) {
+        options.pagination = "local";
+        options.paginationSize = 10;
+    } else {
+        options.pagination = false;
+    }
+
+    if (!isHr011Detail) {
+        options.height = "100%";
+    }
+
+    window.hr013Table = new Tabulator("#TABLE_HR013_A", options);
+}
+
+// 상세모드에서는 테이블 조작 비활성화
+function applyTab3Readonly(isReadOnly) {
+    var locked = !!isReadOnly;
+    $(".tab3-content").toggleClass("is-readonly", locked);
+    $("#TABLE_HR013_A").toggleClass("is-readonly", locked);
+    if (window.hr013Table && typeof window.hr013Table.getColumn === "function") {
+        var checkedColumn = window.hr013Table.getColumn("_checked");
+        if (checkedColumn && typeof checkedColumn.hide === "function" && typeof checkedColumn.show === "function") {
+            if (locked) checkedColumn.hide();
+            else checkedColumn.show();
+        }
+    }
+    $(".btn-tab3-add, .btn-tab3-remove, #btnUpload, .btn-tab3-new, .btn-tab3-edit")
+        .prop("disabled", locked)
+        .toggle(!locked);
+    if (locked) {
+        closeHr013Modal();
+    }
+    if (window.hr013Table) {
+        window.hr013Table.redraw(true);
+    }
+}
+
+window.applyTab3Readonly = applyTab3Readonly;
 
 // 프로젝트 이력 모달 열기
 function openHr013Modal(mode) {
@@ -155,15 +594,20 @@ function openHr013Modal(mode) {
 }
 
 function openHr013RowEditor(row) {
-    if (!isHr013Editable()) return;
-    const rowData = row?.getData ? row.getData() : row;
-    $("#hr013-type").text(rowData?.dev_prj_id ? "수정" : "등록");
+    if (!isHr013Editable()) {
+        return;
+    }
+
+    var rowData = row && typeof row.getData === "function" ? row.getData() : null;
+    $("#hr013-type").text(rowData && rowData.dev_prj_id ? "수정" : "등록");
     closeHr013SkillPicker(true);
+
     if (rowData) {
         fillHr013Form(rowData);
     } else {
         clearHr013Form();
     }
+
     $("#write-hr013-area").show();
 }
 
@@ -303,6 +747,7 @@ function bindHr013ProjectPickerEvents() {
     initHr013ProjectPickerTable();  // 목록 테이블 생성(최초 1회)
 }
 
+
 // 팝업 내부 프로젝트 목록 테이블 생성
 function initHr013ProjectPickerTable() {
     if (hr013ProjectPickerTable || !document.getElementById("TABLE_HR013_PROJECT_PICKER")) {
@@ -324,6 +769,19 @@ function initHr013ProjectPickerTable() {
             { title: "프로젝트명", field: "cd_nm", widthGrow: 1 },
             { title: "당사 여부", field: "inprj_yn", minWidth: 80, width: 85, hozAlign: "center" },
         ],
+        // rowClick: function (e, row) {
+        //     var data = row && typeof row.getData === "function" ? row.getData() : null;
+        //     if (!isHr013ProjectCodeSelectable(data)) {
+        //         showAlert({
+        //             icon: "info",
+        //             title: "알림",
+        //             html: `<strong>당사 프로젝트</strong>만 선택할 수 있습니다.`
+        //         });
+        //         return;
+        //     }
+        //     row.select();
+        //     hr013SelectedProjectCode = data;   // 사용자가 고른 코드 저장
+        // },
         rowSelected: function (row) {
             var data = row && typeof row.getData === "function" ? row.getData() : null;
             if (!isHr013ProjectCodeSelectable(data)) {
@@ -673,12 +1131,21 @@ async function saveHr013ProjectCode() {
     });
 }
 
+
 function closeHr013SkillPicker(immediate) {
     if (!hr013SkillPicker) {
         return;
     }
     hr013SkillPicker.close(immediate);
 }
+
+// function applyHr013SkillPickerSelection() {
+//     if (!hr013SkillPicker) {
+//         closeHr013SkillPicker();
+//         return;
+//     }
+//     hr013SkillPicker.apply();
+// }
 
 function syncHr013SkillPickerUi(forceRebuild) {
     if (!hr013SkillPicker) {
@@ -934,6 +1401,7 @@ function hr013EscapeHtml(value) {
 // 프로젝트 데이터 조회 후 테이블 반영
 function loadHr013TableData() {
     const dev_id = window.currentDevId || $("#dev_id").val();
+    if (!window.hr013Table) return;
 
     $.ajax({
         url: "/hr013/tab3",
@@ -942,6 +1410,7 @@ function loadHr013TableData() {
         success: function (res) {
             const dataArray = Array.isArray(res.list) ? res.list : [];
             var normalized = dataArray.map(function (row) {
+                row._checked = false;
                 if (row.inprj_yn !== "Y") {
                     row._prev_cust_nm = row.cust_nm || "";
                 }
@@ -953,12 +1422,12 @@ function loadHr013TableData() {
                 row.stack_txt_nm = getSkillLabelList(row.stack_txt);
                 return row;
             });
-            hr013Data = normalized;
+            window.hr013Table.setData(normalized);
             // 조회 직후 제목 건수 즉시 갱신
             updateHr013TitleCount();
             normalizeJobCodes();
             syncStackLabelsFromCodes();
-            refreshHr013View();
+            window.hr013Table.redraw();
             $(document).trigger("hr013:dataLoaded", [normalized]);
         },
         error: function () {
@@ -972,13 +1441,20 @@ window.loadHr013TableData = loadHr013TableData;
 
 // 선택 행 가져오기
 function getHr013SelectedRow() {
-    if (!window.hr013Table) return null;
-    const rows = window.hr013Table.getRows().filter(row => {
-        const data = row.getData();
-        return data && data._checked;
-    });
-
-    return rows.length ? rows[0].getData() : null;
+    if (!window.hr013Table) {
+        return null;
+    }
+    var rows = window.hr013Table.getSelectedRows();
+    if (!rows || rows.length === 0) {
+        rows = window.hr013Table.getRows().filter(function (row) {
+            var data = row && typeof row.getData === "function" ? row.getData() : null;
+            return !!(data && data._checked);
+        });
+    }
+    if (!rows || rows.length === 0) {
+        return null;
+    }
+    return rows[0].getData();
 }
 
 // 모달 입력값 채우기
@@ -1001,6 +1477,9 @@ function fillHr013Form(data) {
         stackTagInput.setFromValue(pendingStackValue);
     }
     syncHr013SkillPickerUi(true);
+
+
+    // console.log("input value : " + $("#write_hr013_st_dt").val());
 }
 
 // 모달 입력값 초기화
@@ -1017,7 +1496,6 @@ function clearHr013Form() {
     $("#write_hr013_job_cd").val("");
     $("#write_hr013_alloc_pct").val("");
     $("#write_hr013_remark").val("");
-    lastNonInprjCustNm = "";
     pendingStackValue = "";
     if (stackTagInput) {
         stackTagInput.clear();
@@ -1035,12 +1513,90 @@ function saveHr013Row() {
         ed_dt: normalizeDateForSave($("#write_hr013_ed_dt").val()),
         cust_nm: $("#write_hr013_cust_nm").val(),
         prj_nm: $("#write_hr013_prj_nm").val(),
-        rate_amt: parseHr013RateAmountValue($("#write_hr013_rate_amt").val()),
+        rate_amt: $("#write_hr013_rate_amt").val(),
         job_cd: $("#write_hr013_job_cd").val(),
         stack_txt: $("#write_hr013_stack_txt").val(),
         alloc_pct: $("#write_hr013_alloc_pct").val(),
         remark: $("#write_hr013_remark").val()
     };
+
+    // if (payload.inprj_yn === "Y") {
+    //     payload.cust_nm = "HCNC";
+    //     $("#write_hr013_cust_nm").val(payload.cust_nm);
+    // }
+    //
+    // if (!payload.inprj_yn) {
+    //     showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+    //         icon: 'warning',
+    //         title: '경고',
+    //         html: `<strong>당사여부</strong>을(를) 선택해주세요.`
+    //     });
+    //     return;
+    // }
+    // if (!payload.st_dt) {
+    //     showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+    //         icon: 'warning',
+    //         title: '경고',
+    //         html: `<strong>시작일</strong>을(를) 입력해주세요.`
+    //     });
+    //     return;
+    // }
+    // if (!payload.ed_dt) {
+    //     showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+    //         icon: 'warning',
+    //         title: '경고',
+    //         html: `<strong>종료일</strong>을(를) 입력해주세요.`
+    //     });
+    //     return;
+    // }
+    // if (!payload.cust_nm) {
+    //     showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+    //         icon: 'warning',
+    //         title: '경고',
+    //         html: `<strong>고객사</strong>을(를) 입력해주세요.`
+    //     });
+    //     return;
+    // }
+    // if (!payload.prj_nm) {
+    //     showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+    //         icon: 'warning',
+    //         title: '경고',
+    //         html: `<strong>프로젝트명</strong>을(를) 입력해주세요.`
+    //     });
+    //     return;
+    // }
+    // if (!payload.rate_amt) {
+    //     showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+    //         icon: 'warning',
+    //         title: '경고',
+    //         html: `<strong>계약단가</strong>을(를) 입력해주세요.`
+    //     });
+    //     return;
+    // }
+    // if (!payload.job_cd) {
+    //     showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+    //         icon: 'warning',
+    //         title: '경고',
+    //         html: `<strong>역할</strong>을(를) 선택해주세요.`
+    //     });
+    //     return;
+    // }
+    // if (!payload.alloc_pct) {
+    //     showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+    //         icon: 'warning',
+    //         title: '경고',
+    //         html: `<strong>투입률</strong>을(를) 입력해주세요.`
+    //     });
+    //     return;
+    // }
+    // if (!payload.stack_txt) {
+    //     showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+    //         icon: 'warning',
+    //         title: '경고',
+    //         html: `<strong>기술스택</strong>을(를) 선택해주세요.`
+    //     });
+    //     return;
+    // }
 
     $.ajax({
         url: "/hr013/tab3_save",
@@ -1093,6 +1649,60 @@ function syncHr013ProjectLinkUi(inprjYn) {
     );
 }
 
+// 삭제 버튼
+function inprjCheckboxFormatter(cell) {
+    if (isHr013ProjectReadOnly()) {
+        return cell.getValue() === "Y" ? "Y" : "N";
+    }
+    var checked = cell.getValue() === "Y" ? " checked" : "";
+    var disabled = window.hr010ReadOnly ? " disabled" : "";
+    return "<input type='checkbox' style='pointer-events:none;'" + checked + disabled + " />";
+}
+
+// 선택 행 임시 삭제
+// 체크된 행을 임시 삭제(실제 삭제는 저장 시)
+async function removeHr013SelectedRows() {
+    if (!window.hr013Table) {
+        return;
+    }
+    var rows = window.hr013Table.getRows().filter(function (row) {
+        return row.getData()._checked;
+    });
+    if (!rows || rows.length === 0) {
+        // alert("삭제할 행을 선택해주세요.");
+        showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+            icon: 'info',
+            title: '알림',
+            text: '삭제할 행을 선택해주세요.'
+        });
+        return;
+    }
+
+    const result = await showAlert({
+        icon: 'warning',
+        title: '경고',
+        text: '선택한 행을 정말로 삭제하시겠습니까?',
+        showCancelButton: true,
+        cancelButtonText: '취소',
+        cancelButtonColor: '#212E41'
+    });
+
+    if (!result.isConfirmed) return;
+
+    rows.forEach(function (row) {
+        var data = row.getData();
+        if (data.dev_prj_id) {
+            hr013DeletedIds.push(data.dev_prj_id);
+        }
+        row.delete();
+    });
+
+    changedTabs.tab3 = true;
+    // 행 삭제 후 제목 건수 갱신
+    updateHr013TitleCount();
+}
+
+// 프로젝트 탭 통합 저장용
 // 통합 저장 버튼에서 호출
 window.saveHr013TableData = function () {
     return saveHr013InlineRows();
@@ -1100,11 +1710,11 @@ window.saveHr013TableData = function () {
 
 // 테이블 내용을 서버에 저장/삭제 반영
 function saveHr013InlineRows() {
-    if (!changedTabs.tab3) {
+    if (!window.hr013Table || !changedTabs.tab3) {
         return Promise.resolve();
     }
 
-    let rows = hr013Data;
+    let rows = window.hr013Table.getData();
 
     // 유효성 검사
     if (!validateHr013Rows(rows)) {
@@ -1112,9 +1722,12 @@ function saveHr013InlineRows() {
     }
 
     let devId = window.currentDevId || $("#dev_id").val();
+
     var requests = [];
 
+    // ======================
     // 저장 요청
+    // ======================
     rows.forEach(function (row) {
 
         // 필수값 없는 행 제외
@@ -1152,7 +1765,9 @@ function saveHr013InlineRows() {
         );
     });
 
+    // ======================
     // 삭제 요청
+    // ======================
     hr013DeletedIds.forEach(function (id) {
         requests.push(
             $.ajax({
@@ -1169,15 +1784,19 @@ function saveHr013InlineRows() {
         return Promise.resolve();
     }
 
+    // ======================
     // 전체 요청 실행
+    // ======================
     return $.when.apply($, requests)
         .then(function () {
             hr013DeletedIds = [];
             console.log("[Tab3] 저장 완료");
+
             loadHr013TableData();
         })
         .catch(function (err) {
             console.error("Tab3 저장 실패", err);
+
             showAlert({
                 icon: 'error',
                 title: '오류',
@@ -1215,35 +1834,27 @@ function warnAlert(label) {
     return false;
 }
 
-/* ================================================= 임시 추가 ================================================= */
 // 행 추가
 function addHr013Row() {
-    hr013Data.push({
-        dev_prj_id: "",
-        inprj_yn: "N",
-        cust_nm: "",
-        prj_nm: "",
-        job_cd: "",
-        rate_amt: "",
-        st_dt: "",
-        ed_dt: "",
-        alloc_pct: "",
-        skl_id_lst: [],
-        stack_txt: "",
-        remark: ""
-    });
-    renderHr013Cards();
+    openHr013Modal("new");
 }
-// 행 삭제
-function removeHr013Row(index) {
-    const row = hr013Data[index];
-    if (row && row.dev_prj_id) {
-        hr013DeletedIds.push(row.dev_prj_id);
+
+function toggleInprjValue(cell) {
+    var row = cell.getRow();
+    var data = row.getData();
+    var next = data.inprj_yn === "Y" ? "N" : "Y";
+    if (next === "Y") {
+        // 당사(Y) 전환 시 기존 고객사명은 _prev_cust_nm에 백업한다.
+        var keep = data._prev_cust_nm || "";
+        if (data.cust_nm && data.cust_nm !== "HCNC") {
+            keep = data.cust_nm;
+        }
+        row.update({ inprj_yn: "Y", cust_nm: "HCNC", _prev_cust_nm: keep });
+        return;
     }
-    hr013Data.splice(index, 1);
-    renderHr013Cards();
+    var restored = data._prev_cust_nm || "";
+    row.update({ inprj_yn: "N", cust_nm: restored });
 }
-/* ================================================= 임시 추가 ================================================= */
 
 // 상세 모드 여부
 function isHr013Editable() {
@@ -1355,6 +1966,49 @@ function normalizeDateForSave(value) {
     return raw;
 }
 
+function rowSelectFormatter(cell) {
+    if (window.hr010ReadOnly) {
+        return "";
+    }
+    var checked = cell.getValue() ? " checked" : "";
+    return "<input type='checkbox' class='row-check'" + checked + " />";
+}
+
+// 체크박스 UI 동기화
+function syncRowCheckbox(row, checked) {
+    var el = row.getElement();
+    if (!el) {
+        return;
+    }
+    var checkbox = el.querySelector(".row-check");
+    if (checkbox) {
+        checkbox.checked = !!checked;
+    }
+}
+
+// 셀 클릭 시 편집 시작
+function startEditOnClick(e, cell) {
+    if (!isHr013Editable()) {
+        return;
+    }
+    var resolved = resolveCell(e, cell);
+    if (resolved && typeof resolved.edit === "function") {
+        resolved.edit();
+    }
+}
+
+// 이벤트/셀 객체 타입 분기
+function resolveCell(e, cell) {
+    // Tabulator 콜백마다 인자 순서가 달라 cell/e 어느 쪽이 셀 객체인지 흡수한다.
+    if (cell && typeof cell.getRow === "function") {
+        return cell;
+    }
+    if (e && typeof e.getRow === "function") {
+        return e;
+    }
+    return null;
+}
+
 function hr013TableSkillFormatter(cell) {
     var value = cell.getValue();
     var rowData = cell.getRow() ? cell.getRow().getData() : {};
@@ -1383,6 +2037,171 @@ function hr013TableSkillCellClick(e, cell) {
     openHr013SkillPicker("grid", cell.getRow());
 }
 
+// 날짜 입력 에디터
+function dateEditor(cell, onRendered, success, cancel) {
+    var input = document.createElement("input");
+    input.type = "date";
+    input.style.width = "100%";
+    input.value = normalizeDateForSave(cell.getValue());
+
+    onRendered(function () {
+        input.focus();
+        input.select();
+    });
+
+    input.addEventListener("blur", function () {
+        success(input.value);
+    });
+
+    input.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") {
+            success(input.value);
+        }
+        if (e.key === "Escape") {
+            cancel();
+        }
+    });
+
+    return input;
+}
+
+// 기술스택 태그 입력 에디터
+// function stackTagEditor(cell, onRendered, success, cancel) {
+//     var uid = "hr013_tag_" + Date.now() + "_" + Math.floor(Math.random() * 100000);
+//     var wrap = document.createElement("div");
+//     wrap.className = "tag-input";
+//     wrap.style.width = "100%";
+//     var rowObj = cell && typeof cell.getRow === "function" ? cell.getRow() : null;
+//     var rowEl = rowObj ? rowObj.getElement() : null;
+//     var tagInput = null;
+//     var closed = false;
+//     var docListenerBound = false;
+//     var docMouseDownHandler = null;
+//
+//     // 에디터 종료 시 hidden(csv) 값을 셀 값/표시 라벨에 함께 반영한다.
+//     function closeEditor() {
+//         if (closed) {
+//             return;
+//         }
+//         closed = true;
+//         if (tagInput && input && input.value) {
+//             tagInput.addByLabel(input.value);
+//             input.value = "";
+//         }
+//         var hiddenEl = document.getElementById(uid + "_hidden");
+//         var value = hiddenEl ? hiddenEl.value : "";
+//         var row = cell && typeof cell.getRow === "function" ? cell.getRow() : null;
+//         if (row) {
+//             row.update({
+//                 stack_txt: value,
+//                 stack_txt_nm: getSkillLabelList(value)
+//             });
+//         }
+//         setEditingState(false);
+//         success(value);
+//         if (rowObj && typeof rowObj.normalizeHeight === "function") {
+//             rowObj.normalizeHeight();
+//         }
+//         if (docListenerBound && docMouseDownHandler) {
+//             document.removeEventListener("mousedown", docMouseDownHandler, true);
+//             docListenerBound = false;
+//             docMouseDownHandler = null;
+//         }
+//     }
+//
+//     function setEditingState(isEditing) {
+//         if (!rowEl) {
+//             return;
+//         }
+//         if (isEditing) {
+//             rowEl.classList.add("stack-editing");
+//         } else {
+//             rowEl.classList.remove("stack-editing");
+//         }
+//     }
+//
+//     var box = document.createElement("div");
+//     box.className = "tag-input-box";
+//
+//     var help = document.createElement("div");
+//     help.className = "tag-help";
+//     box.appendChild(help);
+//
+//     var list = document.createElement("ul");
+//     list.className = "tag-list";
+//     list.id = uid + "_list";
+//     box.appendChild(list);
+//
+//     var input = document.createElement("input");
+//     input.type = "text";
+//     input.className = "text tag-input-field";
+//     input.id = uid + "_input";
+//     input.setAttribute("list", uid + "_datalist");
+//     input.placeholder = "입력 후 Enter";
+//     box.appendChild(input);
+//
+//     var row = document.createElement("div");
+//     row.className = "tag-select-row";
+//
+//     var datalist = document.createElement("datalist");
+//     datalist.id = uid + "_datalist";
+//     row.appendChild(datalist);
+//
+//     var hidden = document.createElement("input");
+//     hidden.type = "hidden";
+//     hidden.id = uid + "_hidden";
+//     row.appendChild(hidden);
+//
+//     wrap.appendChild(box);
+//     wrap.appendChild(row);
+//
+//     onRendered(function () {
+//         setEditingState(true);
+//         if (rowObj && typeof rowObj.normalizeHeight === "function") {
+//             rowObj.normalizeHeight();
+//         }
+//         tagInput = createTagInput({
+//             inputSelector: "#" + uid + "_input",
+//             listSelector: "#" + uid + "_list",
+//             hiddenSelector: "#" + uid + "_hidden",
+//             datalistSelector: "#" + uid + "_datalist",
+//             getValue: function (item) { return item.cd; },
+//             getLabel: function (item) { return item.cd_nm; },
+//             matchMode: "prefix"
+//         });
+//         tagInput.setOptions(hr013SkillOptions || []);
+//         tagInput.setFromValue(cell.getValue() || "");
+//
+//         function commitByInput(rawValue) {
+//             var raw = (rawValue || "").replace(",", "");
+//             if (raw) {
+//                 tagInput.addByLabel(raw);
+//             }
+//             input.value = "";
+//         }
+//
+//         input.addEventListener("keydown", function (e) {
+//             if (e.key === "Enter" || e.key === ",") {
+//                 e.preventDefault();
+//                 e.stopPropagation();
+//                 commitByInput(input.value);
+//                 // 엔터/콤마 입력은 즉시 커밋 후 편집 종료한다.
+//                 closeEditor();
+//             }
+//             if (e.key === "Escape") {
+//                 setEditingState(false);
+//                 if (rowObj && typeof rowObj.normalizeHeight === "function") {
+//                     rowObj.normalizeHeight();
+//                 }
+//                 cancel();
+//             }
+//         });
+//         input.focus();
+//     });
+//
+//     return wrap;
+// }
+
 // 콤보 기본 옵션/선택 처리
 function initSelectDefault(selectId, placeholderText) {
     var $sel = $("#" + selectId);
@@ -1394,6 +2213,20 @@ function initSelectDefault(selectId, placeholderText) {
         $sel.find("option:first").prop("selected", true);
     }
 }
+
+// 테이블 표시용 기술스택 변환
+// function skillDisplayFormatter(cell) {
+//     var row = cell.getRow().getData();
+//     if (row && row.stack_txt_nm != null && row.stack_txt_nm !== "") {
+//         return `
+//             <div class="tag-input-box">
+//                 <ul class="tag-list">
+//                     ${row.stack_txt_nm.split(",").map(t => `<li class="tag-item"><span class="tag-text">${t.trim()}</span></li>`).join("")}
+//                 </ul>
+//             </div>`;
+//     }
+//     return null;
+// }
 
 function getSkillLabelList(value) {
     if (value == null || value === "") {
@@ -1437,6 +2270,33 @@ function syncStackLabelsFromCodes() {
                 stack_txt: codes,
                 stack_txt_nm: nextLabel
             });
+        }
+    });
+}
+
+// 역할 코드/라벨 정합성 보정
+function normalizeJobRows() {
+    if (!window.hr013Table) {
+        return;
+    }
+    var map = getJobCodeMap();
+    var labelToCode = {};
+    Object.keys(map).forEach(function (code) {
+        labelToCode[map[code]] = code;
+    });
+    // 서버 데이터(role_nm/job_cd)가 섞여 와도 화면 편집 시 코드/라벨을 맞춰 둔다.
+    window.hr013Table.getRows().forEach(function (row) {
+        var data = row.getData();
+        var code = normalizeJobValue(data.job_cd) || "";
+        var label = normalizeJobValue(data.role_nm) || "";
+        if (code && map[code]) {
+            if (!label) {
+                row.update({ role_nm: map[code] });
+            }
+            return;
+        }
+        if (label && labelToCode[label]) {
+            row.update({ job_cd: labelToCode[label], role_nm: label });
         }
     });
 }
@@ -1503,15 +2363,8 @@ function formatNumberInput(value) {
     const onlyNumber = value.toString().replace(/\D/g, "");
     if (!onlyNumber) return "";
     // 숫자 포맷 (콤마)
-    return Number(onlyNumber).toLocaleString(); // "원" 제거
-}
-
-// 퍼센트 중복 입력 방지
-function formatPercentSafe(value) {
-    if (!value) return "";
-
-    let raw = String(value).replace(/[^\d]/g, "");
-    return raw ? raw + "%" : "";
+    const formatted = Number(onlyNumber).toLocaleString();
+    return formatted + "원";
 }
 
 // rate_amt가 숫자/문자열/객체 어떤 형태여도 숫자 문자열로 통일한다.
@@ -1571,105 +2424,130 @@ function formatPercentInput(value) {
     return raw + "%";
 }
 
-// 카드뷰 렌더 함수
-function renderHr013Cards() {
-    const $container = $("#TABLE_HR013_A");
-    $container.empty();
+// function normalizeTagValue(value) {
+//     if (value == null) {
+//         return "";
+//     }
+//     if (typeof value === "object") {
+//         return "";
+//     }
+//     // 태그 CSV 정리(공백/빈값 제거)
+//     return String(value).split(",").map(function (code) {
+//         return $.trim(code);
+//     }).filter(function (code) {
+//         return code !== "";
+//     }).join(",");
+// }
 
-    if (!hr013Data.length) {
-        $container.html('<div class="empty">데이터 없음</div>');
-        return;
-    }
+// function editRisk(rowData) {
+//     window.hr013_prj_nm = rowData.dev_prj_id;
+//
+//     // A: 테이블 데이터
+//     var eval = evalData.get(window.hr013_prj_nm);
+//     const pA = (eval === null || eval === undefined)
+//         ? loadHr014TableDataA()
+//         : Promise.resolve(window.hr014TableA.setData(eval));
+//
+//     // B: 위험정보 상태
+//     var risk = riskData.get(window.hr013_prj_nm);
+//     const pB = (risk === null || risk === undefined)
+//         ? loadHr014TableDataB()
+//         : Promise.resolve((function () {
+//             riskState.leave_txt = risk.leave_txt || "";
+//             riskState.claim_txt = risk.claim_txt || "";
+//             riskState.sec_txt = risk.sec_txt || "";
+//             riskState.re_in_yn = risk.re_in_yn || "N";
+//             riskState.memo = risk.memo || "";
+//             $("#HR015_REIN_CHECK").prop("checked", riskState.re_in_yn === "Y");
+//             setRiskActive(riskActiveKey);
+//         })());
+//
+//     return Promise.all([pA, pB]).then(() => {
+//         // 탭이 숨겨져 있다가 열리는 구조면 redraw가 필요할 수 있어 안전장치
+//         if (window.hr014TableA) window.hr014TableA.redraw(true);
+//         if (window.hr014TableB) window.hr014TableB.redraw(true);
+//     });
+// }
 
-    const isReadOnly = window.hr010ReadOnly && !document.querySelector(".hr011-page.is-edit-mode");
+// $('#btnUpload').on('click', function () {
+//     $('#excelFile').click();
+// });
+//
+// $('#excelFile').on('change', function (e) {
+//     const file = e.target.files[0];
+//     e.target.value = '';
+//
+//     if (!file) return showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
+//         icon: 'info',
+//         title: '알림',
+//         text: '파일을 선택하세요.'
+//     });
+//
+//     else console.log('파일 선택 완료:', file.name);
+//
+//     const formData = new FormData();
+//     formData.append("file", file);
+//
+//     $.ajax({
+//         url: "/api/excel/upload.do",
+//         type: "POST",
+//         data: formData,
+//         processData: false,
+//         contentType: false,
+//         success: function (result) {
+//             let data = window.hr013Table.getData();
+//
+//             // 엑셀 업로드 값은 공통코드 기준(cd_nm -> cd)으로 정규화 후 테이블에 append한다.
+//             result.data.forEach(function (item) {
+//                 if (item.inprj_yn?.toUpperCase() !== 'Y') {
+//                     item.inprj_yn = 'N';
+//                 }
+//
+//                 item.st_dt = item.st_dt ? item.st_dt.slice(0, 10) : "";
+//                 item.ed_dt = item.ed_dt ? item.ed_dt.slice(0, 10) : "";
+//
+//                 // 입력된 job_cd가 실제로 공통코드에 있는 정보인지 확인
+//                 var jobcdYn = false;
+//                 hr013JobOptions.forEach(function (d) {
+//                     if (item.job_cd.toUpperCase() === d.cd_nm.toUpperCase()) {
+//                         item.job_cd = d.cd;
+//                         if (!jobcdYn) jobcdYn = true;
+//                     }
+//                 });
+//                 // 존재하지 않는 job_cd일 경우 공백처리
+//                 if (!jobcdYn)
+//                     item.job_cd = null;
+//
+//                 var skl_lst = [];
+//                 item.skl_id_lst?.split(',').map(x => x.trim()).forEach(function (skl_id) {
+//                     hr013SkillOptions.forEach(function (d) {
+//                         if (skl_id.toUpperCase() === d.cd_nm.toUpperCase()) {
+//                             skl_lst.push({ code: d.cd, label: d.cd_nm });
+//                         }
+//                     });
+//                 });
+//                 item.skl_id_lst = skl_lst;
+//
+//                 data.push(item);
+//             })
+//
+//             window.hr013Table.setData(data);
+//             changedTabs.tab3 = true;
+//             // 엑셀 업로드 반영 후 제목 건수 갱신
+//             updateHr013TitleCount();
+//         },
+//         error: function (xhr) {
+//             // 서버 에러도 모달로 표시
+//             const msg = xhr.responseText || ("HTTP " + xhr.status);
+//             // openModal(msg);
+//         }
+//     });
+// });
 
-    const html = hr013Data.map((row, index) => {
-        const cust = hr013EscapeHtml(row.cust_nm || "-");
-        const prj = hr013EscapeHtml(row.prj_nm || "-");
-        const job = hr013EscapeHtml(getJobCodeMap()[row.job_cd] || "-");
-
-        const rate = hr013AmountFormatter({ getValue: () => row.rate_amt });
-        const period = `${formatDateDisplay(row.st_dt)} ~ ${formatDateDisplay(row.ed_dt)}`;
-        const pct = formatPercentSafe(row.alloc_pct);
-
-        const skills = hr013EscapeHtml(
-            getHr013SkillLabelText(row.skl_id_lst || row.stack_txt)
-        );
-
-        // 자사 여부
-        const isInternal = String(row.inprj_yn).toUpperCase() === "Y";
-
-        return `
-            <div class="hr013-card ${isInternal ? "is-hcnc" : ""}" data-index="${index}">
-                
-                <div class="card-header">
-                    <div class="left">
-                        <span class="cust">${cust}</span>
-                        ${isInternal ? `<span class="badge">당사</span>` : ""}
-                    </div>
-                    <div class="right">
-                        ${!isReadOnly ? `
-                            <button class="btn-edit" data-index="${index}">수정</button>
-                            <button class="btn-delete" data-index="${index}">삭제</button>
-                        ` : ""}
-                    </div>
-                </div>
-
-                <div class="card-title">${prj}</div>
-
-                <div class="card-body">
-                    <div><b>역할</b> ${job}</div>
-                    <div><b>단가</b> ${rate}</div>
-                    <div><b>기간</b> ${period}</div>
-                    <div><b>투입률</b> ${pct}</div>
-                </div>
-
-                <div class="card-skill">${skills || "-"}</div>
-
-                ${isInternal && !isReadOnly ? `
-                    <div class="card-footer">
-                        <button class="btn-eval" data-index="${index}">평가</button>
-                    </div>
-                ` : ""}
-            </div>
-        `;
-    }).join("");
-
-    $container.html(html);
-    bindHr013CardEvents();
-    updateHr013TitleCount();
-}
-
-function bindHr013CardEvents() {
-    const $container = $("#TABLE_HR013_A");
-
-    $container.off(".card"); // 전체 네임스페이스 제거
-
-    $container.on("click.card", ".btn-edit", function () {
-        const index = $(this).data("index");
-        openHr013RowEditor(hr013Data[index]);
-    });
-
-    $container.on("click.card", ".btn-delete", function () {
-        const index = $(this).data("index");
-        removeHr013Row(index);
-    });
-
-    $container.on("click.card", ".btn-eval", function () {
-        const index = $(this).data("index");
-        const row = hr013Data[index];
-
-        window.currentDevId = row.dev_id;
-        window.hr013_prj_nm = row.dev_prj_id;
-
-        $(".tab-btn").last().click();
-
-        reloadTab4(row.dev_prj_id).then(() => {
-            $(document).trigger("hr013:focusEvaluation", [row.dev_prj_id]);
-        });
-    });
-}
-
-function refreshHr013View() {
-    renderHr013Cards();
-}
+// 보유역량 기술 테이블 정렬 순서
+// function getPriority(text) {
+//     if (/^[a-zA-Z]/.test(text)) return 1;   // 영문 (1번째)
+//     if (/^[0-9]/.test(text)) return 2;      // 숫자 (2번째)
+//     if (/^[ㄱ-ㅎ가-힣]/.test(text)) return 3; // 한글 (3번째)
+//     return 4;                               // 기타 (4번째)
+// }
