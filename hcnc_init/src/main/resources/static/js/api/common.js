@@ -16,7 +16,7 @@ function getComCode(strGrpCd, strTag, func) {
             showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
                 icon: 'error',
                 title: '오류',
-                text: `'콤보박스' 데이터를 불러오는 중 오류가 발생했습니다.`
+                html: `<div><strong>콤보박스</strong>&nbsp;데이터를 불러오는 중 오류가 발생했습니다.</div>`
             });
             return null;
         }
@@ -47,7 +47,7 @@ function setComCode(strId, strGrpCd, strTag, id = "cd", name = "cd_nm", done, bT
             showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
                 icon: 'error',
                 title: '오류',
-                text: `'콤보박스' 데이터를 불러오는 중 오류가 발생했습니다.`
+                html: `<div><strong>콤보박스</strong>&nbsp;데이터를 불러오는 중 오류가 발생했습니다.</div>`
             });
         }
     });
@@ -163,10 +163,10 @@ function select2MultiEditor(cfg){
                             e.stopPropagation();
                             e.stopImmediatePropagation?.();
 
-                            // ✅ Select2 강제 종료
+                            // Select2 강제 종료
                             $(select).select2("destroy");
 
-                            // ✅ Tabulator 편집 취소 (여기가 핵심)
+                            // Tabulator 편집 취소 (여기가 핵심)
                             cancel();
 
                             return false;

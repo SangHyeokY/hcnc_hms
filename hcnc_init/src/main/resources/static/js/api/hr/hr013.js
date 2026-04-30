@@ -17,7 +17,7 @@ var hr013SelectedProjectCode = null;     // 사용자가 선택한 코드 1건
 var hr013Data = []; // 테이블 구조 분리
 var hr013Paging = {
     page: 1,
-    size: 10,
+    size: 5,
     total: 0
 };
 
@@ -46,21 +46,6 @@ window.initTab3 = function () {
         $(this).val(formatPercentInput($(this).val()));
     });
 
-    $(".btn-hr013-save").off("click").on("click", function () {
-        saveHr013Row();
-    });
-    $(".btn-tab3-edit").off("click").on("click", function () {
-        const index = $(this).data("index");
-        const row = hr013Data[index];
-        openHr013RowEditor(row);
-    });
-    $(".btn-tab3-remove").off("click").on("click", function () {
-        const index = $(this).data("index");
-        removeHr013Row(index);
-    });
-    $(".btn-tab3-add").off("click").on("click", function () {
-        addHr013Row();
-    });
     $("#write_hr013_inprj_yn").off("change").on("change", function () {
         applyInprjCustomerName($(this).val(), $("#write_hr013_cust_nm").val());
         syncHr013ProjectLinkUi($(this).val());
@@ -72,9 +57,6 @@ window.initTab3 = function () {
     });
     $("#btn_hr013_project_link").off("click.hr013projectlink").on("click.hr013projectlink", function () {
         openHr013ProjectPicker(null);
-    });
-    $(document).on("click", ".btn-tab3-new", function () {
-        openHr013Modal("new");
     });
 
     // 역할/기술스택 공통코드는 테이블 formatter/editor에서 재사용하므로 캐시해 둔다.
@@ -360,7 +342,7 @@ async function openHr013ProjectPicker(row) {
         showAlert({
             icon: "info",
             title: "알림",
-            html: `<strong>당사 프로젝트</strong>만 선택할 수 있습니다.`
+            html: `<div><strong>당사 프로젝트</strong>만 선택할 수 있습니다.</div>`
         });
         return;
     }
@@ -591,7 +573,7 @@ function applyHr013ProjectPickerSelection() {
     }
     if (!isHr013ProjectCodeSelectable(hr013SelectedProjectCode)) {
         showAlert({
-            icon: "info", title: "알림", html: `<strong>당사 프로젝트</strong>만 선택할 수 있습니다.`
+            icon: "info", title: "알림", html: `<div><strong>당사 프로젝트</strong>만 선택할 수 있습니다.</div>`
         });
         return;
     }
@@ -628,7 +610,7 @@ async function saveHr013ProjectCode() {
     const confirmResult = await showAlert({
         icon: "warning",
         title: "확인",
-        html: `<strong>cdNm</strong>&nbsp;프로젝트를 등록하시겠습니까?`,
+        html: `<div><strong>cdNm</strong>&nbsp;프로젝트를 등록하시겠습니까?</div>`,
         showCancelButton: true,
         confirmText: "등록",
         cancelText: "취소",
@@ -958,12 +940,18 @@ function loadHr013TableData() {
                 row.stack_txt_nm = getSkillLabelList(row.stack_txt);
                 return row;
             });
+
             hr013Data = normalized;
-            // 조회 직후 제목 건수 즉시 갱신
-            updateHr013TitleCount();
+
+            // 후처리 먼저
             normalizeJobCodes();
             syncStackLabelsFromCodes();
+
+            // 렌더는 한 번만
             refreshHr013View();
+
+            updateHr013TitleCount();
+
             $(document).trigger("hr013:dataLoaded", [normalized]);
         },
         error: function () {
@@ -1177,8 +1165,8 @@ function saveHr013InlineRows() {
         );
     });
 
-    console.log(requests);
-    console.log(requests.length);
+    // console.log(requests);
+    // console.log(requests.length);
 
     // 전체 요청 실행
     return $.when.apply($, requests)
@@ -1192,7 +1180,7 @@ function saveHr013InlineRows() {
             showAlert({
                 icon: 'error',
                 title: '오류',
-                text: `"프로젝트" 저장 중 오류가 발생했습니다.`
+                html: `<div><strong>프로젝트</strong>&nbsp;저장 중 오류가 발생했습니다.</div>`
             });
             return Promise.reject(err);
         });
@@ -1240,7 +1228,7 @@ function warnAlert(label) {
     showAlert({
         icon: 'warning',
         title: '경고',
-        html: `<strong>${label}</strong>을(를) 입력해주세요.`
+        html: `<div><strong>${label}</strong>을(를) 입력해주세요.</div>`
     });
     return false;
 }
@@ -1266,14 +1254,17 @@ function addHr013Row() {
     renderHr013Cards();
 }
 // 행 삭제
-function removeHr013Row(index) {
+function deleteHr013Prj(id) {
+    const index = hr013Data.findIndex(row => Number(row.dev_prj_id) === Number(id));
+    if (index === -1) return;
     const row = hr013Data[index];
     if (row && row.dev_prj_id) {
         hr013DeletedIds.push(row.dev_prj_id);
     }
     hr013Data.splice(index, 1);
     changedTabs.tab3 = true;
-    renderHr013Cards();
+
+    refreshHr013View();
 }
 /* ================================================= 임시 추가 ================================================= */
 
@@ -1513,7 +1504,7 @@ function hr013AmountFormatter(cell) {
     var value = cell && typeof cell.getValue === "function" ? cell.getValue() : cell;
     var parsed = parseHr013RateAmountValue(value);
     if (parsed === "" || parsed === null) {
-        return "-";
+        return "미입력";
     }
     return formatNumberInput(parsed) + "만원";
 }
@@ -1616,20 +1607,27 @@ function formatPercentInput(value) {
     return raw + "%";
 }
 
+function getSkillChipMarkup(row, maxChips) {
+    const skills = getHr013SkillLabelText(row.skl_id_lst, row.stack_txt)
+        .split(",")
+        .map(s => s.trim())
+        .filter(Boolean);
+
+    const hasMore = skills.length > maxChips;
+    const visible = (skills.length ? skills : ["미등록"]).slice(0, maxChips);
+
+    return visible.map(skill => {
+        return `<span class="chip">${hr013EscapeHtml(skill)}</span>`;
+    }).join("") + (hasMore ? `<span class="chip">...</span>` : "");
+}
+
 // 카드뷰 렌더 함수
 function renderHr013Cards(list) {
-    if (!Array.isArray(list)) {
-        list = hr013Data || [];
+    if (Array.isArray(list)) {
+        hr013LastRenderedRows = list.slice();
     }
 
-    hr013LastRenderedRows = list.slice();
     hr013Paging.total = hr013LastRenderedRows.length;
-    const totalPage = Math.ceil(hr013Paging.total / hr013Paging.size);
-
-    if (hr013Paging.page > totalPage) {
-        hr013Paging.page = totalPage || 1;
-    }
-
     const pagedList = getPagedList(hr013LastRenderedRows);
 
     $container.empty();
@@ -1640,48 +1638,50 @@ function renderHr013Cards(list) {
         return;
     }
 
-    const html = pagedList.map((row, index) => {
+    const html = pagedList.map((row) => {
         const cust = hr013EscapeHtml(row.cust_nm || "-");
         const prj = hr013EscapeHtml(row.prj_nm || "-");
         const job = hr013EscapeHtml(getJobCodeMap()[row.job_cd] || "-");
 
         const rate = hr013AmountFormatter({ getValue: () => row.rate_amt });
-        const period = `${formatDateDisplay(row.st_dt)}<br>${formatDateDisplay(row.ed_dt)}`;
+        const period = `<span class="st_dt">${formatDateDisplay(row.st_dt)}</span>~<span class="ed_dt">${formatDateDisplay(row.ed_dt)}</span>`;
         const pct = formatPercentSafe(row.alloc_pct);
 
         const skills = hr013EscapeHtml(
             getHr013SkillLabelText(row.skl_id_lst || row.stack_txt)
         );
 
-        const remark = hr013EscapeHtml(row.remark || "-");
+        const remark = hr013EscapeHtml(row.remark || "* 비고 미입력");
 
         const isReadOnly = window.hr010ReadOnly && !document.querySelector(".hr011-page.is-edit-mode");
         const isInternal = String(row.inprj_yn).toUpperCase() === "Y";
 
         return `
-            <div class="hr013-card ${isInternal ? "is-hcnc" : ""}" data-index="${index}">
+            <div class="hr013-card ${isInternal ? "is-hcnc" : ""}">
                 
                 <!-- 기존 grid 컬럼 그대로 -->
                 <div class="cust">
                     ${!isReadOnly ? `
-                        <input type="checkbox" class="card-check" data-index="${index}" ${row._checked ? "checked" : ""}>
+                        <input type="checkbox" class="card-check" data-id="${row.dev_prj_id}" ${row._checked ? "checked" : ""}>
                     ` : ""}
                     ${cust}
                 </div>
                 <div class="prj">${prj}</div>
-                <div class="skills">${skills || "-"}</div>
-                <div class="job">${job}</div>
-                <div class="pct">${pct}</div>
+                <div class="skills">
+                    ${getSkillChipMarkup(row, 5)}
+                </div>
                 <div class="period">${period}</div>
+                <div class="job">${job}</div>
                 <div class="rate">${rate}</div>
-        
+                <div class="pct">${pct}</div>
+                
                 <!-- footer -->
                 <div class="card-footer">
                     <div class="remark">${remark}</div>
                     <div class="card-actions">
-                        ${isInternal && !isReadOnly ? `
-                            <button class="btn-eval" data-index="${index}">평가</button>
-                        ` : ""}
+                        <button class="btn-eval" data-id="${row.dev_prj_id}" ${isInternal && !isReadOnly ? "" : "disabled"}>
+                            ${isInternal && !isReadOnly ? "자사 프로젝트 평가" : "타사 프로젝트"}
+                        </button>
                     </div>
                 </div>
         
@@ -1696,34 +1696,74 @@ function renderHr013Cards(list) {
     updateHr013TitleCount();
 }
 
-// 체크 박스 이벤트 처리
-$container.on("change.card", ".card-check", function () {
-    const index = $(this).data("index");
-    hr013Data[index]._checked = $(this).is(":checked");
-
-    $(this).closest(".hr013-card")
-        .toggleClass("selected", $(this).is(":checked"));
-});
-
 function bindHr013CardEvents() {
     const $container = $("#TABLE_HR013_A");
 
-    $container.off(".card"); // 전체 네임스페이스 제거
+    // 기존 이벤트 전부 제거
+    $container.off(".card");
 
-    // 버튼 기능 안하고 있음
-    $container.on("click.card", ".btn-edit", function () {
-        const index = $(this).data("index");
-        openHr013RowEditor(hr013Data[index]);
+    // 체크박스 단일 선택
+    $container.on("change.card", ".card-check", function () {
+        const id = $(this).data("id");
+        const isChecked = $(this).is(":checked");
+
+        hr013Data.forEach(row => row._checked = false);
+
+        if (isChecked) {
+            const target = hr013Data.find(row => row.dev_prj_id === id);
+            if (target) target._checked = true;
+        }
+        renderHr013Cards();
     });
 
-    $container.on("click.card", ".btn-delete", function () {
-        const index = $(this).data("index");
-        removeHr013Row(index);
+    // 프로젝트 등록
+    $("#hr011QuickAddProjectBtn").off("click.hr013").on("click.hr013", () => openHr013Modal("new"));
+
+    // 프로젝트 수정
+    $container.on("click.card", ".hr011-section-edit-btn", function () {
+        const id = $(this).data("id");
+        const row = hr013Data.find(r => r.dev_prj_id === id);
+        if (row) openHr013RowEditor(row);
     });
 
+    // 프로젝트 삭제
+    $("#hr011QuickRemoveProjectBtn").off("click.hr013").on("click.hr013", async function () {
+
+        const selected = hr013Data.find(r => r._checked);
+
+        if (!selected) {
+            showAlert({ icon: "info", title: "알림", text: "삭제할 프로젝트를 선택해주세요." });
+            return;
+        }
+
+        const deletedName = selected.prj_nm;
+
+        const result = await showAlert({
+            icon: "warning",
+            title: "확인",
+            html: `<div><strong>${deletedName}</strong>&nbsp;프로젝트를 정말로 삭제하시겠습니까?</div>`,
+            showCancelButton: true,
+            confirmText: "삭제",
+            cancelText: "취소",
+            cancelButtonColor: "#212E41"
+        });
+        if (!(result && (result.isConfirmed || result === true))) return;
+        deleteHr013Prj(selected.dev_prj_id);
+
+        showAlert({
+            icon: "success",
+            title: "완료",
+            html: `<div><strong>${deletedName}</strong>가 목록에서 삭제되었습니다.</div>
+                   <div><strong>저장하기</strong>&nbsp;버튼을 누르시면 변경사항이 저장됩니다.</div>`,
+        });
+    });
+
+    // 평가 버튼
     $container.on("click.card", ".btn-eval", function () {
-        const index = $(this).data("index");
-        const row = hr013Data[index];
+        const id = $(this).data("id");
+        const row = hr013Data.find(r => r.dev_prj_id === id);
+
+        if (!row) return;
 
         window.currentDevId = row.dev_id;
         window.hr013_prj_nm = row.dev_prj_id;
@@ -1741,65 +1781,67 @@ function refreshHr013View() {
 }
 
 function renderHr013Pager() {
-    const totalPage = Math.ceil(hr013Paging.total / hr013Paging.size);
-    const $pager = $("#HR013_PAGER");
+    const pagerRoot = document.getElementById("HR013_PAGER");
+    if (!pagerRoot) return;
 
-    $pager.empty();
+    let pager = pagerRoot.querySelector(".hr013-pager");
 
-    if (totalPage <= 1) return;
+    const size = hr013Paging.size;
+    const totalPage = Math.ceil(hr013Paging.total / size);
 
-    let html = `<div class="hr013-pager">`;
+    if (totalPage <= 1) {
+        if (pager) pager.remove();
+        return;
+    }
 
-    // 이전 버튼
-    html += `
-        <button class="hr013-page-btn" data-page="${hr013Paging.page - 1}" 
-            ${hr013Paging.page === 1 ? "disabled" : ""}>
-            ‹
-        </button>
+    if (!pager) {
+        pager = document.createElement("div");
+        pager.className = "hr013-pager";
+        pagerRoot.appendChild(pager);
+    }
+
+    let html = `
+        <button data-page="first" ${hr013Paging.page === 1 ? "disabled" : ""}>«</button>
+        <button data-page="prev" ${hr013Paging.page === 1 ? "disabled" : ""}>‹</button>
     `;
 
-    // 페이지 번호
     for (let i = 1; i <= totalPage; i++) {
         html += `
-            <button class="hr013-page-btn ${i === hr013Paging.page ? "active" : ""}" 
-                data-page="${i}">
+            <button class="${i === hr013Paging.page ? "active" : ""}" data-page="${i}">
                 ${i}
             </button>
         `;
     }
 
-    // 다음 버튼
     html += `
-        <button class="hr013-page-btn" data-page="${hr013Paging.page + 1}" 
-            ${hr013Paging.page === totalPage ? "disabled" : ""}>
-            ›
-        </button>
+        <button data-page="next" ${hr013Paging.page === totalPage ? "disabled" : ""}>›</button>
+        <button data-page="last" ${hr013Paging.page === totalPage ? "disabled" : ""}>»</button>
     `;
 
-    html += `</div>`;
+    pager.innerHTML = html;
 
-    $pager.html(html);
+    pager.querySelectorAll("button").forEach(btn => {
+        btn.onclick = function () {
+            if (this.disabled) return;
 
-    bindHr013PagerEvent();
-}
+            const type = this.dataset.page;
 
-function bindHr013PagerEvent() {
-    $("#hr013-pager").off("click").on("click", ".hr013-page-btn", function () {
-        const page = Number($(this).data("page"));
+            if (type === "first") hr013Paging.page = 1;
+            else if (type === "last") hr013Paging.page = totalPage;
+            else if (type === "prev") hr013Paging.page = Math.max(1, hr013Paging.page - 1);
+            else if (type === "next") hr013Paging.page = Math.min(totalPage, hr013Paging.page + 1);
+            else hr013Paging.page = Number(type);
 
-        if (!page || page < 1) return;
-
-        const totalPage = Math.ceil(hr013Paging.total / hr013Paging.size);
-        if (page > totalPage) return;
-
-        hr013Paging.page = page;
-
-        renderHr013Cards();
+            renderHr013Cards(hr013LastRenderedRows);
+        };
     });
 }
 
 function getPagedList(list) {
-    const start = (hr013Paging.page - 1) * hr013Paging.size;
-    const end = start + hr013Paging.size;
-    return (list || []).slice(start, end);
+    const size = hr013Paging.size;
+    if (!Array.isArray(list)) {
+        return [];
+    }
+    const start = (hr013Paging.page - 1) * size;
+    return list.slice(start, start + size);
 }

@@ -117,7 +117,7 @@
   height: 40px;
   border-radius: 48px;
   border: 1px solid transparent;
-  background: url("../icons/ico-search.png") 14px center no-repeat #2C80FF;
+  background: url("../icons/ico-search.png") 14px center no-repeat var(--hcnc-shell-primary);
   background-size:20px;
   color: #fff;
   font-size: 18px;
@@ -439,8 +439,8 @@ input[type="checkbox"]:before {
 input[type="checkbox"]:checked:before {
     /* 체크박스를 체크했을때 */
     color: #fff; 
-    border-color: #ED2455;
-    background: #ED2455;
+    border-color: var(--hcnc-shell-primary);
+    background: var(--hcnc-shell-primary);
 }
 input[type="checkbox"]:checked:after {
     content: "";

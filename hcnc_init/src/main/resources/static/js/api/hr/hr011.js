@@ -69,7 +69,7 @@ $(document).on("tab:readonly.hr011", function (_, isReadOnly) {
                 showAlert({
                     icon: 'info',
                     title: '알림',
-                    html: `<strong>이미지 파일</strong>만 선택 가능합니다.`,
+                    html: `<div><strong>이미지 파일</strong>만 선택 가능합니다.</div>`,
                 });
                 $(this).val(""); // 선택 초기화
             }
@@ -368,7 +368,7 @@ function saveHr011TableData() {
             showAlert({
                 icon: 'error',
                 title: '오류',
-                html: `<strong>소속 및 계약</strong>&nbsp;저장 중 오류가 발생했습니다.`
+                html: `<div><strong>소속 및 계약</strong>&nbsp;저장 중 오류가 발생했습니다.</div>`
             });
         }
     });
@@ -380,7 +380,7 @@ async function deleteHr011() {
         await showAlert({
             icon: 'error',
             title: '오류',
-            html: `<strong>소속 및 계약</strong>&nbsp;데이터가 존재하지 않습니다.`
+            html: `<div><strong>소속 및 계약</strong>&nbsp;데이터가 존재하지 않습니다.</div>`
         });
         return;
     }
@@ -408,7 +408,7 @@ async function deleteHr011() {
             showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
                 icon: 'success',
                 title: '완료',
-                html: `<strong>소속 및 계약</strong>&nbsp;데이터가 삭제되었습니다.`
+                html: `<div><strong>소속 및 계약</strong>&nbsp;데이터가 삭제되었습니다.</div>`
             });
             loadHr011TableData(window.currentDevId);
         },
@@ -416,7 +416,7 @@ async function deleteHr011() {
             showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
                 icon: 'error',
                 title: '오류',
-                html: `<strong>소속 및 계약</strong>&nbsp;데이터를 삭제하는 중 오류가 발생했습니다.`
+                html: `<div><strong>소속 및 계약</strong>&nbsp;데이터를 삭제하는 중 오류가 발생했습니다.</div>`
             })
     });
 }
@@ -449,7 +449,7 @@ function validateUserForm() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            html: `<strong>성명</strong>을(를) 입력하세요.`
+            html: `<div><strong>성명</strong>을(를) 입력하세요.</div>`
         });
         $("#dev_nm").focus();
         return false;
@@ -460,7 +460,7 @@ function validateUserForm() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            html: `<strong>소속구분</strong>을(를) 선택해주세요.`
+            html: `<div><strong>소속구분</strong>을(를) 선택해주세요.</div>`
         });
         $("#select_dev_typ").focus();
         return false;
@@ -471,7 +471,7 @@ function validateUserForm() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            html: `<strong>생년월일</strong>을(를) 입력하세요.`
+            html: `<div><strong>생년월일</strong>을(를) 입력하세요.</div>`
         });
         $("#brdt").focus();
         return false;
@@ -482,7 +482,7 @@ function validateUserForm() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            html: `<strong>연락처</strong>을(를) 입력하세요.`
+            html: `<div><strong>연락처</strong>을(를) 입력하세요./div>`
         });
         $("#tel").focus();
         return false;
@@ -493,7 +493,7 @@ function validateUserForm() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            html: `<strong>연락처</strong>&nbsp;형식이 올바르지 않습니다.`
+            html: `<div><strong>연락처</strong>&nbsp;형식이 올바르지 않습니다.</div>`
         });
         $("#tel").focus();
         return false;
@@ -504,7 +504,7 @@ function validateUserForm() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            html: `<strong>이메일</strong>을(를) 입력하세요.`
+            html: `<div><strong>이메일</strong>을(를) 입력하세요.</div>`
         });
         $("#email").focus();
         return false;
@@ -517,7 +517,7 @@ function validateUserForm() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            html: `<strong>이메일</strong>&nbsp;형식이 올바르지 않습니다.`
+            html: `<div><strong>이메일</strong>&nbsp;형식이 올바르지 않습니다.</div>`
         });
         $("#email").focus();
         return false;
@@ -528,7 +528,7 @@ function validateUserForm() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            html: `<strong>근무가능형태</strong>을(를) 선택해주세요.`
+            html: `<div><strong>근무가능형태</strong>을(를) 선택해주세요.</div>`
         });
         $("#select_work_md").focus();
         return false;
@@ -539,7 +539,7 @@ function validateUserForm() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            html: `<strong>최종학력</strong>을(를) 입력하세요.`
+            html: `<div><strong>최종학력</strong>을(를) 입력하세요.</div>`
         });
         $("#edu_last").focus();
         return false;
@@ -550,7 +550,7 @@ function validateUserForm() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            html: `<strong>단가</strong>을(를) 입력해주세요.`
+            html: `<div><strong>단가</strong>을(를) 입력해주세요.</div>`
         });
         $("#hope_rate_amt").focus();
         return false;
@@ -561,7 +561,7 @@ function validateUserForm() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            html: `<strong>KOSA등급</strong>을(를) 선택해주세요.`
+            html: `<div><strong>KOSA등급</strong>을(를) 선택해주세요.</div>`
         });
         $("#select_kosa_grd_cd").focus();
         return false;
@@ -572,7 +572,7 @@ function validateUserForm() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            html: `<strong>경력연차(년/개월)</strong>을(를) 입력하세요.`
+            html: `<div><strong>경력연차(년/개월)</strong>을(를) 입력하세요.</div>`
         });
         if (expYrYear === "") {
             $("#exp_yr_year").focus();
@@ -585,7 +585,7 @@ function validateUserForm() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            html: `<strong>경력연차(년/개월)</strong>을(를) 입력하세요.`
+            html: `<div><strong>경력연차(년/개월)</strong>을(를) 입력하세요.</div>`
         });
         $("#exp_yr_year").focus();
         return false;
@@ -596,7 +596,7 @@ function validateUserForm() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            html: `<strong>경력연차</strong>은(는) 년(0~99), 개월(0~12) 범위 내에서 입력해주세요.`
+            html: `<div><strong>경력연차</strong>은(는) 년(0~99), 개월(0~12) 범위 내에서 입력해주세요.</div>`
         });
         $("#exp_yr_year").focus();
         return false;
@@ -608,7 +608,7 @@ function validateUserForm() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            html: `<strong>주요분야</strong>을(를) 선택해주세요.`
+            html: `<div><strong>주요분야</strong>을(를) 선택해주세요.</div>`
         });
         $("#select_main_fld_cd").focus();
         return false;
@@ -619,7 +619,7 @@ function validateUserForm() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            html: `<strong>계약형태</strong>을(를) 선택해주세요.`
+            html: `<div><strong>계약형태</strong>을(를) 선택해주세요.</div>`
         });
         $("#select_ctrt_typ").focus();
         return false;
@@ -630,7 +630,7 @@ function validateUserForm() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            html: `<strong>주요고객사</strong>을(를) 선택해주세요.`
+            html: `<div><strong>주요고객사</strong>을(를) 선택해주세요.</div>`
         });
         $("#select_main_cust_cd").focus();
         return false;
@@ -652,7 +652,7 @@ function validateHr011Form() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            html: `<strong>소속사</strong>을(를) 입력해주세요.`
+            html: `<div><strong>소속사</strong>을(를) 입력해주세요.</div>`
         });
         $("#org_nm").focus();
         return false;
@@ -662,7 +662,7 @@ function validateHr011Form() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            html: `<strong>계약시작일</strong>을(를) 입력해주세요.`
+            html: `<div><strong>계약시작일</strong>을(를) 입력해주세요.</div>`
         });
         $("#st_dt").focus();
         return false;
@@ -672,7 +672,7 @@ function validateHr011Form() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            html: `<strong>계약종료일</strong>을(를) 입력해주세요.`
+            html: `<div><strong>계약종료일</strong>을(를) 입력해주세요.</div>`
         });
         $("#ed_dt").focus();
         return false;
@@ -682,7 +682,7 @@ function validateHr011Form() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            html: `<strong>계약종료일</strong>은(는)&nbsp;<strong>계약시작일</strong>&nbsp;이후여야 합니다.`
+            html: `<div><strong>계약종료일</strong>은(는)&nbsp;<strong>계약시작일</strong>&nbsp;이후여야 합니다.</div>`
         });
         $("#ed_dt").focus();
         return false;
@@ -692,7 +692,7 @@ function validateHr011Form() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            html: `<strong>사업자유형</strong>을(를) 선택해주세요.`
+            html: `<div><strong>사업자유형</strong>을(를) 선택해주세요.</div>`
         });
         $("#select_biz_typ").focus();
         return false;
@@ -702,7 +702,7 @@ function validateHr011Form() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            html: `<strong>계약금액</strong>을(를) 입력해주세요.`
+            html: `<div><strong>계약금액</strong>을(를) 입력해주세요.</div>`
         });
         $("#amt").focus();
         return false;
@@ -712,7 +712,7 @@ function validateHr011Form() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            html: `<strong>계약금액</strong>은(는) 0보다 큰 숫자여야 합니다.`
+            html: `<div><strong>계약금액</strong>은(는) 0보다 큰 숫자여야 합니다.</div>`
         });
         $("#amt").focus();
         return false;
@@ -2253,7 +2253,6 @@ function syncHr011EditIntegrations(isEditable, wasEditable) {
     if (quickProjectRemoveBtn) {
         quickProjectRemoveBtn.disabled = !isEditable;
     }
-    // scheduleHr011StepStatusSync();
     setTimeout(updateStepperUI, 0);
 }
 
@@ -4869,7 +4868,7 @@ if (excelBtn) {
             showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
                 icon: 'error',
                 title: '오류',
-                html: `<strong>개발자ID</strong>가 없습니다.`
+                html: `<div><strong>개발자ID</strong>가 없습니다.</div>`
             });
             return;
         }

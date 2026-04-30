@@ -55,7 +55,7 @@
           AND prj.use_yn = 'Y'
           AND prj.del_yn = 'N'
         GROUP BY prj.dev_prj_id
-        ORDER BY prj.st_dt DESC, prj.dev_prj_id DESC
+        ORDER BY prj.inprj_yn DESC, prj.st_dt DESC, prj.dev_prj_id DESC
         ;
     </select>
 

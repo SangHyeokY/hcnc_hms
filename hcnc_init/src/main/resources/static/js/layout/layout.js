@@ -222,7 +222,7 @@ document.addEventListener("DOMContentLoaded", () => {
               showAlert({
                   icon: 'info',
                   title: '알림',
-                  html: `<strong>로그아웃</strong>&nbsp;하시겠습니까?`,
+                  html: `<div><strong>로그아웃</strong>&nbsp;하시겠습니까?</div>`,
                   showCancelButton: true,       // 취소 버튼 추가
                   confirmButtonText: '확인',
                   cancelButtonText: '취소',

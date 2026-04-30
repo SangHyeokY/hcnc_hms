@@ -305,7 +305,7 @@ function upsertUserBtn() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: "warning",
             title: "경고",
-            html: `<strong>아이디</strong>을(를) 입력해주세요.`
+            html: `<div><strong>아이디</strong>을(를) 입력해주세요.</div>`
         });
         $("#write_user_id").focus();
         return;
@@ -315,7 +315,7 @@ function upsertUserBtn() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: "warning",
             title: "경고",
-            html: `<strong>이름</strong>을(를) 입력해주세요.`
+            html: `<div><strong>이름</strong>을(를) 입력해주세요.</div>`
         });
         $("#write_user_nm").focus();
         return;
@@ -325,7 +325,7 @@ function upsertUserBtn() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: "warning",
             title: "경고",
-            html: `<strong>역할</strong>을(를) 선택해주세요.`
+            html: `<div><strong>역할</strong>을(를) 선택해주세요.</div>`
         });
         $("#write_role_cd").focus();
         return;
@@ -335,7 +335,7 @@ function upsertUserBtn() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: "warning",
             title: "경고",
-            html: `<strong>비밀번호</strong>을(를) 입력해주세요.`
+            html: `<div><strong>비밀번호</strong>을(를) 입력해주세요.</div>`
         });
         $("#write_pwd_hash").focus();
         return;

@@ -599,7 +599,7 @@ function loadMainTableData() {
             showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
                 icon: 'error',
                 title: '오류',
-                html: `<strong>코드그룹</strong>&nbsp;데이터를 불러오는 중 오류가 발생했습니다.`
+                html: `<div><strong>코드그룹</strong>&nbsp;데이터를 불러오는 중 오류가 발생했습니다.</div>`
             });
         },
         complete: function () {
@@ -614,7 +614,7 @@ async function deleteMainRows() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'info',
             title: '알림',
-            html: `삭제할&nbsp;<strong>코드그룹</strong>을 선택해주세요.`
+            html: `<div>삭제할&nbsp;<strong>코드그룹</strong>을 선택해주세요.</div>`
         });
         return;
     }
@@ -625,7 +625,7 @@ async function deleteMainRows() {
     const firstResult = await showAlert({  // 알림(info), 경고(warning), 오류(error), 완료(success)
         icon: 'warning',
         title: '경고',
-        html: `선택한&nbsp;<strong>${firstRowData.cd} (${firstRowData.grp_nm})</strong>&nbsp;코드그룹을 삭제하시겠습니까?`,
+        html: `<div>선택한&nbsp;<strong>${firstRowData.cd} (${firstRowData.grp_nm})</strong>&nbsp;코드그룹을 삭제하시겠습니까?</div>`,
         showCancelButton: true,
         cancelButtonText: '취소',
         cancelButtonColor: '#212E41'
@@ -635,7 +635,7 @@ async function deleteMainRows() {
     const secondResult = await showAlert({
         icon: 'warning',
         title: '경고',
-        html: `다시 확인 버튼을 누르시면&nbsp;<strong>${firstRowData.cd} (${firstRowData.grp_nm})</strong>의 데이터가 삭제되며, 되돌릴 수 없습니다.`,
+        html: `<div>다시 확인 버튼을 누르시면&nbsp;<strong>${firstRowData.cd} (${firstRowData.grp_nm})</strong>의 데이터가 삭제되며, 되돌릴 수 없습니다.</div>`,
         showCancelButton: true,
         cancelButtonText: '취소',
         cancelButtonColor: '#212E41'
@@ -688,7 +688,7 @@ async function deleteMainRows() {
                 showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
                     icon: 'error',
                     title: '오류',
-                    html: `<strong>코드그룹</strong>&nbsp;삭제 중 오류가 발생했습니다.`
+                    html: `<div><strong>코드그룹</strong>&nbsp;삭제 중 오류가 발생했습니다.</div>`
                 });
             }
         });
@@ -704,7 +704,7 @@ function upsertMainBtn() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            html: `<strong>코드그룹</strong>을(를) 입력해주세요.`
+            html: `<div><strong>코드그룹</strong>을(를) 입력해주세요.</div>`
         });
         $("#write_main_grp_cd").focus();
         return;
@@ -714,7 +714,7 @@ function upsertMainBtn() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            html: `<strong>코드그룹명</strong>을(를) 입력해주세요.`
+            html: `<div><strong>코드그룹명</strong>을(를) 입력해주세요.</div>`
         });
         $("#write_main_grp_nm").focus();
         return;
@@ -724,7 +724,7 @@ function upsertMainBtn() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            html: `<strong>코드</strong>을(를) 입력해주세요.`
+            html: `<div><strong>코드</strong>을(를) 입력해주세요.</div>`
         });
         $("#write_main_cd").focus();
         return;
@@ -784,7 +784,7 @@ function openMainWriteModal(type) {
             showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
                 icon: 'info',
                 title: '알림',
-                html: `수정할&nbsp;<strong>코드그룹</strong>을 선택해주세요.`
+                html: `<div>수정할&nbsp;<strong>코드그룹</strong>을 선택해주세요.</div>`
             });
             return;
         }
@@ -868,7 +868,7 @@ function loadDetailTableData(grpCd) {
             showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
                 icon: 'error',
                 title: '오류',
-                html: `<strong>상세코드</strong>&nbsp;데이터를 불러오는 중 오류가 발생했습니다.`
+                html: `<div><strong>상세코드</strong>&nbsp;데이터를 불러오는 중 오류가 발생했습니다.</div>`
             });
         },
         complete: function () {
@@ -883,7 +883,7 @@ async function deleteDetailRows() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'info',
             title: '알림',
-            html: `삭제할&nbsp;<strong>상세코드</strong>를 선택해주세요.`
+            html: `<div>삭제할&nbsp;<strong>상세코드</strong>를 선택해주세요.</div>`
         });
         return;
     }
@@ -893,7 +893,7 @@ async function deleteDetailRows() {
     const firstResult = await showAlert({
         icon: 'warning',
         title: '경고',
-        html: `선택한&nbsp;<strong>${firstRow.cd} (${firstRow.cd_nm})</strong>&nbsp;상세코드를 삭제하시겠습니까?`,
+        html: `<div>선택한&nbsp;<strong>${firstRow.cd} (${firstRow.cd_nm})</strong>&nbsp;상세코드를 삭제하시겠습니까?</div>`,
         showCancelButton: true,
         confirmText: '삭제',
         cancelText: '취소'
@@ -904,7 +904,7 @@ async function deleteDetailRows() {
     const secondResult = await showAlert({
         icon: 'warning',
         title: '경고',
-        html: `다시 확인 버튼을 누르시면&nbsp;<strong>${firstRow.cd} (${firstRow.cd_nm})</strong>의 데이터가 삭제되며, 되돌릴 수 없습니다.`,
+        html: `<div>다시 확인 버튼을 누르시면&nbsp;<strong>${firstRow.cd} (${firstRow.cd_nm})</strong>의 데이터가 삭제되며, 되돌릴 수 없습니다.</div>`,
         showCancelButton: true,
         confirmText: '삭제',
         cancelText: '취소'
@@ -944,7 +944,7 @@ async function deleteDetailRows() {
                 showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
                     icon: 'error',
                     title: '오류',
-                    html: `<strong>상세코드</strong>&nbsp;삭제 중 오류가 발생했습니다.`
+                    html: `<div><strong>상세코드</strong>&nbsp;삭제 중 오류가 발생했습니다.</div>`
                 });
             }
         });
@@ -996,7 +996,7 @@ function upsertDetailBtn() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            html: `<strong>코드그룹</strong>을(를) 선택해주세요.`
+            html: `<div><strong>코드그룹</strong>을(를) 선택해주세요.</div>`
         });
         return;
     }
@@ -1005,7 +1005,7 @@ function upsertDetailBtn() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            html: `<strong>코드</strong>을(를) 입력해주세요.`
+            html: `<div><strong>코드</strong>을(를) 입력해주세요.</div>`
         });
         $("#write_detail_cd").focus();
         return;
@@ -1015,7 +1015,7 @@ function upsertDetailBtn() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            html: `<strong>코드명</strong>을(를) 입력해주세요.`
+            html: `<div><strong>코드명</strong>을(를) 입력해주세요.</div>`
         });
         $("#write_detail_cd_nm").focus();
         return;
@@ -1025,7 +1025,7 @@ function upsertDetailBtn() {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            html: `<strong>정렬순서</strong>을(를) 입력해주세요.`
+            html: `<div><strong>정렬순서</strong>을(를) 입력해주세요.</div>`
         });
         $("#write_detail_sort_no").focus();
         return;
@@ -1089,7 +1089,7 @@ function openDetailWriteModal(type) {
         showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
             icon: 'warning',
             title: '경고',
-            html: `<strong>상세 테이블</strong>이 초기화되지 않았습니다.`
+            html: `<div><strong>상세 테이블</strong>이 초기화되지 않았습니다.</div>`
         });
         return;
     }
@@ -1100,7 +1100,7 @@ function openDetailWriteModal(type) {
             showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
                 icon: 'warning',
                 title: '경고',
-                html: `<strong>코드그룹 테이블</strong>이 초기화되지 않았습니다.`
+                html: `<div><strong>코드그룹 테이블</strong>이 초기화되지 않았습니다.</div>`
             });
             return;
         }
@@ -1110,7 +1110,7 @@ function openDetailWriteModal(type) {
             showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
                 icon: 'warning',
                 title: '경고',
-                html: `<strong>코드그룹</strong>을 먼저 선택해주세요.`
+                html: `<div><strong>코드그룹</strong>을 먼저 선택해주세요.</div>`
             });
             return;
         }
@@ -1138,7 +1138,7 @@ function openDetailWriteModal(type) {
             showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
                 icon: 'info',
                 title: '알림',
-                html: `수정할&nbsp;<strong>상세코드</strong>를 선택해주세요.`
+                html: `<div>수정할&nbsp;<strong>상세코드</strong>를 선택해주세요.</div>`
             });
             return;
         }

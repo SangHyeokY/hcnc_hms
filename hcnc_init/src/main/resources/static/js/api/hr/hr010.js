@@ -3306,7 +3306,7 @@ if (excelBtn) {
             showAlert({ // 알림(info), 경고(warning), 오류(error), 완료(success)
                 icon: 'error',
                 title: '오류',
-                html: `<strong>개발자ID</strong>가 없습니다.`
+                html: `<div><strong>개발자ID</strong>가 없습니다.</div>`
             });
             return;
         }
