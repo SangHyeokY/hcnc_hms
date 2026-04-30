@@ -6363,6 +6363,9 @@ section.search-area .search-info #searchType {
   flex: 0 0 18px;
 }
 
+/* 프로젝트 평가는 일단 카운팅 숨겨둠 */
+/*.hr011-edit-step-btn[data-step-target="project"] .cnt, .hr011-edit-step-btn[data-step-target="project"] .cnt + * {display: none !important;}*/
+
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-step-btn.is-active,
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-step-btn.is-done {border: 1px solid #000000; background: #ffffff; color: #000000;}
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-step-btn.is-active .txt,
@@ -6590,11 +6593,10 @@ section.search-area .search-info #searchType {
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-profile-section .hr011-field-card input:focus,
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-profile-section .hr011-field-card select:focus,
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-profile-section .hr011-field-card textarea:focus,
-.tab4-content select:focus,
-.tab4-content textarea:focus {
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(229, 0, 25, 0.5) !important;
-}
+.tab4-content textarea:focus {outline: none; box-shadow: 0 0 0 2px rgba(229, 0, 25, 0.5) !important;}
+
+.tab4-content select {width: 400px; color: var(--hcnc-shell-primary) !important; border: 1px solid var(--hcnc-shell-primary) !important; margin: 10px 0;}
+.tab4-content select:focus {outline: none;}
 
 /* Pretendard 폰트 대신 inter 폰트 사용 */
 /*.hr011-detail-wrap .hr011-ref-layout,
@@ -11092,13 +11094,13 @@ body.hr011-project-eval-modal-open {
 /*  background: linear-gradient(180deg, #f8fbff 0%, #f3f8ff 100%);*/
 /*}*/
 
-.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section-body .hr014-shell.hr011-dual-pane .hr014-toolbar-01 .hr014-title-wrap {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  width: 100%;
-}
+/*.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section-body .hr014-shell.hr011-dual-pane .hr014-toolbar-01 .hr014-title-wrap {*/
+/*  display: flex;*/
+/*  align-items: center;*/
+/*  justify-content: space-between;*/
+/*  gap: 12px;*/
+/*  width: 100%;*/
+/*}*/
 
 /*.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section-body .hr014-shell.hr011-dual-pane .hr014-tab-panels {*/
 /*  display: grid !important;*/
@@ -11203,7 +11205,6 @@ body.hr011-project-eval-modal-open {
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section-body .tab4-content .hr014-tab-panel {
   display: block !important;
   position: relative;
-  padding-top: 10px;
 }
 
 /*.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section-body .tab4-content #HR014_TAB_A::before,*/
@@ -11228,11 +11229,11 @@ body.hr011-project-eval-modal-open {
 /*  min-height: 240px;*/
 /*}*/
 
-.hr011-detail-wrap .hr011-section-body #HR014_TAB_B .risk-detail textarea {resize: vertical; height: 100%;}
+.hr011-detail-wrap .hr011-section-body #HR014_TAB_B .risk-detail textarea {resize: vertical; height: 198px; overflow: visible;}
 
 .hr011-detail-wrap .hr011-page.is-update-mode .hr011-section-body #HR014_TAB_B .risk-box-top {
   grid-template-columns: 160px minmax(0, 1fr);
-  gap: 20px;
+  gap: 10px;
   /*margin-bottom: 30px;*/
 }
 

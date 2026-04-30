@@ -181,6 +181,11 @@ function buildHr014TableA() {
                 widthGrow: 1,
                 headerSort: false,
                 editor: "input",
+                editorParams: {
+                    elementAttributes: {
+                        placeholder: "클릭하여 평가의견을 작성하세요."
+                    }
+                },
                 formatter: commentTextFormatter,
                 editable: function () {
                     return !window.hr010ReadOnly;
@@ -257,6 +262,8 @@ function loadHr014TableDataA(selectedOverride) {
                     );
                 });
                 $select.val(selected);
+                updateHr014Count();
+                // updateStepperUI();
 
                 // setData 이후 렌더까지 체감상 보장하려면(선택)
                 // renderComplete 이벤트 1회 대기
@@ -762,3 +769,10 @@ $(document).on("keydown", function(e) {
         closeUserViewModal(); // clear 직접 호출 금지
     }
 });
+
+/* 당사 프로젝트 개수 표시 */
+function updateHr014Count() {
+    const data = Array.isArray(window.hr013Data) ? window.hr013Data : [];
+    const count = data.filter(row => String(row.inprj_yn).trim() === "Y").length;
+    $("#hr014-count .hcnc-grid-count-number").text(count);
+}

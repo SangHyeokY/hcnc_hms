@@ -951,6 +951,7 @@ function loadHr013TableData() {
             refreshHr013View();
 
             updateHr013TitleCount();
+            updateStepperUI();
 
             $(document).trigger("hr013:dataLoaded", [normalized]);
         },
@@ -1765,20 +1766,34 @@ function bindHr013CardEvents() {
         });
     });
 
-    // 평가 버튼
+    // 평가 버튼 클릭하면 발생하는 이벤트
     $container.on("click.card", ".btn-eval", function () {
         const id = $(this).data("id");
         const row = hr013Data.find(r => r.dev_prj_id === id);
-
         if (!row) return;
 
         window.currentDevId = row.dev_id;
         window.hr013_prj_nm = row.dev_prj_id;
 
-        $(".tab-btn").last().click();
+        // STEP을 4번으로 강제 이동 (스크롤 위치 버그 발생 시, 원상복구할 것)
+        // $('.hr011-edit-step [data-step-target="project"]').click();
 
         reloadTab4(row.dev_prj_id).then(() => {
-            $(document).trigger("hr013:focusEvaluation", [row.dev_prj_id]);
+
+            requestAnimationFrame(() => {
+                const container = document.querySelector(".hr011-edit-flow");
+                const target = document.querySelector(".hr014-toolbar-01");
+
+                if (!container || !target) return;
+
+                const top =
+                    target.getBoundingClientRect().top -
+                    container.getBoundingClientRect().top +
+                    container.scrollTop;
+
+                smoothScrollTo(container, top - 20, 400);
+            });
+
         });
     });
 }

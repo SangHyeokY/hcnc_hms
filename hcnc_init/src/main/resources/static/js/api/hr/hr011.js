@@ -4950,8 +4950,8 @@ const stepFields = {
     // 4. 프로젝트 평가
     // project: () => window.hr013Table ? window.hr013Table.getData().length : 0,
     project: () => {
-        const data = window.hr013Table?.getData?.() || [];
-        const projectCount = data.length;
+        const data = window.hr013Data || [];
+        const projectCount = data.filter(row => row.inprj_yn === "Y").length;
         const evalRiskCount = data.filter(row => row?.cust_nm === "HCNC").length;
         return {
             projectCount,
@@ -5087,9 +5087,17 @@ function updateStepperUI() {
         const { filled, total } = calculateStepProgress(step);
 
         // 수치 표시
-        $(this).find(".cnt").html(`
-            <span class="filled">${filled}</span>&nbsp;/&nbsp;<span class="total-filled">${total}</span>
-        `);
+        if (step === "project") {
+            const result = stepFields.project();
+            const projectCount = result.projectCount || 0;
+            $(this).find(".cnt").html(`
+                <span>참여</span>&nbsp;<span class="filled">${projectCount}</span><span>건</span>
+            `);
+        } else {
+            $(this).find(".cnt").html(`
+                <span class="filled">${filled}</span>&nbsp;/&nbsp;<span class="total-filled">${total}</span>
+            `);
+        }
 
         // 초기화
         const currentIndex = activeKeys.indexOf(hr011CurrentEditStepKey);
