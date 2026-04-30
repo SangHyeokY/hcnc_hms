@@ -176,7 +176,7 @@ function buildHr014TableA() {
                 headerSort: false
             },
             {
-                title: "평가의견",
+                title: "✏️ 평가의견",
                 field: "cmt",
                 widthGrow: 1,
                 headerSort: false,
@@ -370,9 +370,13 @@ function commentInputFormatter(cell, formatterParams, onRendered) {
 
 function commentTextFormatter(cell) {
     var value = cell.getValue();
-    var safeValue = escapeHtml(value == null ? "" : String(value));
 
-    return `<div class="hr014-comment-text" style="white-space:pre-wrap; word-break:break-word; line-height:1.6; color:#20385c; font-weight:600;">${safeValue}</div>`;
+    if (!value) {
+        return `<div class="hr014-comment-text" style="color:#92979D !important;">평가의견을 구체적으로 입력하세요.</div>`;
+    }
+    var safeValue = escapeHtml(String(value));
+
+    return `<div class="hr014-comment-text">${safeValue}</div>`;
 }
 
 function escapeHtml(value) {
