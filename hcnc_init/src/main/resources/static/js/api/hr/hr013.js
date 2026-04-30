@@ -1504,9 +1504,9 @@ function hr013AmountFormatter(cell) {
     var value = cell && typeof cell.getValue === "function" ? cell.getValue() : cell;
     var parsed = parseHr013RateAmountValue(value);
     if (parsed === "" || parsed === null) {
-        return "미입력";
+        return `<div class="empty">미입력</div>`;
     }
-    return formatNumberInput(parsed) + "만원";
+    return `<div class="amount">${formatNumberInput(parsed)}만원</div>`;
 }
 
 // 만원 → 원
@@ -1633,7 +1633,14 @@ function renderHr013Cards(list) {
     $container.empty();
 
     if (!pagedList.length) {
-        $container.html('<div class="empty">데이터 없음</div>');
+        $container.html(`
+            <div class="no-data-wrap">
+                <div class="no-data-box">
+                    <div class="no-data-icon">📭</div>
+                    <div class="no-data-text">데이터 없음</div>
+                </div>
+            </div>
+        `);
         renderHr013Pager();
         return;
     }
@@ -1647,9 +1654,9 @@ function renderHr013Cards(list) {
         const period = `<span class="st_dt">${formatDateDisplay(row.st_dt)}</span>~<span class="ed_dt">${formatDateDisplay(row.ed_dt)}</span>`;
         const pct = formatPercentSafe(row.alloc_pct);
 
-        const skills = hr013EscapeHtml(
-            getHr013SkillLabelText(row.skl_id_lst || row.stack_txt)
-        );
+        // const skills = hr013EscapeHtml(
+        //     getHr013SkillLabelText(row.skl_id_lst || row.stack_txt)
+        // );
 
         const remark = hr013EscapeHtml(row.remark || "* 비고 미입력");
 

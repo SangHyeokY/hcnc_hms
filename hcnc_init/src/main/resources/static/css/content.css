@@ -305,7 +305,7 @@ option {
   border-right: 0;
   border-left: 0;
   border-bottom: 0;
-  height: 100%;
+  height: 100% !important;
   width: 100% !important;
   max-width: 100%;
   background: #fff;
@@ -317,7 +317,7 @@ option {
   padding: 0 !important;
   margin: 0 !important;
   border-bottom: 0 !important;
-  font-size: 1em !important;
+  font-size: 15px !important;
 }
 
 .tabulator-header .tabulator-col {
@@ -378,7 +378,7 @@ option {
 }
 
 .tabulator-row .tabulator-cell {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 400 !important;
   padding: 2px 10px !important;
   line-height: 30px;
@@ -462,9 +462,7 @@ option {
   min-height: 40px !important;
 }
 
-#view-user-area #TABLE_HR012_B.tabulator .tabulator-row .tabulator-cell:first-child {
-  line-height: 40px !important;
-}
+#view-user-area #TABLE_HR012_B.tabulator .tabulator-row .tabulator-cell:first-child {line-height: 40px !important;}
 
 .tabulator .tabulator-footer {
   position: relative;
@@ -922,6 +920,16 @@ button.btn.btn-add-skill,
   gap: 10px;
 }
 
+.tab3-content .content-body #TABLE_HR013_A .no-data-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  border-radius: 14px;
+  border: 1px solid #DEE2E7;
+  height: 102px;
+}
+
 .tab3-content .content-body #TABLE_HR013_A .hr013-card {
   position: relative; /* 체크박스 위치용 */
   min-height: 85px;
@@ -977,12 +985,13 @@ button.btn.btn-add-skill,
 #TABLE_HR013_A .hr013-card .remark {font-size: 12px; font-weight: 500; color: #76787A; width: calc(100% - 160px);}
 #TABLE_HR013_A .hr013-card .skills {display: flex; flex-wrap: wrap; gap: 8px;}
 #TABLE_HR013_A .hr013-card .rate {justify-content: flex-end; font-weight: 500;}
+#TABLE_HR013_A .hr013-card .rate .empty {width: 100%; justify-content: center; color: #76787A; font-weight: 400;}
 #TABLE_HR013_A .hr013-card .cust, #TABLE_HR013_A .hr013-card .prj {font-size: 16px; font-weight: 600;}
 #TABLE_HR013_A .hr013-card.is-hcnc .cust {color: #E50019;}
 #TABLE_HR013_A .hr013-card .job, #TABLE_HR013_A .hr013-card .pct, #TABLE_HR013_A .hr013-card .period {justify-content: center; font-weight: 500;}
 #TABLE_HR013_A .hr013-card .period {flex-direction: column; font-size: 13px;}
-#TABLE_HR013_A .hr013-card .btn-eval {width: 135px; height: 30px; font-size: 13px;}
-#TABLE_HR013_A .hr013-card:not(.is-hcnc) .btn-eval {background: transparent; border: none; cursor: default; pointer-events: none; color: #76787A; justify-content: right;}
+#TABLE_HR013_A .hr013-card.is-hcnc .btn-eval {width: 135px; height: 30px; font-size: 13px; border-color: var(--hcnc-shell-primary); color: var(--hcnc-shell-primary);}
+#TABLE_HR013_A .hr013-card:not(.is-hcnc) .btn-eval {width: 135px; height: 30px; font-size: 13px; background: #f3f7fd; /*border: none;*/ cursor: default; pointer-events: none; color: #76787A; /*justify-content: right;*/}
 
 .tab3-content .content-body #TABLE_HR013_A .hr013-card .card-check {margin-right: 20px !important;}
 /*.tab3-content .content-body #TABLE_HR013_A .hr013-card.selected {border-color: #4a7cff; background: #f5f8ff;} !* 선택 강조 *!*/
@@ -1067,7 +1076,7 @@ button.btn.btn-add-skill,
 .hr011-detail-wrap .hr011-section-body .tabulator .tabulator-row .tabulator-cell:hover,
 .hr011-detail-wrap .hr011-section-body .tabulator .tabulator-row .tabulator-cell:focus,
 .hr011-detail-wrap .hr011-section-body .tabulator .tabulator-row .tabulator-cell:focus-within {
-  background: #ffffff !important;
+  background: #ffffff;
   border-color: #e0e7f2 !important;
   box-shadow: none !important;
   outline: none !important;
@@ -2487,7 +2496,7 @@ button.btn.btn-add-skill,
   color: #FD323A;
   height: 18px;
   position: absolute;
-  top: 59px;
+  top: 56px;
 }
 
 .hr011-field-card.hr011-skill-card {bottom: 9px;}
@@ -2555,16 +2564,13 @@ button.btn.btn-add-skill,
   position: relative;
   font-size: 16px;
   font-weight: 500;
+  line-height: 1.4;
   white-space: nowrap;
-  color: #76787A;
+  color: #333333;
   font-family: var(--hcnc-font-display) !important;
 }
 
 .tab4-content .hr014-title-wrap {justify-content: flex-start !important;}
-
-.tab4-content .hr014-title-wrap .select_prj_cd {
-  width: 350px !important;
-}
 
 .tab4-content.is-readonly .hr014-title-wrap .select_prj_cd {
   pointer-events: auto;
@@ -2627,7 +2633,7 @@ button.btn.btn-add-skill,
   border-radius: 0 !important;
   padding: 0 !important;
   height: auto !important;
-  font-size: 16px !important;
+  font-size: 15px !important;
   font-weight: 400 !important;
   line-height: 1.5 !important;
   border: none;
@@ -2688,19 +2694,11 @@ button.btn.btn-add-skill,
 
 /* ================================================ 테두리 ================================================ */
 /* 첫 행의 윗 부분 둥글게 */
-.tabulator {
-  border-top-left-radius: 12px;
-  border-top-right-radius: 12px;
-}
+.tabulator {border-radius: 12px !important;}
 
 /* 테이블 윗 부분 둥글게 */
-.tabulator .tabulator-header .tabulator-col:first-child {
-  border-top-left-radius: 12px !important;
-}
-
-.tabulator .tabulator-header .tabulator-col:last-child {
-  border-top-right-radius: 12px !important;
-}
+/*.tabulator .tabulator-header .tabulator-col:first-child {border-top-left-radius: 12px !important;}*/
+/*.tabulator .tabulator-header .tabulator-col:last-child {border-top-right-radius: 12px !important;}*/
 
 /* 헤더 부분 둥글게, 테두리 */
 .tabulator .tabulator-header {
@@ -2774,6 +2772,15 @@ button.btn.btn-add-skill,
   border-right: 1px solid #DEE2E7 !important;
 }
 
+.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section-body .tab2-content .hr014-shell.hr011-dual-pane-tab2 #TABLE_HR012_B {
+  display: block !important;
+  border-radius: 12px;
+  border-right: 1px solid #DEE2E7 !important;
+}
+.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section-body .tab2-content .hr014-shell.hr011-dual-pane-tab2 #TABLE_HR012_B .tabulator-header {
+  border-right: 1px solid transparent !important;
+}
+
 /* 각 행 마다 위 테두리 */
 .tabulator .tabulator-table>.tabulator-row:not(:nth-child(1))>.tabulator-cell {
   border-top: 1px solid #DEE2E7 !important;
@@ -2784,7 +2791,7 @@ button.btn.btn-add-skill,
   height: 45px !important;
   min-height: 45px !important;
   line-height: 45px !important;
-  font-size: 16px !important;
+  font-size: 15px !important;
   padding-top: 0 !important;
   padding-bottom: 0 !important;
   box-sizing: border-box;
@@ -2853,13 +2860,13 @@ button.btn.btn-add-skill,
 
 /* Tabulator 체크박스 선택 색상 */
 .tabulator input[type="checkbox"] {
-  accent-color: #ED2455;
+  accent-color: var(--hcnc-shell-primary);
   border-radius: 16px;
 }
 
 .tabulator input[type="checkbox"]:checked:before {
-  border-color: #ED2455 !important;
-  background: #ED2455 !important;
+  border-color: var(--hcnc-shell-primary) !important;
+  background: var(--hcnc-shell-primary) !important;
 }
 
 /* ============================= 유틸 css ============================= */
@@ -5926,9 +5933,9 @@ section.search-area .search-info #searchType {
 /*.hr010-dashboard-wrap .hr010-list-header.hr010-enter-item {transform:translateY(12px);}*/
 @media (prefers-reduced-motion: reduce) {.hr010-dashboard-wrap .list-view.hr010-enter-item, .hr010-dashboard-wrap .list-view.hr010-enter-item.is-visible {opacity:1; transform:none; transition:none;}}
 .hr010-dashboard-wrap .no-data-wrap {position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:#ffffff; border-radius:14px; border: 1px solid #DEE2E7; height: calc(75vh - var(--hcnc-header-height));}
-.hr010-dashboard-wrap .no-data-box {text-align:center; color:#333333;}
-.hr010-dashboard-wrap .no-data-icon {font-size:48px; margin-bottom:10px; opacity:0.7;}
-.hr010-dashboard-wrap .no-data-text {font-size:16px; font-weight:500;}
+.hr010-dashboard-wrap .no-data-box, #TABLE_HR013_A .no-data-wrap .no-data-box {text-align:center; color:#333333;}
+.hr010-dashboard-wrap .no-data-icon, #TABLE_HR013_A .no-data-wrap .no-data-icon {font-size:48px; margin-top: -13px; margin-bottom:10px; opacity:0.7;}
+.hr010-dashboard-wrap .no-data-text, #TABLE_HR013_A .no-data-wrap .no-data-text {font-size:16px; font-weight:500;}
 
 .contents-wrap.hr010-dashboard-wrap>section.white-full.hr010-dashboard-shell {display:flex; flex-direction:column; height:100%; min-height:calc(100vh - var(--hcnc-header-height)); padding:0; border:0; border-radius:0; box-shadow:none; overflow:visible; background:#ffffff;}
 .contents-wrap.hr010-dashboard-wrap>section.white-full.hr010-dashboard-shell>.content-body {display:flex; flex: 1 1 auto; flex-direction:row; align-items:stretch; gap:0; padding: 0; height: auto; min-height:calc(100vh - var(--hcnc-header-height)); overflow: visible; transition: gap .32s cubic-bezier(0.22, 1, 0.36, 1), padding-left .32s cubic-bezier(0.22, 1, 0.36, 1);}
@@ -6434,10 +6441,11 @@ section.search-area .search-info #searchType {
   margin-right: 12px;
   border-radius: 999px;
   border: none;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 700;
   color: #ffffff;
   background: #000000;
+  font-family: var(--hcnc-font-body);
 }
 
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section-add-btn,
@@ -6558,7 +6566,9 @@ section.search-area .search-info #searchType {
 
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-profile-section .hr011-field-card input,
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-profile-section .hr011-field-card select,
-.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-profile-section .hr011-field-card textarea {
+.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-profile-section .hr011-field-card textarea,
+.tab4-content select,
+.tab4-content textarea {
   border-radius: 8px;
   font-size: 15px;
   font-weight: 500;
@@ -6568,8 +6578,8 @@ section.search-area .search-info #searchType {
   border: 1px solid #E9ECEF;
 }
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-profile-section .hr011-field-card input {padding: 18px 16px;}
-.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-profile-section .hr011-field-card textarea {padding: 13px 16px; min-height: 45px !important; overflow: hidden; resize: none;}
-.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-profile-section .hr011-field-card select {padding: 0 16px;}
+.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-profile-section .hr011-field-card textarea, .tab4-content textarea {padding: 13px 16px; min-height: 45px !important; overflow: hidden; resize: none;}
+.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-profile-section .hr011-field-card select, .tab4-content select {padding: 0 16px;}
 
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section[data-edit-step="skill"] {min-height: 320px;}
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section[data-edit-step="project"] {margin-top: 0;}
@@ -6579,7 +6589,9 @@ section.search-area .search-info #searchType {
 
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-profile-section .hr011-field-card input:focus,
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-profile-section .hr011-field-card select:focus,
-.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-profile-section .hr011-field-card textarea:focus {
+.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-profile-section .hr011-field-card textarea:focus,
+.tab4-content select:focus,
+.tab4-content textarea:focus {
   outline: none;
   box-shadow: 0 0 0 2px rgba(229, 0, 25, 0.5) !important;
 }
@@ -11088,11 +11100,6 @@ body.hr011-project-eval-modal-open {
   width: 100%;
 }
 
-.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section-body .hr014-shell.hr011-dual-pane .hr014-toolbar-01 .select_prj_cd {
-  min-width: 280px;
-  max-width: 420px;
-}
-
 /*.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section-body .hr014-shell.hr011-dual-pane .hr014-tab-panels {*/
 /*  display: grid !important;*/
 /*  grid-template-columns: repeat(2, minmax(0, 1fr));*/
@@ -11152,15 +11159,6 @@ body.hr011-project-eval-modal-open {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   grid-template-areas: "a b";
   gap: 20px;
-}
-
-.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section-body .tab2-content .hr014-shell.hr011-dual-pane-tab2 #TABLE_HR012_A,
-.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section-body .tab2-content .hr014-shell.hr011-dual-pane-tab2 #TABLE_HR012_B {
-  display: block !important;
-  border: 1px solid #dfe8f5;
-  border-radius: 12px;
-  background: #fff;
-  overflow: hidden;
 }
 
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section-body .tab2-content .hr014-shell.hr011-dual-pane-tab2 #TABLE_HR012_A {
@@ -11235,7 +11233,7 @@ body.hr011-project-eval-modal-open {
 .hr011-detail-wrap .hr011-page.is-update-mode .hr011-section-body #HR014_TAB_B .risk-box-top {
   grid-template-columns: 160px minmax(0, 1fr);
   gap: 20px;
-  margin-bottom: 30px;
+  /*margin-bottom: 30px;*/
 }
 
 .hr011-detail-wrap .hr011-page.is-update-mode .hr011-section-body #HR014_TAB_B .risk-list-top {
@@ -11244,10 +11242,10 @@ body.hr011-project-eval-modal-open {
   gap: 10px;
   width: 160px;
   min-width: 160px;
-  padding: 10px;
-  border: 1px solid #dbe7f8;
-  border-radius: 14px;
-  background: linear-gradient(180deg, #f8fbff 0%, #eef5ff 100%);
+  /*padding: 10px;*/
+  /*border: 1px solid #dbe7f8;*/
+  /*border-radius: 14px;*/
+  /*background: linear-gradient(180deg, #f8fbff 0%, #eef5ff 100%);*/
 }
 
 .hr011-detail-wrap .hr011-page.is-update-mode .hr011-section-body #HR014_TAB_B .risk-list-top .risk-item {
@@ -11255,52 +11253,37 @@ body.hr011-project-eval-modal-open {
   align-items: center;
   justify-content: flex-start;
   min-height: 42px;
-  padding: 0 12px;
-  border: 1px solid #d5e3f6 !important;
+  padding: 0 15px;
+  border: 1px solid #DEE2E7 !important;
   border-radius: 10px;
-  background: #ffffff !important;
-  color: #27415f !important;
-  font-size: 13px;
-  font-weight: 700;
+  background: #ffffff;
+  color: #3A3C40 !important;
+  font-size: 15px;
+  font-weight: 600;
   cursor: pointer;
   transition: all .18s ease;
 }
 
 .hr011-detail-wrap .hr011-page.is-update-mode .hr011-section-body #HR014_TAB_B .risk-list-top .risk-item:hover {
-  border-color: #2f63f4 !important;
-  color: #1f4b8b !important;
-  box-shadow: 0 5px 12px rgba(47, 99, 244, 0.10) !important;
+  /*border-color: var(--hcnc-shell-primary) !important;*/
+  color: #ed2455 !important;
+  /*box-shadow: 0 5px 12px rgba(47, 99, 244, 0.10) !important;*/
 }
 
 .hr011-detail-wrap .hr011-page.is-update-mode .hr011-section-body #HR014_TAB_B .risk-list-top .risk-item.active {
-  border-color: #2f63f4 !important;
-  background: linear-gradient(135deg, #2f63f4 0%, #4b7dff 100%) !important;
-  color: #ffffff !important;
-  box-shadow: 0 8px 16px rgba(47, 99, 244, 0.22) !important;
+  /*border-color: #2f63f4 !important;*/
+  /*background: linear-gradient(135deg, #2f63f4 0%, #4b7dff 100%) !important;*/
+  /*color: #ffffff !important;*/
+  background: #EFF1F6 !important;
+  /*box-shadow: 0 8px 16px rgba(47, 99, 244, 0.22) !important;*/
 }
 
 .hr011-detail-wrap .hr011-page.is-update-mode .hr011-section-body #HR014_TAB_B .risk-detail {
   height: 100%;
-  border: 1px solid #dbe7f8;
-  border-radius: 14px;
-  background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
-  padding: 10px;
-}
-
-.hr011-detail-wrap .hr011-page.is-update-mode .hr011-section-body #HR014_TAB_B .risk-detail textarea {
-  /*min-height: 260px;*/
-  border: 1px solid #d6e4f8;
-  border-radius: 10px;
-  background: #fdfefe;
-  padding: 12px 14px;
-  font-size: 14px;
-  color: #1f3556;
-}
-
-.hr011-detail-wrap .hr011-page.is-update-mode .hr011-section-body #HR014_TAB_B .risk-detail textarea:focus {
-  outline: none;
-  border-color: #8eb0e7;
-  box-shadow: 0 0 0 3px rgba(93, 140, 222, 0.15);
+  /*border: 1px solid #dbe7f8;*/
+  /*border-radius: 14px;*/
+  /*background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);*/
+  /*padding: 10px;*/
 }
 
 .hr011-detail-wrap .hr011-page.is-view-mode .tab3-content .tab-actions .btn-area>button.btn-tab3-add,
@@ -11432,7 +11415,7 @@ body.hr011-project-eval-modal-open {
 .hr011-detail-wrap .hr011-page.is-update-mode .hr011-section-body .hr014-tab-panels {
   display: flex !important;
   flex-direction: column;
-  gap: 20px;
+  gap: 10px;
 }
 
 .hr011-detail-wrap .hr011-page.is-view-mode .hr011-section-body .hr014-tab-panel {

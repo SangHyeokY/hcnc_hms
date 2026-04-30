@@ -5173,8 +5173,8 @@ function setHr011ActiveEditStep(stepKey) {
 // 신규 등록일 때 안보일 STEP은 빼놓기 (보유역량 평가 & 프로젝트 평가 제외)
 function getActiveStepKeys() {
     const isInsert = hr011Mode === "insert";
-    // $("#3-step-end, #4-step-end").toggle(!isInsert);
-    $("#3-step-end").toggle(!isInsert);
+    $("#3-step-end, #4-step-end, #5-step-end").toggle(!isInsert);
+    // $("#3-step-end").toggle(!isInsert);
 
     if (isInsert) {
         return HR011_STEP_CONFIG
