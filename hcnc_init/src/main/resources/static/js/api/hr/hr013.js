@@ -1665,7 +1665,7 @@ function renderHr013Cards(list) {
         const isInternal = String(row.inprj_yn).toUpperCase() === "Y";
 
         return `
-            <div class="hr013-card ${isInternal ? "is-hcnc" : ""}">
+            <div class="hr013-card ${isInternal ? "is-hcnc" : ""} ${row._checked ? "selected" : ""}">
                 
                 <!-- 기존 grid 컬럼 그대로 -->
                 <div class="cust">
@@ -1714,14 +1714,17 @@ function bindHr013CardEvents() {
     $container.on("change.card", ".card-check", function () {
         const id = $(this).data("id");
         const isChecked = $(this).is(":checked");
+        selectHr013Row(id, isChecked);
+    });
 
-        hr013Data.forEach(row => row._checked = false);
-
-        if (isChecked) {
-            const target = hr013Data.find(row => row.dev_prj_id === id);
-            if (target) target._checked = true;
-        }
-        renderHr013Cards();
+    // 카드 전체 클릭 시 체크박스 선택
+    $container.on("click.card", ".hr013-card", function (e) {
+        if ($(e.target).closest("button, input").length) return;
+        const $checkbox = $(this).find(".card-check");
+        if (!$checkbox.length) return;
+        const id = $checkbox.data("id");
+        const isChecked = !$checkbox.is(":checked"); // 토글
+        selectHr013Row(id, isChecked);
     });
 
     // 프로젝트 등록
@@ -1798,6 +1801,15 @@ function bindHr013CardEvents() {
     });
 }
 
+function selectHr013Row(id, isChecked) {
+    hr013Data.forEach(row => row._checked = false);
+    if (isChecked) {
+        const target = hr013Data.find(row => row.dev_prj_id === id);
+        if (target) target._checked = true;
+    }
+    renderHr013Cards();
+}
+
 function refreshHr013View() {
     renderHr013Cards(hr013Data);
 }
@@ -1853,7 +1865,7 @@ function renderHr013Pager() {
             else if (type === "prev") hr013Paging.page = Math.max(1, hr013Paging.page - 1);
             else if (type === "next") hr013Paging.page = Math.min(totalPage, hr013Paging.page + 1);
             else hr013Paging.page = Number(type);
-
+            hr013Data.forEach(row => row._checked = false); // 페이지 바뀌면 선택된 것 초기화
             renderHr013Cards(hr013LastRenderedRows);
         };
     });

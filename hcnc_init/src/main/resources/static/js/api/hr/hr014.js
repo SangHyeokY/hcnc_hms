@@ -114,7 +114,7 @@ function buildHr014TableA() {
             );
         },
         columns: [
-            { title: "항 목", field: "cd_nm", hozAlign: "center", width: 150, minWidth: 150, maxWidth: 150 },
+            { title: "항 목", field: "cd_nm", hozAlign: "center", width: 160, minWidth: 160, maxWidth: 160 },
             {
                 title: "1점",
                 field: "lv1",

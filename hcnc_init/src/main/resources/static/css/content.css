@@ -961,6 +961,7 @@ button.btn.btn-add-skill,
   color: #3A3C40;
   line-height: 1;
   letter-spacing: 0;
+  cursor: pointer;
 }
 
 .tab3-content .content-body #TABLE_HR013_A .hr013-card div {
@@ -989,6 +990,8 @@ button.btn.btn-add-skill,
 }
 
 .tab3-content .content-body #TABLE_HR013_A .hr013-card.is-hcnc {border: 1px solid #dbe7f5; background: #f3f7fd;}
+
+.tab3-content .content-body #TABLE_HR013_A .hr013-card.selected {border-color: var(--hcnc-shell-primary) !important;}
 
 #TABLE_HR013_A .hr013-card .remark {font-size: 12px; font-weight: 500; color: #76787A; width: calc(100% - 160px);}
 #TABLE_HR013_A .hr013-card .skills {display: flex; flex-wrap: wrap; gap: 8px;}
@@ -3020,7 +3023,7 @@ button.btn.btn-add-skill,
 }
 
 /* 경력연차 레이아웃 */
-#exp_yr_text {color: #76787A; font-size: 14px; font-weight: 500; line-height: 18px; letter-spacing: 0;}
+#exp_yr_text {color: #76787A; font-size: 15px; font-weight: 500; line-height: 18px; letter-spacing: 0;}
 
 .tag-input {
   display: flex;
@@ -11237,7 +11240,7 @@ body.hr011-project-eval-modal-open {
 /*  min-height: 240px;*/
 /*}*/
 
-.hr011-detail-wrap .hr011-section-body #HR014_TAB_B .risk-detail textarea {resize: vertical; height: 198px; overflow: visible;}
+.hr011-detail-wrap .hr011-section-body #HR014_TAB_B .risk-detail textarea {resize: vertical; height: 198px; overflow: visible; border-radius: 12px;}
 .hr011-detail-wrap .hr011-section-body #HR014_TAB_B .risk-detail textarea::placeholder {color: #92979D;}
 
 .hr011-detail-wrap .hr011-page.is-update-mode .hr011-section-body #HR014_TAB_B .risk-box-top {
@@ -11265,7 +11268,7 @@ body.hr011-project-eval-modal-open {
   min-height: 42px;
   padding: 0 15px;
   border: 1px solid #DEE2E7 !important;
-  border-radius: 10px;
+  border-radius: 12px;
   background: #ffffff;
   color: #3A3C40 !important;
   font-size: 15px;
