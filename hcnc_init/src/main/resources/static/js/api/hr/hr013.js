@@ -50,12 +50,19 @@ window.initTab3 = function () {
         applyInprjCustomerName($(this).val(), $("#write_hr013_cust_nm").val());
         syncHr013ProjectLinkUi($(this).val());
     });
+
     $("#write_hr013_cust_nm").off("input").on("input", function () {
         if ($("#write_hr013_inprj_yn").val() !== "Y") {
             lastNonInprjCustNm = $(this).val();
         }
     });
-    $("#btn_hr013_project_link").off("click.hr013projectlink").on("click.hr013projectlink", function () {
+
+    // $("#btn_hr013_project_link").off("click.hr013projectlink").on("click.hr013projectlink", function () {
+    //     openHr013ProjectPicker(null);
+    // });
+
+    // 프로젝트 모달 열기
+    $("#hr011QuickAddProjectBtn").off("click.hr013quickproject").on("click.hr013quickproject", function () {
         openHr013ProjectPicker(null);
     });
 
@@ -276,9 +283,9 @@ function bindHr013ProjectPickerEvents() {
         saveHr013ProjectCode(); // 신규 공통코드 등록
     });
 
-    $("#btn_hr013_project_picker_search").off("click.hr013project").on("click.hr013project", function () {
-        loadHr013ProjectCodeList($.trim($("#hr013-project-picker-search").val())); // 검색 버튼 클릭 시 조회
-    });
+    // $("#btn_hr013_project_picker_search").off("click.hr013project").on("click.hr013project", function () {
+    //     loadHr013ProjectCodeList($.trim($("#hr013-project-picker-search").val())); // 검색 버튼 클릭 시 조회
+    // });
 
     $("#hr013-project-picker-search").off("keyup.hr013project").on("keyup.hr013project", function (e) {
         if (e.key === "Enter") {
@@ -303,7 +310,7 @@ function initHr013ProjectPickerTable() {
         selectableRange: false, // v5 이상이면 안전하게 추가
         resizableColumns: false,
         pagination: "local",
-        paginationSize: 10,
+        paginationSize: 5,
         paginationSizeSelector: [5, 10, 15, 20],
         columns: [
             { title: "코드", field: "cd", width: 120, hozAlign: "center" },
@@ -331,21 +338,21 @@ function initHr013ProjectPickerTable() {
     });
 }
 
-// 특정 행 컨텍스트로 프로젝트 선택 팝업 열기
+// 프로젝트 추가 모달 열기
 async function openHr013ProjectPicker(row) {
     bindHr013ProjectPickerEvents();
     if (!isHr013Editable()) return;
 
-    var rowData = row && typeof row.getData === "function" ? row.getData() : null;
-    var currentInprjYn = rowData ? rowData.inprj_yn : $("#write_hr013_inprj_yn").val();
-    if (!isHr013InprjYnY(currentInprjYn)) {
-        showAlert({
-            icon: "info",
-            title: "알림",
-            html: `<div><strong>당사 프로젝트</strong>만 선택할 수 있습니다.</div>`
-        });
-        return;
-    }
+    // var rowData = row && typeof row.getData === "function" ? row.getData() : null;
+    // var currentInprjYn = rowData ? rowData.inprj_yn : $("#write_hr013_inprj_yn").val();
+    // if (!isHr013InprjYnY(currentInprjYn)) {
+    //     showAlert({
+    //         icon: "info",
+    //         title: "알림",
+    //         html: `<div><strong>당사 프로젝트</strong>만 선택할 수 있습니다.</div>`
+    //     });
+    //     return;
+    // }
 
     showLoading();
 
@@ -1077,6 +1084,7 @@ function applyInprjCustomerName(inprjYn, custNm) {
     $("#write_hr013_cust_nm").val(nextValue).prop("disabled", false);
 }
 
+// 이거 쓰는가?
 function syncHr013ProjectLinkUi(inprjYn) {
     var isInternal = isHr013InprjYnY(inprjYn);
     $("#btn_hr013_project_link").prop("disabled", !isInternal);
@@ -1685,7 +1693,9 @@ function renderHr013Cards(list) {
                 
                 <!-- footer -->
                 <div class="card-footer">
-                    <div class="remark">${remark}</div>
+                    <div class="remark">
+                        <span>${remark}</span>
+                    </div>
                     <div class="card-actions">
                         <button class="btn-eval" data-id="${row.dev_prj_id}" ${isInternal && !isReadOnly ? "" : "disabled"}>
                             ${isInternal && !isReadOnly ? "자사 프로젝트 평가" : "타사 프로젝트"}

@@ -606,7 +606,7 @@
 
     <!-- !!!!!!!!!!!!!!!!! 모달 영역 !!!!!!!!!!!!!!!!! -->
 
-    <!-- 인적사항 서브 모달 -->
+    <!-- [주 개발언어] 모달 -->
     <div class="modal-wrap" id="main-lang-picker-area" style="display:none">
         <div class="modal-container main-lang-picker-container">
 
@@ -641,7 +641,7 @@
         </div>
     </div>
 
-    <!-- Tab2 서브 모달 -->
+    <!-- [보유역량 기술] 모달 -->
     <div class="modal-wrap" id="hr012-skill-picker-area" style="display:none">
         <div class="modal-container hr012-skill-picker-container">
 
@@ -676,130 +676,7 @@
         </div>
     </div>
 
-    <!-- 프로젝트 평가 모달 -->
-    <div class="modal-wrap" id="write-hr013-area" style="display: none">
-        <div class="modal-container">
-
-            <div class="header">
-                <h3 class="sub-title">프로젝트 평가 <span id="hr013-type">등록</span></h3>
-                <div class="btn-area">
-                    <button class="modal-close" type="button" onclick="closeHr013Modal()">
-                        <img src="./icons/Icon-close.png" alt="" />
-                    </button>
-                </div>
-            </div>
-
-            <div class="modal-content">
-                <article>
-                    <div class="div-table">
-                        <ul>
-                            <li class="table-col fl-ac full-row">
-                                <div class="table-cell">
-                                    <p class="cell-tit">당사여부</p>
-                                    <div class="cell-info">
-                                        <input type="hidden" id="write_hr013_dev_prj_id">
-                                        <select id="write_hr013_inprj_yn">
-                                            <option value="Y">Y</option>
-                                            <option value="N">N</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="table-cell"></div>
-                            </li>
-                            <li class="table-col fl-ac full-row">
-                                <div class="table-cell">
-                                    <p class="cell-tit">기간</p>
-                                    <div class="cell-info date-range">
-                                        <input type="date" class="text" id="write_hr013_st_dt">
-                                        <span class="date-split">~</span>
-                                        <input type="date" class="text" id="write_hr013_ed_dt">
-                                    </div>
-                                </div>
-                                <div class="table-cell"></div>
-                            </li>
-                            <li class="table-col fl-ac">
-                                <div class="table-cell">
-                                    <p class="cell-tit">고객사</p>
-                                    <div class="cell-info">
-                                        <input type="text" class="text" id="write_hr013_cust_nm" placeholder="고객사">
-                                    </div>
-                                </div>
-                                <div class="table-cell">
-                                    <p class="cell-tit">프로젝트명</p>
-                                    <div class="cell-info">
-                                        <input type="text" class="text" id="write_hr013_prj_nm" placeholder="프로젝트명">
-                                    </div>
-                                </div>
-                            </li>
-                            <li class="table-col fl-ac">
-                                <div class="table-cell">
-                                    <p class="cell-tit">계약단가</p>
-                                    <div class="cell-info">
-                                        <input type="text" class="text" id="write_hr013_rate_amt" placeholder="계약단가">
-                                    </div>
-                                </div>
-                                <div class="table-cell">
-                                    <p class="cell-tit">역할</p>
-                                    <div class="cell-info">
-                                        <select id="write_hr013_job_cd"></select>
-                                    </div>
-                                </div>
-                            </li>
-                            <li class="table-col fl-ac full-row">
-                                <div class="table-cell">
-                                    <p class="cell-tit">투입률</p>
-                                    <div class="cell-info">
-                                        <input type="text" class="text" id="write_hr013_alloc_pct" placeholder="숫자%">
-                                    </div>
-                                </div>
-                                <div class="table-cell"></div>
-                            </li>
-                            <li class="table-col fl-ac full-row" style="align-items: start;">
-                                <div class="table-cell full-width">
-                                    <p class="cell-tit">기술스택</p>
-                                    <div class="cell-info">
-                                        <div class="tag-input">
-                                            <div class="tag-input-box">
-                                                <div class="tag-help"></div>
-                                                <ul class="tag-list" id="hr013SkillTagList"></ul>
-                                                <input type="text" class="text" id="write_hr013_stack_input"
-                                                       list="write_hr013_stack_datalist" placeholder="검색할 기술명을 입력하세요."
-                                                       style="display:none;">
-                                            </div>
-                                            <div class="tag-select-row">
-                                                <button type="button" class="btn btn-add-skill btn-hr013-skill-picker"
-                                                        id="btn_hr013_skill_picker">기술 선택</button>
-                                                <datalist id="write_hr013_stack_datalist"></datalist>
-                                                <select id="write_hr013_skl_cd" style="display:none"></select>
-                                                <input type="hidden" id="write_hr013_stack_txt">
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="table-cell"></div>
-                            </li>
-                            <li class="table-col fl-ac full-row">
-                                <div class="table-cell full-width">
-                                    <p class="cell-tit">비고</p>
-                                    <div class="cell-info">
-                                        <textarea class="text" id="write_hr013_remark" placeholder="비고"></textarea>
-                                    </div>
-                                </div>
-                                <div class="table-cell"></div>
-                            </li>
-                        </ul>
-                    </div>
-                </article>
-            </div>
-            <div class="modal-btn">
-                <ul>
-                    <li><button class="btn btn-close" onclick="closeHr013Modal()">닫기</button></li>
-                    <li><button class="btn btn-save btn-hr013-save">저장</button></li>
-                </ul>
-            </div>
-        </div>
-    </div>
-
+    <!-- [프로젝트 기술] 모달 -->
     <div class="modal-wrap" id="hr013-skill-picker-area" style="display:none">
         <div class="modal-container hr013-skill-picker-container">
 
@@ -834,12 +711,12 @@
         </div>
     </div>
 
-    <!-- 프로젝트 코드 선택/등록 팝업 -->
+    <!-- [프로젝트 추가] 모달 -->
     <div class="modal-wrap" id="hr013-project-picker-area" style="display:none">
         <div class="modal-container hr013-project-picker-container">
 
             <div class="header">
-                <h3 class="sub-title">프로젝트 목록 <span>추가</span></h3>
+                <h3 class="sub-title">참여 프로젝트 <span>추가</span></h3>
                 <div class="btn-area">
                     <button class="close-btn" type="button" id="btn_hr013_project_picker_close_x">
                         <img src="./icons/Icon-close.png" alt="" />
@@ -853,45 +730,79 @@
                     <div class="hr013-project-picker-search-row">
                         <label for="hr013-project-picker-search" class="fw600">프로젝트 검색</label>
                         <div class="hr013-project-picker-search-wrap">
-                            <input type="text" id="hr013-project-picker-search" class="wp100"
-                                   placeholder="검색할 프로젝트명을 입력하세요.">
-                            <button type="button" class="btn btn-close" id="btn_hr013_project_picker_search">
-                                <!--<img src="/icons/ico-search.png" alt="검색">-->
-                                조회
-                            </button>
+                            <input type="text" id="hr013-project-picker-search" class="wp100" placeholder="검색할 프로젝트명을 입력하세요.">
+                            <!--<button type="button" class="btn btn-close" id="btn_hr013_project_picker_search">조회</button>-->
                         </div>
-                    </div>
-                    <div class="hr013-project-picker-result-head page-sub-title">
-                        <p class="hr013-project-picker-result-title">검색결과</p>
                         <span id="hr013-project-picker-count" class="hcnc-grid-count hcnc-grid-count-title">
                             총 <span class="hcnc-grid-count-number">0</span>건
                         </span>
                     </div>
                     <div id="TABLE_HR013_PROJECT_PICKER"></div>
-                </div>
 
-                <!-- 우: 신규 등록 -->
-                <div class="hr013-project-picker-right">
-                    <p class="cell-tit hr013-project-picker-title">신규 프로젝트 등록</p>
-                    <div class="cell-right">
+                    <p class="cell-tit hr013-project-picker-title">신규 프로젝트</p>
+                    <!-- 데이터 입력 -->
+                    <div class="cell-left">
                         <div class="cell-info">
                             <label for="write_hr013_project_cd_nm" class="fw600">프로젝트 명칭</label>
                             <input type="text" id="write_hr013_project_cd_nm" class="text" placeholder="등록할 신규 프로젝트명을 입력하세요.">
                         </div>
                         <div class="cell-info">
-                            <label for="write_hr013_project_inprj_yn">당사 여부</label>
+                            <label for="write_hr013_project_inprj_yn" class="fw600">당사 여부</label>
                             <select id="write_hr013_project_inprj_yn">
                                 <option value="Y">Y</option>
                                 <option value="N">N</option>
                             </select>
                         </div>
+                        <!-- //////////////// -->
                         <div class="btn-area prj-save">
                             <button type="button" class="btn btn-save" id="btn_hr013_project_code_save"><img src="./images/common/btn-ico-plus.png">신규 등록</button>
                         </div>
                     </div>
+                </div>
+
+                <!-- 우: 신규 등록 -->
+                <div class="hr013-project-picker-right">
                     <div>
-                        <button type="button" class="btn btn-close" id="btn_hr013_project_picker_apply">등록</button>
+                        <p class="cell-tit hr013-project-picker-title">참여 프로젝트 작성</p>
+                        <!-- 데이터 입력 -->
+                        <div class="cell-right">
+                            <div class="cell-info">
+                                <label for="" class="fw600">고객사</label>
+                                <input type="text" id="" class="text" placeholder="">
+                            </div>
+                            <div class="cell-info">
+                                <label for="" class="fw600">프로젝트명</label>
+                                <input type="text" id="" class="text" placeholder="">
+                            </div>
+                            <div class="cell-info">
+                                <label for="" class="fw600">기술스택</label>
+                                <input type="text" id="" class="text" placeholder="">
+                            </div>
+                            <div class="cell-info">
+                                <label for="" class="fw600">참여기간</label>
+                                <input type="text" id="" class="text" placeholder="">
+                            </div>
+                            <div class="cell-info">
+                                <label for="" class="fw600">역할</label>
+                                <input type="text" id="" class="text" placeholder="">
+                            </div>
+                            <div class="cell-info">
+                                <label for="" class="fw600">계약단가</label>
+                                <input type="text" id="" class="text" placeholder="">
+                            </div>
+                            <div class="cell-info">
+                                <label for="" class="fw600">투입률</label>
+                                <input type="text" id="" class="text" placeholder="">
+                            </div>
+                            <!-- //////////////// -->
+                            <div class="btn-area prj-save">
+                                <button type="button" class="btn btn-save" id=""><img src="./images/common/btn-ico-plus.png">등록</button>
+                            </div>
+                        </div>
                     </div>
+<!--                    <div>-->
+<!--                        <button type="button" class="btn btn-close" id="btn_hr013_project_picker_apply">등록</button>-->
+<!--                    </div>-->
                 </div>
             </div>
         </div>

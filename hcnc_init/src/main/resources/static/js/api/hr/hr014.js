@@ -398,12 +398,30 @@ function commentInputFormatter(cell, formatterParams, onRendered) {
     return `<input type="text" class="hr014-comment-input" placeholder="${placeholder}" value="${safeValue}" ${disabled} style="border: none"/>`;
 }
 
+// function commentTextFormatter(cell) {
+//     var value = cell.getValue();
+//
+//     if (!value) {
+//         return `<div class="hr014-comment-text" style="color:#92979D !important;">평가의견을 구체적으로 입력하세요.</div>`;
+//     }
+//     var safeValue = escapeHtml(String(value));
+//
+//     return `<div class="hr014-comment-text">${safeValue}</div>`;
+// }
+
 function commentTextFormatter(cell) {
     var value = cell.getValue();
+    var rowData = cell.getRow().getData() || {};
+    var itemName = rowData.cd_nm || "항목";
 
     if (!value) {
-        return `<div class="hr014-comment-text" style="color:#92979D !important;">평가의견을 구체적으로 입력하세요.</div>`;
+        return `
+            <div class="hr014-comment-text" style="color:#92979D !important;">
+                ${escapeHtml(itemName)}에 대한 평가의견을 구체적으로 입력하세요.
+            </div>
+        `;
     }
+
     var safeValue = escapeHtml(String(value));
 
     return `<div class="hr014-comment-text">${safeValue}</div>`;
@@ -611,7 +629,7 @@ function setRiskActive(key) {
     if (!window.hr010ReadOnly && item) {
         $("#HR014_RISK_TEXT").prop(
             "placeholder",
-            item.label + "을(를) 구체적으로 입력하세요."
+            item.label + "에 대하여 구체적으로 입력하세요."
         );
     }
 

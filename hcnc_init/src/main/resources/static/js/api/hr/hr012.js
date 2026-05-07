@@ -44,27 +44,65 @@ function applyHr012DetailStackLayout() {
 //     return '<span class="hr012-skill-plain-text">' + escapeHtml(text) + "</span>";
 // }
 
+function getHr012SkillLevelMap() {
+    const map = new Map();
+
+    if (!window.hr012TableB || typeof window.hr012TableB.getData !== "function") {
+        return map;
+    }
+
+    window.hr012TableB.getData().forEach(row => {
+        let level = 0;
+
+        if (row.lv5) level = 5;
+        else if (row.lv4) level = 4;
+        else if (row.lv3) level = 3;
+        else if (row.lv2) level = 2;
+        else if (row.lv1) level = 1;
+
+        map.set(String(row.skl_id), level);
+    });
+
+    return map;
+}
+
 function hr012PlainSkillFormatter(cell) {
-    var value = cell && typeof cell.getValue === "function" ? cell.getValue() : null;
+    var value = cell && typeof cell.getValue === "function"
+        ? cell.getValue()
+        : null;
+
     var items = normalizeTagList(value);
 
     if (!items.length) {
         return '<span class="hr012-skill-empty">-</span>';
     }
 
+    const levelMap = getHr012SkillLevelMap();
+
     return `
         <div class="hr012-skill-list">
-                    ${items.map(item => {
-                const label = String(
-                    item && (item.label || item.cd_nm || item.name || item.code || item.value || "")
-                ).trim();
-        
-                return `
-                        <span class="hr012-skill-item">
-                            ${escapeHtml(label)}
-                        </span>
-                    `;
-            }).join("")}
+            ${items.map(item => {
+
+        const code = String(
+            item && (item.code || item.cd || item.value || "")
+        ).trim();
+
+        const label = String(
+            item && (item.label || item.cd_nm || item.name || code)
+        ).trim();
+
+        const levelValue = Number(levelMap.get(code) || 0);
+
+        const levelText = levelValue > 0
+            ? `${levelValue}점`
+            : "미평가";
+
+        return `
+                    <span class="hr012-skill-item">
+                        ${escapeHtml(label)}&nbsp;•&nbsp;${levelText}
+                    </span>
+                `;
+    }).join("")}
         </div>
     `;
 }
@@ -333,7 +371,7 @@ function buildHr012TableB() {
            changedTabs.tab2 = true;
         },
         columns: [
-            { title: "보유기술", field: "cd_nm", hozAlign: "left", width: 180, minWidth: 160},
+            { title: "보유역량", field: "cd_nm", hozAlign: "left", width: 180, minWidth: 160},
             { title: "skl_id", field: "skl_id", visible:false },
             ...[1,2,3,4,5].map(i => ({
                 title: i.toString() + "점",
