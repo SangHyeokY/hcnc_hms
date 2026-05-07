@@ -34,14 +34,39 @@ function applyHr012DetailStackLayout() {
     }
 }
 
+// function hr012PlainSkillFormatter(cell) {
+//     var value = cell && typeof cell.getValue === "function" ? cell.getValue() : null;
+//     var items = normalizeTagList(value);
+//     var labels = items.map(function (item) {
+//         return String(item && (item.label || item.cd_nm || item.name || item.code || item.value || "")).trim();
+//     }).filter(Boolean);
+//     var text = labels.length ? labels.join(", ") : "-";
+//     return '<span class="hr012-skill-plain-text">' + escapeHtml(text) + "</span>";
+// }
+
 function hr012PlainSkillFormatter(cell) {
     var value = cell && typeof cell.getValue === "function" ? cell.getValue() : null;
     var items = normalizeTagList(value);
-    var labels = items.map(function (item) {
-        return String(item && (item.label || item.cd_nm || item.name || item.code || item.value || "")).trim();
-    }).filter(Boolean);
-    var text = labels.length ? labels.join(", ") : "-";
-    return '<span class="hr012-skill-plain-text">' + escapeHtml(text) + "</span>";
+
+    if (!items.length) {
+        return '<span class="hr012-skill-empty">-</span>';
+    }
+
+    return `
+        <div class="hr012-skill-list">
+                    ${items.map(item => {
+                const label = String(
+                    item && (item.label || item.cd_nm || item.name || item.code || item.value || "")
+                ).trim();
+        
+                return `
+                        <span class="hr012-skill-item">
+                            ${escapeHtml(label)}
+                        </span>
+                    `;
+            }).join("")}
+        </div>
+    `;
 }
 
 // hr012.js
@@ -243,13 +268,48 @@ function loadHr012TableDataA() {
 
 // =============================================================================================================================
 
+// function radioFormatter(cell) {
+//     const rowData = cell.getRow().getData();
+//     const field = cell.getField();
+//
+//     // 현재 컬럼 번호 추출 (lv3 -> 3)
+//     const currentLevel = Number(field.replace("lv", ""));
+//
+//     // 선택된 점수 찾기
+//     let selectedLevel = 0;
+//
+//     for (let i = 1; i <= 5; i++) {
+//         if (rowData["lv" + i]) {
+//             selectedLevel = i;
+//             break;
+//         }
+//     }
+//
+//     // 현재 칸이 선택 점수 이하인지 판단
+//     const active = currentLevel <= selectedLevel;
+//
+//     return active
+//         ? '<span class="hr012-star is-on">★</span>'
+//         : '<span class="hr012-star">☆</span>';
+// }
+
 function radioFormatter(cell) {
-    const checked = cell.getValue() ? "checked" : "";
+    const checked = cell.getValue();
+
+    // 읽기 모드
     if (currentMode === "view" || window.hr010ReadOnly) {
-        return checked ? "<span class=\"hr012-score-mark\">●</span>" : "";
+        return checked
+            ? '<span class="hr012-star is-on">★</span>'
+            : '<span class="hr012-star">☆</span>';
     }
-    return `<input type="radio" class="circle-radio" ${checked}>`;
+
+    // 편집 모드
+    return checked
+        ? '<span class="hr012-star is-on">★</span>'
+        : '<span class="hr012-star">☆</span>';
 }
+
+// =============================================================================================================================
 
 function buildHr012TableB() {
     if (window.hr012TableB) return;
@@ -273,7 +333,7 @@ function buildHr012TableB() {
            changedTabs.tab2 = true;
         },
         columns: [
-            { title: "기술", field: "cd_nm", hozAlign: "left", width: 180, minWidth: 160},
+            { title: "보유기술", field: "cd_nm", hozAlign: "left", width: 180, minWidth: 160},
             { title: "skl_id", field: "skl_id", visible:false },
             ...[1,2,3,4,5].map(i => ({
                 title: i.toString() + "점",

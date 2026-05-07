@@ -119,7 +119,7 @@ function buildHr014TableA() {
                 title: "1점",
                 field: "lv1",
                 hozAlign: "center",
-                width: 50,
+                width: 80,
                 formatter: scoreCheckboxFormatter,
                 cellClick: function (e, cell) {
                     setScore(cell.getRow(), 1);
@@ -131,7 +131,7 @@ function buildHr014TableA() {
                 title: "2점",
                 field: "lv2",
                 hozAlign: "center",
-                width: 50,
+                width: 80,
                 formatter: scoreCheckboxFormatter,
                 cellClick: function (e, cell) {
                     setScore(cell.getRow(), 2);
@@ -143,7 +143,7 @@ function buildHr014TableA() {
                 title: "3점",
                 field: "lv3",
                 hozAlign: "center",
-                width: 50,
+                width: 80,
                 formatter: scoreCheckboxFormatter,
                 cellClick: function (e, cell) {
                     setScore(cell.getRow(), 3);
@@ -155,7 +155,7 @@ function buildHr014TableA() {
                 title: "4점",
                 field: "lv4",
                 hozAlign: "center",
-                width: 50,
+                width: 80,
                 formatter: scoreCheckboxFormatter,
                 cellClick: function (e, cell) {
                     setScore(cell.getRow(), 4);
@@ -167,7 +167,7 @@ function buildHr014TableA() {
                 title: "5점",
                 field: "lv5",
                 hozAlign: "center",
-                width: 50,
+                width: 80,
                 formatter: scoreCheckboxFormatter,
                 cellClick: function (e, cell) {
                     setScore(cell.getRow(), 5);
@@ -320,18 +320,48 @@ $(document).on("change", ".select_prj_cd", async function () {
 
 // =============================================================================================================================
 
+// function scoreCheckboxFormatter(cell, formatterParams, onRendered) {
+//     const value = cell.getValue();
+//     const checked = value === "Y" ? "checked" : "";
+//     const isReadOnly = !!window.hr010ReadOnly;
+//     // 실제 점수 변경은 radio 자체가 아니라 cellClick(setScore)에서 처리한다.
+//     if (isReadOnly) {
+//         const scoreLabel = String(cell.getColumn().getField() || "").replace("lv", "");
+//         return `<span class="hr014-readonly-score" style="display:block; width:100%; text-align:center; font-weight:700; color:#20385c;">${checked ? scoreLabel : ""}</span>`;
+//     }
+//     const disabled = isReadOnly ? "disabled" : "";
+//     return `<input type="radio" ${checked} ${disabled} />`;
+// }
+
 function scoreCheckboxFormatter(cell, formatterParams, onRendered) {
     const value = cell.getValue();
-    const checked = value === "Y" ? "checked" : "";
+    const checked = value === "Y";
     const isReadOnly = !!window.hr010ReadOnly;
-    // 실제 점수 변경은 radio 자체가 아니라 cellClick(setScore)에서 처리한다.
+
+    // readonly 모드
     if (isReadOnly) {
         const scoreLabel = String(cell.getColumn().getField() || "").replace("lv", "");
-        return `<span class="hr014-readonly-score" style="display:block; width:100%; text-align:center; font-weight:700; color:#20385c;">${checked ? scoreLabel : ""}</span>`;
+        return `
+            <span class="hr014-readonly-score"
+                  style="display:block;
+                         width:100%;
+                         text-align:center;
+                         font-weight:700;
+                         color:#20385c;">
+                ${checked ? scoreLabel : ""}
+            </span>
+        `;
     }
-    const disabled = isReadOnly ? "disabled" : "";
-    return `<input type="radio" ${checked} ${disabled} />`;
+
+    // 수정 가능 모드
+    return `
+        <div class="hr014-star ${checked ? "is-on" : ""}">
+            ${checked ? "★" : "☆"}
+        </div>
+    `;
 }
+
+// =============================================================================================================================
 
 function setScore(row, level) {
     if (window.hr010ReadOnly) {
@@ -778,5 +808,27 @@ $(document).on("keydown", function(e) {
 function updateHr014Count() {
     const data = Array.isArray(window.hr013Data) ? window.hr013Data : [];
     const count = data.filter(row => String(row.inprj_yn).trim() === "Y").length;
+
     $("#hr014-count .hcnc-grid-count-number").text(count);
+
+    // tab4 영역
+    const $tab4Content = $(".hms-tab-wrap.tab4-content");
+    const $tab4Line = $("#4-step-end");
+
+    // tab2 제목
+    const $hr012Title = $("#hr012-title");
+
+    if (count === 0) {
+        $tab4Content[0].style.setProperty("display", "none", "important");
+        $tab4Line.addClass("is-hidden");
+
+        // 보유역량 평가의 넘버링 변경 3) => 2)
+        $hr012Title.contents().first()[0].textContent = "2) 보유역량 평가 ";
+    } else {
+        $tab4Content[0].style.setProperty("display", "block", "important");
+        $tab4Line.removeClass("is-hidden");
+
+        // 원상복구
+        $hr012Title.contents().first()[0].textContent = "3) 보유역량 평가 ";
+    }
 }
