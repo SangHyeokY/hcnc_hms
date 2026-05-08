@@ -57,6 +57,50 @@ window.initTab3 = function () {
         }
     });
 
+    $(document)
+        .off("click.hr013ProjectForm")
+        .on("click.hr013ProjectForm", "#hr013_modal_toggle", function () {
+
+            const $form = $("#hr013_project_form");
+
+            if ($form.hasClass("is-open")) {
+
+                // 닫기
+                $form.css("height", $form[0].scrollHeight + "px");
+
+                requestAnimationFrame(() => {
+                    $form.removeClass("is-open");
+                    $form.css({
+                        height: "0px",
+                        opacity: 0,
+                        transform: "translateY(-8px)"
+                    });
+                });
+
+            } else {
+
+                // 열기
+                const fullHeight = $form[0].scrollHeight;
+
+                $form.addClass("is-open");
+
+                $form.css({
+                    height: fullHeight + "px",
+                    opacity: 1,
+                    transform: "translateY(0)"
+                });
+
+                // 애니메이션 끝나면 auto 처리
+                $form.one("transitionend", function () {
+                    if ($form.hasClass("is-open")) {
+                        $form.css("height", "auto");
+                    }
+                });
+            }
+
+            $(this).toggleClass("is-open");
+        });
+
     // $("#btn_hr013_project_link").off("click.hr013projectlink").on("click.hr013projectlink", function () {
     //     openHr013ProjectPicker(null);
     // });
@@ -71,7 +115,7 @@ window.initTab3 = function () {
         hr013JobOptions = $("#write_hr013_job_cd option").map(function () {
             return { cd: this.value, cd_nm: $(this).text() };
         }).get();
-        initSelectDefault("write_hr013_job_cd", "선택");
+        initSelectDefault("write_hr013_job_cd", "역할 선택");
         jobMap = getJobCodeMap();
     });
     setComCode("write_hr013_skl_cd", "skl_id", "", "cd", "cd_nm", function (res) {
@@ -309,6 +353,7 @@ function initHr013ProjectPickerTable() {
         /*height: "480px",*/
         selectableRange: false, // v5 이상이면 안전하게 추가
         resizableColumns: false,
+        placeholder: "조회된 프로젝트가 없습니다.",
         pagination: "local",
         paginationSize: 5,
         paginationSizeSelector: [5, 10, 15, 20],
@@ -343,22 +388,13 @@ async function openHr013ProjectPicker(row) {
     bindHr013ProjectPickerEvents();
     if (!isHr013Editable()) return;
 
-    // var rowData = row && typeof row.getData === "function" ? row.getData() : null;
-    // var currentInprjYn = rowData ? rowData.inprj_yn : $("#write_hr013_inprj_yn").val();
-    // if (!isHr013InprjYnY(currentInprjYn)) {
-    //     showAlert({
-    //         icon: "info",
-    //         title: "알림",
-    //         html: `<div><strong>당사 프로젝트</strong>만 선택할 수 있습니다.</div>`
-    //     });
-    //     return;
-    // }
-
     showLoading();
 
     try {
         hr013ProjectPickerContextRow = row || null;
         hr013SelectedProjectCode = null;
+
+        $("#prj_dev_nm").val($("#dev_nm").val() || $("#dev_nm").text());
 
         $("#write_hr013_project_cd_nm").val("");
         $("#write_hr013_project_inprj_yn").val("Y");
@@ -617,7 +653,7 @@ async function saveHr013ProjectCode() {
     const confirmResult = await showAlert({
         icon: "warning",
         title: "확인",
-        html: `<div><strong>cdNm</strong>&nbsp;프로젝트를 등록하시겠습니까?</div>`,
+        html: `<div><strong>${cdNm}</strong>&nbsp;프로젝트를 등록하시겠습니까?</div>`,
         showCancelButton: true,
         confirmText: "등록",
         cancelText: "취소",

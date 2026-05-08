@@ -135,9 +135,12 @@
                                     <span>주요 분야</span>
                                     <strong id="hr011RefMainFld">-</strong>
                                 </div>
+                                <!-- 데이터 저장 -->
                                 <div hidden>
                                     <span id="hr011RefProjectInfo">0회</span>
                                     <span id="hr011RefBrdt">-</span>
+                                    <span id="grade"></span>
+                                    <span id="score"></span>
                                 </div>
                             </div>
                         </div>
@@ -739,70 +742,115 @@
                     </div>
                     <div id="TABLE_HR013_PROJECT_PICKER"></div>
 
-                    <p class="cell-tit hr013-project-picker-title">신규 프로젝트</p>
                     <!-- 데이터 입력 -->
-                    <div class="cell-left">
-                        <div class="cell-info">
-                            <label for="write_hr013_project_cd_nm" class="fw600">프로젝트 명칭</label>
-                            <input type="text" id="write_hr013_project_cd_nm" class="text" placeholder="등록할 신규 프로젝트명을 입력하세요.">
+                    <section>
+                        <p class="hr013-project-picker-title" id="hr013_modal_toggle">신규 프로젝트 등록</p>
+                        <div class="toggle-form" id="hr013_project_form">
+                            <div class="cell-info-wrap">
+                                <div class="cell-info">
+                                    <label for="write_hr013_project_cd_nm">1) 프로젝트명</label>
+                                    <input type="text" id="write_hr013_project_cd_nm" class="text" placeholder="등록할 신규 프로젝트명을 입력하세요.">
+                                </div>
+                                <div class="cell-info">
+                                    <label for="write_hr013_project_inprj_yn">2) 당사 여부</label>
+                                    <select id="write_hr013_project_inprj_yn">
+                                        <option value="Y">Y</option>
+                                        <option value="N">N</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="btn-area prj-save">
+                                <button type="button" class="btn btn-save" id="btn_hr013_project_code_save" style="width: 100% !important;">신규 등록</button>
+                            </div>
                         </div>
-                        <div class="cell-info">
-                            <label for="write_hr013_project_inprj_yn" class="fw600">당사 여부</label>
-                            <select id="write_hr013_project_inprj_yn">
-                                <option value="Y">Y</option>
-                                <option value="N">N</option>
-                            </select>
-                        </div>
-                        <!-- //////////////// -->
-                        <div class="btn-area prj-save">
-                            <button type="button" class="btn btn-save" id="btn_hr013_project_code_save"><img src="./images/common/btn-ico-plus.png">신규 등록</button>
-                        </div>
-                    </div>
+                    </section>
                 </div>
 
                 <!-- 우: 신규 등록 -->
                 <div class="hr013-project-picker-right">
-                    <div>
-                        <p class="cell-tit hr013-project-picker-title">참여 프로젝트 작성</p>
-                        <!-- 데이터 입력 -->
-                        <div class="cell-right">
-                            <div class="cell-info">
-                                <label for="" class="fw600">고객사</label>
-                                <input type="text" id="" class="text" placeholder="">
+                    <section>
+                        <p class="hr013-project-picker-title">참여 프로젝트 등록</p>
+                        <div class="hr013-modal-grid">
+                            <!-- 1행 -->
+                            <div class="hr013-field-card">
+                                <label for="prj_dev_nm">성명</label>
                             </div>
-                            <div class="cell-info">
-                                <label for="" class="fw600">프로젝트명</label>
-                                <input type="text" id="" class="text" placeholder="">
+                            <div class="hr013-field-card">
+                                <input type="text" id="prj_dev_nm" class="wp100 is-readonly" readonly>
                             </div>
-                            <div class="cell-info">
-                                <label for="" class="fw600">기술스택</label>
-                                <input type="text" id="" class="text" placeholder="">
+                            <div class="null-card"></div>
+                            <div class="hr013-field-card">
+                                <label for="write_hr013_job_cd">역할</label>
                             </div>
-                            <div class="cell-info">
-                                <label for="" class="fw600">참여기간</label>
-                                <input type="text" id="" class="text" placeholder="">
+                            <div class="hr013-field-card">
+                                <select id="write_hr013_job_cd" class="wp100"></select>
                             </div>
-                            <div class="cell-info">
-                                <label for="" class="fw600">역할</label>
-                                <input type="text" id="" class="text" placeholder="">
+
+                            <!-- 2행 -->
+                            <div class="hr013-field-card">
+                                <label for="prj_prj_nm">프로젝트명</label>
                             </div>
-                            <div class="cell-info">
-                                <label for="" class="fw600">계약단가</label>
-                                <input type="text" id="" class="text" placeholder="">
+                            <div class="hr013-field-card">
+                                <input type="text" id="prj_prj_nm" class="wp100">
                             </div>
-                            <div class="cell-info">
-                                <label for="" class="fw600">투입률</label>
-                                <input type="text" id="" class="text" placeholder="">
+                            <div class="null-card"></div>
+                            <div class="hr013-field-card">
+                                <label for="prj_cust_nm">고객사</label>
                             </div>
-                            <!-- //////////////// -->
-                            <div class="btn-area prj-save">
-                                <button type="button" class="btn btn-save" id=""><img src="./images/common/btn-ico-plus.png">등록</button>
+                            <div class="hr013-field-card">
+                                <input type="text" id="prj_cust_nm" class="wp100">
+                            </div>
+
+                            <!-- 3행 -->
+                            <div class="hr013-field-card">
+                                <label for="prj_st_dt">계약시작일</label>
+                            </div>
+                            <div class="hr013-field-card">
+                                <input type="date" id="prj_st_dt" class="wp100">
+                            </div>
+                            <div class="null-card"></div>
+                            <div class="hr013-field-card">
+                                <label for="prj_ed_dt">계약종료일</label>
+                            </div>
+                            <div class="hr013-field-card">
+                                <input type="date" id="prj_ed_dt" class="wp100">
+                            </div>
+
+                            <!-- 4행 -->
+                            <div class="hr013-field-card">
+                                <label for="prj_rate_amt">계약단가</label>
+                            </div>
+                            <div class="hr013-field-card">
+                                <input type="text" id="prj_rate_amt" class="wp100">
+                            </div>
+                            <div class="null-card"></div>
+                            <div class="hr013-field-card">
+                                <label for="prj_alloc_pct">투입률</label>
+                            </div>
+                            <div class="hr013-field-card">
+                                <input type="text" id="prj_alloc_pct" class="wp100">
+                            </div>
+
+                            <!-- 5행 -->
+                            <div class="hr013-field-card">
+                                <label for="">기술스택</label>
+                            </div>
+                            <div class="hr013-field-card" style="grid-column: span 4;">
+                                <input type="text" id="" class="wp100">
+                            </div>
+
+                            <!-- 6행 -->
+                            <div class="hr013-field-card" style="display: flex; align-items: flex-start; height: 100%;">
+                                <label for="prj_remark" style="height: 40px;">비고</label>
+                            </div>
+                            <div class="hr013-field-card" style="grid-column: span 4;">
+                                <textarea id="prj_remark" class="wp100"></textarea>
                             </div>
                         </div>
-                    </div>
-<!--                    <div>-->
-<!--                        <button type="button" class="btn btn-close" id="btn_hr013_project_picker_apply">등록</button>-->
-<!--                    </div>-->
+                        <div class="btn-area prj-save">
+                            <button type="button" class="btn btn-save" id="btn_hr013_project_picker_apply">등록</button>
+                        </div>
+                    </section>
                 </div>
             </div>
         </div>

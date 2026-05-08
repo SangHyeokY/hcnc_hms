@@ -12,9 +12,9 @@
     var DEFAULT_PAGE_SIZE = 10;
     var DEFAULT_PAGE_SIZES = [10, 20, 50, 100];
     var COUNTER_CLASS = "hcnc-grid-count"; 
-    var FOOTER_COMPACT_CLASS = "hcnc-grid-footer-compact";  // 공통코드 > 코드그룹은 폭이 좁아 건수 텍스트를 항상 페이지 버튼 아래로 배치
+    // var FOOTER_COMPACT_CLASS = "hcnc-grid-footer-compact";  // 공통코드 > 코드그룹은 폭이 좁아 건수 텍스트를 항상 페이지 버튼 아래로 배치
     var trackedTables = [];
-    var viewTableId = null; // table의 id값을 임시 저장
+    // var viewTableId = null; // table의 id값을 임시 저장
     var resizeTimer = null;
     var PAGINATION_SYMBOL_LANG = {
         pagination: {
@@ -264,19 +264,19 @@
     }
 
     // 특정 화면(코드그룹)은 카운터를 타이틀이 아닌 푸터에 유지
-    function shouldRenderCounterInTitle(tableEl, titleEl) {
-        if (!tableEl || !titleEl) {
-            return false;
-        }
-        if (tableEl.id === "TABLE_COMMON_MAIN") {
-            return false;
-        }
-        var titleText = getNormalizedTitleText(titleEl);
-        if (titleText.indexOf("코드그룹") > -1) {
-            return false;
-        }
-        return true;
-    }
+    // function shouldRenderCounterInTitle(tableEl, titleEl) {
+    //     if (!tableEl || !titleEl) {
+    //         return false;
+    //     }
+    //     if (tableEl.id === "TABLE_COMMON_MAIN") {
+    //         return false;
+    //     }
+    //     var titleText = getNormalizedTitleText(titleEl);
+    //     if (titleText.indexOf("코드그룹") > -1) {
+    //         return false;
+    //     }
+    //     return true;
+    // }
 
     // 카운터를 타이틀 영역으로 이동
     function mountCounterToTitle(titleEl, counterEl) {
@@ -292,49 +292,49 @@
     }
 
     // 카운터를 푸터 영역으로 이동
-    function mountCounterToFooter(tableEl, counterEl) {
-        if (!tableEl || !counterEl) {
-            return false;
-        }
-        var footerEl = tableEl.querySelector(".tabulator-footer");
-        if (!footerEl) {
-            return false;
-        }
-        if (counterEl.parentElement !== footerEl) {
-            footerEl.appendChild(counterEl);
-        }
-        counterEl.classList.remove("hcnc-grid-count-title");
-        var titleEl = findRelatedTitle(tableEl);
-        if (titleEl) {
-            var titleNode = titleEl.querySelector("h4") || titleEl;
-            titleNode.classList.remove("hcnc-grid-title-with-count");
-        }
-        return true;
-    }
+    // function mountCounterToFooter(tableEl, counterEl) {
+    //     if (!tableEl || !counterEl) {
+    //         return false;
+    //     }
+    //     var footerEl = tableEl.querySelector(".tabulator-footer");
+    //     if (!footerEl) {
+    //         return false;
+    //     }
+    //     if (counterEl.parentElement !== footerEl) {
+    //         footerEl.appendChild(counterEl);
+    //     }
+    //     counterEl.classList.remove("hcnc-grid-count-title");
+    //     var titleEl = findRelatedTitle(tableEl);
+    //     if (titleEl) {
+    //         var titleNode = titleEl.querySelector("h4") || titleEl;
+    //         titleNode.classList.remove("hcnc-grid-title-with-count");
+    //     }
+    //     return true;
+    // }
 
-    function applyResponsiveFooterLayout(table, counterEl) {    // 좁은 화면에서 compact모드 판단
-        var tableEl = getTableElement(table);
-        if (!tableEl || !counterEl) {
-            return;
-        }
-        var footerEl = tableEl.querySelector(".tabulator-footer");
-        var pagesEl = footerEl ? footerEl.querySelector(".tabulator-pages") : null;
-        if (!footerEl || !pagesEl) {
-            return;
-        }
-
-        footerEl.classList.remove(FOOTER_COMPACT_CLASS);
-
-        var footerWidth = footerEl.clientWidth || 0;
-        var pagesWidth = pagesEl.offsetWidth || 0;
-        var counterWidth = counterEl.offsetWidth || 0;
-        var reserved = 56; // 좌/우 여백 + 간격
-        var requiredWidth = pagesWidth + counterWidth + reserved;
-
-        if (requiredWidth > footerWidth) {  // 좌/우 여백 + 간격 + 건수 텍스트 + 간격
-            footerEl.classList.add(FOOTER_COMPACT_CLASS);
-        }
-    }
+    // function applyResponsiveFooterLayout(table, counterEl) {    // 좁은 화면에서 compact모드 판단
+    //     var tableEl = getTableElement(table);
+    //     if (!tableEl || !counterEl) {
+    //         return;
+    //     }
+    //     var footerEl = tableEl.querySelector(".tabulator-footer");
+    //     var pagesEl = footerEl ? footerEl.querySelector(".tabulator-pages") : null;
+    //     if (!footerEl || !pagesEl) {
+    //         return;
+    //     }
+    //
+    //     footerEl.classList.remove(FOOTER_COMPACT_CLASS);
+    //
+    //     var footerWidth = footerEl.clientWidth || 0;
+    //     var pagesWidth = pagesEl.offsetWidth || 0;
+    //     var counterWidth = counterEl.offsetWidth || 0;
+    //     var reserved = 56; // 좌/우 여백 + 간격
+    //     var requiredWidth = pagesWidth + counterWidth + reserved;
+    //
+    //     if (requiredWidth > footerWidth) {  // 좌/우 여백 + 간격 + 건수 텍스트 + 간격
+    //         footerEl.classList.add(FOOTER_COMPACT_CLASS);
+    //     }
+    // }
 
     function enforcePaginatorSymbols(table) {   // 페이징버튼 강제 적용
         var tableEl = getTableElement(table);
@@ -355,7 +355,8 @@
         if (!tableEl || !tableEl.id) {
             return false;
         }
-        return tableEl.id === "TABLE_COMMON_MAIN" || tableEl.id === "TABLE_COMMON_DETAIL";
+        // return tableEl.id === "TABLE_COMMON_MAIN" || tableEl.id === "TABLE_COMMON_DETAIL";
+        return tableEl.id === "TABLE_COMMON_MAIN";
     }
 
     // 이미 생성된 건수 엘리먼트가 남아 있으면 제거해 이후 렌더링에서 다시 나타나지 않게 하고, 화면에서는 제거
@@ -378,15 +379,22 @@
 
     function updateGridCounter(table) { // 건수/아이콘/반응형 한번에 갱신
         var tableEl = getTableElement(table);
-        if (!tableEl || tableEl.id !== viewTableId) return; // 현재 보고 있는 id의 테이블 아니면 무시
+
+        // if (!tableEl || tableEl.id !== viewTableId) return; // 현재 보고 있는 id의 테이블 아니면 무시
+        if (!tableEl) return;
 
         // 공통코드 화면(코드그룹/상세코드)은 건수 렌더링과 반응형 푸터 계산을 생략한다.
+        // if (shouldHideGridCounter(tableEl)) {
+        //     removeGridCounterElement(table, tableEl);
+        //     var footerEl = tableEl.querySelector(".tabulator-footer");
+        //     if (footerEl) {
+        //         footerEl.classList.remove(FOOTER_COMPACT_CLASS);
+        //     }
+        //     return;
+        // }
+        // 숨김 처리 대상만 제외
         if (shouldHideGridCounter(tableEl)) {
             removeGridCounterElement(table, tableEl);
-            var footerEl = tableEl.querySelector(".tabulator-footer");
-            if (footerEl) {
-                footerEl.classList.remove(FOOTER_COMPACT_CLASS);
-            }
             return;
         }
 
@@ -401,19 +409,22 @@
                               '</span>건';
 
         var titleEl = findRelatedTitle(tableEl);
-        var inTitle = shouldRenderCounterInTitle(tableEl, titleEl);
-        if (inTitle) {
+        // var inTitle = shouldRenderCounterInTitle(tableEl, titleEl);
+        // if (inTitle) {
+        //     mountCounterToTitle(titleEl, counterEl);
+        //     var footerForTitle = tableEl.querySelector(".tabulator-footer");
+        //     if (footerForTitle) {
+        //         footerForTitle.classList.remove(FOOTER_COMPACT_CLASS);
+        //     }
+        //     return;
+        // }
+        if (titleEl) {
             mountCounterToTitle(titleEl, counterEl);
-            var footerForTitle = tableEl.querySelector(".tabulator-footer");
-            if (footerForTitle) {
-                footerForTitle.classList.remove(FOOTER_COMPACT_CLASS);
-            }
-            return;
         }
 
-        if (mountCounterToFooter(tableEl, counterEl)) {
-            applyResponsiveFooterLayout(table, counterEl);
-        }
+        // if (mountCounterToFooter(tableEl, counterEl)) {
+        //     applyResponsiveFooterLayout(table, counterEl);
+        // }
     }
 
     function clearGridSelectionOnPageLoaded(table) { // 페이지 이동시 이전 페이지 선택 해제
@@ -503,16 +514,17 @@
     }
 
     function PatchedTabulator(element, options) {   // Tabulator 생성자 자체를 래핑
-        var tableEl = (typeof element === "string") ? document.querySelector(element) : element;
-        var tableId = tableEl ? tableEl.id : ""; // 테이블 id 저장
-
-        if (viewTableId && viewTableId !== tableId) {
-            // console.log("조회 중인 테이블이 바뀌었습니다 : 기존 테이블 => " + viewTableId + ", 새 테이블 => " + tableId);
-            return new OriginalTabulator(element, withDefaultPaging(options)); // 그냥 생성만
-        }
+        // var tableEl = (typeof element === "string") ? document.querySelector(element) : element;
+        // var tableId = tableEl ? tableEl.id : ""; // 테이블 id 저장
+        //
+        // if (viewTableId && viewTableId !== tableId) {
+        //     // console.log("조회 중인 테이블이 바뀌었습니다 : 기존 테이블 => " + viewTableId + ", 새 테이블 => " + tableId);
+        //     return new OriginalTabulator(element, withDefaultPaging(options)); // 그냥 생성만
+        // }
+        // var instance = new OriginalTabulator(element, withDefaultPaging(options));
         var instance = new OriginalTabulator(element, withDefaultPaging(options));
         trackedTables.push(instance);
-        viewTableId = tableId;
+        // viewTableId = tableId;
         return instance;
     }
 

@@ -1971,8 +1971,10 @@ function renderHr011ReferenceDashboard(row) {
     const devTypeLabel = devTypeValue === "HCNC_F" ? "프리랜서" : "직원";
     const mainLangParts = splitHr011MainLang(row);
     const careerText = formatCareerYearMonth(row.exp_yr) || "0개월";
+
     const gradeText = $.trim($("#grade").text() || "-");
     const scoreText = $.trim($("#score").text() || "");
+
     const projectCountText = `${hr011RefProjectRows.length || 0}회`;
     const skillCardRows = buildHr011SkillCardRows(row);
     const mainLangSkills = mainLangParts.skills.slice(0, 6);
