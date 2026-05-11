@@ -768,8 +768,12 @@
 
                 <!-- 우: 신규 등록 -->
                 <div class="hr013-project-picker-right">
+                    <div class="hr013-project-picker-search-row">
+                        <label for="write_hr013_prj_nm" class="fw600">참여 프로젝트명</label>
+                        <input type="text" id="write_hr013_prj_nm" placeholder="왼쪽 테이블에서 프로젝트를 클릭해주세요.">
+                    </div>
                     <section>
-                        <p class="hr013-project-picker-title">참여 프로젝트 정보</p>
+                        <p class="hr013-project-picker-title">참여 프로젝트 상세 정보</p>
                         <div class="hr013-modal-grid">
                             <!-- 1행 -->
                             <div class="hr013-field-card">
@@ -788,17 +792,17 @@
 
                             <!-- 2행 -->
                             <div class="hr013-field-card">
-                                <label for="write_hr013_prj_nm">프로젝트명</label>
-                            </div>
-                            <div class="hr013-field-card">
-                                <input type="text" id="write_hr013_prj_nm" class="wp100">
-                            </div>
-                            <div class="null-card"></div>
-                            <div class="hr013-field-card">
                                 <label for="write_hr013_cust_nm">고객사</label>
                             </div>
                             <div class="hr013-field-card">
                                 <input type="text" id="write_hr013_cust_nm" class="wp100">
+                            </div>
+                            <div class="null-card"></div>
+                            <div class="hr013-field-card">
+                                <label for="write_hr013_alloc_pct">투입률</label>
+                            </div>
+                            <div class="hr013-field-card">
+                                <input type="text" id="write_hr013_alloc_pct" class="wp100 ta-r">
                             </div>
 
                             <!-- 3행 -->
@@ -820,23 +824,19 @@
                             <div class="hr013-field-card">
                                 <label for="write_hr013_rate_amt">계약단가</label>
                             </div>
-                            <div class="hr013-field-card">
-                                <input type="text" id="write_hr013_rate_amt" class="wp100">
-                            </div>
-                            <div class="null-card"></div>
-                            <div class="hr013-field-card">
-                                <label for="write_hr013_alloc_pct">투입률</label>
-                            </div>
-                            <div class="hr013-field-card">
-                                <input type="text" id="write_hr013_alloc_pct" class="wp100">
+                            <div class="hr013-field-card" style="grid-column: span 4;">
+                                <input type="text" id="write_hr013_rate_amt" class="wp100 ta-r">
                             </div>
 
                             <!-- 5행 -->
                             <div class="hr013-field-card">
-                                <label for="">기술스택</label>
+                                <label for="write_hr013_stack_txt">기술스택</label>
                             </div>
                             <div class="hr013-field-card" style="grid-column: span 4;">
-                                <input type="text" id="" class="wp100">
+                                <!-- 사용자 표시용 -->
+                                <div id="write_hr013_stack_txt_nm"></div>
+                                <!-- 실제 저장용 -->
+                                <input type="hidden" id="write_hr013_stack_txt">
                             </div>
 
                             <!-- 6행 -->
@@ -844,11 +844,12 @@
                                 <label for="write_hr013_remark" style="height: 40px;">비고</label>
                             </div>
                             <div class="hr013-field-card" style="grid-column: span 4;">
-                                <textarea id="write_hr013_remark" class="wp100"></textarea>
+                                <textarea id="write_hr013_remark" class="wp100" style="height: 116px;"></textarea>
                             </div>
                         </div>
-                        <div class="btn-area prj-save">
-                            <button type="button" class="btn btn-save" id="btn_hr013_project_picker_apply">등록</button>
+                        <div class="btn-area" id="prj-modal-btn">
+                            <button type="button" class="btn" id="btn_hr013_skill_apply">기술스택 추가</button>
+                            <button type="button" class="btn" id="btn_hr013_project_picker_apply">등록</button>
                         </div>
                     </section>
                 </div>

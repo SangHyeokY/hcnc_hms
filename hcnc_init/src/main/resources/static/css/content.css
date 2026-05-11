@@ -1052,7 +1052,8 @@ button.btn.btn-add-skill,
 
 #TABLE_HR013_A .hr013-card .remark {font-size: 14px; font-weight: 500; color: #76787A; width: calc(100% - 160px);}
 #TABLE_HR013_A .hr013-card .remark span {overflow: hidden; text-overflow: ellipsis; white-space: nowrap;}
-#TABLE_HR013_A .hr013-card .skills, #TABLE_HR012_A .hr012-skill-list {display: flex; flex-wrap: wrap; gap: 8px;}
+#TABLE_HR013_A .hr013-card .skills, #TABLE_HR012_A .hr012-skill-list, #write_hr013_stack_txt_nm {display: flex; flex-wrap: wrap; gap: 8px;}
+#write_hr013_stack_txt_nm {height: 40px; padding: 5px; border-radius: 8px; border: 1px solid #DEE2E7; background-color: #fff;}
 #TABLE_HR013_A .hr013-card .rate {justify-content: flex-end; font-weight: 500;}
 #TABLE_HR013_A .hr013-card .rate .empty {width: 100%; justify-content: center; color: #76787A; font-weight: 400;}
 #TABLE_HR013_A .hr013-card .cust, #TABLE_HR013_A .hr013-card .prj {font-size: 16px; font-weight: 600;}
@@ -3323,7 +3324,8 @@ section.search-area .search-info #insertNm::placeholder,
 #hr012-skill-picker-area #hr012-skill-picker-search::placeholder,
 #hr013-skill-picker-area #hr013-skill-picker-search::placeholder,
 #hr013-project-picker-area #hr013-project-picker-search::placeholder,
-#write_hr013_project_cd_nm::placeholder {color:#8F9098;}
+#write_hr013_project_cd_nm::placeholder,
+#write_hr013_prj_nm::placeholder {font-weight: 400; color:#8F9098;}
 
 section.search-area .search-info #searchKeyword:focus,
 section.search-area .search-info #insertNm:focus,
@@ -3439,7 +3441,7 @@ section.search-area .search-info #searchType {
 
 #hr013-project-picker-area .hr013-project-picker-search-wrap {display: flex; width: 100%;}
 #hr013-project-picker-area #hr013-project-picker-search {display: flex; flex: 1; min-width: 0;}
-#hr013-project-picker-area .hr013-project-picker-search-row > label {width: 180px;}
+#hr013-project-picker-area .hr013-project-picker-search-row > label {min-width: auto;}
 
 #hr013-project-picker-area .hr013-project-picker-content {
   padding: 20px;
@@ -3454,13 +3456,9 @@ section.search-area .search-info #searchType {
   min-width: 0;
 }
 
-#hr013-project-picker-area #btn_hr013_project_code_save, #hr013-project-picker-area #btn_hr013_project_picker_apply {border-color: var(--hcnc-shell-primary); color: var(--hcnc-shell-primary);}
-#hr013-project-picker-area #btn_hr013_project_code_save:before,
-#hr013-project-picker-area #btn_hr013_project_picker_apply:before {-webkit-mask-image: url(../images/common/btn-ico-plus.png); mask-image: url(../images/common/btn-ico-plus.png);}
-
+#hr013-project-picker-area #btn_hr013_project_code_save, #hr013-project-picker-area #btn_hr013_project_picker_apply, #hr013-project-picker-area #btn_hr013_skill_apply {border-color: var(--hcnc-shell-primary); color: var(--hcnc-shell-primary);}
 #hr013-project-picker-area .hr013-project-picker-left section {border: 1px solid #e7ebf0; background: #f8fafd;}
-#hr013-project-picker-area .hr013-project-picker-right section {border: 1px solid #dbe7f5; background: #f3f7fd;}
-
+#hr013-project-picker-area .hr013-project-picker-right section {border: 1px solid #dbe7f5; background: #f3f7fd; height: auto;}
 #hr013-project-picker-area .pill-title.pill-title--modal {font-size: 22px;padding: 4px 18px;}
 
 #hr013-project-picker-area .hr013-project-picker-left .cell-left,
@@ -3579,6 +3577,8 @@ section.search-area .search-info #searchType {
   white-space: nowrap;
   color: #333333;
 }
+
+#hr013-project-picker-area .btn-area {justify-content: flex-end;}
 
 /*#hr013-project-picker-area #btn_hr013_project_code_save {*/
 /*  display: flex;*/
@@ -6569,7 +6569,8 @@ section.search-area .search-info #searchType {
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section-remove-btn:before,
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section-edit-btn:before,
 #hr013-project-picker-area #btn_hr013_project_code_save:before,
-#hr013-project-picker-area #btn_hr013_project_picker_apply:before {
+#hr013-project-picker-area #btn_hr013_project_picker_apply:before,
+#hr013-project-picker-area #btn_hr013_skill_apply:before {
   content: "";
   width: 16px;
   height: 16px;
@@ -6583,6 +6584,9 @@ section.search-area .search-info #searchType {
 }
 
 /* add ( + ) */
+#hr013-project-picker-area #btn_hr013_project_code_save:before,
+.is-save #btn_hr013_project_picker_apply:before,
+#btn_hr013_skill_apply:before,
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section-add-btn:before {
   -webkit-mask-image: url(../images/common/btn-ico-plus.png);
   mask-image: url(../images/common/btn-ico-plus.png);
@@ -6595,6 +6599,7 @@ section.search-area .search-info #searchType {
 }
 
 /* edit */
+.is-edit #btn_hr013_project_picker_apply:before,
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section-edit-btn:before {
   -webkit-mask-image: url(../images/common/btn-ico-pencil.png);
   mask-image: url(../images/common/btn-ico-pencil.png);
@@ -6691,8 +6696,20 @@ section.search-area .search-info #searchType {
 .tab4-content textarea:focus,
 #hr013-project-picker-area input:focus,
 #hr013-project-picker-area select:focus,
-#hr013-project-picker-area textarea:focus
-{outline: none; box-shadow: 0 0 0 2px rgba(229, 0, 25, 0.5) !important;}
+#hr013-project-picker-area textarea:focus {outline: none; box-shadow: 0 0 0 2px rgba(229, 0, 25, 0.5) !important;}
+
+#hr013-project-picker-area #write_hr013_prj_nm {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  border-radius: 12px;
+  color: #333333;
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0;
+  padding: 0 18px;
+  border: 1.5px solid var(--hcnc-shell-primary);
+}
 
 .tab4-content select {width: 400px; color: var(--hcnc-shell-primary) !important; border: 1px solid var(--hcnc-shell-primary) !important; margin: 10px 0;}
 .tab4-content select:focus {outline: none;}
@@ -9774,7 +9791,8 @@ body.hr011-project-eval-modal-open {
 .hr011-detail-wrap .hr011-ref-mainlang .chip,
 .hr011-detail-wrap .hr011-ref-cert .chip,
 #TABLE_HR013_A .skills .chip,
-#TABLE_HR012_A .hr012-skill-item {
+#TABLE_HR012_A .hr012-skill-item,
+#write_hr013_stack_txt_nm .skill-tag {
   min-height: 28px;
   padding: 4px 8px;
   border: 0;
