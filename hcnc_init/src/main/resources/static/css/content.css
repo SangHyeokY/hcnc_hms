@@ -3322,7 +3322,8 @@ section.search-area .search-info #insertNm::placeholder,
 #main-lang-picker-area #main-lang-picker-search::placeholder,
 #hr012-skill-picker-area #hr012-skill-picker-search::placeholder,
 #hr013-skill-picker-area #hr013-skill-picker-search::placeholder,
-#hr013-project-picker-area #hr013-project-picker-search::placeholder {color:#8F9098;}
+#hr013-project-picker-area #hr013-project-picker-search::placeholder,
+#write_hr013_project_cd_nm::placeholder {color:#8F9098;}
 
 section.search-area .search-info #searchKeyword:focus,
 section.search-area .search-info #insertNm:focus,
@@ -3487,7 +3488,7 @@ section.search-area .search-info #searchType {
 
 #hr013-project-picker-area .hr013-project-picker-left .hr013-project-picker-title::after {content: ""; width: 17px; height: 13px; background: url("../icons/step-arrow.png") no-repeat; background-size: contain; margin-left: 10px; transition: transform 0.25s ease;}
 #hr013-project-picker-area .hr013-project-picker-left .hr013-project-picker-title.is-open::after {transform: rotate(180deg);}
-#hr013-project-picker-area .hr013-project-picker-left .hr013-project-picker-title:not(.is-open) {margin: 0 !important;}
+#hr013-project-picker-area .hr013-project-picker-left .hr013-project-picker-title:not(.is-open) {margin: 0 !important; cursor: pointer;}
 
 #hr013-project-picker-area #hr013_project_form {
   overflow: hidden;

@@ -719,7 +719,7 @@
         <div class="modal-container hr013-project-picker-container">
 
             <div class="header">
-                <h3 class="sub-title">참여 프로젝트 <span>추가</span></h3>
+                <h3 class="sub-title">참여 프로젝트 <span id="hr013-type"></span></h3>
                 <div class="btn-area">
                     <button class="close-btn" type="button" id="btn_hr013_project_picker_close_x">
                         <img src="./icons/Icon-close.png" alt="" />
@@ -754,8 +754,8 @@
                                 <div class="cell-info">
                                     <label for="write_hr013_project_inprj_yn">2) 당사 여부</label>
                                     <select id="write_hr013_project_inprj_yn">
-                                        <option value="Y">Y</option>
-                                        <option value="N">N</option>
+                                        <option value="Y">HCNC</option>
+                                        <option value="N">당사 아님</option>
                                     </select>
                                 </div>
                             </div>
@@ -769,14 +769,14 @@
                 <!-- 우: 신규 등록 -->
                 <div class="hr013-project-picker-right">
                     <section>
-                        <p class="hr013-project-picker-title">참여 프로젝트 등록</p>
+                        <p class="hr013-project-picker-title">참여 프로젝트 정보</p>
                         <div class="hr013-modal-grid">
                             <!-- 1행 -->
                             <div class="hr013-field-card">
-                                <label for="prj_dev_nm">성명</label>
+                                <label for="write_hr013_dev_nm">성명</label>
                             </div>
                             <div class="hr013-field-card">
-                                <input type="text" id="prj_dev_nm" class="wp100 is-readonly" readonly>
+                                <input type="text" id="write_hr013_dev_nm" class="wp100 is-readonly" readonly>
                             </div>
                             <div class="null-card"></div>
                             <div class="hr013-field-card">
@@ -788,47 +788,47 @@
 
                             <!-- 2행 -->
                             <div class="hr013-field-card">
-                                <label for="prj_prj_nm">프로젝트명</label>
+                                <label for="write_hr013_prj_nm">프로젝트명</label>
                             </div>
                             <div class="hr013-field-card">
-                                <input type="text" id="prj_prj_nm" class="wp100">
+                                <input type="text" id="write_hr013_prj_nm" class="wp100">
                             </div>
                             <div class="null-card"></div>
                             <div class="hr013-field-card">
-                                <label for="prj_cust_nm">고객사</label>
+                                <label for="write_hr013_cust_nm">고객사</label>
                             </div>
                             <div class="hr013-field-card">
-                                <input type="text" id="prj_cust_nm" class="wp100">
+                                <input type="text" id="write_hr013_cust_nm" class="wp100">
                             </div>
 
                             <!-- 3행 -->
                             <div class="hr013-field-card">
-                                <label for="prj_st_dt">계약시작일</label>
+                                <label for="write_hr013_st_dt">계약시작일</label>
                             </div>
                             <div class="hr013-field-card">
-                                <input type="date" id="prj_st_dt" class="wp100">
+                                <input type="date" id="write_hr013_st_dt" class="wp100">
                             </div>
                             <div class="null-card"></div>
                             <div class="hr013-field-card">
-                                <label for="prj_ed_dt">계약종료일</label>
+                                <label for="write_hr013_ed_dt">계약종료일</label>
                             </div>
                             <div class="hr013-field-card">
-                                <input type="date" id="prj_ed_dt" class="wp100">
+                                <input type="date" id="write_hr013_ed_dt" class="wp100">
                             </div>
 
                             <!-- 4행 -->
                             <div class="hr013-field-card">
-                                <label for="prj_rate_amt">계약단가</label>
+                                <label for="write_hr013_rate_amt">계약단가</label>
                             </div>
                             <div class="hr013-field-card">
-                                <input type="text" id="prj_rate_amt" class="wp100">
+                                <input type="text" id="write_hr013_rate_amt" class="wp100">
                             </div>
                             <div class="null-card"></div>
                             <div class="hr013-field-card">
-                                <label for="prj_alloc_pct">투입률</label>
+                                <label for="write_hr013_alloc_pct">투입률</label>
                             </div>
                             <div class="hr013-field-card">
-                                <input type="text" id="prj_alloc_pct" class="wp100">
+                                <input type="text" id="write_hr013_alloc_pct" class="wp100">
                             </div>
 
                             <!-- 5행 -->
@@ -841,10 +841,10 @@
 
                             <!-- 6행 -->
                             <div class="hr013-field-card" style="display: flex; align-items: flex-start; height: 100%;">
-                                <label for="prj_remark" style="height: 40px;">비고</label>
+                                <label for="write_hr013_remark" style="height: 40px;">비고</label>
                             </div>
                             <div class="hr013-field-card" style="grid-column: span 4;">
-                                <textarea id="prj_remark" class="wp100"></textarea>
+                                <textarea id="write_hr013_remark" class="wp100"></textarea>
                             </div>
                         </div>
                         <div class="btn-area prj-save">
