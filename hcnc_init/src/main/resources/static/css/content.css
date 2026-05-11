@@ -3340,7 +3340,8 @@ section.search-area .search-info #searchType:hover,
 #main-lang-picker-area #main-lang-picker-search:hover,
 #hr012-skill-picker-area #hr012-skill-picker-search:hover,
 #hr013-skill-picker-area #hr013-skill-picker-search:hover,
-#hr013-project-picker-area #hr013-project-picker-search:hover {outline: none !important; box-shadow: none !important;}
+#hr013-project-picker-area #hr013-project-picker-search:hover,
+#hr013-project-picker-area #write_hr013_prj_nm:focus {outline: none !important; box-shadow: none !important;}
 
 .contents-wrap:has(#TABLE_HR010_A) section.search-area .search-info .search-select,
 .contents-wrap:has(#TABLE_HR010_A) section.search-area .search-info .search-input {flex: 0 0 auto;}
@@ -6583,10 +6584,14 @@ section.search-area .search-info #searchType {
   background-color: currentColor;
 }
 
+#btn_hr013_skill_apply:before {
+  -webkit-mask-image: url(../images/common/ico-skill-search.png);
+  mask-image: url(../images/common/ico-skill-search.png);
+}
+
 /* add ( + ) */
 #hr013-project-picker-area #btn_hr013_project_code_save:before,
 .is-save #btn_hr013_project_picker_apply:before,
-#btn_hr013_skill_apply:before,
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section-add-btn:before {
   -webkit-mask-image: url(../images/common/btn-ico-plus.png);
   mask-image: url(../images/common/btn-ico-plus.png);
