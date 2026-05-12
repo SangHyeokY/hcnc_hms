@@ -6,6 +6,30 @@
 var $modal = $("#view-user-area");
 const HR011_PROJECT_EVAL_MODAL_MOTION_MS = 800;
 
+const LoadingScope = {
+    PAGE: "page",
+    SAVE: "save"
+};
+
+const loadingManager = {
+    current: null,
+    show(type) {
+        if (this.current === null) {
+            console.log("SHOW", performance.now());
+            showLoading();
+        }
+        this.current = type;
+    },
+
+    hide(type) {
+        if (this.current === type) {
+            this.current = null;
+            console.log("HIDE", performance.now());
+            hideLoading();
+        }
+    }
+};
+
 // 주 개발언어 태그 입력 공통 모듈
 var mainLangTagInput = null;
 var pendingMainLangValue = "";
@@ -1084,10 +1108,10 @@ $(document).ready(async function () {
     $("#write_user_id").val($.trim($(".header-user__id, .header-user__meta-id").first().text() || ""));
 
     try {
-        showLoading();
+        loadingManager.show(LoadingScope.PAGE);
         await initHr011DetailPage();
     } finally {
-        hideLoading();
+        loadingManager.hide(LoadingScope.PAGE);
     }
 });
 
@@ -1318,7 +1342,7 @@ async function initHr011DetailPage() {
         window.initTab2();
         window.initTab3();
         if (typeof window.initTab4 === "function") {
-            window.initTab4();
+            await window.initTab4();
         }
 
         window.hr011EditUnlocked = true;
@@ -1336,7 +1360,7 @@ async function initHr011DetailPage() {
     window.initTab2();
     window.initTab3();
     if (typeof window.initTab4 === "function") {
-        window.initTab4();
+        await window.initTab4();
     }
 
     scheduleHr011ReadOnlyTextareas();
@@ -4489,7 +4513,7 @@ async function saveHr011DetailPage() {
     const wasInsertMode = hr011Mode === "insert";
 
     try {
-        showLoading();
+        loadingManager.show(LoadingScope.SAVE);
 
         // =========================
         // 저장 로직
@@ -4558,6 +4582,9 @@ async function saveHr011DetailPage() {
             title: "오류",
             text: "상세 정보 저장 중 오류가 발생했습니다."
         });
+    }
+    finally {
+        loadingManager.hide(LoadingScope.SAVE);
     }
 }
 
@@ -4950,11 +4977,17 @@ const stepFields = {
     ],
 
     // 4. 프로젝트 평가
-    // project: () => window.hr013Table ? window.hr013Table.getData().length : 0,
     project: () => {
-        const data = hr013State.data || [];
-        const projectCount = data.filter(row => row.inprj_yn === "Y").length;
-        const evalRiskCount = data.filter(row => row?.cust_nm === "HCNC").length;
+        const data = Array.isArray(hr013State.data)
+            ? hr013State.data
+            : [];
+
+        const projectCount = data.length;
+
+        const evalRiskCount = data.filter(row =>
+            String(row?.cust_nm || "").trim() === "HCNC"
+        ).length;
+
         return {
             projectCount,
             evalRiskCount
@@ -4988,16 +5021,16 @@ function calculateStepProgress(step) {
 
         // project (객체 반환)
         if (typeof result === "object") {
-            const projectCount = result.projectCount ?? 0;
-            const evalRiskCount = result.evalRiskCount ?? 0;
-
-            const evalRiskBonus = evalRiskCount > 0 ? 1 : 0;
-
             return {
-                filled: projectCount + evalRiskBonus,
-                total: projectCount + 1 // eval-risk 1칸
+                projectCount: result.projectCount ?? 0,
+                evalRiskCount: result.evalRiskCount ?? 0
             };
         }
+
+        return {
+            projectCount: 0,
+            evalRiskCount: 0
+        };
 
         return { filled: 0, total: 0 };
     }
@@ -5091,9 +5124,9 @@ function updateStepperUI() {
         // 수치 표시
         if (step === "project") {
             const result = stepFields.project();
-            const projectCount = result.projectCount || 0;
+            const evalRiskCount = result.evalRiskCount || 0;
             $(this).find(".cnt").html(`
-                <span>참여</span>&nbsp;<span class="filled">${projectCount}</span><span>건</span>
+                <span>평가</span>&nbsp;<span class="filled">${evalRiskCount}</span><span>건</span>
             `);
         } else {
             $(this).find(".cnt").html(`

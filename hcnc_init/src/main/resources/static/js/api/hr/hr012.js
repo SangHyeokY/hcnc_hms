@@ -127,7 +127,7 @@ window.initTab2 = function() {
     attachHr012TagSync();   // 태그 변경 이벤트 받을 리스너
 
     // 초기 데이터 로드
-    if (window.currentDevId) {
+    if (window.currentDevId && hr011Mode !== "view") {
         loadHr012TableDataA();
         loadHr012TableDataB();
     }

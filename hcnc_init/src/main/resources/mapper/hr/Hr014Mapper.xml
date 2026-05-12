@@ -144,8 +144,8 @@
         prj_nm
         FROM tb_dev_prj_info
         WHERE del_yn = 'N'
-        AND inprj_yn = 'Y'
         AND dev_id = #{dev_id}
+        AND TRIM(cust_nm) = 'HCNC'
         ORDER BY prj_nm
     </select>
 

@@ -24,41 +24,48 @@ $(document).off("tab:readonly.hr014").on("tab:readonly.hr014", function(_, isRea
     applyTab4Readonly(!!isReadOnly);
 });
 
-window.initTab4 = function() {
-    // 서브 탭 초기 상태 설정
-    var $tab4 = $("#tab4");
-    var $subBtns = $tab4.find(".tab-sub-btn");
+window.initTab4 = async function () {
+    showLoading(); // ✔️ 여기서만 로딩 시작
 
-    // 초기 탭 상태
-    $subBtns.removeClass("active");
-    $subBtns.filter("[data-tab='tab4-A']").addClass("active");
+    try {
+        const $tab4 = $("#tab4");
+        const $subBtns = $tab4.find(".tab-sub-btn");
 
-    // 테이블 초기화 (한 번만 수행)
-    if (!window.hr014TableA) buildHr014TableA();
-    // if (!window.hr014TableB) buildHr014TableB();
+        $subBtns.removeClass("active");
+        $subBtns.filter("[data-tab='tab4-A']").addClass("active");
 
-    // 서버에서 항상 조회
-    loadHr014TableDataA().then(function (data) {
-        window.hr014TableA.setData(data);  // 초기 데이터로 덮어쓰기
-        window.hr014TableA.redraw(true);
-        return loadHr014TableDataB().catch(function (err) {
-            console.warn("tab4B 초기 로드 실패", err);
-        });
-    });
+        if (!window.hr014TableA) {
+            buildHr014TableA();
+        }
 
-    // A/B 테이블 보여주기/숨기기
-    $tab4.find("#TABLE_HR014_A").show();
-    $tab4.find("#TABLE_HR014_B").hide();
+        // ✔️ 데이터 로딩 (절대 showLoading 금지)
+        const aData = await loadHr014TableDataA();
+        const bData = await loadHr014TableDataB();
 
-    initHr014Tabs();
-    buildRiskList();
-    setRiskActive(riskActiveKey);   // 리스크 항목 선택
+        window.hr014TableA.setData(aData);
 
-    $(".btn-tab4-save").off("click").on("click", function () {
-        saveTab4Active();
-    });
+        setTimeout(() => {
+            window.hr014TableA.redraw(true);
+        }, 0);
 
-    window.hr014TabInitialized = true;
+        $tab4.find("#TABLE_HR014_A").show();
+        $tab4.find("#TABLE_HR014_B").hide();
+
+        initHr014Tabs();
+        buildRiskList();
+        setRiskActive(riskActiveKey);
+
+        $(".btn-tab4-save")
+            .off("click")
+            .on("click", saveTab4Active);
+
+        window.hr014TabInitialized = true;
+
+    } catch (err) {
+        console.error("Tab4 초기화 실패", err);
+    } finally {
+        hideLoading();
+    }
 };
 
 function initHr014Tabs() {
@@ -93,9 +100,13 @@ function initHr014Tabs() {
 }
 
 function buildHr014TableA() {
-    if (window.hr014TableA) return;
+    const el = document.querySelector("#TABLE_HR014_A");
+    if (!el) {
+        console.warn("TABLE_HR014_A DOM 없음");
+        return;
+    }
 
-    window.hr014TableA = new Tabulator("#TABLE_HR014_A", {
+    window.hr014TableA = new Tabulator(el, {
         layout: "fitColumns",
         // 관리자평가(A)는 현재 페이징 미사용. 필요 시 true/"local"로 즉시 전환 가능.
         pagination: false,
@@ -205,7 +216,6 @@ function buildHr014TableA() {
 
 function loadHr014TableDataA(selectedOverride) {
     const devId = window.currentDevId || $("#dev_id").val();
-    if (!window.hr014TableA) return Promise.resolve(); // 기존 return 대신 완료로 처리
     const requestedPrjId = String(selectedOverride || window.hr013_prj_nm || "").trim();
 
     return new Promise((resolve, reject) => {
@@ -222,62 +232,33 @@ function loadHr014TableDataA(selectedOverride) {
                     return;
                 }
 
-                const dataArray = Array.isArray(response.list) ? response.list : [];
-                const projectList = Array.isArray(response.projectList) ? response.projectList : [];
-                const defaultProjectId = projectList.length ? String(projectList[0].dev_prj_id || "").trim() : "";
-                let selected = requestedPrjId;
+                const dataArray = response.list || [];
+                const projectList = response.projectList || [];
 
-                if (!selected && defaultProjectId) {
-                    selected = defaultProjectId;
-                }
-
-                if (selected && projectList.length) {
-                    const found = projectList.some(function (item) {
-                        return String(item.dev_prj_id || "").trim() === selected;
-                    });
-                    if (!found) {
-                        selected = defaultProjectId;
-                    }
-                }
-
-                if (selected && selected !== requestedPrjId) {
-                    window.hr013_prj_nm = selected;
-                    loadHr014TableDataA(selected).then(resolve).catch(reject);
-                    return;
-                }
+                // 선택값만 계산하고 재호출 금지
+                const defaultProjectId = projectList[0]?.dev_prj_id || "";
+                const selected = requestedPrjId || defaultProjectId;
 
                 window.hr013_prj_nm = selected;
 
-                // 자사 프로젝트 표시
                 const $select = $(".select_prj_cd");
-
-                // 항상 초기화
                 $select.empty();
 
-                projectList.forEach(function (item) {
-                    const itemId = String(item.dev_prj_id || "").trim();
-                    const isSelected = itemId && itemId === selected ? "selected" : "";
+                projectList.forEach(item => {
+                    const id = String(item.dev_prj_id || "");
                     $select.append(
-                        `<option value="${itemId}" ${isSelected}>${item.prj_nm}</option>`
+                        `<option value="${id}" ${id === selected ? "selected" : ""}>${item.prj_nm}</option>`
                     );
                 });
-                $select.val(selected);
-                updateHr014Count();
-                // updateStepperUI();
 
-                // setData 이후 렌더까지 체감상 보장하려면(선택)
-                // renderComplete 이벤트 1회 대기
-                if (window.hr014TableA && window.hr014TableA.once) {
-                    window.hr014TableA.once("renderComplete", function () {
-                        resolve(dataArray);
-                    });
-                } else {
-                    resolve(dataArray);
-                }
+                $select.val(selected);
+
+                updateHr014Count();
+
+                resolve(dataArray);
             },
             error: function (xhr, status, err) {
-                console.log("tab4A 데이터 로드 실패");
-                reject(err || new Error("tab4A load failed"));
+                reject(err);
             }
         });
     });
@@ -285,19 +266,12 @@ function loadHr014TableDataA(selectedOverride) {
 
 // 보유역량 평가 => 이동[TAB4 => TAB3]
 async function reloadTab4(selectedPrjId) {
-    showLoading();
     window.isTab4Loading = true;
 
     try {
         window.hr013_prj_nm = selectedPrjId;
 
-        // 서버 데이터 가져오기
-        const [aData] = await Promise.all([
-            loadHr014TableDataA(),
-            loadHr014TableDataB()
-        ]);
-
-        // 기존 사용자 입력이 있으면 그걸 우선
+        const aData = await loadHr014TableDataA(selectedPrjId);
         const saved = evalData.get(selectedPrjId);
 
         if (saved) {
@@ -308,7 +282,6 @@ async function reloadTab4(selectedPrjId) {
 
     } finally {
         window.isTab4Loading = false;
-        hideLoading();
     }
 }
 
@@ -824,29 +797,34 @@ $(document).on("keydown", function(e) {
 
 /* 당사 프로젝트 개수 표시 */
 function updateHr014Count() {
-    const data = Array.isArray(window.hr013State.data) ? window.hr013State.data : [];
-    const count = data.filter(row => String(row.inprj_yn).trim() === "Y").length;
+    const data = Array.isArray(window.hr013State.data)
+        ? window.hr013State.data
+        : [];
+
+    // HCNC 프로젝트 존재 여부
+    const hcncProjects = data.filter(row =>
+        String(row.cust_nm || "").trim() === "HCNC"
+    );
+
+    const count = hcncProjects.length;
 
     $("#hr014-count .hcnc-grid-count-number").text(count);
 
-    // tab4 영역
     const $tab4Content = $(".hms-tab-wrap.tab4-content");
     const $tab4Line = $("#4-step-end");
-
-    // tab2 제목
     const $hr012Title = $("#hr012-title");
 
     if (count === 0) {
         $tab4Content[0].style.setProperty("display", "none", "important");
         $tab4Line.addClass("is-hidden");
 
-        // 보유역량 평가의 넘버링 변경 3) => 2)
-        $hr012Title.contents().first()[0].textContent = "2) 보유역량 평가 ";
+        $hr012Title.contents().first()[0].textContent =
+            "2) 보유역량 평가 ";
     } else {
         $tab4Content[0].style.setProperty("display", "block", "important");
         $tab4Line.removeClass("is-hidden");
 
-        // 원상복구
-        $hr012Title.contents().first()[0].textContent = "3) 보유역량 평가 ";
+        $hr012Title.contents().first()[0].textContent =
+            "3) 보유역량 평가 ";
     }
 }
