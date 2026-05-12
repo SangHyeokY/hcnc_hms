@@ -4952,7 +4952,7 @@ const stepFields = {
     // 4. 프로젝트 평가
     // project: () => window.hr013Table ? window.hr013Table.getData().length : 0,
     project: () => {
-        const data = window.hr013Data || [];
+        const data = hr013State.data || [];
         const projectCount = data.filter(row => row.inprj_yn === "Y").length;
         const evalRiskCount = data.filter(row => row?.cust_nm === "HCNC").length;
         return {

@@ -55,8 +55,11 @@
           AND prj.use_yn = 'Y'
           AND prj.del_yn = 'N'
         GROUP BY prj.dev_prj_id
-        ORDER BY prj.inprj_yn DESC, prj.st_dt DESC, prj.dev_prj_id DESC
-        ;
+        ORDER BY
+            CASE WHEN prj.cust_nm = 'HCNC' THEN 0 ELSE 1 END,
+            prj.inprj_yn DESC,
+            prj.st_dt DESC,
+            prj.dev_prj_id DESC;
     </select>
 
     <!-- [Tab3] 프로젝트 > 등록 -->

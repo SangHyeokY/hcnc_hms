@@ -824,7 +824,7 @@ $(document).on("keydown", function(e) {
 
 /* 당사 프로젝트 개수 표시 */
 function updateHr014Count() {
-    const data = Array.isArray(window.hr013Data) ? window.hr013Data : [];
+    const data = Array.isArray(window.hr013State.data) ? window.hr013State.data : [];
     const count = data.filter(row => String(row.inprj_yn).trim() === "Y").length;
 
     $("#hr014-count .hcnc-grid-count-number").text(count);

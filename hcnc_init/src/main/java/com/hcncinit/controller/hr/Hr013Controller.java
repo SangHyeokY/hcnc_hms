@@ -25,7 +25,7 @@ public class Hr013Controller {
     // [Tab3][프로젝트] > 조회
     @RequestMapping("/tab3")
     public ModelAndView list(@RequestParam(required = false) Map<String, Object> map) {
-        // System.out.println("tab3 : "+map); // map => dev_id
+        // System.out.println("dev_id = " + map.get("dev_id"));
         applyDefaults(map);
         ModelAndView mv = new ModelAndView("jsonView");
         List<Map<String, Object>> list = hr013Service.list(map);
@@ -43,7 +43,9 @@ public class Hr013Controller {
         applyDefaults(map);
         normalizeNumbers(map);
         map.put("ed_dt", "".equals(map.get("ed_dt")) ? null : map.get("ed_dt"));
+        // System.out.println("save map = " + map);
         int res = hr013Service.save(map);
+        // System.out.println("save end");
         mv.addObject("success", res > 0);
         return mv;
     }
