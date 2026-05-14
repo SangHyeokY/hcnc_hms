@@ -25,7 +25,7 @@ $(document).off("tab:readonly.hr014").on("tab:readonly.hr014", function(_, isRea
 });
 
 window.initTab4 = async function () {
-    showLoading(); // ✔️ 여기서만 로딩 시작
+    showLoading();
 
     try {
         const $tab4 = $("#tab4");
@@ -38,7 +38,7 @@ window.initTab4 = async function () {
             buildHr014TableA();
         }
 
-        // ✔️ 데이터 로딩 (절대 showLoading 금지)
+        // 데이터 로딩 (절대 showLoading 금지)
         const aData = await loadHr014TableDataA();
         const bData = await loadHr014TableDataB();
 

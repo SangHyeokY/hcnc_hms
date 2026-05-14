@@ -844,6 +844,7 @@ button.btn.btn-add-skill,
   align-items: center;
   gap: 6px;
   cursor: pointer;
+  white-space: nowrap;
 }
 
 #main-modal-table button.btn.btn-add-skill {
@@ -1044,6 +1045,24 @@ button.btn.btn-add-skill,
   right: 156px;  /* 좌우 여백 */
   height: 1px;
   background: #e7ebf0;
+}
+
+.hr011-dashboard-grid .hr011-edit-form {
+  container-name: hr011EditForm;
+  container-type: inline-size;
+}
+@container hr011EditForm (max-width: 1200px) {
+  .hr013-list-header,
+  #TABLE_HR013_A .hr013-card {
+    grid-template-columns:
+      minmax(120px, 1.5fr)
+      minmax(180px, 2fr)
+      minmax(120px, 3fr)
+      minmax(160px, 1fr)
+      minmax(70px, 0.8fr)
+      minmax(100px, 1fr)
+      minmax(70px, 0.8fr) !important;
+  }
 }
 
 .tab3-content .content-body #TABLE_HR013_A .hr013-card.is-hcnc {border: 1px solid #dbe7f5; background: #f3f7fd;}
@@ -3457,6 +3476,13 @@ section.search-area .search-info #searchType {
   min-width: 0;
 }
 
+#hr013-project-picker-area .hr013-project-picker-content .is-lock,
+#hr013-project-picker-area .hr013-project-picker-content #write_hr013_dev_nm {
+  pointer-events: none;
+  cursor: not-allowed;
+  background-color: #F2F5F9;
+}
+
 #hr013-project-picker-area #btn_hr013_project_code_save, #hr013-project-picker-area #btn_hr013_project_picker_apply, #hr013-project-picker-area #btn_hr013_skill_apply {border-color: var(--hcnc-shell-primary); color: var(--hcnc-shell-primary);}
 #hr013-project-picker-area .hr013-project-picker-left section {border: 1px solid #e7ebf0; background: #f8fafd;}
 #hr013-project-picker-area .hr013-project-picker-right section {border: 1px solid #dbe7f5; background: #f3f7fd; height: auto;}
@@ -3536,9 +3562,9 @@ section.search-area .search-info #searchType {
 
 #hr013-project-picker-area .cell-info-wrap {display: flex; flex-direction: row; white-space: nowrap; align-items: center; justify-content: space-between;}
 #hr013-project-picker-area .cell-info-wrap .cell-info {margin: 0 2px;}
-#hr013-project-picker-area #write_hr013_project_cd_nm {width: 340px;}
+#hr013-project-picker-area #write_hr013_project_cd_nm {width: 320px;}
 #hr013-project-picker-area #write_hr013_project_inprj_yn,
-#hr013-project-picker-area #write_hr013_job_cd {width: 100px; padding: 0 16px !important;}
+#hr013-project-picker-area #write_hr013_job_cd {width: 120px; padding: 0 16px !important;}
 
 #hr013-project-picker-area .hr013-modal-grid {
   position: relative;

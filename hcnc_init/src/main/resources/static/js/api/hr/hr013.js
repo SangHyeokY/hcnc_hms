@@ -74,14 +74,15 @@ window.initTab3 = function () {
         }, 0);
     });
 
-    $("#write_hr013_inprj_yn").off("change").on("change", function () {
-        applyInprjCustomerName($(this).val(), $("#write_hr013_cust_nm").val());
-    });
-
     $("#write_hr013_cust_nm").off("input").on("input", function () {
         if ($("#write_hr013_inprj_yn").val() !== "Y") {
             hr013State.lastNonInprjCustNm = $(this).val();
         }
+    });
+
+    $("#write_hr013_inprj_yn").off("change").on("change", function () {
+        const val = $(this).val();
+        applyHr013InprjState(val);
     });
 
     $("#write_hr013_rate_amt").on("input", function (e) {
@@ -324,7 +325,11 @@ function bindHr013ProjectPickerEvents() {
     $("#btn_hr013_project_picker_apply").off("click.hr013project").on("click.hr013project", async function (e) {
         e.preventDefault();
         e.stopPropagation();
-        await saveHr013modal();
+        try {
+            await saveHr013modal();
+        } catch (err) {
+            console.warn("saveHr013modal 실패:", err);
+        }
     });
 
     $("#btn_hr013_project_code_save").off("click.hr013project").on("click.hr013project", async function () {
@@ -373,22 +378,12 @@ function initHr013ProjectPickerTable() {
         ],
         rowSelected: function (row) {
             const data = row.getData();
-
             hr013State.selectedProjectCode = data;
-
-            // 프로젝트 정보 반영
             $("#write_hr013_prj_nm").val(data.cd_nm || "");
             $("#write_hr013_prj_cd").val(data.cd || "");
-
-            // 고객사 처리
-            const isHcnc = String(data.inprj_yn || "").toUpperCase() === "Y";
-            if (isHcnc) {
-                $("#write_hr013_inprj_yn").val("Y");
-                $("#write_hr013_cust_nm").val("HCNC").prop("disabled", true);
-            } else {
-                $("#write_hr013_inprj_yn").val("N");
-                $("#write_hr013_cust_nm").val("").prop("disabled", false);
-            }
+            const inprjYn = String(data.inprj_yn ?? "N").toUpperCase();
+            $("#write_hr013_inprj_yn").val(inprjYn);
+            applyHr013InprjState(inprjYn);
         },
         rowDeselected: function (row) {
             const data = row.getData();
@@ -401,7 +396,6 @@ function initHr013ProjectPickerTable() {
                 }
                 $("#write_hr013_prj_nm").val("");
                 $("#write_hr013_prj_cd").val("");
-                $("#write_hr013_inprj_yn").val("N");
                 $("#write_hr013_cust_nm").val("").prop("disabled", false);
             }
         },
@@ -421,29 +415,25 @@ async function openHr013ProjectPicker(mode, row) {
         // 프로젝트 목록 로딩
         await loadHr013ProjectCodeList("");
 
-        if (mode === "edit" && row) {
-            $("#hr013-type").text("수정");
-            fillHr013Form(row);
-            setHr013ProjectMode("edit");
-        } else {
-            $("#hr013-type").text("등록");
-            clearHr013Form();
-            setHr013ProjectMode("save");
-        }
+        clearHr013Form();
 
         // 추가 / 수정 분기
         if (mode === "edit" && row) {
             // 제목 변경
             $("#hr013-type").text("수정");
-            // 기존 데이터 채우기
             fillHr013Form(row);
+            setHr013ProjectMode("edit");
             // 버튼명 변경
             $("#btn_hr013_project_picker_apply").text("수정");
         } else {
             $("#hr013-type").text("등록");
-            clearHr013Form();
+            setHr013ProjectMode("save");
             $("#btn_hr013_project_picker_apply").text("등록");
         }
+        const inprjYn = row?.inprj_yn || "N";
+        $("#write_hr013_inprj_yn").val(inprjYn);
+        applyHr013InprjState(inprjYn);
+
         $("#write_hr013_dev_nm").val($("#dev_nm").val() || $("#dev_nm").text()); // 성명
 
         // 모달 열기
@@ -1011,21 +1001,40 @@ function loadHr013TableData() {
     });
 }
 
+function applyHr013InprjState(inprjYn) {
+    const $custNm = $("#write_hr013_cust_nm");
+    const $prjNm = $("#write_hr013_prj_nm");
+
+    const isHcnc = String(inprjYn || "").toUpperCase() === "Y";
+
+    if (isHcnc) {
+        $custNm.val("HCNC").prop("disabled", true).addClass("is-lock");
+        $prjNm.addClass("is-lock");
+    } else {
+        $custNm.prop("disabled", false).removeClass("is-lock");
+        $custNm.val(hr013State.lastNonInprjCustNm || "");
+        $prjNm.removeClass("is-lock");
+    }
+}
+
 // 모달 입력값 채우기
 function fillHr013Form(data) {
     $("#write_hr013_dev_prj_id").val(data.dev_prj_id || ""); // DB PK
     $("#write_hr013_prj_cd").val(data.prj_cd || data.cd || ""); // 프로젝트 코드
-    $("#write_hr013_inprj_yn").val(data.inprj_yn || "N"); // 자사여부
+    $("#write_hr013_cust_nm").val(data.cust_nm || ""); // 고객사
     $("#write_hr013_st_dt").val(toDateInput(data.st_dt)); // 계약시작일
     $("#write_hr013_ed_dt").val(toDateInput(data.ed_dt)); // 계약종료일
     $("#write_hr013_prj_nm").val(data.prj_nm || ""); // 프로젝트명
-    $("#write_hr013_rate_amt").val(Number(data.rate_amt || 0).toLocaleString() + "원");
+    const rateAmt = Number(data.rate_amt || 0);
+    $("#write_hr013_rate_amt").val(rateAmt.toLocaleString() + "원");
     $("#write_hr013_job_cd").val(data.job_cd || ""); // 역할
     $("#write_hr013_alloc_pct").val(formatPercentInput(data.alloc_pct)); // 투입률
     $("#write_hr013_remark").val(data.remark || ""); // 비고
 
-    hr013State.lastNonInprjCustNm = data.inprj_yn === "Y" ? "" : (data.cust_nm || "");
-    applyInprjCustomerName(data.inprj_yn, data.cust_nm);
+    const inprjYn = data.inprj_yn;
+    hr013State.lastNonInprjCustNm = inprjYn === "Y" ? "" : (data.cust_nm || "");
+    $("#write_hr013_cust_nm").val(data.cust_nm || "");
+    applyHr013InprjState(data.inprj_yn);
 
     // 실제 저장값(코드)
     $("#write_hr013_stack_txt").val(data.stack_txt || "");
@@ -1049,17 +1058,17 @@ function fillHr013Form(data) {
 function clearHr013Form() {
     $("#write_hr013_dev_prj_id").val(""); // DB PK
     $("#write_hr013_prj_cd").val(""); // 프로젝트 코드
-    $("#write_hr013_inprj_yn").val("N"); // 자사여부
+    $("#write_hr013_inprj_yn").val(""); // 자사여부
     $("#write_hr013_st_dt").val(""); // 계약시작일
     $("#write_hr013_ed_dt").val(""); // 계약종료일
     $("#write_hr013_prj_nm").val(""); // 프로젝트명
-    $("#write_hr013_rate_amt").val(""); // 계약단가
+    $("#write_hr013_rate_amt").val("0원"); // 계약단가
     $("#write_hr013_job_cd").val(""); // 역할
     $("#write_hr013_alloc_pct").val(""); // 투입률
     $("#write_hr013_remark").val(""); // 비고
 
     hr013State.lastNonInprjCustNm = "";
-    applyInprjCustomerName("N", "");
+    // applyInprjCustomerName("N", "");
     hr013State.pendingStackValue = "";
     if (hr013State.stackTagInput) {
         hr013State.stackTagInput.clear();
@@ -1096,6 +1105,11 @@ function saveHr013modal() {
         remark: $("#write_hr013_remark").val()
     };
 
+    // 유효성 검사
+    if (!validateHr013Row(row)) {
+        return Promise.reject("validation failed");
+    }
+
     const idx = hr013State.data.findIndex(r =>
         String(r.dev_prj_id || "").trim() === currentDevPrjId
     );
@@ -1121,17 +1135,12 @@ function saveHr013modal() {
 }
 
 // 당사 여부에 따라 고객사 자동 입력
-function applyInprjCustomerName(inprjYn, custNm) {
-    if (inprjYn === "Y") {
-        if (inprjYn !== "Y") {
-            hr013State.lastNonInprjCustNm = custNm || "";
-        }
-        $("#write_hr013_cust_nm").val("HCNC").prop("disabled", true);
-        return;
-    }
-    var nextValue = hr013State.lastNonInprjCustNm || (custNm && custNm !== "HCNC" ? custNm : "") || "";
-    $("#write_hr013_cust_nm").val(nextValue).prop("disabled", false);
-}
+// function applyInprjCustomerName(inprjYn, custNm) {
+//    const isHcnc = String(inprjYn || "").toUpperCase() === "Y";
+//    if (isHcnc) {
+//        $("#write_hr013_cust_nm").val("HCNC");
+//    }
+// }
 
 // 통합 저장 버튼에서 호출
 window.saveHr013TableData = function () {
@@ -1149,12 +1158,6 @@ function saveHr013InlineRows() {
     }
 
     let rows = hr013State.data;
-
-    // 유효성 검사
-    if (!validateHr013Rows(rows)) {
-        return Promise.reject("validation failed");
-    }
-
     let devId = window.currentDevId || $("#dev_id").val();
     var requests = [];
 
@@ -1263,19 +1266,17 @@ function isHr013RowChanged(row, originalRow) {
 }
 
 // 저장하기 전, 유효성 검사
-function validateHr013Rows(rows) {
-    for (let row of rows) {
-        if (!row.inprj_yn) return warnAlert("당사여부");
-        if (!row.cust_nm && row.inprj_yn !== "Y") return warnAlert("고객사");
-        if (!row.prj_nm) return warnAlert("프로젝트명");
-        if (!row.job_cd) return warnAlert("역할");
-        if (row.rate_amt === "" || row.rate_amt === null) return warnAlert("계약단가");
-        // const stackCsv = getHr013SkillCsvForSave(row.skl_id_lst, row.stack_txt);
-        // if (!stackCsv) return warnAlert("기술스택");
-        if (!row.st_dt) return warnAlert("시작일");
-        if (!row.ed_dt) return warnAlert("종료일");
-        if (row.alloc_pct === "" || row.alloc_pct === null) return warnAlert("투입률");
-    }
+function validateHr013Row(row) {
+    if (!row.prj_nm) return warnAlert("프로젝트명");
+    if (!row.job_cd) return warnAlert("역할");
+    // if (!row.inprj_yn) return warnAlert("당사여부");
+    if (!row.cust_nm && row.inprj_yn !== "Y") return warnAlert("고객사");
+    if (!row.alloc_pct) return warnAlert("투입률");
+    if (!row.st_dt) return warnAlert("시작일");
+    if (!row.ed_dt) return warnAlert("종료일");
+    if (!row.rate_amt) return warnAlert("계약단가");
+    // const stackCsv = getHr013SkillCsvForSave(row.skl_id_lst, row.stack_txt);
+    // if (!stackCsv) return warnAlert("기술스택");
     return true;
 }
 
