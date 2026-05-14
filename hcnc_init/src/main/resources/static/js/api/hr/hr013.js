@@ -242,59 +242,51 @@ function initHr013SkillPicker() {
         suggestItemClass: "hr013-skill-suggest-item",
         flashClass: "is-flash",
         groupColumnWidth: 180,
+
         getSkillOptions: function () {
             return hr013State.skillOptions || [];
         },
         getGroupOptions: function () {
             return hr013State.skillGroupOptions || [];
         },
-        // 모달/그리드 어느 화면에서 열렸는지에 따라 현재 선택값 원본을 분기한다.
         getSelectedCodes: function (context) {
             if (context && context.type === "grid" && context.row) {
                 return getHr013RowSelectedCodeSet(context.row);
             }
             return getHr013SelectedCodeSet();
         },
-        // 모달 내부 버튼으로 열릴 때는 기본 context를 modal로 고정한다.
         getContextFromOpenEvent: function () {
             return { type: "modal", row: null };
         },
         isReadonly: function () {
             return currentMode === "view" || window.hr010ReadOnly;
         },
-        // "적용" 버튼을 눌렀을 때만 실제 원본 데이터(모달 hidden/그리드 row)를 갱신한다.
         onApply: function (payload) {
             var csv = payload && payload.csv ? payload.csv : "";
             var context = payload && payload.context ? payload.context : null;
 
             if (context && context.type === "grid" && context.row && typeof context.row.update === "function") {
-                var updateResult = context.row.update({
+                context.row.update({
                     skl_id_lst: getHr013SkillArrayFromCsv(csv),
                     stack_txt: csv,
                     stack_txt_nm: getSkillLabelList(csv)
                 });
 
-                if (updateResult && typeof updateResult.then === "function") {
-                    updateResult.then(function () {
-                        scheduleHr013StackRowState(context.row);
-                    });
-                } else {
-                    scheduleHr013StackRowState(context.row);
-                }
                 changedTabs.tab3 = true;
                 return;
             }
+
             if (hr013State.stackTagInput) {
                 hr013State.stackTagInput.setFromValue(csv);
             }
-            $("#write_hr013_stack_txt").val(csv);
 
-            $("#write_hr013_stack_txt_nm").val(
-                getSkillLabelList(csv)
-            );
+            $("#write_hr013_stack_txt").val(csv);
+            renderHr013ModalSkillTags(csv);
             hr013State.pendingStackValue = csv;
         }
     });
+
+    hr013State.skillPicker.bindEvents();
 }
 
 // sourceType(modal/grid)에 따라 선택 원본을 분기해서 팝업을 연다.
@@ -320,6 +312,12 @@ function openHr013SkillPicker(sourceType, row) {
 function bindHr013ProjectPickerEvents() {
     $("#btn_hr013_project_picker_close_x").off("click.hr013project").on("click.hr013project", function () {
         closeHr013ProjectPicker(true); // 즉시 닫기
+    });
+
+    $("#btn_hr013_skill_apply").off("click.hr013skill").on("click.hr013skill", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        openHr013SkillPicker("modal");
     });
 
     $("#btn_hr013_project_picker_apply").off("click.hr013project").on("click.hr013project", async function (e) {
@@ -378,11 +376,20 @@ function initHr013ProjectPickerTable() {
         ],
         rowSelected: function (row) {
             const data = row.getData();
+            const inprjYn = String(data.inprj_yn ?? "N").toUpperCase();
+
+            // HCNC가 아닌 row를 클릭하기 전에 현재 고객사명이 HCNC가 아니면 보관
+            const currentCustNm = String($("#write_hr013_cust_nm").val() || "").trim();
+            if (currentCustNm && currentCustNm.toUpperCase() !== "HCNC") {
+                hr013State.lastNonInprjCustNm = currentCustNm;
+            }
+
             hr013State.selectedProjectCode = data;
+
             $("#write_hr013_prj_nm").val(data.cd_nm || "");
             $("#write_hr013_prj_cd").val(data.cd || "");
-            const inprjYn = String(data.inprj_yn ?? "N").toUpperCase();
             $("#write_hr013_inprj_yn").val(inprjYn);
+
             applyHr013InprjState(inprjYn);
         },
         rowDeselected: function (row) {
@@ -430,7 +437,7 @@ async function openHr013ProjectPicker(mode, row) {
             setHr013ProjectMode("save");
             $("#btn_hr013_project_picker_apply").text("등록");
         }
-        const inprjYn = row?.inprj_yn || "N";
+        const inprjYn = isHr013HcncProject(row) ? "Y" : "N";
         $("#write_hr013_inprj_yn").val(inprjYn);
         applyHr013InprjState(inprjYn);
 
@@ -1005,15 +1012,39 @@ function applyHr013InprjState(inprjYn) {
     const $custNm = $("#write_hr013_cust_nm");
     const $prjNm = $("#write_hr013_prj_nm");
 
-    const isHcnc = String(inprjYn || "").toUpperCase() === "Y";
+    const isHcnc = isHr013HcncProject(inprjYn);
+    const currentCustNm = String($custNm.val() || "").trim();
 
     if (isHcnc) {
-        $custNm.val("HCNC").prop("disabled", true).addClass("is-lock");
-        $prjNm.addClass("is-lock");
+        // HCNC로 덮어쓰기 전에 기존 고객사명을 보관
+        if (currentCustNm && currentCustNm.toUpperCase() !== "HCNC") {
+            hr013State.lastNonInprjCustNm = currentCustNm;
+        }
+
+        $custNm
+            .val("HCNC")
+            .prop("readonly", true)
+            .prop("disabled", true)
+            .addClass("is-lock");
+
+        $prjNm
+            .prop("readonly", true)
+            .addClass("is-lock");
+
     } else {
-        $custNm.prop("disabled", false).removeClass("is-lock");
-        $custNm.val(hr013State.lastNonInprjCustNm || "");
-        $prjNm.removeClass("is-lock");
+        $custNm
+            .prop("readonly", false)
+            .prop("disabled", false)
+            .removeClass("is-lock");
+
+        $prjNm
+            .prop("readonly", false)
+            .removeClass("is-lock");
+
+        // HCNC에서 타사 프로젝트로 돌아오면 이전 고객사명 복원
+        if (!currentCustNm || currentCustNm.toUpperCase() === "HCNC") {
+            $custNm.val(hr013State.lastNonInprjCustNm || "");
+        }
     }
 }
 
@@ -1038,13 +1069,8 @@ function fillHr013Form(data) {
 
     // 실제 저장값(코드)
     $("#write_hr013_stack_txt").val(data.stack_txt || "");
-    const stackList = getSkillLabelList(data.stack_txt || "")
-        .split(",");
-    let html = "";
-    stackList.forEach((skill) => {
-        html += `<span class="skill-tag">${skill.trim()}</span>`;
-    });
-    $("#write_hr013_stack_txt_nm").html(html);
+
+    renderHr013ModalSkillTags(data.stack_txt || "");
 
     // 화면 표시용 태그/텍스트
     hr013State.pendingStackValue = data.stack_txt || "";
@@ -1061,11 +1087,21 @@ function clearHr013Form() {
     $("#write_hr013_inprj_yn").val(""); // 자사여부
     $("#write_hr013_st_dt").val(""); // 계약시작일
     $("#write_hr013_ed_dt").val(""); // 계약종료일
-    $("#write_hr013_prj_nm").val(""); // 프로젝트명
     $("#write_hr013_rate_amt").val("0원"); // 계약단가
     $("#write_hr013_job_cd").val(""); // 역할
     $("#write_hr013_alloc_pct").val(""); // 투입률
     $("#write_hr013_remark").val(""); // 비고
+
+    $("#write_hr013_cust_nm") // 고객사
+        .val("")
+        .prop("readonly", false)
+        .prop("disabled", false)
+        .removeClass("is-lock");
+
+    $("#write_hr013_prj_nm") // 프로젝트명
+        .val("")
+        .prop("readonly", false)
+        .removeClass("is-lock");
 
     hr013State.lastNonInprjCustNm = "";
     // applyInprjCustomerName("N", "");
@@ -1658,7 +1694,7 @@ function renderHr013Cards(list) {
                 </div>
                 <div class="prj">${prj}</div>
                 <div class="skills">
-                    ${getSkillChipMarkup(row, 5)}
+                    ${getSkillChipMarkup(row, 3)}
                 </div>
                 <div class="period">${period}</div>
                 <div class="job">${job}</div>
@@ -1843,4 +1879,30 @@ function getPagedList(list) {
     }
     const start = (hr013State.paging.page - 1) * size;
     return list.slice(start, start + size);
+}
+
+// 고객사의 자사 여부 판단
+function isHr013HcncProject(rowOrInprjYn) {
+    if (typeof rowOrInprjYn === "object" && rowOrInprjYn !== null) {
+        return String(rowOrInprjYn.inprj_yn || "").toUpperCase() === "Y"
+            || String(rowOrInprjYn.cust_nm || "").trim().toUpperCase() === "HCNC";
+    }
+
+    return String(rowOrInprjYn || "").toUpperCase() === "Y";
+}
+
+function renderHr013ModalSkillTags(csv) {
+    const labelText = getSkillLabelList(csv || "");
+    const labels = String(labelText || "")
+        .split(",")
+        .map(item => item.trim())
+        .filter(Boolean);
+    if (!labels.length) {
+        $("#write_hr013_stack_txt_nm").html("");
+        return;
+    }
+    const html = labels.map(label => {
+        return `<span class="skill-tag">${hr013EscapeHtml(label)}</span>`;
+    }).join("");
+    $("#write_hr013_stack_txt_nm").html(html);
 }

@@ -60,7 +60,10 @@ function getHr012SkillLevelMap() {
         else if (row.lv2) level = 2;
         else if (row.lv1) level = 1;
 
-        map.set(String(row.skl_id), level);
+        const code = String(row.skl_id || "").trim();
+        if (code) {
+            map.set(code, level);
+        }
     });
 
     return map;
@@ -428,11 +431,12 @@ function loadHr012TableDataB() {
         data: { dev_id: devId },
         success: function(response) {
             const dataArray = Array.isArray(response) ? response : response.res;
-            if (!Array.isArray(dataArray)) return console.error("Tab2B 데이터 형식이 배열이 아닙니다.", response);
-
+            if (!Array.isArray(dataArray)) {
+                return console.error("Tab2B 데이터 형식이 배열이 아닙니다.", response);
+            }
             const tableData = dataArray.map(item => ({
                 cd_nm: item.cd_nm,
-                skl_id: item.skl_id,
+                skl_id: String(item.skl_id || "").trim(),
                 lv1: item.lv1 === "Y",
                 lv2: item.lv2 === "Y",
                 lv3: item.lv3 === "Y",
@@ -441,9 +445,12 @@ function loadHr012TableDataB() {
             }));
 
             window.hr012TableB.setData(tableData);
-            // 조회 직후 제목 건수 즉시 갱신
+
             updateHr012BTitleCount();
-            // 초기 로드에서는 숙련도 목록을 건드리지 않음
+
+            if (window.hr012TableA && typeof window.hr012TableA.redraw === "function") {
+                window.hr012TableA.redraw(true);
+            }
         },
         error: function() {
             console.log("Tab2B 데이터 로드 실패");

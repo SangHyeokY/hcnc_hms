@@ -838,8 +838,8 @@ button.btn.btn-add-skill,
   font-weight: 600;
   line-height: 18px;
   letter-spacing: 0;
-  min-height: 45px;
-  height: 45px;
+  min-height: 40px;
+  height: 40px;
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -1072,7 +1072,7 @@ button.btn.btn-add-skill,
 #TABLE_HR013_A .hr013-card .remark {font-size: 14px; font-weight: 500; color: #76787A; width: calc(100% - 160px);}
 #TABLE_HR013_A .hr013-card .remark span {overflow: hidden; text-overflow: ellipsis; white-space: nowrap;}
 #TABLE_HR013_A .hr013-card .skills, #TABLE_HR012_A .hr012-skill-list, #write_hr013_stack_txt_nm {display: flex; flex-wrap: wrap; gap: 8px;}
-#write_hr013_stack_txt_nm {height: 40px; padding: 5px; border-radius: 8px; border: 1px solid #DEE2E7; background-color: #fff;}
+#write_hr013_stack_txt_nm {min-height: 40px; padding: 5px; border-radius: 8px; border: 1px solid #DEE2E7; background-color: #fff;}
 #TABLE_HR013_A .hr013-card .rate {justify-content: flex-end; font-weight: 500;}
 #TABLE_HR013_A .hr013-card .rate .empty {width: 100%; justify-content: center; color: #76787A; font-weight: 400;}
 #TABLE_HR013_A .hr013-card .cust, #TABLE_HR013_A .hr013-card .prj {font-size: 16px; font-weight: 600;}
@@ -2528,7 +2528,7 @@ button.btn.btn-add-skill,
   color: #FD323A;
   height: 18px;
   position: absolute;
-  top: 56px;
+  top: 51px;
 }
 
 .hr011-field-card.hr011-skill-card {bottom: 9px;}
@@ -2587,6 +2587,16 @@ button.btn.btn-add-skill,
 .hr014-side-tabs button.active:hover .tab-text {
   transform: scale(1.06);
   color: #E50019;
+}
+
+.hr012-table-wrapper p {
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.4;
+  white-space: nowrap;
+  color: var(--hcnc-shell-primary);
+  font-family: var(--hcnc-font-display) !important;
+  margin-bottom: 10px;
 }
 
 .hr012-toolbar-01, .hr012-toolbar-02, .hr013-toolbar, .hr014-toolbar-01, .hr014-toolbar-02 {
@@ -5972,7 +5982,7 @@ section.search-area .search-info #searchType {
 .hr010-dashboard-wrap .user-card__profile {display:flex; flex-direction:column; align-items:center; text-align:center; gap:6px; padding:0 25px;}
 .hr010-dashboard-wrap .user-card__avatar {display:flex; align-items:center; justify-content:center;}
 
-.hr010-dashboard-wrap .user-card__avatar .profile-circle-icon {width:120px; height:120px; font-size:32px; font-weight: 700;}
+.hr010-dashboard-wrap .user-card__avatar .profile-circle-icon {width:120px; height:120px; font-size:40px; font-weight: 700;}
 .hr010-dashboard-wrap .user-card__name {margin-top:9px; font-family:var(--hcnc-font-body); font-size:22px; font-weight:600; color:#3A3C40; letter-spacing:0; line-height:27px;}
 .hr010-dashboard-wrap .user-card__subtitle {display:none !important;}
 .hr010-dashboard-wrap .user-card__subtitle {font-size:12px; font-weight:700; color:#8696ad;}
@@ -9824,6 +9834,7 @@ body.hr011-project-eval-modal-open {
 #TABLE_HR013_A .skills .chip,
 #TABLE_HR012_A .hr012-skill-item,
 #write_hr013_stack_txt_nm .skill-tag {
+  height: 28px;
   min-height: 28px;
   padding: 4px 8px;
   border: 0;
@@ -10401,6 +10412,10 @@ body.hr011-project-eval-modal-open {
 
 .hr011-detail-wrap .hr011-page:not(.is-edit-mode) .hr011-ref-actions-inline .hr011-page-btn:hover,
 .hr011-detail-wrap .hr011-page .hr011-ref-actions-inline #hr011BackBtn:hover,
+.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section-remove-btn:hover,
+.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section-edit-btn:hover,
+button.btn.btn-add-skill:hover,
+.hr012-toolbar-01 button.btn.btn-add-skill:hover,
 #TABLE_HR013_A .btn-eval:hover {
   background:#DEEDFF;
 }

@@ -356,7 +356,8 @@
                                                     주 개발언어
                                                 </button>
                                             </span>
-                                            <span class="tag-text">* 기존 스킬 정보와 연동합니다.</span>
+                                            <!--<span class="tag-text">* 기존 스킬 정보와 연동합니다.</span>-->
+                                            <span class="tag-text">* 인적사항 검색에 사용됩니다.</span>
                                         </div>
 
                                         <!-- 4행 -->
@@ -832,8 +833,8 @@
                             </div>
 
                             <!-- 5행 -->
-                            <div class="hr013-field-card">
-                                <label for="write_hr013_stack_txt">기술스택</label>
+                            <div class="hr013-field-card" style="display: flex; align-items: flex-start; height: 100%;">
+                                <label for="write_hr013_stack_txt" style="height: 40px;">기술스택</label>
                             </div>
                             <div class="hr013-field-card" style="grid-column: span 4;">
                                 <!-- 사용자 표시용 -->
@@ -847,7 +848,7 @@
                                 <label for="write_hr013_remark" style="height: 40px;">비고</label>
                             </div>
                             <div class="hr013-field-card" style="grid-column: span 4;">
-                                <textarea id="write_hr013_remark" class="wp100" style="height: 116px;"></textarea>
+                                <textarea id="write_hr013_remark" class="wp100" style="min-height: 116px; max-height: 116px;"></textarea>
                             </div>
                         </div>
                         <div class="btn-area" id="prj-modal-btn">
