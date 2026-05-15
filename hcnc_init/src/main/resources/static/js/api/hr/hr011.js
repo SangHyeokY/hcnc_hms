@@ -289,6 +289,14 @@ function setHr011Mode(mode, options) {
         renderHr011ProjectEvaluationContent(hr011ProjectEvalModalProjectKey);
     }
 
+    if (hr011Mode === "insert") {
+        $('.hr011-section[data-edit-step="project"]').hide();
+        $('#3-step-end, #4-step-end, #5-step-end').hide();
+    } else {
+        $('.hr011-section[data-edit-step="project"]').show();
+        $('#3-step-end, #4-step-end, #5-step-end').show();
+    }
+
     // 일부 탭 초기화가 버튼 라벨을 덮는 경우가 있어 모드 기준으로 한 번 더 보정한다.
     setTimeout(function () {
         const isInsertMode = hr011Mode === "insert";
@@ -972,10 +980,10 @@ if (!window.hr011ProjectEvalModalEscBound) {
     }, true);
 }
 
-function getHr011SkillCategoryColor(index) {
-    const idx = Math.max(0, Number(index) || 0);
-    return HR011_SKILL_CHART_PALETTE[idx % HR011_SKILL_CHART_PALETTE.length];
-}
+// function getHr011SkillCategoryColor(index) {
+//     const idx = Math.max(0, Number(index) || 0);
+//     return HR011_SKILL_CHART_PALETTE[idx % HR011_SKILL_CHART_PALETTE.length];
+// }
 
 function syncHr011ReadOnlyTextareas() {
     const isViewMode = hr011Mode === "view";
@@ -1387,9 +1395,9 @@ function isHr011InsertModeRequest() {
 }
 
 function applyHr011InsertDefaults() {
-    const defaultDevTyp = $("#select_dev_typ option").filter(function () {
-        return !!String(this.value || "").trim();
-    }).first().val() || "";
+    // const defaultDevTyp = $("#select_dev_typ option").filter(function () {
+    //     return !!String(this.value || "").trim();
+    // }).first().val() || "";
 
     $("#dev_id").val("");
     $("#dev_nm").val("");
@@ -2400,16 +2408,16 @@ function getHr011ProjectDetailItemKey(item, idx) {
     return String(raw || `row-${idx}`).trim();
 }
 
-function getHr011ProjectDetailDefaultExpandedKey(rows) {
-    const list = Array.isArray(rows) ? rows : [];
-    if (!list.length) return "";
-    const internalRow = list.find(function (item) {
-        return isHr011InternalProject(item);
-    });
-    const target = internalRow || list[0];
-    const targetIndex = list.indexOf(target);
-    return getHr011ProjectDetailItemKey(target, targetIndex < 0 ? 0 : targetIndex);
-}
+// function getHr011ProjectDetailDefaultExpandedKey(rows) {
+//     const list = Array.isArray(rows) ? rows : [];
+//     if (!list.length) return "";
+//     const internalRow = list.find(function (item) {
+//         return isHr011InternalProject(item);
+//     });
+//     const target = internalRow || list[0];
+//     const targetIndex = list.indexOf(target);
+//     return getHr011ProjectDetailItemKey(target, targetIndex < 0 ? 0 : targetIndex);
+// }
 
 function formatHr011ProjectDateText(value) {
     const formatted = formatHr011Date(value);
@@ -2834,30 +2842,30 @@ function makeHr011SafeDomId(raw) {
     return text.replace(/[^a-zA-Z0-9_-]/g, "_");
 }
 
-function getHr011ExternalCompanyBadgeText(companyName) {
-    const text = String(companyName || "").replace(/\s+/g, "").trim();
-    if (!text) return "외부";
-    return text.slice(0, 6);
-}
+// function getHr011ExternalCompanyBadgeText(companyName) {
+//     const text = String(companyName || "").replace(/\s+/g, "").trim();
+//     if (!text) return "외부";
+//     return text.slice(0, 6);
+// }
 
-function buildHr011ProjectCompanyBadge(item, companyName, isInternal) {
-    const company = companyName || "-";
-    if (isInternal) {
-        return [
-            `<div class="hr011-ref-project-company-wrap">`,
-            buildHr011ProjectBadgeMarkup(company, true),
-            `<span class="hr011-ref-project-detail-company">${escapeHr011(company)}</span>`,
-            `</div>`
-        ].join("");
-    }
-
-    return [
-        `<div class="hr011-ref-project-company-wrap">`,
-        buildHr011ProjectBadgeMarkup(company, false),
-        `<span class="hr011-ref-project-detail-company">${escapeHr011(company)}</span>`,
-        `</div>`
-    ].join("");
-}
+// function buildHr011ProjectCompanyBadge(item, companyName, isInternal) {
+//     const company = companyName || "-";
+//     if (isInternal) {
+//         return [
+//             `<div class="hr011-ref-project-company-wrap">`,
+//             buildHr011ProjectBadgeMarkup(company, true),
+//             `<span class="hr011-ref-project-detail-company">${escapeHr011(company)}</span>`,
+//             `</div>`
+//         ].join("");
+//     }
+//
+//     return [
+//         `<div class="hr011-ref-project-company-wrap">`,
+//         buildHr011ProjectBadgeMarkup(company, false),
+//         `<span class="hr011-ref-project-detail-company">${escapeHr011(company)}</span>`,
+//         `</div>`
+//     ].join("");
+// }
 
 function buildHr011ProjectBadgeMarkup(companyName, isInternal) {
     if (isInternal) {

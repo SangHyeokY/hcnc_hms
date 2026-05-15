@@ -5976,7 +5976,7 @@ section.search-area .search-info #searchType {
 .hr010-dashboard-wrap .user-card.selected, .hr010-dashboard-wrap .user-list-row.selected {border-color: var(--hcnc-shell-primary); /* box-shadow:0 0 0 2px rgba(59, 110, 234, 0.12), 0 16px 28px rgba(18, 38, 81, 0.10); */}
 /*.hr010-dashboard-wrap .user-card:hover, .hr010-dashboard-wrap .user-list-row:hover {border-color: #003675;}*/
 .hr010-dashboard-wrap .user-card__top {position:absolute; top:21px; right:21px; display:flex; align-items:flex-start; justify-content:flex-end; min-height:0; margin:0; z-index:1;}
-.hr010-dashboard-wrap .user-card__badge {display:inline-flex; align-items:center; justify-content:center; min-width:72px; height:30px; padding:6px 8px; border-radius:62px; font-family:var(--hcnc-font-body); font-size:13px; font-weight:600; line-height:16px; letter-spacing:0;}
+.hr010-dashboard-wrap .user-card__badge {display:inline-flex; align-items:center; justify-content:center; min-width:72px; height:30px; padding:6px 8px; border-radius:62px; font-family:var(--hcnc-font-body); font-size:13px; font-weight:600; /*line-height:16px;*/ letter-spacing:0;}
 .hr010-dashboard-wrap .user-card__badge--staff {background:#FDE7EE; color:#F13252;}
 .hr010-dashboard-wrap .user-card__badge--freelancer {background:#E8F1FF; color:#006FFD;}
 .hr010-dashboard-wrap .user-card__profile {display:flex; flex-direction:column; align-items:center; text-align:center; gap:6px; padding:0 25px;}
@@ -6107,7 +6107,7 @@ section.search-area .search-info #searchType {
 .hr010-dashboard-wrap .hr010-search-keyword-input::placeholder {color:#8F9098;}
 .hr010-dashboard-wrap .hr010-search-keyword-input:focus {outline:none !important; border-color: transparent !important; box-shadow: none !important;}
 .hr010-dashboard-wrap .hr010-search-keyword-input:hover {outline:none !important; border-color: transparent !important; box-shadow: none !important;}
-.hr010-dashboard-wrap .hr010-search-action-group {display:inline-flex; align-items:center; justify-content:space-between; align-self:stretch; width:124px; min-width:124px; gap:10px; margin:-12px 0; padding:0 20px; background:var(--hcnc-shell-primary); border-radius:0 12px 12px 0;}
+.hr010-dashboard-wrap .hr010-search-action-group {display:inline-flex; align-items:center; justify-content:space-between; align-self:stretch; width:124px; min-width:124px; gap:10px; margin:-12px 0; padding:0 20px; background:var(--hcnc-shell-primary); border-radius:0 10px 10px 0;}
 .hr010-dashboard-wrap .hr010-search-action-divider {display:block; width:1px; height:24px; background:rgba(255, 255, 255, 0.4);}
 
 .hr010-dashboard-wrap .hr010-search-icon-btn {display:inline-flex; align-items:center; justify-content:center; width:100%; height:100%; flex:0 0 24px; border:0; padding:0; background:transparent; cursor:pointer; transition:opacity .18s ease, transform .18s ease;}
@@ -6559,11 +6559,16 @@ section.search-area .search-info #searchType {
 }
 
 /* 카운터 초기화 */
-.hr011-detail-wrap .hr011-page.is-edit-mode {counter-reset: section;}
+.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-edit-form {
+  counter-reset: section;
+}
+
+.hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section {
+  counter-increment: section;
+}
 
 /* h4 앞에 번호 붙이기 */
 .hr011-detail-wrap .hr011-page.is-edit-mode .hr011-section-head h4::before {
-  counter-increment: section;
   content: counter(section);
   display: inline-flex;
   align-items: center;
@@ -11947,11 +11952,6 @@ button.btn.btn-add-skill:hover,
   .hr011-detail-wrap .hr011-ref-detail-row {
     min-height: 30px !important;
     align-items: center !important;
-  }
-
-  .hr011-detail-wrap .hr011-ref-detail-row > strong {
-    font-size: 25px !important;
-    line-height: 30px !important;
   }
 
   .hr011-detail-wrap .hr011-ref-skill-card {
