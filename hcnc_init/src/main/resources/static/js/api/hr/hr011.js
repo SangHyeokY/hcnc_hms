@@ -2065,14 +2065,16 @@ function renderHr011ReferenceDashboard(row) {
     $("#hr011RefSkillCardMeta").text(skillCardRows.length ? `${skillCardRows.length}개` : "0개");
     $("#hr011RefRadarAverage").text(radarAverageText);
 
-    const projects = (hr011RefProjectRows || []).slice(0, 4);
+    const projects = hr011RefProjectRows || [];
     $("#hr011RefProjectList").html(projects.length ? projects.map(function (item) {
         const company = item.org_nm || item.cust_nm || item.cli_nm || "-";
         const isInternal = isHr011InternalProject(item);
         const stacks = parseHr011SkillList(item.stack_txt_nm || item.stack_txt);
-        const stackMarkup = (stacks.length ? stacks.slice(0, 5) : ["미등록"]).map(function (stack) {
-            return `<span class="chip">${escapeHr011(stack)}</span>`;
-        }).join("");
+        const visibleStacks = stacks.length ? stacks.slice(0, 5) : ["미등록"];
+        const stackMarkup = visibleStacks.map(function (stack) {
+                return `<span class="chip">${escapeHr011(stack)}</span>`;
+            }).join("")
+            + (stacks.length > 3 ? `<span class="chip chip-more">...</span>` : "");
         return [
             `<article class="hr011-ref-project-item">`,
             `<div class="hr011-ref-project-item-badge">${buildHr011ProjectBadgeMarkup(company, isInternal)}</div>`,
@@ -5248,11 +5250,18 @@ function goHr011EditStep(stepKey) {
     setHr011ActiveEditStep(stepKey);
     updateStepperUI();
 
-    const scrollEl = document.querySelector(".hr011-edit-flow");
     const section = document.querySelector(`.hr011-section[data-edit-step="${stepKey}"]`);
-    if (!scrollEl || !section) return;
+    if (!section) return;
 
-    smoothScrollTo(scrollEl, section.offsetTop - HR011_EDIT_STEP_ACTIVE_OFFSET, 450);
+    const target =
+        section.getBoundingClientRect().top +
+        window.scrollY -
+        HR011_EDIT_STEP_ACTIVE_OFFSET;
+
+    window.scrollTo({
+        top: target,
+        behavior: "smooth"
+    });
 }
 
 function smoothScrollTo(container, target, duration = 500) {
@@ -5294,10 +5303,8 @@ let lastScrollTop = 0;
 let scrollVelocity = 0;
 
 function syncHr011ActiveStepByScroll() {
-    const scrollEl = document.querySelector(".hr011-edit-flow");
-    if (!scrollEl) return;
+    const current = window.scrollY || document.documentElement.scrollTop || 0;
 
-    const current = scrollEl.scrollTop;
     scrollVelocity = current - lastScrollTop;
     lastScrollTop = current;
 
@@ -5305,27 +5312,24 @@ function syncHr011ActiveStepByScroll() {
 
     const sections = activeKeys
         .map(k => document.querySelector(`.hr011-section[data-edit-step="${k}"]`))
-        .filter(Boolean);
+        .filter(section => section && section.offsetParent !== null);
 
-    const anchor = scrollEl.scrollTop + scrollEl.clientHeight * 0.35;
+    const anchor = current + window.innerHeight * 0.35;
 
     let activeKey = hr011CurrentEditStepKey;
 
     for (const section of sections) {
-        const top = section.offsetTop;
+        const top = section.getBoundingClientRect().top + current;
 
-        if (scrollVelocity >= 0) {
-            // 내려갈 때
-            if (top <= anchor) activeKey = section.dataset.editStep;
-        } else {
-            // 올라갈 때
-            if (top < anchor) activeKey = section.dataset.editStep;
+        if (top <= anchor) {
+            activeKey = section.dataset.editStep;
         }
     }
 
     if (activeKey !== hr011CurrentEditStepKey) {
         setHr011ActiveEditStep(activeKey);
         updateStepperUI();
+        updateCurrentStepUI();
     }
 }
 
@@ -5357,12 +5361,9 @@ function initHr011EditStepNavigation(isEditable) {
     flow.style.display = "";
     renderHr011Steps();
 
-    const scrollEl = document.querySelector(".hr011-detail-wrap .hr011-edit-flow");
-
-    // 하나의 scroll 이벤트만 사용
-    if (scrollEl && !scrollEl.dataset.bound) {
-        scrollEl.dataset.bound = "Y";
-        scrollEl.addEventListener("scroll", requestHr011ActiveStepSync, { passive: true });
+    if (!window.hr011BodyScrollBound) {
+        window.hr011BodyScrollBound = true;
+        window.addEventListener("scroll", requestHr011ActiveStepSync, { passive: true });
     }
 
     // 클릭 이동
