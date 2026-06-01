@@ -330,7 +330,7 @@ function buildPrjTable() {
                 formatter: jobCodeFormatter,
                 editor: false,
                 editable: false,
-                widthGrow: 1
+                width: 65,
             },
             {
                 title: "참여 기간",
