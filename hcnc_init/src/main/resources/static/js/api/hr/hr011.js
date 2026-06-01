@@ -5145,7 +5145,7 @@ function updateStepperUI() {
             const result = stepFields.project();
             const evalRiskCount = result.evalRiskCount || 0;
             $(this).find(".cnt").html(`
-                <span>평가</span>&nbsp;<span class="filled">${evalRiskCount}</span><span>건</span>
+                <span>참여</span>&nbsp;<span class="filled">${evalRiskCount}</span><span>건</span>
             `);
         } else {
             $(this).find(".cnt").html(`

@@ -2675,7 +2675,7 @@ button.btn.btn-add-skill,
   gap: 0;
 }
 
-#TABLE_HR012_A .tabulator-table .tabulator-cell {background: #FFFFFF !important;}
+/*#TABLE_HR012_A .tabulator-table .tabulator-cell {background: #FFFFFF !important;}*/
 
 /* 상세보기 모달에서는 is-readonly 클래스 유무와 관계없이 텍스트 전용 표시 */
 #view-user-area.is-view-mode #TABLE_HR012_A .tabulator-cell[data-field="skl_id_lst"] .tag-item,

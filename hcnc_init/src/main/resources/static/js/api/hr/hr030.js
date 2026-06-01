@@ -1,3 +1,5 @@
+// 대시보드 js
+
 (function () {
     var dashboardData = window.HR030_DASHBOARD_DATA;
 

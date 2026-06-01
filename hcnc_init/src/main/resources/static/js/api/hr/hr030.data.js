@@ -1,3 +1,5 @@
+// 대시보드 임시 데이터
+
 window.HR030_DASHBOARD_DATA = {
     alertCount: 4,
     kpis: [], // 초기 kpi 안전값
