@@ -1785,11 +1785,68 @@ function buildHr011SkillToken(name) {
 }
 
 const HR011_SKILL_ICON_IMAGE_MAP = {
-    oracle: "/icons/" + encodeURIComponent("skil (4).png"),
-    kubernetes: "/icons/" + encodeURIComponent("skil (1).png"),
-    react: "/icons/" + encodeURIComponent("skil (2).png"),
-    qliksense: "/icons/" + encodeURIComponent("skil (3).png")
-};
+    java: "/icons/" + encodeURIComponent("skill (1).png"),
+    spring: "/icons/" + encodeURIComponent("skill (2).png"),
+    node: "/icons/" + encodeURIComponent("skill (3).png"),
+    python: "/icons/" + encodeURIComponent("skill (4).png"),
+    golang: "/icons/" + encodeURIComponent("skill (5).png"),
+    oracle: "/icons/" + encodeURIComponent("skill (6).png"),
+    mysql: "/icons/" + encodeURIComponent("skill (7).png"),
+    postgresql: "/icons/" + encodeURIComponent("skill (8).png"),
+    sqlserver: "/icons/" + encodeURIComponent("skill (9).png"),
+    docker: "/icons/" + encodeURIComponent("skill (10).png"),
+    kubernetes: "/icons/" + encodeURIComponent("skill (11).png"),
+    // cicd: "/icons/" + encodeURIComponent("skill (12).png"),
+    sap: "/icons/" + encodeURIComponent("skill (13).png"),
+    // mes: "/icons/" + encodeURIComponent("skill (14).png"),
+    react: "/icons/" + encodeURIComponent("skill (15).png"),
+    vue: "/icons/" + encodeURIComponent("skill (16).png"),
+    angular: "/icons/" + encodeURIComponent("skill (17).png"),
+    // jsp: "/icons/" + encodeURIComponent("skill (18).png"),
+    websquare: "/icons/" + encodeURIComponent("skill (19).png"),
+    aws: "/icons/" + encodeURIComponent("skill (20).png"),
+    azure: "/icons/" + encodeURIComponent("skill (21).png"),
+    // onpremise: "/icons/" + encodeURIComponent("skill (22).png"),
+    logpresso: "/icons/" + encodeURIComponent("skill (23).png"),
+    qliksense: "/icons/" + encodeURIComponent("skill (24).png"),
+    android: "/icons/" + encodeURIComponent("skill (25).png"),
+    ios: "/icons/" + encodeURIComponent("skill (26).png"),
+    flutter: "/icons/" + encodeURIComponent("skill (27).png"),
+    // ai: "/icons/" + encodeURIComponent("skill (28).png"),
+    // rpa: "/icons/" + encodeURIComponent("skill (29).png"),
+    // bi: "/icons/" + encodeURIComponent("skill (30).png")
+    csharp: "/icons/" + encodeURIComponent("skill (31).png"),
+    kotlinbackend: "/icons/" + encodeURIComponent("skill (32).png"),
+    redis: "/icons/" + encodeURIComponent("skill (33).png"),
+    mongodb: "/icons/" + encodeURIComponent("skill (34).png"),
+    mariadb: "/icons/" + encodeURIComponent("skill (35).png"),
+    elasticsearch: "/icons/" + encodeURIComponent("skill (36).png"),
+    github: "/icons/" + encodeURIComponent("skill (37).png"),
+    jenkins: "/icons/" + encodeURIComponent("skill (38).png"),
+    terraform: "/icons/" + encodeURIComponent("skill (39).png"),
+    ansible: "/icons/" + encodeURIComponent("skill (40).png"),
+    oracleerp: "/icons/" + encodeURIComponent("skill (41).png"),
+    typescript: "/icons/" + encodeURIComponent("skill (42).png"),
+    nextjs: "/icons/" + encodeURIComponent("skill (43).png"),
+    tailwindcss: "/icons/" + encodeURIComponent("skill (44).png"),
+    redux: "/icons/" + encodeURIComponent("skill (45).png"),
+    nuxtjs: "/icons/" + encodeURIComponent("skill (46).png"),
+    linux: "/icons/" + encodeURIComponent("skill (47).png"),
+    nginx: "/icons/" + encodeURIComponent("skill (48).png"),
+    gcp: "/icons/" + encodeURIComponent("skill (49).png"),
+    kafka: "/icons/" + encodeURIComponent("skill (50).png"),
+    // reactnative: "/icons/" + encodeURIComponent("skill (51).png"),
+    // kotlinandroid: "/icons/" + encodeURIComponent("skill (52).png"),
+    swift: "/icons/" + encodeURIComponent("skill (53).png"),
+    pytorch: "/icons/" + encodeURIComponent("skill (54).png"),
+    tensorflow: "/icons/" + encodeURIComponent("skill (55).png"),
+    openai: "/icons/" + encodeURIComponent("skill (56).png"),
+    langchain: "/icons/" + encodeURIComponent("skill (57).png"),
+    django: "/icons/" + encodeURIComponent("skill (58).png"),
+    express: "/icons/" + encodeURIComponent("skill (59).png"),
+    nestjs: "/icons/" + encodeURIComponent("skill (60).png"),
+    selenium: "/icons/" + encodeURIComponent("skill (61).png"),
+}
 
 const HR011_SKILL_ICON_PALETTE = [
     { bg: "#4F46E5", fg: "#FFFFFF" },
@@ -1803,7 +1860,11 @@ const HR011_SKILL_ICON_PALETTE = [
 ];
 
 function normalizeHr011SkillIconKey(rawSkill) {
-    return $.trim(String(rawSkill || "")).toLowerCase().replace(/[\s\-_./()]+/g, "");
+    return String(rawSkill || "")
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, "")
+        .replace(/[._-]/g, "")
 }
 
 function hashHr011SkillIconKey(rawSkill) {
@@ -1822,12 +1883,71 @@ function hashHr011SkillIconKey(rawSkill) {
 }
 
 function resolveHr011SkillIconSource(rawSkill) {
-    const iconKey = normalizeHr011SkillIconKey(rawSkill);
-    if (iconKey.includes("oracle")) return HR011_SKILL_ICON_IMAGE_MAP.oracle;
-    if (iconKey.includes("kubernetes") || iconKey.includes("kubmetes") || iconKey.includes("k8s")) return HR011_SKILL_ICON_IMAGE_MAP.kubernetes;
-    if (iconKey.includes("react")) return HR011_SKILL_ICON_IMAGE_MAP.react;
-    if (iconKey.includes("qlik")) return HR011_SKILL_ICON_IMAGE_MAP.qliksense;
-    return HR011_SKILL_ICON_IMAGE_MAP[iconKey] || "";
+    const iconKey = normalizeHr011SkillIconKey(rawSkill)
+
+    if (iconKey.includes("java")) return HR011_SKILL_ICON_IMAGE_MAP.java
+    if (iconKey.includes("spring")) return HR011_SKILL_ICON_IMAGE_MAP.spring
+    if (iconKey.includes("node")) return HR011_SKILL_ICON_IMAGE_MAP.node
+    if (iconKey.includes("python")) return HR011_SKILL_ICON_IMAGE_MAP.python
+    if (iconKey.includes("golang")) return HR011_SKILL_ICON_IMAGE_MAP.golang
+    if (iconKey.includes("oracle")) return HR011_SKILL_ICON_IMAGE_MAP.oracle
+    if (iconKey.includes("mysql")) return HR011_SKILL_ICON_IMAGE_MAP.mysql
+    if (iconKey.includes("postgres")) return HR011_SKILL_ICON_IMAGE_MAP.postgresql
+    if (iconKey.includes("sqlserver") || iconKey.includes("mssql")) return HR011_SKILL_ICON_IMAGE_MAP.sqlserver
+    if (iconKey.includes("docker")) return HR011_SKILL_ICON_IMAGE_MAP.docker
+    if (iconKey.includes("kubernetes") || iconKey.includes("kubmetes") || iconKey.includes("k8s")) return HR011_SKILL_ICON_IMAGE_MAP.kubernetes
+    // if (iconKey.includes("cicd") || iconKey.includes("ci/cd")) return HR011_SKILL_ICON_IMAGE_MAP.cicd
+    if (iconKey.includes("sap")) return HR011_SKILL_ICON_IMAGE_MAP.sap
+    // if (iconKey.includes("mes")) return HR011_SKILL_ICON_IMAGE_MAP.mes
+    if (iconKey.includes("react")) return HR011_SKILL_ICON_IMAGE_MAP.react
+    if (iconKey.includes("vue")) return HR011_SKILL_ICON_IMAGE_MAP.vue
+    if (iconKey.includes("angular")) return HR011_SKILL_ICON_IMAGE_MAP.angular
+    // if (iconKey.includes("jsp")) return HR011_SKILL_ICON_IMAGE_MAP.jsp
+    if (iconKey.includes("websquare")) return HR011_SKILL_ICON_IMAGE_MAP.websquare
+    if (iconKey.includes("aws")) return HR011_SKILL_ICON_IMAGE_MAP.aws
+    if (iconKey.includes("azure")) return HR011_SKILL_ICON_IMAGE_MAP.azure
+    // if (iconKey.includes("onpremise") || iconKey.includes("onprem")) return HR011_SKILL_ICON_IMAGE_MAP.onpremise
+    if (iconKey.includes("logpresso")) return HR011_SKILL_ICON_IMAGE_MAP.logpresso
+    if (iconKey.includes("qlik")) return HR011_SKILL_ICON_IMAGE_MAP.qliksense
+    if (iconKey.includes("android")) return HR011_SKILL_ICON_IMAGE_MAP.android
+    if (iconKey.includes("ios")) return HR011_SKILL_ICON_IMAGE_MAP.ios
+    if (iconKey.includes("flutter")) return HR011_SKILL_ICON_IMAGE_MAP.flutter
+    // if (iconKey.includes("ai")) return HR011_SKILL_ICON_IMAGE_MAP.ai
+    // if (iconKey.includes("rpa")) return HR011_SKILL_ICON_IMAGE_MAP.rpa
+    // if (iconKey.includes("bi")) return HR011_SKILL_ICON_IMAGE_MAP.bi
+    if (iconKey.includes("c#") || iconKey.includes("csharp")) return HR011_SKILL_ICON_IMAGE_MAP.csharp
+    if (iconKey.includes("kotlinbackend") || iconKey.includes("kotlin")) return HR011_SKILL_ICON_IMAGE_MAP.kotlinbackend
+    if (iconKey.includes("redis")) return HR011_SKILL_ICON_IMAGE_MAP.redis
+    if (iconKey.includes("mongo")) return HR011_SKILL_ICON_IMAGE_MAP.mongodb
+    if (iconKey.includes("mariadb")) return HR011_SKILL_ICON_IMAGE_MAP.mariadb
+    if (iconKey.includes("elastic")) return HR011_SKILL_ICON_IMAGE_MAP.elasticsearch
+    if (iconKey.includes("github") || iconKey.includes("github")) return HR011_SKILL_ICON_IMAGE_MAP.github
+    if (iconKey.includes("jenkins")) return HR011_SKILL_ICON_IMAGE_MAP.jenkins
+    if (iconKey.includes("terraform")) return HR011_SKILL_ICON_IMAGE_MAP.terraform
+    if (iconKey.includes("ansible")) return HR011_SKILL_ICON_IMAGE_MAP.ansible
+    if (iconKey.includes("oracleerp")) return HR011_SKILL_ICON_IMAGE_MAP.oracleerp
+    if (iconKey.includes("typescript") || iconKey === "ts") return HR011_SKILL_ICON_IMAGE_MAP.typescript
+    if (iconKey.includes("next")) return HR011_SKILL_ICON_IMAGE_MAP.nextjs
+    if (iconKey.includes("tailwind")) return HR011_SKILL_ICON_IMAGE_MAP.tailwindcss
+    if (iconKey.includes("redux")) return HR011_SKILL_ICON_IMAGE_MAP.redux
+    if (iconKey.includes("nuxt")) return HR011_SKILL_ICON_IMAGE_MAP.nuxtjs
+    if (iconKey.includes("linux")) return HR011_SKILL_ICON_IMAGE_MAP.linux
+    if (iconKey.includes("nginx")) return HR011_SKILL_ICON_IMAGE_MAP.nginx
+    if (iconKey.includes("gcp") || iconKey.includes("googlecloud")) return HR011_SKILL_ICON_IMAGE_MAP.gcp
+    if (iconKey.includes("kafka")) return HR011_SKILL_ICON_IMAGE_MAP.kafka
+    // if (iconKey.includes("reactnative")) return HR011_SKILL_ICON_IMAGE_MAP.reactnative
+    // if (iconKey.includes("kotlinandroid")) return HR011_SKILL_ICON_IMAGE_MAP.kotlinandroid
+    if (iconKey.includes("swift")) return HR011_SKILL_ICON_IMAGE_MAP.swift
+    if (iconKey.includes("pytorch")) return HR011_SKILL_ICON_IMAGE_MAP.pytorch
+    if (iconKey.includes("tensorflow")) return HR011_SKILL_ICON_IMAGE_MAP.tensorflow
+    if (iconKey.includes("openai")) return HR011_SKILL_ICON_IMAGE_MAP.openai
+    if (iconKey.includes("langchain")) return HR011_SKILL_ICON_IMAGE_MAP.langchain
+    if (iconKey.includes("django")) return HR011_SKILL_ICON_IMAGE_MAP.django
+    if (iconKey.includes("express")) return HR011_SKILL_ICON_IMAGE_MAP.express
+    if (iconKey.includes("nestjs") || iconKey.includes("nest")) return HR011_SKILL_ICON_IMAGE_MAP.nestjs
+    if (iconKey.includes("selenium")) return HR011_SKILL_ICON_IMAGE_MAP.selenium
+
+    return HR011_SKILL_ICON_IMAGE_MAP[iconKey] || ""
 }
 
 function resolveHr011SkillIconMeta(name) {
