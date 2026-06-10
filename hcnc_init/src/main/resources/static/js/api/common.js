@@ -872,7 +872,7 @@ function createGroupedSkillPicker(config) {
             return;
         }
         state.table = new Tabulator(cfg.tableSelector, {
-            layout: "fitDataStretch",
+            layout: "fitColumns",
             height: cfg.tableHeight,
             virtualDom: false,
             placeholder: cfg.emptyText,

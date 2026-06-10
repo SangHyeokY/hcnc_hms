@@ -15,7 +15,7 @@ const loadingManager = {
     current: null,
     show(type) {
         if (this.current === null) {
-            console.log("SHOW", performance.now());
+            // console.log("SHOW", performance.now());
             showLoading();
         }
         this.current = type;
@@ -24,7 +24,7 @@ const loadingManager = {
     hide(type) {
         if (this.current === type) {
             this.current = null;
-            console.log("HIDE", performance.now());
+            // console.log("HIDE", performance.now());
             hideLoading();
         }
     }
@@ -1731,6 +1731,7 @@ function normalizeHr011SkillKey(rawSkill) {
 function resolveHr011SkillCategoryClass(rawCategory) {
     const category = $.trim(String(rawCategory || "")).toLowerCase();
     if (!category) return "neutral";
+    if (category.includes("주개발언어")) return "mainlang";
     if (category.includes("backend") || category.includes("백엔드")) return "backend";
     if (category.includes("frontend") || category.includes("프론트")) return "frontend";
     if (category.includes("devops")) return "devops";
@@ -2053,10 +2054,21 @@ function buildHr011SkillCardRows(row) {
         });
     });
 
+    const mainLangKeySet = new Set(
+        splitHr011MainLang(row).skills.map(normalizeHr011SkillKey)
+    );
+
     return Array.from(skillMap.values())
         .map(function (item) {
-            const categories = (categoryMap.get(item.key) || []).slice(0, 2);
+            let categories = (categoryMap.get(item.key) || []).slice(0, 2);
+
+            if (mainLangKeySet.has(item.key) &&
+                !categories.includes("주개발언어")) {
+                categories.push("주개발언어");
+            }
+
             const projectCount = projectCountMap.get(item.key) || 0;
+
             return {
                 key: item.key,
                 name: item.name,
@@ -2066,11 +2078,6 @@ function buildHr011SkillCardRows(row) {
                 projectCount
             };
         })
-        .sort(function (a, b) {
-            if (b.level !== a.level) return b.level - a.level;
-            if (b.projectCount !== a.projectCount) return b.projectCount - a.projectCount;
-            return a.name.localeCompare(b.name, "ko");
-        });
 }
 
 function buildHr011SkillCardsMarkup(row, options) {

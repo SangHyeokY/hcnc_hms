@@ -3130,7 +3130,7 @@ function normalizeSuggestionText(value) {
 // ==============================
 async function fetchAllScores(list) {
     const results = await Promise.allSettled(
-        list.map(row => fetchUserScore(row.dev_id))
+        list.map(row => fetchUserScore(row.dev_id, row.dev_nm))
     );
 
     const map = {};
@@ -3145,7 +3145,7 @@ async function fetchAllScores(list) {
     return map;
 }
 // 사용자 점수 조회 (안정성 + 예외처리 + 기본값 포함)
-function fetchUserScore(devId) {
+function fetchUserScore(devId, devNm) {
     // devId 없으면 바로 기본값 반환
     if (!devId) {
         return Promise.resolve({
@@ -3177,7 +3177,7 @@ function fetchUserScore(devId) {
             return response;
         })
         .catch(function (error) {
-            console.warn(`점수 조회 실패 (devId: ${devId})`, error);
+            console.warn(`점수 조회 실패 (이름: ${devNm}, 아이디: ${devId}) / 평가 데이터 필요`, error);
 
             // 실패해도 전체 로직 안 깨지도록 기본값 반환
             return {
