@@ -7630,7 +7630,7 @@ section.search-area .search-info #searchType {
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  gap: 8px;
+  gap: 10px;
   width: 100%;
   min-width: 0;
   flex: 1 1 auto;
@@ -12085,7 +12085,7 @@ button.btn.btn-add-skill:hover,
     display: flex !important;
     align-items: center !important;
     justify-content: flex-start !important;
-    gap: 15px !important;
+    gap: 10px !important;
     width: 100% !important;
     min-width: 0 !important;
     flex: 1 1 auto !important;
