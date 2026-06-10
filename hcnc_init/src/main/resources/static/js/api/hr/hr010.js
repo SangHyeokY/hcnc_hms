@@ -3129,21 +3129,29 @@ function normalizeSuggestionText(value) {
 // 점수 조회
 // ==============================
 async function fetchAllScores(list) {
-    const results = await Promise.allSettled(
-        list.map(row => fetchUserScore(row.dev_id, row.dev_nm))
-    );
-
     const map = {};
+    const rows = Array.isArray(list) ? list : [];
+    const chunkSize = 8;
 
-    results.forEach((res, idx) => {
-        const devId = list[idx].dev_id;
-        map[devId] = res.status === "fulfilled"
-            ? (res.value?.res || {})
-            : {};
-    });
+    for (let i = 0; i < rows.length; i += chunkSize) {
+        const chunk = rows.slice(i, i + chunkSize);
 
+        const results = await Promise.allSettled(
+            chunk.map(row => fetchUserScore(row.dev_id, row.dev_nm))
+        );
+
+        results.forEach((res, idx) => {
+            const row = chunk[idx];
+            const devId = row.dev_id;
+
+            map[devId] = res.status === "fulfilled"
+                ? (res.value?.res || { rank: "", score: 0 })
+                : { rank: "", score: 0 };
+        });
+    }
     return map;
 }
+
 // 사용자 점수 조회 (안정성 + 예외처리 + 기본값 포함)
 function fetchUserScore(devId, devNm) {
     // devId 없으면 바로 기본값 반환
@@ -3161,7 +3169,7 @@ function fetchUserScore(devId, devNm) {
         type: "GET",
         data: { dev_id: devId },
         dataType: "json",
-        timeout: 5000 // 네트워크 지연 방지
+        timeout: 10000 // 네트워크 지연 방지
     })
         .then(function (response) {
             // 정상 응답인데 값이 없는 경우 대비

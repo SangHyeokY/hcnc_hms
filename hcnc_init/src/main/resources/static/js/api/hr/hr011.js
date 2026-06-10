@@ -3734,13 +3734,28 @@ async function openHr011ProjectEvaluationModal(projectKey) {
 
     hr011ProjectEvalModalProjectKey = projectKey;
     hr011ProjectEvalModalLastFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+
+    // 모달을 열기 전에 현재 포커스 제거
+    if (hr011ProjectEvalModalLastFocus) {
+        hr011ProjectEvalModalLastFocus.blur();
+    }
+
     hr011ProjectEvalModalClosing = false;
     modalEl.hidden = false;
     bodyEl.innerHTML = `<div class="hr011-ref-project-eval-loading">평가 데이터를 불러오는 중입니다.</div>`;
+
     requestAnimationFrame(function () {
         requestAnimationFrame(function () {
             document.body.classList.add("hr011-project-eval-modal-open");
             modalEl.classList.add("is-open");
+
+            const focusTarget = modalEl.querySelector(
+                "[data-hr011-project-eval-close], button, input, textarea, select, [tabindex]:not([tabindex='-1'])"
+            );
+
+            if (focusTarget) {
+                focusTarget.focus();
+            }
         });
     });
 
