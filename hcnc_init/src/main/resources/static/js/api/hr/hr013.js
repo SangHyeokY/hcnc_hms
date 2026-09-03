@@ -1313,6 +1313,19 @@ function validateHr013Row(row) {
     if (!row.rate_amt) return warnAlert("계약단가");
     // const stackCsv = getHr013SkillCsvForSave(row.skl_id_lst, row.stack_txt);
     // if (!stackCsv) return warnAlert("기술스택");
+
+    // 날짜 검사
+    if (new Date(row.st_dt) > new Date(row.ed_dt)) {
+        showAlert({
+            icon: "warning",
+            title: "경고",
+            html: `<div><strong>계약종료일</strong>은(는)&nbsp;<strong>계약시작일</strong>&nbsp;이후여야 합니다.</div>`
+        });
+
+        $("#write_hr013_ed_dt").focus();
+        return false;
+    }
+    if (!row.rate_amt) return warnAlert("계약단가");
     return true;
 }
 
@@ -1784,22 +1797,21 @@ function bindHr013CardEvents() {
         window.currentDevId = row.dev_id;
         window.hr013_prj_nm = row.dev_prj_id;
 
-        // STEP을 4번으로 강제 이동 (스크롤 위치 버그 발생 시, 원상복구할 것)
-        // $('.hr011-edit-step [data-step-target="project"]').click();
-
         reloadTab4(row.dev_prj_id).then(() => {
             requestAnimationFrame(() => {
-                const container = document.querySelector(".hr011-edit-flow");
                 const target = document.querySelector(".hr014-toolbar-01");
 
-                if (!container || !target) return;
+                if (!target) return;
 
                 const top =
-                    target.getBoundingClientRect().top -
-                    container.getBoundingClientRect().top +
-                    container.scrollTop;
+                    target.getBoundingClientRect().top +
+                    window.scrollY -
+                    80;
 
-                smoothScrollTo(container, top - 20, 400);
+                window.scrollTo({
+                    top: top,
+                    behavior: "auto"
+                });
             });
         });
     });
